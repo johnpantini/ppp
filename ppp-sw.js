@@ -131,7 +131,7 @@ self.addEventListener('fetch', (event) => {
             };
 
             if (
-              ct === 'application/javascript' &&
+              ct?.startsWith('application/javascript') &&
               text.startsWith('/** @decorator */')
             ) {
               return new Response(removeDecorators(text), init);
