@@ -3,12 +3,12 @@
   "short_name":  "Trading Terminal by John Pantini",
   "icons":       [
     {
-      "src":   "/icons/terminal/icon-512x512.png",
+      "src":   "icons/terminal/icon-512x512.png",
       "type":  "image/png",
       "sizes": "512x512"
     },
     {
-      "src":   "/icons/terminal/icon-192x192.png",
+      "src":   "icons/terminal/icon-192x192.png",
       "type":  "image/png",
       "sizes": "192x192"
     }
