@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru" data-ppp-realm="desktop" class="desktop">
+  <head>
+    <meta charset="UTF-8" />
+    <title>PPP Console</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="PPP Terminal" />
+    <meta name="apple-mobile-web-app-title" content="PPP Terminal" />
+    <meta name="msapplication-TileColor" content="#131722" />
+    <meta name="theme-color" content="#131722" />
+    <meta name="msapplication-navbutton-color" content="#131722" />
+    <meta name="msapplication-starturl" content="/" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+  </head>
+  <style>
+    *:not(:defined) {
+      visibility: hidden;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      font-smooth: always;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      height: 100%;
+    }
+
+    body[appearance="leafygreen"] {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+      position: relative;
+      width: 100%;
+    }
+  </style>
+  <template id="ppp-loader">
+    <style>
+      @keyframes spin {
+        50% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes spin-reverse {
+        50% {
+          transform: rotate(-360deg);
+        }
+      }
+
+      :host {
+        display: flex;
+        position: absolute;
+        background: #fff;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      :host([appearance='inline']) {
+        opacity: 0.56;
+      }
+
+      .gears {
+        position: relative;
+        width: 100px;
+        height: 80px;
+        margin: 0 auto 50px auto;
+      }
+
+      .gear {
+        position: absolute;
+        z-index: 0;
+        width: 40px;
+        height: 40px;
+        animation: spin 5s infinite;
+      }
+
+      .two {
+        left: 40px;
+        width: 80px;
+        height: 80px;
+        animation: spin-reverse 5s infinite;
+      }
+
+      .three {
+        top: 45px;
+        left: -10px;
+        width: 60px;
+        height: 60px;
+      }
+
+      .small-circle {
+        position: absolute;
+        border-radius: 50%;
+        box-shadow: inset 0 0 10px 2px gray, 0 0 50px white;
+        width: 100px;
+        height: 100px;
+        opacity: 0.65;
+      }
+
+      .blur-circle {
+        position: absolute;
+        top: -19px;
+        left: -19px;
+      }
+
+      .text {
+        color: #a09f9e;
+        font-size: 18px;
+        font-family: -apple-system, BlinkMacSystemFont, Roboto, Segoe UI,
+          'Trebuchet MS', Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue,
+          Icons16, sans-serif;
+        text-align: center;
+      }
+    </style>
+    <svg style="display: none">
+      <defs>
+        <symbol id="gear">
+          <path
+            stroke="#000000"
+            stroke-miterlimit="10"
+            d="M99.412,46.313V53.1
+		          l-9.494,4.198c-0.374,1.959-0.891,3.867-1.538,5.715l6.111,8.357l-3.41,5.878L80.739,76.16c-1.294,1.49-2.697,2.885-4.194,4.174
+		          l1.093,10.289l-5.907,3.394l-8.399-6.08c-1.857,0.644-3.775,1.157-5.745,1.53l-4.219,9.445h-6.822l-4.22-9.446
+		          c-1.969-0.372-3.888-0.886-5.745-1.529l-8.399,6.08l-5.907-3.394l1.094-10.288c-1.499-1.289-2.902-2.685-4.197-4.175l-10.34,1.088
+		          L5.42,71.37l6.111-8.356c-0.647-1.848-1.164-3.757-1.538-5.716L0.5,53.1v-6.787l9.493-4.198c0.375-1.959,0.89-3.869,1.537-5.718
+		          l-6.11-8.355l3.411-5.878l10.344,1.088c1.295-1.49,2.695-2.886,4.193-4.174L22.274,8.789l5.907-3.394l8.4,6.08
+		          c1.857-0.643,3.775-1.158,5.744-1.529l4.22-9.446h6.822l4.219,9.446c1.97,0.372,3.887,0.887,5.744,1.529l8.4-6.08l5.907,3.394
+		          l-1.093,10.289c1.497,1.288,2.896,2.685,4.191,4.174l10.345-1.088l3.41,5.878l-6.109,8.355c0.647,1.849,1.162,3.758,1.537,5.718
+		          L99.412,46.313z M49.956,34.424c-8.483,0-15.359,6.842-15.359,15.282c0,8.44,6.876,15.282,15.359,15.282
+		          c8.482,0,15.359-6.842,15.359-15.282C65.315,41.266,58.438,34.424,49.956,34.424z"
+          ></path>
+        </symbol>
+      </defs>
+      <use href="#gear" />
+    </svg>
+    <div class="gears">
+      <div class="gear one">
+        <svg viewbox="0 0 100 100" fill="rgb(121,114,217)">
+          <use href="#gear" />
+        </svg>
+      </div>
+      <div class="gear two">
+        <svg viewbox="0 0 100 100" fill="rgb(217,128,62)">
+          <use href="#gear" />
+        </svg>
+      </div>
+      <div class="gear three">
+        <svg viewbox="0 0 100 100" fill="rgb(209,61,95)">
+          <use href="#gear" />
+        </svg>
+      </div>
+      <div class="small-circle"></div>
+      <svg class="blur-circle">
+        <filter id="blur">
+          <fegaussianblur in="SourceGraphic" stddeviation="13"></fegaussianblur>
+        </filter>
+        <circle
+          cx="70"
+          cy="70"
+          r="66"
+          fill="transparent"
+          stroke="white"
+          stroke-width="40"
+          filter="url(#blur)"
+        ></circle>
+      </svg>
+    </div>
+    <slot class="text" name="text">
+      <div>ЗАГРУЗКА</div>
+    </slot>
+  </template>
+  <script>
+    window.customElements.define(
+      'ppp-loader',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.attachShadow({ mode: 'open' }).appendChild(
+            document.getElementById('ppp-loader').content.cloneNode(true)
+          );
+
+          globalThis.loader = this;
+        }
+      }
+    );
+
+    function appendMainScript() {
+      if (!document.querySelector('[data-ppp-main]')) {
+        const script = document.createElement('script');
+
+        script.src = 'ppp.js';
+        script.type = 'module';
+        script.setAttribute('data-ppp-main', true);
+        document.body.append(script);
+      }
+    }
+
+    window.addEventListener('load', async () => {
+      const registration = await navigator.serviceWorker.register('ppp-sw.js');
+
+      if (navigator.serviceWorker.controller === null) {
+        await navigator.serviceWorker.ready;
+
+        registration.active.postMessage('reclaim');
+
+        navigator.serviceWorker.addEventListener(
+          'controllerchange',
+          async () => {
+            appendMainScript();
+          }
+        );
+      } else {
+        appendMainScript();
+      }
+    });
+  </script>
+  <body>
+    <ppp-loader id="global-loader"></ppp-loader>
+  </body>
+</html>
