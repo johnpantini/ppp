@@ -13,7 +13,6 @@ export const appTemplate = (context, definition) => html`
       <div class="app-container">
         <${'ppp-side-nav'} ?data-expanded="${(x) => x.expanded}">
           <${'ppp-side-nav-item'}
-            disabled
             @click="${(x) => x.handleMyBalanceClick()}"
           >
             <span class="balance-icon" slot="start">💰</span>
@@ -58,6 +57,9 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Оплата</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item disabled slot="items">
+              <span slot="title">Достижения</span>
+            </ppp-side-nav-item>
+            <ppp-side-nav-item disabled slot="items">
               <span slot="title">Настройки</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
@@ -66,13 +68,16 @@ export const appTemplate = (context, definition) => html`
               slot: 'start'
             })}
             <span slot="title">Параметры</span>
-            <ppp-side-nav-item slot="items">
+            <ppp-side-nav-item disabled slot="items">
               <span slot="title">Облачные сервисы</span>
+            </ppp-side-nav-item>
+            <ppp-side-nav-item disabled slot="items">
+              <span slot="title">Личный сервер</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item disabled slot="items">
               <span slot="title">Ключи Warden</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item slot="items">
+            <ppp-side-nav-item disabled slot="items">
               <span slot="title">Обновления</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>

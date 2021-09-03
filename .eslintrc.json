@@ -1,15 +1,18 @@
 {
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
+    "requireConfigFile": false,
     "ecmaVersion": 2021,
-    "sourceType":  "module"
+    "sourceType": "module"
   },
-  "rules":         {
+  "rules": {
+    "lines-between-class-members": [2, "always"],
     "padding-line-between-statements": [
       2,
       {
         "blankLine": "always",
-        "prev":      "*",
-        "next":      [
+        "prev": "*",
+        "next": [
           "break",
           "if",
           "try",
@@ -27,7 +30,7 @@
       },
       {
         "blankLine": "always",
-        "prev":      [
+        "prev": [
           "if",
           "try",
           "for",
@@ -40,32 +43,17 @@
           "function",
           "class"
         ],
-        "next":      "*"
+        "next": "*"
       },
       {
         "blankLine": "always",
-        "prev":      "*",
-        "next":      [
-          "if",
-          "try",
-          "for",
-          "while",
-          "do",
-          "switch"
-        ]
+        "prev": "*",
+        "next": ["if", "try", "for", "while", "do", "switch"]
       },
       {
         "blankLine": "any",
-        "prev":      [
-          "const",
-          "let",
-          "var"
-        ],
-        "next":      [
-          "const",
-          "let",
-          "var"
-        ]
+        "prev": ["const", "let", "var"],
+        "next": ["const", "let", "var"]
       }
     ]
   }

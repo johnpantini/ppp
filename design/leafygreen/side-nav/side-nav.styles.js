@@ -16,6 +16,20 @@ export const sideNavStyles = (context, definition) =>
       width: 184px;
     }
 
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    }
+
     .wrapper {
       position: absolute;
       top: 0;
@@ -59,7 +73,8 @@ export const sideNavStyles = (context, definition) =>
       opacity: 0;
     }
 
-    .expanded-content > ul {
+    .expanded-content > ul,
+    .collapsed-content > ul {
       margin-block: 0;
       padding-inline-start: 0;
       padding: 16px 0;
@@ -67,7 +82,29 @@ export const sideNavStyles = (context, definition) =>
       overflow: hidden auto;
       position: absolute;
       inset: 0;
+    }
+
+    .expanded-content > ul {
       width: 184px;
+    }
+
+    .collapsed-content > ul li:first-of-type {
+      border-top: 1px solid rgb(231, 238, 236);
+    }
+
+    .collapsed-content > ul li {
+      display: flex;
+      -webkit-box-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      justify-content: center;
+      height: 40px;
+      border-bottom: 1px solid rgb(231, 238, 236);
+      color: rgb(17, 97, 73);
+    }
+
+    .collapsed-content .action-icon {
+      color: #007cad;
     }
 
     .nav:not([data-expanded]) .expanded-content {

@@ -1,4 +1,5 @@
 import { html } from '../../../lib/template.js';
+import { repeat } from '../../../lib/element/templating/repeat.js';
 import { slotted } from '../../../lib/element/templating/slotted.js';
 
 import { chevronLeft } from '../icons/chervon-left.js';
@@ -21,14 +22,23 @@ export const sideNavTemplate = (context, definition) => html`
             <slot
               ${slotted({
                 filter: (x) => {
-                  return x.nodeType !== 3;
+                  return (
+                    x.nodeType !== 3 && x.firstElementChild.slot === 'start'
+                  );
                 },
-                property: 'items'
+                property: 'topLevelItems'
               })}
             ></slot>
           </ul>
         </div>
-        <div class="collapsed-content"></div>
+        <div class="collapsed-content">
+          <ul>
+            ${repeat(
+              (x) => x.topLevelItems,
+              html`<li>${(x) => html`${x.firstElementChild.outerHTML}`}</li>`
+            )}
+          </ul>
+        </div>
       </nav>
       <button
         class="collapse-toggle"

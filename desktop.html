@@ -1,6 +1,35 @@
 <!DOCTYPE html>
 <html lang="ru" data-ppp-realm="desktop" class="desktop">
   <head>
+    <style>
+      *:not(:defined) {
+        visibility: hidden;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        position: relative;
+        font-smooth: always;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body[appearance="leafygreen"] {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        position: relative;
+        width: 100%;
+      }
+    </style>
     <meta charset="UTF-8" />
     <title>PPP Console</title>
     <link rel="manifest" href="manifest.json" />
@@ -19,34 +48,6 @@
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
   </head>
-  <style>
-    *:not(:defined) {
-      visibility: hidden;
-    }
-
-    [hidden] {
-      display: none !important;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      position: relative;
-      font-smooth: always;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      height: 100%;
-    }
-
-    body[appearance="leafygreen"] {
-      display: flex;
-      flex-direction: column;
-      flex-grow: 1;
-      position: relative;
-      width: 100%;
-    }
-  </style>
   <template id="ppp-loader">
     <style>
       @keyframes spin {

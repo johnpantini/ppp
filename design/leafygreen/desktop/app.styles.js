@@ -8,7 +8,6 @@ export const appStyles = (context, definition) =>
 
     :host {
       font-family: ${bodyFont};
-      min-width: 1200px;
       flex-direction: column;
       flex-grow: 1;
       position: relative;
