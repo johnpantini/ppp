@@ -1,6 +1,6 @@
 {
-  "name":        "PPP Terminal",
-  "short_name":  "Trading Terminal by John Pantini",
+  "name":        "PPP Console",
+  "short_name":  "PPP Console by John Pantini",
   "icons":       [
     {
       "src":   "icons/terminal/icon-512x512.png",
