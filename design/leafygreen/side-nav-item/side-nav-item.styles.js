@@ -39,6 +39,12 @@ export const sideNavItemStyles = (context, definition) =>
       text-decoration: none;
     }
 
+    :host([data-active]) {
+      color: rgb(11, 59, 53);
+      background-color: rgb(228, 244, 228);
+      font-weight: bold;
+    }
+
     slot[name='start']::slotted(.action-icon) {
       color: #007cad;
     }
