@@ -1,4 +1,5 @@
 import { html } from '../../../lib/template.js';
+import { when } from '../../../lib/element/templating/when.js';
 
 import { plus } from '../icons/plus.js';
 import { charts } from '../icons/charts.js';
@@ -13,7 +14,7 @@ export const appTemplate = (context, definition) => html`
       <div class="app-container">
         <${'ppp-side-nav'} ?data-expanded="${(x) => x.expanded}">
           <${'ppp-side-nav-item'}
-            @click="${(x) => x.handleMyBalanceClick()}"
+            @click="${(x) => (x.page = 'profile')}"
           >
             <span class="balance-icon" slot="start">💰</span>
             <span slot="title">
@@ -21,8 +22,7 @@ export const appTemplate = (context, definition) => html`
             </span>
           </ppp-side-nav-item>
           <ppp-side-nav-item
-            disabled
-            @click="${(x) => x.handleNewTerminalClick()}"
+            @click="${(x) => (x.page = 'new-terminal')}"
           >
             ${plus({
               slot: 'start',
@@ -35,13 +35,15 @@ export const appTemplate = (context, definition) => html`
               slot: 'start'
             })}
             <span slot="title">Торговля</span>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item
+              slot="items"
+            >
               <span slot="title">Виджеты</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Аналитика</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Настройки</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
@@ -50,16 +52,16 @@ export const appTemplate = (context, definition) => html`
               slot: 'start'
             })}
             <span slot="title">PPP</span>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Обзор</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Оплата</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Достижения</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Настройки</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
@@ -68,16 +70,22 @@ export const appTemplate = (context, definition) => html`
               slot: 'start'
             })}
             <span slot="title">Параметры</span>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item
+              @click="${(x) => (x.page = 'cloud-services')}"
+              slot="items"
+            >
               <span slot="title">Облачные сервисы</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Личный сервер</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item slot="items">
               <span slot="title">Ключи Warden</span>
             </ppp-side-nav-item>
-            <ppp-side-nav-item disabled slot="items">
+            <ppp-side-nav-item
+              @click="${(x) => (x.page = 'updates')}"
+              slot="items"
+            >
               <span slot="title">Обновления</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
@@ -86,7 +94,10 @@ export const appTemplate = (context, definition) => html`
               slot: 'start'
             })}
             <span slot="title">Помощь</span>
-            <ppp-side-nav-item slot="items">
+            <ppp-side-nav-item
+              @click="${(x) => (x.page = 'guides')}"
+              slot="items"
+            >
               <span slot="title">Инструкции</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
@@ -102,6 +113,11 @@ export const appTemplate = (context, definition) => html`
           </ppp-side-nav-item>
         </ppp-side-nav>
         <div class="page-content">
+          ${when(
+            (x) => x.page === 'guides',
+            html`<${'ppp-guides-view'}></ppp-guides-view>`
+          )}
+        </div>
       </div>
     </div>
   </template>
