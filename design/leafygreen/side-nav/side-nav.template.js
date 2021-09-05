@@ -1,6 +1,7 @@
 import { html } from '../../../lib/template.js';
 import { repeat } from '../../../lib/element/templating/repeat.js';
 import { slotted } from '../../../lib/element/templating/slotted.js';
+import { ref } from '../../../lib/element/templating/ref.js';
 
 import { chevronLeft } from '../icons/chervon-left.js';
 import { chevronRight } from '../icons/chervon-right.js';
@@ -13,9 +14,9 @@ export const sideNavTemplate = (context, definition) => html`
         class="nav"
         ?data-expanded="${(x) => x.expanded}"
         aria-label="side-nav"
-        @pointerenter="${(x) => x.handlePointerEnter()}"
-        @pointerleave="${(x) => x.handlePointerLeave()}"
-        @pointercancel="${(x) => x.handlePointerLeave()}"
+        @pointerover="${(x, c) => x.handlePointerEnter(c)}"
+        @pointerout="${(x, c) => x.handlePointerLeave(c)}"
+        @pointercancel="${(x, c) => x.handlePointerLeave(c)}"
       >
         <div class="expanded-content">
           <ul>
@@ -41,6 +42,7 @@ export const sideNavTemplate = (context, definition) => html`
         </div>
       </nav>
       <button
+        ${ref('collapseToggle')}
         class="collapse-toggle"
         ?data-expanded="${(x) => x.expanded}"
         @click="${(x) => (x.expanded = !x.expanded)}"
