@@ -15,7 +15,7 @@ export const notFoundPageTemplate = (context, definition) => html`
   <template>
     <main>
       <div class="content">
-        <img src="/static/404.png" alt="Page not found" />
+        <img src="static/404.png" alt="Page not found" />
         <div class="details">
           <p class="headline">Что-то пошло не так.</p>
           <p class="text">Страница не найдена. А верный ли адрес?</p>
