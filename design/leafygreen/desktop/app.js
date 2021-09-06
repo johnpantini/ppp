@@ -51,6 +51,7 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">Торговля</span>
             <ppp-side-nav-item
+              disabled
               ?data-active="${(x) => x.page === 'analytics'}"
               @click="${(x) => (x.page = 'analytics')}"
               slot="items"
@@ -58,8 +59,8 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Аналитика</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?data-active="${(x) => x.page === 'settings'}"
-              @click="${(x) => (x.page = 'settings')}"
+              ?data-active="${(x) => x.page === 'trade-settings'}"
+              @click="${(x) => (x.page = 'trade-settings')}"
               slot="items"
             >
               <span slot="title">Настройки</span>
@@ -131,7 +132,7 @@ export const appTemplate = (context, definition) => html`
               @click="${(x) => (x.page = 'warden-keys')}"
               slot="items"
             >
-              <span slot="title">Ключи Warden</span>
+              <span slot="title">Telegram Warden</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
               ?data-active="${(x) => x.page === 'updates'}"
@@ -166,8 +167,14 @@ export const appTemplate = (context, definition) => html`
           </ppp-side-nav-item>
         </ppp-side-nav>
         <div class="page-content">
+          ${page('me')}
+          ${page('trade-settings')}
+          ${page('cloud-services')}
           ${page('brokers')}
           ${page('new-broker')}
+          ${page('personal-server')}
+          ${page('warden-keys')}
+          ${page('updates')}
           ${when(
             (x) => !x.pageHasTemplate && requireComponent('ppp-not-found-page'),
             html`<ppp-not-found-page :page="${(x) => x}"></ppp-not-found-page>`

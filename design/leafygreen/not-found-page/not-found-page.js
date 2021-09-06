@@ -21,6 +21,14 @@ export const notFoundPageTemplate = (context, definition) => html`
           <p class="text">Страница не найдена. А верный ли адрес?</p>
         </div>
       </div>
+      <div class="footer">
+        <div class="copyright">
+          <p>
+            © PPP 2021-текущее время. Приложение PPP разработано командой John
+            Pantini.
+          </p>
+        </div>
+      </div>
     </main>
   </template>
 `;
@@ -74,6 +82,17 @@ export const notFoundPageStyles = (context, definition) =>
       font-size: 16px;
       line-height: 24px;
       margin-top: 24px;
+    }
+
+    .footer {
+      width: auto;
+      font-size: 80%;
+      border: none;
+      padding: 20px 0;
+    }
+
+    .copyright {
+      text-align: center;
     }
   `;
 
