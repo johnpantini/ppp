@@ -223,6 +223,20 @@ export const appStyles = (context, definition) =>
       padding-right: 20px;
       padding-top: 20px;
     }
+
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      border-radius: 2px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      border-radius: 2px;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    }
   `;
 
 export const app = App.compose({

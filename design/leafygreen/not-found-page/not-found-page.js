@@ -38,7 +38,7 @@ export const notFoundPageStyles = (context, definition) =>
     ${notDefined}
 
     main {
-      margin: calc(45px + 32px) auto 64px auto;
+      margin: calc(45px + 32px) auto 48px auto;
       max-width: 1150px;
       padding: 0 24px;
     }
