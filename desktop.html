@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-ppp-realm="desktop" class="desktop">
+<html lang="ru" ppp-realm="desktop" class="desktop">
   <head>
     <style>
       *:not(:defined) {
@@ -80,10 +80,7 @@
         display: flex;
         position: absolute;
         background: #fff;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
         height: 100%;
         flex-direction: column;
@@ -221,12 +218,12 @@
     );
 
     function appendMainScript() {
-      if (!document.querySelector('[data-ppp-main]')) {
+      if (!document.querySelector('[ppp-main]')) {
         const script = document.createElement('script');
 
         script.src = 'ppp.js';
         script.type = 'module';
-        script.setAttribute('data-ppp-main', true);
+        script.setAttribute('ppp-main', true);
         document.body.append(script);
       }
     }

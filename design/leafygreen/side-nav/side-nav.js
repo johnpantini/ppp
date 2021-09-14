@@ -15,7 +15,7 @@ export const sideNavTemplate = (context, definition) => html`
     <div class="wrapper">
       <nav
         class="nav"
-        ?data-expanded="${(x) => x.expanded}"
+        ?expanded="${(x) => x.expanded}"
         aria-label="side-nav"
         @pointerover="${(x, c) => x.handlePointerEnter(c)}"
         @pointerout="${(x, c) => x.handlePointerLeave(c)}"
@@ -47,7 +47,7 @@ export const sideNavTemplate = (context, definition) => html`
       <button
         ${ref('collapseToggle')}
         class="collapse-toggle"
-        ?data-expanded="${(x) => x.expanded}"
+        ?expanded="${(x) => x.expanded}"
         @click="${(x) => (x.expanded = !x.expanded)}"
       >
         <div class="icon-wrapper">
@@ -72,7 +72,7 @@ export const sideNavStyles = (context, definition) =>
       position: relative;
     }
 
-    :host([data-expanded]) {
+    :host([expanded]) {
       width: 184px;
     }
 
@@ -107,11 +107,11 @@ export const sideNavStyles = (context, definition) =>
       z-index: 0;
     }
 
-    .nav[data-expanded] {
+    .nav[expanded] {
       width: 184px;
     }
 
-    :host([data-hovered]) .nav:not([data-expanded]) {
+    :host([hovered]) .nav:not([expanded]) {
       width: 184px;
       border-right: 1px solid rgb(249, 251, 250);
       box-shadow: rgb(6 22 33 / 10%) 2px 0 4px;
@@ -167,22 +167,22 @@ export const sideNavStyles = (context, definition) =>
       color: #007cad;
     }
 
-    .nav:not([data-expanded]) .expanded-content {
+    .nav:not([expanded]) .expanded-content {
       opacity: 0;
       pointer-events: none;
     }
 
-    .nav:not([data-expanded]) .collapsed-content {
+    .nav:not([expanded]) .collapsed-content {
       opacity: 1;
       pointer-events: auto;
     }
 
-    :host([data-hovered]) .expanded-content {
+    :host([hovered]) .expanded-content {
       opacity: 1;
       pointer-events: auto;
     }
 
-    :host([data-hovered]) .collapsed-content {
+    :host([hovered]) .collapsed-content {
       opacity: 0;
       pointer-events: none;
     }
@@ -222,7 +222,7 @@ export const sideNavStyles = (context, definition) =>
       box-shadow: rgb(6 22 33 / 20%) 0 2px 2px;
     }
 
-    .collapse-toggle[data-expanded]:hover .icon-wrapper {
+    .collapse-toggle[expanded]:hover .icon-wrapper {
       transform: translate3d(-2px, 0, 0);
     }
 

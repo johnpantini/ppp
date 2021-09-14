@@ -2,16 +2,19 @@ import { SideNavItem } from '../../../lib/side-nav-item/side-nav-item.js';
 import { css } from '../../../lib/element/styles/css.js';
 import { display } from '../../../lib/utilities/style/display.js';
 import { html } from '../../../lib/template.js';
-import { endTemplate, startTemplate } from '../../../lib/patterns/start-end.js';
+import {
+  endSlotTemplate,
+  startSlotTemplate
+} from '../../../lib/patterns/start-end.js';
 
 // TODO - aria attributes
 export const sideNavItemTemplate = (context, definition) => html`
   <template>
-    ${startTemplate}
+    ${startSlotTemplate}
     <li class="content" part="content">
       <slot name="title"></slot>
     </li>
-    ${endTemplate}
+    ${endSlotTemplate}
   </template>
 `;
 
@@ -53,7 +56,7 @@ export const sideNavItemStyles = (context, definition) =>
       text-decoration: none;
     }
 
-    :host([data-active]) {
+    :host([active]) {
       color: rgb(11, 59, 53);
       background-color: rgb(228, 244, 228);
       font-weight: bold;

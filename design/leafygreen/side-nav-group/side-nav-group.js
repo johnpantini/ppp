@@ -2,16 +2,19 @@ import { SideNavGroup } from '../../../lib/side-nav-group/side-nav-group.js';
 import { css } from '../../../lib/element/styles/css.js';
 import { display } from '../../../lib/utilities/style/display.js';
 import { html } from '../../../lib/template.js';
-import { endTemplate, startTemplate } from '../../../lib/patterns/start-end.js';
+import {
+  endSlotTemplate,
+  startSlotTemplate
+} from '../../../lib/patterns/start-end.js';
 
 // TODO - aria attributes
 export const sideNavGroupTemplate = (context, definition) => html`
   <template>
     <div class="title">
       <div class="title-container">
-        ${startTemplate}
+        ${startSlotTemplate}
         <slot name="title"></slot>
-        ${endTemplate}
+        ${endSlotTemplate}
       </div>
     </div>
     <ul class="items-container">

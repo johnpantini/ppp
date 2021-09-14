@@ -48,4 +48,4 @@ new (class {
   async start() {
     return this.problemWithKeys();
   }
-})(document.documentElement.getAttribute('data-ppp-realm'));
+})(document.documentElement.getAttribute('ppp-realm'));
