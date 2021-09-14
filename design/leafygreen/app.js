@@ -18,7 +18,7 @@ const page = (page) => {
         x.page === page &&
           requireComponent(
             `ppp-${page}-page`,
-            `../../${globalThis.ppp.realm}/${page}/${page}-page.js`
+            `../${globalThis.ppp.realm}/${page}/${page}-page.js`
           )
       ),
     html`<ppp-${page}-page :app="${(x) => x}"></ppp-${page}-page>`
