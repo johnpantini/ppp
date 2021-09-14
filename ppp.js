@@ -1,12 +1,10 @@
 import { $global } from './lib/element/platform.js';
 
 new (class {
+  theme = 'leafygreen';
+
   constructor(realm) {
     this.realm = realm;
-    this.configuration = {
-      realm,
-      theme: 'leafygreen'
-    };
 
     $global.ppp = this;
 
@@ -17,30 +15,31 @@ new (class {
     return 0;
   }
 
-  async createApplication(configuration = {}) {
+  async createApplication() {
     const { DesignSystem } = await import(
       './lib/design-system/design-system.js'
     );
-    const { app } = await import(
-      `./design/${configuration.theme}/${this.realm}/app.js`
+    const { app } = await import(`./${this.realm}/app.js`);
+    const { appStyles, appTemplate } = await import(
+      `./design/${this.theme}/app.js`
     );
 
     $global.ppp.DesignSystem = DesignSystem;
 
-    DesignSystem.getOrCreate().register(app());
+    DesignSystem.getOrCreate().register(app(appStyles, appTemplate)());
 
-    document.body.setAttribute('appearance', configuration.theme);
+    document.body.setAttribute('appearance', this.theme);
 
     this.appElement = document.body.appendChild(
       document.createElement('ppp-app')
     );
 
     this.appElement.ppp = this;
-    this.appElement.setAttribute('appearance', configuration.theme);
+    this.appElement.setAttribute('appearance', this.theme);
   }
 
   async problemWithKeys() {
-    await this.createApplication(this.configuration);
+    await this.createApplication();
 
     $global.loader.setAttribute('hidden', true);
   }

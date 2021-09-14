@@ -218,12 +218,12 @@
     );
 
     function appendMainScript() {
-      if (!document.querySelector('[ppp-main]')) {
+      if (!document.querySelector('[ppp-state]')) {
         const script = document.createElement('script');
 
         script.src = 'ppp.js';
         script.type = 'module';
-        script.setAttribute('ppp-main', true);
+        script.setAttribute('ppp-state', 'processed');
         document.body.append(script);
       }
     }

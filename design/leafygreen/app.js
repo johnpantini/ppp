@@ -1,22 +1,25 @@
-import { App } from '../../../lib/desktop/app.js';
-import { css } from '../../../lib/element/styles/css.js';
-import { display } from '../../../lib/utilities/style/display.js';
-import { bodyFont } from '../design-tokens.js';
-import { html, requireComponent } from '../../../lib/template.js';
-import { when } from '../../../lib/element/templating/when.js';
+import { bodyFont } from './design-tokens.js';
+import { css } from '../../lib/element/styles/css.js';
+import { display } from '../../lib/utilities/style/display.js';
+import { html, requireComponent } from '../../lib/template.js';
+import { when } from '../../lib/element/templating/when.js';
 
-import { plus } from '../icons/plus.js';
-import { charts } from '../icons/charts.js';
-import { laptop } from '../icons/laptop.js';
-import { settings } from '../icons/settings.js';
-import { support } from '../icons/support.js';
-import { arrowLeft } from '../icons/arrow-left.js';
+import { plus } from './icons/plus.js';
+import { charts } from './icons/charts.js';
+import { laptop } from './icons/laptop.js';
+import { settings } from './icons/settings.js';
+import { support } from './icons/support.js';
+import { arrowLeft } from './icons/arrow-left.js';
 
 const page = (page) => {
   return when(
     (x) =>
       x.setPageTemplate(
-        x.page === page && requireComponent(`ppp-${page}-page`)
+        x.page === page &&
+          requireComponent(
+            `ppp-${page}-page`,
+            `../../${globalThis.ppp.realm}/${page}/${page}-page.js`
+          )
       ),
     html`<ppp-${page}-page :app="${(x) => x}"></ppp-${page}-page>`
   );
@@ -173,10 +176,16 @@ export const appTemplate = (context, definition) => html`
           ${page('brokers')}
           ${page('new-broker')}
           ${page('ssh-servers')}
+          ${page('new-ssh-server')}
           ${page('warden-keys')}
           ${page('updates')}
           ${when(
-            (x) => !x.pageHasTemplate && requireComponent('ppp-not-found-page'),
+            (x) =>
+              !x.pageHasTemplate &&
+              requireComponent(
+                'ppp-not-found-page',
+                `../../${globalThis.ppp.realm}/not-found/not-found-page.js`
+              ),
             html`<ppp-not-found-page :page="${(x) => x}"></ppp-not-found-page>`
           )}
         </div>
@@ -238,9 +247,3 @@ export const appStyles = (context, definition) =>
       box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
     }
   `;
-
-export const app = App.compose({
-  baseName: 'app',
-  template: appTemplate,
-  styles: appStyles
-});

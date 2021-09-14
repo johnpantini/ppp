@@ -1,10 +1,10 @@
 /** @decorator */
 
-import { FoundationElement } from '../../../lib/foundation-element/foundation-element.js';
-import { observable } from '../../../lib/element/observation/observable.js';
-import { html } from '../../../lib/template.js';
-import { css } from '../../../lib/element/styles/css.js';
-import { notDefined } from '../../../lib/utilities/style/display.js';
+import { FoundationElement } from '../../lib/foundation-element/foundation-element.js';
+import { observable } from '../../lib/element/observation/observable.js';
+import { html } from '../../lib/template.js';
+import { css } from '../../lib/element/styles/css.js';
+import { notDefined } from '../../lib/utilities/style/display.js';
 
 export class SshServersPage extends FoundationElement {}
 
