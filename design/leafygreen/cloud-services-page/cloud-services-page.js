@@ -13,7 +13,7 @@ export class CloudServicesPage extends FoundationElement {
 
 export const cloudServicesPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>Параметры облачных сервисов</ppp-page-header>
+    <${'ppp-page-header'}>Облачные сервисы</ppp-page-header>
   </template>
 `;
 

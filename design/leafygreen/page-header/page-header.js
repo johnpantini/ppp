@@ -9,6 +9,9 @@ export const pageHeaderTemplate = (context, definition) => html`
     <div class="title">
       <slot></slot>
     </div>
+    <div class="controls">
+      <slot name="controls"></slot>
+    </div>
   </template>
 `;
 
@@ -36,6 +39,15 @@ export const pageHeaderStyles = (context, definition) => css`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .controls {
+    align-items: center;
+    display: flex;
+    margin-left: auto;
+  }
+
+  .controls ::slotted(*) {
+    margin-left: 14px;
   }
 `;
 

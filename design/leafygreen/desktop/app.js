@@ -18,7 +18,7 @@ const page = (page) => {
       x.setPageTemplate(
         x.page === page && requireComponent(`ppp-${page}-page`)
       ),
-    html`<ppp-${page}-page :page="${(x) => x}"></ppp-${page}-page>`
+    html`<ppp-${page}-page :app="${(x) => x}"></ppp-${page}-page>`
   );
 };
 

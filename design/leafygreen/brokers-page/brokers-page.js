@@ -6,14 +6,20 @@ import { html } from '../../../lib/template.js';
 import { css } from '../../../lib/element/styles/css.js';
 import { notDefined } from '../../../lib/utilities/style/display.js';
 
-export class BrokersPage extends FoundationElement {
-  @observable
-  page;
-}
+export class BrokersPage extends FoundationElement {}
 
 export const brokersPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>Список брокерских профилей</ppp-page-header>
+    <${'ppp-page-header'}>
+      <${'ppp-button'}
+        appearance="primary"
+        slot="controls"
+        @click="${(x) => (x.app.page = 'new-broker')}"
+      >
+        Добавить брокера
+      </ppp-button>
+      Список брокеров
+    </ppp-page-header>
   </template>
 `;
 

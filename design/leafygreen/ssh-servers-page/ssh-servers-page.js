@@ -6,14 +6,14 @@ import { html } from '../../../lib/template.js';
 import { css } from '../../../lib/element/styles/css.js';
 import { notDefined } from '../../../lib/utilities/style/display.js';
 
-export class SshServersPage extends FoundationElement {
-  @observable
-  page;
-}
+export class SshServersPage extends FoundationElement {}
 
 export const sshServersPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>Машины SSH</ppp-page-header>
+    <${'ppp-page-header'}>
+      <${'ppp-button'} appearance="primary" slot="controls">Добавить машину</ppp-button>
+      Машины SSH
+    </ppp-page-header>
   </template>
 `;
 
