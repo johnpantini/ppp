@@ -147,15 +147,17 @@ export const textFieldStyles = (context, definition) => css`
     width: 100%;
   }
 
-  :host .root-container:hover .interaction-ring {
+  :host .root-container:hover input:not(:focus) + .interaction-ring {
     box-shadow: rgb(231 238 236) 0 0 0 3px;
   }
 
-  :host([state='error']) .root-container:hover .interaction-ring {
+  // prettier-ignore
+  :host([state='error']) .root-container:hover input:not(:focus) + .interaction-ring {
     box-shadow: rgb(252 235 226) 0 0 0 3px;
   }
 
-  :host([state='valid']) .root-container:hover .interaction-ring {
+  // prettier-ignore
+  :host([state='valid']) .root-container:hover input:not(:focus) + .interaction-ring {
     box-shadow: rgb(228 244 228) 0 0 0 3px;
   }
 
@@ -199,7 +201,7 @@ export const textFieldStyles = (context, definition) => css`
     border-radius: 4px;
   }
 
-  input:focus ~ .interaction-ring {
+  :host input:focus ~ .interaction-ring {
     box-shadow: rgb(1, 158, 226) 0 0 0 3px;
   }
 
