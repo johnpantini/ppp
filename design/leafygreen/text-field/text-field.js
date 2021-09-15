@@ -1,6 +1,11 @@
+/** @decorator */
+
 import { TextField as FoundationTextField } from '../../../lib/text-field/text-field.js';
+import { observable } from '../../../lib/element/observation/observable.js';
 import { html } from '../../../lib/element/templating/template.js';
+import { attr } from '../../../lib/element/components/attributes.js';
 import { ref } from '../../../lib/element/templating/ref.js';
+import { when } from '../../../lib/element/templating/when.js';
 import {
   endSlotTemplate,
   startSlotTemplate
@@ -10,6 +15,10 @@ import { display } from '../../../lib/utilities/style/display.js';
 
 import { bodyFont } from '../design-tokens.js';
 
+import { warning } from '../icons/warning.js';
+import { checkmark } from '../icons/checkmark.js';
+
+// TODO - startTemplate
 export const textFieldTemplate = (context, definition) => html`
   <template class="${(x) => (x.readOnly ? 'readonly' : '')}">
     <label part="label" for="control" class="label">
@@ -20,7 +29,6 @@ export const textFieldTemplate = (context, definition) => html`
     </p>
     <div class="root" part="root">
       <div class="root-container">
-        ${startSlotTemplate(context, definition)}
         <input
           class="control"
           part="control"
@@ -61,16 +69,41 @@ export const textFieldTemplate = (context, definition) => html`
           aria-roledescription="${(x) => x.ariaRoledescription}"
           ${ref('control')}
         />
-        ${endSlotTemplate(context, definition)}
+        <div class="interaction-ring"></div>
       </div>
+      ${when(
+        (x) => x.state === 'default',
+        endSlotTemplate(context, definition)
+      )}
+      ${when(
+        (x) => x.state === 'error' && !!x.errorMessage,
+        html`<div class="end">
+          ${warning({
+            cls: 'error-icon'
+          })}
+        </div>`
+      )}
+      ${when(
+        (x) => x.state === 'valid',
+        html`<div class="end">
+          ${checkmark({
+            cls: 'checkmark-icon'
+          })}
+        </div>`
+      )}
     </div>
+    ${when(
+      (x) => x.state === 'error' && !!x.errorMessage,
+      html`<div class="helper error">
+        <label>${(x) => x.errorMessage}</label>
+      </div>`
+    )}
   </template>
 `;
 
 // TODO - design tokens
 export const textFieldStyles = (context, definition) => css`
   ${display('flex')}
-
   :host {
     flex-direction: column;
   }
@@ -114,6 +147,18 @@ export const textFieldStyles = (context, definition) => css`
     width: 100%;
   }
 
+  :host .root-container:hover .interaction-ring {
+    box-shadow: rgb(231 238 236) 0 0 0 3px;
+  }
+
+  :host([state='error']) .root-container:hover .interaction-ring {
+    box-shadow: rgb(252 235 226) 0 0 0 3px;
+  }
+
+  :host([state='valid']) .root-container:hover .interaction-ring {
+    box-shadow: rgb(228 244 228) 0 0 0 3px;
+  }
+
   input {
     width: 100%;
     height: 36px;
@@ -130,9 +175,90 @@ export const textFieldStyles = (context, definition) => css`
     padding-right: 12px;
     font-family: ${bodyFont};
   }
+
+  :host([state='error']) input {
+    border: 1px solid rgb(207, 74, 34);
+    padding-right: 30px;
+  }
+
+  :host([state='valid']) input {
+    border: 1px solid rgb(19, 170, 82);
+    padding-right: 30px;
+  }
+
+  :host input:focus {
+    border: 1px solid rgb(255, 255, 255);
+  }
+
+  .interaction-ring {
+    transition: all 150ms ease-in-out 0s;
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 4px;
+  }
+
+  input:focus ~ .interaction-ring {
+    box-shadow: rgb(1, 158, 226) 0 0 0 3px;
+  }
+
+  .helper {
+    font-size: 14px;
+    min-height: 20px;
+    padding-top: 4px;
+    font-weight: normal;
+  }
+
+  .helper.error {
+    color: rgb(207, 74, 34);
+  }
+
+  .end {
+    position: absolute;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    right: 12px;
+    z-index: 1;
+  }
+
+  .error-icon {
+    flex-shrink: 0;
+    color: rgb(207, 74, 34);
+  }
+
+  .checkmark-icon {
+    flex-shrink: 0;
+    color: rgb(19, 170, 82);
+  }
 `;
 
-export class TextField extends FoundationTextField {}
+export class TextField extends FoundationTextField {
+  @attr
+  state;
+
+  @observable
+  errorMessage;
+
+  stateChanged(oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.classList.add(newValue);
+      this.classList.remove(oldValue);
+    }
+  }
+
+  /**
+   * @internal
+   */
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (!this.state) {
+      this.state = 'default';
+    }
+  }
+}
 
 /**
  *
