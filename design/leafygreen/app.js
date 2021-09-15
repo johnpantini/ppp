@@ -31,6 +31,7 @@ export const appTemplate = (context, definition) => html`
       <div class="app-container">
         <${'ppp-side-nav'} ?expanded="${(x) => x.expanded}">
           <${'ppp-side-nav-item'}
+            disabled
             ?active="${(x) => x.page === 'me'}"
             @click="${(x) => (x.page = 'me')}"
           >
@@ -40,6 +41,7 @@ export const appTemplate = (context, definition) => html`
             </span>
           </ppp-side-nav-item>
           <ppp-side-nav-item
+            disabled
             @click="${(x) => x.handleNewTerminalClick()}"
           >
             ${plus({
@@ -62,6 +64,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Аналитика</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'trade-settings'}"
               @click="${(x) => (x.page = 'trade-settings')}"
               slot="items"
@@ -75,6 +78,7 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">PPP</span>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'ppp-dashboard'}"
               @click="${(x) => (x.page = 'ppp-dashboard')}"
               slot="items"
@@ -82,6 +86,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Обзор</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'ppp-billing'}"
               @click="${(x) => (x.page = 'ppp-billing')}"
               slot="items"
@@ -89,6 +94,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Оплата</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'ppp-achievements'}"
               @click="${(x) => (x.page = 'ppp-achievements')}"
               slot="items"
@@ -96,6 +102,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Достижения</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'ppp-settings'}"
               @click="${(x) => (x.page = 'ppp-settings')}"
               slot="items"
@@ -116,6 +123,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Облачные сервисы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) =>
                 x.page === 'brokers' || x.page === 'new-broker'}"
               @click="${(x) => (x.page = 'brokers')}"
@@ -124,6 +132,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Брокеры</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'ssh-servers'}"
               @click="${(x) => (x.page = 'ssh-servers')}"
               slot="items"
@@ -131,6 +140,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Машины SSH</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'warden-keys'}"
               @click="${(x) => (x.page = 'warden-keys')}"
               slot="items"
@@ -138,6 +148,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Telegram Warden</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'updates'}"
               @click="${(x) => (x.page = 'updates')}"
               slot="items"
@@ -151,6 +162,7 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">Помощь</span>
             <ppp-side-nav-item
+              disabled
               ?active="${(x) => x.page === 'guides'}"
               @click="${(x) => (x.page = 'guides')}"
               slot="items"
@@ -159,6 +171,7 @@ export const appTemplate = (context, definition) => html`
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-item
+            disabled
             style="margin-top: 16px"
             @click="${(x) => x.handleSignOutClick()}"
           >
