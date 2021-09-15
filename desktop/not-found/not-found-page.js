@@ -6,10 +6,10 @@ import { html } from '../../lib/template.js';
 import { css } from '../../lib/element/styles/css.js';
 import { notDefined } from '../../lib/utilities/style/display.js';
 
-export class NotFoundPage extends FoundationElement {
-  @observable
-  page;
-}
+// TODO
+import { settings } from '../../design/leafygreen/icons/settings.js';
+
+export class NotFoundPage extends FoundationElement {}
 
 export const notFoundPageTemplate = (context, definition) => html`
   <template>
@@ -18,7 +18,18 @@ export const notFoundPageTemplate = (context, definition) => html`
         <img src="static/404.png" alt="Page not found" />
         <div class="details">
           <p class="headline">Что-то пошло не так.</p>
-          <p class="text">Страница не найдена. А верный ли адрес?</p>
+          <p class="text">
+            Страница не найдена. Убедитесь, что адрес введён корректно.
+          </p>
+          <div class="actions">
+            <${'ppp-button'} @click="${(x) =>
+  (x.app.page = 'cloud-services')}" appearance="primary">
+              ${settings({
+                slot: 'start'
+              })}
+              К настройкам облачных сервисов
+            </ppp-button>
+          </div>
         </div>
       </div>
       <div class="footer">
@@ -38,7 +49,7 @@ export const notFoundPageStyles = (context, definition) =>
     ${notDefined}
 
     main {
-      margin: calc(45px + 32px) auto 48px auto;
+      margin: calc(25px + 32px) auto 32px auto;
       max-width: 1150px;
       padding: 0 24px;
     }
@@ -52,7 +63,7 @@ export const notFoundPageStyles = (context, definition) =>
       -webkit-box-pack: center;
       -webkit-justify-content: center;
       justify-content: center;
-      margin-bottom: 128px;
+      margin-bottom: 64px;
     }
 
     img {
@@ -81,6 +92,10 @@ export const notFoundPageStyles = (context, definition) =>
     .text {
       font-size: 16px;
       line-height: 24px;
+      margin-top: 24px;
+    }
+
+    .actions {
       margin-top: 24px;
     }
 

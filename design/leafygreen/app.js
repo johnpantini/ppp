@@ -166,27 +166,19 @@ export const appTemplate = (context, definition) => html`
               slot: 'start',
               cls: 'action-icon'
             })}
-            <span slot="title">Выйти</span>
+            <span slot="title">Выйти</span
           </ppp-side-nav-item>
         </ppp-side-nav>
         <div class="page-content">
-          ${page('me')}
-          ${page('trade-settings')}
           ${page('cloud-services')}
-          ${page('brokers')}
-          ${page('new-broker')}
-          ${page('ssh-servers')}
-          ${page('new-ssh-server')}
-          ${page('warden-keys')}
-          ${page('updates')}
           ${when(
             (x) =>
               !x.pageHasTemplate &&
               requireComponent(
                 'ppp-not-found-page',
-                `../../${globalThis.ppp.realm}/not-found/not-found-page.js`
+                `../${globalThis.ppp.realm}/not-found/not-found-page.js`
               ),
-            html`<ppp-not-found-page :page="${(x) => x}"></ppp-not-found-page>`
+            html`<ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
           )}
         </div>
       </div>

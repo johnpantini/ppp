@@ -8,7 +8,7 @@ export const svg = ({ size = 16, role = 'img', content = '', slot, cls }) => {
   return html`<svg
     width="${width}"
     height="${height}"
-    viewBox="0 0 16 16"
+    viewBox="0 0 ${width} ${height}"
     role="${role}"
     ${typeof slot === 'string' ? 'slot="' + slot + '"' : ''}
     ${typeof cls === 'string' ? 'class="' + cls + '"' : ''}
