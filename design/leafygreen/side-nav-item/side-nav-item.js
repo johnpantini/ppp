@@ -56,7 +56,7 @@ export const sideNavItemStyles = (context, definition) =>
       text-decoration: none;
     }
 
-    :host([active]) {
+    :host([active]:not([disabled])) {
       color: rgb(11, 59, 53);
       background-color: rgb(228, 244, 228);
       font-weight: bold;
