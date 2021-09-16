@@ -70,6 +70,8 @@ export const sideNavStyles = (context, definition) =>
       width: 48px;
       transition: width 200ms ease-in-out 0s;
       position: relative;
+      scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.5);
+      scrollbar-width: thin;
     }
 
     :host([expanded]) {
