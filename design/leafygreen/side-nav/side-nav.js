@@ -135,7 +135,7 @@ export const sideNavStyles = (context, definition) =>
 
     .expanded-content > ul,
     .collapsed-content > ul {
-      scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.5);
+      scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
       scrollbar-width: thin;
       margin-block: 0;
       padding-inline-start: 0;
