@@ -77,17 +77,15 @@ export const sideNavStyles = (context, definition) =>
     }
 
     ::-webkit-scrollbar {
-      width: 4px;
+      width: 8px;
     }
 
     ::-webkit-scrollbar-track {
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-      border-radius: 2px;
+      background-color: rgba(0, 0, 0, 0.2);
     }
 
     ::-webkit-scrollbar-thumb {
-      border-radius: 2px;
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.3);
     }
 
     .wrapper {
