@@ -14,7 +14,7 @@
     }
   ],
   "lang":        "ru-RU",
-  "start_url":   "/ppp",
+  "start_url":   "/",
   "display":     "minimal-ui",
   "theme_color": "#131722"
 }
