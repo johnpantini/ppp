@@ -13,54 +13,58 @@ import {
 import { slotted } from '../../../lib/element/templating/slotted.js';
 import { appearanceBehavior } from '../../../lib/utilities/behaviors.js';
 
+import { bodyFont } from '../design-tokens.js';
+
 // TODO - ripple
 export const buttonTemplate = (context, definition) => html`
-  <button
-    class="control"
-    part="control"
-    ?autofocus="${(x) => x.autofocus}"
-    ?disabled="${(x) => x.disabled}"
-    form="${(x) => x.formId}"
-    formaction="${(x) => x.formaction}"
-    formenctype="${(x) => x.formenctype}"
-    formmethod="${(x) => x.formmethod}"
-    formnovalidate="${(x) => x.formnovalidate}"
-    formtarget="${(x) => x.formtarget}"
-    name="${(x) => x.name}"
-    type="${(x) => x.type}"
-    value="${(x) => x.value}"
-    aria-atomic="${(x) => x.ariaAtomic}"
-    aria-busy="${(x) => x.ariaBusy}"
-    aria-controls="${(x) => x.ariaControls}"
-    aria-current="${(x) => x.ariaCurrent}"
-    aria-describedBy="${(x) => x.ariaDescribedby}"
-    aria-details="${(x) => x.ariaDetails}"
-    aria-disabled="${(x) => x.ariaDisabled}"
-    aria-errormessage="${(x) => x.ariaErrormessage}"
-    aria-expanded="${(x) => x.ariaExpanded}"
-    aria-flowto="${(x) => x.ariaFlowto}"
-    aria-haspopup="${(x) => x.ariaHaspopup}"
-    aria-hidden="${(x) => x.ariaHidden}"
-    aria-invalid="${(x) => x.ariaInvalid}"
-    aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
-    aria-label="${(x) => x.ariaLabel}"
-    aria-labelledby="${(x) => x.ariaLabelledby}"
-    aria-live="${(x) => x.ariaLive}"
-    aria-owns="${(x) => x.ariaOwns}"
-    aria-pressed="${(x) => x.ariaPressed}"
-    aria-relevant="${(x) => x.ariaRelevant}"
-    aria-roledescription="${(x) => x.ariaRoledescription}"
-    ${ref('control')}
-  >
-    <div class="ripple-container"></div>
-    <div class="content-container">
-      ${startSlotTemplate(context, definition)}
-      <span class="content" part="content">
-        <slot ${slotted('defaultSlottedContent')}></slot>
-      </span>
-      ${endSlotTemplate(context, definition)}
-    </div>
-  </button>
+  <template>
+    <button
+      class="control"
+      part="control"
+      ?autofocus="${(x) => x.autofocus}"
+      ?disabled="${(x) => x.disabled}"
+      form="${(x) => x.formId}"
+      formaction="${(x) => x.formaction}"
+      formenctype="${(x) => x.formenctype}"
+      formmethod="${(x) => x.formmethod}"
+      formnovalidate="${(x) => x.formnovalidate}"
+      formtarget="${(x) => x.formtarget}"
+      name="${(x) => x.name}"
+      type="${(x) => x.type}"
+      value="${(x) => x.value}"
+      aria-atomic="${(x) => x.ariaAtomic}"
+      aria-busy="${(x) => x.ariaBusy}"
+      aria-controls="${(x) => x.ariaControls}"
+      aria-current="${(x) => x.ariaCurrent}"
+      aria-describedBy="${(x) => x.ariaDescribedby}"
+      aria-details="${(x) => x.ariaDetails}"
+      aria-disabled="${(x) => x.ariaDisabled}"
+      aria-errormessage="${(x) => x.ariaErrormessage}"
+      aria-expanded="${(x) => x.ariaExpanded}"
+      aria-flowto="${(x) => x.ariaFlowto}"
+      aria-haspopup="${(x) => x.ariaHaspopup}"
+      aria-hidden="${(x) => x.ariaHidden}"
+      aria-invalid="${(x) => x.ariaInvalid}"
+      aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
+      aria-label="${(x) => x.ariaLabel}"
+      aria-labelledby="${(x) => x.ariaLabelledby}"
+      aria-live="${(x) => x.ariaLive}"
+      aria-owns="${(x) => x.ariaOwns}"
+      aria-pressed="${(x) => x.ariaPressed}"
+      aria-relevant="${(x) => x.ariaRelevant}"
+      aria-roledescription="${(x) => x.ariaRoledescription}"
+      ${ref('control')}
+    >
+      <div class="ripple-container"></div>
+      <div class="content-container">
+        ${startSlotTemplate(context, definition)}
+        <span class="content" part="content">
+          <slot ${slotted('defaultSlottedContent')}></slot>
+        </span>
+        ${endSlotTemplate(context, definition)}
+      </div>
+    </button>
+  </template>
 `;
 
 export const baseButtonStyles = (context, definition) =>
@@ -105,6 +109,7 @@ export const baseButtonStyles = (context, definition) =>
       z-index: 0;
       font-size: 14px;
       height: 36px;
+      font-family: ${bodyFont};
     }
 
     .control:focus {
@@ -182,8 +187,8 @@ export const primaryButtonStyles = (context, definition) => css`
 
 export const disabledButtonStyles = (context, definition) =>
   css`
-    :host(:disabled) .control,
-    :host(:disabled) .control:hover {
+    :host(:disabled) button.control,
+    :host(:disabled) button.control:hover {
       background-color: rgb(231, 238, 236);
       border: 1px solid rgb(231, 238, 236);
       box-shadow: rgb(184 196 194) 0 0 0 1px;
@@ -191,8 +196,8 @@ export const disabledButtonStyles = (context, definition) =>
       color: rgb(93, 108, 116);
     }
 
-    :host(:disabled) .start,
-    :host(:disabled) .end {
+    :host(:disabled) .content-container .start,
+    :host(:disabled) .content-container .end {
       color: rgb(184, 196, 194);
     }
   `;
@@ -202,6 +207,9 @@ export const buttonStyles = (context, definition) =>
   css`
     ${baseButtonStyles(context, definition)}
     ${disabledButtonStyles(context, definition)}
+    slot[name='end']::slotted(.spinner-icon) {
+      color: #13aa52;
+    }
 
     .xsmall {
       height: 22px;
