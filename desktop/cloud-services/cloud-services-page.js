@@ -77,9 +77,15 @@ export const cloudServicesPageTemplate = (context, definition) => html`
           </div>
           <div class="label-group">
             <h6>Токен администрирования Auth0</h6>
-            <${'ppp-banner'} class="inline margin-top" appearance="warning">Токен Auth0
+            <${'ppp-banner'} class="inline margin-top" appearance="warning">
+              Токен Auth0
               требуется только для первичной настройки приложения, он не
-              сохраняется.
+              сохраняется. Если вы собираетесь использовать <a target="_blank"
+                                                               href="https://pantini.gitbook.io/pantini-co/ppp/cloudflare-pages">Cloudflare
+              Pages</a>,
+              вводите все настройки на этой странице, открыв её через ваш ресурс Cloudflare
+              Pages.
+            </ppp-banner>
             </ppp-banner>
             <p>Сервис Auth0 служит для авторизации пользователей приложения PPP
               по
@@ -153,7 +159,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
 export const cloudServicesPageStyles = (context, definition) =>
   css`
     ${basePageStyles}
-    section ppp-text-field {
+    section ppp-text-field, section ppp-banner {
       max-width: 600px;
     }
   `;
