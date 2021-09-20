@@ -127,4 +127,8 @@ export const basePageStyles = css`
   svg.spinner-icon {
     animation: spin 2s linear infinite;
   }
+
+  .margin-top {
+    margin-top: 10px;
+  }
 `;

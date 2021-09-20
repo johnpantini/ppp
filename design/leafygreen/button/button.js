@@ -70,7 +70,6 @@ export const buttonTemplate = (context, definition) => html`
 export const baseButtonStyles = (context, definition) =>
   css`
     ${display('inline-flex')}
-
     .ripple-container {
       overflow: hidden;
       border-radius: 3px;

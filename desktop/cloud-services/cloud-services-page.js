@@ -6,7 +6,7 @@ import { ref } from '../../lib/element/templating/ref.js';
 import { html } from '../../lib/template.js';
 import { css } from '../../lib/element/styles/css.js';
 import { when } from '../../lib/element/templating/when.js';
-import { validate } from '../../lib/validate.js';
+import { validate, invalidate } from '../../lib/validate.js';
 import {
   basePageStyles,
   circleSvg,
@@ -24,9 +24,22 @@ export class CloudServicesPage extends FoundationElement {
       this.busy = true;
 
       await validate(this.gitHubToken);
+
+      const r1 = await this.app.ppp.keyVault.checkGitHubToken({
+        token: this.gitHubToken.value
+      });
+
+      if (!r1.ok)
+        invalidate(this.gitHubToken, {
+          errorMessage: `Неверный токен (ошибка ${r1.status})`,
+          status: r1.status
+        });
+
+      this.app.ppp.keyVault.keys.gitHub = this.gitHubToken.value;
+
       await validate(this.auth0Token);
-      await validate(this.mongoPublicKey);
-      await validate(this.mongoPrivateKey);
+      // await validate(this.mongoPublicKey);
+      // await validate(this.mongoPrivateKey);
     } finally {
       this.busy = false;
     }
@@ -64,6 +77,10 @@ export const cloudServicesPageTemplate = (context, definition) => html`
           </div>
           <div class="label-group">
             <h6>Токен администрирования Auth0</h6>
+            <${'ppp-banner'} class="inline margin-top" appearance="warning">Токен Auth0
+              требуется только для первичной настройки приложения, он не
+              сохраняется.
+            </ppp-banner>
             <p>Сервис Auth0 служит для авторизации пользователей приложения PPP
               по
               логину и паролю, а также хранения ключей других облачных сервисов.
