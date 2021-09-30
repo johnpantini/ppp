@@ -10,6 +10,7 @@ import { bodyFont } from '../design-tokens.js';
 import { checkmarkWithCircle } from '../icons/checkmark-with-circle.js';
 import { warning } from '../icons/warning.js';
 import { settings } from '../icons/settings.js';
+import { x } from '../icons/x.js';
 
 // TODO - aria attributes
 export const toastTemplate = (context, definition) => html`
@@ -33,12 +34,22 @@ export const toastTemplate = (context, definition) => html`
       </div>
     </div>
     ${when(
+      (x) => !!x.dismissible,
+      html` <button
+        @click="${(x) => (x.visible = false)}"
+        aria-label="Close Message"
+        class="close"
+        tabindex="0"
+      >
+        <div class="close-icon">${x({})}</div>
+      </button>`
+    )}
+    ${when(
       (x) => x.appearance === 'progress',
       html`
         <div class="progress-container">
-          <${'ppp-progress'} ${ref(
-        'progress'
-      )} min="0" max="100"></ppp-progress>
+          <${'ppp-progress'} ${ref('progress')} min="0" max="100">
+          </ppp-progress>
         </div>`
     )}
   </template>
@@ -53,7 +64,7 @@ export const successToastStyles = (context, definition) => css`
     border: 1px solid rgb(195, 231, 202);
   }
 
-  :host([appearance='success']) svg {
+  :host([appearance='success']) .container > svg {
     color: rgb(9, 128, 76);
   }
 
@@ -63,6 +74,14 @@ export const successToastStyles = (context, definition) => css`
 
   :host([appearance='success']) .text {
     color: rgb(17, 97, 73);
+  }
+
+  :host([appearance='success']) .close {
+    color: rgb(17, 97, 73);
+  }
+
+  :host([appearance='success']) .close:hover::before {
+    background-color: rgb(195, 231, 202);
   }
 `;
 
@@ -75,7 +94,7 @@ export const warningToastStyles = (context, definition) => css`
     border: 1px solid rgb(249, 211, 197);
   }
 
-  :host([appearance='warning']) svg {
+  :host([appearance='warning']) .container > svg {
     color: rgb(207, 74, 34);
   }
 
@@ -85,6 +104,18 @@ export const warningToastStyles = (context, definition) => css`
 
   :host([appearance='warning']) .text {
     color: rgb(143, 34, 27);
+  }
+
+  :host([appearance='warning']) .close {
+    color: rgb(177, 55, 31);
+  }
+
+  :host([appearance='warning']) .close:hover {
+    color: rgb(11, 59, 53);
+  }
+
+  :host([appearance='warning']) .close:hover::before {
+    background-color: rgb(249, 211, 197);
   }
 `;
 
@@ -106,7 +137,7 @@ export const progressToastStyles = (context, definition) => css`
     border-bottom-color: initial;
   }
 
-  :host([appearance='progress']) svg {
+  :host([appearance='progress']) .container > svg {
     color: rgb(61, 79, 88);
   }
 
@@ -127,6 +158,18 @@ export const progressToastStyles = (context, definition) => css`
     background-color: rgb(231, 238, 236);
     border-radius: 0 0 4px 4px;
     overflow: hidden;
+  }
+
+  :host([appearance='progress']) .close {
+    color: rgb(137, 151, 155);
+  }
+
+  :host([appearance='progress']) .close:hover {
+    color: rgb(61, 79, 88);
+  }
+
+  :host([appearance='progress']) .close:hover::before {
+    background-color: rgb(231, 238, 236);
   }
 `;
 
@@ -151,7 +194,7 @@ export const toastStyles = (context, definition) =>
       pointer-events: none;
     }
 
-    :host([active]) {
+    :host([visible]) {
       visibility: visible;
       transform: translate3d(0, 0, 0) scale(1);
       opacity: 1;
@@ -184,7 +227,60 @@ export const toastStyles = (context, definition) =>
       font-weight: 400;
     }
 
-    :host svg {
+    .close {
+      border: none;
+      appearance: unset;
+      padding: unset;
+      display: inline-block;
+      border-radius: 100px;
+      cursor: pointer;
+      flex-shrink: 0;
+      background-color: rgba(255, 255, 255, 0);
+      height: 28px;
+      width: 28px;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      transition: color 0.15s ease-in-out 0s;
+    }
+
+    .close::before {
+      content: '';
+      transition: all 150ms ease-in-out 0s;
+      position: absolute;
+      inset: 0;
+      border-radius: 100%;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    .close:hover::before {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .close:focus {
+      color: rgb(26, 86, 126);
+      outline: none;
+    }
+
+    .close:focus::before {
+      background-color: rgb(197, 228, 242);
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .close-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      -webkit-box-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      justify-content: center;
+    }
+
+    .container > svg {
       flex-shrink: 0;
       margin-right: 16px;
     }
