@@ -1,0 +1,15 @@
+{
+  "name": "ppp",
+  "version": "1.0.0",
+  "description": "PPP",
+  "author": "johnpantini",
+  "main": "ppp-dyno.js",
+  "scripts": {
+    "start": "node ppp-dyno.js"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^20.2.0",
+    "node-ssh": "^12.0.0"
+  },
+  "license": "MIT"
+}
