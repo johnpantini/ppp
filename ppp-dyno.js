@@ -6,7 +6,10 @@ const ssh = new NodeSSH();
 const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT ?? 3777,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    routes: {
+      cors: true
+    }
   });
 
   server.route({
@@ -19,6 +22,7 @@ const init = async () => {
     method: 'GET',
     path: '/ssh',
     handler: (request, h) => {
+      // TODO
       return request.headers['user-agent'];
     }
   });
