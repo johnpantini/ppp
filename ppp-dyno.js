@@ -1,4 +1,7 @@
 const Hapi = require('@hapi/hapi');
+const { NodeSSH } = require('node-ssh');
+
+const ssh = new NodeSSH();
 
 const init = async () => {
   const server = Hapi.server({
@@ -8,7 +11,13 @@ const init = async () => {
 
   server.route({
     method: 'GET',
-    path: '/',
+    path: '/ping',
+    handler: () => 'pong'
+  });
+
+  server.route({
+    method: 'GET',
+    path: '/ssh',
     handler: (request, h) => {
       return request.headers['user-agent'];
     }
