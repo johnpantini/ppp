@@ -52,6 +52,8 @@ export class UpdatesPage extends BasePage {
 
   async checkForUpdates() {
     try {
+      this.currentCommit = void 0;
+      this.targetCommit = void 0;
       this.busy = true;
       this.app.toast.source = this;
       this.toastTitle = i18n.t('$pages.updates.toast.title');
@@ -281,11 +283,10 @@ export const updatesPageTemplate = (context, definition) => html`
                 <${'ppp-badge'} appearance="lightgray">main</ppp-badge>
                 официального <a target="_blank"
                                 href="https://github.com/johnpantini/ppp"
-              >GitHub-репозитория</a
-              >
+              >GitHub-репозитория</a>
               </h2>
               <button
-                @click="${(x) => window.location.reload()}"
+                @click="${(x) => x.checkForUpdates()}"
                 type="button"
                 class="cta"
                 aria-disabled="false"
