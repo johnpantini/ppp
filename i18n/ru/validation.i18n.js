@@ -4,6 +4,7 @@ i18n.extend({
   invalidMongoDBRealmKeys: 'Неверные ключи MongoDB Realm',
   invalidToken: 'Неверный токен',
   invalidTokenWithStatus: 'Неверный токен (код ошибки %{status})',
+  invalidURL: 'Неверный URL',
   mongoDBProblemWithStatus: 'Проблема с MongoDB (код ошибки %{status})',
   operationFailedWithStatus: 'Операция не выполнена (код ошибки %{status})',
   operationDoneRefreshPage:

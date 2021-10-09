@@ -4,5 +4,6 @@ i18n.extend({
   loading: 'Загрузка',
   save: 'Сохранить',
   signOut: 'Выйти',
+  update: 'Обновление',
   updates: 'Обновления'
 });
