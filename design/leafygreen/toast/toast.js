@@ -48,7 +48,7 @@ export const toastTemplate = (context, definition) => html`
       (x) => x.appearance === 'progress',
       html`
         <div class="progress-container">
-          <${'ppp-progress'} ${ref('progress')} min="0" max="100">
+          <${'ppp-progress'} ${ref('progress')} min="0" max="100" value="0">
           </ppp-progress>
         </div>`
     )}

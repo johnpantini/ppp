@@ -1,9 +1,7 @@
 import { Badge } from '../../../lib/badge/badge.js';
 import { css } from '../../../lib/element/styles/css.js';
-import { ref } from '../../../lib/element/templating/ref.js';
 import { html } from '../../../lib/template.js';
 import { appearanceBehavior } from '../../../lib/utilities/behaviors.js';
-import { when } from '../../../lib/element/templating/when.js';
 import { display } from '../../../lib/utilities/style/display.js';
 
 import { bodyFont } from '../design-tokens.js';
