@@ -206,7 +206,7 @@ export const updatesPageTemplate = (context, definition) => html`
         ${when(
           (x) =>
             x.currentCommit?.sha &&
-            x.currentCommit?.sha === x.targetCommit?.sha,
+            x.currentCommit?.sha !== x.targetCommit?.sha,
           html`
             <${'ppp-banner'} class="inline margin-top" appearance="info">
               Для полного применения обновления может потребоваться до 10 минут.
