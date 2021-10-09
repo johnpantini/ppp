@@ -9,6 +9,7 @@ await i18nImport(['validation']);
 export async function checkGitHubToken({ token }) {
   try {
     return await fetch('https://api.github.com/user', {
+      cache: 'no-cache',
       headers: {
         Accept: 'application/vnd.github.v3+json',
         Authorization: `token ${token}`
@@ -35,6 +36,7 @@ export async function checkAuth0MgmntToken({ token, email }) {
     );
 
     const r1 = await fetch(url.toString(), {
+      cache: 'no-cache',
       headers: {
         Accept: 'application/json',
         Authorization: `Bearer ${token}`
@@ -96,6 +98,7 @@ export class CloudServicesPage extends BasePage {
           'github-login'
         )}/ppp/milestones`,
         {
+          cache: 'no-cache',
           headers: {
             Accept: 'application/vnd.github.v3+json',
             Authorization: `token ${this.app.ppp.keyVault.getKey(

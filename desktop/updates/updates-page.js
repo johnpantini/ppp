@@ -61,6 +61,7 @@ export class UpdatesPage extends BasePage {
       const r1 = await fetch(
         'https://api.github.com/repos/johnpantini/ppp/git/refs/heads/main',
         {
+          cache: 'no-cache',
           headers: {
             Accept: 'application/vnd.github.v3+json',
             Authorization: `token ${this.app.ppp.keyVault.getKey(
@@ -74,6 +75,7 @@ export class UpdatesPage extends BasePage {
 
       const targetRef = await r1.json();
       const r2 = await fetch(targetRef.object.url, {
+        cache: 'no-cache',
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `token ${this.app.ppp.keyVault.getKey('github-token')}`
@@ -97,6 +99,7 @@ export class UpdatesPage extends BasePage {
       const r4 = await fetch(
         `https://api.github.com/repos/${user.login}/ppp/git/refs/heads/main`,
         {
+          cache: 'no-cache',
           headers: {
             Accept: 'application/vnd.github.v3+json',
             Authorization: `token ${this.app.ppp.keyVault.getKey(
@@ -110,6 +113,7 @@ export class UpdatesPage extends BasePage {
 
       const currentRef = await r4.json();
       const r5 = await fetch(currentRef.object.url, {
+        cache: 'no-cache',
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `token ${this.app.ppp.keyVault.getKey('github-token')}`
@@ -286,7 +290,7 @@ export const updatesPageTemplate = (context, definition) => html`
               >GitHub-репозитория</a>
               </h2>
               <button
-                @click="${(x) => x.checkForUpdates(1)}"
+                @click="${(x) => x.checkForUpdates()}"
                 type="button"
                 class="cta"
                 aria-disabled="false"
