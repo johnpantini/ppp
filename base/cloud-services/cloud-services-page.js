@@ -1,11 +1,5 @@
-/** @decorator */
-
-import { FoundationElement } from '../../lib/foundation-element/foundation-element.js';
+import { BasePage } from '../../lib/page/page.js';
 import { DOM } from '../../lib/element/dom.js';
-import {
-  Observable,
-  observable
-} from '../../lib/element/observation/observable.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { parseJwt } from '../../lib/key-vault.js';
 import { auth0Bridge, auth0BridgeCallback } from '../../lib/auth0-bridge.js';
@@ -94,24 +88,7 @@ export async function checkMongoRealmCredentials({
   });
 }
 
-export class CloudServicesPage extends FoundationElement {
-  @observable
-  busy;
-
-  @observable
-  toastTitle;
-
-  @observable
-  toastText;
-
-  toastTitleChanged() {
-    Observable.notify(this.app.toast, 'source');
-  }
-
-  toastTextChanged() {
-    Observable.notify(this.app.toast, 'source');
-  }
-
+export class CloudServicesPage extends BasePage {
   async #updateGitHubMilestone({ domain, clientId }) {
     try {
       const r1 = await fetch(
@@ -660,7 +637,7 @@ export class CloudServicesPage extends FoundationElement {
       this.busy = true;
       this.app.toast.visible = false;
       this.app.toast.source = this;
-      this.toastTitle = i18n.t('cloudServices.toast.title');
+      this.toastTitle = i18n.t('$pages.cloudServices.toast.title');
 
       await validate(this.serviceMachineUrl);
       await validate(this.gitHubToken);
@@ -774,7 +751,7 @@ export class CloudServicesPage extends FoundationElement {
         this.mongoPrivateKey.value
       );
 
-      this.toastText = i18n.t('cloudServices.toast.mongoDBRealmStep');
+      this.toastText = i18n.t('$pages.cloudServices.toast.mongoDBRealmStep');
       this.app.toast.visible = true;
       this.app.toast.dismissible = false;
       this.app.toast.appearance = 'progress';
@@ -805,7 +782,7 @@ export class CloudServicesPage extends FoundationElement {
       }
 
       this.app.toast.progress.value = 80;
-      this.toastText = i18n.t('cloudServices.toast.auth0Step');
+      this.toastText = i18n.t('$pages.cloudServices.toast.auth0Step');
 
       // 5. Store all the credentials inside Auth0 app
       const r5 = await this.#setUpAuth0App(
@@ -828,7 +805,7 @@ export class CloudServicesPage extends FoundationElement {
       }
 
       this.app.toast.progress.value = 90;
-      this.toastText = i18n.t('cloudServices.toast.gitHubStep');
+      this.toastText = i18n.t('$pages.cloudServices.toast.gitHubStep');
 
       const r6 = await this.#updateGitHubMilestone({
         domain: r2.domain,

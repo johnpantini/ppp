@@ -148,19 +148,19 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Telegram Warden</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'updates'}"
               @click="${(x) => (x.page = 'updates')}"
               slot="items"
             >
-              <span slot="title">Обновления</span>
+              <span slot="title">${i18n.t('update')}</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             ${support({
               slot: 'start'
             })}
-            <span slot="title">Помощь</span>
+            <span slot="title">${i18n.t('help')}</span>
             <ppp-side-nav-item
               disabled
               ?active="${(x) => x.page === 'guides'}"
@@ -170,20 +170,10 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Инструкции</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
-          <ppp-side-nav-item
-            disabled
-            style="margin-top: 16px"
-            @click="${(x) => x.handleSignOutClick()}"
-          >
-            ${arrowLeft({
-              slot: 'start',
-              cls: 'action-icon'
-            })}
-            <span slot="title">Выйти</span
-          </ppp-side-nav-item>
         </ppp-side-nav>
         <div class="page-content">
           ${page('cloud-services')}
+          ${when((x) => x.ppp?.keyVault.ok(), page('updates'))}
           ${when(
             (x) =>
               !x.pageHasTemplate &&

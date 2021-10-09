@@ -67,6 +67,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
+    <script src="./vendor/polyglot.min.js"></script>
   </head>
   <template id="ppp-loader">
     <style>
@@ -1322,21 +1323,23 @@
         </g>
       </g>
     </svg>
-    <div class="text">Загрузка</div>
+    <div class="text">
+      <slot></slot>
+    </div>
   </template>
-  <script>
-    window.customElements.define(
-      'ppp-loader',
-      class extends HTMLElement {
-        connectedCallback() {
-          this.attachShadow({ mode: 'open' }).appendChild(
-            document.getElementById('ppp-loader').content.cloneNode(true)
-          );
+  <script type="module">
+    // noinspection JSUnusedGlobalSymbols
+    const SUPPORTED_LANGS = ['ru'];
+    // noinspection JSUnusedGlobalSymbols
+    const storedLang = localStorage.getItem('ppp-lang');
+    const lang = SUPPORTED_LANGS.indexOf(storedLang) > -1 ? storedLang : 'ru';
 
-          globalThis.loader = this;
-        }
-      }
-    );
+    document.documentElement.setAttribute('lang', lang);
+
+    globalThis.locale = document.documentElement.getAttribute('lang');
+    globalThis.i18n = new Polyglot({
+      locale: globalThis.locale
+    });
 
     function appendMainScript() {
       if (!document.querySelector('[ppp-state]')) {
@@ -1367,10 +1370,32 @@
         appendMainScript();
       }
     });
+
+    await import(`./i18n/${globalThis.locale}/base.i18n.js`);
+
+    window.customElements.define(
+      'ppp-loader',
+      class extends HTMLElement {
+        connectedCallback() {
+          this.attachShadow({ mode: 'open' }).appendChild(
+            document.getElementById('ppp-loader').content.cloneNode(true)
+          );
+
+          this.textContent = i18n.t('loading');
+          globalThis.loader = this;
+        }
+      }
+    );
   </script>
   <body>
     <ppp-loader id="global-loader"></ppp-loader>
-    <div class="toast" role="status" aria-live="polite" aria-atomic="true" aria-relevant="all">
+    <div
+      class="toast"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-relevant="all"
+    >
       <ppp-toast></ppp-toast>
     </div>
   </body>
