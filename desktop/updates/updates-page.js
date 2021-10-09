@@ -286,7 +286,7 @@ export const updatesPageTemplate = (context, definition) => html`
               >GitHub-репозитория</a>
               </h2>
               <button
-                @click="${(x) => x.checkForUpdates()}"
+                @click="${(x) => x.checkForUpdates(1)}"
                 type="button"
                 class="cta"
                 aria-disabled="false"
