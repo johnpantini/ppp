@@ -20,6 +20,9 @@ await i18nImport(['validation', 'updates']);
 
 export class UpdatesPage extends BasePage {
   @observable
+  updateComplete;
+
+  @observable
   targetCommit;
 
   @observable
@@ -43,6 +46,7 @@ export class UpdatesPage extends BasePage {
 
     this.currentCommit = void 0;
     this.targetCommit = void 0;
+    this.updateComplete = false;
   }
 
   connectedCallback() {
@@ -189,6 +193,7 @@ export class UpdatesPage extends BasePage {
         'Обновление успешно выполнено. Изменения будут применены в течение нескольких минут';
       this.app.toast.visible = true;
       this.busy = false;
+      this.updateComplete = true;
     } catch (e) {
       console.error(e);
 
@@ -246,13 +251,13 @@ export const updatesPageTemplate = (context, definition) => html`
             <section class="last">
               <div class="footer-actions">
                 <${'ppp-button'}
-                  ?disabled="${(x) => !!x.busy}"
+                  ?disabled="${(x) => x.busy || x.updateComplete}"
                   type="submit"
                   @click="${(x) => x.updateApp()}"
                   appearance="primary"
                 >
                   ${when(
-                    (x) => !!x.busy,
+                    (x) => x.busy,
                     settings({
                       slot: 'end',
                       cls: 'spinner-icon'
