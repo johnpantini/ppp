@@ -9,12 +9,7 @@ new (class {
 
   constructor(realm) {
     this.realm = realm;
-
     $global.ppp = this;
-
-    [this.repoOwner] = location.hostname.endsWith('pages.dev')
-      ? [location.hostname.split('-').slice(0, -1).join('-')]
-      : location.hostname.split('.github.io');
 
     void this.start();
   }
@@ -120,15 +115,35 @@ new (class {
   async start() {
     this.keyVault = new KeyVault();
 
+    const repoOwner = location.hostname.endsWith('pages.dev')
+      ? location.hostname.split('.pages.dev')[0]
+      : location.hostname.split('.github.io')[0];
+
     if (!this.keyVault.hasAuth0Keys()) {
-      const r = await fetch(
-        `https://api.github.com/repos/${this.repoOwner}/ppp/milestones`,
+      let r = await fetch(
+        `https://api.github.com/repos/${repoOwner}/ppp/milestones`,
         {
+          cache: 'no-cache',
           headers: {
             Accept: 'application/vnd.github.v3+json'
           }
         }
       );
+
+      if (!r.ok) {
+        r = await fetch(
+          `https://api.github.com/repos/${repoOwner
+            .split('-')
+            .slice(0, -1)
+            .join('-')}/ppp/milestones`,
+          {
+            cache: 'no-cache',
+            headers: {
+              Accept: 'application/vnd.github.v3+json'
+            }
+          }
+        );
+      }
 
       if (r.ok) {
         const json = await r.json();
