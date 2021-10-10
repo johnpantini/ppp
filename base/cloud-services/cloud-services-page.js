@@ -158,14 +158,13 @@ export class CloudServicesPage extends BasePage {
 
   async #setUpAuth0App(auth0Token, userId) {
     try {
-      const repoOwner = this.app.ppp.repoOwner;
       const domainList = [
-        `https://${repoOwner}.github.io/ppp`,
-        `https://${repoOwner}.github.io/ppp/desktop`,
-        `https://${repoOwner}.github.io/ppp/mobile`,
-        `https://${repoOwner}.github.io.dev`,
-        `https://${repoOwner}.github.io.dev/desktop`,
-        `https://${repoOwner}.github.io.dev/mobile`,
+        `https://*.github.io/ppp`,
+        `https://*.github.io/ppp/desktop`,
+        `https://*.github.io/ppp/mobile`,
+        `https://*.github.io.dev`,
+        `https://*.github.io.dev/desktop`,
+        `https://*.github.io.dev/mobile`,
         `https://*.pages.dev`,
         `https://*.pages.dev/desktop`,
         `https://*.pages.dev/mobile`
