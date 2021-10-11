@@ -24,7 +24,7 @@ const init = async () => {
     handler: () => {
       if (process.env.HEROKU_APP_NAME)
         return `https://${process.env.HEROKU_APP_NAME}.herokuapp.com`;
-      else return 'http://localhost:3777';
+      else return JSON.stringify(process.env);
     }
   });
 
