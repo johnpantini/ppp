@@ -1,5 +1,5 @@
 i18n.extend({
-  applicationNotFound: 'Приложение %{appName} не найдено',
+  appNotFound: 'Приложение %{appName} не найдено',
   expiredToken: 'Срок действия токена истёк',
   invalidMongoDBRealmKeys: 'Неверные ключи MongoDB Realm',
   invalidToken: 'Неверный токен',

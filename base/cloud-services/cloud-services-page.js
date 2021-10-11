@@ -799,7 +799,7 @@ export class CloudServicesPage extends BasePage {
 
         if (r5.status === 417) {
           invalidate(this.app.toast, {
-            errorMessage: i18n.t('applicationNotFound', { appName: 'ppp' })
+            errorMessage: i18n.t('appNotFound', { appName: 'ppp' })
           });
         } else {
           invalidate(this.app.toast, {
