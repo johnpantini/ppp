@@ -20,6 +20,16 @@ const init = async () => {
 
   server.route({
     method: 'GET',
+    path: '/',
+    handler: () => {
+      if (process.env.HEROKU_APP_NAME)
+        return `https://${process.env.HEROKU_APP_NAME}.herokuapp.com`;
+      else return 'http://localhost:3777';
+    }
+  });
+
+  server.route({
+    method: 'GET',
     path: '/ssh',
     handler: (request, h) => {
       // TODO
