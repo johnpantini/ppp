@@ -21,10 +21,8 @@ const init = async () => {
   server.route({
     method: 'GET',
     path: '/',
-    handler: () => {
-      if (process.env.HEROKU_APP_NAME)
-        return `https://${process.env.HEROKU_APP_NAME}.herokuapp.com`;
-      else return JSON.stringify(process.env);
+    handler: (request) => {
+      return `https://${request.headers.host}`;
     }
   });
 
