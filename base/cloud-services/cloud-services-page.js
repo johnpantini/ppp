@@ -253,7 +253,8 @@ export class CloudServicesPage extends BasePage {
             Authorization: `Bearer ${auth0Token}`
           },
           body: JSON.stringify({
-            app_type: 'spa',
+            app_type: 'regular_web',
+            token_endpoint_auth_method: 'none',
             callbacks: domainList,
             web_origins: domainList,
             allowed_logout_urls: domainList
