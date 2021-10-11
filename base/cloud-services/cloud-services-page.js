@@ -357,7 +357,7 @@ export class CloudServicesPage extends BasePage {
 
       for (const f of funcs) {
         const codeRequest = await fetch(
-          new URL(f.path, window.location.origin)
+          new URL(f.path, window.location.origin + window.location.pathname)
         );
 
         if (codeRequest.ok) {
