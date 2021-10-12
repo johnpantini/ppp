@@ -3,13 +3,11 @@
   "version": "1.0.0",
   "description": "PPP",
   "author": "johnpantini",
-  "main": "ppp-dyno.js",
+  "main": "ppp-dyno.mjs",
   "scripts": {
-    "start": "node ppp-dyno.js"
+    "start": "node ppp-dyno.mjs"
   },
   "dependencies": {
-    "@hapi/hapi": "^20.2.0",
-    "node-ssh": "^12.0.0"
   },
   "license": "MIT"
 }
