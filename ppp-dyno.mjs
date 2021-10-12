@@ -1,7 +1,13 @@
 import { createServer } from 'http';
 
+process.on('unhandledRejection', (err) => {
+  console.log(err);
+  process.exit(1);
+});
+
 function ssh(request, response) {
   response.setHeader('Transfer-Encoding', 'chunked');
+  response.end();
 }
 
 createServer((request, response) => {
@@ -20,6 +26,11 @@ createServer((request, response) => {
       break;
     case '/ssh':
       return ssh(request, response);
+    case '/ping':
+      response.write('pong');
+      response.end();
+
+      break;
     default:
       response.writeHead(404).end();
   }
