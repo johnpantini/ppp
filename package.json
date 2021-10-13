@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "PPP",
   "author": "johnpantini",
-  "main": "ppp-dyno.mjs",
+  "main": "ppp-dyno.js",
   "scripts": {
-    "start": "node ppp-dyno.mjs"
+    "start": "node ppp-dyno.js"
   },
   "dependencies": {
   },

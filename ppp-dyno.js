@@ -1,5 +1,5 @@
-import { createServer } from 'http';
-import { Client } from './ppp-dyno/ssh2/index.js';
+const { createServer } = require('http');
+const { Client } = require('./ppp-dyno/ssh2');
 
 process.on('unhandledRejection', (err) => {
   console.log(err);
