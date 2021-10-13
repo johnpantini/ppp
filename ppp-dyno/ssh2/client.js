@@ -41,7 +41,7 @@ const {
   PACKET_SIZE,
   windowAdjust,
   WINDOW_THRESHOLD
-} = require('./Channel.js');
+} = require('./channel.js');
 const {
   ChannelManager,
   generateAlgorithmList,
