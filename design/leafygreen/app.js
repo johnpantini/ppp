@@ -9,7 +9,6 @@ import { charts } from './icons/charts.js';
 import { laptop } from './icons/laptop.js';
 import { settings } from './icons/settings.js';
 import { support } from './icons/support.js';
-import { arrowLeft } from './icons/arrow-left.js';
 
 const page = (page) => {
   return when(
@@ -123,7 +122,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Облачные сервисы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) =>
                 x.page === 'brokers' || x.page === 'new-broker'}"
               @click="${(x) => (x.page = 'brokers')}"
@@ -173,6 +172,9 @@ export const appTemplate = (context, definition) => html`
         </ppp-side-nav>
         <div class="page-content">
           ${page('cloud-services')}
+          ${when((x) => x.ppp?.keyVault.ok(), page('brokers'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('broker'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('new-broker'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('updates'))}
           ${when(
             (x) =>

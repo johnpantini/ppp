@@ -29,7 +29,7 @@ export class UpdatesPage extends BasePage {
   currentCommit;
 
   formatDate(date) {
-    // TODO - refactor later
+    // TODO - refactor later, time can be invalid
     return new Intl.DateTimeFormat('ru-RU', {
       month: 'numeric',
       day: 'numeric',

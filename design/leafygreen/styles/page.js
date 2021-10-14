@@ -16,9 +16,91 @@ export const loadingIndicator = (size = 'xlarge') => `
   </div>
 `;
 
+export const emptyStateStyles = css`
+  .empty-state {
+    word-wrap: break-word;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-flow: column;
+    justify-content: center;
+    min-height: 260px;
+    padding: 40px 0 0;
+  }
+  .empty-state h1 {
+    display: flex;
+    font-size: 32px;
+    font-weight: 300;
+    padding: 32px 0 16px;
+  }
+
+  .empty-state h2 {
+    font-size: 21px;
+    font-weight: 500;
+    padding: 0 0 32px;
+    text-align: center;
+  }
+
+  .empty-state button {
+    margin-bottom: 16px;
+  }
+
+  .empty-state .cta {
+    appearance: none;
+    padding: 0;
+    margin: 0;
+    border: 0 solid transparent;
+    display: inline-flex;
+    -webkit-box-align: stretch;
+    align-items: stretch;
+    border-radius: 4px;
+    transition: all 150ms ease-in-out 0s;
+    position: relative;
+    text-decoration: none;
+    cursor: pointer;
+    z-index: 0;
+    background-color: rgb(9, 128, 76);
+    box-shadow: rgb(19 170 82 / 40%) 0 2px 3px;
+    color: rgb(255, 255, 255);
+    height: 48px;
+    font-size: 18px;
+    line-height: 24px;
+  }
+
+  .empty-state .cta:hover, .empty-state .cta:active {
+    color: rgb(255, 255, 255);
+    background-color: rgb(17, 97, 73);
+    box-shadow: rgb(19 170 82 / 40%) 02px 3px, rgb(195 231 202) 0 0 0 3px;
+  }
+
+  .empty-state .cta .text {
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+    position: relative;
+    z-index: 0;
+    font-family: ${bodyFont}
+    -webkit-box-pack: center;
+    justify-content: center;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .empty-state p {
+    padding: 0 0 20px;
+    text-align: center;
+  }`;
+
 export const basePageStyles = css`
-  h1, h2 {
+  * {
     box-sizing: border-box;
+  }
+
+  h1,
+  h2 {
     margin: 0;
     padding: 0;
   }
@@ -145,80 +227,5 @@ export const basePageStyles = css`
     margin-top: 10px;
   }
 
-  .empty-state {
-    word-wrap: break-word;
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    flex-flow: column;
-    justify-content: center;
-    min-height: 260px;
-    padding: 40px 0 0;
-  }
-  .empty-state h1 {
-    display: flex;
-    font-size: 32px;
-    font-weight: 300;
-    padding: 32px 0 16px;
-  }
-
-  .empty-state h2 {
-    font-size: 21px;
-    font-weight: 500;
-    padding: 0 0 32px;
-    text-align: center;
-  }
-
-  .empty-state button {
-    margin-bottom: 16px;
-  }
-
-  .empty-state .cta {
-    appearance: none;
-    padding: 0;
-    margin: 0;
-    border: 0 solid transparent;
-    display: inline-flex;
-    -webkit-box-align: stretch;
-    align-items: stretch;
-    border-radius: 4px;
-    transition: all 150ms ease-in-out 0s;
-    position: relative;
-    text-decoration: none;
-    cursor: pointer;
-    z-index: 0;
-    background-color: rgb(9, 128, 76);
-    box-shadow: rgb(19 170 82 / 40%) 0 2px 3px;
-    color: rgb(255, 255, 255);
-    height: 48px;
-    font-size: 18px;
-    line-height: 24px;
-  }
-
-  .empty-state .cta:hover, .empty-state .cta:active {
-    color: rgb(255, 255, 255);
-    background-color: rgb(17, 97, 73);
-    box-shadow: rgb(19 170 82 / 40%) 02px 3px, rgb(195 231 202) 0 0 0 3px;
-  }
-
-  .empty-state .cta .text {
-    display: flex;
-    -webkit-box-align: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    pointer-events: none;
-    position: relative;
-    z-index: 0;
-    font-family: ${bodyFont}
-    -webkit-box-pack: center;
-    justify-content: center;
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-
-  .empty-state p {
-    padding: 0 0 20px;
-    text-align: center;
-  }
+  ${emptyStateStyles}
 `;
