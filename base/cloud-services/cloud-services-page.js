@@ -109,7 +109,7 @@ export class CloudServicesPage extends BasePage {
       );
 
       if (!r1.ok) {
-        r1.json && console.warn(await r1.json());
+        console.warn(await r1.text());
 
         return r1;
       }
@@ -139,7 +139,7 @@ export class CloudServicesPage extends BasePage {
         );
 
         if (!r2.ok) {
-          r2.json && console.warn(await r2.json());
+          console.warn(await r2.text());
 
           return r2;
         }
@@ -203,7 +203,7 @@ export class CloudServicesPage extends BasePage {
       });
 
       if (!r1.ok) {
-        r1.json && console.warn(await r1.json());
+        console.warn(await r1.text());
 
         return r1;
       }
@@ -225,7 +225,7 @@ export class CloudServicesPage extends BasePage {
       );
 
       if (!r2.ok) {
-        r2.json && console.warn(await r2.json());
+        console.warn(await r2.text());
 
         return r2;
       }
@@ -263,7 +263,7 @@ export class CloudServicesPage extends BasePage {
       );
 
       if (!r3.ok) {
-        r3.json && console.warn(await r3.json());
+        console.warn(await r3.text());
 
         return r3;
       }
@@ -679,7 +679,7 @@ export class CloudServicesPage extends BasePage {
       });
 
       if (!r1.ok) {
-        r1.json && console.warn(await r1.json());
+        console.warn(await r1.text());
 
         invalidate(this.gitHubToken, {
           errorMessage: i18n.t('invalidTokenWithStatus', r1),
@@ -701,7 +701,7 @@ export class CloudServicesPage extends BasePage {
       if (!r2.ok) {
         let j2;
 
-        r2.json && console.warn((j2 = await r2.json()));
+        console.warn((j2 = await r2.json()));
 
         if (r2.status === 404) {
           invalidate(this.auth0Email, {
@@ -828,6 +828,12 @@ export class CloudServicesPage extends BasePage {
       this.app.toast.appearance = 'success';
       this.app.toast.dismissible = true;
       this.toastText = i18n.t('operationDoneRefreshPage');
+    } catch (e) {
+      console.error(e);
+
+      invalidate(this.app.toast, {
+        errorMessage: i18n.t('operationFailed')
+      });
     } finally {
       this.busy = false;
     }

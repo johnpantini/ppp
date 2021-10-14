@@ -10,7 +10,7 @@ import {
   loadingIndicator
 } from '../../design/leafygreen/styles/page.js';
 
-// TODO -theme
+// TODO - theme
 import { settings } from '../../design/leafygreen/icons/settings.js';
 
 await i18nImport(['cloud-services']);
