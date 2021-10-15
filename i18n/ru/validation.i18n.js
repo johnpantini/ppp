@@ -6,6 +6,7 @@ i18n.extend({
   invalidTokenWithStatus: 'Неверный токен (код ошибки %{status})',
   invalidURL: 'Неверный URL',
   mongoDBProblemWithStatus: 'Проблема с MongoDB (код ошибки %{status})',
+  operationFailed: 'Операция не выполнена',
   operationFailedWithStatus: 'Операция не выполнена (код ошибки %{status})',
   operationDoneRefreshPage:
     'Операция успешно выполнена, можно обновить страницу',

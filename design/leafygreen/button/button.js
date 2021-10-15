@@ -186,8 +186,8 @@ export const primaryButtonStyles = (context, definition) => css`
 
 export const disabledButtonStyles = (context, definition) =>
   css`
-    :host(:disabled) button.control,
-    :host(:disabled) button.control:hover {
+    :host([disabled]) button.control,
+    :host([disabled]) button.control:hover {
       background-color: rgb(231, 238, 236);
       border: 1px solid rgb(231, 238, 236);
       box-shadow: rgb(184 196 194) 0 0 0 1px;
@@ -195,8 +195,8 @@ export const disabledButtonStyles = (context, definition) =>
       color: rgb(93, 108, 116);
     }
 
-    :host(:disabled) .content-container .start,
-    :host(:disabled) .content-container .end {
+    :host([disabled]) .content-container .start,
+    :host([disabled]) .content-container .end {
       color: rgb(184, 196, 194);
     }
   `;
