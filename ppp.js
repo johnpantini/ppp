@@ -1,11 +1,14 @@
 import { $global } from './lib/element/platform.js';
 import { KeyVault, keySet } from './lib/key-vault.js';
+import { PPPCrypto } from './lib/ppp-crypto.js';
 
 new (class {
   /**
    * Default theme is leafygreen {@link https://www.mongodb.design/}
    */
   theme = 'leafygreen';
+
+  crypto = new PPPCrypto(this);
 
   constructor(realm) {
     this.realm = realm;
