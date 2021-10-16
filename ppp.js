@@ -111,12 +111,15 @@ new (class {
       } catch (e) {
         console.error(e);
 
-        // TODO - remove alerts
-        if (e.statusCode === 401) {
-          alert('Your MongoDB Realm API key is no longer valid');
-
+        if (e.statusCode === 401 || e.statusCode === 404) {
           this.keyVault.removeKey('mongo-api-key');
-        } else alert('We have a MongoDB problem. Contact @johnpantini');
+
+          return this.#authorizeWithAuth0();
+        } else {
+          return alert(
+            'Вероятно, кластер MongoDB Atlas отключён за неактивность. Перейдите в панель управления MongoDB Atlas и нажмите Refresh, а затем обновите текущую страницу'
+          );
+        }
       }
     }
 
