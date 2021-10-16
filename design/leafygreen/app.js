@@ -17,7 +17,7 @@ const page = (page) => {
         x.page === page &&
           requireComponent(
             `ppp-${page}-page`,
-            `../${globalThis.ppp.realm}/${page}/${page}-page.js`
+            `../${globalThis.ppp.appType}/${page}/${page}-page.js`
           )
       ),
     html`<ppp-${page}-page :app="${(x) => x}"></ppp-${page}-page>`
@@ -181,7 +181,7 @@ export const appTemplate = (context, definition) => html`
               !x.pageHasTemplate &&
               requireComponent(
                 'ppp-not-found-page',
-                `../${globalThis.ppp.realm}/not-found/not-found-page.js`
+                `../${globalThis.ppp.appType}/not-found/not-found-page.js`
               ),
             html`<ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
           )}

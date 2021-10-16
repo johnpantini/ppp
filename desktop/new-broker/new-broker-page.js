@@ -212,6 +212,9 @@ export const newBrokerPageTemplate = (context, definition) => html`
               <div class="section-index-icon">${circleSvg(2)}</div>
               <div class="label-group">
                 <h6>Токен для доступа к API</h6>
+                <${'ppp-banner'} class="inline margin-top" appearance="warning">
+                  Токен будет сохранён в зашифрованном виде (по алгоритму AES-GCM).
+                </ppp-banner>
                 <p>
                   Требуется для подписи всех запросов. Получить можно по
                   <a target="_blank" href="https://alor.dev/open-api-tokens"
@@ -232,25 +235,29 @@ export const newBrokerPageTemplate = (context, definition) => html`
         )}
         ${when((x) => !!x.busy, html`${loadingIndicator()}`)}
       </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => !!x.busy}"
-            type="submit"
-            @click="${(x) => x.createBroker()}"
-            appearance="primary"
-          >
-            ${when(
-              (x) => !!x.busy,
-              settings({
-                slot: 'end',
-                cls: 'spinner-icon'
-              })
-            )}
-            ${i18n.t('save')}
-          </ppp-button>
-        </div>
-      </section>
+      ${when(
+        (x) => x.broker,
+        html`
+          <section class="last">
+            <div class="footer-actions">
+              <${'ppp-button'}
+                ?disabled="${(x) => !!x.busy}"
+                type="submit"
+                @click="${(x) => x.createBroker()}"
+                appearance="primary"
+              >
+                ${when(
+                  (x) => !!x.busy,
+                  settings({
+                    slot: 'end',
+                    cls: 'spinner-icon'
+                  })
+                )}
+                ${i18n.t('save')}
+              </ppp-button>
+            </div>
+          </section>`
+      )}
     </form>
   </template>
 `;

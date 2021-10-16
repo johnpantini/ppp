@@ -3,8 +3,13 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
+import { generateIV } from '../../lib/ppp-crypto.js';
 
 await i18nImport(['validation']);
+
+const SUPPORTED_BROKERS = {
+  ALOR_OPENAPI_V2: 'alor-openapi-v2'
+};
 
 export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
   try {
@@ -27,22 +32,7 @@ export class NewBrokerPage extends BasePage {
   broker;
 
   async createAlorOAPIV2Broker() {
-    await validate(this.alorRefreshToken);
-
-    const r1 = await checkAlorOAPIV2RefreshToken({
-      refreshToken: this.alorRefreshToken.value
-    });
-
-    if (!r1.ok) {
-      console.warn(await r1.text());
-
-      invalidate(this.alorRefreshToken, {
-        errorMessage: i18n.t('invalidTokenWithStatus', r1),
-        status: r1.status
-      });
-    }
-
-    const j1 = await r1.json();
+    // TODO
   }
 
   async createBroker() {
@@ -55,7 +45,7 @@ export class NewBrokerPage extends BasePage {
       await validate(this.profileName);
 
       switch (this.broker) {
-        case 'alor-openapi-v2':
+        case SUPPORTED_BROKERS.ALOR_OPENAPI_V2:
           return await this.createAlorOAPIV2Broker();
       }
     } catch (e) {
@@ -90,7 +80,12 @@ export class NewBrokerPage extends BasePage {
       passive: true
     });
 
-    this.broker = this.app.params()?.broker;
+    const broker = this.app.params()?.broker;
+
+    if (Object.values(SUPPORTED_BROKERS).indexOf(broker) === -1)
+      return this.app.navigate(this.app.url({ page: this.app.params().page }));
+
+    this.broker = broker;
   }
 
   disconnectedCallback() {

@@ -29,7 +29,8 @@ export class UpdatesPage extends BasePage {
   currentCommit;
 
   formatDate(date) {
-    // TODO - refactor later, time can be invalid
+    if (!date) return 'N/A';
+
     return new Intl.DateTimeFormat('ru-RU', {
       month: 'numeric',
       day: 'numeric',
@@ -134,7 +135,7 @@ export class UpdatesPage extends BasePage {
       this.app.toast.appearance = 'warning';
       this.app.toast.dismissible = true;
       this.toastText = i18n.t('operationFailedWithStatus', {
-        status: e.status
+        status: e.status || 503
       });
       this.app.toast.visible = true;
     }
@@ -217,6 +218,7 @@ export const updatesPageTemplate = (context, definition) => html`
         ${when(
           (x) =>
             x.currentCommit?.sha &&
+            x.targetCommit?.sha &&
             x.currentCommit?.sha !== x.targetCommit?.sha,
           html`
             <${'ppp-banner'} class="inline margin-top" appearance="info">

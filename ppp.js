@@ -10,8 +10,8 @@ new (class {
 
   crypto = new PPPCrypto(this);
 
-  constructor(realm) {
-    this.realm = realm;
+  constructor(appType) {
+    this.appType = appType;
     $global.ppp = this;
 
     void this.start();
@@ -93,10 +93,37 @@ new (class {
 
   async #createApplication({ emergency }) {
     // TODO - fetch settings from MongoDB
+    if (!emergency) {
+      const { getApp, Credentials } = await import('./vendor/realm.js');
+
+      try {
+        this.realm = getApp(this.keyVault.getKey('mongo-app-client-id'));
+        this.credentials = Credentials.apiKey(
+          this.keyVault.getKey('mongo-api-key')
+        );
+        this.user = await this.realm.logIn(this.credentials);
+
+        const result = await this.user.functions.count({
+          collection: 'brokers'
+        });
+
+        console.log(result);
+      } catch (e) {
+        console.error(e);
+
+        // TODO - remove alerts
+        if (e.statusCode === 401) {
+          alert('Your MongoDB Realm API key is no longer valid');
+
+          this.keyVault.removeKey('mongo-api-key');
+        } else alert('We have a MongoDB problem. Contact @johnpantini');
+      }
+    }
+
     const [{ DesignSystem }, { app }, { appStyles, appTemplate }] =
       await Promise.all([
         import('./lib/design-system/design-system.js'),
-        import(`./${this.realm}/app.js`),
+        import(`./${this.appType}/app.js`),
         import(`./design/${this.theme}/app.js`)
       ]);
 
@@ -133,6 +160,7 @@ new (class {
         }
       );
 
+      // Try to remove potential Cloudflare Pages extra dash
       if (!r.ok) {
         r = await fetch(
           `https://api.github.com/repos/${repoOwner
@@ -171,4 +199,4 @@ new (class {
       return this.#createApplication({});
     }
   }
-})(document.documentElement.getAttribute('ppp-realm'));
+})(document.documentElement.getAttribute('ppp-type'));
