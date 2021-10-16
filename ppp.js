@@ -117,7 +117,7 @@ new (class {
           return this.#authorizeWithAuth0();
         } else {
           return alert(
-            'Вероятно, кластер MongoDB Atlas отключён за неактивность. Перейдите в панель управления MongoDB Atlas и нажмите Refresh, а затем обновите текущую страницу'
+            'Вероятно, кластер MongoDB Atlas отключён за неактивность. Перейдите в панель управления MongoDB Atlas и нажмите Resume, а затем обновите текущую страницу'
           );
         }
       }
