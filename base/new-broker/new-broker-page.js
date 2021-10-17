@@ -3,7 +3,7 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV } from '../../lib/ppp-crypto.js';
+import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
 
 await i18nImport(['validation']);
 
@@ -32,7 +32,39 @@ export class NewBrokerPage extends BasePage {
   broker;
 
   async createAlorOAPIV2Broker() {
-    // TODO
+    await validate(this.alorRefreshToken);
+
+    const r1 = await checkAlorOAPIV2RefreshToken({
+      refreshToken: this.alorRefreshToken.value
+    });
+
+    if (!r1.ok) {
+      console.warn(await r1.text());
+
+      invalidate(this.alorRefreshToken, {
+        errorMessage: i18n.t('invalidTokenWithStatus', r1),
+        status: r1.status
+      });
+    }
+
+    const iv = generateIV();
+    const encryptedToken = await this.app.ppp.crypto.encrypt(
+      iv,
+      this.alorRefreshToken.value.trim()
+    );
+
+    await this.app.ppp.user.functions.insertOne(
+      {
+        collection: 'brokers'
+      },
+      {
+        _id: this.profileName.value.trim(),
+        type: SUPPORTED_BROKERS.ALOR_OPENAPI_V2,
+        iv: bufferToString(iv),
+        refresh_token: encryptedToken,
+        created_at: new Date()
+      }
+    );
   }
 
   async createBroker() {
@@ -46,14 +78,27 @@ export class NewBrokerPage extends BasePage {
 
       switch (this.broker) {
         case SUPPORTED_BROKERS.ALOR_OPENAPI_V2:
-          return await this.createAlorOAPIV2Broker();
+          await this.createAlorOAPIV2Broker();
+
+          break;
       }
+
+      this.app.toast.appearance = 'success';
+      this.app.toast.dismissible = true;
+      this.toastText = i18n.t('operationDone');
+      this.app.toast.visible = true;
     } catch (e) {
       console.error(e);
 
-      invalidate(this.app.toast, {
-        errorMessage: i18n.t('operationFailed')
-      });
+      if (/E11000/i.test(e.error)) {
+        invalidate(this.app.toast, {
+          errorMessage: 'Профиль с таким названием уже существует'
+        });
+      } else {
+        invalidate(this.app.toast, {
+          errorMessage: i18n.t('operationFailed')
+        });
+      }
     } finally {
       this.busy = false;
     }
