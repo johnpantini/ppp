@@ -94,7 +94,7 @@ new (class {
   async #createApplication({ emergency }) {
     // TODO - fetch settings from MongoDB
     if (!emergency) {
-      const { getApp, Credentials } = await import('./vendor/realm.js');
+      const { getApp, Credentials } = await import('./lib/realm.js');
 
       try {
         this.realm = getApp(this.keyVault.getKey('mongo-app-client-id'));
@@ -102,12 +102,6 @@ new (class {
           this.keyVault.getKey('mongo-api-key')
         );
         this.user = await this.realm.logIn(this.credentials);
-
-        const result = await this.user.functions.count({
-          collection: 'brokers'
-        });
-
-        console.log(result);
       } catch (e) {
         console.error(e);
 
