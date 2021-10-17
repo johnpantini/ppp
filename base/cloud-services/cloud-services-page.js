@@ -755,10 +755,11 @@ export class CloudServicesPage extends BasePage {
         this.mongoPrivateKey.value
       );
 
+      this.app.toast.appearance = 'progress';
+      this.app.toast.dismissible = false;
       this.toastText = i18n.t('$pages.cloudServices.toast.mongoDBRealmStep');
       this.app.toast.visible = true;
-      this.app.toast.dismissible = false;
-      this.app.toast.appearance = 'progress';
+
       DOM.queueUpdate(() => (this.app.toast.progress.value = 0));
 
       // 4. Create a MongoDB realm API key, setup cloud functions and services
@@ -824,10 +825,10 @@ export class CloudServicesPage extends BasePage {
         });
       }
 
-      this.app.toast.progress.value = 100;
       this.app.toast.appearance = 'success';
       this.app.toast.dismissible = true;
       this.toastText = i18n.t('operationDoneRefreshPage');
+      this.app.toast.progress.value = 100;
     } catch (e) {
       console.error(e);
 

@@ -8,8 +8,8 @@ i18n.extend({
   mongoDBProblemWithStatus: 'Проблема с MongoDB (код ошибки %{status})',
   operationFailed: 'Операция не выполнена',
   operationFailedWithStatus: 'Операция не выполнена (код ошибки %{status})',
-  operationDoneRefreshPage:
-    'Операция успешно выполнена, можно обновить страницу',
+  operationDone: 'Операция выполнена успешно',
+  operationDoneRefreshPage: 'Операция выполнена успешно, обновите страницу',
   projectNotFound: 'Проект %{projectName} не найден',
   userNotFound: 'Пользователь не найден'
 });

@@ -189,10 +189,12 @@ export class UpdatesPage extends BasePage {
 
       assert(r3);
 
+      this.app.toast.appearance = 'success';
       this.app.toast.dismissible = true;
       this.toastText =
         'Обновление успешно выполнено. Изменения будут применены в течение нескольких минут';
       this.app.toast.visible = true;
+
       this.busy = false;
       this.updateComplete = true;
     } catch (e) {
