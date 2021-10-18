@@ -210,7 +210,7 @@ export const buttonStyles = (context, definition) =>
       color: #13aa52;
     }
 
-    .xsmall {
+    :host(.xsmall) .control {
       height: 22px;
       text-transform: uppercase;
       font-size: 12px;
@@ -219,11 +219,16 @@ export const buttonStyles = (context, definition) =>
       letter-spacing: 0.4px;
     }
 
-    .small {
+    :host(.xsmall) .content-container {
+      padding-left: 6px;
+      padding-right: 6px;
+    }
+
+    :host(.small) .control {
       height: 28px;
     }
 
-    .large {
+    :host(.large) .control {
       height: 48px;
       font-size: 18px;
       line-height: 24px;
