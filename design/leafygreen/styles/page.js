@@ -122,7 +122,8 @@ export const basePageStyles = css`
   .loading-wrapper {
     position: relative;
     width: 100%;
-    min-height: 64px;
+    max-width: 100%;
+    min-height: 128px;
     flex-grow: 1;
     opacity: 1;
   }
