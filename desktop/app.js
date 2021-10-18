@@ -10,8 +10,8 @@ export class App extends BaseApp {
     requireComponent('ppp-toast');
   }
 
-  pageChanged(oldValue, newValue) {
-    super.pageChanged(oldValue, newValue);
+  navigate(url, params = {}) {
+    super.navigate(url, params);
 
     this._toast && (this._toast.visible = false);
   }
