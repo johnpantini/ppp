@@ -7,6 +7,7 @@ import { html } from '../../lib/template.js';
 import { css } from '../../lib/element/styles/css.js';
 import { observable } from '../../lib/element/observation/observable.js';
 import { assert } from '../../lib/assert.js';
+import { formatDate } from '../../lib/intl.js';
 
 import {
   basePageStyles,
@@ -27,20 +28,6 @@ export class UpdatesPage extends BasePage {
 
   @observable
   currentCommit;
-
-  formatDate(date) {
-    if (!date) return 'N/A';
-
-    return new Intl.DateTimeFormat('ru-RU', {
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-      hour12: false,
-      timeZone: 'Europe/Moscow'
-    }).format(new Date(date));
-  }
 
   disconnectedCallback() {
     super.disconnectedCallback();
@@ -236,7 +223,7 @@ export const updatesPageTemplate = (context, definition) => html`
                   ${(x) => x.currentCommit?.sha}
                 </a>
                 </ppp-badge>
-                <p>${(x) => x.formatDate(x.currentCommit?.author.date)} MSK</p>
+                <p>${(x) => formatDate(x.currentCommit?.author.date)} MSK</p>
               </div>
             </section>
             <section>
@@ -249,7 +236,7 @@ export const updatesPageTemplate = (context, definition) => html`
                   ${(x) => x.targetCommit?.sha}
                 </a>
                 </ppp-badge>
-                <p>${(x) => x.formatDate(x.targetCommit?.author.date)} MSK</p>
+                <p>${(x) => formatDate(x.targetCommit?.author.date)} MSK</p>
               </div>
             </section>
             <section class="last">
