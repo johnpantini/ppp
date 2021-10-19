@@ -8,7 +8,8 @@ import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
 await i18nImport(['validation']);
 
 const SUPPORTED_BROKERS = {
-  ALOR_OPENAPI_V2: 'alor-openapi-v2'
+  ALOR_OPENAPI_V2: 'alor-openapi-v2',
+  UNITED_TRADERS: 'united-traders'
 };
 
 export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
@@ -27,15 +28,81 @@ export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
   }
 }
 
+export async function checkUnitedTradersLoginPassword({
+  url,
+  login,
+  password
+}) {
+  try {
+    return await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({
+        login,
+        password
+      })
+    });
+  } catch (e) {
+    console.error(e);
+
+    return {
+      ok: false,
+      status: 422
+    };
+  }
+}
+
 export class NewBrokerPage extends BasePage {
   @attr
   broker;
+
+  async createUnitedTradersBroker() {
+    await validate(this.utLogin);
+    await validate(this.utPassword);
+
+    const r1 = await checkUnitedTradersLoginPassword({
+      url: new URL(
+        'ut',
+        this.app.ppp.keyVault.getKey('service-machine-url')
+      ).toString(),
+      login: this.utLogin.value.trim(),
+      password: this.utPassword.value.trim()
+    });
+
+    if (!r1.ok) {
+      console.warn(await r1.text());
+
+      invalidate(this.utPassword, {
+        errorMessage: i18n.t('invalidLoginPasswordWithStatus', r1),
+        status: r1.status
+      });
+    }
+
+    const iv = generateIV();
+    const encryptedPassword = await this.app.ppp.crypto.encrypt(
+      iv,
+      this.utPassword.value.trim()
+    );
+
+    await this.app.ppp.user.functions.insertOne(
+      {
+        collection: 'brokers'
+      },
+      {
+        _id: this.profileName.value.trim(),
+        type: SUPPORTED_BROKERS.UNITED_TRADERS,
+        iv: bufferToString(iv),
+        login: this.utLogin.value.trim(),
+        password: encryptedPassword,
+        created_at: new Date()
+      }
+    );
+  }
 
   async createAlorOAPIV2Broker() {
     await validate(this.alorRefreshToken);
 
     const r1 = await checkAlorOAPIV2RefreshToken({
-      refreshToken: this.alorRefreshToken.value
+      refreshToken: this.alorRefreshToken.value.trim()
     });
 
     if (!r1.ok) {
@@ -79,6 +146,11 @@ export class NewBrokerPage extends BasePage {
       switch (this.broker) {
         case SUPPORTED_BROKERS.ALOR_OPENAPI_V2:
           await this.createAlorOAPIV2Broker();
+
+          break;
+
+        case SUPPORTED_BROKERS.UNITED_TRADERS:
+          await this.createUnitedTradersBroker();
 
           break;
       }
