@@ -1,0 +1,2 @@
+ping:
+  response: 'pong'
