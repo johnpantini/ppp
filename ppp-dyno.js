@@ -127,7 +127,7 @@ async function ssh(request, response) {
 
     client
       .on('ready', () => {
-        client.exec(body.cmd, (err, stream) => {
+        client.exec(body.cmd, { pty: true }, (err, stream) => {
           if (err) {
             console.error(err);
 
