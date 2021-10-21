@@ -139,20 +139,10 @@ async function ssh(request, response) {
               client.end();
             })
             .on('data', (data) => {
-              response.write(
-                JSON.stringify({
-                  s: 'o',
-                  d: data.toString()
-                })
-              );
+              response.write(data.toString());
             })
             .stderr.on('data', (data) => {
-              response.write(
-                JSON.stringify({
-                  s: 'e',
-                  d: data.toString()
-                })
-              );
+              response.write(data.toString());
             });
         });
       })
