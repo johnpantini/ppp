@@ -111,16 +111,14 @@ export class NewServerPage extends BasePage {
 
       // TODO - add apt-get support
       const cmd = [
-        'groupadd -f ppp ;',
-        'id -u pppuser &>/dev/null || useradd --gid ppp pppuser ;',
-        'which dnf &>/dev/null && sudo dnf -y install git python3-devel tar openssl openssl-devel && sudo dnf -y remove cmake && sudo dnf -y group install "Development Tools";',
+        'which dnf &>/dev/null && sudo dnf -y install git python3-devel libffi-devel tar openssl openssl-devel && sudo dnf -y remove cmake && sudo dnf -y group install "Development Tools";',
         'wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-$(uname -m).tar.gz -O cmake-3.21.3-linux-$(uname -m).tar.gz ;',
         'tar xzf cmake-3.21.3-linux-$(uname -m).tar.gz ;',
         'sudo ln -fs ~/cmake-3.21.3-linux-$(uname -m)/bin/cmake /usr/bin/cmake ;',
         'wget https://github.com/libgit2/libgit2/archive/refs/tags/v1.3.0.tar.gz -O libgit2-1.3.0.tar.gz ;',
         'tar xzf libgit2-1.3.0.tar.gz ;',
         'cd libgit2-1.3.0/ ; cmake . ; make -j$(nproc); sudo make install ;',
-        'sudo -H python3 -m pip install --upgrade pip setuptools wheel pygit2 ;',
+        'sudo -H python3 -m pip install --upgrade pip setuptools wheel cffi pygit2 ;',
         'sudo ln -fs /usr/local/lib64/libgit2.so.1.3 /usr/lib64/libgit2.so.1.3 ; ',
         'curl -L https://bootstrap.saltproject.io | sudo sh -s --',
         '-D -x python3 -X -j',
