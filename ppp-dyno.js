@@ -133,7 +133,17 @@ async function ssh(request, response) {
           if (err) {
             console.error(err);
 
-            return response.writeHead(503).end();
+            response.writeHead(503);
+            response.write(
+              JSON.stringify({
+                e: {
+                  level: err.level,
+                  message: err.message
+                }
+              })
+            );
+
+            return response.end();
           }
 
           stream
