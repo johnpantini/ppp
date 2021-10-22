@@ -109,9 +109,26 @@ export class NewServerPage extends BasePage {
         'github-login'
       )}/ppp.git`;
 
+      const minionConfiguration = `backend: requests
+ext_pillar:
+  - git:
+    - main ${repoUrl}:
+      - root: salt/pillar
+file_client: local
+fileserver_backend:
+  - git
+gitfs_base: main
+gitfs_provider: pygit2
+gitfs_remotes:
+  - ${repoUrl}
+gitfs_root: salt/states
+pillar_opts: true
+`;
+
       // TODO - add apt-get support
       const cmd = [
         'sudo rm -f /etc/yum.repos.d/salt.repo ;',
+        'sudo mkdir -p /etc/salt ;',
         'sudo dnf -y install git python3-devel libffi-devel tar openssl openssl-devel ;',
         'sudo dnf -y remove cmake ;',
         'sudo dnf -y group install "Development Tools" ;',
@@ -125,32 +142,9 @@ export class NewServerPage extends BasePage {
         'sudo -H python3 -m pip install --upgrade --force-reinstall cffi ;',
         'sudo -H python3 -m pip install --upgrade --force-reinstall pygit2 ;',
         'sudo ln -fs /usr/local/lib64/libgit2.so.1.3 /usr/lib64/libgit2.so.1.3 ; ',
-        'curl -L https://bootstrap.saltproject.io | sudo sh -s --',
-        '-D -x python3 -X -j',
-        JSON.stringify(
-          JSON.stringify({
-            backend: 'requests',
-            file_client: 'local',
-            pillar_opts: true,
-            gitfs_remotes: [repoUrl],
-            ext_pillar: [
-              {
-                git: [
-                  {
-                    [`main ${repoUrl}`]: [{ root: 'salt/pillar' }]
-                  }
-                ]
-              }
-            ],
-            gitfs_provider: 'pygit2',
-            gitfs_root: 'salt/states',
-            gitfs_base: 'main',
-            fileserver_backend: ['git']
-          })
-        ) + ' ;',
         'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall salt ;',
+        `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ; `,
         'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
-        'sudo systemctl stop salt-minion && sudo systemctl disable salt-minion ;',
         'sudo salt-call --local state.sls ping'
       ].join(' ');
 
