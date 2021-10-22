@@ -114,6 +114,8 @@ async function ssh(request, response) {
     buffers.push(chunk);
   }
 
+  let client;
+
   try {
     const body = JSON.parse(Buffer.concat(buffers).toString());
 
@@ -123,7 +125,7 @@ async function ssh(request, response) {
     response.setHeader('Transfer-Encoding', 'chunked');
     response.setHeader('Content-Type', 'application/json; charset=UTF-8');
 
-    const client = new Client();
+    client = new Client();
 
     client
       .on('ready', () => {
@@ -149,16 +151,18 @@ async function ssh(request, response) {
       .on('error', (e) => {
         console.error(e);
 
-        response.writeHead(400);
-        response.write(
-          JSON.stringify({
-            e: {
-              level: e.level,
-              message: e.message
-            }
-          })
-        );
-        response.end();
+        if (!response.writableEnded) {
+          response.writeHead(400);
+          response.write(
+            JSON.stringify({
+              e: {
+                level: e.level,
+                message: e.message
+              }
+            })
+          );
+          response.end();
+        }
       })
       .on('end', () => response.end())
       .connect(body);
@@ -166,6 +170,8 @@ async function ssh(request, response) {
     request.on('close', () => client.end());
   } catch (e) {
     console.error(e);
+
+    client.end();
 
     response.writeHead(400);
     response.write(
@@ -175,6 +181,7 @@ async function ssh(request, response) {
         }
       })
     );
+
     response.end();
   }
 }
