@@ -113,7 +113,7 @@ export class NewServerPage extends BasePage {
       const cmd = [
         'groupadd -f ppp ;',
         'id -u pppuser &>/dev/null || useradd --gid ppp pppuser ;',
-        'which dnf &>/dev/null && dnf -y install git python3-devel tar openssl openssl-devel && dnf -y remove cmake && dnf -y group install "Development Tools";',
+        'which dnf &>/dev/null && sudo dnf -y install git python3-devel tar openssl openssl-devel && sudo dnf -y remove cmake && sudo dnf -y group install "Development Tools";',
         'wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-$(uname -m).tar.gz -O cmake-3.21.3-linux-$(uname -m).tar.gz ;',
         'tar xzf cmake-3.21.3-linux-$(uname -m).tar.gz ;',
         'sudo ln -fs ~/cmake-3.21.3-linux-$(uname -m)/bin/cmake /usr/bin/cmake ;',
