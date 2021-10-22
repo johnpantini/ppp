@@ -1,26 +1,26 @@
 /** @decorator */
 
-import { TextField as FoundationTextField } from '../../../lib/text-field/text-field.js';
-import { observable } from '../../../lib/element/observation/observable.js';
-import { html } from '../../../lib/element/templating/template.js';
-import { attr } from '../../../lib/element/components/attributes.js';
-import { ref } from '../../../lib/element/templating/ref.js';
-import { when } from '../../../lib/element/templating/when.js';
 import {
-  endSlotTemplate,
-  startSlotTemplate
-} from '../../../lib/patterns/start-end.js';
+  TextArea as FoundationTextArea,
+  TextAreaResize
+} from '../../../lib/text-area/text-area.js';
+import { attr } from '../../../lib/element/components/attributes.js';
+import { observable } from '../../../lib/element/observation/observable.js';
 import { css } from '../../../lib/element/styles/css.js';
 import { display } from '../../../lib/utilities/style/display.js';
+import { html } from '../../../lib/element/templating/template.js';
+import { ref } from '../../../lib/element/templating/ref.js';
+import { when } from '../../../lib/element/templating/when.js';
 
 import { bodyFont } from '../design-tokens.js';
 
-import { warning } from '../icons/warning.js';
-import { checkmark } from '../icons/checkmark.js';
-
-// TODO - startTemplate
-export const textFieldTemplate = (context, definition) => html`
-  <template class="${(x) => (x.readOnly ? 'readonly' : '')}">
+export const textAreaTemplate = (context, definition) => html`
+  <template
+    class="
+            ${(x) => (x.readOnly ? 'readonly' : '')}
+            ${(x) =>
+      x.resize !== TextAreaResize.none ? `resize-${x.resize}` : ''}"
+  >
     <label part="label" for="control" class="label">
       <slot name="label"></slot>
     </label>
@@ -29,25 +29,23 @@ export const textFieldTemplate = (context, definition) => html`
     </p>
     <div class="root" part="root">
       <div class="root-container">
-        <input
-          class="control"
+        <textarea
           part="control"
+          class="control"
           id="control"
-          @input="${(x) => x.handleTextInput()}"
-          @change="${(x) => x.handleChange()}"
           ?autofocus="${(x) => x.autofocus}"
+          cols="${(x) => x.cols}"
           ?disabled="${(x) => x.disabled}"
           list="${(x) => x.list}"
           maxlength="${(x) => x.maxlength}"
           minlength="${(x) => x.minlength}"
-          pattern="${(x) => x.pattern}"
+          name="${(x) => x.name}"
           placeholder="${(x) => x.placeholder}"
           ?readonly="${(x) => x.readOnly}"
           ?required="${(x) => x.required}"
-          size="${(x) => x.size}"
+          rows="${(x) => x.rows}"
           ?spellcheck="${(x) => x.spellcheck}"
           :value="${(x) => x.value}"
-          type="${(x) => x.type}"
           aria-atomic="${(x) => x.ariaAtomic}"
           aria-busy="${(x) => x.ariaBusy}"
           aria-controls="${(x) => x.ariaControls}"
@@ -67,42 +65,24 @@ export const textFieldTemplate = (context, definition) => html`
           aria-owns="${(x) => x.ariaOwns}"
           aria-relevant="${(x) => x.ariaRelevant}"
           aria-roledescription="${(x) => x.ariaRoledescription}"
+          @input="${(x, c) => x.handleTextInput()}"
+          @change="${(x) => x.handleChange()}"
           ${ref('control')}
-        />
+        ></textarea>
         <div class="interaction-ring"></div>
       </div>
-      ${when(
-        (x) => x.state === 'default',
-        endSlotTemplate(context, definition)
-      )}
-      ${when(
-        (x) => x.state === 'error' && !!x.errorMessage,
-        html`<div class="end">
-          ${warning({
-            cls: 'error-icon'
-          })}
-        </div>`
-      )}
-      ${when(
-        (x) => x.state === 'valid',
-        html`<div class="end">
-          ${checkmark({
-            cls: 'checkmark-icon'
-          })}
-        </div>`
-      )}
     </div>
     ${when(
       (x) => x.state === 'error' && !!x.errorMessage,
-      html`<div class="helper error">
+      html` <div class="helper error">
         <label>${(x) => x.errorMessage}</label>
       </div>`
     )}
   </template>
 `;
 
-// TODO - design tokens
-export const textFieldStyles = (context, definition) => css`
+// TODO - design tokens, scrollbars
+export const textAreaStyles = (context, definition) => css`
   ${display('flex')}
   :host {
     flex-direction: column;
@@ -156,25 +136,25 @@ export const textFieldStyles = (context, definition) => css`
     border-radius: 4px;
   }
 
-  :host .root-container:hover input:not(:focus) + .interaction-ring {
+  :host .root-container:hover textarea:not(:focus) + .interaction-ring {
     box-shadow: rgb(231 238 236) 0 0 0 3px;
   }
 
   // prettier-ignore
-  :host([state='error']) .root-container:hover input:not(:focus) + .interaction-ring {
+  :host([state='error']) .root-container:hover textarea:not(:focus) + .interaction-ring {
     box-shadow: rgb(252 235 226) 0 0 0 3px;
   }
 
   // prettier-ignore
-  :host([state='valid']) .root-container:hover input:not(:focus) + .interaction-ring {
+  :host([state='valid']) .root-container:hover textarea:not(:focus) + .interaction-ring {
     box-shadow: rgb(228 244 228) 0 0 0 3px;
   }
 
-  input {
+  textarea {
+    resize: none;
     width: 100%;
-    height: 36px;
+    height: 128px;
     border-radius: 4px;
-    padding-left: 12px;
     font-size: 14px;
     font-weight: normal;
     border: 1px solid rgb(137, 151, 155);
@@ -183,25 +163,44 @@ export const textFieldStyles = (context, definition) => css`
     outline: none;
     color: rgb(33, 49, 60);
     background-color: rgb(255, 255, 255);
-    padding-right: 12px;
+    padding: 10px 12px;
     font-family: ${bodyFont};
+    scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
+    scrollbar-width: thin;
   }
 
-  :host([state='error']) input {
+  textarea::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  textarea::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  textarea::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  :host([monospace]) textarea {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono',
+      Menlo, Consolas, monospace;
+  }
+
+  :host([state='error']) textarea {
     border: 1px solid rgb(207, 74, 34);
     padding-right: 30px;
   }
 
-  :host([state='valid']) input {
+  :host([state='valid']) textarea {
     border: 1px solid rgb(19, 170, 82);
     padding-right: 30px;
   }
 
-  :host input:focus {
+  :host textarea:focus {
     border: 1px solid rgb(255, 255, 255);
   }
 
-  :host input:focus ~ .interaction-ring {
+  :host textarea:focus ~ .interaction-ring {
     box-shadow: rgb(1, 158, 226) 0 0 0 3px;
   }
 
@@ -236,7 +235,10 @@ export const textFieldStyles = (context, definition) => css`
   }
 `;
 
-export class TextField extends FoundationTextField {
+export class TextArea extends FoundationTextArea {
+  @attr({ mode: 'boolean' })
+  monospace;
+
   @attr
   state;
 
@@ -268,10 +270,10 @@ export class TextField extends FoundationTextField {
  *
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/delegatesFocus | delegatesFocus}
  */
-export const textField = TextField.compose({
-  baseName: 'text-field',
-  template: textFieldTemplate,
-  styles: textFieldStyles,
+export const textArea = TextArea.compose({
+  baseName: 'text-area',
+  template: textAreaTemplate,
+  styles: textAreaStyles,
   shadowOptions: {
     delegatesFocus: true
   }
