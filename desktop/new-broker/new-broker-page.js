@@ -10,11 +10,12 @@ import {
   loadingIndicator
 } from '../../design/leafygreen/styles/page.js';
 
+import { SUPPORTED_BROKERS } from '../../base/new-broker/new-broker-page.js';
 import { settings } from '../../design/leafygreen/icons/settings.js';
 
 await i18nImport(['new-broker']);
 
-const brokerCardsTemplate = html`
+const brokerSelectionTemplate = html`
   <div class="card-container">
     <${'ppp-generic-card'}>
       <svg slot="logo" height="40px" viewBox="0 0 242 80" fill="none"
@@ -68,7 +69,7 @@ const brokerCardsTemplate = html`
         target="_blank"
         href="https://alor.dev/docs">Перейти к документации</a>.</span>
       <${'ppp-button'}
-        @click="${(x) => (x.broker = 'alor-openapi-v2')}"
+        @click="${(x) => (x.broker = SUPPORTED_BROKERS.ALOR_OPENAPI_V2)}"
         slot="action"
       >
         Продолжить
@@ -191,10 +192,10 @@ const brokerCardsTemplate = html`
         </svg>
       </div>
       <span slot="title">United Traders</span>
-      <span slot="description">Торговля через <a target="_blank"
+      <span slot="description">Рыночные данные от <a target="_blank"
                                                  href="https://unitedtraders.biz/trading/aurora">United Traders</a>.</span>
       <ppp-button
-        @click="${(x) => (x.broker = 'united-traders')}"
+        @click="${(x) => (x.broker = SUPPORTED_BROKERS.UNITED_TRADERS)}"
         slot="action"
       >Продолжить
       </ppp-button>
@@ -210,7 +211,7 @@ const alorOpenAPIV2Template = html`
         Произвольное имя, чтобы ссылаться на этот профиль, когда
         потребуется.
       </p>
-      <ppp-text-field
+      <${'ppp-text-field'}
         placeholder="Введите имя"
         name="profileName"
         ${ref('profileName')}
@@ -234,7 +235,7 @@ const alorOpenAPIV2Template = html`
         >зарегистрируйтесь</a
         > предварительно.
       </p>
-      <${'ppp-text-field'}
+      <ppp-text-field
         placeholder="Alor refresh token"
         name="alorRefreshToken"
         ${ref('alorRefreshToken')}
@@ -252,7 +253,7 @@ const unitedTradersTemplate = html`
         Произвольное имя, чтобы ссылаться на этот профиль, когда
         потребуется.
       </p>
-      <ppp-text-field
+      <${'ppp-text-field'}
         placeholder="Введите имя"
         name="profileName"
         ${ref('profileName')}
@@ -265,11 +266,12 @@ const unitedTradersTemplate = html`
       <h6>Логин учётной записи United Traders</h6>
       <p>
         Учётную запись можно зарегистрировать по
-        <a target="_blank" href="https://unitedtraders.biz/trading/aurora/auth/registration"
+        <a target="_blank"
+           href="https://unitedtraders.biz/trading/aurora/auth/registration"
         >ссылке</a
         >.
       </p>
-      <${'ppp-text-field'}
+      <ppp-text-field
         placeholder="UT1234567"
         name="utLogin"
         ${ref('utLogin')}
@@ -297,7 +299,7 @@ const unitedTradersTemplate = html`
 export const newBrokerPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'}>Новый профиль брокера</ppp-page-header>
-    ${when((x) => !x.broker, brokerCardsTemplate)}
+    ${when((x) => !x.broker, brokerSelectionTemplate)}
     <form ${ref(
       'form'
     )} id="new-broker" name="new-broker" onsubmit="return false">

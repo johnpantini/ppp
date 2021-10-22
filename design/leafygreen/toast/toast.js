@@ -34,7 +34,7 @@ export const toastTemplate = (context, definition) => html`
       </div>
     </div>
     ${when(
-      (x) => !!x.dismissible,
+      (x) => x.dismissible,
       html` <button
         @click="${(x) => (x.visible = false)}"
         aria-label="Close Message"

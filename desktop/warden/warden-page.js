@@ -13,7 +13,7 @@ export class WardenKeysPage extends FoundationElement {
 
 export const wardenKeysPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>Telegram Warden</ppp-page-header>
+    <${'ppp-page-header'}>Warden</ppp-page-header>
   </template>
 `;
 

@@ -123,7 +123,7 @@ export const basePageStyles = css`
     position: relative;
     width: 100%;
     max-width: 100%;
-    min-height: 128px;
+    min-height: 180px;
     flex-grow: 1;
     opacity: 1;
   }

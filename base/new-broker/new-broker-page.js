@@ -7,7 +7,7 @@ import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
 
 await i18nImport(['validation']);
 
-const SUPPORTED_BROKERS = {
+export const SUPPORTED_BROKERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
   UNITED_TRADERS: 'united-traders'
 };

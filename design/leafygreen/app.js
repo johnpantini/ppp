@@ -20,7 +20,8 @@ const page = (page) => {
             `../${globalThis.ppp.appType}/${page}/${page}-page.js`
           )
       ),
-    html`<ppp-${page}-page :app="${(x) => x}"></ppp-${page}-page>`
+    html`
+      <ppp-${page}-page :app="${(x) => x}"></ppp-${page}-page>`
   );
 };
 
@@ -56,19 +57,19 @@ export const appTemplate = (context, definition) => html`
             <span slot="title">Торговля</span>
             <ppp-side-nav-item
               disabled
-              ?active="${(x) => x.page === 'analytics'}"
-              @click="${(x) => (x.page = 'analytics')}"
+              ?active="${(x) => x.page === 'services'}"
+              @click="${(x) => (x.page = 'services')}"
               slot="items"
             >
-              <span slot="title">Аналитика</span>
+              <span slot="title">Сервисы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
               disabled
-              ?active="${(x) => x.page === 'trade-settings'}"
-              @click="${(x) => (x.page = 'trade-settings')}"
+              ?active="${(x) => x.page === 'instruments'}"
+              @click="${(x) => (x.page = 'instruments')}"
               slot="items"
             >
-              <span slot="title">Настройки</span>
+              <span slot="title">Инструменты</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
@@ -83,30 +84,6 @@ export const appTemplate = (context, definition) => html`
               slot="items"
             >
               <span slot="title">Обзор</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'ppp-billing'}"
-              @click="${(x) => (x.page = 'ppp-billing')}"
-              slot="items"
-            >
-              <span slot="title">Оплата</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'ppp-achievements'}"
-              @click="${(x) => (x.page = 'ppp-achievements')}"
-              slot="items"
-            >
-              <span slot="title">Достижения</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'ppp-settings'}"
-              @click="${(x) => (x.page = 'ppp-settings')}"
-              slot="items"
-            >
-              <span slot="title">Настройки</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
@@ -131,20 +108,29 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Брокеры</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'ssh-servers'}"
-              @click="${(x) => (x.page = 'ssh-servers')}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
+              ?active="${(x) =>
+                x.page === 'servers' || x.page === 'new-server'}"
+              @click="${(x) => (x.page = 'servers')}"
               slot="items"
             >
-              <span slot="title">Машины SSH</span>
+              <span slot="title">Серверы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
               disabled
-              ?active="${(x) => x.page === 'warden-keys'}"
-              @click="${(x) => (x.page = 'warden-keys')}"
+              ?active="${(x) => x.page === 'telegram'}"
+              @click="${(x) => (x.page = 'telegram')}"
               slot="items"
             >
-              <span slot="title">Telegram Warden</span>
+              <span slot="title">Telegram</span>
+            </ppp-side-nav-item>
+            <ppp-side-nav-item
+              disabled
+              ?active="${(x) => x.page === 'warden'}"
+              @click="${(x) => (x.page = 'warden')}"
+              slot="items"
+            >
+              <span slot="title">Warden</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
@@ -161,9 +147,13 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">${i18n.t('help')}</span>
             <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'guides'}"
-              @click="${(x) => (x.page = 'guides')}"
+              @click="${(x) =>
+                window
+                  .open(
+                    'https://pantini.gitbook.io/pantini-co/ppp/getting-started',
+                    '_blank'
+                  )
+                  .focus()}"
               slot="items"
             >
               <span slot="title">Инструкции</span>
@@ -175,6 +165,8 @@ export const appTemplate = (context, definition) => html`
           ${when((x) => x.ppp?.keyVault.ok(), page('brokers'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('broker'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('new-broker'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('servers'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('new-server'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('updates'))}
           ${when(
             (x) =>
@@ -183,7 +175,7 @@ export const appTemplate = (context, definition) => html`
                 'ppp-not-found-page',
                 `../${globalThis.ppp.appType}/not-found/not-found-page.js`
               ),
-            html`<ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
+            html` <ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
           )}
         </div>
       </div>
@@ -194,7 +186,6 @@ export const appTemplate = (context, definition) => html`
 export const appStyles = (context, definition) =>
   css`
     ${display('flex')}
-
     :host {
       font-family: ${bodyFont};
       flex-direction: column;
@@ -219,7 +210,7 @@ export const appStyles = (context, definition) =>
 
     ppp-side-nav {
       flex-shrink: 0;
-      z-index: 998;
+      z-index: 10;
     }
 
     .page-content {
@@ -228,19 +219,5 @@ export const appStyles = (context, definition) =>
       padding-left: 20px;
       padding-right: 20px;
       padding-top: 20px;
-    }
-
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    ::-webkit-scrollbar-track {
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-      border-radius: 2px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      border-radius: 2px;
-      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
     }
   `;
