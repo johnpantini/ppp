@@ -268,9 +268,11 @@ pillar_opts: true
       this.busy = false;
       console.error(e);
 
-      this.modal.dismissible = true;
-      this.modal.visibleChanged = (oldValue, newValue) =>
-        !newValue && (this.mode = void 0);
+      if (this.modal) {
+        this.modal.dismissible = true;
+        this.modal.visibleChanged = (oldValue, newValue) =>
+          !newValue && (this.mode = void 0);
+      }
 
       if (/E11000/i.test(e.error)) {
         invalidate(this.app.toast, {

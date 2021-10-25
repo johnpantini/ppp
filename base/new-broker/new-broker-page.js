@@ -9,8 +9,31 @@ await i18nImport(['validation']);
 
 export const SUPPORTED_BROKERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
+  TINKOFF_OPENAPI_V1: 'tinkoff-openapi-v1',
   UNITED_TRADERS: 'united-traders'
 };
+
+export async function checkTinkoffOAPIV1Token({ token }) {
+  try {
+    return await fetch(
+      'https://api-invest.tinkoff.ru/openapi/market/search/by-ticker?ticker=AAPL',
+      {
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+  } catch (e) {
+    console.error(e);
+
+    return {
+      ok: false,
+      status: e
+    };
+  }
+}
 
 export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
   try {
@@ -54,6 +77,42 @@ export async function checkUnitedTradersLoginPassword({
 export class NewBrokerPage extends BasePage {
   @attr
   broker;
+
+  async createTinkoffOAPIV1Broker() {
+    await validate(this.tinkoffToken);
+
+    const r1 = await checkTinkoffOAPIV1Token({
+      token: this.tinkoffToken.value.trim()
+    });
+
+    if (!r1.ok) {
+      console.warn(r1);
+
+      invalidate(this.tinkoffToken, {
+        errorMessage: i18n.t('invalidTokenWithStatus', { status: 401 }),
+        status: r1.status
+      });
+    }
+
+    const iv = generateIV();
+    const encryptedToken = await this.app.ppp.crypto.encrypt(
+      iv,
+      this.tinkoffToken.value.trim()
+    );
+
+    await this.app.ppp.user.functions.insertOne(
+      {
+        collection: 'brokers'
+      },
+      {
+        _id: this.profileName.value.trim(),
+        type: SUPPORTED_BROKERS.TINKOFF_OPENAPI_V1,
+        iv: bufferToString(iv),
+        token: encryptedToken,
+        created_at: new Date()
+      }
+    );
+  }
 
   async createUnitedTradersBroker() {
     await validate(this.utLogin);
@@ -151,6 +210,11 @@ export class NewBrokerPage extends BasePage {
 
         case SUPPORTED_BROKERS.UNITED_TRADERS:
           await this.createUnitedTradersBroker();
+
+          break;
+
+        case SUPPORTED_BROKERS.TINKOFF_OPENAPI_V1:
+          await this.createTinkoffOAPIV1Broker();
 
           break;
       }
