@@ -1,0 +1,11 @@
+backend: requests
+file_client: local
+fileserver_backend:
+  - roots
+pillar_opts: true
+file_roots:
+  base:
+    - /srv/salt/states
+pillar_roots:
+  main:
+    - /srv/salt/pillar
