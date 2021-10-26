@@ -1,3 +1,4 @@
 main:
   '*':
     - ping
+    - node
