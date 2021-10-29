@@ -1,53 +1,11 @@
 const { createServer } = require('http');
-const { request } = require('https');
 const { Client } = require('./ppp-dyno/ssh2');
+const fetch = require('./salt/states/ppp/lib/fetch.js');
 
 process.on('unhandledRejection', (err) => {
   console.log(err);
   process.exit(1);
 });
-
-async function fetch(url, options = {}) {
-  const u = new URL(url);
-
-  return new Promise(async (resolve, reject) => {
-    const requestOptions = {
-      hostname: u.hostname,
-      port: 443,
-      path: u.pathname,
-      method: options.method,
-      headers: options.headers
-    };
-
-    const req = request(requestOptions, async (res) => {
-      try {
-        let responseText = '';
-
-        for await (const chunk of res) {
-          responseText += chunk;
-        }
-
-        resolve({
-          responseText,
-          headers: res.headers,
-          statusCode: res.statusCode
-        });
-      } catch (error) {
-        reject({
-          responseText: error.toString(),
-          headers: res.headers,
-          statusCode: res.statusCode
-        });
-      }
-    });
-
-    req.on('error', (error) => reject(error));
-
-    if (options.body) req.write(options.body);
-
-    req.end();
-  });
-}
 
 async function ut(request, response) {
   if (!/post/i.test(request.method)) {
@@ -84,7 +42,7 @@ async function ut(request, response) {
     );
 
     response.setHeader('Content-Type', utResponse.headers['content-type']);
-    response.writeHead(utResponse.statusCode);
+    response.writeHead(utResponse.status);
     response.write(utResponse.responseText);
     response.end();
   } catch (e) {
