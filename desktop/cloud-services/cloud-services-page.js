@@ -128,7 +128,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             ></ppp-text-field>
           </div>
         </section>
-        ${when((x) => !!x.busy, html`${loadingIndicator()}`)}
+        ${when((x) => x.busy, html`${loadingIndicator()}`)}
       </div>
       <section class="last">
         <div class="footer-actions">

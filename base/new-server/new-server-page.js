@@ -9,7 +9,7 @@ import { requireComponent } from '../../lib/template.js';
 import { later } from '../../lib/later.js';
 import { assert } from '../../lib/assert.js';
 
-await i18nImport(['validation']);
+await i18nImport(['validation', 'new-server']);
 
 export const SUPPORTED_SERVER_TYPES = {
   PASSWORD: 'password',

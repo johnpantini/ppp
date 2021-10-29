@@ -10,8 +10,6 @@ import {
   loadingIndicator
 } from '../../design/leafygreen/styles/page.js';
 
-await i18nImport(['brokers']);
-
 export const brokersPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'}>

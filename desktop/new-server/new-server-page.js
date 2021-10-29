@@ -13,8 +13,6 @@ import {
 import { SUPPORTED_SERVER_TYPES } from '../../base/new-server/new-server-page.js';
 import { settings } from '../../design/leafygreen/icons/settings.js';
 
-await i18nImport(['new-server']);
-
 const serverTypeSelectionTemplate = html`
   <div class="selector">
     <h1 class="selector-title">
@@ -241,7 +239,7 @@ export const newServerPageTemplate = (context, definition) => html`
             </ppp-modal>
           `
         )}
-        ${when((x) => !!x.busy, html`${loadingIndicator()}`)}
+        ${when((x) => x.busy, html`${loadingIndicator()}`)}
       </div>
       ${when(
         (x) => x.type,

@@ -117,12 +117,12 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Серверы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'telegram'}"
-              @click="${(x) => (x.page = 'telegram')}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
+              ?active="${(x) => x.page === 'telegram-bots' || x.page === 'new-telegram-bot'}"
+              @click="${(x) => (x.page = 'telegram-bots')}"
               slot="items"
             >
-              <span slot="title">Telegram</span>
+              <span slot="title">Боты Telegram</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
               disabled
@@ -163,10 +163,11 @@ export const appTemplate = (context, definition) => html`
         <div class="page-content">
           ${page('cloud-services')}
           ${when((x) => x.ppp?.keyVault.ok(), page('brokers'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('broker'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('new-broker'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('servers'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('new-server'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('telegram-bots'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('new-telegram-bot'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('updates'))}
           ${when(
             (x) =>

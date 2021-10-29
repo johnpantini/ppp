@@ -13,8 +13,6 @@ import {
 import { SUPPORTED_BROKERS } from '../../base/new-broker/new-broker-page.js';
 import { settings } from '../../design/leafygreen/icons/settings.js';
 
-await i18nImport(['new-broker']);
-
 const brokerSelectionTemplate = html`
   <div class="card-container">
     <${'ppp-generic-card'}>
@@ -478,7 +476,7 @@ export const newBrokerPageTemplate = (context, definition) => html`
           (x) => x.broker === SUPPORTED_BROKERS.TINKOFF_OPENAPI_V1,
           tinkoffOpenAPIV1Template
         )}
-        ${when((x) => !!x.busy, html`${loadingIndicator()}`)}
+        ${when((x) => x.busy, html`${loadingIndicator()}`)}
       </div>
       ${when(
         (x) => x.broker,

@@ -5,7 +5,7 @@ import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
 import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
 
-await i18nImport(['validation']);
+await i18nImport(['validation', 'new-broker']);
 
 export const SUPPORTED_BROKERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',

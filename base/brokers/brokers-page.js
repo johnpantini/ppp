@@ -11,7 +11,7 @@ import { html } from '../../lib/template.js';
 // TODO - refactor
 import { trash } from '../../design/leafygreen/icons/trash.js';
 
-await i18nImport(['validation', 'broker-type']);
+await i18nImport(['validation', 'brokers', 'broker-type']);
 
 export class BrokersPage extends BasePage {
   @observable

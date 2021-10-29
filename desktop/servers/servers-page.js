@@ -10,8 +10,6 @@ import {
   loadingIndicator
 } from '../../design/leafygreen/styles/page.js';
 
-await i18nImport(['servers']);
-
 export const serversPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'}>

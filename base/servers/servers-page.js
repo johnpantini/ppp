@@ -11,7 +11,7 @@ import { html } from '../../lib/template.js';
 // TODO - refactor
 import { trash } from '../../design/leafygreen/icons/trash.js';
 
-await i18nImport(['validation', 'server-type']);
+await i18nImport(['validation', 'servers', 'server-type']);
 
 export class ServersPage extends BasePage {
   @observable
