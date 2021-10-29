@@ -2,3 +2,4 @@ main:
   '*':
     - ping
     - node
+    - redis
