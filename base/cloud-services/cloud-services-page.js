@@ -699,21 +699,26 @@ export class CloudServicesPage extends BasePage {
       });
 
       if (!r2.ok) {
-        let j2;
-
-        console.warn((j2 = await r2.json()));
-
         if (r2.status === 404) {
           invalidate(this.auth0Email, {
             errorMessage: i18n.t('userNotFound'),
             status: r2.status
           });
         } else {
-          if (r2.status === 401 && /expired/i.test(j2?.message)) {
-            invalidate(this.auth0Token, {
-              errorMessage: i18n.t('expiredToken', r2),
-              status: r2.status
-            });
+          if (r2.status === 401) {
+            const j2 = await r2.json();
+
+            if (/expired/i.test(j2?.message)) {
+              invalidate(this.auth0Token, {
+                errorMessage: i18n.t('expiredToken', r2),
+                status: r2.status
+              });
+            } else {
+              invalidate(this.auth0Token, {
+                errorMessage: i18n.t('invalidTokenWithStatus', r2),
+                status: r2.status
+              });
+            }
           } else
             invalidate(this.auth0Token, {
               errorMessage: i18n.t('invalidTokenWithStatus', r2),
