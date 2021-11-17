@@ -287,9 +287,11 @@ export class CloudServicesPage extends BasePage {
       const appId = this.app.ppp.keyVault.getKey('mongo-app-id');
       const funcs = [
         { name: 'aggregate', path: 'functions/mongodb/aggregate.js' },
+        { name: 'bulkWrite', path: 'functions/mongodb/bulk-write.js' },
         { name: 'count', path: 'functions/mongodb/count.js' },
         { name: 'deleteMany', path: 'functions/mongodb/delete-many.js' },
         { name: 'deleteOne', path: 'functions/mongodb/delete-one.js' },
+        { name: 'distinct', path: 'functions/mongodb/distinct.js' },
         { name: 'find', path: 'functions/mongodb/find.js' },
         { name: 'findOne', path: 'functions/mongodb/find-one.js' },
         {
@@ -649,6 +651,8 @@ export class CloudServicesPage extends BasePage {
       await validate(this.auth0Email);
       await validate(this.mongoPublicKey);
       await validate(this.mongoPrivateKey);
+
+      localStorage.removeItem('ppp-mongo-location-url');
 
       const serviceMachineURL = new URL('ping', this.serviceMachineUrl.value);
 

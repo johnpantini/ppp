@@ -21,7 +21,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
     <form ${ref(
       'form'
     )} id="cloud-services" name="cloud-services" onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => !!x.busy}">
+      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         <section>
           <div class="section-index-icon">
             ${circleSvg(1)}
@@ -36,7 +36,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             <ppp-text-field
               placeholder="https://example.com"
               name="service-machine-url"
-              value="${(x) => x.app.ppp.keyVault.getKey('service-machine-url')}"
+              value="${(x) => x.app.ppp?.keyVault.getKey('service-machine-url')}"
               ${ref('serviceMachineUrl')}
             ></ppp-text-field>
           </div>
@@ -54,7 +54,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             <${'ppp-text-field'}
               placeholder="Токен"
               name="github-token"
-              value="${(x) => x.app.ppp.keyVault.getKey('github-token')}"
+              value="${(x) => x.app.ppp?.keyVault.getKey('github-token')}"
               ${ref('gitHubToken')}
             ></ppp-text-field>
           </div>
@@ -80,7 +80,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             <ppp-text-field
               placeholder="Токен Auth0"
               name="auth0-token"
-              value="${(x) => x.app.ppp.keyVault.getKey('auth0-token')}"
+              value="${(x) => x.app.ppp?.keyVault.getKey('auth0-token')}"
               ${ref('auth0Token')}
             ></ppp-text-field>
             <p>Укажите Email пользователя, которого вы создали ранее в сервисе
@@ -91,7 +91,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             <ppp-text-field
               placeholder="Email пользователя Auth0"
               name="auth0-email"
-              value="${(x) => x.app.ppp.keyVault.getKey('auth0-email')}"
+              value="${(x) => x.app.ppp?.keyVault.getKey('auth0-email')}"
               ${ref('auth0Email')}
             ></ppp-text-field>
           </div>
@@ -109,7 +109,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             <ppp-text-field
               placeholder="Публичный ключ"
               name="mongo-public-key"
-              value="${(x) => x.app.ppp.keyVault.getKey('mongo-public-key')}"
+              value="${(x) => x.app.ppp?.keyVault.getKey('mongo-public-key')}"
               ${ref('mongoPublicKey')}
             ></ppp-text-field>
           </div>
@@ -123,7 +123,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             <ppp-text-field
               placeholder="Приватный ключ"
               name="mongo-private-key"
-              value="${(x) => x.app.ppp.keyVault.getKey('mongo-private-key')}"
+              value="${(x) => x.app.ppp?.keyVault.getKey('mongo-private-key')}"
               ${ref('mongoPrivateKey')}
             ></ppp-text-field>
           </div>
@@ -133,13 +133,13 @@ export const cloudServicesPageTemplate = (context, definition) => html`
       <section class="last">
         <div class="footer-actions">
           <${'ppp-button'}
-            ?disabled="${(x) => !!x.busy}"
+            ?disabled="${(x) => x.busy}"
             type="submit"
             @click="${(x) => x.saveCloudCredentials()}"
             appearance="primary"
           >
             ${when(
-              (x) => !!x.busy,
+              (x) => x.busy,
               settings({
                 slot: 'end',
                 cls: 'spinner-icon'
