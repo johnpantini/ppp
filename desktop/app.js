@@ -1,5 +1,6 @@
 import { App as BaseApp } from '../lib/app.js';
 import { requireComponent } from '../lib/template.js';
+import { $global } from '../lib/element/platform.js';
 
 export class App extends BaseApp {
   _toast;
