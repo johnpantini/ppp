@@ -92,7 +92,6 @@ new (class {
   }
 
   async #createApplication({ emergency }) {
-    // TODO - fetch settings from MongoDB
     if (!emergency) {
       const { getApp, Credentials } = await import('./lib/realm.js');
 
@@ -101,7 +100,7 @@ new (class {
         this.credentials = Credentials.apiKey(
           this.keyVault.getKey('mongo-api-key')
         );
-        this.user = await this.realm.logIn(this.credentials);
+        this.user = await this.realm.logIn(this.credentials, false);
       } catch (e) {
         console.error(e);
 
@@ -111,7 +110,7 @@ new (class {
           return this.#authorizeWithAuth0();
         } else {
           return alert(
-            'Вероятно, кластер MongoDB Atlas отключён за неактивность. Перейдите в панель управления MongoDB Atlas и нажмите Resume, а спустя несколько минут обновите текущую страницу'
+            'Не удалось соединиться с MongoDB, попробуйте обновить страницу. Если проблема не решится, вероятно, кластер MongoDB Atlas отключён за неактивность. В таком случае перейдите в панель управления MongoDB Atlas и нажмите Resume, а спустя несколько минут обновите текущую страницу'
           );
         }
       }
@@ -134,9 +133,32 @@ new (class {
       document.body.firstChild
     );
 
-    $global.loader.setAttribute('hidden', true);
+    this.appElement.setAttribute('hidden', true);
+
+    // TODO - handle errors
+    if (!emergency) {
+      const [workspaces, settings] = await Promise.all([
+        this.user.functions.find({
+          collection: 'workspaces'
+        }),
+        this.user.functions.findOne(
+          {
+            collection: 'app'
+          },
+          {
+            _id: 'settings'
+          }
+        )
+      ]);
+
+      this.appElement.workspaces = workspaces;
+      this.appElement.settings = settings ?? {};
+    }
+
     this.appElement.ppp = this;
     this.appElement.setAttribute('appearance', this.theme);
+    $global.loader.setAttribute('hidden', true);
+    this.appElement.removeAttribute('hidden');
   }
 
   async start() {
