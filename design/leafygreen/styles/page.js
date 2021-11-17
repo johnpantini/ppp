@@ -67,6 +67,17 @@ export const emptyStateStyles = css`
     line-height: 24px;
   }
 
+  .empty-state .cta[disabled] {
+    pointer-events: none;
+    appearance: none;
+    text-decoration: none;
+    background-color: rgb(231, 238, 236);
+    border: 1px solid rgb(231, 238, 236);
+    box-shadow: rgb(184, 196, 194) 0 0 0 1px;
+    cursor: not-allowed;
+    color: rgb(93, 108, 116);
+  }
+
   .empty-state .cta:hover, .empty-state .cta:active {
     color: rgb(255, 255, 255);
     background-color: rgb(17, 97, 73);
