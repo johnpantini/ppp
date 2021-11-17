@@ -76,16 +76,26 @@ export const textFieldTemplate = (context, definition) => html`
         endSlotTemplate(context, definition)
       )}
       ${when(
-        (x) => x.state === 'error' && !!x.errorMessage,
-        html`<div class="end">
+        (x) => x.state === 'error' && x.errorMessage,
+        html` <div class="end">
           ${warning({
             cls: 'error-icon'
           })}
         </div>`
       )}
       ${when(
+        (x) => x.optional,
+        html`
+          <div class="end">
+            <div class="optional-text">
+              <p>Опционально</p>
+            </div>
+          </div>
+        `
+      )}
+      ${when(
         (x) => x.state === 'valid',
-        html`<div class="end">
+        html` <div class="end">
           ${checkmark({
             cls: 'checkmark-icon'
           })}
@@ -93,8 +103,8 @@ export const textFieldTemplate = (context, definition) => html`
       )}
     </div>
     ${when(
-      (x) => x.state === 'error' && !!x.errorMessage,
-      html`<div class="helper error">
+      (x) => x.state === 'error' && x.errorMessage,
+      html` <div class="helper error">
         <label>${(x) => x.errorMessage}</label>
       </div>`
     )}
@@ -187,6 +197,10 @@ export const textFieldStyles = (context, definition) => css`
     font-family: ${bodyFont};
   }
 
+  :host([optional]) input {
+    padding-right: 90px;
+  }
+
   :host([state='error']) input {
     border: 1px solid rgb(207, 74, 34);
     padding-right: 30px;
@@ -216,6 +230,13 @@ export const textFieldStyles = (context, definition) => css`
     color: rgb(207, 74, 34);
   }
 
+  .optional-text {
+    font-size: 12px;
+    font-style: italic;
+    font-weight: normal;
+    color: rgb(93, 108, 116);
+  }
+
   .end {
     position: absolute;
     display: flex;
@@ -239,6 +260,9 @@ export const textFieldStyles = (context, definition) => css`
 export class TextField extends FoundationTextField {
   @attr
   state;
+
+  @attr({ mode: 'boolean' })
+  optional;
 
   @observable
   errorMessage;
