@@ -18,7 +18,7 @@ export const newTelegramBotPageTemplate = (context, definition) => html`
     <form ${ref(
       'form'
     )} id="new-telegram-bot" name="new-telegram-bot" onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => !!x.busy}">
+      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         <section>
           <div class="section-index-icon">${circleSvg(1)}</div>
           <div class="label-group">
@@ -60,13 +60,13 @@ export const newTelegramBotPageTemplate = (context, definition) => html`
       <section class="last">
         <div class="footer-actions">
           <${'ppp-button'}
-            ?disabled="${(x) => !!x.busy}"
+            ?disabled="${(x) => x.busy}"
             type="submit"
             @click="${(x) => x.addTelegramBot()}"
             appearance="primary"
           >
             ${when(
-              (x) => !!x.busy,
+              (x) => x.busy,
               settings({
                 slot: 'end',
                 cls: 'spinner-icon'

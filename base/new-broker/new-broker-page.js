@@ -3,7 +3,7 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
+import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js'
 
 await i18nImport(['validation', 'new-broker']);
 
@@ -106,6 +106,7 @@ export class NewBrokerPage extends BasePage {
       },
       {
         _id: this.profileName.value.trim(),
+        uuid: uuidv4(),
         type: SUPPORTED_BROKERS.TINKOFF_OPENAPI_V1,
         iv: bufferToString(iv),
         token: encryptedToken,
@@ -148,6 +149,7 @@ export class NewBrokerPage extends BasePage {
       },
       {
         _id: this.profileName.value.trim(),
+        uuid: uuidv4(),
         type: SUPPORTED_BROKERS.UNITED_TRADERS,
         iv: bufferToString(iv),
         login: this.utLogin.value.trim(),
@@ -185,6 +187,7 @@ export class NewBrokerPage extends BasePage {
       },
       {
         _id: this.profileName.value.trim(),
+        uuid: uuidv4(),
         type: SUPPORTED_BROKERS.ALOR_OPENAPI_V2,
         iv: bufferToString(iv),
         refresh_token: encryptedToken,
@@ -241,9 +244,11 @@ export class NewBrokerPage extends BasePage {
   }
 
   brokerChanged(oldValue, newValue) {
+    const params = this.app.params();
+
     this.app.navigate(
       this.app.url({
-        page: this.app.params().page,
+        ...params,
         broker: newValue || void 0
       })
     );

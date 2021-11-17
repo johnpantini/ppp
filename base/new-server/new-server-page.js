@@ -3,7 +3,7 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
+import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js'
 import { DOM } from '../../lib/element/dom.js';
 import { requireComponent } from '../../lib/template.js';
 import { later } from '../../lib/later.js';
@@ -125,7 +125,6 @@ gitfs_root: salt/states
 pillar_opts: true
 `;
 
-      // TODO - add apt-get support
       const cmd = [
         'sudo rm -f /etc/yum.repos.d/salt.repo ;',
         'sudo mkdir -p /etc/salt ;',
@@ -218,6 +217,7 @@ pillar_opts: true
 
             payload = {
               _id: this.serverName.value.trim(),
+              uuid: uuidv4(),
               type: this.type,
               host: this.host.value.trim(),
               port: this.port.value.trim(),
@@ -236,6 +236,7 @@ pillar_opts: true
 
             payload = {
               _id: this.serverName.value.trim(),
+              uuid: uuidv4(),
               type: this.type,
               host: this.host.value.trim(),
               port: this.port.value.trim(),
@@ -287,9 +288,11 @@ pillar_opts: true
   }
 
   typeChanged(oldValue, newValue) {
+    const params = this.app.params();
+
     this.app.navigate(
       this.app.url({
-        page: this.app.params().page,
+        ...params,
         type: newValue || void 0
       })
     );

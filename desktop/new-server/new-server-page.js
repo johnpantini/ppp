@@ -232,7 +232,7 @@ export const newServerPageTemplate = (context, definition) => html`
             <ppp-modal ${ref('modal')}>
               <span slot="title">Настройка нового сервера</span>
               <div slot="body">
-                <div class="inner">
+                <div class="description">
                   <ppp-terminal ${ref('terminalDom')}></ppp-terminal>
                 </div>
               </div>
@@ -356,8 +356,8 @@ export const newServerPageStyles = (context, definition) =>
       max-width: 600px;
     }
 
-    .inner {
-      padding: 10px 8px 10px 20px;
+    .description {
+      padding: 10px 16px 10px 20px;
       border-radius: 7px;
       background-color: rgb(33, 49, 60);
       border: 1px solid rgb(231, 238, 236);

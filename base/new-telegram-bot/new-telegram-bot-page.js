@@ -1,6 +1,6 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
-import { generateIV, bufferToString } from '../../lib/ppp-crypto.js';
+import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js'
 
 await i18nImport(['validation', 'new-telegram-bot']);
 
@@ -55,6 +55,7 @@ export class NewTelegramBotPage extends BasePage {
         },
         {
           _id: this.profileName.value.trim(),
+          uuid: uuidv4(),
           type: 'telegram',
           iv: bufferToString(iv),
           token: encryptedToken,

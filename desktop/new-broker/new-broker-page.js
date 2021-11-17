@@ -463,7 +463,7 @@ export const newBrokerPageTemplate = (context, definition) => html`
     <form ${ref(
       'form'
     )} id="new-broker" name="new-broker" onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => !!x.busy}">
+      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         ${when(
           (x) => x.broker === SUPPORTED_BROKERS.ALOR_OPENAPI_V2,
           alorOpenAPIV2Template
@@ -484,13 +484,13 @@ export const newBrokerPageTemplate = (context, definition) => html`
           <section class="last">
             <div class="footer-actions">
               <${'ppp-button'}
-                ?disabled="${(x) => !!x.busy}"
+                ?disabled="${(x) => x.busy}"
                 type="submit"
                 @click="${(x) => x.createBroker()}"
                 appearance="primary"
               >
                 ${when(
-                  (x) => !!x.busy,
+                  (x) => x.busy,
                   settings({
                     slot: 'end',
                     cls: 'spinner-icon'
