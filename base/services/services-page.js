@@ -65,6 +65,9 @@ export class ServicesPage extends BasePage {
         collection: 'servers'
       });
 
+      if (!this.servers.length)
+        this.servers = void 0;
+
       this.fetching = false;
     } catch (e) {
       console.error(e);
