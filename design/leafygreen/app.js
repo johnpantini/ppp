@@ -168,9 +168,9 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Виджеты</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'services'}"
-              @click="${(x) => (x.page = 'services')}"
+              @click="${(x) => ((x.page = void 0) || (x.page = 'services'))}"
               slot="items"
             >
               <span slot="title">Сервисы</span>
@@ -268,7 +268,7 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">${i18n.t('help')}</span>
             <ppp-side-nav-item
-              @click="${(x) =>
+              @click="${() =>
                 window
                   .open(
                     'https://pantini.gitbook.io/pantini-co/ppp/getting-started',
@@ -284,6 +284,7 @@ export const appTemplate = (context, definition) => html`
         <div class="page-content">
           ${page('cloud-services')}
           ${when((x) => x.ppp?.keyVault.ok(), page('workspace'))}
+          ${when((x) => x.ppp?.keyVault.ok(), page('services'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('brokers'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('new-broker'))}
           ${when((x) => x.ppp?.keyVault.ok(), page('servers'))}

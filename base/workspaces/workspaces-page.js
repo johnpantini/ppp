@@ -23,7 +23,7 @@ export class WorkspacesPage extends BasePage {
   async removeWorkspace(_id) {
     this.busy = true;
     this.app.toast.source = this;
-    this.toastTitle = i18n.t('$pages.workspaces.toast.title');
+    this.toastTitle = 'Удаление терминала';
 
     try {
       const deletion = await this.app.ppp.user.functions.deleteOne(
