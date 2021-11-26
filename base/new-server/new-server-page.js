@@ -23,42 +23,9 @@ export class NewServerPage extends BasePage {
   @attr
   mode;
 
-  #outputText = '';
-
-  async #readChunk(reader, decoder) {
-    const result = await reader.read();
-    const chunk = decoder.decode(result.value || new Uint8Array(), {
-      stream: !result.done
-    });
-
-    if (chunk.length) {
-      const string = chunk.toString();
-
-      this.#outputText += string;
-
-      if (string.startsWith('{"e"'))
-        try {
-          this.terminalDom.terminal.write(
-            '\x1b[31m' + JSON.parse(string).e.message + '\x1b[0m\r\n'
-          );
-        } catch (e) {
-          this.terminalDom.terminal.write(string);
-        }
-      else this.terminalDom.terminal.write(string);
-    }
-
-    if (!result.done) {
-      return this.#readChunk(reader, decoder);
-    }
-  }
-
-  async #processChunkedResponse(response) {
-    return this.#readChunk(response.body.getReader(), new TextDecoder());
-  }
-
   async createServer() {
     try {
-      this.#outputText = '';
+      this.outputText = '';
       this.busy = true;
       this.app.toast.visible = false;
       this.app.toast.source = this;
@@ -125,10 +92,10 @@ gitfs_root: salt/states
 pillar_opts: true
 `;
 
-      const cmd = [
+      let cmd = [
         'sudo rm -f /etc/yum.repos.d/salt.repo ;',
         'sudo mkdir -p /etc/salt ;',
-        'sudo dnf -y install git python3-devel libffi-devel tar openssl openssl-devel ;',
+        'sudo dnf -y install epel-release wget git python3-devel libffi-devel tar openssl openssl-devel ;',
         'sudo dnf -y remove cmake ;',
         'sudo dnf -y group install "Development Tools" ;',
         'wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-$(uname -m).tar.gz -O cmake-3.21.3-linux-$(uname -m).tar.gz ;',
@@ -137,7 +104,8 @@ pillar_opts: true
         'wget https://github.com/libgit2/libgit2/archive/refs/tags/v1.3.0.tar.gz -O libgit2-1.3.0.tar.gz ;',
         'tar xzf libgit2-1.3.0.tar.gz ;',
         'cd libgit2-1.3.0/ ; cmake . ; make -j$(nproc); sudo make install ;',
-        'sudo -H python3 -m pip install --upgrade pip setuptools wheel ;',
+        'sudo -H python3 -m pip install --upgrade pip setuptools wheel six ;',
+        'sudo dnf -y reinstall python3-six ;',
         'sudo -H python3 -m pip install --upgrade --force-reinstall cffi ;',
         'sudo -H python3 -m pip install --upgrade --force-reinstall pygit2 ;',
         'sudo ln -fs /usr/local/lib64/libgit2.so.1.3 /usr/lib64/libgit2.so.1.3 ; ',
@@ -147,6 +115,11 @@ pillar_opts: true
         'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
         'sudo salt-call --local state.sls ping'
       ].join(' ');
+
+      const commands = this.commands.value.trim();
+
+      if (commands)
+        cmd = commands + ' ; ' + cmd;
 
       terminal.writeln(`\x1b[33m${cmd}\x1b[0m\r\n`);
 
@@ -187,7 +160,7 @@ pillar_opts: true
       );
 
       try {
-        await this.#processChunkedResponse(r1);
+        await this.processChunkedResponse(r1);
         assert(r1);
       } catch (e) {
         terminal.writeln(
@@ -204,7 +177,7 @@ pillar_opts: true
       this.modal.visibleChanged = (oldValue, newValue) =>
         !newValue && (this.mode = void 0);
 
-      if (/Succeeded: 1/i.test(this.#outputText)) {
+      if (/Succeeded: 1/i.test(this.outputText)) {
         const iv = generateIV();
         let payload;
 

@@ -1,4 +1,7 @@
-import { NewServerPage } from '../../base/new-server/new-server-page.js';
+import {
+  NewServerPage,
+  SUPPORTED_SERVER_TYPES
+} from '../../base/new-server/new-server-page.js';
 import { html } from '../../lib/template.js';
 import { ref } from '../../lib/element/templating/ref.js';
 import { css } from '../../lib/element/styles/css.js';
@@ -10,7 +13,6 @@ import {
   loadingIndicator
 } from '../../design/leafygreen/styles/page.js';
 
-import { SUPPORTED_SERVER_TYPES } from '../../base/new-server/new-server-page.js';
 import { settings } from '../../design/leafygreen/icons/settings.js';
 
 const serverTypeSelectionTemplate = html`
@@ -21,27 +23,20 @@ const serverTypeSelectionTemplate = html`
     <div class="cards">
       <div class="card">
         <div class="card-logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48px" height="48px"
-               viewBox="0 0 32 32">
-            <g stroke="none"
-               stroke-width="1" fill="none" fill-rule="evenodd"
-               stroke-linecap="round" stroke-linejoin="round">
-              <g
-                transform="translate(3.000000, 0.666667)" stroke-width="1.25">
-                <path
-                  d="M0.00485667374,4.40562745 L0.00485667374,14.7069216 C0.00485667374,21.3721782 4.10969798,27.3491131 10.330549,29.7421569 L11.7389608,30.2833333 C12.6768778,30.6440948 13.7152791,30.6440948 14.6531961,30.2833333 L16.0616078,29.7421569 C22.2824589,27.3491131 26.3873002,21.3721782 26.3873002,14.7069216 L26.3873002,4.40562745 C26.3925514,3.61380851 25.9328789,2.89252517 25.212902,2.56292157 C21.4244473,0.909342237 17.3295084,0.0744025561 13.1960784,0.112745098 C9.06264844,0.0744025561 4.9677096,0.909342237 1.1792549,2.56292157 C0.459277983,2.89252517 -0.00039451049,3.61380851 0.00485667374,4.40562745 Z"
-                  stroke="#13AA52"/>
-                <rect stroke="#116149" x="7.10784314"
-                      y="12.2892157" width="12.1764706" height="10.1470588"
-                      rx="1.5"/>
-                <path
-                  d="M13.1960784,6.20098039 L13.1960784,6.20098039 C10.9544521,6.20098039 9.1372549,8.01817758 9.1372549,10.2598039 L9.1372549,12.2892157 L17.254902,12.2892157 L17.254902,10.2598039 C17.254902,8.01817758 15.4377048,6.20098039 13.1960784,6.20098039 Z"
-                  stroke="#116149"/>
-                <path
-                  d="M13.1960784,16.8946275 C13.4762817,16.8946275 13.7034314,17.1217771 13.7034314,17.4019804 C13.7034314,17.6821837 13.4762817,17.9093333 13.1960784,17.9093333 C12.9158751,17.9093333 12.6887255,17.6821837 12.6887255,17.4019804 C12.6887255,17.1217771 12.9158751,16.8946275 13.1960784,16.8946275"
-                  stroke="#13AA52"/>
-              </g>
-            </g>
+          <svg xmlns="http://www.w3.org/2000/svg" height="54"
+               viewBox="0 0 56 66" fill="none">
+            <path
+              d="M23.75 39.0578L23.5067 38.6211L23.25 38.764V39.0578H23.75ZM19.25 39.0578H19.75V38.764L19.4933 38.6211L19.25 39.0578ZM39.9836 21.5H3.01639V22.5H39.9836V21.5ZM42.5 24.0923C42.5 23.413 42.1773 22.7711 41.7299 22.3069C41.2836 21.8438 40.657 21.5 39.9836 21.5V22.5C40.3184 22.5 40.7 22.6793 41.0099 23.0008C41.3186 23.3212 41.5 23.7254 41.5 24.0923H42.5ZM42.5 51.641V24.0923H41.5V51.641H42.5ZM37.7992 56.5C40.445 56.5 42.5 54.3406 42.5 51.641H41.5C41.5 53.8235 39.8582 55.5 37.7992 55.5V56.5ZM5.20082 56.5H37.7992V55.5H5.20082V56.5ZM0.5 51.641C0.5 54.3406 2.55496 56.5 5.20082 56.5V55.5C3.14176 55.5 1.5 53.8235 1.5 51.641H0.5ZM0.5 24.0923V51.641H1.5V24.0923H0.5ZM3.01639 21.5C1.54677 21.5 0.5 22.6132 0.5 24.0923H1.5C1.5 23.1304 2.13356 22.5 3.01639 22.5V21.5ZM23.25 39.0578V41.8512H24.25V39.0578H23.25ZM25.5 35.2975C25.5 36.7147 24.7099 37.9507 23.5067 38.6211L23.9933 39.4946C25.4901 38.6608 26.5 37.1035 26.5 35.2975H25.5ZM21.5 31.5C23.7208 31.5 25.5 33.2315 25.5 35.2975H26.5C26.5 32.6363 24.2292 30.5 21.5 30.5V31.5ZM17.5 35.2975C17.5 33.2315 19.2792 31.5 21.5 31.5V30.5C18.7708 30.5 16.5 32.6363 16.5 35.2975H17.5ZM19.4933 38.6211C18.2901 37.9507 17.5 36.7147 17.5 35.2975H16.5C16.5 37.1035 17.5099 38.6608 19.0067 39.4946L19.4933 38.6211ZM19.75 41.8512V39.0578H18.75V41.8512H19.75ZM21.5 43.5C20.5167 43.5 19.75 42.7355 19.75 41.8512H18.75C18.75 43.3306 20.0083 44.5 21.5 44.5V43.5ZM23.25 41.8512C23.25 42.7355 22.4833 43.5 21.5 43.5V44.5C22.9917 44.5 24.25 43.3306 24.25 41.8512H23.25Z"
+              fill="#001E2B"/>
+            <path
+              d="M9 21.8306V13.3629C9 6.58871 14.4247 1 21 1C27.5753 1 33 6.58871 33 13.3629V22"
+              stroke="#001E2B" stroke-miterlimit="10"/>
+            <path
+              d="M15 51C15 49.9 15.9474 49 17.1053 49H52.8947C54.0526 49 55 49.9 55 51V63C55 64.1 54.0526 65 52.8947 65H17.1053C15.9474 65 15 64.1 15 63V51Z"
+              fill="#00ED64"/>
+            <path
+              d="M21 55L23 57M23 57L25 59M23 57L25 55M23 57L21 59M29 55L31 57M31 57L33 59M31 57L33 55M31 57L29 59M37 55L39 57M39 57L41 59M39 57L41 55M39 57L37 59M45 55L47 57M47 57L49 59M47 57L49 55M47 57L45 59M15 51C15 49.9 15.9474 49 17.1053 49H52.8947C54.0526 49 55 49.9 55 51V63C55 64.1 54.0526 65 52.8947 65H17.1053C15.9474 65 15 64.1 15 63V51Z"
+              stroke="#001E2B" stroke-miterlimit="10"/>
           </svg>
         </div>
         <div class="card-title">Пароль</div>
@@ -148,6 +143,7 @@ export const newServerPageTemplate = (context, definition) => html`
     <${'ppp-banner'} class="inline margin-top" appearance="warning">
       На сервер будет установлена система управления конфигурациями <a
       target="_blank" href="https://repo.saltproject.io/">Salt</a>.
+      Поддерживаются только операционные системы с пакетным менеджером RPM.
     </ppp-banner>
     <${'ppp-page-header'}>Новый сервер</ppp-page-header>
     ${when((x) => !x.type, serverTypeSelectionTemplate)}
@@ -227,6 +223,33 @@ export const newServerPageTemplate = (context, definition) => html`
           serverTypeKeyTemplate
         )}
         ${when(
+          (x) => x.type,
+          html`
+          <section>
+            <div class="section-index-icon">${circleSvg(6)}</div>
+            <div class="label-group">
+              <h6>Команды перед настройкой</h6>
+              <${'ppp-banner'} class="inline margin-top" appearance="warning">
+                Поддерживаются только операционные системы с пакетным
+                менеджером
+                RPM.
+              </ppp-banner>
+              <p>
+                Произвольные команды, которые можно использовать в отладочных
+                целях.
+              </p>
+              <${'ppp-text-area'}
+                monospace
+                placeholder="Введите команды (опционально)"
+                value=""
+                name="commands"
+                ${ref('commands')}
+              ></ppp-text-area>
+            </div>
+          </section>
+        `
+        )}
+        ${when(
           (x) => x.mode === 'terminal',
           html`
             <ppp-modal ${ref('modal')}>
@@ -273,8 +296,13 @@ export const newServerPageStyles = (context, definition) =>
   css`
     ${basePageStyles}
     section ppp-text-field,
-    section ppp-banner {
+    section ppp-banner,
+    section ppp-text-area {
       max-width: 600px;
+    }
+
+    ppp-page-header {
+      padding-top: 15px;
     }
 
     .selector {
@@ -341,19 +369,6 @@ export const newServerPageStyles = (context, definition) =>
 
     .card-action {
       margin-bottom: 25px;
-    }
-
-    ppp-page-header {
-      padding-top: 15px;
-    }
-
-    section ppp-text-field,
-    section ppp-banner {
-      max-width: 600px;
-    }
-
-    section ppp-text-area {
-      max-width: 600px;
     }
 
     .description {
