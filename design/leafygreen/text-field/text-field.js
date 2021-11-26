@@ -14,6 +14,7 @@ import { css } from '../../../lib/element/styles/css.js';
 import { display } from '../../../lib/utilities/style/display.js';
 
 import { bodyFont } from '../design-tokens.js';
+import { heightNumber } from '../styles/size.js';
 
 import { warning } from '../icons/warning.js';
 import { checkmark } from '../icons/checkmark.js';
@@ -181,10 +182,11 @@ export const textFieldStyles = (context, definition) => css`
   }
 
   input {
+    box-sizing: border-box;
     width: 100%;
-    height: 36px;
+    height: calc(${heightNumber} * 1px);
     border-radius: 4px;
-    padding-left: 12px;
+    padding: 0 12px;
     font-size: 14px;
     font-weight: normal;
     border: 1px solid rgb(137, 151, 155);
@@ -193,7 +195,6 @@ export const textFieldStyles = (context, definition) => css`
     outline: none;
     color: rgb(33, 49, 60);
     background-color: rgb(255, 255, 255);
-    padding-right: 12px;
     font-family: ${bodyFont};
   }
 
