@@ -65,8 +65,7 @@ export class ServicesPage extends BasePage {
         collection: 'servers'
       });
 
-      if (!this.servers.length)
-        this.servers = void 0;
+      if (!this.servers.length) this.servers = void 0;
 
       this.fetching = false;
     } catch (e) {
@@ -178,6 +177,8 @@ export class ServicesPage extends BasePage {
         'ppp/vendor/netdata/kickstart.sh',
         origin.split('.dev')[0]
       ).toString();
+    else if (origin.endsWith('github.io'))
+      scriptUrl = new URL('ppp/vendor/netdata/kickstart.sh', origin).toString();
 
     let cmd = [
       'sudo sh -c "echo 1 >/sys/kernel/mm/ksm/run" ;',
