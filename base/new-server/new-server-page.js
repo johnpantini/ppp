@@ -3,18 +3,14 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js'
+import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js';
 import { DOM } from '../../lib/element/dom.js';
 import { requireComponent } from '../../lib/template.js';
 import { later } from '../../lib/later.js';
 import { assert } from '../../lib/assert.js';
+import { SUPPORTED_SERVER_TYPES } from '../../lib/const.js';
 
 await i18nImport(['validation', 'new-server']);
-
-export const SUPPORTED_SERVER_TYPES = {
-  PASSWORD: 'password',
-  KEY: 'key'
-};
 
 export class NewServerPage extends BasePage {
   @attr
@@ -93,9 +89,10 @@ pillar_opts: true
 `;
 
       let cmd = [
+        'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm ;',
         'sudo rm -f /etc/yum.repos.d/salt.repo ;',
         'sudo mkdir -p /etc/salt ;',
-        'sudo dnf -y install epel-release wget git python3-devel libffi-devel tar openssl openssl-devel ;',
+        'sudo dnf -y install epel-release wget git python3 python3-devel libffi-devel tar openssl openssl-devel ;',
         'sudo dnf -y remove cmake ;',
         'sudo dnf -y group install "Development Tools" ;',
         'wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-$(uname -m).tar.gz -O cmake-3.21.3-linux-$(uname -m).tar.gz ;',
@@ -118,8 +115,7 @@ pillar_opts: true
 
       const commands = this.commands.value.trim();
 
-      if (commands)
-        cmd = commands + ' ; ' + cmd;
+      if (commands) cmd = commands + ' ; ' + cmd;
 
       terminal.writeln(`\x1b[33m${cmd}\x1b[0m\r\n`);
 

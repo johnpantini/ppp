@@ -1,9 +1,6 @@
 /** @decorator */
 
-import {
-  ServicesPage,
-  SUPPORTED_SERVICES
-} from '../../base/services/services-page.js';
+import { ServicesPage } from '../../base/services/services-page.js';
 import { html, requireComponent } from '../../lib/template.js';
 import { css } from '../../lib/element/styles/css.js';
 import { when } from '../../lib/element/templating/when.js';
@@ -14,6 +11,7 @@ import {
   circleSvg,
   loadingIndicator
 } from '../../design/leafygreen/styles/page.js';
+import { SUPPORTED_SERVICES } from '../../lib/const.js';
 
 import { settings } from '../../design/leafygreen/icons/settings.js';
 import { caretDown } from '../../design/leafygreen/icons/caret-down.js';
@@ -41,39 +39,14 @@ const administrationServicesTemplate = html`
       <span slot="description">Клиент для Let's Encrypt. HTTPS для домена. <a
         target="_blank"
         href="https://certbot.eff.org/">Сайт</a>.</span>
-      <${'ppp-button'}
-        disabled
+      <ppp-button
         slot="action"
+        @click="${(x) => (x.service = SUPPORTED_SERVICES.CERTBOT)}"
       >
         Продолжить
       </ppp-button>
     </ppp-generic-card>
   </div>`;
-
-const netdataServiceTemplate = html`
-  <h6 class="section-header">Важная информация</h6>
-  <div class="section-subheader">
-    <div class="section-description">
-      По умолчанию Netdata работает на порту 19999, который закрыт сетевым
-      экраном. Чтобы сервис стал доступным в публичной сети, необходимо открыть
-      порт как внутри самой машины, так и снаружи через панель управления
-      облачной платформы. Для машин в Oracle Cloud можно обратиться к инструкции
-      по
-      <a
-        target="_blank"
-        href="https://pantini.gitbook.io/pantini-co/recipes/open-port-oracle-cloud"
-        >ссылке</a
-      >. Для открытия порта изнутри машины используйте следующие команды:
-    </div>
-    <div class="snippet-holder">
-      <div class="snippet-inner">
-        <pre
-          tabindex="-1"
-        ><code><table class="code-table"><tbody><tr><td>sudo firewall-cmd --permanent --add-port=19999/tcp</td></tr><tr><td>sudo firewall-cmd --reload</td></tr></tbody></table></code></pre>
-      </div>
-    </div>
-  </div>
-`;
 
 export const servicesPageTemplate = (context, definition) => html`
   <template>
@@ -95,7 +68,54 @@ export const servicesPageTemplate = (context, definition) => html`
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         ${when(
           (x) => x.service === SUPPORTED_SERVICES.NETDATA,
-          netdataServiceTemplate
+          html`
+            <h6 class="section-header">Важная информация</h6>
+            <div class="section-subheader">
+              <div class="section-description">
+                По умолчанию Netdata работает на порту 19999, который закрыт
+                сетевым экраном. Чтобы сервис стал доступным в публичной сети,
+                необходимо открыть порт как внутри самой машины, так и снаружи
+                через панель управления облачной платформы. Для машин в Oracle
+                Cloud можно обратиться к инструкции по
+                <a
+                  target="_blank"
+                  href="https://pantini.gitbook.io/pantini-co/recipes/open-port-oracle-cloud"
+                  >ссылке</a
+                >. Для открытия порта изнутри машины используйте следующие
+                команды:
+              </div>
+              <div class="snippet-holder">
+                <div class="snippet-inner">
+                  <pre
+                    tabindex="-1"
+                  ><code><table class="code-table"><tbody><tr><td>sudo firewall-cmd --permanent --add-port=19999/tcp</td></tr><tr><td>sudo firewall-cmd --reload</td></tr></tbody></table></code></pre>
+                </div>
+              </div>
+            </div>
+          `
+        )}
+        ${when(
+          (x) => x.service === SUPPORTED_SERVICES.CERTBOT,
+          html`
+            <h6 class="section-header">Важная информация</h6>
+            <div class="section-subheader">
+              <div class="section-description">
+                Для успешной установки сервиса откройте порты 80 и 443. Для
+                машин в Oracle Cloud можно обратиться к инструкции по
+                <a
+                  target="_blank"
+                  href="https://pantini.gitbook.io/pantini-co/recipes/open-port-oracle-cloud"
+                  >ссылке</a
+                >. Также необходимо добавить IP-адрес сервера в A-запись DNS
+                домена, для которого будет запрашиваться сертификат. Смотрите
+                <a
+                  target="_blank"
+                  href="https://pantini.gitbook.io/pantini-co/recipes/setting-up-domain"
+                  >инструкцию</a
+                >.
+              </div>
+            </div>
+          `
         )}
         ${when(
           (x) => x.service,
@@ -158,6 +178,45 @@ export const servicesPageTemplate = (context, definition) => html`
                   name="commands"
                   ${ref('commands')}
                 ></ppp-text-area>
+              </div>
+            </section>
+          `
+        )}
+        ${when(
+          (x) => x.service === SUPPORTED_SERVICES.CERTBOT,
+          html`
+            <section>
+              <div class="section-index-icon">${circleSvg(3)}</div>
+              <div class="label-group">
+                <h6>Email</h6>
+                <p>
+                  Адрес, на который будет зарегистрирована учётная запись, чтобы
+                  получать служебные уведомления (например, при скором истечении
+                  сертификата).
+                </p>
+                <ppp-text-field
+                  placeholder="Email"
+                  name="email"
+                  value="${(x) => x.app.ppp?.keyVault.getKey('auth0-email')}"
+                  ${ref('email')}
+                >
+                </ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="section-index-icon">${circleSvg(4)}</div>
+              <div class="label-group">
+                <h6>Домены</h6>
+                <p>
+                  Список доменов, для которых нужно получить сертификаты. Можно
+                  ввести несколько через запятую.
+                </p>
+                <ppp-text-field
+                  placeholder="example.com, www.example.com"
+                  name="domains"
+                  ${ref('domains')}
+                >
+                </ppp-text-field>
               </div>
             </section>
           `

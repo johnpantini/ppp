@@ -1,11 +1,9 @@
-import {
-  NewServerPage,
-  SUPPORTED_SERVER_TYPES
-} from '../../base/new-server/new-server-page.js';
+import { NewServerPage } from '../../base/new-server/new-server-page.js';
 import { html } from '../../lib/template.js';
 import { ref } from '../../lib/element/templating/ref.js';
 import { css } from '../../lib/element/styles/css.js';
 import { when } from '../../lib/element/templating/when.js';
+import { SUPPORTED_SERVER_TYPES } from '../../lib/const.js';
 
 import {
   basePageStyles,
@@ -225,29 +223,29 @@ export const newServerPageTemplate = (context, definition) => html`
         ${when(
           (x) => x.type,
           html`
-          <section>
-            <div class="section-index-icon">${circleSvg(6)}</div>
-            <div class="label-group">
-              <h6>Команды перед настройкой</h6>
-              <${'ppp-banner'} class="inline margin-top" appearance="warning">
-                Поддерживаются только операционные системы с пакетным
-                менеджером
-                RPM.
-              </ppp-banner>
-              <p>
-                Произвольные команды, которые можно использовать в отладочных
-                целях.
-              </p>
-              <${'ppp-text-area'}
-                monospace
-                placeholder="Введите команды (опционально)"
-                value=""
-                name="commands"
-                ${ref('commands')}
-              ></ppp-text-area>
-            </div>
-          </section>
-        `
+            <section>
+              <div class="section-index-icon">${circleSvg(6)}</div>
+              <div class="label-group">
+                <h6>Команды перед настройкой</h6>
+                <${'ppp-banner'} class="inline margin-top" appearance="warning">
+                  Поддерживаются только операционные системы с пакетным
+                  менеджером
+                  RPM.
+                </ppp-banner>
+                <p>
+                  Произвольные команды, которые можно использовать в отладочных
+                  целях.
+                </p>
+                <${'ppp-text-area'}
+                  monospace
+                  placeholder="Введите команды (опционально)"
+                  value=""
+                  name="commands"
+                  ${ref('commands')}
+                ></ppp-text-area>
+              </div>
+            </section>
+          `
         )}
         ${when(
           (x) => x.mode === 'terminal',
