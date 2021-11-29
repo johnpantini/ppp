@@ -55,12 +55,9 @@ export class ServicesPage extends BasePage {
           ).toString();
 
         return [
+          'sudo salt-call --local state.sls epel ;',
           'sudo sh -c "echo 1 >/sys/kernel/mm/ksm/run" ;',
           'sudo sh -c "echo 1000 >/sys/kernel/mm/ksm/sleep_millisecs" ;',
-          'sudo dnf -y install dnf-plugins-core ;',
-          'sudo dnf -y config-manager --set-enabled powertools ;',
-          'sudo dnf -y config-manager --set-enabled PowerTools ;',
-          'sudo dnf -y config-manager --set-enabled ol8_codeready_builder ;',
           'sudo dnf -y install libuv libuv-devel libuuid libuuid-devel;',
           `bash <(curl -Ss ${scriptUrl}) --dont-wait`
         ].join(' ');
@@ -81,6 +78,10 @@ export class ServicesPage extends BasePage {
           .map((d) => d.trim());
 
         return [
+          'sudo salt-call --local state.sls epel ;',
+          'sudo firewall-cmd --permanent --add-port=80/tcp ;',
+          'sudo firewall-cmd --permanent --add-port=443/tcp ;',
+          'sudo firewall-cmd --reload ;',
           'sudo dnf -y install certbot ;',
           domains
             .map(
