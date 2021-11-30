@@ -21,7 +21,7 @@ await requireComponent('ppp-select');
 const administrationServicesTemplate = html`
   <div class="card-container">
     <${'ppp-generic-card'}>
-      <img slot="logo" alt="Netdata" src="../../static/netdata.svg"/>
+      <img slot="logo" alt="Netdata" src="static/netdata.svg"/>
       <span slot="title">Netdata</span>
       <span slot="description">Мониторинг серверов в реальном времени. <a
         target="_blank"
@@ -34,7 +34,7 @@ const administrationServicesTemplate = html`
       </ppp-button>
     </ppp-generic-card>
     <${'ppp-generic-card'}>
-      <img slot="logo" alt="Certbot" src="../../static/certbot.svg"/>
+      <img slot="logo" alt="Certbot" src="static/certbot.svg"/>
       <span slot="title">Certbot</span>
       <span slot="description">Клиент для Let's Encrypt. HTTPS для домена. <a
         target="_blank"
