@@ -25,6 +25,7 @@ function connect() {
 
   ws.onopen = function () {
     ws.send('OK');
+    ws.close();
   };
 
   ws.onmessage = function (e) {
