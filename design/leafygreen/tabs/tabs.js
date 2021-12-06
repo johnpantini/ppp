@@ -66,7 +66,6 @@ const tabStyles = (context, definition) => css`
   }
 
   :host(:hover) {
-    cursor: default;
     color: inherit;
     text-decoration: inherit;
   }

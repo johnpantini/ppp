@@ -109,16 +109,6 @@ export const appTemplate = (context, definition) => html`
         <${'ppp-side-nav'} ${ref('sideNav')}
                            ?expanded="${(x) => !x.settings.sideNavCollapsed}">
           <${'ppp-side-nav-item'}
-            disabled
-            ?active="${(x) => x.page === 'me'}"
-            @click="${(x) => (x.page = 'me')}"
-          >
-            <span class="balance-icon" slot="start">💰‍</span>
-            <span slot="title">
-              <span class="balance">0,00</span>&nbsp;₽
-            </span>
-          </ppp-side-nav-item>
-          <ppp-side-nav-item
             ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
             @click="${(x) => x.handleNewWorkspaceClick()}"
           >
@@ -160,7 +150,7 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">Торговля</span>
             <ppp-side-nav-item
-              disabled
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'widgets'}"
               @click="${(x) => (x.page = 'widgets')}"
               slot="items"
@@ -170,32 +160,18 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'services'}"
-              @click="${(x) => ((x.page = void 0) || (x.page = 'services'))}"
+              @click="${(x) => (x.page = void 0) || (x.page = 'services')}"
               slot="items"
             >
               <span slot="title">Сервисы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'instruments'}"
               @click="${(x) => (x.page = 'instruments')}"
               slot="items"
             >
               <span slot="title">Инструменты</span>
-            </ppp-side-nav-item>
-          </ppp-side-nav-group>
-          <ppp-side-nav-group>
-            ${laptop({
-              slot: 'start'
-            })}
-            <span slot="title">PPP</span>
-            <ppp-side-nav-item
-              disabled
-              ?active="${(x) => x.page === 'ppp-dashboard'}"
-              @click="${(x) => (x.page = 'ppp-dashboard')}"
-              slot="items"
-            >
-              <span slot="title">Обзор</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
@@ -238,7 +214,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Боты Telegram</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              disabled
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'warden'}"
               @click="${(x) => (x.page = 'warden')}"
               slot="items"
@@ -300,7 +276,7 @@ export const appTemplate = (context, definition) => html`
                 'ppp-not-found-page',
                 `../${globalThis.ppp.appType}/not-found/not-found-page.js`
               ),
-            html`<ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
+            html` <ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
           )}
         </div>
       </div>

@@ -2,6 +2,8 @@ i18n.extend({
   appNotFound: 'Приложение %{appName} не найдено',
   expiredToken: 'Срок действия токена истёк',
   invalidMongoDBRealmKeys: 'Неверные ключи MongoDB Realm',
+  invalidKeySecretWithStatus:
+    'Неверный ключ или секрет (код ошибки %{status})',
   invalidLoginPasswordWithStatus:
     'Неверный логин или пароль (код ошибки %{status})',
   invalidToken: 'Неверный токен',

@@ -3,15 +3,10 @@
 import { BasePage } from '../../lib/page/page.js';
 import { validate, invalidate } from '../../lib/validate.js';
 import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js'
+import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js';
+import { SUPPORTED_BROKERS } from '../../lib/const.js';
 
 await i18nImport(['validation', 'new-broker']);
-
-export const SUPPORTED_BROKERS = {
-  ALOR_OPENAPI_V2: 'alor-openapi-v2',
-  TINKOFF_OPENAPI_V1: 'tinkoff-openapi-v1',
-  UNITED_TRADERS: 'united-traders'
-};
 
 export async function checkTinkoffOAPIV1Token({ token }) {
   try {
@@ -47,6 +42,29 @@ export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
     return {
       ok: false,
       status: 422
+    };
+  }
+}
+
+export async function checkAlpacaV2Token({ key, secret }) {
+  try {
+    return await fetch(
+      'https://data.alpaca.markets/v2/stocks/AAPL/quotes/latest',
+      {
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: {
+          'APCA-API-KEY-ID': key,
+          'APCA-API-SECRET-KEY': secret
+        }
+      }
+    );
+  } catch (e) {
+    console.error(e);
+
+    return {
+      ok: false,
+      status: e
     };
   }
 }
@@ -90,7 +108,7 @@ export class NewBrokerPage extends BasePage {
 
       invalidate(this.tinkoffToken, {
         errorMessage: i18n.t('invalidTokenWithStatus', { status: 401 }),
-        status: r1.status
+        status: 401
       });
     }
 
@@ -196,6 +214,46 @@ export class NewBrokerPage extends BasePage {
     );
   }
 
+  async createAlpacaV2Broker() {
+    await validate(this.alpacaKey);
+    await validate(this.alpacaSecret);
+
+    const r1 = await checkAlpacaV2Token({
+      key: this.alpacaKey.value.trim(),
+      secret: this.alpacaSecret.value.trim()
+    });
+
+    if (!r1.ok) {
+      console.warn(r1);
+
+      invalidate(this.alpacaSecret, {
+        errorMessage: i18n.t('invalidKeySecretWithStatus', { status: 403 }),
+        status: 403
+      });
+    }
+
+    const iv = generateIV();
+    const encryptedSecret = await this.app.ppp.crypto.encrypt(
+      iv,
+      this.alpacaSecret.value.trim()
+    );
+
+    await this.app.ppp.user.functions.insertOne(
+      {
+        collection: 'brokers'
+      },
+      {
+        _id: this.profileName.value.trim(),
+        uuid: uuidv4(),
+        type: SUPPORTED_BROKERS.ALPACA_V2,
+        iv: bufferToString(iv),
+        key: this.alpacaKey.value.trim(),
+        secret: encryptedSecret,
+        created_at: new Date()
+      }
+    );
+  }
+
   async createBroker() {
     try {
       this.busy = true;
@@ -218,6 +276,11 @@ export class NewBrokerPage extends BasePage {
 
         case SUPPORTED_BROKERS.TINKOFF_OPENAPI_V1:
           await this.createTinkoffOAPIV1Broker();
+
+          break;
+
+        case SUPPORTED_BROKERS.ALPACA_V2:
+          await this.createAlpacaV2Broker();
 
           break;
       }
