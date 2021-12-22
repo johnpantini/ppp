@@ -142,6 +142,7 @@ export const xtermStyles = css`
 
   .xterm .xterm-viewport::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   .xterm .xterm-viewport::-webkit-scrollbar-track {
