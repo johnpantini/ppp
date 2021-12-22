@@ -171,6 +171,7 @@ export const textAreaStyles = (context, definition) => css`
 
   textarea::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   textarea::-webkit-scrollbar-track {
