@@ -4,7 +4,13 @@ import { css } from '../lib/element/styles/css.js';
 import { notDefined } from '../lib/utilities/style/display.js';
 import { settings } from '../design/leafygreen/icons/settings.js';
 
-export class NotFoundPage extends FoundationElement {}
+export class NotFoundPage extends FoundationElement {
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.app.pageConnected = true;
+  }
+}
 
 export const notFoundPageTemplate = (context, definition) => html`
   <template>
