@@ -82,17 +82,26 @@ export const emptyStateStyles = css`
   }
 
   .empty-state h1 {
-    display: flex;
     font-size: 32px;
-    font-weight: 300;
-    padding: 32px 0 16px;
+    text-align: center;
+    margin: unset;
+    font-family: ${bodyFont};
+    color: rgb(33, 49, 60);
+    font-weight: 500;
+    line-height: 68px;
+    letter-spacing: -0.3px;
   }
 
   .empty-state h2 {
-    font-size: 21px;
-    font-weight: 500;
-    padding: 0 0 32px;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    margin: auto;
     text-align: center;
+    font-family: ${bodyFont};
+    color: rgb(33, 49, 60);
+    letter-spacing: 0;
   }
 
   .empty-state button {
@@ -100,9 +109,9 @@ export const emptyStateStyles = css`
   }
 
   .empty-state .cta {
+    margin: 32px auto auto;
     appearance: none;
     padding: 0;
-    margin: 0;
     border: 0 solid transparent;
     display: inline-flex;
     -webkit-box-align: stretch;
@@ -116,9 +125,8 @@ export const emptyStateStyles = css`
     background-color: rgb(9, 128, 76);
     box-shadow: rgb(19 170 82 / 40%) 0 2px 3px;
     color: rgb(255, 255, 255);
-    height: 48px;
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 14px;
+    height: 36px;
   }
 
   .empty-state .cta[disabled] {
@@ -205,14 +213,6 @@ export const basePageStyles = css`
     font-weight: 400;
   }
 
-  ppp-page-header + ppp-tabs {
-    border-bottom: 3px solid #ebebed;
-    display: grid;
-    list-style: none;
-    margin: 0;
-    padding: 20px 0 0;
-  }
-
   .last {
     border-bottom: none;
   }
@@ -276,11 +276,21 @@ export const basePageStyles = css`
   }
 
   .label-group {
-    width: 100%;
+    width: 50%;
     flex-grow: 0;
     flex-shrink: 1;
     min-width: 50%;
     align-self: baseline;
+  }
+
+  .label-group.full {
+    width: 100%;
+  }
+
+  .input-group {
+    flex-grow: 1;
+    align-items: center;
+    max-width: 100%;
   }
 
   .label-group > h6 {
@@ -291,12 +301,17 @@ export const basePageStyles = css`
     letter-spacing: 0;
   }
 
+  .label-group ppp-banner {
+    margin-right: 20px;
+  }
+
   .label-group > p {
     margin-top: 10px;
     font-size: 14px;
     line-height: 16px;
     font-weight: normal;
     padding-bottom: 4px;
+    padding-right: 20px;
     margin-bottom: 0;
     color: rgb(93, 108, 116);
   }
@@ -323,6 +338,25 @@ export const basePageStyles = css`
 
   .margin-top {
     margin-top: 10px;
+  }
+
+  .action-input {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    white-space: nowrap;
+  }
+
+  .action-input-text {
+    width: 100%
+  }
+
+  .action-input-text + .action-input-button {
+    margin-top: 8px;
+  }
+
+  .action-input-button {
+    margin-left: 5px;
   }
 
   ${emptyStateStyles}
