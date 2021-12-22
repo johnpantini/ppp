@@ -1,6 +1,6 @@
 import { svg } from './svg.js';
 
-export const trash = ({ size, role, slot, cls, viewBox }) =>
+export const trash = ({ size, role, slot, cls, viewBox } = {}) =>
   svg({
     size,
     role,
