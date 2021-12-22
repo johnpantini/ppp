@@ -6,11 +6,8 @@ import {
   tabPanelTemplate
 } from '../../../lib/tabs/tabs.template.js';
 import { display } from '../../../lib/utilities/style/display.js';
-import { requireComponent} from '../../../lib/template.js';
 
 import { bodyFont } from '../design-tokens.js';
-import { SystemColors } from '../../../lib/web-utilities/system-colors.js';
-import { forcedColorsStylesheetBehavior } from '../../../lib/utilities/match-media-stylesheet-behavior.js';
 import { focusVisible } from '../../../lib/utilities/style/focus.js';
 
 // TODO - design tokens
@@ -20,6 +17,7 @@ const tabsStyles = (context, definition) => css`
     font-family: ${bodyFont};
     grid-template-columns: auto 1fr auto;
     grid-template-rows: auto 1fr;
+    border-bottom: 1px solid #e7eeec;
   }
 
   .tablist {
@@ -49,25 +47,57 @@ const tabStyles = (context, definition) => css`
   ${display('inline-flex')} :host {
     box-sizing: border-box;
     font-family: ${bodyFont};
-    color: #a09f9e;
     display: inline-block;
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1;
     margin-bottom: -3px;
-    padding: 8px 24px;
     fill: currentcolor;
     border-radius: 4px;
-    border: 1px solid transparent;
     align-items: center;
     justify-content: center;
     grid-row: 1;
     cursor: pointer;
+    background-color: transparent;
+    border: 0;
+    padding: 12px 16px;
+    text-decoration: none;
+    max-width: 300px;
+    white-space: nowrap;
+    transition: color 150ms ease-in-out 0s;
+    font-weight: 600;
+    font-size: 16px;
+    position: relative;
+    color: rgb(93, 108, 116);
+  }
+
+  :host:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    border-radius: 4px 4px 0 0;
+    transition: all 150ms ease-in-out 0s;
+    background-color: transparent;
+    transform: scaleX(0.8);
   }
 
   :host(:hover) {
-    color: inherit;
+    color: rgb(17, 97, 73);
     text-decoration: inherit;
+  }
+
+  :host([aria-selected='false']:hover):after {
+    transform: scaleX(1);
+    background-color: rgb(231, 238, 236);
+  }
+
+  :host([aria-selected='true']:hover):after {
+    transform: scaleX(0.97);
+  }
+
+  :host([aria-selected='true']):after {
+    transform: scaleX(1);
+    background-color: rgb(19, 170, 82);
   }
 
   :host(:focus) {
@@ -82,17 +112,7 @@ const tabStyles = (context, definition) => css`
 
   :host([aria-selected='true']) {
     fill: currentcolor;
-    color: inherit;
-    background-color: #fff;
-    border-bottom: 3px solid #13aa52;
-  }
-
-  :host([aria-selected='true']:hover) {
-    fill: currentcolor;
-  }
-
-  :host([aria-selected='true']:active) {
-    fill: currentcolor;
+    color: rgb(17, 97, 73);
   }
 
   :host(:${focusVisible}) {
@@ -122,18 +142,9 @@ export const tab = Tab.compose({
   styles: tabStyles
 });
 
+// noinspection JSUnusedGlobalSymbols
 export const tabPanel = TabPanel.compose({
   baseName: 'tab-panel',
   template: tabPanelTemplate,
   styles: tabPanelStyles
 });
-
-void requireComponent(
-  'ppp-tab',
-  import.meta.url
-)
-
-void requireComponent(
-  'ppp-tab-panel',
-  import.meta.url
-)
