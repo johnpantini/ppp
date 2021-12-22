@@ -36,6 +36,14 @@ new (class {
 
       const json = await req.json();
 
+      if (!json.app_metadata) {
+        console.error(req, json);
+
+        alert(
+          'Проблема с метаданными пользователя Auth0. Свяжитесь с @johnpantini'
+        );
+      }
+
       keySet.forEach((k) => this.keyVault.setKey(k, json.app_metadata[k]));
 
       this.auth0.logout({
