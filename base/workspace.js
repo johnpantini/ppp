@@ -1,11 +1,11 @@
 /** @decorator */
 
-import { BasePage } from '../../lib/page/page.js';
+import { BasePage } from '../lib/page/page.js';
 import {
   Observable,
   observable
-} from '../../lib/element/observation/observable.js';
-import { requireComponent } from '../../lib/template.js';
+} from '../lib/element/observation/observable.js';
+import { requireComponent } from '../lib/template.js';
 
 await i18nImport(['validation']);
 
