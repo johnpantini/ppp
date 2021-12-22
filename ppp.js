@@ -136,32 +136,42 @@ new (class {
     DesignSystem.getOrCreate().register(app(appStyles, appTemplate)());
     document.body.setAttribute('appearance', this.theme);
 
+    let workspaces = [];
+    let settings = {};
+
+    if (!emergency) {
+      try {
+        [workspaces, settings] = await Promise.all([
+          this.user.functions.find({
+            collection: 'workspaces'
+          }),
+          this.user.functions.findOne(
+            {
+              collection: 'app'
+            },
+            {
+              _id: 'settings'
+            }
+          )
+        ]);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    const element = document.createElement('ppp-app');
+
+    if (!emergency) {
+      element.workspaces = workspaces;
+      element.settings = settings ?? {};
+    }
+
     this.appElement = document.body.insertBefore(
-      document.createElement('ppp-app'),
+      element,
       document.body.firstChild
     );
 
     this.appElement.setAttribute('hidden', true);
-
-    // TODO - handle errors
-    if (!emergency) {
-      const [workspaces, settings] = await Promise.all([
-        this.user.functions.find({
-          collection: 'workspaces'
-        }),
-        this.user.functions.findOne(
-          {
-            collection: 'app'
-          },
-          {
-            _id: 'settings'
-          }
-        )
-      ]);
-
-      this.appElement.workspaces = workspaces;
-      this.appElement.settings = settings ?? {};
-    }
 
     this.appElement.ppp = this;
     this.appElement.setAttribute('appearance', this.theme);

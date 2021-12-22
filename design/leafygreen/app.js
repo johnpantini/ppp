@@ -190,8 +190,7 @@ export const appTemplate = (context, definition) => html`
             </ppp-side-nav-item>
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
-              ?active="${(x) =>
-                x.page === 'brokers' || x.page === 'broker'}"
+              ?active="${(x) => x.page === 'brokers' || x.page === 'broker'}"
               @click="${(x) => (x.page = 'brokers')}"
               slot="items"
             >
@@ -199,8 +198,7 @@ export const appTemplate = (context, definition) => html`
             </ppp-side-nav-item>
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
-              ?active="${(x) =>
-                x.page === 'servers' || x.page === 'server'}"
+              ?active="${(x) => x.page === 'servers' || x.page === 'server'}"
               @click="${(x) => (x.page = 'servers')}"
               slot="items"
             >
