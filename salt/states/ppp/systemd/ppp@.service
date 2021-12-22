@@ -1,0 +1,25 @@
+[Unit]
+Description=PPP {{ pillar['service_type'] }} service (%i)
+After=network-online.target
+
+[Service]
+Type=simple
+User=pppuser
+Group=ppp
+Environment=DIRECTORY=/opt/ppp/lib/services/%i
+{% if pillar['service_domain'] is defined  %}
+ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['service_domain'] }}/fullchain.pem /opt/ppp/lib/services/%i/fullchain.pem
+ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['service_domain'] }}/privkey.pem /opt/ppp/lib/services/%i/privkey.pem
+{% endif %}
+ExecStart=/bin/node /opt/ppp/lib/services/%i/main.mjs
+PrivateTmp=yes
+ProtectHome=read-only
+NoNewPrivileges=yes
+WorkingDirectory=/opt/ppp/lib/services/%i
+
+KillSignal=2
+RestartSec=1s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
