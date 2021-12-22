@@ -1,34 +1,34 @@
 /** @decorator */
 
-import { BasePage } from '../../lib/page/page.js';
+import { BasePage } from '../lib/page/page.js';
 import {
   Observable,
   observable
-} from '../../lib/element/observation/observable.js';
-import { formatDate } from '../../lib/intl.js';
-import { html } from '../../lib/template.js';
+} from '../lib/element/observation/observable.js';
+import { formatDate } from '../lib/intl.js';
+import { html } from '../lib/template.js';
 
 // TODO - refactor
-import { trash } from '../../design/leafygreen/icons/trash.js';
+import { trash } from '../design/leafygreen/icons/trash.js';
 
-await i18nImport(['validation', 'telegram-bots']);
+await i18nImport(['validation', 'servers']);
 
-export class TelegramBotsPage extends BasePage {
+export class ServersPage extends BasePage {
   @observable
   columns;
 
   @observable
   table;
 
-  async removeTelegramBot(_id) {
+  async removeServer(_id) {
     this.busy = true;
     this.app.toast.source = this;
-    this.toastTitle = i18n.t('$pages.telegramBots.toast.title');
+    this.toastTitle = i18n.t('$pages.servers.toast.title');
 
     try {
       const deletion = await this.app.ppp.user.functions.deleteOne(
         {
-          collection: 'bots'
+          collection: 'servers'
         },
         {
           _id
@@ -65,26 +65,30 @@ export class TelegramBotsPage extends BasePage {
     }
   }
 
-  async fetchTelegramBots() {
+  async fetchServers() {
     try {
       this.busy = true;
       this.app.toast.source = this;
-      this.toastTitle = i18n.t('$pages.telegramBots.toast.title');
+      this.toastTitle = i18n.t('$pages.servers.toast.title');
 
       this.table.rows = (
         await this.app.ppp.user.functions.find({
-          collection: 'bots'
+          collection: 'servers'
         })
       ).map((datum) => {
         return {
           datum,
           cells: [
             datum._id,
+            datum.host,
+            datum.port,
+            datum.username,
+            i18n.t(`$serverType.${datum.type}`),
             formatDate(datum.created_at),
             html`
               <${'ppp-button'}
                 class="xsmall"
-                @click="${(x) => this.removeTelegramBot(datum._id)}"
+                @click="${(x) => this.removeServer(datum._id)}"
               >
                 ${trash({})}
               </ppp-button>`
@@ -114,6 +118,22 @@ export class TelegramBotsPage extends BasePage {
         sortBy: (d) => d._id
       },
       {
+        label: 'Адрес',
+        sortBy: (d) => d.host
+      },
+      {
+        label: 'Порт',
+        sortBy: (d) => d.port
+      },
+      {
+        label: 'Пользователь',
+        sortBy: (d) => d.username
+      },
+      {
+        label: 'Тип',
+        sortBy: (d) => d.type
+      },
+      {
         label: 'Дата создания',
         sortBy: (d) => d.created_at
       },
@@ -126,13 +146,6 @@ export class TelegramBotsPage extends BasePage {
   connectedCallback() {
     super.connectedCallback();
 
-    this.bots = [];
-    void this.fetchTelegramBots();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-
-    this.bots = [];
+    void this.fetchServers();
   }
 }

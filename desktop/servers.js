@@ -1,14 +1,12 @@
-/** @decorator */
-
-import { ServersPage } from '../../base/servers/servers-page.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
-import { ref } from '../../lib/element/templating/ref.js';
+import { ServersPage } from '../base/servers.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
+import { ref } from '../lib/element/templating/ref.js';
 import {
   basePageStyles,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
 export const serversPageTemplate = (context, definition) => html`
   <template>
@@ -16,7 +14,7 @@ export const serversPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'new-server')}"
+        @click="${(x) => (x.app.page = 'server')}"
       >
         Добавить сервер
       </ppp-button>

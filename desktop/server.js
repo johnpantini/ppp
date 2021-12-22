@@ -1,17 +1,17 @@
-import { NewServerPage } from '../../base/new-server/new-server-page.js';
-import { html } from '../../lib/template.js';
-import { ref } from '../../lib/element/templating/ref.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
-import { SUPPORTED_SERVER_TYPES } from '../../lib/const.js';
+import { ServerPage } from '../../base/server.js';
+import { html } from '../lib/template.js';
+import { ref } from '../lib/element/templating/ref.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
+import { SUPPORTED_SERVER_TYPES } from '../lib/const.js';
 
 import {
   basePageStyles,
   circleSvg,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
-import { settings } from '../../design/leafygreen/icons/settings.js';
+import { settings } from '../design/leafygreen/icons/settings.js';
 
 const serverTypeSelectionTemplate = html`
   <div class="selector">
@@ -136,7 +136,7 @@ const serverTypeKeyTemplate = html`
   </section>
 `;
 
-export const newServerPageTemplate = (context, definition) => html`
+export const serverPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-banner'} class="inline margin-top" appearance="warning">
       На сервер будет установлена система управления конфигурациями <a
@@ -145,9 +145,7 @@ export const newServerPageTemplate = (context, definition) => html`
     </ppp-banner>
     <${'ppp-page-header'}>Новый сервер</ppp-page-header>
     ${when((x) => !x.type, serverTypeSelectionTemplate)}
-    <form ${ref(
-      'form'
-    )} id="new-server" name="new-server" onsubmit="return false">
+    <form ${ref('form')} id="server" name="server" onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         ${when(
           (x) => x.type,
@@ -290,15 +288,9 @@ export const newServerPageTemplate = (context, definition) => html`
 `;
 
 // TODO - refactor later if needed
-export const newServerPageStyles = (context, definition) =>
+export const serverPageStyles = (context, definition) =>
   css`
     ${basePageStyles}
-    section ppp-text-field,
-    section ppp-banner,
-    section ppp-text-area {
-      max-width: 600px;
-    }
-
     ppp-page-header {
       padding-top: 15px;
     }
@@ -377,8 +369,8 @@ export const newServerPageStyles = (context, definition) =>
     }
   `;
 
-export const newServerPage = NewServerPage.compose({
-  baseName: 'new-server-page',
-  template: newServerPageTemplate,
-  styles: newServerPageStyles
+export const serverPage = ServerPage.compose({
+  baseName: 'server-page',
+  template: serverPageTemplate,
+  styles: serverPageStyles
 });

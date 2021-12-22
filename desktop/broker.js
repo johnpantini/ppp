@@ -1,17 +1,17 @@
-import { NewBrokerPage } from '../../base/new-broker/new-broker-page.js';
-import { html } from '../../lib/template.js';
-import { ref } from '../../lib/element/templating/ref.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
+import { BrokerPage } from '../base/broker.js';
+import { html } from '../lib/template.js';
+import { ref } from '../lib/element/templating/ref.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
 
 import {
   basePageStyles,
   circleSvg,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
-import { SUPPORTED_BROKERS } from '../../lib/const.js';
-import { settings } from '../../design/leafygreen/icons/settings.js';
+import { SUPPORTED_BROKERS } from '../lib/const.js';
+import { settings } from '../design/leafygreen/icons/settings.js';
 
 const brokerSelectionTemplate = html`
   <div class="card-container">
@@ -568,13 +568,13 @@ const alpacaAPIV2Template = html`
   </section>
 `;
 
-export const newBrokerPageTemplate = (context, definition) => html`
+export const brokerPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'}>Новый профиль брокера</ppp-page-header>
     ${when((x) => !x.broker, brokerSelectionTemplate)}
     <form ${ref(
       'form'
-    )} id="new-broker" name="new-broker" onsubmit="return false">
+    )} id="broker" name="broker" onsubmit="return false">
       ${when(
         (x) => x.broker,
         html`
@@ -626,7 +626,7 @@ export const newBrokerPageTemplate = (context, definition) => html`
   </template>
 `;
 
-export const newBrokerPageStyles = (context, definition) =>
+export const brokerPageStyles = (context, definition) =>
   css`
     ${basePageStyles}
     .card-container {
@@ -635,15 +635,10 @@ export const newBrokerPageStyles = (context, definition) =>
       grid-template-columns: repeat(auto-fill, 450px);
       grid-gap: 10px 30px;
     }
-
-    section ppp-text-field,
-    section ppp-banner {
-      max-width: 600px;
-    }
   `;
 
-export const newBrokerPage = NewBrokerPage.compose({
-  baseName: 'new-broker-page',
-  template: newBrokerPageTemplate,
-  styles: newBrokerPageStyles
+export const brokerPage = BrokerPage.compose({
+  baseName: 'broker-page',
+  template: brokerPageTemplate,
+  styles: brokerPageStyles
 });

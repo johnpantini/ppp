@@ -1,14 +1,12 @@
-/** @decorator */
-
-import { WorkspacesPage } from '../../base/workspaces/workspaces-page.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
-import { ref } from '../../lib/element/templating/ref.js';
+import { WorkspacesPage } from '../base/workspaces.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
+import { ref } from '../lib/element/templating/ref.js';
 import {
   basePageStyles,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
 export const workspacesPageTemplate = (context, definition) => html`
   <template>
@@ -39,6 +37,7 @@ export const workspacesPageStyles = (context, definition) =>
     }
   `;
 
+// noinspection JSUnusedGlobalSymbols
 export const workspacesPage = WorkspacesPage.compose({
   baseName: 'workspaces-page',
   template: workspacesPageTemplate,

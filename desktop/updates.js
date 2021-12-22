@@ -1,21 +1,21 @@
 /** @decorator */
 
-import { BasePage } from '../../lib/page/page.js';
-import { ref } from '../../lib/element/templating/ref.js';
-import { when } from '../../lib/element/templating/when.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { observable } from '../../lib/element/observation/observable.js';
-import { assert } from '../../lib/assert.js';
-import { formatDate } from '../../lib/intl.js';
+import { BasePage } from '../lib/page/page.js';
+import { ref } from '../lib/element/templating/ref.js';
+import { when } from '../lib/element/templating/when.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { observable } from '../lib/element/observation/observable.js';
+import { assert } from '../lib/assert.js';
+import { formatDate } from '../lib/intl.js';
 
 import {
   basePageStyles,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
 // TODO -theme
-import { settings } from '../../design/leafygreen/icons/settings.js';
+import { settings } from '../design/leafygreen/icons/settings.js';
 
 await i18nImport(['validation', 'updates']);
 

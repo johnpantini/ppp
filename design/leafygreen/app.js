@@ -15,14 +15,15 @@ import { laptop } from './icons/laptop.js';
 import { settings } from './icons/settings.js';
 import { support } from './icons/support.js';
 
-const page = (page) => {
+const page = (page, condition) => {
   return when(
     (x) =>
       x.setPageTemplate(
-        x.page === page &&
+        condition &&
+          x.page === page &&
           requireComponent(
             `ppp-${page}-page`,
-            `../${globalThis.ppp.appType}/${page}/${page}-page.js`
+            `../${globalThis.ppp.appType}/${page}.js`
           )
       ),
     html`
@@ -46,7 +47,7 @@ const newWorkSpaceModalTemplate = html`
             <div class="section-index-icon">
               ${circleSvg(1)}
             </div>
-            <div class="label-group">
+            <div class="label-group full">
               <h6>Название</h6>
               <p>Будет отображаться в боковой панели.</p>
               <ppp-text-field
@@ -60,7 +61,7 @@ const newWorkSpaceModalTemplate = html`
             <div class="section-index-icon">
               ${circleSvg(2)}
             </div>
-            <div class="label-group">
+            <div class="label-group full">
               <h6>Комментарий</h6>
               <${'ppp-text-field'}
                 optional
@@ -101,6 +102,7 @@ const newWorkSpaceModalTemplate = html`
   </ppp-modal>
 `;
 
+// noinspection JSUnusedGlobalSymbols
 export const appTemplate = (context, definition) => html`
   <template>
     ${when((x) => x.ppp?.keyVault.ok(), newWorkSpaceModalTemplate)}
@@ -159,8 +161,8 @@ export const appTemplate = (context, definition) => html`
             </ppp-side-nav-item>
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
-              ?active="${(x) => x.page === 'services'}"
-              @click="${(x) => (x.page = void 0) || (x.page = 'services')}"
+              ?active="${(x) => x.page === 'services' || x.page === 'service'}"
+              @click="${(x) => (x.page = 'services')}"
               slot="items"
             >
               <span slot="title">Сервисы</span>
@@ -189,7 +191,7 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) =>
-                x.page === 'brokers' || x.page === 'new-broker'}"
+                x.page === 'brokers' || x.page === 'broker'}"
               @click="${(x) => (x.page = 'brokers')}"
               slot="items"
             >
@@ -198,7 +200,7 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) =>
-                x.page === 'servers' || x.page === 'new-server'}"
+                x.page === 'servers' || x.page === 'server'}"
               @click="${(x) => (x.page = 'servers')}"
               slot="items"
             >
@@ -207,7 +209,7 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) =>
-                x.page === 'telegram-bots' || x.page === 'new-telegram-bot'}"
+                x.page === 'telegram-bots' || x.page === 'telegram-bot'}"
               @click="${(x) => (x.page = 'telegram-bots')}"
               slot="items"
             >
@@ -257,27 +259,29 @@ export const appTemplate = (context, definition) => html`
             </ppp-side-nav-item>
           </ppp-side-nav-group>
         </ppp-side-nav>
-        <div class="page-content">
-          ${page('cloud-services')}
-          ${when((x) => x.ppp?.keyVault.ok(), page('workspace'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('services'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('brokers'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('new-broker'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('servers'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('new-server'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('telegram-bots'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('new-telegram-bot'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('workspaces'))}
-          ${when((x) => x.ppp?.keyVault.ok(), page('updates'))}
+        <div class="page-content">${(app) => html`
+          ${page('cloud-services', true)}
+          ${page('workspace', app.ppp?.keyVault.ok())}
+          ${page('workspaces', app.ppp?.keyVault.ok())}
+          ${page('service', app.ppp?.keyVault.ok())}
+          ${page('services', app.ppp?.keyVault.ok())}
+          ${page('broker', app.ppp?.keyVault.ok())}
+          ${page('brokers', app.ppp?.keyVault.ok())}
+          ${page('server', app.ppp?.keyVault.ok())}
+          ${page('servers', app.ppp?.keyVault.ok())}
+          ${page('telegram-bots', app.ppp?.keyVault.ok())}
+          ${page('telegram-bot', app.ppp?.keyVault.ok())}
+          ${page('updates', app.ppp?.keyVault.ok())}
           ${when(
             (x) =>
               !x.pageHasTemplate &&
               requireComponent(
                 'ppp-not-found-page',
-                `../${globalThis.ppp.appType}/not-found/not-found-page.js`
+                `../${globalThis.ppp.appType}/not-found.js`
               ),
             html` <ppp-not-found-page :app="${(x) => x}"></ppp-not-found-page>`
           )}
+        `}
         </div>
       </div>
     </div>
@@ -285,6 +289,7 @@ export const appTemplate = (context, definition) => html`
 `;
 
 // TODO - refactor modal styles
+// noinspection JSUnusedGlobalSymbols
 export const appStyles = (context, definition) =>
   css`
     ${basePageStyles}

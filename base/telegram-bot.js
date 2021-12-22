@@ -1,6 +1,6 @@
-import { BasePage } from '../../lib/page/page.js';
-import { validate, invalidate } from '../../lib/validate.js';
-import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js'
+import { BasePage } from '../lib/page/page.js';
+import { validate, invalidate } from '../lib/validate.js';
+import { generateIV, bufferToString, uuidv4 } from '../lib/ppp-crypto.js';
 
 await i18nImport(['validation', 'new-telegram-bot']);
 
@@ -19,7 +19,7 @@ export async function checkTelegramBotToken({ token }) {
   }
 }
 
-export class NewTelegramBotPage extends BasePage {
+export class TelegramBotPage extends BasePage {
   async addTelegramBot() {
     try {
       this.busy = true;

@@ -1,17 +1,17 @@
 /** @decorator */
 
-import { BasePage } from '../../lib/page/page.js';
+import { BasePage } from '../lib/page/page.js';
 import {
   Observable,
   observable
-} from '../../lib/element/observation/observable.js';
-import { formatDate } from '../../lib/intl.js';
-import { html } from '../../lib/template.js';
+} from '../lib/element/observation/observable.js';
+import { formatDate } from '../lib/intl.js';
+import { html } from '../lib/template.js';
 
 // TODO - refactor
-import { trash } from '../../design/leafygreen/icons/trash.js';
+import { trash } from '../design/leafygreen/icons/trash.js';
 
-await i18nImport(['validation', 'brokers', 'broker-type']);
+await i18nImport(['validation', 'brokers']);
 
 export class BrokersPage extends BasePage {
   @observable
@@ -131,13 +131,6 @@ export class BrokersPage extends BasePage {
   connectedCallback() {
     super.connectedCallback();
 
-    this.brokers = [];
     void this.fetchBrokers();
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-
-    this.brokers = [];
   }
 }

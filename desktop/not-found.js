@@ -1,12 +1,8 @@
-/** @decorator */
-
-import { FoundationElement } from '../../lib/foundation-element/foundation-element.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { notDefined } from '../../lib/utilities/style/display.js';
-
-// TODO
-import { settings } from '../../design/leafygreen/icons/settings.js';
+import { FoundationElement } from '../lib/foundation-element/foundation-element.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { notDefined } from '../lib/utilities/style/display.js';
+import { settings } from '../design/leafygreen/icons/settings.js';
 
 export class NotFoundPage extends FoundationElement {}
 
@@ -14,15 +10,16 @@ export const notFoundPageTemplate = (context, definition) => html`
   <template>
     <main>
       <div class="content">
-        <img src="static/404.png" alt="Page not found" />
+        <img src="static/404.png" draggable="false" alt="404"/>
         <div class="details">
           <p class="headline">Что-то пошло не так.</p>
           <p class="text">
             Страница не найдена. Убедитесь, что адрес введён корректно.
           </p>
           <div class="actions">
-            <${'ppp-button'} @click="${(x) =>
-  (x.app.page = 'cloud-services')}" appearance="primary">
+            <${'ppp-button'}
+              @click="${(x) => (x.app.page = 'cloud-services')}"
+              appearance="primary">
               ${settings({
                 slot: 'start'
               })}
@@ -46,21 +43,16 @@ export const notFoundPageTemplate = (context, definition) => html`
 export const notFoundPageStyles = (context, definition) =>
   css`
     ${notDefined}
-
     main {
-      margin: calc(25px + 32px) auto 32px auto;
+      margin: 32px auto;
       max-width: 1150px;
       padding: 0 24px;
     }
 
     .content {
-      -webkit-align-items: center;
-      -webkit-box-align: center;
       align-items: center;
       display: flex;
       flex-flow: row-reverse wrap;
-      -webkit-box-pack: center;
-      -webkit-justify-content: center;
       justify-content: center;
       margin-bottom: 64px;
     }
@@ -110,6 +102,7 @@ export const notFoundPageStyles = (context, definition) =>
     }
   `;
 
+// noinspection JSUnusedGlobalSymbols
 export const notFoundPage = NotFoundPage.compose({
   baseName: 'not-found-page',
   template: notFoundPageTemplate,

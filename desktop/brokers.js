@@ -1,14 +1,12 @@
-/** @decorator */
-
-import { BrokersPage } from '../../base/brokers/brokers-page.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
-import { ref } from '../../lib/element/templating/ref.js';
+import { BrokersPage } from '../base/brokers.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
+import { ref } from '../lib/element/templating/ref.js';
 import {
   basePageStyles,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
 export const brokersPageTemplate = (context, definition) => html`
   <template>
@@ -16,7 +14,7 @@ export const brokersPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'new-broker')}"
+        @click="${(x) => (x.app.page = 'broker')}"
       >
         Добавить брокера
       </ppp-button>

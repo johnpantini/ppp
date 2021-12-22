@@ -1,17 +1,16 @@
-import { CloudServicesPage } from '../../base/cloud-services/cloud-services-page.js';
-import { ref } from '../../lib/element/templating/ref.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
+import { CloudServicesPage } from '../base/cloud-services.js';
+import { ref } from '../lib/element/templating/ref.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
 
 import {
   basePageStyles,
   circleSvg,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
-// TODO - theme
-import { settings } from '../../design/leafygreen/icons/settings.js';
+import { settings } from '../design/leafygreen/icons/settings.js';
 
 await i18nImport(['cloud-services']);
 
@@ -22,6 +21,11 @@ export const cloudServicesPageTemplate = (context, definition) => html`
       'form'
     )} id="cloud-services" name="cloud-services" onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+        <${'ppp-banner'} class="inline margin-top" appearance="warning">
+          Токен Auth0
+          требуется только на этапе настройки облачных сервисов, он не
+          сохраняется на сервере.
+        </ppp-banner>
         <section>
           <div class="section-index-icon">
             ${circleSvg(1)}
@@ -33,10 +37,13 @@ export const cloudServicesPageTemplate = (context, definition) => html`
                 target="_blank"
                 href="https://pantini.gitbook.io/pantini-co/ppp/service-machine">Посмотреть
                 инструкцию</a>.</p>
+          </div>
+          <div class="input-group">
             <ppp-text-field
               placeholder="https://example.com"
               name="service-machine-url"
-              value="${(x) => x.app.ppp?.keyVault.getKey('service-machine-url')}"
+              value="${(x) =>
+                x.app.ppp?.keyVault.getKey('service-machine-url')}"
               ${ref('serviceMachineUrl')}
             ></ppp-text-field>
           </div>
@@ -51,6 +58,8 @@ export const cloudServicesPageTemplate = (context, definition) => html`
               target="_blank"
               href="https://pantini.gitbook.io/pantini-co/ppp/github">Посмотреть
               инструкцию</a>.</p>
+          </div>
+          <div class="input-group">
             <${'ppp-text-field'}
               placeholder="Токен"
               name="github-token"
@@ -64,30 +73,38 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             ${circleSvg(3)}
           </div>
           <div class="label-group">
-            <h6>${i18n.t('auth0EmailToken')}</h6>
-            <${'ppp-banner'} class="inline margin-top" appearance="warning">
-              Токен Auth0
-              требуется только на этапе настройки облачных сервисов, он не
-              сохраняется на сервере.
-            </ppp-banner>
+            <h6>${i18n.t('auth0Token')}</h6>
             <p>Сервис Auth0 служит для авторизации пользователей приложения PPP
               по
               логину и паролю, а также хранения ключей других облачных сервисов.
               <a
                 target="_blank"
                 href="https://pantini.gitbook.io/pantini-co/ppp/auth0">Посмотреть
-                инструкцию</a>.</p>
+                инструкцию</a>.
+            </p>
+          </div>
+          <div class="input-group">
             <ppp-text-field
               placeholder="Токен Auth0"
               name="auth0-token"
               value="${(x) => x.app.ppp?.keyVault.getKey('auth0-token')}"
               ${ref('auth0Token')}
             ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="section-index-icon">
+            ${circleSvg(4)}
+          </div>
+          <div class="label-group">
+            <h6>${i18n.t('auth0Email')}</h6>
             <p>Укажите Email пользователя, которого вы создали ранее в сервисе
               Auth0 по <a
                 target="_blank"
                 href="https://pantini.gitbook.io/pantini-co/ppp/auth0">инструкции</a>.
             </p>
+          </div>
+          <div class="input-group">
             <ppp-text-field
               placeholder="Email пользователя Auth0"
               name="auth0-email"
@@ -98,14 +115,17 @@ export const cloudServicesPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="section-index-icon">
-            ${circleSvg(4)}
+            ${circleSvg(5)}
           </div>
           <div class="label-group">
             <h6>${i18n.t('mongoDBRealmPubKey')}</h6>
             <p>MongoDB Realm обеспечивает приложение PPP хранилищем настроек и
               платформой бессерверных функций. <a target="_blank"
                                                   href="https://pantini.gitbook.io/pantini-co/ppp/mongodb">Посмотреть
-                инструкцию</a>.</p>
+                инструкцию</a>.
+            </p>
+          </div>
+          <div class="input-group">
             <ppp-text-field
               placeholder="Публичный ключ"
               name="mongo-public-key"
@@ -116,10 +136,12 @@ export const cloudServicesPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="section-index-icon">
-            ${circleSvg(5)}
+            ${circleSvg(6)}
           </div>
           <div class="label-group">
             <h6>${i18n.t('mongoDBRealmPrivateKey')}</h6>
+          </div>
+          <div class="input-group">
             <ppp-text-field
               placeholder="Приватный ключ"
               name="mongo-private-key"
@@ -156,11 +178,9 @@ export const cloudServicesPageTemplate = (context, definition) => html`
 export const cloudServicesPageStyles = (context, definition) =>
   css`
     ${basePageStyles}
-    section ppp-text-field, section ppp-banner {
-      max-width: 600px;
-    }
   `;
 
+// noinspection JSUnusedGlobalSymbols
 export const cloudServicesPage = CloudServicesPage.compose({
   baseName: 'cloud-services-page',
   template: cloudServicesPageTemplate,

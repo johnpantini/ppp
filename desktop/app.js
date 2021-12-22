@@ -1,5 +1,6 @@
 import { App as BaseApp } from '../lib/app.js';
 import { requireComponent } from '../lib/template.js';
+import { keyCodeEscape } from '../lib/web-utilities/key-codes.js';
 
 export class App extends BaseApp {
   _toast;
@@ -7,7 +8,19 @@ export class App extends BaseApp {
   constructor() {
     super(...arguments);
 
-    requireComponent('ppp-toast');
+    document.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.code === keyCodeEscape) {
+          this.toast.visible = false;
+        }
+      },
+      {
+        passive: true
+      }
+    );
+
+    void requireComponent('ppp-toast');
   }
 
   navigate(url, params = {}) {

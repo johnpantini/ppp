@@ -1,10 +1,10 @@
 /** @decorator */
 
-import { BasePage } from '../../lib/page/page.js';
-import { validate, invalidate } from '../../lib/validate.js';
-import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js';
-import { SUPPORTED_BROKERS } from '../../lib/const.js';
+import { BasePage } from '../lib/page/page.js';
+import { validate, invalidate } from '../lib/validate.js';
+import { attr } from '../lib/element/components/attributes.js';
+import { generateIV, bufferToString, uuidv4 } from '../lib/ppp-crypto.js';
+import { SUPPORTED_BROKERS } from '../lib/const.js';
 
 await i18nImport(['validation', 'new-broker']);
 
@@ -92,7 +92,7 @@ export async function checkUnitedTradersLoginPassword({
   }
 }
 
-export class NewBrokerPage extends BasePage {
+export class BrokerPage extends BasePage {
   @attr
   broker;
 

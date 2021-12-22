@@ -1,18 +1,18 @@
 /** @decorator */
 
-import { BasePage } from '../../lib/page/page.js';
-import { validate, invalidate } from '../../lib/validate.js';
-import { attr } from '../../lib/element/components/attributes.js';
-import { generateIV, bufferToString, uuidv4 } from '../../lib/ppp-crypto.js';
-import { DOM } from '../../lib/element/dom.js';
-import { requireComponent } from '../../lib/template.js';
-import { later } from '../../lib/later.js';
-import { assert } from '../../lib/assert.js';
-import { SUPPORTED_SERVER_TYPES } from '../../lib/const.js';
+import { BasePage } from '../lib/page/page.js';
+import { validate, invalidate } from '../lib/validate.js';
+import { attr } from '../lib/element/components/attributes.js';
+import { generateIV, bufferToString, uuidv4 } from '../lib/ppp-crypto.js';
+import { DOM } from '../lib/element/dom.js';
+import { requireComponent } from '../lib/template.js';
+import { later } from '../lib/later.js';
+import { assert } from '../lib/assert.js';
+import { SUPPORTED_SERVER_TYPES } from '../lib/const.js';
 
 await i18nImport(['validation', 'new-server']);
 
-export class NewServerPage extends BasePage {
+export class ServerPage extends BasePage {
   @attr
   type;
 

@@ -1,23 +1,23 @@
-import { NewTelegramBotPage } from '../../base/new-telegram-bot/new-telegram-bot-page.js';
-import { html } from '../../lib/template.js';
-import { ref } from '../../lib/element/templating/ref.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
+import { TelegramBotPage } from '../base/telegram-bot.js';
+import { html } from '../lib/template.js';
+import { ref } from '../lib/element/templating/ref.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
 
 import {
   basePageStyles,
   circleSvg,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
-import { settings } from '../../design/leafygreen/icons/settings.js';
+import { settings } from '../design/leafygreen/icons/settings.js';
 
-export const newTelegramBotPageTemplate = (context, definition) => html`
+export const telegramBotPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'}>Новый бот Telegram</ppp-page-header>
     <form ${ref(
       'form'
-    )} id="new-telegram-bot" name="new-telegram-bot" onsubmit="return false">
+    )} id="telegram-bot" name="telegram-bot" onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         <section>
           <div class="section-index-icon">${circleSvg(1)}</div>
@@ -80,17 +80,13 @@ export const newTelegramBotPageTemplate = (context, definition) => html`
   </template>
 `;
 
-export const newTelegramBotPageStyles = (context, definition) =>
+export const telegramBotPageStyles = (context, definition) =>
   css`
     ${basePageStyles}
-    section ppp-text-field,
-    section ppp-banner {
-      max-width: 600px;
-    }
   `;
 
-export const newTelegramBotPage = NewTelegramBotPage.compose({
-  baseName: 'new-telegram-bot-page',
-  template: newTelegramBotPageTemplate,
-  styles: newTelegramBotPageStyles
+export const telegramBotPage = TelegramBotPage.compose({
+  baseName: 'telegram-bot-page',
+  template: telegramBotPageTemplate,
+  styles: telegramBotPageStyles
 });

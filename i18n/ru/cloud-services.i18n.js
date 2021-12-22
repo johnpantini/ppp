@@ -10,7 +10,8 @@ i18n.extend({
     }
   },
   personalGitHubToken: 'Персональный токен GitHub',
-  auth0EmailToken: 'Токен/Email Auth0',
+  auth0Email: 'Email Auth0',
+  auth0Token: 'Токен Auth0',
   mongoDBRealmPubKey: 'Публичный ключ MongoDB Realm',
   mongoDBRealmPrivateKey: 'Приватный ключ MongoDB Realm'
 });

@@ -1,14 +1,12 @@
-/** @decorator */
-
-import { TelegramBotsPage } from '../../base/telegram-bots/telegram-bots-page.js';
-import { html } from '../../lib/template.js';
-import { css } from '../../lib/element/styles/css.js';
-import { when } from '../../lib/element/templating/when.js';
-import { ref } from '../../lib/element/templating/ref.js';
+import { TelegramBotsPage } from '../base/telegram-bots.js';
+import { html } from '../lib/template.js';
+import { css } from '../lib/element/styles/css.js';
+import { when } from '../lib/element/templating/when.js';
+import { ref } from '../lib/element/templating/ref.js';
 import {
   basePageStyles,
   loadingIndicator
-} from '../../design/leafygreen/styles/page.js';
+} from '../design/leafygreen/styles/page.js';
 
 export const telegramBotsPageTemplate = (context, definition) => html`
   <template>
@@ -16,7 +14,7 @@ export const telegramBotsPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'new-telegram-bot')}"
+        @click="${(x) => (x.app.page = 'telegram-bot')}"
       >
         Добавить бота
       </ppp-button>
@@ -39,6 +37,7 @@ export const telegramBotsPageStyles = (context, definition) =>
     }
   `;
 
+// noinspection JSUnusedGlobalSymbols
 export const telegramBotsPage = TelegramBotsPage.compose({
   baseName: 'telegram-bots-page',
   template: telegramBotsPageTemplate,
