@@ -39,7 +39,7 @@ export const sideNavTemplate = (context, definition) => html`
           <ul>
             ${repeat(
               (x) => x.topLevelItems,
-              html`<li>${(x) => html`${x.firstElementChild.outerHTML}`}</li>`
+              html` <li>${(x) => html`${x.firstElementChild.outerHTML}`}</li>`
             )}
           </ul>
         </div>
@@ -65,11 +65,13 @@ export const sideNavTemplate = (context, definition) => html`
 export const sideNavStyles = (context, definition) =>
   css`
     ${notDefined}
-
     :host {
       width: 48px;
-      transition: width 200ms ease-in-out 0s;
       position: relative;
+    }
+
+    :host([ready]) {
+      transition: width 200ms ease-in-out 0s;
     }
 
     :host([expanded]) {
@@ -78,6 +80,7 @@ export const sideNavStyles = (context, definition) =>
 
     ::-webkit-scrollbar {
       width: 8px;
+      height: 8px;
     }
 
     ::-webkit-scrollbar-track {
@@ -98,11 +101,14 @@ export const sideNavStyles = (context, definition) =>
 
     .nav {
       width: 48px;
-      transition: all 200ms ease-in-out 0s;
       background-color: rgb(249, 251, 250);
       border-right: 1px solid rgb(231, 238, 236);
       position: relative;
       z-index: 0;
+    }
+
+    :host([ready]) .nav {
+      transition: all 200ms ease-in-out 0s;
     }
 
     .nav[expanded] {
@@ -117,10 +123,14 @@ export const sideNavStyles = (context, definition) =>
 
     .expanded-content,
     .collapsed-content {
-      transition: opacity 200ms ease-in-out 0s, transform 200ms ease-in-out 0s;
       position: absolute;
       inset: 0;
       overflow: hidden;
+    }
+
+    :host([ready]) .expanded-content,
+    :host([ready]) .collapsed-content {
+      transition: opacity 200ms ease-in-out 0s, transform 200ms ease-in-out 0s;
     }
 
     .expanded-content {
