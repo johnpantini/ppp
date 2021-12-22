@@ -125,6 +125,11 @@ const selectStyles = (context, definition) => css`
   :host {
     flex-direction: column;
     position: relative;
+    z-index: 2;
+  }
+
+  :host(.open) {
+    z-index: 100;
   }
 
   :host(:focus-visible) {
@@ -238,6 +243,7 @@ const selectStyles = (context, definition) => css`
 
   .listbox::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
 
   .listbox::-webkit-scrollbar-track {

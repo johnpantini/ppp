@@ -63,6 +63,16 @@ export const tableStyles = (context, definition) => css`
     position: relative;
   }
 
+  .cell a {
+    background-color: transparent;
+    color: #006cbc;
+    text-decoration: none;
+  }
+
+  .cell a:hover {
+    text-decoration: underline;
+  }
+
   .row > .cell:nth-child(1) {
     padding-left: 8px;
   }
