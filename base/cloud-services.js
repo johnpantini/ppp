@@ -1,8 +1,8 @@
-import { BasePage } from '../../lib/page/page.js';
-import { DOM } from '../../lib/element/dom.js';
-import { validate, invalidate } from '../../lib/validate.js';
-import { parseJwt } from '../../lib/key-vault.js';
-import { auth0Bridge, auth0BridgeCallback } from '../../lib/auth0-bridge.js';
+import { BasePage } from '../lib/page/page.js';
+import { DOM } from '../lib/element/dom.js';
+import { validate, invalidate } from '../lib/validate.js';
+import { parseJwt } from '../lib/key-vault.js';
+import { auth0Bridge, auth0BridgeCallback } from '../lib/auth0-bridge.js';
 
 await i18nImport(['validation']);
 

@@ -1,4 +1,4 @@
-import { ServerPage } from '../../base/server.js';
+import { ServerPage } from '../base/server.js';
 import { html } from '../lib/template.js';
 import { ref } from '../lib/element/templating/ref.js';
 import { css } from '../lib/element/styles/css.js';
