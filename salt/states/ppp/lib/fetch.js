@@ -7,7 +7,7 @@ module.exports = async function fetch(url, options = {}) {
     const requestOptions = {
       hostname: u.hostname,
       port: 443,
-      path: u.pathname,
+      path: u.pathname + u.search,
       method: options.method,
       headers: options.headers
     };
