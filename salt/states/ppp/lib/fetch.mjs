@@ -1,6 +1,6 @@
-const { request } = require('https');
+import { request } from 'https';
 
-module.exports = async function fetch(url, options = {}) {
+export async function fetch(url, options = {}) {
   const u = new URL(url);
 
   return new Promise(async (resolve, reject) => {
