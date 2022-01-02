@@ -1,6 +1,7 @@
-const { createServer } = require('http');
-const { Client } = require('./ppp-dyno/ssh2');
-const fetch = require('./salt/states/ppp/lib/fetch.js');
+import { createServer } from 'http';
+import { Client as SSHClient } from './ppp-dyno/ssh2/index.js';
+import { fetch } from './salt/states/ppp/lib/fetch.mjs';
+import { Connection } from './ppp-dyno/pg/connection.mjs';
 
 process.on('unhandledRejection', (err) => {
   console.log(err);
@@ -61,6 +62,63 @@ async function ut(request, response) {
   }
 }
 
+async function pg(request, response) {
+  if (!/post/i.test(request.method)) {
+    return response.writeHead(405).end();
+  }
+
+  const buffers = [];
+
+  for await (const chunk of request) {
+    buffers.push(chunk);
+  }
+
+  response.setHeader('Content-Type', 'application/json; charset=UTF-8');
+
+  try {
+    const body = JSON.parse(Buffer.concat(buffers).toString());
+
+    if (!body.connectionString || typeof body.connectionString !== 'string')
+      return response.writeHead(422).end();
+
+    if (!body.query || typeof body.query !== 'string')
+      return response.writeHead(422).end();
+
+    let connection;
+
+    try {
+      connection = new Connection(body.connectionString);
+
+      await connection.connect();
+
+      const result = await connection.query(body.query, body.options ?? {});
+
+      response.write(JSON.stringify(result));
+      response.end();
+    } finally {
+      if (connection) await connection.close();
+    }
+  } catch (e) {
+    console.error(e);
+
+    response.writeHead(400);
+    response.write(
+      JSON.stringify(
+        Object.assign(
+          {
+            e
+          },
+          {
+            message: e.message
+          }
+        )
+      )
+    );
+
+    response.end();
+  }
+}
+
 async function ssh(request, response) {
   if (!/post/i.test(request.method)) {
     return response.writeHead(405).end();
@@ -83,7 +141,7 @@ async function ssh(request, response) {
     response.setHeader('Transfer-Encoding', 'chunked');
     response.setHeader('Content-Type', 'application/json; charset=UTF-8');
 
-    client = new Client();
+    client = new SSHClient();
 
     client
       .on('ready', () => {
@@ -139,7 +197,7 @@ async function ssh(request, response) {
   } catch (e) {
     console.error(e);
 
-    client.end();
+    if (client) client.end();
 
     response.writeHead(400);
     response.write(
@@ -172,6 +230,8 @@ createServer((request, response) => {
       return ut(request, response);
     case '/ssh':
       return ssh(request, response);
+    case '/pg':
+      return pg(request, response);
     case '/ping':
       response.setHeader('Content-Type', 'text/plain; charset=UTF-8');
       response.write('pong');
