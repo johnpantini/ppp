@@ -219,6 +219,10 @@ createServer((request, response) => {
     'GET, POST, OPTIONS, PUT, PATCH, DELETE'
   );
 
+  if (/options/i.test(request.method)) {
+    return response.writeHead(200).end();
+  }
+
   switch (request.url) {
     case '/':
       response.setHeader('Content-Type', 'text/plain; charset=UTF-8');
