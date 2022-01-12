@@ -91,7 +91,7 @@ async function pg(request, response) {
 
       await connection.connect();
 
-      const result = await connection.query(body.query, body.options ?? {});
+      const result = await connection.execute(body.query, body.options ?? {});
 
       response.write(JSON.stringify(result));
       response.end();
