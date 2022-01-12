@@ -245,7 +245,11 @@ export class IntlConnection extends SafeEventEmitter {
 
             break;
           case Protocol.BackendMessageCode.DataRow:
-            let row = msg.columns.map((x) => x.toString('utf8'));
+            let row = msg.columns.map((x) => {
+              if (x === null) return null;
+
+              return x.toString('utf8');
+            });
 
             parseRow(parsers, row, opts);
 
