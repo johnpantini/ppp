@@ -165,7 +165,10 @@ export class CloudServicesPage extends BasePage {
         `https://*.github.io.dev/mobile`,
         `https://*.pages.dev`,
         `https://*.pages.dev/desktop`,
-        `https://*.pages.dev/mobile`
+        `https://*.pages.dev/mobile`,
+        `https://*.netlify.app`,
+        `https://*.netlify.app/desktop`,
+        `https://*.netlify.app/mobile`
       ];
 
       // 1. Save metadata
