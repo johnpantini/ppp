@@ -1,18 +1,31 @@
-import { $global } from './lib/element/platform.js';
-import { KeyVault, keySet } from './lib/key-vault.js';
-import { PPPCrypto } from './lib/ppp-crypto.js';
+import { KeyVault, keySet } from './shared/key-vault.js';
+import { PPPCrypto } from './shared/ppp-crypto.js';
 
-new (class {
+export default new (class {
   /**
    * Default theme is leafygreen {@link https://www.mongodb.design/}
    */
   theme = 'leafygreen';
 
+  /**
+   * Supported languages.
+   * @type {[string]}
+   */
+  locales = ['ru'];
+
   crypto = new PPPCrypto(this);
 
   constructor(appType) {
     this.appType = appType;
-    $global.ppp = this;
+
+    const storedLang = localStorage.getItem('ppp-lang');
+
+    this.locale = this.locales.indexOf(storedLang) > -1 ? storedLang : 'ru';
+    this.dict = new Polyglot({
+      locale: this.locale
+    });
+
+    document.documentElement.setAttribute('lang', this.locale);
 
     void this.start();
   }
@@ -101,7 +114,7 @@ new (class {
 
   async #createApplication({ emergency }) {
     if (!emergency) {
-      const { getApp, Credentials } = await import('./lib/realm.js');
+      const { getApp, Credentials } = await import('./shared/realm.js');
 
       try {
         this.realm = getApp(this.keyVault.getKey('mongo-app-client-id'));
@@ -124,14 +137,13 @@ new (class {
       }
     }
 
-    const [{ DesignSystem }, { app }, { appStyles, appTemplate }] =
+    const [{ DesignSystem }, { app, appStyles, appTemplate }] =
       await Promise.all([
-        import('./lib/design-system/design-system.js'),
-        import(`./${this.appType}/app.js`),
-        import(`./design/${this.theme}/app.js`)
+        import('./shared/design-system/design-system.js'),
+        import(`./${this.appType}/${this.theme}/app.js`)
       ]);
 
-    $global.ppp.DesignSystem = DesignSystem;
+    this.DesignSystem = DesignSystem;
 
     DesignSystem.getOrCreate().register(app(appStyles, appTemplate)());
     document.body.setAttribute('appearance', this.theme);
@@ -166,25 +178,38 @@ new (class {
       element.settings = settings ?? {};
     }
 
+    element.ppp = this;
+
     this.appElement = document.body.insertBefore(
       element,
       document.body.firstChild
     );
 
     this.appElement.setAttribute('hidden', true);
-
-    this.appElement.ppp = this;
     this.appElement.setAttribute('appearance', this.theme);
-    $global.loader.setAttribute('hidden', true);
+    document.getElementById('global-loader').setAttribute('hidden', true);
     this.appElement.removeAttribute('hidden');
+  }
+
+  async i18n(url) {
+    const fileName = url
+      .substr(url.lastIndexOf('/') + 1)
+      .replace('.', '.i18n.');
+
+    (await import(`./i18n/${this.locale}/${fileName}`)).default(this.dict);
   }
 
   async start() {
     this.keyVault = new KeyVault();
 
-    const repoOwner = location.hostname.endsWith('pages.dev')
+    (await import(`./i18n/${this.locale}/shared.i18n.js`)).default(this.dict);
+
+    let repoOwner = location.hostname.endsWith('pages.dev')
       ? location.hostname.split('.pages.dev')[0]
       : location.hostname.split('.github.io')[0];
+
+    if (location.hostname.endsWith('netlify.app'))
+      repoOwner = location.hostname.split('.netlify.app')[0]
 
     if (!this.keyVault.hasAuth0Keys()) {
       let r = await fetch(
