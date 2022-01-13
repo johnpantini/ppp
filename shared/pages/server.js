@@ -1,0 +1,297 @@
+/** @decorator */
+
+import { BasePage } from '../lib/page/page.js';
+import { validate, invalidate } from '../lib/validate.js';
+import { attr } from '../lib/element/components/attributes.js';
+import { generateIV, bufferToString, uuidv4 } from '../lib/ppp-crypto.js';
+import { DOM } from '../lib/element/dom.js';
+import { requireComponent } from '../lib/template.js';
+import { later } from '../lib/later.js';
+import { assert } from '../lib/assert.js';
+import { SUPPORTED_SERVER_TYPES } from '../lib/const.js';
+
+export class ServerPage extends BasePage {
+  @attr
+  type;
+
+  @attr
+  mode;
+
+  async createServer() {
+    try {
+      this.outputText = '';
+      this.busy = true;
+      this.app.toast.visible = false;
+      this.app.toast.source = this;
+      this.toastTitle = i18n.t('$pages.newServer.toast.title');
+      this.toastText = '';
+
+      await validate(this.serverName);
+      await validate(this.host);
+      await validate(this.port);
+      await validate(this.userName);
+
+      switch (this.type) {
+        case SUPPORTED_SERVER_TYPES.PASSWORD:
+          await validate(this.password);
+
+          break;
+        case SUPPORTED_SERVER_TYPES.KEY:
+          await validate(this.key);
+
+          break;
+      }
+
+      this.mode = 'terminal';
+
+      await Promise.all([
+        requireComponent('ppp-modal'),
+        requireComponent('ppp-terminal')
+      ]);
+
+      await later(250);
+
+      this.busy = false;
+      this.modal.visible = true;
+
+      const terminal = this.terminalDom.terminal;
+
+      terminal.clear();
+      terminal.reset();
+      terminal.writeln('\x1b[33;1mПодготовка к настройке сервера...\x1b[0m');
+      terminal.writeln('');
+
+      this.app.toast.appearance = 'progress';
+      DOM.queueUpdate(() => (this.app.toast.progress.value = 0));
+      this.app.toast.dismissible = false;
+      this.app.toast.visible = true;
+
+      const repoUrl = `https://github.com/${this.app.ppp.keyVault.getKey(
+        'github-login'
+      )}/ppp.git`;
+
+      const minionConfiguration = `backend: requests
+ext_pillar:
+  - git:
+    - main ${repoUrl}:
+      - root: salt/pillar
+file_client: local
+fileserver_backend:
+  - git
+gitfs_base: main
+gitfs_provider: pygit2
+gitfs_remotes:
+  - ${repoUrl}
+gitfs_root: salt/states
+pillar_opts: true
+`;
+
+      let cmd = [
+        'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm ;',
+        'sudo rm -f /etc/yum.repos.d/salt.repo ;',
+        'sudo mkdir -p /etc/salt ;',
+        'sudo dnf -y install epel-release wget git python3 python3-devel libffi-devel tar openssl openssl-devel ;',
+        'sudo dnf -y remove cmake ;',
+        'sudo dnf -y group install "Development Tools" ;',
+        'wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-$(uname -m).tar.gz -O cmake-3.21.3-linux-$(uname -m).tar.gz ;',
+        'tar xzf cmake-3.21.3-linux-$(uname -m).tar.gz ;',
+        'sudo ln -fs ~/cmake-3.21.3-linux-$(uname -m)/bin/cmake /usr/bin/cmake ;',
+        'wget https://github.com/libgit2/libgit2/archive/refs/tags/v1.3.0.tar.gz -O libgit2-1.3.0.tar.gz ;',
+        'tar xzf libgit2-1.3.0.tar.gz ;',
+        'cd libgit2-1.3.0/ ; cmake . ; make -j$(nproc); sudo make install ;',
+        'sudo -H python3 -m pip install --upgrade pip setuptools wheel six ;',
+        'sudo dnf -y reinstall python3-six ;',
+        'sudo -H python3 -m pip install --upgrade --force-reinstall cffi ;',
+        'sudo -H python3 -m pip install --upgrade --force-reinstall pygit2 ;',
+        'sudo ln -fs /usr/local/lib64/libgit2.so.1.3 /usr/lib64/libgit2.so.1.3 ; ',
+        'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall salt ;',
+        'sudo rm -f /etc/salt/minion ;',
+        `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ;`,
+        'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
+        'sudo salt-call --local state.sls ping'
+      ].join(' ');
+
+      const commands = this.commands.value.trim();
+
+      if (commands) cmd = commands + ' ; ' + cmd;
+
+      terminal.writeln(`\x1b[33m${cmd}\x1b[0m\r\n`);
+
+      let body;
+
+      switch (this.type) {
+        case SUPPORTED_SERVER_TYPES.PASSWORD:
+          body = JSON.stringify({
+            host: this.host.value.trim(),
+            port: this.port.value.trim(),
+            cmd,
+            username: this.userName.value.trim(),
+            password: this.password.value.trim()
+          });
+
+          break;
+
+        case SUPPORTED_SERVER_TYPES.KEY: {
+          body = JSON.stringify({
+            host: this.host.value.trim(),
+            port: this.port.value.trim(),
+            cmd,
+            username: this.userName.value.trim(),
+            privateKey: this.key.value.trim()
+          });
+        }
+      }
+
+      const r1 = await fetch(
+        new URL(
+          'ssh',
+          this.app.ppp.keyVault.getKey('service-machine-url')
+        ).toString(),
+        {
+          method: 'POST',
+          body
+        }
+      );
+
+      try {
+        await this.processChunkedResponse(r1);
+        assert(r1);
+      } catch (e) {
+        terminal.writeln(
+          `\r\n\x1b[31;1mОперация завершилась с ошибкой ${
+            e.status || 503
+          }\x1b[0m\r\n`
+        );
+
+        // noinspection ExceptionCaughtLocallyJS
+        throw e;
+      }
+
+      this.modal.dismissible = true;
+      this.modal.visibleChanged = (oldValue, newValue) =>
+        !newValue && (this.mode = void 0);
+
+      if (/Succeeded: 1/i.test(this.outputText)) {
+        const iv = generateIV();
+        let payload;
+
+        switch (this.type) {
+          case SUPPORTED_SERVER_TYPES.PASSWORD:
+            const encryptedPassword = await this.app.ppp.crypto.encrypt(
+              iv,
+              this.password.value.trim()
+            );
+
+            payload = {
+              _id: this.serverName.value.trim(),
+              uuid: uuidv4(),
+              type: this.type,
+              host: this.host.value.trim(),
+              port: this.port.value.trim(),
+              iv: bufferToString(iv),
+              username: this.userName.value.trim(),
+              password: encryptedPassword,
+              created_at: new Date()
+            };
+
+            break;
+          case SUPPORTED_SERVER_TYPES.KEY:
+            const encryptedKey = await this.app.ppp.crypto.encrypt(
+              iv,
+              this.key.value.trim()
+            );
+
+            payload = {
+              _id: this.serverName.value.trim(),
+              uuid: uuidv4(),
+              type: this.type,
+              host: this.host.value.trim(),
+              port: this.port.value.trim(),
+              iv: bufferToString(iv),
+              username: this.userName.value.trim(),
+              key: encryptedKey,
+              created_at: new Date()
+            };
+
+            break;
+        }
+
+        await this.app.ppp.user.functions.insertOne(
+          {
+            collection: 'servers'
+          },
+          payload
+        );
+
+        this.app.toast.appearance = 'success';
+        this.app.toast.dismissible = true;
+        this.toastText = i18n.t('operationDone');
+        this.app.toast.visible = true;
+      } else {
+        invalidate(this.app.toast, {
+          errorMessage: i18n.t('operationFailed')
+        });
+      }
+    } catch (e) {
+      this.busy = false;
+      console.error(e);
+
+      if (this.modal) {
+        this.modal.dismissible = true;
+        this.modal.visibleChanged = (oldValue, newValue) =>
+          !newValue && (this.mode = void 0);
+      }
+
+      if (/E11000/i.test(e.error)) {
+        invalidate(this.app.toast, {
+          errorMessage: 'Сервер с таким названием уже существует'
+        });
+      } else {
+        invalidate(this.app.toast, {
+          errorMessage: i18n.t('operationFailed')
+        });
+      }
+    }
+  }
+
+  typeChanged(oldValue, newValue) {
+    const params = this.app.params();
+
+    this.app.navigate(
+      this.app.url({
+        ...params,
+        type: newValue || void 0
+      })
+    );
+  }
+
+  #onPopState() {
+    this.type = this.app.params()?.type;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._onPopState = this.#onPopState.bind(this);
+
+    window.addEventListener('popstate', this._onPopState, {
+      passive: true
+    });
+
+    const type = this.app.params()?.type;
+
+    if (Object.values(SUPPORTED_SERVER_TYPES).indexOf(type) === -1)
+      return this.app.navigate(this.app.url({ page: this.app.params().page }));
+
+    this.type = type;
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+
+    window.removeEventListener('popstate', this._onPopState, {
+      passive: true
+    });
+
+    this.type = void 0;
+  }
+}
