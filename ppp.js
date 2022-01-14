@@ -71,6 +71,8 @@ export default new (class {
   async #authorizeWithAuth0() {
     const script = document.createElement('script');
 
+    console.log(window.location.origin);
+
     script.onload = async () => {
       this.auth0 = await createAuth0Client({
         domain: this.keyVault.getKey('auth0-domain'),
