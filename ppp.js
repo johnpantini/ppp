@@ -209,7 +209,7 @@ export default new (class {
 
     (await import(`./i18n/${this.locale}/shared.i18n.js`)).default(this.dict);
 
-    let [repoOwner] = location.hostname.split('.');
+    const [repoOwner] = location.hostname.split('.');
 
     if (!this.keyVault.hasAuth0Keys()) {
       let r = await fetch(
