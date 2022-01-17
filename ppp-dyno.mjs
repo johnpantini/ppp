@@ -39,8 +39,10 @@ async function $fetch(request, response) {
       requestOptions.body = JSON.stringify(body.body);
 
     const fetchResponse = await fetch(body.url, requestOptions);
+    const ct = fetchResponse.headers['content-type'];
 
-    response.setHeader('Content-Type', fetchResponse.headers['content-type']);
+    if (ct) response.setHeader('Content-Type', ct);
+
     response.writeHead(fetchResponse.status);
     response.write(fetchResponse.responseText);
     response.end();
