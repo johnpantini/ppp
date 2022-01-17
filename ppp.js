@@ -149,11 +149,12 @@ export default new (class {
     document.body.setAttribute('appearance', this.theme);
 
     let workspaces = [];
+    let extensions = [];
     let settings = {};
 
     if (!emergency) {
       try {
-        [workspaces, settings] = await Promise.all([
+        [workspaces, settings, extensions] = await Promise.all([
           this.user.functions.find({
             collection: 'workspaces'
           }),
@@ -164,7 +165,10 @@ export default new (class {
             {
               _id: 'settings'
             }
-          )
+          ),
+          this.user.functions.find({
+            collection: 'extensions'
+          })
         ]);
       } catch (e) {
         console.error(e);
@@ -175,6 +179,7 @@ export default new (class {
 
     if (!emergency) {
       element.workspaces = workspaces;
+      element.extensions = extensions;
       element.settings = settings ?? {};
     }
 
@@ -204,12 +209,7 @@ export default new (class {
 
     (await import(`./i18n/${this.locale}/shared.i18n.js`)).default(this.dict);
 
-    let repoOwner = location.hostname.endsWith('pages.dev')
-      ? location.hostname.split('.pages.dev')[0]
-      : location.hostname.split('.github.io')[0];
-
-    if (location.hostname.endsWith('netlify.app'))
-      repoOwner = location.hostname.split('.netlify.app')[0]
+    let [repoOwner] = location.hostname.split('.');
 
     if (!this.keyVault.hasAuth0Keys()) {
       let r = await fetch(
@@ -222,7 +222,7 @@ export default new (class {
         }
       );
 
-      // Try to remove potential Cloudflare Pages extra dash
+      // Try to remove potential extra dash
       if (!r.ok) {
         r = await fetch(
           `https://api.github.com/repos/${repoOwner
