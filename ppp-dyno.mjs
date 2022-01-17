@@ -8,11 +8,7 @@ process.on('unhandledRejection', (err) => {
   process.exit(1);
 });
 
-async function ut(request, response) {
-  if (!/post/i.test(request.method)) {
-    return response.writeHead(405).end();
-  }
-
+async function $fetch(request, response) {
   const buffers = [];
 
   for await (const chunk of request) {
@@ -21,30 +17,32 @@ async function ut(request, response) {
 
   try {
     const body = JSON.parse(Buffer.concat(buffers).toString());
-    const utResponse = await fetch(
-      'https://sso.unitedtraders.com/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
-      {
-        method: 'POST',
-        headers: {
-          'User-Agent':
-            request.headers['user-agent'] ??
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          realm: 'aurora',
-          clientId: 'utcom',
-          loginOrEmail: body.login,
-          password: body.password,
-          product: 'UTCOM',
-          locale: 'ru'
-        })
-      }
-    );
+    const headers = body.headers ?? {};
 
-    response.setHeader('Content-Type', utResponse.headers['content-type']);
-    response.writeHead(utResponse.status);
-    response.write(utResponse.responseText);
+    if (!headers['User-Agent']) {
+      headers['User-Agent'] =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36';
+    }
+
+    if (!headers['Content-Type']) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    const requestOptions = {
+      method: request.method.toUpperCase(),
+      headers
+    };
+
+    if (typeof body.body === 'string') {
+      requestOptions.body = body.body;
+    } else if (typeof body.body === 'object')
+      requestOptions.body = JSON.stringify(body.body);
+
+    const fetchResponse = await fetch(body.url, requestOptions);
+
+    response.setHeader('Content-Type', fetchResponse.headers['content-type']);
+    response.writeHead(fetchResponse.status);
+    response.write(fetchResponse.responseText);
     response.end();
   } catch (e) {
     console.error(e);
@@ -218,10 +216,7 @@ createServer((request, response) => {
     'Access-Control-Allow-Methods',
     'GET, POST, OPTIONS, PUT, PATCH, DELETE'
   );
-  response.setHeader(
-    'Access-Control-Allow-Headers',
-    'content-type'
-  );
+  response.setHeader('Access-Control-Allow-Headers', 'content-type');
 
   if (/options/i.test(request.method)) {
     return response.writeHead(200).end();
@@ -234,8 +229,8 @@ createServer((request, response) => {
       response.end();
 
       break;
-    case '/ut':
-      return ut(request, response);
+    case '/fetch':
+      return $fetch(request, response);
     case '/ssh':
       return ssh(request, response);
     case '/pg':
