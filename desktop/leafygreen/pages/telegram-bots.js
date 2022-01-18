@@ -42,6 +42,7 @@ export const telegramBotsPageTemplate = (context, definition) => html`
                 >`,
                 formatDate(datum.createdAt),
                 formatDate(datum.updatedAt ?? datum.createdAt),
+                datum.version,
                 html`
                   <${'ppp-button'}
                     class="xsmall"

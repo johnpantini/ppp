@@ -15,6 +15,10 @@ export class TelegramBotsPage extends PageWithTable {
       sortBy: (d) => d.updatedAt
     },
     {
+      label: 'Версия',
+      sortBy: (d) => d.version
+    },
+    {
       label: 'Действия'
     }
   ];

@@ -2,7 +2,6 @@
 
 import { BasePage } from '../page.js';
 import { invalidate, validate } from '../validate.js'
-import { FetchError } from '../fetch-error.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { maybeFetchError } from '../fetch-error.js';
