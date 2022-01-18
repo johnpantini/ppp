@@ -1,179 +1,140 @@
 import { BasePage } from '../page.js';
-import { DOM } from '../element/dom.js';
 import { validate, invalidate } from '../validate.js';
 import { parseJwt } from '../key-vault.js';
-import { auth0Bridge, auth0BridgeCallback } from '../auth0-bridge.js';
+import { maybeFetchError } from '../fetch-error.js';
 
 export async function checkGitHubToken({ token }) {
-  try {
-    return await fetch('https://api.github.com/user', {
-      cache: 'no-cache',
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-        Authorization: `token ${token}`
-      }
-    });
-  } catch (e) {
-    console.error(e);
-
-    return {
-      ok: false,
-      status: 422
-    };
-  }
-}
-
-export async function checkAuth0MgmntToken({ token, email }) {
-  try {
-    const json = parseJwt(token);
-    const url = new URL(
-      `users-by-email?fields=user_id&include_fields=true&email=${encodeURIComponent(
-        email
-      )}`,
-      json.aud
-    );
-
-    const r1 = await fetch(url.toString(), {
-      cache: 'no-cache',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    if (!r1.ok) {
-      return r1;
+  return fetch('https://api.github.com/user', {
+    cache: 'no-cache',
+    headers: {
+      Accept: 'application/vnd.github.v3+json',
+      Authorization: `token ${token}`
     }
-
-    const j1 = await r1.json();
-
-    if (!j1.length)
-      return {
-        ok: false,
-        status: 404
-      };
-
-    r1.details = j1;
-    r1.domain = url.hostname;
-
-    return r1;
-  } catch (e) {
-    console.error(e);
-
-    return {
-      ok: false,
-      status: 422
-    };
-  }
+  });
 }
 
-export async function checkMongoRealmCredentials({
+export async function checkMongoDBRealmCredentials({
+  serviceMachineUrl,
   publicKey,
-  privateKey,
-  auth0Token
+  privateKey
 }) {
-  return auth0Bridge({
-    auth0Token,
-    code: `console.log(await new Promise((resolve, reject) => {
-        request.post(
-          {
-            url: 'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
-            json: {
-              username: '${publicKey}',
-              apiKey: '${privateKey}'
-            }
-          }, ${auth0BridgeCallback}
-        );
-      }));`
+  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
+    cache: 'no-cache',
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      url: 'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
+      body: {
+        username: publicKey,
+        apiKey: privateKey
+      }
+    })
   });
 }
 
 export class CloudServicesPage extends BasePage {
   async #updateGitHubMilestone({ domain, clientId }) {
-    try {
-      const r1 = await fetch(
+    const rMilestones = await fetch(
+      `https://api.github.com/repos/${this.app.ppp.keyVault.getKey(
+        'github-login'
+      )}/ppp/milestones`,
+      {
+        cache: 'no-cache',
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `token ${this.app.ppp.keyVault.getKey('github-token')}`
+        }
+      }
+    );
+
+    await maybeFetchError(rMilestones);
+    this.progressOperation(95);
+
+    const jMilestones = await rMilestones.json();
+
+    if (!jMilestones.find((m) => m.title.trim() === domain.trim())) {
+      const rUpdateMilestone = await fetch(
         `https://api.github.com/repos/${this.app.ppp.keyVault.getKey(
           'github-login'
         )}/ppp/milestones`,
         {
-          cache: 'no-cache',
+          method: 'POST',
           headers: {
             Accept: 'application/vnd.github.v3+json',
             Authorization: `token ${this.app.ppp.keyVault.getKey(
               'github-token'
             )}`
-          }
+          },
+          body: JSON.stringify({
+            title: domain,
+            description: clientId
+          })
         }
       );
 
-      if (!r1.ok) {
-        console.warn(await r1.text());
-
-        return r1;
-      }
-
-      this.app.toast.progress.value = 95;
-
-      const j1 = await r1.json();
-
-      if (!j1.find((m) => m.title.trim() === domain.trim())) {
-        const r2 = await fetch(
-          `https://api.github.com/repos/${this.app.ppp.keyVault.getKey(
-            'github-login'
-          )}/ppp/milestones`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/vnd.github.v3+json',
-              Authorization: `token ${this.app.ppp.keyVault.getKey(
-                'github-token'
-              )}`
-            },
-            body: JSON.stringify({
-              title: domain,
-              description: clientId
-            })
-          }
-        );
-
-        if (!r2.ok) {
-          console.warn(await r2.text());
-
-          return r2;
-        }
-
-        return r2;
-      } else return r1;
-    } catch (e) {
-      console.error(e);
-
-      return {
-        ok: false,
-        status: 422
-      };
+      await maybeFetchError(rUpdateMilestone);
     }
   }
 
-  async #setUpAuth0App(auth0Token, userId) {
-    try {
-      const domainList = [
-        `https://*.github.io/ppp`,
-        `https://*.github.io/ppp/desktop`,
-        `https://*.github.io/ppp/mobile`,
-        `https://*.github.io.dev`,
-        `https://*.github.io.dev/desktop`,
-        `https://*.github.io.dev/mobile`,
-        `https://*.pages.dev`,
-        `https://*.pages.dev/desktop`,
-        `https://*.pages.dev/mobile`,
-        `https://*.netlify.app`,
-        `https://*.netlify.app/desktop`,
-        `https://*.netlify.app/mobile`
-      ];
+  async #setUpAuth0App({ auth0Token, userId }) {
+    const domainList = [
+      `https://*.github.io/ppp`,
+      `https://*.github.io/ppp/desktop`,
+      `https://*.github.io/ppp/mobile`,
+      `https://*.pages.dev`,
+      `https://*.pages.dev/desktop`,
+      `https://*.pages.dev/mobile`,
+      `https://*.onrender.com`,
+      `https://*.onrender.com/desktop`,
+      `https://*.onrender.com/mobile`,
+      `https://*.netlify.app`,
+      `https://*.netlify.app/desktop`,
+      `https://*.netlify.app/mobile`,
+      `https://*.vercel.app`,
+      `https://*.vercel.app/desktop`,
+      `https://*.vercel.app/mobile`,
+      // Development only
+      `https://*.github.io.dev`,
+      `https://*.github.io.dev/desktop`,
+      `https://*.github.io.dev/mobile`
+    ];
 
-      // 1. Save metadata
-      const json = parseJwt(auth0Token);
-      const r1 = await fetch(new URL(`users/${userId}`, json.aud).toString(), {
+    // 1. Get client ID
+    const { aud } = parseJwt(auth0Token);
+    const rClients = await fetch(
+      new URL(
+        `clients?fields=client_id,name&include_fields=true`,
+        aud
+      ).toString(),
+      {
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${auth0Token}`
+        }
+      }
+    );
+
+    await maybeFetchError(rClients);
+
+    const jClients = await rClients.json();
+    const pppApp = jClients?.find((c) => c.name === 'ppp');
+
+    if (!pppApp) {
+      invalidate(this.app.toast, {
+        errorMessage: 'Приложение ppp не найдено в сервисе Auth0.'
+      });
+    }
+
+    this.app.ppp.keyVault.setKey('auth0-client-id', pppApp.client_id);
+    this.progressOperation(85);
+
+    // 2. Save metadata
+    const rSaveMetadata = await fetch(
+      new URL(`users/${userId}`, aud).toString(),
+      {
+        cache: 'no-cache',
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -181,11 +142,12 @@ export class CloudServicesPage extends BasePage {
         },
         body: JSON.stringify({
           app_metadata: {
-            'auth0-client-id': this.app.ppp.keyVault.getKey('auth0-client-id'),
+            'auth0-client-id': pppApp.client_id,
             'auth0-domain': this.app.ppp.keyVault.getKey('auth0-domain'),
             'auth0-email': this.app.ppp.keyVault.getKey('auth0-email'),
             'github-login': this.app.ppp.keyVault.getKey('github-login'),
             'github-token': this.app.ppp.keyVault.getKey('github-token'),
+            'master-password': this.app.ppp.keyVault.getKey('master-password'),
             'mongo-api-key': this.app.ppp.keyVault.getKey('mongo-api-key'),
             'mongo-app-client-id': this.app.ppp.keyVault.getKey(
               'mongo-app-client-id'
@@ -201,451 +163,379 @@ export class CloudServicesPage extends BasePage {
             )
           }
         })
-      });
-
-      if (!r1.ok) {
-        console.warn(await r1.text());
-
-        return r1;
       }
+    );
 
-      this.app.toast.progress.value = 85;
+    await maybeFetchError(rSaveMetadata);
+    this.progressOperation(88);
 
-      // 2. Update URLs
-      const r2 = await fetch(
-        new URL(
-          `clients?fields=client_id,name&include_fields=true`,
-          json.aud
-        ).toString(),
-        {
+    // 3. Update Auth0 application
+    const rUpdateApp = await fetch(
+      new URL(`clients/${pppApp.client_id}`, aud).toString(),
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth0Token}`
+        },
+        body: JSON.stringify({
+          app_type: 'regular_web',
+          token_endpoint_auth_method: 'none',
+          callbacks: domainList,
+          web_origins: domainList,
+          allowed_logout_urls: domainList
+        })
+      }
+    );
+
+    await maybeFetchError(rUpdateApp);
+  }
+
+  async #createServerlessFunctions({
+    serviceMachineUrl,
+    mongoDBRealmAccessToken
+  }) {
+    const groupId = this.app.ppp.keyVault.getKey('mongo-group-id');
+    const appId = this.app.ppp.keyVault.getKey('mongo-app-id');
+    const funcs = [
+      { name: 'eval', path: 'functions/mongodb/eval.js' },
+      { name: 'aggregate', path: 'functions/mongodb/aggregate.js' },
+      { name: 'bulkWrite', path: 'functions/mongodb/bulk-write.js' },
+      { name: 'count', path: 'functions/mongodb/count.js' },
+      { name: 'deleteMany', path: 'functions/mongodb/delete-many.js' },
+      { name: 'deleteOne', path: 'functions/mongodb/delete-one.js' },
+      { name: 'distinct', path: 'functions/mongodb/distinct.js' },
+      { name: 'find', path: 'functions/mongodb/find.js' },
+      { name: 'findOne', path: 'functions/mongodb/find-one.js' },
+      {
+        name: 'findOneAndDelete',
+        path: 'functions/mongodb/find-one-and-delete.js'
+      },
+      {
+        name: 'findOneAndReplace',
+        path: 'functions/mongodb/find-one-and-replace.js'
+      },
+      {
+        name: 'findOneAndUpdate',
+        path: 'functions/mongodb/find-one-and-update.js'
+      },
+      { name: 'insertMany', path: 'functions/mongodb/insert-many.js' },
+      { name: 'insertOne', path: 'functions/mongodb/insert-one.js' },
+      { name: 'updateMany', path: 'functions/mongodb/update-many.js' },
+      { name: 'updateOne', path: 'functions/mongodb/update-one.js' }
+    ];
+
+    const rFunctionList = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'GET',
+          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
           headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${auth0Token}`
+            Authorization: `Bearer ${mongoDBRealmAccessToken}`
           }
-        }
+        })
+      }
+    );
+
+    await maybeFetchError(rFunctionList);
+    this.progressOperation(30);
+
+    const functions = await rFunctionList.json();
+
+    for (const f of functions) {
+      if (funcs.find((fun) => fun.name === f.name)) {
+        const rRemoveFunc = await fetch(
+          new URL('fetch', serviceMachineUrl).toString(),
+          {
+            cache: 'no-cache',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              method: 'DELETE',
+              url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${f._id}`,
+              headers: {
+                Authorization: `Bearer ${mongoDBRealmAccessToken}`
+              }
+            })
+          }
+        );
+
+        await maybeFetchError(rRemoveFunc);
+
+        this.app.toast.progress.value += Math.floor(25 / funcs.length);
+      }
+    }
+
+    for (const f of funcs) {
+      const sourceRequest = await fetch(
+        new URL(f.path, window.location.origin + window.location.pathname)
       );
-
-      if (!r2.ok) {
-        console.warn(await r2.text());
-
-        return r2;
-      }
-
-      const j2 = await r2.json();
-      const pppApp = j2?.find((c) => c.name === 'ppp');
-
-      if (!pppApp) {
-        return {
-          ok: false,
-          details: j2,
-          status: 417
-        };
-      }
-
-      this.app.ppp.keyVault.setKey('auth0-client-id', pppApp.client_id);
-      this.app.toast.progress.value = 88;
-
-      const r3 = await fetch(
-        new URL(`clients/${pppApp.client_id}`, json.aud).toString(),
+      const source = await sourceRequest.text();
+      const rCreateFunc = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
         {
-          method: 'PATCH',
+          cache: 'no-cache',
+          method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${auth0Token}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            app_type: 'regular_web',
-            token_endpoint_auth_method: 'none',
-            callbacks: domainList,
-            web_origins: domainList,
-            allowed_logout_urls: domainList
+            method: 'POST',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: JSON.stringify({
+              name: f.name,
+              source,
+              run_as_system: true
+            })
           })
         }
       );
 
-      if (!r3.ok) {
-        console.warn(await r3.text());
+      await maybeFetchError(rCreateFunc);
 
-        return r3;
-      }
-
-      r3.clientId = pppApp.client_id;
-
-      return r3;
-    } catch (e) {
-      console.error(e);
-
-      return {
-        ok: false,
-        status: 422
-      };
+      this.app.toast.progress.value += Math.floor(25 / funcs.length);
     }
   }
 
-  async #createServerlessFunctions(auth0Token, mongoDBRealmToken) {
-    try {
-      const groupId = this.app.ppp.keyVault.getKey('mongo-group-id');
-      const appId = this.app.ppp.keyVault.getKey('mongo-app-id');
-      const funcs = [
-        { name: 'aggregate', path: 'functions/mongodb/aggregate.js' },
-        { name: 'bulkWrite', path: 'functions/mongodb/bulk-write.js' },
-        { name: 'count', path: 'functions/mongodb/count.js' },
-        { name: 'deleteMany', path: 'functions/mongodb/delete-many.js' },
-        { name: 'deleteOne', path: 'functions/mongodb/delete-one.js' },
-        { name: 'distinct', path: 'functions/mongodb/distinct.js' },
-        { name: 'find', path: 'functions/mongodb/find.js' },
-        { name: 'findOne', path: 'functions/mongodb/find-one.js' },
-        {
-          name: 'findOneAndDelete',
-          path: 'functions/mongodb/find-one-and-delete.js'
+  async #setUpMongoDBRealmApp({ serviceMachineUrl, mongoDBRealmAccessToken }) {
+    // 1. Get Group (Project) ID
+    const rProjectId = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        {
-          name: 'findOneAndReplace',
-          path: 'functions/mongodb/find-one-and-replace.js'
-        },
-        {
-          name: 'findOneAndUpdate',
-          path: 'functions/mongodb/find-one-and-update.js'
-        },
-        { name: 'insertMany', path: 'functions/mongodb/insert-many.js' },
-        { name: 'insertOne', path: 'functions/mongodb/insert-one.js' },
-        { name: 'updateMany', path: 'functions/mongodb/update-many.js' },
-        { name: 'updateOne', path: 'functions/mongodb/update-one.js' }
-      ];
-
-      const r1 = await auth0Bridge({
-        auth0Token,
-        code: `console.log(await new Promise((resolve, reject) => {
-          request.get(
-            {
-              url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions',
-              headers: {
-                Authorization: 'Bearer ${mongoDBRealmToken}'
-              }
-            }, ${auth0BridgeCallback}
-          );
-        }));`
-      });
-
-      if (!r1.ok) {
-        return r1;
-      }
-
-      this.app.toast.progress.value = 30;
-
-      const functions = new Function(`return ${r1.logs.response}`)();
-
-      for (const f of functions) {
-        if (funcs.find((fun) => fun.name === f.name)) {
-          const rd = await auth0Bridge({
-            auth0Token,
-            code: `console.log(await new Promise((resolve, reject) => {
-              request.delete(
-                {
-                  url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${f._id}',
-                  headers: {
-                    Authorization: 'Bearer ${mongoDBRealmToken}'
-                  }
-                }, ${auth0BridgeCallback}
-              );
-            }));`
-          });
-
-          if (!rd.ok) {
-            return rd;
+        body: JSON.stringify({
+          method: 'GET',
+          url: 'https://realm.mongodb.com/api/admin/v3.0/auth/profile',
+          headers: {
+            Authorization: `Bearer ${mongoDBRealmAccessToken}`
           }
-
-          this.app.toast.progress.value += Math.floor(25 / funcs.length);
-        }
+        })
       }
+    );
 
-      for (const f of funcs) {
-        const codeRequest = await fetch(
-          new URL(f.path, window.location.origin + window.location.pathname)
-        );
+    await maybeFetchError(rProjectId);
+    this.progressOperation(5);
 
-        if (codeRequest.ok) {
-          const code = await codeRequest.text();
+    const { roles } = await rProjectId.json();
 
-          const r2 = await auth0Bridge({
-            auth0Token,
-            code: `console.log(await new Promise((resolve, reject) => {
-              request.post(
-                {
-                  url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions',
-                  headers: {
-                    Authorization: 'Bearer ${mongoDBRealmToken}'
-                  },
-                  json: {
-                    name: '${f.name}',
-                    source: ${JSON.stringify(code)},
-                    run_as_system: true
-                  }
-                }, ${auth0BridgeCallback}
-              );
-            }));`
-          });
+    // TODO - will fail if a user has multiple projects
+    const groupId = roles?.find((r) => r.role_name === 'GROUP_OWNER')?.group_id;
 
-          if (!r2.ok) {
-            return r2;
+    if (groupId) {
+      this.app.ppp.keyVault.setKey('mongo-group-id', groupId);
+    } else {
+      invalidate(this.app.toast, {
+        errorMessage: 'Проект ppp не найден.'
+      });
+    }
+
+    // 2. Get App Client ID
+    const rAppId = await fetch(new URL('fetch', serviceMachineUrl).toString(), {
+      cache: 'no-cache',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        method: 'GET',
+        url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps`,
+        headers: {
+          Authorization: `Bearer ${mongoDBRealmAccessToken}`
+        }
+      })
+    });
+
+    await maybeFetchError(rAppId);
+    this.progressOperation(10);
+
+    const apps = await rAppId.json();
+    const pppApp = apps?.find((a) => a.name === 'ppp');
+
+    if (pppApp) {
+      this.app.ppp.keyVault.setKey('mongo-app-client-id', pppApp.client_app_id);
+      this.app.ppp.keyVault.setKey('mongo-app-id', pppApp._id);
+    } else {
+      invalidate(this.app.toast, {
+        errorMessage: 'Приложение ppp не найдено.'
+      });
+    }
+
+    // 3. Create & enable API Key provider
+    const rAuthProviders = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'GET',
+          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers`,
+          headers: {
+            Authorization: `Bearer ${mongoDBRealmAccessToken}`
           }
-
-          this.app.toast.progress.value += Math.floor(25 / funcs.length);
-        } else return codeRequest;
+        })
       }
+    );
 
-      return {
-        ok: true,
-        status: 204
-      };
-    } catch (e) {
-      console.error(e);
+    await maybeFetchError(rAuthProviders);
+    this.progressOperation(15);
 
-      return {
-        ok: false,
-        status: 422
-      };
-    }
-  }
+    const providers = await rAuthProviders.json();
+    const apiKeyProvider = providers.find((p) => (p.type = 'api-key'));
 
-  async #setUpMongoDBRealm(auth0Token, mongoDBRealmToken) {
-    try {
-      // 1. Get Group (Project) ID
-      const r1 = await auth0Bridge({
-        auth0Token,
-        code: `console.log(await new Promise((resolve, reject) => {
-          request.get(
-            {
-              url: 'https://realm.mongodb.com/api/admin/v3.0/auth/profile',
-              headers: {
-                Authorization: 'Bearer ${mongoDBRealmToken}'
-              }
-            }, ${auth0BridgeCallback}
-          );
-        }));`
-      });
-
-      if (!r1.ok) {
-        return r1;
-      }
-
-      this.app.toast.progress.value = 5;
-
-      const { roles } = new Function(`return ${r1.logs.response}`)();
-
-      // TODO - can fail if a user has multiple projects
-      const groupId = roles?.find(
-        (r) => r.role_name === 'GROUP_OWNER'
-      )?.group_id;
-
-      if (groupId) {
-        this.app.ppp.keyVault.setKey('mongo-group-id', groupId);
-      } else {
-        return {
-          ok: false,
-          details: {
-            missing: 'project'
+    if (apiKeyProvider && apiKeyProvider.disabled) {
+      const rEnableAPIKeyProvider = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
           },
-          status: 404
-        };
-      }
-
-      // 2. Get App Client ID
-      const r2 = await auth0Bridge({
-        auth0Token,
-        code: `console.log(await new Promise((resolve, reject) => {
-          request.get(
-            {
-              url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps',
-              headers: {
-                Authorization: 'Bearer ${mongoDBRealmToken}'
-              }
-            }, ${auth0BridgeCallback}
-          );
-        }));`
-      });
-
-      if (!r2.ok) {
-        return r2;
-      }
-
-      this.app.toast.progress.value = 10;
-
-      const apps = new Function(`return ${r2.logs.response}`)();
-      const pppApp = apps?.find((a) => a.name === 'ppp');
-
-      if (pppApp) {
-        this.app.ppp.keyVault.setKey(
-          'mongo-app-client-id',
-          pppApp.client_app_id
-        );
-        this.app.ppp.keyVault.setKey('mongo-app-id', pppApp._id);
-      } else {
-        return {
-          ok: false,
-          details: {
-            missing: 'app'
-          },
-          status: 404
-        };
-      }
-
-      // 3. Create & enable API Key provider
-      const r3 = await auth0Bridge({
-        auth0Token,
-        code: `console.log(await new Promise((resolve, reject) => {
-          request.get(
-            {
-              url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers',
-              headers: {
-                Authorization: 'Bearer ${mongoDBRealmToken}'
-              }
-            }, ${auth0BridgeCallback}
-          );
-        }));`
-      });
-
-      if (!r3.ok) {
-        return r3;
-      }
-
-      this.app.toast.progress.value = 15;
-
-      const providers = new Function(`return ${r3.logs.response}`)();
-      const apiKeyProvider = providers.find((p) => (p.type = 'api-key'));
-
-      if (apiKeyProvider && apiKeyProvider.disabled) {
-        const re = await auth0Bridge({
-          auth0Token,
-          code: `console.log(await new Promise((resolve, reject) => {
-            request.put(
-              {
-                url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers/${apiKeyProvider._id}/enable',
-                headers: {
-                  Authorization: 'Bearer ${mongoDBRealmToken}'
-                }
-              }, ${auth0BridgeCallback}
-            );
-          }));`
-        });
-
-        if (!re.ok) {
-          return re;
+          body: JSON.stringify({
+            method: 'PUT',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers/${apiKeyProvider._id}/enable`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            }
+          })
         }
-      }
+      );
 
-      if (!apiKeyProvider) {
-        const r4 = await auth0Bridge({
-          auth0Token,
-          code: `console.log(await new Promise((resolve, reject) => {
-            request.post(
-              {
-                url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers',
-                headers: {
-                  Authorization: 'Bearer ${mongoDBRealmToken}'
-                },
-                json: {
-                  name: 'api-key',
-                  type: 'api-key',
-                  disabled: false
-                }
-              }, ${auth0BridgeCallback}
-            );
-          }));`
-        });
-
-        if (!r4.ok) {
-          return r4;
-        }
-      }
-
-      // 4. Create an API Key
-      const r5 = await auth0Bridge({
-        auth0Token,
-        code: `console.log(await new Promise((resolve, reject) => {
-          request.get(
-            {
-              url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys',
-              headers: {
-                Authorization: 'Bearer ${mongoDBRealmToken}'
-              }
-            }, ${auth0BridgeCallback}
-          );
-        }));`
-      });
-
-      if (!r5.ok) {
-        return r5;
-      }
-
-      this.app.toast.progress.value = 20;
-
-      const apiKeys = new Function(`return ${r5.logs.response}`)();
-      const pppKey = apiKeys.find((k) => k.name === 'ppp');
-
-      if (pppKey) {
-        const r6 = await auth0Bridge({
-          auth0Token,
-          code: `console.log(await new Promise((resolve, reject) => {
-            request.delete(
-              {
-                url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys/${pppKey._id}',
-                headers: {
-                  Authorization: 'Bearer ${mongoDBRealmToken}'
-                }
-              }, ${auth0BridgeCallback}
-            );
-          }));`
-        });
-
-        if (!r6.ok) {
-          return r6;
-        }
-      }
-
-      const r7 = await auth0Bridge({
-        auth0Token,
-        code: `console.log(await new Promise((resolve, reject) => {
-          request.post(
-            {
-              url: 'https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys',
-              headers: {
-                Authorization: 'Bearer ${mongoDBRealmToken}'
-              },
-              json: {
-                name: 'ppp'
-              }
-            }, ${auth0BridgeCallback}
-          );
-        }));`
-      });
-
-      if (!r7.ok) {
-        return r7;
-      }
-
-      this.app.toast.progress.value = 25;
-      this.app.ppp.keyVault.setKey('mongo-api-key', r7.logs.response.key);
-
-      // 5. Create serverless functions
-      return this.#createServerlessFunctions(auth0Token, mongoDBRealmToken);
-    } catch (e) {
-      console.error(e);
-
-      return {
-        ok: false,
-        status: 422
-      };
+      await maybeFetchError(rEnableAPIKeyProvider);
     }
+
+    if (!apiKeyProvider) {
+      const rCreateAPIKeyProvider = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'POST',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: JSON.stringify({
+              name: 'api-key',
+              type: 'api-key',
+              disabled: false
+            })
+          })
+        }
+      );
+
+      await maybeFetchError(rCreateAPIKeyProvider);
+    }
+
+    // 4. Create an API Key
+    const rAPIKeys = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'GET',
+          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys`,
+          headers: {
+            Authorization: `Bearer ${mongoDBRealmAccessToken}`
+          }
+        })
+      }
+    );
+
+    await maybeFetchError(rAPIKeys);
+    this.progressOperation(20);
+
+    const apiKeys = await rAPIKeys.json();
+    const pppKey = apiKeys.find((k) => k.name === 'ppp');
+
+    if (pppKey) {
+      const rRemoveAPIKey = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'DELETE',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys/${pppKey._id}`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            }
+          })
+        }
+      );
+
+      await maybeFetchError(rRemoveAPIKey);
+    }
+
+    const rCreateAPIKey = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'POST',
+          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys`,
+          headers: {
+            Authorization: `Bearer ${mongoDBRealmAccessToken}`
+          },
+          body: JSON.stringify({
+            name: 'ppp'
+          })
+        })
+      }
+    );
+
+    await maybeFetchError(rCreateAPIKey);
+    this.progressOperation(25);
+    this.app.ppp.keyVault.setKey(
+      'mongo-api-key',
+      (await rCreateAPIKey.json()).key
+    );
+
+    // 5. Create serverless functions
+    await this.#createServerlessFunctions({
+      serviceMachineUrl,
+      mongoDBRealmAccessToken
+    });
   }
 
   async saveCloudCredentials() {
-    try {
-      this.busy = true;
-      this.app.toast.visible = false;
-      this.app.toast.source = this;
-      this.toastTitle = 'Настройка облачных сервисов';
+    this.beginOperation();
 
+    try {
+      await validate(this.masterPassword);
       await validate(this.serviceMachineUrl);
       await validate(this.gitHubToken);
       await validate(this.auth0Token);
@@ -655,11 +545,18 @@ export class CloudServicesPage extends BasePage {
 
       localStorage.removeItem('ppp-mongo-location-url');
 
-      const serviceMachineURL = new URL('ping', this.serviceMachineUrl.value);
+      this.app.ppp.keyVault.setKey(
+        'master-password',
+        this.masterPassword.value.trim()
+      );
+
+      let serviceMachineUrl;
 
       // Check service machine URL
       try {
-        const rs = await fetch(serviceMachineURL);
+        serviceMachineUrl = new URL('ping', this.serviceMachineUrl.value);
+
+        const rs = await fetch(serviceMachineUrl.toString());
         const rst = await rs.text();
 
         if (rst !== 'pong') {
@@ -669,91 +566,97 @@ export class CloudServicesPage extends BasePage {
         }
       } catch (e) {
         invalidate(this.serviceMachineUrl, {
-          errorMessage: 'Неверный URL'
+          errorMessage: 'Неверный или неполный URL'
         });
       }
 
       this.app.ppp.keyVault.setKey(
         'service-machine-url',
-        serviceMachineURL.origin
+        serviceMachineUrl.origin
       );
 
       // 1. Check GitHub token, store repo owner
-      const r1 = await checkGitHubToken({
+      const rGitHub = await checkGitHubToken({
         token: this.gitHubToken.value
       });
 
-      if (!r1.ok) {
-        console.warn(await r1.text());
-
+      if (!rGitHub.ok) {
         invalidate(this.gitHubToken, {
           errorMessage: 'Неверный токен',
-          status: r1.status
+          silent: true
+        });
+
+        await maybeFetchError(rGitHub);
+      }
+
+      const jGitHub = await rGitHub.json();
+
+      this.app.ppp.keyVault.setKey('github-login', jGitHub.login);
+      this.app.ppp.keyVault.setKey('github-token', this.gitHubToken.value);
+
+      // 2. Check Auth0 management token
+      const { aud } = parseJwt(this.auth0Token.value);
+      const url = new URL(
+        `users-by-email?fields=user_id&include_fields=true&email=${encodeURIComponent(
+          this.auth0Email.value
+        )}`,
+        aud
+      );
+
+      const rAuth0 = await fetch(url.toString(), {
+        cache: 'no-cache',
+        headers: {
+          Accept: 'application/json',
+          Authorization: `Bearer ${this.auth0Token.value}`
+        }
+      });
+
+      // {statusCode: 400, error: 'Bad Request', message: "Query validation error: 'Object didn't pass valida…l (Email address to search for (case-sensitive)).", errorCode: 'invalid_query_string'}
+      if (rAuth0.status === 400) {
+        invalidate(this.auth0Email, {
+          errorMessage: 'Некорректный e-mail',
+          silent: true
+        });
+
+        await maybeFetchError(rAuth0);
+      }
+
+      const jAuth0 = await rAuth0.json();
+
+      if (rAuth0.status === 401 && /expired/i.test(jAuth0?.message)) {
+        invalidate(this.auth0Token, {
+          errorMessage: 'Токен истёк'
+        });
+      } else if (!rAuth0.ok) {
+        invalidate(this.auth0Token, {
+          errorMessage: 'Неверный токен'
         });
       }
 
-      const j1 = await r1.json();
-
-      this.app.ppp.keyVault.setKey('github-login', j1.login);
-      this.app.ppp.keyVault.setKey('github-token', this.gitHubToken.value);
-
-      // 2. Check Auth0 mgmnt token
-      const r2 = await checkAuth0MgmntToken({
-        token: this.auth0Token.value,
-        email: this.auth0Email.value
-      });
-
-      if (!r2.ok) {
-        if (r2.status === 404) {
-          invalidate(this.auth0Email, {
-            errorMessage: 'Пользователь не найден',
-            status: r2.status
-          });
-        } else {
-          if (r2.status === 401) {
-            const j2 = await r2.json();
-
-            if (/expired/i.test(j2?.message)) {
-              invalidate(this.auth0Token, {
-                errorMessage: 'Токен истёк',
-                status: r2.status
-              });
-            } else {
-              invalidate(this.auth0Token, {
-                errorMessage: 'Неверный токен',
-                status: r2.status
-              });
-            }
-          } else
-            invalidate(this.auth0Token, {
-              errorMessage: 'Неверный токен',
-              status: r2.status
-            });
-        }
+      if (!jAuth0.length) {
+        invalidate(this.auth0Email, {
+          errorMessage: 'Пользователь не найден'
+        });
       }
 
-      this.app.ppp.keyVault.setKey('auth0-domain', r2.domain);
+      this.app.ppp.keyVault.setKey('auth0-domain', new URL(aud).hostname);
       this.app.ppp.keyVault.setKey('auth0-token', this.auth0Token.value);
       this.app.ppp.keyVault.setKey('auth0-email', this.auth0Email.value);
 
       // 3. Check MongoDB Realm admin credentials, get the access_token
-      const r3 = await checkMongoRealmCredentials({
+      const rMongoDBRealmCredentials = await checkMongoDBRealmCredentials({
+        serviceMachineUrl: serviceMachineUrl.origin,
         publicKey: this.mongoPublicKey.value,
-        privateKey: this.mongoPrivateKey.value,
-        auth0Token: this.app.ppp.keyVault.getKey('auth0-token')
+        privateKey: this.mongoPrivateKey.value
       });
 
-      if (!r3.ok) {
-        console.warn(r3);
-
-        let errorMessage = 'Проблема с MongoDB';
-
-        if (r3.status === 401) errorMessage = 'Неверные ключи MongoDB Realm';
-
+      if (!rMongoDBRealmCredentials.ok) {
         invalidate(this.mongoPrivateKey, {
-          errorMessage,
-          status: r3.status
+          errorMessage: 'Неверные ключи MongoDB Realm',
+          silent: true
         });
+
+        await maybeFetchError(rMongoDBRealmCredentials);
       }
 
       this.app.ppp.keyVault.setKey(
@@ -765,88 +668,36 @@ export class CloudServicesPage extends BasePage {
         this.mongoPrivateKey.value
       );
 
-      this.app.toast.appearance = 'progress';
-      this.app.toast.dismissible = false;
-      this.toastText = 'Настройка приложения MongoDB Realm';
-      this.app.toast.visible = true;
+      const jMongoDBRealmCredentials = await rMongoDBRealmCredentials.json();
 
-      DOM.queueUpdate(() => (this.app.toast.progress.value = 0));
+      this.progressOperation(0, 'Настройка приложения MongoDB Realm');
 
-      // 4. Create a MongoDB realm API key, setup cloud functions and services
-      const r4 = await this.#setUpMongoDBRealm(
-        this.app.ppp.keyVault.getKey('auth0-token'),
-        r3.logs.response.access_token
-      );
+      // 4. Create a MongoDB realm API key, setup cloud functions
+      await this.#setUpMongoDBRealmApp({
+        serviceMachineUrl: serviceMachineUrl.origin,
+        mongoDBRealmAccessToken: jMongoDBRealmCredentials.access_token
+      });
 
-      if (!r4.ok) {
-        console.warn(r4);
-
-        if (r4.status === 404 && r4.details.missing === 'project') {
-          invalidate(this.app.toast, {
-            errorMessage: 'Проект ppp не найден.'
-          });
-        } else if (r4.status === 404 && r4.details.missing === 'app') {
-          invalidate(this.app.toast, {
-            errorMessage: 'Приложение ppp не найдено.'
-          });
-        } else {
-          invalidate(this.app.toast, {
-            errorMessage: 'Операция не выполнена.'
-          });
-        }
-      }
-
-      this.app.toast.progress.value = 80;
-      this.toastText = 'Запись учётных данных в приложение Auth0';
+      this.progressOperation(80, 'Запись учётных данных в приложение Auth0');
 
       // 5. Store all the credentials inside Auth0 app
-      const r5 = await this.#setUpAuth0App(
-        this.auth0Token.value,
-        r2.details[0].user_id
-      );
-
-      if (!r5.ok) {
-        console.warn(r5);
-
-        if (r5.status === 417) {
-          invalidate(this.app.toast, {
-            errorMessage: 'Приложение ppp не найдено.'
-          });
-        } else {
-          invalidate(this.app.toast, {
-            errorMessage: 'Операция не выполнена.'
-          });
-        }
-      }
-
-      this.app.toast.progress.value = 90;
-      this.toastText = 'Сохранение данных авторизации Auth0 в GitHub';
-
-      const r6 = await this.#updateGitHubMilestone({
-        domain: r2.domain,
-        clientId: r5.clientId
+      await this.#setUpAuth0App({
+        auth0Token: this.auth0Token.value,
+        userId: jAuth0[0].user_id
       });
 
-      if (!r6.ok) {
-        console.warn(r6);
+      this.progressOperation(90);
 
-        invalidate(this.app.toast, {
-          errorMessage: 'Операция не выполнена.'
-        });
-      }
+      await this.#updateGitHubMilestone({
+        domain: new URL(aud).hostname,
+        clientId: this.app.ppp.keyVault.getKey('auth0-client-id')
+      });
 
-      this.app.toast.appearance = 'success';
-      this.app.toast.dismissible = true;
-      this.toastText = 'Операция выполнена успешно, обновите страницу.'
-      this.app.toast.progress.value = 100;
+      this.succeedOperation();
     } catch (e) {
-      console.error(e);
-
-      invalidate(this.app.toast, {
-        errorMessage: 'Операция не выполнена.'
-      });
+      this.failOperation(e);
     } finally {
-      this.busy = false;
+      this.endOperation();
     }
   }
 }
