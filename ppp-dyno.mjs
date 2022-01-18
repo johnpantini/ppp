@@ -29,7 +29,7 @@ async function $fetch(request, response) {
     }
 
     const requestOptions = {
-      method: request.method.toUpperCase(),
+      method: body.method.toUpperCase() ?? request.method.toUpperCase(),
       headers
     };
 
