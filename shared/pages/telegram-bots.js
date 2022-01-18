@@ -1,19 +1,18 @@
 import { PageWithTable } from '../page.js';
-import { Observable } from '../element/observation/observable.js';
 
 export class TelegramBotsPage extends PageWithTable {
   columns = [
     {
       label: 'Название',
-      sortBy: (d) => d._id
+      sortBy: (d) => d.name
     },
     {
       label: 'Дата создания',
-      sortBy: (d) => d.created_at
+      sortBy: (d) => d.createdAt
     },
     {
       label: 'Последнее изменение',
-      sortBy: (d) => d.updated_at
+      sortBy: (d) => d.updatedAt
     },
     {
       label: 'Действия'

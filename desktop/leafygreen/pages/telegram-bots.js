@@ -30,18 +30,18 @@ export const telegramBotsPageTemplate = (context, definition) => html`
               cells: [
                 html`<a
                   @click="${() => {
-                  x.app.navigate({
-                    page: 'telegram-bot',
-                    bot: datum.uuid
-                  });
+                    x.app.navigate({
+                      page: 'telegram-bot',
+                      bot: datum._id
+                    });
 
-                  return false;
-                }}"
-                  href="?page=telegram-bot&bot=${datum.uuid}"
-                  >${datum._id}</a
+                    return false;
+                  }}"
+                  href="?page=telegram-bot&bot=${datum._id}"
+                  >${datum.name}</a
                 >`,
-                formatDate(datum.created_at),
-                formatDate(datum.updated_at ?? datum.created_at),
+                formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
                   <${'ppp-button'}
                     class="xsmall"

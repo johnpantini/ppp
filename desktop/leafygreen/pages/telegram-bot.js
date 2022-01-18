@@ -19,9 +19,8 @@ export const telegramBotPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              ?disabled="${(x) => x.bot}"
               placeholder="My bot"
-              value="${(x) => x.bot?._id}"
+              value="${(x) => x.bot?.name}"
               ${ref('botName')}
             ></ppp-text-field>
           </div>

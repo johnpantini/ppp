@@ -1,10 +1,11 @@
 /** @decorator */
 
 import { BasePage } from '../page.js';
-import { validate } from '../validate.js';
+import { invalidate, validate } from '../validate.js'
 import { FetchError } from '../fetch-error.js';
-import { generateIV, uuidv4, bufferToString } from '../ppp-crypto.js';
+import { generateIV, bufferToString } from '../ppp-crypto.js';
 import { Observable, observable } from '../element/observation/observable.js';
+import { maybeFetchError } from '../fetch-error.js';
 
 export async function checkTelegramBotToken({ token }) {
   return fetch(`https://api.telegram.org/bot${token}/getMe`, {
@@ -19,9 +20,9 @@ export class TelegramBotPage extends BasePage {
   async connectedCallback() {
     super.connectedCallback();
 
-    const bot = this.app.params()?.bot;
+    const botId = this.app.params()?.bot;
 
-    if (bot) {
+    if (botId) {
       this.beginOperation();
 
       try {
@@ -30,7 +31,7 @@ export class TelegramBotPage extends BasePage {
             collection: 'bots'
           },
           {
-            uuid: bot
+            _id: botId
           }
         );
 
@@ -59,13 +60,18 @@ export class TelegramBotPage extends BasePage {
       await validate(this.botName);
       await validate(this.botToken);
 
-      const r1 = await checkTelegramBotToken({
+      const rNewBot = await checkTelegramBotToken({
         token: this.botToken.value.trim()
       });
 
-      if (!r1.ok)
-        // noinspection ExceptionCaughtLocallyJS
-        throw new FetchError({ ...r1, ...{ message: await r1.text() } });
+      if (!rNewBot.ok) {
+        invalidate(this.botToken, {
+          errorMessage: 'Неверный токен',
+          silent: true
+        });
+
+        await maybeFetchError(rNewBot);
+      }
 
       const iv = generateIV();
       const encryptedToken = await this.app.ppp.crypto.encrypt(
@@ -83,11 +89,12 @@ export class TelegramBotPage extends BasePage {
           },
           {
             $set: {
+              name: this.botName.value.trim(),
               version: 1,
               iv: bufferToString(iv),
               token: encryptedToken,
               type: 'telegram',
-              updated_at: new Date()
+              updatedAt: new Date()
             }
           }
         );
@@ -97,12 +104,11 @@ export class TelegramBotPage extends BasePage {
             collection: 'bots'
           },
           {
-            _id: this.botName.value.trim(),
+            name: this.botName.value.trim(),
             version: 1,
-            uuid: uuidv4(),
             type: 'telegram',
-            created_at: new Date(),
-            updated_at: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
             iv: bufferToString(iv),
             token: encryptedToken
           }
