@@ -36,7 +36,10 @@ async function validate(element, options) {
 
         element?.focus();
 
-        throw new ValidationError({ element });
+        throw new ValidationError({
+          element,
+          message: 'Форма заполнена некорректно или не полностью.'
+        });
       }
 
       break;
@@ -44,24 +47,30 @@ async function validate(element, options) {
 }
 
 function invalidate(element, options = {}) {
+  const errorMessage = options.errorMessage ?? 'Неизвестная ошибка';
+
   if (element.$pppController.definition.type.name === 'Toast') {
     element.appearance = 'warning';
     element.dismissible = true;
 
     if (!element.source.toastTitle) element.source.toastTitle = 'ppp';
 
-    element.source.toastText = options.errorMessage ?? 'Неизвестная ошибка';
+    element.source.toastText = errorMessage;
 
     element.visible = true;
   } else {
-    element.errorMessage = options.errorMessage ?? 'Неизвестная ошибка';
+    element.errorMessage = errorMessage;
     element.state = 'error';
 
     element?.focus();
   }
 
   if (!options.silent)
-    throw new ValidationError({ element, status: options.status });
+    throw new ValidationError({
+      message: errorMessage,
+      element,
+      status: options.status
+    });
 }
 
 export { validate, invalidate };
