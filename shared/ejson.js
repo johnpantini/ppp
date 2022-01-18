@@ -27,7 +27,15 @@ export function serializeDocument(doc, options) {
     const _doc = {};
 
     for (const name in doc) {
-      _doc[name] = serializeValue(doc[name], options);
+      if (
+        name === '_id' &&
+        typeof doc[name] === 'string' &&
+        !doc[name].startsWith('@')
+      )
+        _doc[name] = {
+          $oid: doc[name]
+        };
+      else _doc[name] = serializeValue(doc[name], options);
     }
 
     return _doc;
@@ -73,6 +81,11 @@ export function serializeValue(value, options) {
 }
 
 const keysToCodecs = {
+  $oid: {
+    fromExtendedJSON(doc, options) {
+      return doc.$oid;
+    }
+  },
   $numberInt: {
     fromExtendedJSON(doc, options) {
       return parseInt(doc.$numberInt, 10);
