@@ -52,7 +52,7 @@ export function $debounce(
 export function throttle(wait = 0, opts = {}) {
   return (proto, name, descriptor) => {
     if (!descriptor || typeof descriptor.value !== 'function') {
-      throw new Error('throttle can only decorate functions');
+      throw new Error('throttle can only decorate functions.');
     }
 
     const fn = descriptor.value;
@@ -65,7 +65,7 @@ export function throttle(wait = 0, opts = {}) {
 export function debounce(wait = 0, opts = {}) {
   return (proto, name, descriptor) => {
     if (!descriptor || typeof descriptor.value !== 'function') {
-      throw new Error('debounce can only decorate functions');
+      throw new Error('debounce can only decorate functions.');
     }
 
     const fn = descriptor.value;
