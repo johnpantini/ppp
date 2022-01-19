@@ -7,7 +7,5 @@
   "scripts": {
     "start": "node ppp-dyno.mjs"
   },
-  "dependencies": {
-  },
   "license": "MIT"
 }
