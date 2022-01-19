@@ -95,6 +95,9 @@ export class CloudServicesPage extends BasePage {
       `https://*.vercel.app`,
       `https://*.vercel.app/desktop`,
       `https://*.vercel.app/mobile`,
+      `https://*.ondigitalocean.app`,
+      `https://*.ondigitalocean.app/desktop`,
+      `https://*.ondigitalocean.app/mobile`,
       // Development only
       `https://*.github.io.dev`,
       `https://*.github.io.dev/desktop`,
