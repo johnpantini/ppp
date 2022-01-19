@@ -1,3 +1,5 @@
+import ppp from '../ppp.js';
+
 export function stringToBuffer(base64) {
   const string = window.atob(base64);
   const buffer = new ArrayBuffer(string.length);
@@ -64,14 +66,11 @@ export function uuidv4() {
 export class PPPCrypto {
   #key;
 
-  constructor(ppp) {
-    this.ppp = ppp;
-  }
-
   async #generateKey() {
     if (!this.#key) {
-      const token = this.ppp.keyVault.getKey('github-token');
-      const rawKey = new TextEncoder().encode(token.slice(4, 36));
+      const rawKey = new TextEncoder().encode(
+        ppp.keyVault.getKey('master-password').slice(0, 32).padEnd(32, '.')
+      );
 
       this.#key = await window.crypto.subtle.importKey(
         'raw',
