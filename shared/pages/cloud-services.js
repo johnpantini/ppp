@@ -696,7 +696,9 @@ export class CloudServicesPage extends BasePage {
         clientId: this.app.ppp.keyVault.getKey('auth0-client-id')
       });
 
-      this.succeedOperation();
+      this.succeedOperation(
+        'Операция успешно выполнена. Необходимо обновить страницу.'
+      );
     } catch (e) {
       this.failOperation(e);
     } finally {
