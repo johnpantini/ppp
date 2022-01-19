@@ -8,7 +8,8 @@ export const SUPPORTED_APIS = {
 };
 
 export const SUPPORTED_SERVICES = {
-  SPBEX_HALTS: 'spbex-halts'
+  SPBEX_HALTS: 'spbex-halts',
+  NYSE_NSDQ_HALTS: 'nyse-nsdq-halts'
 };
 
 export const SUPPORTED_BROKERS = {
