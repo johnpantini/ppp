@@ -24,6 +24,10 @@
       window.location.replace(
         window.location.origin + '/ppp/desktop?page=cloud-services'
       );
+    else if (/(vercel|ondigitalocean)/ig.test(window.location.origin))
+      window.location.replace(
+        window.location.origin + '/desktop.html?page=cloud-services'
+      );
     else
       window.location.replace(
         window.location.origin + '/desktop?page=cloud-services'
