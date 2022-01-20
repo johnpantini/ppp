@@ -22,8 +22,10 @@ async function validate(element, options) {
 
   const value = element?.value;
 
-  element.errorMessage = void 0;
-  element.state = 'default';
+  if (element) {
+    element.errorMessage = void 0;
+    element.state        = 'default';
+  }
 
   switch (options.hook) {
     case 'required':
@@ -31,8 +33,12 @@ async function validate(element, options) {
         typeof value === 'undefined' ||
         value?.toString().replace(/\s*/g, '') === ''
       ) {
-        element.errorMessage = 'Это поле обязательно';
-        element.state = 'error';
+
+        if (element) {
+          element.errorMessage = 'Это поле обязательно';
+          element.state = 'error';
+        }
+
 
         element?.focus();
 
