@@ -1,7 +1,7 @@
 /** @decorator */
 
 import { BasePage } from '../page.js';
-import { invalidate, validate } from '../validate.js'
+import { invalidate, validate } from '../validate.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { maybeFetchError } from '../fetch-error.js';
@@ -79,6 +79,10 @@ export class TelegramBotPage extends BasePage {
       );
 
       if (this.bot) {
+        this.bot.name = this.botName.value.trim();
+
+        Observable.notify(this, 'bot');
+
         await this.app.ppp.user.functions.updateOne(
           {
             collection: 'bots'
@@ -88,7 +92,7 @@ export class TelegramBotPage extends BasePage {
           },
           {
             $set: {
-              name: this.botName.value.trim(),
+              name: this.bot.name,
               version: 1,
               iv: bufferToString(iv),
               token: encryptedToken,
