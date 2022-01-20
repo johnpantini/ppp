@@ -22,12 +22,17 @@ export default function (i18n) {
         [SUPPORTED_SERVER_TYPES.KEY]: 'Вход по приватному ключу'
       },
       serverState: {
+        ok: 'Работает',
+        failed: 'Неисправен'
+      },
+      serviceState: {
         active: 'Запущен',
         stopped: 'Остановлен',
         failed: 'Неисправен'
       },
       service: {
-        [SUPPORTED_SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX'
+        [SUPPORTED_SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
+        [SUPPORTED_SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NSDQ'
       }
     }
   });
