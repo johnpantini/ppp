@@ -7,7 +7,8 @@ import { pageStyles, loadingIndicator } from '../page.js';
 
 export const telegramBotPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>Бот Telegram
+    <${'ppp-page-header'} ${ref('header')}>
+      ${x => x.bot?.name ? `Бот Telegram - ${x.bot?.name}` : 'Бот Telegram'}
     </ppp-page-header>
     <form ${ref('form')} onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
@@ -53,7 +54,7 @@ export const telegramBotPageTemplate = (context, definition) => html`
             @click="${(x) => x.addTelegramBot()}"
             appearance="primary"
           >
-            Сохранить бота
+            ${x => x.bot ? 'Обновить бота' : 'Добавить бота'}
           </ppp-button>
         </div>
       </section>
