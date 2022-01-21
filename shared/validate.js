@@ -37,10 +37,9 @@ async function validate(element, options) {
         if (element) {
           element.errorMessage = 'Это поле обязательно';
           element.state = 'error';
+
+          element?.focus();
         }
-
-
-        element?.focus();
 
         throw new ValidationError({
           element,
@@ -64,7 +63,7 @@ function invalidate(element, options = {}) {
     element.source.toastText = errorMessage;
 
     element.visible = true;
-  } else {
+  } else if (element) {
     element.errorMessage = errorMessage;
     element.state = 'error';
 

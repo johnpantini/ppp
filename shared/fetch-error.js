@@ -8,3 +8,13 @@ export class FetchError extends CustomError {
     this.status = status;
   }
 }
+
+export async function maybeFetchError(r) {
+  if (!r.ok) {
+    // noinspection ExceptionCaughtLocallyJS
+    throw new FetchError({
+      ...r,
+      ...{ message: await r.text() }
+    });
+  }
+}

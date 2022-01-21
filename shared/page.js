@@ -4,8 +4,10 @@ import { FoundationElement } from './foundation-element.js';
 import { Observable, observable } from './element/observation/observable.js';
 import { invalidate } from './validate.js';
 import { DOM } from './element/dom.js';
-import { assert } from './assert.js';
+import { maybeFetchError } from './fetch-error.js';
 import { SUPPORTED_SERVER_TYPES } from './const.js';
+import { assert } from './assert.js';
+import { requireComponent } from './template.js';
 
 export class BasePage extends FoundationElement {
   @observable
@@ -31,14 +33,15 @@ export class BasePage extends FoundationElement {
     return this.app.ppp.dict.t(key, options);
   }
 
-  beginOperation(toastTitle = this.header.lastChild.textContent.trim()) {
+  beginOperation(toastTitle = this.header.textContent.trim()) {
     this.busy = true;
     this.toastTitle = toastTitle;
+    this.toastText = '';
     this.app.toast.visible = false;
     this.app.toast.source = this;
   }
 
-  progressOperation(progress = 0, toastText = '') {
+  progressOperation(progress = 0, toastText = this.toastText) {
     this.app.toast.appearance = 'progress';
     this.toastText = toastText;
     DOM.queueUpdate(() => (this.app.toast.progress.value = progress));
@@ -47,16 +50,22 @@ export class BasePage extends FoundationElement {
   }
 
   failOperation(e) {
-    console.warn(e);
+    console.dir(e);
 
-    if (e === 404) {
+    if (e.name === 'OperationError') {
+      invalidate(this.app.toast, {
+        errorMessage: 'Не удалось дешифровать данные. Проверьте мастер-пароль.',
+        silent: true
+      });
+    } else if (e === 404) {
       invalidate(this.app.toast, {
         errorMessage: 'Запись с таким ID не существует.',
         silent: true
       });
     } else if (e?.name === 'ValidationError') {
       invalidate(this.app.toast, {
-        errorMessage: 'Поля формы заполнены некорректно или не полностью.',
+        errorMessage:
+          e?.message ?? 'Форма заполнена некорректно или не полностью.',
         silent: true
       });
     } else if (/E11000/i.test(e?.error)) {
@@ -88,13 +97,23 @@ export class BasePage extends FoundationElement {
 
     this.app.pageConnected = true;
   }
+
+  async notFound() {
+    await requireComponent(
+      'ppp-not-found-page',
+      `../${this.app.ppp.appType}/${this.app.ppp.theme}/pages/not-found.js`
+    );
+
+    this.style.display = 'none';
+    this.app.pageNotFound = true;
+  }
 }
 
 export class PageWithTerminal extends BasePage {
   terminalOutput = '';
 
   async executeSSHCommand({
-    serverUuid,
+    serverId,
     commands,
     commandsToDisplay,
     progress = 0,
@@ -116,7 +135,7 @@ export class PageWithTerminal extends BasePage {
     let server;
 
     try {
-      server = await this.getServer(serverUuid);
+      server = await this.getServer(serverId);
     } catch (e) {
       if (e.status === 404)
         terminal.writeError(`Сервер не найден (${e.status ?? 503})`);
@@ -128,6 +147,8 @@ export class PageWithTerminal extends BasePage {
       // noinspection ExceptionCaughtLocallyJS
       throw e;
     }
+
+    if (!commandsToDisplay) commandsToDisplay = commands;
 
     terminal.writeInfo(commandsToDisplay);
     terminal.writeln('');
@@ -169,19 +190,23 @@ export class PageWithTerminal extends BasePage {
     return /ppp-ssh-ok/i.test(this.terminalOutput);
   }
 
-  async getServer(uuid) {
+  async getServer(serverObjectOrId) {
+    if (typeof serverObjectOrId === 'object')
+      return serverObjectOrId;
+
     const server = await this.app.ppp.user.functions.findOne(
       {
         collection: 'servers'
       },
       {
-        uuid
+        _id: serverObjectOrId
       }
     );
 
-    assert({
-      predicate: server !== null,
-      status: 404
+    await maybeFetchError({
+      ok: server !== null,
+      status: server !== null ? 200 : 404,
+      text: async () => 'Сервер не найден.'
     });
 
     let result;
@@ -189,7 +214,7 @@ export class PageWithTerminal extends BasePage {
     switch (server.type) {
       case SUPPORTED_SERVER_TYPES.PASSWORD:
         result = {
-          host: server.host,
+          hostname: server.hostname,
           port: server.port,
           username: server.username,
           password: await this.app.ppp.crypto.decrypt(
@@ -202,10 +227,13 @@ export class PageWithTerminal extends BasePage {
 
       case SUPPORTED_SERVER_TYPES.KEY: {
         result = {
-          host: server.host,
+          hostname: server.hostname,
           port: server.port,
           username: server.username,
-          privateKey: await this.app.ppp.crypto.decrypt(server.iv, server.key)
+          privateKey: await this.app.ppp.crypto.decrypt(
+            server.iv,
+            server.privateKey
+          )
         };
       }
     }

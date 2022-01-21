@@ -13,7 +13,7 @@ export default new (class {
    */
   locales = ['ru'];
 
-  crypto = new PPPCrypto(this);
+  crypto = new PPPCrypto();
 
   constructor(appType) {
     this.appType = appType;
@@ -163,7 +163,7 @@ export default new (class {
               collection: 'app'
             },
             {
-              _id: 'settings'
+              _id: '@settings'
             }
           ),
           this.user.functions.find({

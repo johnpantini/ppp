@@ -69,6 +69,59 @@ export const snippetStyles = css`
   }
 `;
 
+export const foldingStyles = css`
+  .folding {
+    margin-top: 25px;
+    margin-bottom: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .folding-header {
+    border: none;
+    background-color: #ffffff;
+    padding: 5px 15px;
+    align-items: center;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .folding-header-text {
+    pointer-events: none;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #807f7f;
+    width: 100%;
+  }
+
+  .folding-header-toggle {
+    pointer-events: none;
+    width: 16px;
+    height: 27px;
+    transform: rotate(-90deg);
+    margin-right: 16px;
+    display: inline-block;
+    margin-left: auto;
+    transition: transform 0.1s ease-in-out;
+  }
+
+  .folding-open .folding-header-toggle {
+    transform: rotate(0deg);
+  }
+
+  .folding-content {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px 15px 0 15px;
+    display: none;
+  }
+
+  .folding-open .folding-content {
+    display: initial;
+  }
+`;
+
 export const emptyStateStyles = css`
   .empty-state {
     word-wrap: break-word;
@@ -458,6 +511,7 @@ export const pageStyles = css`
     font-weight: normal;
   }
 
+  ${foldingStyles}
   ${emptyStateStyles}
   ${snippetStyles}
 `;
