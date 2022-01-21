@@ -1,11 +1,10 @@
 import { PageWithTable } from '../page.js';
-import { Observable } from '../element/observation/observable.js';
 
 export class ApisPage extends PageWithTable {
   columns = [
     {
       label: 'Название',
-      sortBy: (d) => d._id
+      sortBy: (d) => d.name
     },
     {
       label: 'Тип',
@@ -13,11 +12,15 @@ export class ApisPage extends PageWithTable {
     },
     {
       label: 'Дата создания',
-      sortBy: (d) => d.created_at
+      sortBy: (d) => d.createdAt
     },
     {
       label: 'Последнее изменение',
-      sortBy: (d) => d.updated_at
+      sortBy: (d) => d.updatedAt
+    },
+    {
+      label: 'Версия',
+      sortBy: (d) => d.version
     },
     {
       label: 'Действия'

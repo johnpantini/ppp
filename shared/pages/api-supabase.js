@@ -1,11 +1,11 @@
 /** @decorator */
 
 import { BasePage } from '../page.js';
-import { validate } from '../validate.js';
-import { FetchError } from '../fetch-error.js';
-import { generateIV, uuidv4, bufferToString } from '../ppp-crypto.js';
+import { invalidate, validate } from '../validate.js';
+import { generateIV, bufferToString } from '../ppp-crypto.js';
 import { SUPPORTED_APIS } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
+import { maybeFetchError } from '../fetch-error.js';
 
 export async function checkSupabaseCredentials({ apiUrl, apiKey }) {
   return fetch(new URL('rest/v1/rpc/get_size_by_bucket', apiUrl).toString(), {
@@ -39,9 +39,9 @@ export class ApiSupabasePage extends BasePage {
   async connectedCallback() {
     super.connectedCallback();
 
-    const api = this.app.params()?.api;
+    const apiId = this.app.params()?.api;
 
-    if (api) {
+    if (apiId) {
       this.beginOperation();
 
       try {
@@ -50,12 +50,13 @@ export class ApiSupabasePage extends BasePage {
             collection: 'apis'
           },
           {
-            uuid: api
+            _id: apiId
           }
         );
 
         if (!this.api) {
           this.failOperation(404);
+          await this.notFound();
         } else {
           this.api.key = await this.app.ppp.crypto.decrypt(
             this.api.iv,
@@ -89,18 +90,22 @@ export class ApiSupabasePage extends BasePage {
       await validate(this.dbUser);
       await validate(this.dbPassword);
 
-      const r1 = await checkSupabaseCredentials({
+      const rSupabaseCredentials = await checkSupabaseCredentials({
         apiUrl: this.apiUrl.value.trim(),
         apiKey: this.apiKey.value.trim()
       });
 
-      if (!r1.ok)
-        // noinspection ExceptionCaughtLocallyJS
-        throw new FetchError({ ...r1, ...{ message: await r1.text() } });
+      if (!rSupabaseCredentials.ok) {
+        invalidate(this.apiKey, {
+          errorMessage: 'Неверный токен',
+          silent: true
+        });
+
+        await maybeFetchError(rSupabaseCredentials);
+      }
 
       const { hostname } = new URL(this.apiUrl.value);
-
-      const r2 = await checkPostgreSQLCredentials({
+      const rPgSQLCredentials = await checkPostgreSQLCredentials({
         url: new URL(
           'pg',
           this.app.ppp.keyVault.getKey('service-machine-url')
@@ -110,9 +115,14 @@ export class ApiSupabasePage extends BasePage {
         )}@db.${hostname}:${this.dbPort.value.trim()}/${this.dbName.value.trim()}`
       });
 
-      if (!r2.ok)
-        // noinspection ExceptionCaughtLocallyJS
-        throw new FetchError({ ...r2, ...{ message: await r2.text() } });
+      if (!rPgSQLCredentials.ok) {
+        invalidate(this.dbPassword, {
+          errorMessage: 'Неверный пользователь или пароль',
+          silent: true
+        });
+
+        await maybeFetchError(rPgSQLCredentials);
+      }
 
       const iv = generateIV();
       const encryptedKey = await this.app.ppp.crypto.encrypt(
@@ -130,10 +140,11 @@ export class ApiSupabasePage extends BasePage {
             collection: 'apis'
           },
           {
-            _id: this.apiName.value.trim()
+            _id: this.api._id
           },
           {
             $set: {
+              name: this.apiName.value.trim(),
               url: this.apiUrl.value.trim(),
               version: 1,
               iv: bufferToString(iv),
@@ -142,7 +153,7 @@ export class ApiSupabasePage extends BasePage {
               port: +Math.abs(this.dbPort.value),
               user: this.dbUser.value.trim(),
               password: encryptedPassword,
-              updated_at: new Date()
+              updatedAt: new Date()
             }
           }
         );
@@ -152,12 +163,11 @@ export class ApiSupabasePage extends BasePage {
             collection: 'apis'
           },
           {
-            _id: this.apiName.value.trim(),
+            name: this.apiName.value.trim(),
             version: 1,
-            uuid: uuidv4(),
             type: SUPPORTED_APIS.SUPABASE,
-            created_at: new Date(),
-            updated_at: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
             url: this.apiUrl.value.trim(),
             iv: bufferToString(iv),
             key: encryptedKey,

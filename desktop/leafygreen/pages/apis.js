@@ -35,17 +35,19 @@ export const apisPageTemplate = (context, definition) => html`
                   @click="${() => {
                     x.app.navigate({
                       page: `api-${datum.type}`,
-                      api: datum.uuid
+                      api: datum._id
                     });
 
                     return false;
                   }}"
-                  href="?page=api-${datum.type}&api=${datum.uuid}"
-                  >${datum._id}</a
-                >`,
+                  href="?page=api-${datum.type}&api=${datum._id}"
+                >
+                  ${datum.name}
+                </a>`,
                 x.t(`$const.api.${datum.type}`),
-                formatDate(datum.created_at),
-                formatDate(datum.updated_at ?? datum.created_at),
+                formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
+                datum.version,
                 html`
                   <${'ppp-button'}
                     class="xsmall"

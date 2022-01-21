@@ -9,7 +9,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>Внешние API - Supabase
     </ppp-page-header>
-    <form ${ref('form')} onsubmit="return false">
+    <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         <section>
           <div class="label-group">
@@ -19,9 +19,8 @@ export const apiSupabasePageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              ?disabled="${x => x.api}"
               placeholder="Supabase"
-              value="${x => x.api?._id}"
+              value="${(x) => x.api?.name}"
               ${ref('apiName')}
             ></ppp-text-field>
           </div>
@@ -36,7 +35,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
             <ppp-text-field
               type="url"
               placeholder="https://ppp.supabase.co"
-              value="${x => x.api?.url}"
+              value="${(x) => x.api?.url}"
               ${ref('apiUrl')}
             ></ppp-text-field>
           </div>
@@ -51,7 +50,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="Ключ API"
-              value="${x => x.api?.key}"
+              value="${(x) => x.api?.key}"
               ${ref('apiKey')}
             ></ppp-text-field>
           </div>
@@ -64,7 +63,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="postgres"
-              value="${x => x.api?.db ?? 'postgres'}"
+              value="${(x) => x.api?.db ?? 'postgres'}"
               ${ref('dbName')}
             ></ppp-text-field>
           </div>
@@ -78,7 +77,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
             <ppp-text-field
               type="number"
               placeholder="5432"
-              value="${x => x.api?.port ?? '5432'}"
+              value="${(x) => x.api?.port ?? '5432'}"
               ${ref('dbPort')}
             ></ppp-text-field>
           </div>
@@ -91,7 +90,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="postgres"
-              value="${x => x.api?.user ?? 'postgres'}"
+              value="${(x) => x.api?.user ?? 'postgres'}"
               ${ref('dbUser')}
             ></ppp-text-field>
           </div>
@@ -106,7 +105,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
             <ppp-text-field
               type="password"
               placeholder="Пароль"
-              value="${x => x.api?.password}"
+              value="${(x) => x.api?.password}"
               ${ref('dbPassword')}
             ></ppp-text-field>
           </div>
@@ -116,12 +115,12 @@ export const apiSupabasePageTemplate = (context, definition) => html`
       <section class="last">
         <div class="footer-actions">
           <${'ppp-button'}
-            ?disabled="${(x) => x.busy}"
+            ?disabled="${(x) => x.busy || x.api?.removed}"
             type="submit"
             @click="${(x) => x.connectApi()}"
             appearance="primary"
           >
-            Подключить API
+            ${(x) => (x.api ? 'Обновить API' : 'Подключить API')}
           </ppp-button>
         </div>
       </section>
