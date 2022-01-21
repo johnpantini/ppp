@@ -10,6 +10,7 @@ class AssertionError extends CustomError {
   }
 }
 
+// TODO - not good enough
 export function assert(condition, message) {
   if (condition instanceof Response) {
     if (!condition.ok) {
