@@ -106,22 +106,24 @@ export class App extends FoundationElement {
   setSetting(key, value) {
     this.settings[key] = value;
 
-    this.ppp.user.functions.updateOne(
-      {
-        collection: 'app'
-      },
-      {
-        _id: 'settings'
-      },
-      {
-        $set: {
-          [key]: value
+    if (this.ppp.keyVault.ok()) {
+      this.ppp.user.functions.updateOne(
+        {
+          collection: 'app'
+        },
+        {
+          _id: '@settings'
+        },
+        {
+          $set: {
+            [key]: value
+          }
+        },
+        {
+          upsert: true
         }
-      },
-      {
-        upsert: true
-      }
-    );
+      );
+    }
   }
 
   setting(key, value) {

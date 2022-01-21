@@ -207,8 +207,8 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Брокеры</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
-              ?active="${(x) => x.page === 'servers' || x.page === 'server'}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
+              ?active="${(x) => x.page.startsWith('server')}"
               @click="${(x) => (x.page = 'servers')}"
               slot="items"
             >
@@ -235,13 +235,21 @@ export const appTemplate = (context, definition) => html`
             ${settings({
               slot: 'start'
             })}
-            <span slot="title">Параметры</span>
+            <span slot="title">Конфигурация</span>
             <ppp-side-nav-item
               ?active="${(x) => x.page === 'cloud-services'}"
               @click="${(x) => (x.page = 'cloud-services')}"
               slot="items"
             >
               <span slot="title">Облачные сервисы</span>
+            </ppp-side-nav-item>
+            <ppp-side-nav-item
+              ?disabled="${(x) => true}"
+              ?active="${(x) => x.page === 'extensions'}"
+              @click="${(x) => (x.page = 'extensions')}"
+              slot="items"
+            >
+              <span slot="title">Дополнения</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
@@ -256,26 +264,14 @@ export const appTemplate = (context, definition) => html`
             ${cloud({
               slot: 'start'
             })}
-            <span slot="title">Дополнительно</span>
+            <span slot="title">Обновление</span>
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'updates'}"
               @click="${(x) => (x.page = 'updates')}"
               slot="items"
             >
-              <span slot="title">Обновление</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              @click="${() =>
-                window
-                  .open(
-                    'https://pantini.gitbook.io/pantini-co/ppp/getting-started',
-                    '_blank'
-                  )
-                  .focus()}"
-              slot="items"
-            >
-              <span slot="title">Инструкции</span>
+              <span slot="title">Проверить</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
         </ppp-side-nav>
