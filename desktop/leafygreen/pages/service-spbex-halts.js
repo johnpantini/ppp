@@ -176,8 +176,11 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               ${repeat(
                 (x) => x?.apis,
                 html`
-                  <ppp-option value="${(x) => x._id}"
-                    >${(x) => x.name}
+                  <ppp-option
+                    ?removed="${(x) => x.removed}"
+                    value="${(x) => x._id}"
+                  >
+                    ${(x) => x.name}
                   </ppp-option>
                 `
               )}
@@ -218,8 +221,11 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               ${repeat(
                 (x) => x?.servers,
                 html`
-                  <ppp-option value="${(x) => x._id}"
-                    >${(x) => x.name}
+                  <ppp-option
+                    ?removed="${(x) => x.removed}"
+                    value="${(x) => x._id}"
+                  >
+                    ${(x) => x.name}
                   </ppp-option>
                 `
               )}
@@ -281,7 +287,8 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                   <ppp-option
                     ?removed="${(x) => x.removed}"
                     value="${(x) => x._id}"
-                    >${(x) => x.name}
+                  >
+                    ${(x) => x.name}
                   </ppp-option>
                 `
               )}

@@ -196,7 +196,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
               $match: {
                 $or: [
                   { removed: { $not: { $eq: true } } },
-                  { _id: { $eq: this.service?.botId } }
+                  { _id: this.service?.botId }
                 ]
               }
             }
@@ -211,7 +211,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
               $match: {
                 $or: [
                   { removed: { $not: { $eq: true } } },
-                  { _id: { $eq: this.service?.serverId } }
+                  { _id: this.service?.serverId }
                 ]
               }
             }
@@ -231,7 +231,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
                   {
                     $or: [
                       { removed: { $not: { $eq: true } } },
-                      { _id: { $eq: this.service?.apiId } }
+                      { _id: this.service?.apiId }
                     ]
                   }
                 ]
