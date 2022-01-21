@@ -10,6 +10,7 @@ export const keySet = [
   'auth0-email',
   'github-login',
   'github-token',
+  'master-password',
   'mongo-api-key',
   'mongo-app-client-id',
   'mongo-app-client-id',
@@ -37,13 +38,13 @@ class KeyVault {
     if (key) {
       this.#keys[key] = value;
 
-      localStorage.setItem(`ppp-${key}`, value?.trim());
+      localStorage.setItem(`ppp-${key}`, (value ?? '').trim());
     }
   }
 
   getKey(key) {
     if (!this.#keys[key])
-      this.#keys[key] = localStorage.getItem(`ppp-${key}`)?.trim();
+      this.#keys[key] = (localStorage.getItem(`ppp-${key}`) ?? '').trim();
 
     return this.#keys[key];
   }
