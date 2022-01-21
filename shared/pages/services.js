@@ -4,11 +4,11 @@ export class ServicesPage extends PageWithTable {
   columns = [
     {
       label: 'Название',
-      sortBy: (d) => d._id
+      sortBy: (d) => d.name
     },
     {
       label: 'Сервер',
-      sortBy: (d) => d.server_uuid
+      sortBy: (d) => d.serverId
     },
     {
       label: 'Тип',
@@ -16,11 +16,11 @@ export class ServicesPage extends PageWithTable {
     },
     {
       label: 'Дата создания',
-      sortBy: (d) => d.created_at
+      sortBy: (d) => d.createdAt
     },
     {
       label: 'Последнее изменение',
-      sortBy: (d) => d.updated_at
+      sortBy: (d) => d.updatedAt
     },
     {
       label: 'Версия',
@@ -46,8 +46,8 @@ export class ServicesPage extends PageWithTable {
         {
           $lookup: {
             from: 'servers',
-            localField: 'server_uuid',
-            foreignField: 'uuid',
+            localField: 'serverId',
+            foreignField: '_id',
             as: 'server'
           }
         }

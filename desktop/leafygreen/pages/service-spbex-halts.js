@@ -13,26 +13,57 @@ import { caretDown } from '../icons/caret-down.js';
 
 await ppp.i18n(import.meta.url);
 
-const exampleCode = `create or replace function format_spbex_halt_message(isin text,
-  ticker text, name text, currency text, date text, url text,
-  start text, finish text)
-returns text as
-$$
-  return \`‼️⏸ Приостановка торгов (SPBEX)
+const exampleInstrumentsCode = `/**
+ * Возвращает список инструментов для отслеживания.
+ *
+ * @returns {Object[]} instruments - Инструменты.
+ * @returns {string} instruments[].isin - ISIN инструмента.
+ * @returns {string} instruments[].ticker - Тикер инструмента.
+ * @returns {string} instruments[].name - Название инструмента.
+ * @returns {string} instruments[].currency - Валюта инструмента.
+ */
+const instruments =
+JSON.parse(
+  plv8.execute(
+    \`select content from http_get('https://api.tinkoff.ru/trading/stocks/list?sortType=ByName&orderType=Asc&country=All')\`
+  )[0].content
+).payload.values || [];
+
+return instruments.map((i) => {
+  return {
+    isin: i.symbol.isin,
+    ticker: i.symbol.ticker,
+    name: i.symbol.showName,
+    currency: i.symbol.currency
+  };
+});`;
+
+const exampleFormatterCode = `/**
+ * Функция форматирования сообщения о торговой паузе.
+ *
+ * @param {string} isin - ISIN инструмента.
+ * @param {string} ticker - Тикер инструмента.
+ * @param {string} name - Название инструмента.
+ * @param {string} currency - Валюта инструмента.
+ * @param {string} date - Дата и время сообщения от биржи.
+ * @param {string} url - Ссылка на сообщение на сайте биржи.
+ * @param {string} start - Время начала торговой паузы, MSK.
+ * @param {string} finish - Время окончания торговой паузы, MSK.
+ */
+return \`‼️⏸ Приостановка торгов (SPBEX)
 \${'$'}\${ticker || isin}
 <b>\${name}, \${isin}</b>
 🕒 \${start} - \${finish}
 
 <a href="\${encodeURIComponent(url)}">Сообщение о приостановке торгов</a>
-\`;
-$$ language plv8;`;
+\`;`;
 
 export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
       Сервисы - торговые паузы SPBEX
     </ppp-page-header>
-    <form ${ref('form')} onsubmit="return false">
+    <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         ${when(
           (x) => x.service,
@@ -41,14 +72,17 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               <div class="service-details">
                 <div class="service-details-controls">
                   <div class="service-details-control service-details-label">
-                    ${(x) => x.service._id}
+                    ${(x) => x.service.name}
                   </div>
                   <div
                     class="service-details-control"
                     style="justify-content: left"
                   >
                     <${'ppp-button'}
-                      ?disabled="${(x) => x.busy || x.service?.removed}"
+                      ?disabled="${(x) =>
+                        x.busy ||
+                        x.service?.removed ||
+                        x.service?.state === 'failed'}"
                       @click="${(x) => x.restart()}">Перезапустить
                     </ppp-button>
                     <ppp-button
@@ -68,7 +102,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                   <div class="service-details-control">
                     <${'ppp-badge'}
                       appearance="${(x) => stateAppearance(x.service.state)}">
-                      ${(x) => x.t(`$const.serverState.${x.service.state}`)}
+                      ${(x) => x.t(`$const.serviceState.${x.service.state}`)}
                     </ppp-badge>
                     <ppp-badge
                       appearance="blue">
@@ -94,16 +128,14 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                     Создан
                     </span>
                     <div style="grid-column-start: 3;grid-row-start: 2;">
-                      ${(x) => formatDate(x.service.created_at)}
+                      ${(x) => formatDate(x.service.createdAt)}
                     </div>
                     <span style="grid-column-start: 4;grid-row-start: 1;">
                     Последнее изменение
                     </span>
                     <div style="grid-column-start: 4;grid-row-start: 2;">
                       ${(x) =>
-                        formatDate(
-                          x.service.updated_at ?? x.service.created_at
-                        )}
+                        formatDate(x.service.updatedAt ?? x.service.createdAt)}
                     </div>
                     <span style="grid-column-start: 5;grid-row-start: 1;">
                     Удалён
@@ -124,9 +156,8 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              ?disabled="${(x) => x.service}"
               placeholder="Название"
-              value="${(x) => x.service?._id}"
+              value="${(x) => x.service?.name}"
               ${ref('serviceName')}
             ></ppp-text-field>
           </div>
@@ -138,15 +169,15 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
           <div class="input-group">
             <${'ppp-select'}
               ?disabled="${(x) => !x.apis}"
-              value="${(x) => x.service?.api_uuid}"
+              value="${(x) => x.service?.apiId}"
               placeholder="Нет доступных профилей"
               ${ref('api')}
             >
               ${repeat(
                 (x) => x?.apis,
                 html`
-                  <ppp-option value="${(x) => x.uuid}"
-                    >${(x) => x._id}
+                  <ppp-option value="${(x) => x._id}"
+                    >${(x) => x.name}
                   </ppp-option>
                 `
               )}
@@ -181,14 +212,14 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             <ppp-select
               ?disabled="${(x) => !x.servers}"
               placeholder="Нет доступных профилей"
-              value="${(x) => x.service?.server_uuid}"
+              value="${(x) => x.service?.serverId}"
               ${ref('server')}
             >
               ${repeat(
                 (x) => x?.servers,
                 html`
-                  <ppp-option value="${(x) => x.uuid}"
-                    >${(x) => x._id}
+                  <ppp-option value="${(x) => x._id}"
+                    >${(x) => x.name}
                   </ppp-option>
                 `
               )}
@@ -241,7 +272,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             <ppp-select
               ?disabled="${(x) => !x.bots}"
               placeholder="Нет доступных профилей"
-              value="${(x) => x.service?.bot_uuid}"
+              value="${(x) => x.service?.botId}"
               ${ref('bot')}
             >
               ${repeat(
@@ -249,8 +280,8 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                 html`
                   <ppp-option
                     ?removed="${(x) => x.removed}"
-                    value="${(x) => x.uuid}"
-                    >${(x) => x._id}
+                    value="${(x) => x._id}"
+                    >${(x) => x.name}
                   </ppp-option>
                 `
               )}
@@ -279,20 +310,52 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
-            <h5>Форматирование</h5>
-            <p>Логика форматирования сообщения на языке PLV8.</p>
+            <h5>Инструменты для отслеживания</h5>
+            <p>Функция на языке PLV8, возвращающая список инструментов для
+              отслеживания. По умолчанию в качестве источника данных
+              используется каталог Тинькофф Инвестиций.</p>
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              :code="${(x) => x.service?.code ?? exampleCode}"
-              ${ref('codeArea')}
+              :code="${(x) =>
+                x.service?.instrumentsCode ?? exampleInstrumentsCode}"
+              ${ref('instrumentsCode')}
             ></ppp-codeflask>
             <${'ppp-button'}
               class="margin-top"
-              @click="${(x) => x.codeArea.updateCode(exampleCode)}"
+              @click="${(x) =>
+                x.instrumentsCode.updateCode(exampleInstrumentsCode)}"
               appearance="primary"
             >
-              Восстановить форматирование по умолчанию
+              Восстановить значение по умолчанию
+            </ppp-button>
+            <ppp-button
+              class="margin-top"
+              ?disabled="${(x) => x.busy}"
+              @click="${(x) => x.callInstrumentsFunction()}"
+              appearance="primary"
+            >
+              Выполнить функцию
+            </ppp-button>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Форматирование</h5>
+            <p>Логика форматирования итогового сообщения на языке PLV8.</p>
+          </div>
+          <div class="input-group">
+            <${'ppp-codeflask'}
+              :code="${(x) => x.service?.formatterCode ?? exampleFormatterCode}"
+              ${ref('formatterCode')}
+            ></ppp-codeflask>
+            <ppp-button
+              class="margin-top"
+              @click="${(x) =>
+                x.formatterCode.updateCode(exampleFormatterCode)}"
+              appearance="primary"
+            >
+              Восстановить значение по умолчанию
             </ppp-button>
           </div>
         </section>
@@ -309,7 +372,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               value="${(x) => x.service?.channel}"
               ${ref('channel')}
             ></ppp-text-field>
-            <${'ppp-button'}
+            <ppp-button
               class="margin-top"
               ?disabled="${(x) => x.busy}"
               @click="${(x) => x.sendTestSpbexHaltMessage()}"

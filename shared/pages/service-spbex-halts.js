@@ -2,10 +2,11 @@
 
 import { PageWithTerminal } from '../page.js';
 import { validate } from '../validate.js';
-import { FetchError } from '../fetch-error.js';
+import { maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
+import { Tmpl } from '../tmpl.js';
 
 export class ServiceSpbexHaltsPage extends PageWithTerminal {
   @observable
@@ -28,74 +29,127 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
     )}@db.${hostname}:${api.port}/${api.db}`;
   }
 
+  async callInstrumentsFunction() {
+    this.beginOperation();
+
+    try {
+      await validate(this.api);
+      await validate(this.instrumentsCode);
+
+      const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
+      // Temporary function, no need to drop
+      const query = `create or replace function ${funcName}()
+        returns json as
+        $$
+          ${this.instrumentsCode.code}
+        $$ language plv8;
+
+        select ${funcName}();
+        `;
+
+      const api = Object.assign(
+        {},
+        this.apis.find((a) => a._id === this.api.value)
+      );
+
+      api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
+
+      const rTestSQL = await fetch(
+        new URL(
+          'pg',
+          this.app.ppp.keyVault.getKey('service-machine-url')
+        ).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query,
+            connectionString: this.getConnectionString(api)
+          })
+        }
+      );
+
+      await maybeFetchError(rTestSQL);
+
+      console.table(
+        JSON.parse(
+          (await rTestSQL.json()).results.find(
+            (r) => r.command.toUpperCase() === 'SELECT'
+          ).rows[0]
+        )
+      );
+
+      this.succeedOperation(
+        'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
+      );
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
   async sendTestSpbexHaltMessage() {
     this.beginOperation();
 
     try {
       await validate(this.api);
-      await validate(this.server);
       await validate(this.bot);
-      await validate(this.codeArea);
+      await validate(this.formatterCode);
       await validate(this.channel);
 
-      const functionBody = this.codeArea.code.match(/\$\$([\s\S]+?)\$\$/i)?.[1];
+      const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
-      if (functionBody) {
-        const temporaryFunction = `function _format_spbex_halt_message(isin,
-          ticker, name, currency, date, url, start, finish){${functionBody}}`;
+      const temporaryFunction = `function ${funcName}(isin,
+        ticker, name, currency, date, url, start, finish) {
+          ${this.formatterCode.code}
+        }`;
 
-        const bot = Object.assign(
-          {},
-          this.bots.find((b) => b.uuid === this.bot.value)
-        );
+      const bot = Object.assign(
+        {},
+        this.bots.find((b) => b._id === this.bot.value)
+      );
 
-        bot.token = await this.app.ppp.crypto.decrypt(bot.iv, bot.token);
+      bot.token = await this.app.ppp.crypto.decrypt(bot.iv, bot.token);
 
-        const query = `do $$
+      const query = `do $$
            ${temporaryFunction}
 
            plv8.execute(\`select content from http_post('https://api.telegram.org/bot${bot.token}/sendMessage',
-          'chat_id=${this.channel.value}&text=\${_format_spbex_halt_message('US0400476075', 'ARNA',
+          'chat_id=${this.channel.value}&text=\${${funcName}('US0400476075', 'ARNA',
           'Arena Pharmaceuticals, Inc.', 'USD', '13.12.2021 14:42', 'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044',
           '14:45', '15:15')}&parse_mode=html', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
 
-        const api = Object.assign(
-          {},
-          this.apis.find((a) => a.uuid === this.api.value)
-        );
+      const api = Object.assign(
+        {},
+        this.apis.find((a) => a._id === this.api.value)
+      );
 
-        api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
+      api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
 
-        const rTestSQL = await fetch(
-          new URL(
-            'pg',
-            this.app.ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
-          {
-            cache: 'no-cache',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              query,
-              connectionString: this.getConnectionString(api)
-            })
-          }
-        );
+      const rTestSQL = await fetch(
+        new URL(
+          'pg',
+          this.app.ppp.keyVault.getKey('service-machine-url')
+        ).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query,
+            connectionString: this.getConnectionString(api)
+          })
+        }
+      );
 
-        if (!rTestSQL.ok)
-          // noinspection ExceptionCaughtLocallyJS
-          throw new FetchError({
-            ...rTestSQL,
-            ...{ message: await rTestSQL.text() }
-          });
-
-        this.succeedOperation('Сообщение отправлено.');
-      } else {
-        // Invalid function
-        this.failOperation(422);
-      }
+      await maybeFetchError(rTestSQL);
+      this.succeedOperation('Сообщение отправлено.');
     } catch (e) {
       this.failOperation(e);
     } finally {
@@ -106,30 +160,32 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
   async connectedCallback() {
     super.connectedCallback();
 
-    const service = this.app.params()?.service;
+    const serviceId = this.app.params()?.service;
 
     this.bots = null;
     this.apis = null;
+    this.servers = null;
 
     this.beginOperation();
 
     try {
-      if (service) {
+      if (serviceId) {
         this.service = await this.app.ppp.user.functions.findOne(
           {
             collection: 'services'
           },
           {
-            uuid: service
+            _id: serviceId
           }
         );
 
         if (!this.service) {
           this.failOperation(404);
+
+          return await this.notFound();
         }
       }
 
-      // TODO - filters
       [this.bots, this.servers, this.apis] = await Promise.all([
         this.app.ppp.user.functions.aggregate(
           {
@@ -140,22 +196,48 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
               $match: {
                 $or: [
                   { removed: { $not: { $eq: true } } },
-                  { uuid: { $eq: this.service?.bot_uuid } }
+                  { _id: { $eq: this.service?.botId } }
                 ]
               }
             }
           ]
         ),
-        this.app.ppp.user.functions.find({
-          collection: 'servers'
-        }),
-        this.app.ppp.user.functions.find(
+        this.app.ppp.user.functions.aggregate(
+          {
+            collection: 'servers'
+          },
+          [
+            {
+              $match: {
+                $or: [
+                  { removed: { $not: { $eq: true } } },
+                  { _id: { $eq: this.service?.serverId } }
+                ]
+              }
+            }
+          ]
+        ),
+        this.app.ppp.user.functions.aggregate(
           {
             collection: 'apis'
           },
-          {
-            type: SUPPORTED_APIS.SUPABASE
-          }
+          [
+            {
+              $match: {
+                $and: [
+                  {
+                    type: SUPPORTED_APIS.SUPABASE
+                  },
+                  {
+                    $or: [
+                      { removed: { $not: { $eq: true } } },
+                      { _id: { $eq: this.service?.apiId } }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
         )
       ]);
 
@@ -181,55 +263,46 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
     return scriptUrl;
   }
 
-  async sql() {
-    const [spbexStocks, sendTelegramMessage, spbexHalts] = await Promise.all([
-      fetch(this.getSQLUrl('spbex-stocks.sql')).then((r) => r.text()),
+  async sql(serviceId) {
+    const [sendTelegramMessage, installSpbexHalts] = await Promise.all([
       fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl('spbex-halts.sql')).then((r) => r.text())
+      fetch(this.getSQLUrl('install-spbex-halts.sql')).then((r) => r.text())
     ]);
 
     const bot = Object.assign(
       {},
-      this.bots.find((b) => b.uuid === this.bot.value)
+      this.bots.find((b) => b._id === this.bot.value)
     );
 
-    return `
-      ${spbexStocks}
-      ${sendTelegramMessage}
-      ${spbexHalts}
-
-      create or replace function send_telegram_message_for_spbex_halt(msg text)
-      returns json as
-      $$
-        return plv8.find_function('send_telegram_message')('${
-          this.channel.value
-        }',
-          '${await this.app.ppp.crypto.decrypt(bot.iv, bot.token)}', msg);
-      $$ language plv8;
-
-      ${this.codeArea.value}
-      `;
+    return `${sendTelegramMessage}
+      ${new Tmpl().render(this, installSpbexHalts, {
+        serviceId,
+        channel: this.channel.value,
+        instrumentsCode: this.instrumentsCode.value,
+        formatterCode: this.formatterCode.value,
+        botToken: await this.app.ppp.crypto.decrypt(bot.iv, bot.token)
+      })}`;
   }
 
-  async commands(uuid, api) {
+  async commands(serviceId, api) {
     let interval = parseInt(this.interval.value);
 
     if (interval < 1 || isNaN(interval)) interval = 5;
 
     const curlExpression = `-X POST --header "apiKey: ${api.key}" ${new URL(
-      'rest/v1/rpc/process_spbex_halts',
+      `rest/v1/rpc/process_spbex_halts_${serviceId}`,
       api.url
     ).toString()}`;
 
     const servicePillar = JSON.stringify({
-      service_name: `ppp@${uuid}`,
+      service_name: `ppp@${serviceId}`,
       service_type: SUPPORTED_SERVICES.SPBEX_HALTS,
       service_systemd_type: 'oneshot',
       exec_start: `/usr/bin/curl --silent ${curlExpression}`
     });
 
     const timerPillar = JSON.stringify({
-      service_name: `ppp@${uuid}`,
+      service_name: `ppp@${serviceId}`,
       service_type: SUPPORTED_SERVICES.SPBEX_HALTS,
       on_unit_inactive_sec: `${interval}s`
     });
@@ -239,7 +312,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
       'sudo salt-call --local state.sls ppp ;',
       `sudo salt-call --local state.sls systemd.service pillar='${servicePillar}' ;`,
       `sudo salt-call --local state.sls systemd.timer pillar='${timerPillar}' ;`,
-      `[ "$(sudo systemctl is-active ppp@${uuid}.service)" == "failed" ] && exit 1 || `
+      `[ "$(sudo systemctl is-active ppp@${serviceId}.service)" == "failed" ] && exit 1 || `
     ].join(' ');
   }
 
@@ -252,39 +325,40 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
       await validate(this.server);
       await validate(this.interval);
       await validate(this.bot);
-      await validate(this.codeArea);
+      await validate(this.instrumentsCode);
+      await validate(this.formatterCode);
       await validate(this.channel);
 
       let interval = parseInt(this.interval.value);
 
       if (interval < 1 || isNaN(interval)) interval = 5;
 
-      let uuid;
+      let serviceId = this.service?._id;
 
       if (!this.service) {
-        uuid = uuidv4();
-
-        await this.app.ppp.user.functions.insertOne(
+        const { insertedId } = await this.app.ppp.user.functions.insertOne(
           {
             collection: 'services'
           },
           {
-            _id: this.serviceName.value.trim(),
-            uuid,
+            name: this.serviceName.value.trim(),
             state: 'failed',
             type: SUPPORTED_SERVICES.SPBEX_HALTS,
             version: 1,
-            created_at: new Date(),
-            updated_at: new Date(),
-            api_uuid: this.api.value,
-            server_uuid: this.server.value,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            apiId: this.api.value,
+            serverId: this.server.value,
+            botId: this.bot.value,
             interval,
-            bot_uuid: this.bot.value,
-            code: this.codeArea.value,
+            instrumentsCode: this.instrumentsCode.value,
+            formatterCode: this.formatterCode.value,
             channel: +this.channel.value
           }
         );
-      } else uuid = this.service.uuid;
+
+        serviceId = insertedId;
+      }
 
       this.busy = false;
       this.terminalModal.visible = true;
@@ -297,13 +371,13 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
 
       this.progressOperation(0);
 
-      const sql = await this.sql();
+      const sql = await this.sql(serviceId);
 
       this.progressOperation(10);
 
       const api = Object.assign(
         {},
-        this.apis.find((a) => a.uuid === this.api.value)
+        this.apis.find((a) => a._id === this.api.value)
       );
 
       api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
@@ -338,9 +412,9 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
 
       terminal.writeln('');
 
-      const commands = await this.commands(uuid, api);
+      const commands = await this.commands(serviceId, api);
       const ok = await this.executeSSHCommand({
-        serverUuid: this.server.value,
+        serverId: this.server.value,
         commands,
         commandsToDisplay: commands.replace(
           /apiKey: ([\s\S]+?)"/,
@@ -355,18 +429,20 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
           collection: 'services'
         },
         {
-          _id: this.serviceName.value.trim()
+          _id: serviceId
         },
         {
           $set: {
+            name: this.serviceName.value.trim(),
             state: ok ? 'active' : 'failed',
             version: 1,
-            updated_at: new Date(),
-            api_uuid: this.api.value,
-            server_uuid: this.server.value,
+            updatedAt: new Date(),
+            apiId: this.api.value,
+            serverId: this.server.value,
+            botId: this.bot.value,
             interval,
-            bot_uuid: this.bot.value,
-            code: this.codeArea.value,
+            instrumentsCode: this.instrumentsCode.value,
+            formatterCode: this.formatterCode.value,
             channel: +this.channel.value
           }
         }
@@ -391,11 +467,11 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
 
     try {
       const commands = [
-        `sudo systemctl restart ppp@${this.service.uuid}.timer &&`
+        `sudo systemctl restart ppp@${this.service._id}.timer &&`
       ].join(' ');
 
       const ok = await this.executeSSHCommand({
-        serverUuid: this.server.uuid,
+        serverId: this.service.serverId,
         commands,
         commandsToDisplay: commands
       });
@@ -414,7 +490,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
           {
             $set: {
               state: 'active',
-              updated_at: new Date()
+              updatedAt: new Date()
             }
           }
         );
@@ -437,11 +513,11 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
 
     try {
       const commands = [
-        `sudo systemctl stop ppp@${this.service.uuid}.timer &&`
+        `sudo systemctl stop ppp@${this.service._id}.timer &&`
       ].join(' ');
 
       const ok = await this.executeSSHCommand({
-        serverUuid: this.server.uuid,
+        serverId: this.service.serverId,
         commands,
         commandsToDisplay: commands
       });
@@ -460,7 +536,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
           {
             $set: {
               state: 'stopped',
-              updated_at: new Date()
+              updatedAt: new Date()
             }
           }
         );
@@ -483,21 +559,54 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
 
     try {
       const commands = [
-        `sudo systemctl disable ppp@${this.service.uuid}.service ;`,
-        `sudo systemctl disable ppp@${this.service.uuid}.timer ;`,
-        `sudo systemctl stop ppp@${this.service.uuid}.timer ;`,
-        `sudo rm -f /etc/systemd/system/ppp@${this.service.uuid}.service ;`,
-        `sudo rm -f /etc/systemd/system/ppp@${this.service.uuid}.timer ;`,
+        `sudo systemctl disable ppp@${this.service._id}.service ;`,
+        `sudo systemctl disable ppp@${this.service._id}.timer ;`,
+        `sudo systemctl stop ppp@${this.service._id}.timer ;`,
+        `sudo rm -f /etc/systemd/system/ppp@${this.service._id}.service ;`,
+        `sudo rm -f /etc/systemd/system/ppp@${this.service._id}.timer ;`,
         'sudo systemctl daemon-reload &&'
       ].join(' ');
 
       const ok = await this.executeSSHCommand({
-        serverUuid: this.server.uuid,
+        serverId: this.service.serverId,
         commands,
         commandsToDisplay: commands
       });
 
       if (ok) {
+        const api = Object.assign(
+          {},
+          this.apis.find((a) => a._id === this.service.apiId)
+        );
+
+        api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
+
+        const queryRequest = await fetch(
+          this.getSQLUrl('remove-spbex-halts.sql')
+        );
+
+        const rRemovalSQL = await fetch(
+          new URL(
+            'pg',
+            this.app.ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'no-cache',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              query: new Tmpl().render(this, await queryRequest.text(), {
+                serviceId: this.service._id
+              }),
+              connectionString: this.getConnectionString(api)
+            })
+          }
+        );
+
+        await maybeFetchError(rRemovalSQL);
+
         this.service.removed = true;
         this.service.state = 'stopped';
         Observable.notify(this, 'service');
@@ -513,7 +622,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
             $set: {
               state: 'stopped',
               removed: true,
-              updated_at: new Date()
+              updatedAt: new Date()
             }
           }
         );

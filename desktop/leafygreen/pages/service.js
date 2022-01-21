@@ -23,6 +23,22 @@ export const servicePageTemplate = (context, definition) => html`
           Продолжить
         </ppp-button>
       </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="SPBEX" style="height: 44px"
+             src="static/nsdq-1.svg"/>
+        <span slot="title">Торговые паузы NYSE/NSDQ</span>
+        <span slot="description">Оповещение о торговых паузах NYSE/NSDQ в Telegram. <a
+          target="_blank"
+          href="http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts">RSS-лента пауз</a>.</span>
+        <${'ppp-button'}
+          disabled
+          slot="action"
+          @click="${(x) =>
+            (x.app.page = `service-${SUPPORTED_SERVICES.NYSE_NSDQ_HALTS}`)}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
     </div>
   </template>
 `;

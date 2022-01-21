@@ -11,6 +11,7 @@ await ppp.i18n(import.meta.url);
 
 export function stateAppearance(state) {
   switch (state) {
+    case 'ok':
     case 'active':
       return 'green';
     case 'stopped':
@@ -47,34 +48,33 @@ export const servicesPageTemplate = (context, definition) => html`
                   @click="${() => {
                     x.app.navigate({
                       page: `service-${datum.type}`,
-                      service: datum.uuid
+                      service: datum._id
                     });
 
                     return false;
                   }}"
-                  href="?page=service-${datum.type}&service=${datum.uuid}"
-                  >${datum._id}</a
+                  href="?page=service-${datum.type}&service=${datum._id}"
+                  >${datum.name}</a
                 >`,
                 html`<a
-                  @click="${(x) => {
+                  @click="${() => {
                     x.app.navigate({
-                      page: `server-${datum.server[0].type}`,
-                      server: datum.server[0].uuid
+                      page: 'server',
+                      server: datum.serverId
                     });
 
                     return false;
                   }}"
-                  href="?page=server-${datum.server[0].type}&server=${datum
-                    .server[0].uuid}"
-                  >${datum.server[0]._id}</a
+                  href="?page=server&server=${datum.serverId}"
+                  >${datum.server[0].name}</a
                 >`,
                 x.t(`$const.service.${datum.type}`),
-                formatDate(datum.created_at),
-                formatDate(datum.updated_at ?? datum.created_at),
+                formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
                 datum.version,
                 html`
                   <${'ppp-badge'} appearance="${stateAppearance(datum.state)}">
-                    ${x.t(`$const.serverState.${datum.state}`)}
+                    ${x.t(`$const.serviceState.${datum.state}`)}
                   </ppp-badge>`
               ]
             };
