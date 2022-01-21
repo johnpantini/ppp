@@ -23,12 +23,11 @@ export function serializeDocument(doc, options) {
   const bsontype = doc._bsontype;
 
   if (typeof bsontype === 'undefined') {
-    // It's a regular object. Recursively serialize its property values.
     const _doc = {};
 
     for (const name in doc) {
       if (
-        name === '_id' &&
+        (name === '_id' || name.endsWith('Id')) &&
         typeof doc[name] === 'string' &&
         !doc[name].startsWith('@')
       )
