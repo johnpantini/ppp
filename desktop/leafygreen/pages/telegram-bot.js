@@ -8,9 +8,9 @@ import { pageStyles, loadingIndicator } from '../page.js';
 export const telegramBotPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
-      ${x => x.bot?.name ? `Бот Telegram - ${x.bot?.name}` : 'Бот Telegram'}
+      ${x => x.bot ? `Бот Telegram - ${x.bot?.name}` : 'Бот Telegram'}
     </ppp-page-header>
-    <form ${ref('form')} onsubmit="return false">
+    <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         <section>
           <div class="label-group">
@@ -49,7 +49,7 @@ export const telegramBotPageTemplate = (context, definition) => html`
       <section class="last">
         <div class="footer-actions">
           <${'ppp-button'}
-            ?disabled="${(x) => x.busy}"
+            ?disabled="${(x) => x.busy || x.bot?.removed}"
             type="submit"
             @click="${(x) => x.addTelegramBot()}"
             appearance="primary"

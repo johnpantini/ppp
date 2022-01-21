@@ -36,6 +36,7 @@ export class TelegramBotPage extends BasePage {
 
         if (!this.bot) {
           this.failOperation(404);
+          await this.notFound();
         } else {
           this.bot.token = await this.app.ppp.crypto.decrypt(
             this.bot.iv,
