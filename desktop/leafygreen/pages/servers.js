@@ -6,14 +6,15 @@ import { ref } from '../../../shared/element/templating/ref.js';
 import { pageStyles, loadingIndicator } from '../page.js';
 import { formatDate } from '../../../shared/intl.js';
 import { trash } from '../icons/trash.js';
+import { stateAppearance } from './services.js';
 
 export const serversPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>
+    <${'ppp-page-header'} ${ref('header')}>
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'server')}"
+        @click="${(x) => (x.app.page = 'server-selector')}"
       >
         Добавить сервер
       </ppp-button>
@@ -28,17 +29,33 @@ export const serversPageTemplate = (context, definition) => html`
             return {
               datum,
               cells: [
-                datum._id,
+                html`<a
+                  @click="${() => {
+                    x.app.navigate({
+                      page: 'server',
+                      server: datum._id
+                    });
+
+                    return false;
+                  }}"
+                  href="?page=server&server=${datum._id}"
+                  >${datum.name}</a
+                >`,
                 datum.host,
                 datum.port,
                 datum.username,
-                i18n.t(`$serverType.${datum.type}`),
-                formatDate(datum.created_at),
-                formatDate(datum.updated_at ?? datum.created_at),
+                x.t(`$const.server.${datum.type}`),
+                formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
+                datum.version,
+                html`
+                  <${'ppp-badge'} appearance="${stateAppearance(datum.state)}">
+                    ${x.t(`$const.serverState.${datum.state}`)}
+                  </ppp-badge>`,
                 html`
                   <${'ppp-button'}
                     class="xsmall"
-                    @click="${() => x.remove(datum._id)}"
+                    @click="${() => x.simpleRemove('servers', datum._id)}"
                   >
                     ${trash()}
                   </ppp-button>`

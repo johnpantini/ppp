@@ -1,75 +1,145 @@
 /** @decorator */
 
-import { BasePage } from '../lib/page/page.js';
-import { validate, invalidate } from '../lib/validate.js';
-import { attr } from '../lib/element/components/attributes.js';
-import { generateIV, bufferToString, uuidv4 } from '../lib/ppp-crypto.js';
-import { DOM } from '../lib/element/dom.js';
-import { requireComponent } from '../lib/template.js';
-import { later } from '../lib/later.js';
-import { assert } from '../lib/assert.js';
-import { SUPPORTED_SERVER_TYPES } from '../lib/const.js';
+import { PageWithTerminal } from '../page.js';
+import { validate } from '../validate.js';
+import { generateIV, bufferToString } from '../ppp-crypto.js';
+import { SUPPORTED_SERVER_TYPES, SUPPORTED_SERVICES } from '../const.js';
+import { Observable, observable } from '../element/observation/observable.js';
 
-export class ServerPage extends BasePage {
-  @attr
-  type;
+export class ServerPage extends PageWithTerminal {
+  @observable
+  server;
 
-  @attr
-  mode;
+  async connectedCallback() {
+    super.connectedCallback();
 
-  async createServer() {
+    const serverId = this.app.params()?.server;
+
+    if (serverId) {
+      this.beginOperation();
+
+      try {
+        this.server = await this.app.ppp.user.functions.findOne(
+          {
+            collection: 'servers'
+          },
+          {
+            _id: serverId
+          }
+        );
+
+        if (!this.server) {
+          this.failOperation(404);
+          await this.notFound();
+        } else {
+          if (this.server.type === SUPPORTED_SERVER_TYPES.PASSWORD)
+            this.server.password = await this.app.ppp.crypto.decrypt(
+              this.server.iv,
+              this.server.password
+            );
+          else if (this.server.type === SUPPORTED_SERVER_TYPES.KEY)
+            this.server.privateKey = await this.app.ppp.crypto.decrypt(
+              this.server.iv,
+              this.server.privateKey
+            );
+
+          Observable.notify(this, 'server');
+        }
+      } catch (e) {
+        this.failOperation(e);
+      } finally {
+        this.endOperation();
+      }
+    } else if (
+      Object.values(SUPPORTED_SERVER_TYPES).indexOf(this.app.params().type) ===
+      -1
+    ) {
+      await this.notFound();
+    }
+  }
+
+  handleFileSelection(c) {
+    const reader = new FileReader();
+
+    reader.readAsText(c.event.target.files[0], 'UTF-8');
+
+    reader.onload = (readerEvent) => {
+      this.privateKey.value = readerEvent.target.result.trim();
+    };
+  }
+
+  loadPrivateKey() {
+    this.fileInput.click();
+  }
+
+  async setupServer() {
+    this.beginOperation();
+
     try {
-      this.outputText = '';
-      this.busy = true;
-      this.app.toast.visible = false;
-      this.app.toast.source = this;
-      this.toastTitle = i18n.t('$pages.newServer.toast.title');
-      this.toastText = '';
-
       await validate(this.serverName);
-      await validate(this.host);
+      await validate(this.hostname);
       await validate(this.port);
       await validate(this.userName);
 
-      switch (this.type) {
-        case SUPPORTED_SERVER_TYPES.PASSWORD:
-          await validate(this.password);
+      const iv = generateIV();
+      let serverType = this.app.params().type;
 
-          break;
-        case SUPPORTED_SERVER_TYPES.KEY:
-          await validate(this.key);
+      if (this.server) serverType = this.server.type;
 
-          break;
+      if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
+        await validate(this.password);
       }
 
-      this.mode = 'terminal';
+      if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
+        await validate(this.privateKey);
+      }
 
-      await Promise.all([
-        requireComponent('ppp-modal'),
-        requireComponent('ppp-terminal')
-      ]);
+      let serverId = this.server?._id;
 
-      await later(250);
+      if (!this.server) {
+        const insertPayload = {
+          name: this.serverName.value.trim(),
+          state: 'failed',
+          type: serverType,
+          hostname: this.hostname.value.trim(),
+          port: this.port.value.trim(),
+          username: this.userName.value.trim(),
+          version: 1,
+          iv: bufferToString(iv),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
+          insertPayload.password = await this.app.ppp.crypto.encrypt(
+            iv,
+            this.password.value.trim()
+          );
+        } else if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
+          insertPayload.privateKey = await this.app.ppp.crypto.encrypt(
+            iv,
+            this.privateKey.value.trim()
+          );
+        }
+
+        const { insertedId } = await this.app.ppp.user.functions.insertOne(
+          {
+            collection: 'servers'
+          },
+          insertPayload
+        );
+
+        serverId = insertedId;
+      }
 
       this.busy = false;
-      this.modal.visible = true;
+      this.terminalModal.visible = true;
 
-      const terminal = this.terminalDom.terminal;
-
-      terminal.clear();
-      terminal.reset();
-      terminal.writeln('\x1b[33;1mПодготовка к настройке сервера...\x1b[0m');
-      terminal.writeln('');
-
-      this.app.toast.appearance = 'progress';
-      DOM.queueUpdate(() => (this.app.toast.progress.value = 0));
-      this.app.toast.dismissible = false;
-      this.app.toast.visible = true;
+      this.progressOperation(0);
 
       const repoUrl = `https://github.com/${this.app.ppp.keyVault.getKey(
         'github-login'
       )}/ppp.git`;
-
       const minionConfiguration = `backend: requests
 ext_pillar:
   - git:
@@ -86,7 +156,7 @@ gitfs_root: salt/states
 pillar_opts: true
 `;
 
-      let cmd = [
+      let commands = [
         'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm ;',
         'sudo rm -f /etc/yum.repos.d/salt.repo ;',
         'sudo mkdir -p /etc/salt ;',
@@ -108,190 +178,71 @@ pillar_opts: true
         'sudo rm -f /etc/salt/minion ;',
         `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ;`,
         'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
-        'sudo salt-call --local state.sls ping'
+        'sudo salt-call --local state.sls ping && '
       ].join(' ');
 
-      const commands = this.commands.value.trim();
+      const extraCommands = this.extraCommands.value.trim();
 
-      if (commands) cmd = commands + ' ; ' + cmd;
+      if (extraCommands) commands = extraCommands + ' ; ' + commands;
 
-      terminal.writeln(`\x1b[33m${cmd}\x1b[0m\r\n`);
+      const ok = await this.executeSSHCommand({
+        serverId: {
+          hostname: this.hostname.value.trim(),
+          port: this.port.value.trim(),
+          username: this.userName.value.trim(),
+          password: this.password?.value.trim(),
+          privateKey: this.privateKey?.value.trim()
+        },
+        commands,
+        commandsToDisplay: commands
+      });
 
-      let body;
+      const updatePayload = {
+        name: this.serverName.value.trim(),
+        state: ok ? 'ok' : 'failed',
+        version: 1,
+        updatedAt: new Date(),
+        hostname: this.hostname.value.trim(),
+        port: this.port.value.trim(),
+        username: this.userName.value.trim(),
+        iv: bufferToString(iv)
+      };
 
-      switch (this.type) {
-        case SUPPORTED_SERVER_TYPES.PASSWORD:
-          body = JSON.stringify({
-            host: this.host.value.trim(),
-            port: this.port.value.trim(),
-            cmd,
-            username: this.userName.value.trim(),
-            password: this.password.value.trim()
-          });
-
-          break;
-
-        case SUPPORTED_SERVER_TYPES.KEY: {
-          body = JSON.stringify({
-            host: this.host.value.trim(),
-            port: this.port.value.trim(),
-            cmd,
-            username: this.userName.value.trim(),
-            privateKey: this.key.value.trim()
-          });
-        }
+      if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
+        updatePayload.password = await this.app.ppp.crypto.encrypt(
+          iv,
+          this.password.value.trim()
+        );
+      } else if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
+        updatePayload.privateKey = await this.app.ppp.crypto.encrypt(
+          iv,
+          this.privateKey.value.trim()
+        );
       }
 
-      const r1 = await fetch(
-        new URL(
-          'ssh',
-          this.app.ppp.keyVault.getKey('service-machine-url')
-        ).toString(),
+      await this.app.ppp.user.functions.updateOne(
         {
-          method: 'POST',
-          body
+          collection: 'servers'
+        },
+        {
+          _id: serverId
+        },
+        {
+          $set: updatePayload
         }
       );
 
-      try {
-        await this.processChunkedResponse(r1);
-        assert(r1);
-      } catch (e) {
-        terminal.writeln(
-          `\r\n\x1b[31;1mОперация завершилась с ошибкой ${
-            e.status || 503
-          }\x1b[0m\r\n`
-        );
-
-        // noinspection ExceptionCaughtLocallyJS
-        throw e;
-      }
-
-      this.modal.dismissible = true;
-      this.modal.visibleChanged = (oldValue, newValue) =>
-        !newValue && (this.mode = void 0);
-
-      if (/Succeeded: 1/i.test(this.outputText)) {
-        const iv = generateIV();
-        let payload;
-
-        switch (this.type) {
-          case SUPPORTED_SERVER_TYPES.PASSWORD:
-            const encryptedPassword = await this.app.ppp.crypto.encrypt(
-              iv,
-              this.password.value.trim()
-            );
-
-            payload = {
-              _id: this.serverName.value.trim(),
-              uuid: uuidv4(),
-              type: this.type,
-              host: this.host.value.trim(),
-              port: this.port.value.trim(),
-              iv: bufferToString(iv),
-              username: this.userName.value.trim(),
-              password: encryptedPassword,
-              created_at: new Date()
-            };
-
-            break;
-          case SUPPORTED_SERVER_TYPES.KEY:
-            const encryptedKey = await this.app.ppp.crypto.encrypt(
-              iv,
-              this.key.value.trim()
-            );
-
-            payload = {
-              _id: this.serverName.value.trim(),
-              uuid: uuidv4(),
-              type: this.type,
-              host: this.host.value.trim(),
-              port: this.port.value.trim(),
-              iv: bufferToString(iv),
-              username: this.userName.value.trim(),
-              key: encryptedKey,
-              created_at: new Date()
-            };
-
-            break;
-        }
-
-        await this.app.ppp.user.functions.insertOne(
-          {
-            collection: 'servers'
-          },
-          payload
-        );
-
-        this.app.toast.appearance = 'success';
-        this.app.toast.dismissible = true;
-        this.toastText = i18n.t('operationDone');
-        this.app.toast.visible = true;
+      if (ok) {
+        this.succeedOperation();
       } else {
-        invalidate(this.app.toast, {
-          errorMessage: i18n.t('operationFailed')
-        });
+        this.failOperation(520);
       }
     } catch (e) {
-      this.busy = false;
-      console.error(e);
+      this.failOperation(e);
+    } finally {
+      this.terminalModal.dismissible = true;
 
-      if (this.modal) {
-        this.modal.dismissible = true;
-        this.modal.visibleChanged = (oldValue, newValue) =>
-          !newValue && (this.mode = void 0);
-      }
-
-      if (/E11000/i.test(e.error)) {
-        invalidate(this.app.toast, {
-          errorMessage: 'Сервер с таким названием уже существует'
-        });
-      } else {
-        invalidate(this.app.toast, {
-          errorMessage: i18n.t('operationFailed')
-        });
-      }
+      this.endOperation();
     }
-  }
-
-  typeChanged(oldValue, newValue) {
-    const params = this.app.params();
-
-    this.app.navigate(
-      this.app.url({
-        ...params,
-        type: newValue || void 0
-      })
-    );
-  }
-
-  #onPopState() {
-    this.type = this.app.params()?.type;
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this._onPopState = this.#onPopState.bind(this);
-
-    window.addEventListener('popstate', this._onPopState, {
-      passive: true
-    });
-
-    const type = this.app.params()?.type;
-
-    if (Object.values(SUPPORTED_SERVER_TYPES).indexOf(type) === -1)
-      return this.app.navigate(this.app.url({ page: this.app.params().page }));
-
-    this.type = type;
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-
-    window.removeEventListener('popstate', this._onPopState, {
-      passive: true
-    });
-
-    this.type = void 0;
   }
 }

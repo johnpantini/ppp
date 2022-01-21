@@ -4,11 +4,11 @@ export class ServersPage extends PageWithTable {
   columns = [
     {
       label: 'Название',
-      sortBy: (d) => d._id
+      sortBy: (d) => d.name
     },
     {
       label: 'Адрес',
-      sortBy: (d) => d.host
+      sortBy: (d) => d.hostname
     },
     {
       label: 'Порт',
@@ -24,11 +24,19 @@ export class ServersPage extends PageWithTable {
     },
     {
       label: 'Дата создания',
-      sortBy: (d) => d.created_at
+      sortBy: (d) => d.createdAt
     },
     {
       label: 'Последнее изменение',
-      sortBy: (d) => d.updated_at
+      sortBy: (d) => d.updatedAt
+    },
+    {
+      label: 'Версия',
+      sortBy: (d) => d.version
+    },
+    {
+      label: 'Состояние',
+      sortBy: (d) => d.state
     },
     {
       label: 'Действия'
@@ -36,16 +44,17 @@ export class ServersPage extends PageWithTable {
   ];
 
   async data() {
-    return this.app.ppp.user.functions.find({
-      collection: 'servers'
-    });
-  }
-
-  async remove(_id) {
-    return {
-      pre: async () => {
-        return this.removeDocument({ collection: 'servers' }, { _id });
-      }
-    };
+    return this.app.ppp.user.functions.aggregate(
+      {
+        collection: 'servers'
+      },
+      [
+        {
+          $match: {
+            removed: { $not: { $eq: true } }
+          }
+        }
+      ]
+    );
   }
 }
