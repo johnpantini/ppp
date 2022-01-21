@@ -33,7 +33,7 @@ return instruments.map((i) => {
   return {
     isin: i.symbol.isin,
     ticker: i.symbol.ticker,
-    name: i.symbol.showName,
+    name: i.symbol.showName.replace("'", "''"),
     currency: i.symbol.currency
   };
 });`;
