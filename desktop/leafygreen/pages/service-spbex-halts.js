@@ -14,7 +14,7 @@ import { caretDown } from '../icons/caret-down.js';
 await ppp.i18n(import.meta.url);
 
 const exampleInstrumentsCode = `/**
- * Возвращает список инструментов для отслеживания.
+ * Возвращает список инструментов с подробными данными.
  *
  * @returns {Object[]} instruments - Инструменты.
  * @returns {string} instruments[].isin - ISIN инструмента.
@@ -317,10 +317,10 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
-            <h5>Инструменты для отслеживания</h5>
-            <p>Функция на языке PLV8, возвращающая список инструментов для
-              отслеживания. По умолчанию в качестве источника данных
-              используется каталог Тинькофф Инвестиций.</p>
+            <h5>Словарь инструментов</h5>
+            <p>Функция на языке PLV8, возвращающая список инструментов биржи с
+              подробными данными. По умолчанию в качестве
+              источника данных используется каталог Тинькофф Инвестиций.</p>
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
