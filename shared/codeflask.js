@@ -118,4 +118,10 @@ export class Codeflask extends FoundationElement {
 
     this.updateCode(this.code);
   }
+
+  codeChanged(oldValue, newValue = '') {
+    if (this.$pppController.isConnected) {
+      this.updateCode(newValue);
+    }
+  }
 }
