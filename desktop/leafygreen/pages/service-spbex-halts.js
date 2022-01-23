@@ -23,11 +23,11 @@ const exampleInstrumentsCode = `/**
  * @returns {string} instruments[].currency - Валюта инструмента.
  */
 const instruments =
-JSON.parse(
-  plv8.execute(
-    \`select content from http_get('https://api.tinkoff.ru/trading/stocks/list?sortType=ByName&orderType=Asc&country=All')\`
-  )[0].content
-).payload.values || [];
+  JSON.parse(
+    plv8.execute(
+      \`select content from http_get('https://api.tinkoff.ru/trading/stocks/list?sortType=ByName&orderType=Asc&country=All')\`
+    )[0].content
+  ).payload.values || [];
 
 return instruments.map((i) => {
   return {

@@ -2,7 +2,7 @@
 
 import { PageWithTerminal } from '../page.js';
 import { validate } from '../validate.js';
-import { maybeFetchError } from '../fetch-error.js';
+import { FetchError, maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
@@ -183,6 +183,8 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
           this.failOperation(404);
 
           return await this.notFound();
+        } else {
+          Observable.notify(this, 'service');
         }
       }
 
