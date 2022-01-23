@@ -209,7 +209,7 @@ const rss = `<?xml version="1.0" encoding="utf-8"?>
 function parse_nyse_nsdq_halts() {
   const lines = rss.split(/\r?\n/);
   const halts = [];
-  const parseLine = (l) => l.replaceAll(/<[^>]*>/gi, '').trim();
+  const parseLine = (l) => l.replace(/<[^>]*>/gi, '').trim();
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -221,11 +221,11 @@ function parse_nyse_nsdq_halts() {
         symbol: parseLine(lines[i + 2]),
         name: parseLine(lines[i + 3]),
         market: parseLine(lines[i + 4]),
-        reasonCode: parseLine(lines[i + 5]),
-        pauseThresholdPrice: parseLine(lines[i + 6]),
-        resumptionDate: parseLine(lines[i + 7]),
-        resumptionQuoteTime: parseLine(lines[i + 8]),
-        resumptionTradeTime: parseLine(lines[i + 9])
+        reason_code: parseLine(lines[i + 5]),
+        pause_threshold_price: parseLine(lines[i + 6]),
+        resumption_date: parseLine(lines[i + 7]),
+        resumption_quote_time: parseLine(lines[i + 8]),
+        resumption_trade_time: parseLine(lines[i + 9])
       });
 
       i += 10;
