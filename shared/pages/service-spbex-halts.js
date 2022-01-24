@@ -314,7 +314,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
       'sudo salt-call --local state.sls ppp ;',
       `sudo salt-call --local state.sls systemd.service pillar='${servicePillar}' ;`,
       `sudo salt-call --local state.sls systemd.timer pillar='${timerPillar}' ;`,
-      `[ "$(sudo systemctl is-active ppp@${serviceId}.service)" == "failed" ] && exit 1 || `
+      `[ "$(sudo systemctl is-active ppp@${serviceId}.active)" == "inactive" ] && exit 1 || `
     ].join(' ');
   }
 
