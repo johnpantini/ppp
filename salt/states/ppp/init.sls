@@ -18,3 +18,6 @@ PPP Lib dir:
     - user: pppuser
     - group: ppp
     - replace: True
+
+rm -rf /var/cache/salt:
+  cmd.run: []
