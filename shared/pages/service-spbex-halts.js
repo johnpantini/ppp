@@ -569,13 +569,30 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
         'sudo systemctl daemon-reload &&'
       ].join(' ');
 
+      let server;
+
+      try {
+        server = await this.getServer(this.service.serverId);
+      } catch (e) {
+        const terminal = this.terminalDom.terminal;
+
+        if (e.status === 404)
+          terminal.writeError(`Сервер не найден (${e.status ?? 503})`);
+        else
+          terminal.writeError(
+            `Операция завершилась с ошибкой ${e.status ?? 503}`
+          );
+
+        server = null;
+      }
+
       const ok = await this.executeSSHCommand({
-        serverId: this.service.serverId,
+        serverId: server,
         commands,
         commandsToDisplay: commands
       });
 
-      if (ok) {
+      if (ok || server === null || server.state === 'failed') {
         const api = Object.assign(
           {},
           this.apis.find((a) => a._id === this.service.apiId)
