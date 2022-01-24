@@ -586,11 +586,18 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
         server = null;
       }
 
-      const ok = await this.executeSSHCommand({
-        serverId: server,
-        commands,
-        commandsToDisplay: commands
-      });
+      let ok;
+
+      try {
+        ok = await this.executeSSHCommand({
+          serverId: server,
+          commands,
+          commandsToDisplay: commands
+        });
+      } catch (e) {
+        ok = true;
+        server = null;
+      }
 
       if (ok || server === null || server.state === 'failed') {
         const api = Object.assign(
