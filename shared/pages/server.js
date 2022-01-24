@@ -153,6 +153,8 @@ gitfs_provider: pygit2
 gitfs_remotes:
   - ${repoUrl}
 gitfs_root: salt/states
+gitfs_global_lock: False
+git_pillar_global_lock: False
 pillar_opts: true
 `;
 
