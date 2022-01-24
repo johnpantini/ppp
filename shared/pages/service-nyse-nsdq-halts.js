@@ -253,6 +253,7 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
       if (!this.apis.length) this.apis = void 0;
     } catch (e) {
       this.failOperation(e);
+      await this.notFound();
     } finally {
       this.endOperation();
     }
