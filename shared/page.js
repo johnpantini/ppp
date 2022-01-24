@@ -220,7 +220,8 @@ export class PageWithTerminal extends BasePage {
           password: await this.app.ppp.crypto.decrypt(
             server.iv,
             server.password
-          )
+          ),
+          state: server.state
         };
 
         break;
@@ -233,7 +234,8 @@ export class PageWithTerminal extends BasePage {
           privateKey: await this.app.ppp.crypto.decrypt(
             server.iv,
             server.privateKey
-          )
+          ),
+          state: server.state
         };
       }
     }

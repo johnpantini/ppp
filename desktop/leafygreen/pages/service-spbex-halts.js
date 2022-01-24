@@ -244,9 +244,8 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               )}
             </ppp-select>
             <ppp-button
-              disabled
               class="margin-top"
-              @click="${(x) => (x.app.page = 'server')}"
+              @click="${(x) => (x.app.page = 'server-selector')}"
               appearance="primary"
             >
               Добавить сервер
