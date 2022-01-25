@@ -7,6 +7,9 @@
 systemctl daemon-reload:
   cmd.run: []
 
+systemctl reset-failed:
+  cmd.run: []
+
 systemctl enable {{ pillar['service_name'] }}.service:
   cmd.run: []
 

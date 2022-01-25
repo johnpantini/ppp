@@ -567,7 +567,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
         `sudo systemctl stop ppp@${this.service._id}.timer ;`,
         `sudo rm -f /etc/systemd/system/ppp@${this.service._id}.service ;`,
         `sudo rm -f /etc/systemd/system/ppp@${this.service._id}.timer ;`,
-        'sudo systemctl daemon-reload &&'
+        'sudo systemctl daemon-reload && systemctl reset-failed && '
       ].join(' ');
 
       let server;
