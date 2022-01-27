@@ -15,8 +15,8 @@ export const cmdistPageStyles = (context, definition) => css`
 `;
 
 // noinspection JSUnusedGlobalSymbols
-export const cmdistPage = CmdistPage.compose({
-  baseName: 'cmdist-page',
+export default CmdistPage.compose({
+  baseName: 'cmdist-[%#payload.extension._id%]-page',
   template: cmdistPageTemplate,
   styles: cmdistPageStyles
 });

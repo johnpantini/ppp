@@ -341,7 +341,8 @@ export const appTemplate = (context, definition) => html`
             `
           )}
           ${(x) => html`
-            <ppp-${x.page}-page :app="${(x) => x}"></ppp-${x.page}-page>`}
+            <ppp-${x.page + (x.extension ? `-${x.extension}` : '')}-page
+              :app="${(x) => x}"></ppp-${x.page}-page>`}
           ${when(
             (x) =>
               x.pageNotFound &&

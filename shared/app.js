@@ -214,11 +214,13 @@ export class App extends FoundationElement {
             ).text();
 
             await requireComponent(
-              `ppp-${extension.page}-page`,
+              `ppp-${extension.page}-${extension._id}-page`,
               esm`${new Tmpl().render(this, pageCode, {
                 baseExtensionUrl,
-                metaUrl: import.meta.url
-              })}`
+                metaUrl: import.meta.url,
+                extension
+              })}`,
+              'default'
             );
           } else {
             this.pageNotFound = true;

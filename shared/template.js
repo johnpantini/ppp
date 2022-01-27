@@ -5,14 +5,15 @@ import ppp from '../ppp.js';
  * This helper asynchronously automatically registers web components.
  * @public
  */
-export async function requireComponent(tagName, path) {
+export async function requireComponent(tagName, path, exportName) {
   const [_, component] = tagName.split(/ppp-/i);
 
   if (component) {
     const module = await import(
       path ?? `../${ppp.appType}/${ppp.theme}/${component}.js`
     );
-    const name = component.replace(/-./g, (x) => x[1].toUpperCase());
+    const name =
+      exportName ?? component.replace(/-./g, (x) => x[1].toUpperCase());
 
     ppp.DesignSystem.getOrCreate().register(module[name]());
   }
