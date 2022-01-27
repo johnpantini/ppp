@@ -9,7 +9,7 @@ import { trash } from '../icons/trash.js';
 
 export const workspacesPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>
+    <${'ppp-page-header'} ${ref('header')}>
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
@@ -29,12 +29,22 @@ export const workspacesPageTemplate = (context, definition) => html`
               datum,
               cells: [
                 datum._id,
-                formatDate(datum.created_at),
-                formatDate(datum.updated_at ?? datum.created_at),
+                formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
                   <${'ppp-button'}
                     class="xsmall"
-                    @click="${() => x.remove(datum._id)}"
+                    @click="${() => {
+                      const index = x.app.workspaces.findIndex(
+                        (x) => x._id === datum._id
+                      );
+
+                      if (index > -1) x.app.workspaces.splice(index, 1);
+
+                      Observable.notify(x.app, 'workspaces');
+
+                      return x.simpleRemove('workspaces', datum._id);
+                    }}"
                   >
                     ${trash()}
                   </ppp-button>`

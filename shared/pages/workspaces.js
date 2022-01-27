@@ -1,4 +1,3 @@
-import { Observable } from '../element/observation/observable.js';
 import { PageWithTable } from '../page.js';
 
 export class WorkspacesPage extends PageWithTable {
@@ -9,11 +8,11 @@ export class WorkspacesPage extends PageWithTable {
     },
     {
       label: 'Дата создания',
-      sortBy: (d) => d.created_at
+      sortBy: (d) => d.createdAt
     },
     {
       label: 'Последнее изменение',
-      sortBy: (d) => d.updated_at
+      sortBy: (d) => d.updatedAt
     },
     {
       label: 'Действия'
@@ -21,23 +20,17 @@ export class WorkspacesPage extends PageWithTable {
   ];
 
   async data() {
-    return await this.app.ppp.user.functions.aggregate({
-      collection: 'workspaces'
-    });
-  }
-
-  async remove(_id) {
-    return {
-      pre: async () => {
-        return this.removeDocument({ collection: 'workspaces' }, { _id });
+    return await this.app.ppp.user.functions.aggregate(
+      {
+        collection: 'workspaces'
       },
-      post: async () => {
-        const index = this.app.workspaces.findIndex((x) => x._id === _id);
-
-        if (index > -1) this.app.workspaces.splice(index, 1);
-
-        Observable.notify(this.app, 'workspaces');
-      }
-    };
+      [
+        {
+          $match: {
+            removed: { $not: { $eq: true } }
+          }
+        }
+      ]
+    );
   }
 }
