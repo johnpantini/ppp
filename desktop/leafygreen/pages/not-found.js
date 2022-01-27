@@ -25,7 +25,10 @@ export const notFoundPageTemplate = (context, definition) => html`
           </p>
           <div class="actions">
             <${'ppp-button'}
-              @click="${(x) => (x.app.page = 'cloud-services')}"
+              @click="${(x) =>
+                x.app.navigate({
+                  page: 'cloud-services'
+                })}"
               appearance="primary">
               ${settings({
                 slot: 'start'
