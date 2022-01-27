@@ -155,9 +155,18 @@ export default new (class {
     if (!emergency) {
       try {
         [workspaces, settings, extensions] = await Promise.all([
-          this.user.functions.find({
-            collection: 'workspaces'
-          }),
+          this.user.functions.aggregate(
+            {
+              collection: 'workspaces'
+            },
+            [
+              {
+                $match: {
+                  removed: { $not: { $eq: true } }
+                }
+              }
+            ]
+          ),
           this.user.functions.findOne(
             {
               collection: 'app'
@@ -166,9 +175,18 @@ export default new (class {
               _id: '@settings'
             }
           ),
-          this.user.functions.find({
-            collection: 'extensions'
-          })
+          this.user.functions.aggregate(
+            {
+              collection: 'extensions'
+            },
+            [
+              {
+                $match: {
+                  removed: { $not: { $eq: true } }
+                }
+              }
+            ]
+          )
         ]);
       } catch (e) {
         console.error(e);
