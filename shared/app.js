@@ -199,8 +199,11 @@ export class App extends FoundationElement {
 
           if (extension) {
             const eUrl = new URL(extension.url);
-            const baseUrl = eUrl.href.slice(0, eUrl.href.lastIndexOf('/'));
-            const pageUrl = `${baseUrl}/${ppp.appType}/${ppp.theme}/pages/${extension.page}.js`;
+            const baseExtensionUrl = eUrl.href.slice(
+              0,
+              eUrl.href.lastIndexOf('/')
+            );
+            const pageUrl = `${baseExtensionUrl}/${ppp.appType}/${ppp.theme}/pages/${extension.page}.js`;
             const pageCode = await (
               await fetch(pageUrl, { cache: 'no-cache' })
             ).text();
@@ -208,7 +211,7 @@ export class App extends FoundationElement {
             await requireComponent(
               `ppp-${extension.page}-page`,
               esm`${new Tmpl().render(this, pageCode, {
-                baseUrl,
+                baseExtensionUrl,
                 metaUrl: import.meta.url
               })}`
             );

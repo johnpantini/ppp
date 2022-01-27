@@ -1,6 +1,6 @@
-import { CmdistPage } from '[%#payload.baseUrl%]/shared/pages/cmdist.js';
-import { html } from '[%#globalThis.location.origin%]/shared/template.js';
-import { css } from '[%#globalThis.location.origin%]/shared/element/styles/css.js';
+import { CmdistPage } from '[%#payload.baseExtensionUrl%]/shared/pages/cmdist.js';
+import { html } from '[%#ctx.ppp.rootUrl%]/shared/template.js';
+import { css } from '[%#ctx.ppp.rootUrl%]/shared/element/styles/css.js';
 
 export const cmdistPageTemplate = (context, definition) => html`
   <template>
