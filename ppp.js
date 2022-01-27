@@ -17,6 +17,9 @@ export default new (class {
 
   constructor(appType) {
     this.appType = appType;
+    this.rootUrl = window.location.origin;
+
+    if (this.rootUrl.endsWith('.github.io')) this.rootUrl += '/ppp';
 
     const storedLang = localStorage.getItem('ppp-lang');
 
