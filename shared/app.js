@@ -33,6 +33,9 @@ export class App extends FoundationElement {
   @attr
   workspace;
 
+  @attr
+  extension;
+
   @observable
   workspaces;
 
@@ -78,6 +81,7 @@ export class App extends FoundationElement {
 
   #onPopState() {
     this.workspace = this.params()?.workspace;
+    this.extension = this.params()?.extension;
 
     this.navigate(this.url(this.params()));
   }
@@ -103,6 +107,7 @@ export class App extends FoundationElement {
     };
 
     this.workspace = this.params()?.workspace;
+    this.extension = this.params()?.extension;
 
     const params = this.params();
 
@@ -221,6 +226,8 @@ export class App extends FoundationElement {
             return;
           }
         } else {
+          this.extension = void 0;
+
           await requireComponent(
             `ppp-${this.page}-page`,
             `../${ppp.appType}/${ppp.theme}/pages/${this.page}.js`

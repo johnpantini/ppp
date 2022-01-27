@@ -196,14 +196,15 @@ export const appTemplate = (context, definition) => html`
                   (x) => x.extensions,
                   html`
                     <ppp-side-nav-item
-                      @click="${(x, c) =>
+                      @click="${(x, c) => {
+                        c.parent.extension = x._id;
+
                         c.parent.navigate({
                           page: x.page,
                           extension: x._id
-                        })}"
-                      ?active="${(x, c) =>
-                        c.parent.page.startsWith(x.page) &&
-                        c.parent.params().extension === x._id}"
+                        });
+                      }} }"
+                      ?active="${(x, c) => c.parent.extension === x._id}"
                       slot="items"
                     >
                       <span slot="title">${(x) => x.title}</span>
