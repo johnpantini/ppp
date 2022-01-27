@@ -69,6 +69,52 @@ export const snippetStyles = css`
   }
 `;
 
+export const modalStyles = css`
+  ppp-modal:not(:defined) {
+    visibility: hidden;
+    position: absolute;
+    height: 0;
+  }
+
+  ppp-modal .description {
+    margin: unset;
+    font-family: ${bodyFont};
+    color: rgb(33, 49, 60);
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    margin-right: 2rem;
+  }
+
+  ppp-modal section {
+    margin-bottom: 11px;
+    padding: 5px 5px 16px 5px;
+  }
+
+  ppp-modal footer {
+    margin-bottom: -16px;
+    padding-top: 16px;
+  }
+
+  ppp-modal .footer-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  ppp-modal .footer-border {
+    border-bottom: 1px solid #ebebed;
+    margin-left: -32px;
+    margin-top: 0;
+    width: 750px;
+  }
+
+  ppp-modal .label-group > h6 {
+    font-size: 0.9rem;
+  }
+`;
+
 export const foldingStyles = css`
   .folding {
     margin-top: 25px;
@@ -511,6 +557,7 @@ export const pageStyles = css`
     font-weight: normal;
   }
 
+  ${modalStyles}
   ${foldingStyles}
   ${emptyStateStyles}
   ${snippetStyles}

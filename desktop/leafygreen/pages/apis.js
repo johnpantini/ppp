@@ -16,7 +16,10 @@ export const apisPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'api')}"
+        @click="${(x) =>
+          x.app.navigate({
+            page: 'api'
+          })}"
       >
         Подключить API
       </ppp-button>

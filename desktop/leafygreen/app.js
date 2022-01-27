@@ -7,10 +7,10 @@ import { ref } from '../../shared/element/templating/ref.js';
 import { repeat } from '../../shared/element/templating/repeat.js';
 import { bodyFont } from './design-tokens.js';
 import { keyCodeEscape } from '../../shared/web-utilities/key-codes.js';
-import { pageStyles, circleSvg, loadingIndicator } from './page.js';
-
+import { pageStyles, loadingIndicator } from './page.js';
 import { plus } from './icons/plus.js';
 import { apps } from './icons/apps.js';
+import { code } from './icons/code.js';
 import { timeSeries } from './icons/time-series.js';
 import { building } from './icons/building.js';
 import { settings } from './icons/settings.js';
@@ -25,34 +25,24 @@ const newWorkSpaceModalTemplate = html`
         Будет создано новое рабочее пространство для торговли. Как
         назовём?
       </div>
-      <form ${ref('newWorkspaceModalForm')} id="new-workspace"
-            name="new-workspace"
-            onsubmit="return false">
+      <form ${ref('newWorkspaceModalForm')} onsubmit="return false" novalidate>
         <div class="loading-wrapper" ?busy="${(x) => x.busy}">
           <section>
-            <div class="section-index-icon">
-              ${circleSvg(1)}
-            </div>
             <div class="label-group full">
               <h6>Название</h6>
               <p>Будет отображаться в боковой панели.</p>
               <ppp-text-field
                 placeholder="Название пространства"
-                name="workspace-name"
                 ${ref('workspaceName')}
               ></ppp-text-field>
             </div>
           </section>
           <section class="last">
-            <div class="section-index-icon">
-              ${circleSvg(2)}
-            </div>
             <div class="label-group full">
               <h6>Комментарий</h6>
               <${'ppp-text-field'}
                 optional
                 placeholder="Произвольное описание"
-                name="workspace-comment"
                 ${ref('workspaceComment')}
               ></ppp-text-field>
             </div>
@@ -62,7 +52,8 @@ const newWorkSpaceModalTemplate = html`
           <footer>
             <div class="footer-actions">
               <${'ppp-button'}
-                @click="${(x) => (x.newWorkspaceModal.visible = false)}">Отмена
+                @click="${(x) => (x.newWorkspaceModal.visible = false)}">
+                Отмена
               </ppp-button>
               <ppp-button
                 style="margin-left: 10px;"
@@ -71,13 +62,6 @@ const newWorkSpaceModalTemplate = html`
                 type="submit"
                 @click="${(x) => x.createWorkspace()}"
               >
-                ${when(
-                  (x) => x.busy,
-                  settings({
-                    slot: 'end',
-                    cls: 'spinner-icon'
-                  })
-                )}
                 Создать
               </ppp-button>
             </div>
@@ -118,14 +102,14 @@ export const appTemplate = (context, definition) => html`
                   (x) => x.workspaces,
                   html`
                     <ppp-side-nav-item
-                      @click="${(x, c) => (c.parent.workspace = x.uuid)}"
+                      @click="${(x, c) => (c.parent.workspace = x._id)}"
                       ?active="${(x, c) =>
-                        c.parent.workspace === x.uuid &&
+                        c.parent.workspace === x._id &&
                         c.parent.page === 'workspace'}"
                       slot="items"
-                      id="${(x) => x.uuid}"
+                      id="${(x) => x._id}"
                     >
-                      <span slot="title">${(x) => x._id}</span>
+                      <span slot="title">${(x) => x.name}</span>
                     </ppp-side-nav-item>
                   `
                 )}
@@ -140,7 +124,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
               ?active="${(x) => x.page === 'widgets'}"
-              @click="${(x) => (x.page = 'widgets')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'widgets'
+                })}"
               slot="items"
             >
               <span slot="title">Виджеты</span>
@@ -148,7 +135,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
               ?active="${(x) => x.page === 'instruments'}"
-              @click="${(x) => (x.page = 'instruments')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'instruments'
+                })}"
               slot="items"
             >
               <span slot="title">Инструменты</span>
@@ -156,7 +146,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
               ?active="${(x) => x.page === 'workspaces'}"
-              @click="${(x) => (x.page = 'workspaces')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'workspaces'
+                })}"
               slot="items"
             >
               <span slot="title">Терминалы</span>
@@ -170,7 +163,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'services'}"
-              @click="${(x) => (x.page = 'services')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'services'
+                })}"
               slot="items"
             >
               <span slot="title">Список</span>
@@ -179,12 +175,44 @@ export const appTemplate = (context, definition) => html`
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) =>
                 x.page === 'service' || x.page.startsWith('service-')}"
-              @click="${(x) => (x.page = 'service')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'service'
+                })}"
               slot="items"
             >
               <span slot="title">Установить сервис</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
+          ${when(
+            (x) => x.extensions.length,
+            html`
+              <${'ppp-side-nav-group'}>
+                ${code({
+                  slot: 'start'
+                })}
+                <span slot="title">Дополнения</span>
+                ${repeat(
+                  (x) => x.extensions,
+                  html`
+                    <ppp-side-nav-item
+                      @click="${(x, c) =>
+                        c.parent.navigate({
+                          page: x.page,
+                          extension: x._id
+                        })}"
+                      ?active="${(x, c) =>
+                        c.parent.page.startsWith(x.page) &&
+                        c.parent.params().extension === x._id}"
+                      slot="items"
+                    >
+                      <span slot="title">${(x) => x.title}</span>
+                    </ppp-side-nav-item>
+                  `
+                )}
+              </ppp-side-nav-group>
+            `
+          )}
           <ppp-side-nav-group>
             ${connect({
               slot: 'start'
@@ -193,7 +221,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page.startsWith('api')}"
-              @click="${(x) => (x.page = 'apis')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'apis'
+                })}"
               slot="items"
             >
               <span slot="title">Внешние API</span>
@@ -201,7 +232,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
               ?active="${(x) => x.page === 'brokers' || x.page === 'broker'}"
-              @click="${(x) => (x.page = 'brokers')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'brokers'
+                })}"
               slot="items"
             >
               <span slot="title">Брокеры</span>
@@ -209,7 +243,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page.startsWith('server')}"
-              @click="${(x) => (x.page = 'servers')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'servers'
+                })}"
               slot="items"
             >
               <span slot="title">Серверы</span>
@@ -217,7 +254,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page.startsWith('telegram-bot')}"
-              @click="${(x) => (x.page = 'telegram-bots')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'telegram-bots'
+                })}"
               slot="items"
             >
               <span slot="title">Боты Telegram</span>
@@ -225,7 +265,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
               ?active="${(x) => x.page === 'warden'}"
-              @click="${(x) => (x.page = 'warden')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'warden'
+                })}"
               slot="items"
             >
               <span slot="title">Warden</span>
@@ -238,15 +281,21 @@ export const appTemplate = (context, definition) => html`
             <span slot="title">Конфигурация</span>
             <ppp-side-nav-item
               ?active="${(x) => x.page === 'cloud-services'}"
-              @click="${(x) => (x.page = 'cloud-services')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'cloud-services'
+                })}"
               slot="items"
             >
               <span slot="title">Облачные сервисы</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'extensions'}"
-              @click="${(x) => (x.page = 'extensions')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'extensions'
+                })}"
               slot="items"
             >
               <span slot="title">Дополнения</span>
@@ -254,7 +303,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => true}"
               ?active="${(x) => x.page === 'settings'}"
-              @click="${(x) => (x.page = 'settings')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'settings'
+                })}"
               slot="items"
             >
               <span slot="title">Настройки</span>
@@ -268,7 +320,10 @@ export const appTemplate = (context, definition) => html`
             <ppp-side-nav-item
               ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'updates'}"
-              @click="${(x) => (x.page = 'updates')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'updates'
+                })}"
               slot="items"
             >
               <span slot="title">Проверить</span>
@@ -314,50 +369,6 @@ export const appStyles = (context, definition) =>
       flex-grow: 1;
       position: relative;
       width: 100%;
-    }
-
-    ppp-modal:not(:defined) {
-      visibility: hidden;
-      position: absolute;
-      height: 0;
-    }
-
-    ppp-modal .description {
-      margin: unset;
-      font-family: ${bodyFont};
-      color: rgb(33, 49, 60);
-      font-size: 14px;
-      line-height: 20px;
-      letter-spacing: 0;
-      font-weight: 400;
-      margin-bottom: 1rem;
-      margin-right: 2rem;
-    }
-
-    ppp-modal section {
-      margin-bottom: 11px;
-      padding: 5px 5px 16px 5px;
-    }
-
-    ppp-modal footer {
-      margin-bottom: -16px;
-      padding-top: 16px;
-    }
-
-    ppp-modal .footer-actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    ppp-modal .footer-border {
-      border-bottom: 1px solid #ebebed;
-      margin-left: -32px;
-      margin-top: 0;
-      width: 750px;
-    }
-
-    ppp-modal .label-group > h6 {
-      font-size: 0.9rem;
     }
 
     .holder {

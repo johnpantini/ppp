@@ -14,7 +14,9 @@ export const serversPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'server-selector')}"
+        @click="${(x) => x.app.navigate({
+          page: 'server-selector'
+        })}"
       >
         Добавить сервер
       </ppp-button>

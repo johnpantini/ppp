@@ -29,7 +29,10 @@ export const servicesPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'service')}"
+        @click="${(x) =>
+          x.app.navigate({
+            page: 'service'
+          })}"
       >
         Установить сервис
       </ppp-button>

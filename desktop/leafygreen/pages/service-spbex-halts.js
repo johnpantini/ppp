@@ -200,7 +200,9 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             </ppp-select>
             <${'ppp-button'}
               class="margin-top"
-              @click="${(x) => (x.app.page = 'api-supabase')}"
+              @click="${(x) => x.app.navigate({
+                page: 'api-supabase'
+              })}"
               appearance="primary"
             >
               Подключить API
@@ -245,7 +247,10 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             </ppp-select>
             <ppp-button
               class="margin-top"
-              @click="${(x) => (x.app.page = 'server-selector')}"
+              @click="${(x) =>
+                x.app.navigate({
+                  page: 'server-selector'
+                })}"
               appearance="primary"
             >
               Добавить сервер
@@ -307,7 +312,10 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             </ppp-select>
             <ppp-button
               class="margin-top"
-              @click="${(x) => (x.app.page = 'telegram-bot')}"
+              @click="${(x) =>
+                x.app.navigate({
+                  page: 'telegram-bot'
+                })}"
               appearance="primary"
             >
               Добавить бота

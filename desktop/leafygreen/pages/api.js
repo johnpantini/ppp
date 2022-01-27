@@ -17,7 +17,10 @@ export const apiPageTemplate = (context, definition) => html`
           href="https://supabase.com/">Официальный ресурс</a>.</span>
         <${'ppp-button'}
           slot="action"
-          @click="${(x) => (x.app.page = `api-${SUPPORTED_APIS.SUPABASE}`)}"
+          @click="${(x) =>
+            x.app.navigate({
+              page: `api-${SUPPORTED_APIS.SUPABASE}`
+            })}"
         >
           Продолжить
         </ppp-button>

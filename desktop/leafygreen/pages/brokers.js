@@ -14,7 +14,9 @@ export const brokersPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'broker')}"
+        @click="${(x) => x.app.navigate({
+          page: 'broker'
+        })}"
       >
         Добавить брокера
       </ppp-button>

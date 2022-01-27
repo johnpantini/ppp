@@ -13,7 +13,10 @@ export const telegramBotsPageTemplate = (context, definition) => html`
       <${'ppp-button'}
         appearance="primary"
         slot="controls"
-        @click="${(x) => (x.app.page = 'telegram-bot')}"
+        @click="${(x) =>
+          x.app.navigate({
+            page: 'telegram-bot'
+          })}"
       >
         Добавить бота
       </ppp-button>

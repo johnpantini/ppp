@@ -7,7 +7,18 @@ import { requireComponent } from './template.js';
 import { invalidate, validate } from './validate.js';
 import { uuidv4 } from './ppp-crypto.js';
 import { debounce } from './ppp-throttle.js';
+import { Tmpl } from './tmpl.js';
 import ppp from '../ppp.js';
+
+function esm(templateStrings, ...substitutions) {
+  let js = templateStrings.raw[0];
+
+  for (let i = 0; i < substitutions.length; i++) {
+    js += substitutions[i] + templateStrings.raw[i + 1];
+  }
+
+  return 'data:text/javascript;text,' + js;
+}
 
 export class App extends FoundationElement {
   @observable
@@ -24,6 +35,9 @@ export class App extends FoundationElement {
 
   @observable
   workspaces;
+
+  @observable
+  extensions;
 
   @observable
   ppp;
@@ -72,20 +86,9 @@ export class App extends FoundationElement {
     super(...arguments);
 
     this.workspaces = [];
+    this.extensions = [];
     this.settings = {};
-
-    const params = this.params();
-
-    this.navigate(
-      this.url(
-        Object.assign(params, {
-          page: params.page ?? 'cloud-services'
-        })
-      ),
-      {
-        replace: !params.page
-      }
-    );
+    this.page = this.params().page ?? 'cloud-services';
 
     window.addEventListener('popstate', this.#onPopState.bind(this), {
       passive: true
@@ -100,6 +103,19 @@ export class App extends FoundationElement {
     };
 
     this.workspace = this.params()?.workspace;
+
+    const params = this.params();
+
+    this.navigate(
+      this.url(
+        Object.assign(params, {
+          page: this.page
+        })
+      ),
+      {
+        replace: true
+      }
+    );
   }
 
   @debounce(100)
@@ -148,18 +164,6 @@ export class App extends FoundationElement {
     );
   }
 
-  navigate(url, params = {}) {
-    if (typeof url === 'object') url = this.url(url);
-
-    if (url === window.location.pathname + window.location.search)
-      params.replace = true;
-
-    if (params.replace) window.history.replaceState({}, '', url);
-    else window.history.pushState({}, '', url);
-
-    if (!params.skipPage) this.page = this.params().page || 'cloud-services';
-  }
-
   url(query) {
     if (query === null) return location.pathname;
 
@@ -169,42 +173,68 @@ export class App extends FoundationElement {
     else return location.pathname + location.search;
   }
 
-  async pageChanged(oldValue, newValue) {
+  async navigate(url, params = {}) {
     this.pageConnected = false;
 
-    if (newValue !== 'workspace') {
+    if (typeof url === 'object') url = this.url(url);
+
+    if (url === window.location.pathname + window.location.search)
+      params.replace = true;
+
+    if (params.replace) window.history.replaceState({}, '', url);
+    else window.history.pushState({}, '', url);
+
+    this.page = this.params().page;
+
+    if (this.page !== 'workspace') {
       this.workspace = void 0;
     }
 
-    if (newValue) {
+    if (this.page) {
       try {
-        await requireComponent(
-          `ppp-${newValue}-page`,
-          `../${ppp.appType}/${ppp.theme}/pages/${newValue}.js`
-        );
+        const extensionId = this.params().extension;
+
+        if (extensionId) {
+          const extension = this.extensions.find((e) => e._id === extensionId);
+
+          if (extension) {
+            const eUrl = new URL(extension.url);
+            const baseUrl = eUrl.href.slice(0, eUrl.href.lastIndexOf('/'));
+            const pageUrl = `${baseUrl}/${ppp.appType}/${ppp.theme}/pages/${extension.page}.js`;
+            const pageCode = await (
+              await fetch(pageUrl, { cache: 'no-cache' })
+            ).text();
+
+            await requireComponent(
+              `ppp-${extension.page}-page`,
+              esm`${new Tmpl().render(this, pageCode, {
+                baseUrl,
+                metaUrl: import.meta.url
+              })}`
+            );
+          } else {
+            this.pageNotFound = true;
+
+            return;
+          }
+        } else {
+          await requireComponent(
+            `ppp-${this.page}-page`,
+            `../${ppp.appType}/${ppp.theme}/pages/${this.page}.js`
+          );
+        }
 
         this.pageNotFound = false;
       } catch (e) {
         console.error(e);
 
         this.pageNotFound = true;
+      } finally {
         this.pageConnected = true;
       }
+    } else {
+      return this.navigate({ page: 'cloud-services' });
     }
-
-    if (!newValue)
-      this.navigate(
-        this.url({
-          page: 'cloud-services'
-        }),
-        {
-          skipPage: true
-        }
-      );
-    else if (newValue !== this.params().page)
-      this.navigate(this.url({ page: newValue }), {
-        skipPage: true
-      });
   }
 
   async handleNewWorkspaceClick() {

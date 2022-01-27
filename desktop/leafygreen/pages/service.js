@@ -18,7 +18,9 @@ export const servicePageTemplate = (context, definition) => html`
         <${'ppp-button'}
           slot="action"
           @click="${(x) =>
-            (x.app.page = `service-${SUPPORTED_SERVICES.SPBEX_HALTS}`)}"
+            x.app.navigate({
+              page: `service-${SUPPORTED_SERVICES.SPBEX_HALTS}`
+            })}"
         >
           Продолжить
         </ppp-button>
@@ -33,7 +35,9 @@ export const servicePageTemplate = (context, definition) => html`
         <${'ppp-button'}
           slot="action"
           @click="${(x) =>
-            (x.app.page = `service-${SUPPORTED_SERVICES.NYSE_NSDQ_HALTS}`)}"
+            x.app.navigate({
+              page: `service-${SUPPORTED_SERVICES.NYSE_NSDQ_HALTS}`
+            })}"
         >
           Продолжить
         </ppp-button>
