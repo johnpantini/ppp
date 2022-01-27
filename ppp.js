@@ -16,6 +16,8 @@ export default new (class {
   crypto = new PPPCrypto();
 
   constructor(appType) {
+    globalThis.ppp = this;
+
     this.appType = appType;
     this.rootUrl = window.location.origin;
 
