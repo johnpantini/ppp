@@ -86,6 +86,7 @@ export const extensionsPageTemplate = (context, definition) => html`
                 datum.title,
                 datum.author,
                 formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
                 datum.version,
                 html`
                   <${'ppp-button'}

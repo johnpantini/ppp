@@ -18,6 +18,10 @@ export class ExtensionsPage extends PageWithTable {
       sortBy: (d) => d.createdAt
     },
     {
+      label: 'Последнее изменение',
+      sortBy: (d) => d.createdAt
+    },
+    {
       label: 'Версия',
       sortBy: (d) => d.version
     },
