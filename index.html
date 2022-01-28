@@ -20,17 +20,21 @@
     />
   </head>
   <script>
+    let type = 'mobile';
+
+    if (!/mobile/i.test(navigator.userAgent)) type = 'desktop';
+
     if (window.location.origin.endsWith('github.io'))
       window.location.replace(
-        window.location.origin + '/ppp/desktop?page=cloud-services'
+        window.location.origin + `/ppp/${type}?page=cloud-services`
       );
-    else if (/(vercel|ondigitalocean)/ig.test(window.location.origin))
+    else if (/(vercel|ondigitalocean)/gi.test(window.location.origin))
       window.location.replace(
-        window.location.origin + '/desktop.html?page=cloud-services'
+        window.location.origin + `/${type}.html?page=cloud-services`
       );
     else
       window.location.replace(
-        window.location.origin + '/desktop?page=cloud-services'
+        window.location.origin + `/${type}?page=cloud-services`
       );
   </script>
   <body></body>
