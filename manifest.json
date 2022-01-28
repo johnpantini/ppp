@@ -1,6 +1,6 @@
 {
-  "name":        "PPP Console",
-  "short_name":  "PPP Console by John Pantini",
+  "name":        "PPP",
+  "short_name":  "PPP",
   "icons":       [
     {
       "src":   "static/icons/icon-512x512.png",
@@ -15,7 +15,7 @@
   ],
   "lang":        "ru-RU",
   "scope":       "/",
-  "start_url":   "/",
+  "start_url":   "./",
   "display":     "standalone",
   "theme_color": "#131722"
 }
