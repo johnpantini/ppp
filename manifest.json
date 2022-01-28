@@ -16,6 +16,6 @@
   "lang":        "ru-RU",
   "scope":       "/",
   "start_url":   "/",
-  "display":     "minimal-ui",
+  "display":     "standalone",
   "theme_color": "#131722"
 }
