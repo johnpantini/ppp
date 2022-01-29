@@ -306,6 +306,9 @@ pillar_opts: true
           }
         );
 
+        if (!this.server.domains)
+          this.server.domains = [];
+
         domains.forEach((d) => {
           if (this.server.domains.indexOf(d) === -1)
             this.server.domains.push(d);
