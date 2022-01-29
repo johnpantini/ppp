@@ -5,9 +5,84 @@ import { ref } from '../../../shared/element/templating/ref.js';
 import { when } from '../../../shared/element/templating/when.js';
 import { css } from '../../../shared/element/styles/css.js';
 import { pageStyles, loadingIndicator } from '../page.js';
+import { trash } from '../icons/trash.js';
+
+const newDomainModalTemplate = html`
+  <ppp-modal ${ref('newDomainModal')} dismissible>
+    <span slot="title" ${ref('modalHeader')}>Добавить домены</span>
+    <div slot="body">
+      <form ${ref('newDomainModalForm')} onsubmit="return false" novalidate>
+        <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+          <section>
+            <div class="label-group full">
+              <h6>Email</h6>
+              <p>
+                Адрес регистрации учётной записи <a target="_blank"
+                                                    href="https://letsencrypt.org/">Let's
+                Encrypt</a> для получения служебных уведомлений (например, при
+                скором истечении
+                сертификата).
+              </p>
+              <${'ppp-text-field'}
+                placeholder="Email"
+                value="${(x) => x.app.ppp?.keyVault.getKey('auth0-email')}"
+                ${ref('certbotEmail')}
+              ></ppp-text-field>
+            </div>
+          </section>
+          <section class="last">
+            <div class="label-group full">
+              <h6>Домены</h6>
+              <p>
+                Список доменов, для которых нужно получить сертификаты. Можно
+                ввести несколько через запятую.
+              </p>
+              <ppp-text-field
+                placeholder="example.com, www.example.com"
+                ${ref('certbotDomains')}
+              ></ppp-text-field>
+            </div>
+          </section>
+          ${when((x) => x.busy, html`${loadingIndicator()}`)}
+          <div class="footer-border"></div>
+          <footer>
+            <div class="footer-actions">
+              <${'ppp-button'}
+                @click="${(x) => (x.newDomainModal.visible = false)}">Отмена
+              </ppp-button>
+              <ppp-button
+                style="margin-left: 10px;"
+                appearance="primary"
+                ?disabled="${(x) => x.busy}"
+                type="submit"
+                @click="${(x) => x.addDomains()}"
+              >
+                Добавить
+              </ppp-button>
+            </div>
+          </footer>
+        </div>
+      </form>
+    </div>
+  </ppp-modal>
+`;
 
 export const serverPageTemplate = (context, definition) => html`
   <template>
+    ${when((x) => x.server, newDomainModalTemplate)}
+    ${when(
+      (x) => x.server,
+      html`
+      <${'ppp-modal'} ${ref('terminalModal')}>
+        <span slot="title">Настройка сервера</span>
+        <div slot="body">
+          <div class="description">
+            <${'ppp-terminal'} ${ref('terminalDom')}></ppp-terminal>
+          </div>
+        </div>
+      </ppp-modal>
+    `
+    )}
     <${'ppp-page-header'} ${ref('header')}>
       ${(x) => (x.server ? `Сервер - ${x.server?.name}` : 'Сервер')}
     </ppp-page-header>
@@ -119,6 +194,72 @@ export const serverPageTemplate = (context, definition) => html`
                        style="display: none;"/>
               </div>
             </section>
+          `
+        )}
+        ${when(
+          (x) => x.server,
+          html`
+            <div class="folding">
+              <div class="folding-header" @click="${(x, c) =>
+                c.event.target.parentNode.classList.toggle('folding-open')}"
+              >
+                <div class="folding-header-toggle">
+                  <img slot="logo" draggable="false" alt="Toggle"
+                       src="static/fa/angle-down.svg"/>
+                </div>
+                <div class="folding-header-text">Домены</div>
+              </div>
+              <div class="folding-content">
+                <section>
+                  <div class="label-group">
+                    <h5>Список доменов</h5>
+                    <p>
+                      Домены, привязанные к серверу.
+                    </p>
+                    <${'ppp-button'}
+                      class="margin-top"
+                      @click="${(x) => x.handleNewDomainClick()}"
+                      appearance="primary"
+                    >
+                      Добавить домены
+                    </ppp-button>
+                  </div>
+                  <div class="input-group">
+                    <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+                      <${'ppp-table'}
+                        ${ref('domainsTable')}
+                        :columns="${() => [
+                          {
+                            label: 'Домен'
+                          },
+                          {
+                            label: 'Действия'
+                          }
+                        ]}"
+                        :rows="${(x) =>
+                          (x.server.domains || []).map((datum) => {
+                            return {
+                              datum,
+                              cells: [
+                                html`<a target="_blank" href="https://${datum}"
+                                  >${datum}</a
+                                >`,
+                                html`
+                                  <${'ppp-button'}
+                                    class="xsmall"
+                                    @click="${() => x.removeDomain(datum)}"
+                                  >
+                                    ${trash()}
+                                  </ppp-button>`
+                              ]
+                            };
+                          })}"
+                      >
+                      </ppp-table>
+                    </div>
+                </section>
+              </div>
+            </div>
           `
         )}
         <div class="folding">

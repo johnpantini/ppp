@@ -3,8 +3,9 @@
 import { PageWithTerminal } from '../page.js';
 import { validate } from '../validate.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
-import { SUPPORTED_SERVER_TYPES, SUPPORTED_SERVICES } from '../const.js';
+import { SUPPORTED_SERVER_TYPES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
+import { requireComponent } from '../template.js';
 
 export class ServerPage extends PageWithTerminal {
   @observable
@@ -244,6 +245,114 @@ pillar_opts: true
     } finally {
       this.terminalModal.dismissible = true;
 
+      this.endOperation();
+    }
+  }
+
+  async handleNewDomainClick() {
+    await requireComponent('ppp-modal');
+
+    this.newDomainModal.visible = true;
+  }
+
+  async addDomains() {
+    this.beginOperation('Добавление доменов');
+
+    try {
+      await validate(this.certbotEmail);
+      await validate(this.certbotDomains);
+
+      const domains = this.certbotDomains.value
+        .trim()
+        .split(',')
+        .map((d) => d.trim());
+
+      const commands = [
+        'sudo salt-call --local state.sls epel ;',
+        'sudo firewall-cmd --permanent --add-port=80/tcp ;',
+        'sudo firewall-cmd --permanent --add-port=443/tcp ;',
+        'sudo firewall-cmd --reload ;',
+        'sudo dnf -y install certbot ;',
+        domains
+          .map(
+            (d) =>
+              `sudo certbot certonly --standalone --non-interactive --agree-tos -m ${this.certbotEmail.value} -d ${d} `
+          )
+          .join('&& ') + ' &&',
+        'sudo systemctl enable certbot-renew.timer &&',
+        'sudo systemctl restart certbot-renew.timer && '
+      ].join(' ');
+
+      const ok = await this.executeSSHCommand({
+        serverId: this.server,
+        commands,
+        commandsToDisplay: commands
+      });
+
+      if (ok) {
+        await this.app.ppp.user.functions.updateOne(
+          {
+            collection: 'servers'
+          },
+          {
+            _id: this.server._id
+          },
+          {
+            $addToSet: {
+              domains: {
+                $each: domains
+              }
+            }
+          }
+        );
+
+        domains.forEach((d) => {
+          if (this.server.domains.indexOf(d) === -1)
+            this.server.domains.push(d);
+        });
+
+        Observable.notify(this, 'server');
+        this.succeedOperation();
+      } else {
+        this.failOperation(520);
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.terminalModal.dismissible = true;
+
+      this.endOperation();
+    }
+  }
+
+  async removeDomain(domain) {
+    this.beginOperation('Удаление домена');
+
+    try {
+      if (this.server.domains?.length) {
+        await this.app.ppp.user.functions.updateOne(
+          {
+            collection: 'servers'
+          },
+          {
+            _id: this.server._id
+          },
+          {
+            $pull: {
+              domains: {
+                $in: [domain]
+              }
+            }
+          }
+        );
+
+        this.server.domains.splice(this.server.domains.indexOf(domain), 1);
+        Observable.notify(this, 'server');
+        this.succeedOperation();
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
       this.endOperation();
     }
   }
