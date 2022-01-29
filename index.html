@@ -22,6 +22,16 @@
   <script>
     let type = 'mobile';
 
+    const params = Object.fromEntries(
+      new URLSearchParams(window.location.search).entries()
+    );
+
+    if (params.clear === 'true') {
+      ['auth0-client-id', 'auth0-domain', 'auth0-email'].forEach((key) =>
+        localStorage.removeItem(`ppp-${key}`)
+      );
+    }
+
     if (!/mobile/i.test(navigator.userAgent)) type = 'desktop';
 
     if (window.location.origin.endsWith('github.io'))
