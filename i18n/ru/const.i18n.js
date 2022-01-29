@@ -32,7 +32,8 @@ export default function (i18n) {
       },
       service: {
         [SUPPORTED_SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
-        [SUPPORTED_SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NSDQ'
+        [SUPPORTED_SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NSDQ',
+        [SUPPORTED_SERVICES.HTTPS_WEBSOCKET]: 'HTTPS/WebSocket'
       }
     }
   });

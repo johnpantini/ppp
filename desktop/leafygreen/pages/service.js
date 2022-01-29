@@ -42,6 +42,22 @@ export const servicePageTemplate = (context, definition) => html`
           Продолжить
         </ppp-button>
       </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="SPBEX" style="height: 40px"
+             src="static/https.svg"/>
+        <span slot="title">HTTPS/WebSocket</span>
+        <span slot="description">Произвольный сервис с доступом по HTTPS/WebSocket.</span>
+        <${'ppp-button'}
+          disabled
+          slot="action"
+          @click="${(x) =>
+            x.app.navigate({
+              page: `service-${SUPPORTED_SERVICES.HTTPS_WEBSOCKET}`
+            })}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
     </div>
   </template>
 `;
