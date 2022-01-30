@@ -49,7 +49,11 @@ export class ExtensionsPage extends PageWithTable {
 
       try {
         if (this.manifestUrl.value.startsWith('/')) {
-          url = new URL(this.manifestUrl.value, this.app.ppp.rootUrl);
+          const rootUrl = window.location.origin;
+
+          if (rootUrl.endsWith('.github.io'))
+            url = new URL('/ppp' + this.manifestUrl.value, rootUrl);
+          else url = new URL(this.manifestUrl.value, rootUrl);
         } else {
           url = new URL(this.manifestUrl.value);
         }
