@@ -372,7 +372,6 @@ export class Tabs extends FoundationElement {
   setComponent() {
     if (this.activeTabIndex !== this.prevActiveTabIndex) {
       this.activeid = this.tabIds[this.activeTabIndex];
-      this.change();
       this.setTabs();
       this.setTabPanels();
       this.focusTab();
