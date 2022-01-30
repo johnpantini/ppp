@@ -48,7 +48,11 @@ export class ExtensionsPage extends PageWithTable {
       let url;
 
       try {
-        url = new URL(this.manifestUrl.value);
+        if (this.manifestUrl.value.startsWith('/')) {
+          url = new URL(this.manifestUrl.value, this.app.ppp.rootUrl);
+        } else {
+          url = new URL(this.manifestUrl.value);
+        }
 
         if (!url.pathname.endsWith('/ppp.json')) {
           // noinspection ExceptionCaughtLocallyJS
