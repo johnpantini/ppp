@@ -94,10 +94,10 @@ export const liquidEquitiesPageTemplate = (context, definition) => html`
             label: 'Ставка риска short, %'
           },
           {
-            label: 'Плечо в long, %'
+            label: 'Плечо в long'
           },
           {
-            label: 'Плечо в short, %'
+            label: 'Плечо в short'
           }
         ]}"
         :rows="${(x) =>
