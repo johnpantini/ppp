@@ -192,6 +192,17 @@ export const textFieldStyles = (context, definition) => css`
     font-family: ${bodyFont};
   }
 
+  input[type='search']::-webkit-search-decoration,
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-results-button,
+  input[type='search']::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+
+  input[type='search'] {
+    padding-right: 30px;
+  }
+
   :host([disabled]) input {
     color: rgb(137, 151, 155);
     background-color: rgb(231, 238, 236);
