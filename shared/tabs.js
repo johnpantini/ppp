@@ -296,6 +296,9 @@ export class Tabs extends FoundationElement {
       }
     };
     this.moveToTabByIndex = (group, index) => {
+      if (this.disabled)
+        return;
+
       const tab = group[index];
 
       this.activetab = tab;
