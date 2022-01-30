@@ -31,6 +31,13 @@ export const tableStyles = (context, definition) => css`
     margin: 0;
   }
 
+  :host([sticky]) th {
+    top: 0;
+    position: sticky;
+    background: #fff;
+    z-index: 10;
+  }
+
   .column-header {
     display: flex;
     -webkit-box-pack: justify;
