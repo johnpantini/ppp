@@ -203,6 +203,10 @@ export class App extends FoundationElement {
           const extension = this.extensions.find((e) => e._id === extensionId);
 
           if (extension) {
+            if (extension.url.startsWith('/')) {
+              extension.url = this.ppp.rootUrl + extension.url;
+            }
+
             const eUrl = new URL(extension.url);
             const baseExtensionUrl = eUrl.href.slice(
               0,

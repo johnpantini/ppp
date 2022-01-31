@@ -46,6 +46,7 @@ export class ExtensionsPage extends PageWithTable {
       await validate(this.manifestUrl);
 
       let url;
+      let urlToStore;
 
       try {
         if (this.manifestUrl.value.startsWith('/')) {
@@ -54,8 +55,11 @@ export class ExtensionsPage extends PageWithTable {
           if (rootUrl.endsWith('.github.io'))
             url = new URL('/ppp' + this.manifestUrl.value, rootUrl);
           else url = new URL(this.manifestUrl.value, rootUrl);
+
+          urlToStore = this.manifestUrl.value.trim();
         } else {
           url = new URL(this.manifestUrl.value);
+          urlToStore = url.toString();
         }
 
         if (!url.pathname.endsWith('/ppp.json')) {
@@ -88,7 +92,7 @@ export class ExtensionsPage extends PageWithTable {
 
         const title = this.extensionTitle.value.trim() || manifest.title.trim();
         const payload = {
-          url: url.toString(),
+          url: urlToStore,
           title,
           repository: manifest.repository,
           page: manifest.page.trim(),
