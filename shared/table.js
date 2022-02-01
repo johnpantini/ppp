@@ -19,7 +19,7 @@ const datumTemplate = repeat(
 
 // TODO - aria attributes
 export const tableTemplate = (context, definition) => html`
-  <template>
+  <template class="${(x) => (x.rows.length >= 10 ? 'long' : '')}">
     <table>
       <thead>
         <tr>
