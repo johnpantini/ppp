@@ -4,7 +4,8 @@ export const SUPPORTED_SERVER_TYPES = {
 };
 
 export const SUPPORTED_APIS = {
-  SUPABASE: 'supabase'
+  SUPABASE: 'supabase',
+  PUSHER: 'pusher'
 };
 
 export const SUPPORTED_SERVICES = {

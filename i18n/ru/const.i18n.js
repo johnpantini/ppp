@@ -9,7 +9,8 @@ export default function (i18n) {
   i18n.extend({
     $const: {
       api: {
-        [SUPPORTED_APIS.SUPABASE]: 'Supabase'
+        [SUPPORTED_APIS.SUPABASE]: 'Supabase',
+        [SUPPORTED_APIS.PUSHER]: 'Pusher'
       },
       broker: {
         [SUPPORTED_BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
