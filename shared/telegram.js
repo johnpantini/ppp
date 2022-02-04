@@ -34,4 +34,16 @@ export class TelegramBot {
       )
     );
   }
+
+  async setWebhook(url, params = {}) {
+    return this.request(
+      'setWebhook',
+      Object.assign(
+        {
+          url
+        },
+        params
+      )
+    );
+  }
 }
