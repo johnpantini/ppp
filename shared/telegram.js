@@ -10,16 +10,24 @@ export class TelegramBot {
     );
 
     const formData = new FormData();
+    const keys = Object.keys(params);
 
-    for (const param of Object.keys(params)) {
+    for (const param of keys) {
       formData.append(param, params[param]);
     }
 
-    return fetch(url.toString(), {
-      method: 'POST',
-      cache: 'no-cache',
-      body: formData
-    });
+    if (keys.length) {
+      return fetch(url.toString(), {
+        method: 'POST',
+        cache: 'no-cache',
+        body: formData
+      });
+    } else {
+      return fetch(url.toString(), {
+        method: 'POST',
+        cache: 'no-cache'
+      });
+    }
   }
 
   async sendMessage(chatId, text, params = {}) {
@@ -45,5 +53,9 @@ export class TelegramBot {
         params
       )
     );
+  }
+
+  async deleteWebhook(url, params = {}) {
+    return this.request('deleteWebhook', Object.assign({}, params));
   }
 }
