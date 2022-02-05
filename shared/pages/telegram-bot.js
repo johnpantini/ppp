@@ -5,6 +5,7 @@ import { invalidate, validate } from '../validate.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { maybeFetchError } from '../fetch-error.js';
+import { TelegramBot } from '../telegram.js';
 
 export async function checkTelegramBotToken({ token }) {
   return fetch(`https://api.telegram.org/bot${token}/getMe`, {
@@ -73,6 +74,26 @@ export class TelegramBotPage extends BasePage {
         await maybeFetchError(rNewBot);
       }
 
+      const telegramBot = new TelegramBot({
+        token: this.botToken.value.trim()
+      });
+
+      if (this.webhook.value) {
+        try {
+          const webHookUrl = new URL(this.webhook.value);
+
+          await maybeFetchError(
+            await telegramBot.setWebhook(webHookUrl.toString())
+          );
+        } catch (e) {
+          invalidate(this.webhook, {
+            errorMessage: 'Неверный или неполный URL'
+          });
+        }
+      } else {
+        await maybeFetchError(await telegramBot.deleteWebhook());
+      }
+
       const iv = generateIV();
       const encryptedToken = await this.app.ppp.crypto.encrypt(
         iv,
@@ -98,25 +119,47 @@ export class TelegramBotPage extends BasePage {
               iv: bufferToString(iv),
               token: encryptedToken,
               type: 'telegram',
-              updatedAt: new Date()
+              updatedAt: new Date(),
+              webhook: this.webhook.value
             }
           }
         );
       } else {
-        await this.app.ppp.user.functions.insertOne(
+        const bot = await this.app.ppp.user.functions.findOne(
           {
             collection: 'bots'
           },
           {
-            name: this.botName.value.trim(),
-            version: 1,
-            type: 'telegram',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            iv: bufferToString(iv),
-            token: encryptedToken
+            removed: { $not: { $eq: true } },
+            name: this.botName.value.trim()
+          },
+          {
+            _id: 1
           }
         );
+
+        if (bot) {
+          return this.failOperation({
+            href: `?page=telegram-bot&bot=${bot._id}`,
+            error: 'E11000'
+          });
+        } else {
+          await this.app.ppp.user.functions.insertOne(
+            {
+              collection: 'bots'
+            },
+            {
+              name: this.botName.value.trim(),
+              version: 1,
+              type: 'telegram',
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              iv: bufferToString(iv),
+              token: encryptedToken,
+              webhook: this.webhook.value
+            }
+          );
+        }
       }
 
       this.succeedOperation();

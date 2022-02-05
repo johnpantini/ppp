@@ -8,7 +8,7 @@ import { pageStyles, loadingIndicator } from '../page.js';
 export const telegramBotPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
-      ${x => x.bot ? `Бот Telegram - ${x.bot?.name}` : 'Бот Telegram'}
+      ${(x) => (x.bot ? `Бот Telegram - ${x.bot?.name}` : 'Бот Telegram')}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
@@ -44,6 +44,36 @@ export const telegramBotPageTemplate = (context, definition) => html`
             ></ppp-text-field>
           </div>
         </section>
+        <div class="folding">
+          <div class="folding-header" @click="${(x, c) =>
+            c.event.target.parentNode.classList.toggle('folding-open')}"
+          >
+            <div class="folding-header-toggle">
+              <img slot="logo" draggable="false" alt="Toggle"
+                   src="static/fa/angle-down.svg"/>
+            </div>
+            <div class="folding-header-text">Webhook</div>
+          </div>
+          <div class="folding-content">
+            <section>
+              <div class="label-group">
+                <h5>Webhook</h5>
+                <p>
+                  Укажите webhook для привязки к боту.
+                </p>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  type="url"
+                  value="${(x) => x.bot?.webhook}"
+                  placeholder="https://example.com"
+                  ${ref('webhook')}
+                >
+                </ppp-text-field>
+              </div>
+            </section>
+          </div>
+        </div>
         ${when((x) => x.busy, html`${loadingIndicator()}`)}
       </div>
       <section class="last">
@@ -54,7 +84,7 @@ export const telegramBotPageTemplate = (context, definition) => html`
             @click="${(x) => x.addTelegramBot()}"
             appearance="primary"
           >
-            ${x => x.bot ? 'Обновить бота' : 'Добавить бота'}
+            ${(x) => (x.bot ? 'Обновить бота' : 'Добавить бота')}
           </ppp-button>
         </div>
       </section>
