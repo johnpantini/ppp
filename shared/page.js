@@ -7,7 +7,7 @@ import { DOM } from './element/dom.js';
 import { maybeFetchError } from './fetch-error.js';
 import { SUPPORTED_SERVER_TYPES } from './const.js';
 import { assert } from './assert.js';
-import { requireComponent } from './template.js';
+import { html, requireComponent } from './template.js';
 
 export class BasePage extends FoundationElement {
   @observable
@@ -70,7 +70,9 @@ export class BasePage extends FoundationElement {
       });
     } else if (/E11000/i.test(e?.error)) {
       invalidate(this.app.toast, {
-        errorMessage: 'Запись с таким названием уже существует.',
+        errorMessage: html`Запись с таким названием уже существует, перейдите по
+          <a href="${e.href}">ссылке</a>
+          для редактирования.`,
         silent: true
       });
     } else {
@@ -191,8 +193,7 @@ export class PageWithTerminal extends BasePage {
   }
 
   async getServer(serverObjectOrId) {
-    if (typeof serverObjectOrId === 'object')
-      return serverObjectOrId;
+    if (typeof serverObjectOrId === 'object') return serverObjectOrId;
 
     const server = await this.app.ppp.user.functions.findOne(
       {
