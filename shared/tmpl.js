@@ -17,7 +17,7 @@ export class Tmpl {
     this.encReg = /[<>&"'\x00]/g;
   }
 
-  render(ctx, str, data) {
+  async render(ctx, str, data) {
     this.encode = (s) => {
       return (!s ? '' : '' + s).replace(
         this.encReg,
@@ -25,7 +25,11 @@ export class Tmpl {
       );
     };
 
-    const f = new Function(
+    const AsyncFunction = Object.getPrototypeOf(
+      async function () {}
+    ).constructor;
+
+    const f = new AsyncFunction(
       'ctx,' + this.arg + ',T',
       'const _encode=T.encode' +
         this.helper +
@@ -49,7 +53,7 @@ export class Tmpl {
               return `'+_encode(` + p3 + `)+'`;
             }
 
-            return `'+(` + p3 + `==null?'':` + p3 + `)+'`;
+            return `'+(` + (p3 ?? '') + `)+'`;
           }
 
           if (p4) {
