@@ -24,7 +24,7 @@ async function validate(element, options) {
 
   if (element) {
     element.errorMessage = void 0;
-    element.state        = 'default';
+    element.state = 'default';
   }
 
   switch (options.hook) {
@@ -33,7 +33,6 @@ async function validate(element, options) {
         typeof value === 'undefined' ||
         value?.toString().replace(/\s*/g, '') === ''
       ) {
-
         if (element) {
           element.errorMessage = 'Это поле обязательно';
           element.state = 'error';
