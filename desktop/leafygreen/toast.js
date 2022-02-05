@@ -297,6 +297,14 @@ export const toastStyles = (context, definition) =>
     svg.spinner-icon {
       animation: spin 2s linear infinite;
     }
+
+    a {
+      background-color: transparent;
+      color: rgb(0, 108, 188);
+      text-decoration: none;
+      outline: none;
+      cursor: pointer;
+    }
   `.withBehaviors(
     appearanceBehavior('success', successToastStyles(context, definition)),
     appearanceBehavior('warning', warningToastStyles(context, definition)),
