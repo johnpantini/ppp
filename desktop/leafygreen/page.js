@@ -455,7 +455,6 @@ export const pageStyles = css`
   }
 
   .action-input {
-    align-items: center;
     display: flex;
     flex-direction: row;
     white-space: nowrap;
@@ -466,7 +465,7 @@ export const pageStyles = css`
   }
 
   .action-input-text + .action-input-button {
-    margin-top: 8px;
+    margin-top: 12px;
   }
 
   .action-input-button {
