@@ -39,7 +39,7 @@ export const tableStyles = (context, definition) => css`
     top: 0;
     position: sticky;
     background: #fff;
-    z-index: 10;
+    z-index: 2;
   }
 
   .column-header {
