@@ -1,9 +1,8 @@
 /** @decorator */
 
-const [{ BasePage }, { observable }, { debounce }] = await Promise.all([
+const [{ BasePage }, { observable }] = await Promise.all([
   import(`${globalThis.ppp.rootUrl}/shared/page.js`),
-  import(`${globalThis.ppp.rootUrl}/shared/element/observation/observable.js`),
-  import(`${globalThis.ppp.rootUrl}/shared/ppp-throttle.js`)
+  import(`${globalThis.ppp.rootUrl}/shared/element/observation/observable.js`)
 ]);
 
 export class LiquidEquitiesPage extends BasePage {
@@ -17,11 +16,6 @@ export class LiquidEquitiesPage extends BasePage {
     super();
 
     this.instruments = [];
-  }
-
-  @debounce(100)
-  searchTextChanged(oldValue, newValue) {
-    const val = newValue?.trim() ?? '';
   }
 
   async connectedCallback() {
