@@ -50,7 +50,7 @@ export class Tmpl {
           if (p2) {
             // interpolation: {%=prop%}, or unescaped: {%#prop%}
             if (p2 === '=') {
-              return `'+_encode(` + p3 + `)+'`;
+              return `'+_encode(` + (p3 ?? '') + `)+'`;
             }
 
             return `'+(` + (p3 ?? '') + `)+'`;
