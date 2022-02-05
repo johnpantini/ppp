@@ -23,18 +23,19 @@ export default function (i18n) {
         [SUPPORTED_SERVER_TYPES.KEY]: 'Вход по приватному ключу'
       },
       serverState: {
-        ok: 'Работает',
+        ok: 'В работе',
         failed: 'Неисправен'
       },
       serviceState: {
-        active: 'Запущен',
+        active: 'В работе',
         stopped: 'Остановлен',
         failed: 'Неисправен'
       },
       service: {
         [SUPPORTED_SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
         [SUPPORTED_SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NSDQ',
-        [SUPPORTED_SERVICES.HTTPS_WEBSOCKET]: 'HTTPS/WebSocket'
+        [SUPPORTED_SERVICES.HTTPS_WEBSOCKET]: 'HTTPS/WebSocket',
+        [SUPPORTED_SERVICES.SSH]: 'SSH-команды'
       }
     }
   });

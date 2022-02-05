@@ -11,7 +11,8 @@ export const SUPPORTED_APIS = {
 export const SUPPORTED_SERVICES = {
   SPBEX_HALTS: 'spbex-halts',
   NYSE_NSDQ_HALTS: 'nyse-nsdq-halts',
-  HTTPS_WEBSOCKET: 'https-websocket'
+  HTTPS_WEBSOCKET: 'https-websocket',
+  SSH: 'ssh'
 };
 
 export const SUPPORTED_BROKERS = {
