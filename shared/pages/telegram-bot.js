@@ -101,10 +101,6 @@ export class TelegramBotPage extends BasePage {
       );
 
       if (this.bot) {
-        this.bot.name = this.botName.value.trim();
-
-        Observable.notify(this, 'bot');
-
         await this.app.ppp.user.functions.updateOne(
           {
             collection: 'bots'
@@ -114,18 +110,17 @@ export class TelegramBotPage extends BasePage {
           },
           {
             $set: {
-              name: this.bot.name,
+              name: this.botName.value.trim(),
               version: 1,
               iv: bufferToString(iv),
               token: encryptedToken,
-              type: 'telegram',
               updatedAt: new Date(),
               webhook: this.webhook.value
             }
           }
         );
       } else {
-        const bot = await this.app.ppp.user.functions.findOne(
+        const existingBot = await this.app.ppp.user.functions.findOne(
           {
             collection: 'bots'
           },
@@ -138,9 +133,9 @@ export class TelegramBotPage extends BasePage {
           }
         );
 
-        if (bot) {
+        if (existingBot) {
           return this.failOperation({
-            href: `?page=telegram-bot&bot=${bot._id}`,
+            href: `?page=telegram-bot&bot=${existingBot._id}`,
             error: 'E11000'
           });
         } else {
