@@ -219,7 +219,7 @@ export class App extends FoundationElement {
 
             await requireComponent(
               `ppp-${extension.page}-${extension._id}-page`,
-              esm`${new Tmpl().render(this, pageCode, {
+              esm`${await new Tmpl().render(this, pageCode, {
                 baseExtensionUrl,
                 metaUrl: import.meta.url,
                 extension
