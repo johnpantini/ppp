@@ -83,6 +83,9 @@ export class Codeflask extends FoundationElement {
     this.code = c.event.target.value;
     this.codeHolder.innerHTML = escapeHtml(c.event.target.value);
     this.highlight();
+
+    if (this.code)
+      this.state = 'default';
   }
 
   onScroll(c) {

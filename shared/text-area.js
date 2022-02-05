@@ -267,6 +267,9 @@ export class TextArea extends FormAssociatedTextArea {
      */
     this.handleTextInput = () => {
       this.value = this.control.value;
+
+      if (this.value)
+        this.state = 'default';
     };
   }
 
