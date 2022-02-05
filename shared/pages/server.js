@@ -3,7 +3,7 @@
 import { PageWithTerminal } from '../page.js';
 import { validate } from '../validate.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
-import { SUPPORTED_SERVER_TYPES } from '../const.js';
+import { SUPPORTED_SERVER_TYPES, SUPPORTED_SERVICES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { requireComponent } from '../template.js';
 
@@ -98,39 +98,59 @@ export class ServerPage extends PageWithTerminal {
       let serverId = this.server?._id;
 
       if (!this.server) {
-        const insertPayload = {
-          name: this.serverName.value.trim(),
-          state: 'failed',
-          type: serverType,
-          hostname: this.hostname.value.trim(),
-          port: this.port.value.trim(),
-          username: this.userName.value.trim(),
-          version: 1,
-          iv: bufferToString(iv),
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-
-        if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
-          insertPayload.password = await this.app.ppp.crypto.encrypt(
-            iv,
-            this.password.value.trim()
-          );
-        } else if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
-          insertPayload.privateKey = await this.app.ppp.crypto.encrypt(
-            iv,
-            this.privateKey.value.trim()
-          );
-        }
-
-        const { insertedId } = await this.app.ppp.user.functions.insertOne(
+        const existingServer = await this.app.ppp.user.functions.findOne(
           {
             collection: 'servers'
           },
-          insertPayload
+          {
+            removed: { $not: { $eq: true } },
+            name: this.serverName.value.trim()
+          },
+          {
+            _id: 1
+          }
         );
 
-        serverId = insertedId;
+        if (existingServer) {
+          return this.failOperation({
+            href: `?page=server&server=${existingServer._id}`,
+            error: 'E11000'
+          });
+        } else {
+          const insertPayload = {
+            name: this.serverName.value.trim(),
+            state: 'failed',
+            type: serverType,
+            hostname: this.hostname.value.trim(),
+            port: this.port.value.trim(),
+            username: this.userName.value.trim(),
+            version: 1,
+            iv: bufferToString(iv),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+
+          if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
+            insertPayload.password = await this.app.ppp.crypto.encrypt(
+              iv,
+              this.password.value.trim()
+            );
+          } else if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
+            insertPayload.privateKey = await this.app.ppp.crypto.encrypt(
+              iv,
+              this.privateKey.value.trim()
+            );
+          }
+
+          const { insertedId } = await this.app.ppp.user.functions.insertOne(
+            {
+              collection: 'servers'
+            },
+            insertPayload
+          );
+
+          serverId = insertedId;
+        }
       }
 
       this.busy = false;
@@ -306,8 +326,7 @@ pillar_opts: true
           }
         );
 
-        if (!this.server.domains)
-          this.server.domains = [];
+        if (!this.server.domains) this.server.domains = [];
 
         domains.forEach((d) => {
           if (this.server.domains.indexOf(d) === -1)
