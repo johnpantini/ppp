@@ -2,12 +2,24 @@ import { ServicePage } from '../../../shared/pages/service.js';
 import { SUPPORTED_SERVICES } from '../../../shared/const.js';
 import { html } from '../../../shared/template.js';
 import { css } from '../../../shared/element/styles/css.js';
+import { ref } from '../../../shared/element/templating/ref.js';
 import { pageStyles } from '../page.js';
+import { search } from '../icons/search.js';
 
 export const servicePageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'}>Сервисы</ppp-page-header>
-    <div class="card-container">
+    <${'ppp-text-field'}
+      class="search-input"
+      type="search"
+      placeholder="Поиск"
+      @input="${(x, c) => x.filterCards(c.event.target.value)}"
+    >
+      ${search({
+        slot: 'end'
+      })}
+    </ppp-text-field>
+    <div class="card-container" ${ref('cards')}>
       <${'ppp-generic-card'}>
         <img slot="logo" draggable="false" alt="SPBEX" style="height: 33px"
              src="static/spbex-1.svg"/>
@@ -26,7 +38,8 @@ export const servicePageTemplate = (context, definition) => html`
         </ppp-button>
       </ppp-generic-card>
       <ppp-generic-card>
-        <img slot="logo" draggable="false" alt="SPBEX" style="height: 44px"
+        <img slot="logo" draggable="false" alt="NYSE/NASDAQ"
+             style="height: 44px"
              src="static/nsdq-1.svg"/>
         <span slot="title">Торговые паузы NYSE/NASDAQ</span>
         <span slot="description">Оповещение о торговых паузах NYSE/NASDAQ в Telegram. <a
@@ -43,7 +56,24 @@ export const servicePageTemplate = (context, definition) => html`
         </ppp-button>
       </ppp-generic-card>
       <ppp-generic-card>
-        <img slot="logo" draggable="false" alt="SPBEX" style="height: 40px"
+        <img slot="logo" draggable="false" alt="SSH" style="height: 44px"
+             src="static/ssh.svg"/>
+        <span slot="title">Команды SSH</span>
+        <span
+          slot="description">Произвольный сервис на основе команд оболочки.</span>
+        <${'ppp-button'}
+          slot="action"
+          @click="${(x) =>
+            x.app.navigate({
+              page: `service-${SUPPORTED_SERVICES.SSH}`
+            })}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="HTTPS/WebSocket"
+             style="height: 40px"
              src="static/https.svg"/>
         <span slot="title">HTTPS/WebSocket</span>
         <span slot="description">Произвольный сервис с доступом по HTTPS/WebSocket.</span>
@@ -65,6 +95,11 @@ export const servicePageTemplate = (context, definition) => html`
 export const servicePageStyles = (context, definition) =>
   css`
     ${pageStyles}
+    .search-input {
+      display: flex;
+      margin: 5px 0 10px 0;
+      width: 300px;
+    }
   `;
 
 // noinspection JSUnusedGlobalSymbols
