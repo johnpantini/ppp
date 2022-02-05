@@ -3,7 +3,7 @@
 import { PageWithTerminal } from '../page.js';
 import { validate } from '../validate.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
-import { SUPPORTED_SERVER_TYPES, SUPPORTED_SERVICES } from '../const.js';
+import { SUPPORTED_SERVER_TYPES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { requireComponent } from '../template.js';
 
