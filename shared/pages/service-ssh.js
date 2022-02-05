@@ -218,10 +218,6 @@ export class ServiceSshPage extends PageWithTerminal {
       });
 
       if (ok) {
-        this.service.removed = true;
-        this.service.state = 'stopped';
-        Observable.notify(this, 'service');
-
         await this.app.ppp.user.functions.updateOne(
           {
             collection: 'services'
@@ -238,6 +234,9 @@ export class ServiceSshPage extends PageWithTerminal {
           }
         );
 
+        this.service.removed = true;
+        this.service.state = 'stopped';
+        Observable.notify(this, 'service');
         this.succeedOperation();
       } else {
         this.failOperation(520);
