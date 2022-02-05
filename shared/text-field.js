@@ -331,6 +331,9 @@ export class TextField extends FormAssociatedTextField {
    */
   handleTextInput() {
     this.value = this.control.value;
+
+    if (this.value)
+      this.state = 'default';
   }
 
   /**
