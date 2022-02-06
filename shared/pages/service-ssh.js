@@ -133,28 +133,28 @@ export class ServiceSshPage extends PageWithTerminal {
             href: `?page=service-${SUPPORTED_SERVICES.SSH}&service=${existingService._id}`,
             error: 'E11000'
           });
-        } else {
-          const { insertedId } = await this.app.ppp.user.functions.insertOne(
-            {
-              collection: 'services'
-            },
-            {
-              name: this.serviceName.value.trim(),
-              state: 'failed',
-              type: SUPPORTED_SERVICES.SSH,
-              version: 1,
-              iv: bufferToString(iv),
-              secrets: encryptedSecrets,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              serverId: this.server.value,
-              installCode: this.installCode.value,
-              removeCode: this.removeCode.value
-            }
-          );
-
-          serviceId = insertedId;
         }
+
+        const { insertedId } = await this.app.ppp.user.functions.insertOne(
+          {
+            collection: 'services'
+          },
+          {
+            name: this.serviceName.value.trim(),
+            state: 'failed',
+            type: SUPPORTED_SERVICES.SSH,
+            version: 1,
+            iv: bufferToString(iv),
+            secrets: encryptedSecrets,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            serverId: this.server.value,
+            installCode: this.installCode.value,
+            removeCode: this.removeCode.value
+          }
+        );
+
+        serviceId = insertedId;
       }
 
       const ok = await this.executeSSHCommand({
