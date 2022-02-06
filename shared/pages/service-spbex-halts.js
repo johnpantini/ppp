@@ -175,7 +175,8 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
             collection: 'services'
           },
           {
-            _id: serviceId
+            _id: serviceId,
+            type: SUPPORTED_SERVICES.SPBEX_HALTS
           }
         );
 
@@ -278,7 +279,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
     );
 
     return `${sendTelegramMessage}
-      ${new Tmpl().render(this, installSpbexHalts, {
+      ${await new Tmpl().render(this, installSpbexHalts, {
         serviceId,
         channel: this.channel.value,
         instrumentsCode: this.instrumentsCode.value,
@@ -339,6 +340,27 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
       let serviceId = this.service?._id;
 
       if (!this.service) {
+        const existingService = await this.app.ppp.user.functions.findOne(
+          {
+            collection: 'services'
+          },
+          {
+            removed: { $not: { $eq: true } },
+            type: SUPPORTED_SERVICES.SPBEX_HALTS,
+            name: this.serviceName.value.trim()
+          },
+          {
+            _id: 1
+          }
+        );
+
+        if (existingService) {
+          return this.failOperation({
+            href: `?page=service-${SUPPORTED_SERVICES.SPBEX_HALTS}&service=${existingService._id}`,
+            error: 'E11000'
+          });
+        }
+
         const { insertedId } = await this.app.ppp.user.functions.insertOne(
           {
             collection: 'services'
@@ -624,7 +646,7 @@ export class ServiceSpbexHaltsPage extends PageWithTerminal {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              query: new Tmpl().render(this, await queryRequest.text(), {
+              query: await new Tmpl().render(this, await queryRequest.text(), {
                 serviceId: this.service._id
               }),
               connectionString: this.getConnectionString(api)

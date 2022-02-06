@@ -178,7 +178,8 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
             collection: 'services'
           },
           {
-            _id: serviceId
+            _id: serviceId,
+            type: SUPPORTED_SERVICES.NYSE_NSDQ_HALTS
           }
         );
 
@@ -283,7 +284,7 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
     const symbols = await this.callSymbolsFunction(true);
 
     return `${sendTelegramMessage}
-      ${new Tmpl().render(this, installNyseNsdqHalts, {
+      ${await new Tmpl().render(this, installNyseNsdqHalts, {
         serviceId,
         channel: this.channel.value,
         symbols: JSON.stringify(symbols),
@@ -344,6 +345,27 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
       let serviceId = this.service?._id;
 
       if (!this.service) {
+        const existingService = await this.app.ppp.user.functions.findOne(
+          {
+            collection: 'services'
+          },
+          {
+            removed: { $not: { $eq: true } },
+            type: SUPPORTED_SERVICES.NYSE_NSDQ_HALTS,
+            name: this.serviceName.value.trim()
+          },
+          {
+            _id: 1
+          }
+        );
+
+        if (existingService) {
+          return this.failOperation({
+            href: `?page=service-${SUPPORTED_SERVICES.NYSE_NSDQ_HALTS}&service=${existingService._id}`,
+            error: 'E11000'
+          });
+        }
+
         const { insertedId } = await this.app.ppp.user.functions.insertOne(
           {
             collection: 'services'
@@ -629,7 +651,7 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              query: new Tmpl().render(this, await queryRequest.text(), {
+              query: await new Tmpl().render(this, await queryRequest.text(), {
                 serviceId: this.service._id
               }),
               connectionString: this.getConnectionString(api)

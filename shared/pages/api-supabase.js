@@ -50,7 +50,8 @@ export class ApiSupabasePage extends BasePage {
             collection: 'apis'
           },
           {
-            _id: apiId
+            _id: apiId,
+            type: SUPPORTED_APIS.SUPABASE
           }
         );
 
@@ -158,6 +159,27 @@ export class ApiSupabasePage extends BasePage {
           }
         );
       } else {
+        const existingSupabaseApi = await this.app.ppp.user.functions.findOne(
+          {
+            collection: 'apis'
+          },
+          {
+            removed: { $not: { $eq: true } },
+            type: SUPPORTED_APIS.SUPABASE,
+            name: this.apiName.value.trim()
+          },
+          {
+            _id: 1
+          }
+        );
+
+        if (existingSupabaseApi) {
+          return this.failOperation({
+            href: `?page=api-${SUPPORTED_APIS.SUPABASE}&api=${existingSupabaseApi._id}`,
+            error: 'E11000'
+          });
+        }
+
         await this.app.ppp.user.functions.insertOne(
           {
             collection: 'apis'

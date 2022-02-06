@@ -43,7 +43,8 @@ export class ServiceSshPage extends PageWithTerminal {
             collection: 'services'
           },
           {
-            _id: serviceId
+            _id: serviceId,
+            type: SUPPORTED_SERVICES.SSH
           }
         );
 

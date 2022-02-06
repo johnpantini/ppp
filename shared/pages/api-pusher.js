@@ -3,7 +3,7 @@
 import { BasePage } from '../page.js';
 import { validate } from '../validate.js';
 import { generateIV, bufferToString } from '../ppp-crypto.js';
-import { SUPPORTED_APIS } from '../const.js';
+import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { maybeFetchError } from '../fetch-error.js';
 
@@ -74,7 +74,8 @@ export class ApiPusherPage extends BasePage {
             collection: 'apis'
           },
           {
-            _id: apiId
+            _id: apiId,
+            type: SUPPORTED_APIS.PUSHER
           }
         );
 
@@ -147,6 +148,27 @@ export class ApiPusherPage extends BasePage {
           }
         );
       } else {
+        const existingPusherApi = await this.app.ppp.user.functions.findOne(
+          {
+            collection: 'apis'
+          },
+          {
+            removed: { $not: { $eq: true } },
+            type: SUPPORTED_APIS.PUSHER,
+            name: this.apiName.value.trim()
+          },
+          {
+            _id: 1
+          }
+        );
+
+        if (existingPusherApi) {
+          return this.failOperation({
+            href: `?page=api-${SUPPORTED_APIS.PUSHER}&api=${existingPusherApi._id}`,
+            error: 'E11000'
+          });
+        }
+
         await this.app.ppp.user.functions.insertOne(
           {
             collection: 'apis'
