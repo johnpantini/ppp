@@ -200,7 +200,8 @@ export class PageWithTerminal extends BasePage {
         collection: 'servers'
       },
       {
-        _id: serverObjectOrId
+        _id: serverObjectOrId,
+        removed: { $not: { $eq: true } }
       }
     );
 
