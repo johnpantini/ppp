@@ -116,41 +116,41 @@ export class ServerPage extends PageWithTerminal {
             href: `?page=server&server=${existingServer._id}`,
             error: 'E11000'
           });
-        } else {
-          const insertPayload = {
-            name: this.serverName.value.trim(),
-            state: 'failed',
-            type: serverType,
-            hostname: this.hostname.value.trim(),
-            port: this.port.value.trim(),
-            username: this.userName.value.trim(),
-            version: 1,
-            iv: bufferToString(iv),
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
-
-          if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
-            insertPayload.password = await this.app.ppp.crypto.encrypt(
-              iv,
-              this.password.value.trim()
-            );
-          } else if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
-            insertPayload.privateKey = await this.app.ppp.crypto.encrypt(
-              iv,
-              this.privateKey.value.trim()
-            );
-          }
-
-          const { insertedId } = await this.app.ppp.user.functions.insertOne(
-            {
-              collection: 'servers'
-            },
-            insertPayload
-          );
-
-          serverId = insertedId;
         }
+
+        const insertPayload = {
+          name: this.serverName.value.trim(),
+          state: 'failed',
+          type: serverType,
+          hostname: this.hostname.value.trim(),
+          port: this.port.value.trim(),
+          username: this.userName.value.trim(),
+          version: 1,
+          iv: bufferToString(iv),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+
+        if (serverType === SUPPORTED_SERVER_TYPES.PASSWORD) {
+          insertPayload.password = await this.app.ppp.crypto.encrypt(
+            iv,
+            this.password.value.trim()
+          );
+        } else if (serverType === SUPPORTED_SERVER_TYPES.KEY) {
+          insertPayload.privateKey = await this.app.ppp.crypto.encrypt(
+            iv,
+            this.privateKey.value.trim()
+          );
+        }
+
+        const { insertedId } = await this.app.ppp.user.functions.insertOne(
+          {
+            collection: 'servers'
+          },
+          insertPayload
+        );
+
+        serverId = insertedId;
       }
 
       this.busy = false;
