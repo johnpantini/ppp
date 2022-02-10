@@ -39,10 +39,16 @@ $$ language plv8;
 -- Populate SPBEX instruments immediately
 select populate_spbex_halts_instruments_[%#payload.serviceId%]();
 
+select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0');
+select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0');
+
 create or replace function parse_spbex_halts_[%#payload.serviceId%]()
 returns json as
 $$
 try {
+  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
+  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
+
   return plv8.execute("select content from http_get('https://spbexchange.ru/ru/about/news.aspx?sectionrss=30')")[0].content
     .match(
       /приостановке организованных торгов ценными бумагами [\s\S]+?<link>(.*?)<\/link>/gi
@@ -166,6 +172,6 @@ try {
 } catch (e) {
   plv8.elog(NOTICE, e.toString());
 
-  return {status: 500};
+  return {status: e.toString()};
 }
 $$ language plv8;
