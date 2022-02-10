@@ -28,23 +28,24 @@ create or replace function parse_nyse_nsdq_halts_[%#payload.serviceId%]()
 returns json as
 $$
 try {
-  const rss = plv8.execute("select content from http_get('http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts')")[0]
-    .content;
-  const lines = rss.split(/\r?\n/);
+  const response = plv8.execute(`select content::json->'result' as result from http(('POST', 'https://www.nasdaqtrader.com/RPCHandler.axd', ARRAY[http_header('Referer', 'https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts')], 'application/json', '{"id":2,"method":"BL_TradeHalt.GetTradeHalts","params":"[]","version":"1.1"}')::http_request)`)[0];
+  const lines = response.result.split(/\r?\n/);
   const halts = [];
-  const parseLine = (l = '') => l.replace(/<[^>]*>/gi, '').trim().replace("'", "''");
+  const parseLine = (l) => l.replace(/<[^>]*>/gi, '').trim();
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
 
-    if (line.startsWith('<ndaq:HaltDate>')) {
+    if (line.startsWith('<td>')) {
+      const codes = (lines[i + 5] || '').replace(/<[^>]*>/gi, ' ').trim().split(' ');
+
       halts.push({
         halt_date: parseLine(lines[i]),
         halt_time: parseLine(lines[i + 1]),
-        symbol: parseLine(lines[i + 2]).replace(' ', '.'),
+        symbol: parseLine(lines[i + 2]),
         name: parseLine(lines[i + 3]),
         market: parseLine(lines[i + 4]),
-        reason_code: parseLine(lines[i + 5]),
+        reason_code: codes[codes.length - 1],
         pause_threshold_price: parseLine(lines[i + 6]),
         resumption_date: parseLine(lines[i + 7]),
         resumption_quote_time: parseLine(lines[i + 8]),

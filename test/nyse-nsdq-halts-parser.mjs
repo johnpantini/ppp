@@ -216,8 +216,8 @@ function parse_nyse_nsdq_halts() {
 
     if (line.startsWith('<ndaq:HaltDate>')) {
       halts.push({
-        haltDate: parseLine(lines[i]),
-        haltTime: parseLine(lines[i + 1]),
+        halt_date: parseLine(lines[i]),
+        halt_time: parseLine(lines[i + 1]),
         symbol: parseLine(lines[i + 2]),
         name: parseLine(lines[i + 3]),
         market: parseLine(lines[i + 4]),

@@ -107,7 +107,7 @@ let message = \`‼️⏸ Приостановка торгов (\${market})
 const description = mappings[reason_code];
 
 if (description) message += \`<b>Код \${reason_code}</b>: \${description}\\n\`;
-else message += \`<b>Код \${reason_code}</b>\\n\`;
+else message += \`<b>Ожидание кода</b>\\n\`;
 
 if (resumption_quote_time)
   message += \`\\nОткрытие книги заявок: \${formatDateTime(
