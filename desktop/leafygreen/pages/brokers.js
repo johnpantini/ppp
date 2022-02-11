@@ -1,3 +1,4 @@
+import ppp from '../../../ppp.js';
 import { BrokersPage } from '../../../shared/pages/brokers.js';
 import { html } from '../../../shared/template.js';
 import { css } from '../../../shared/element/styles/css.js';
@@ -6,17 +7,19 @@ import { ref } from '../../../shared/element/templating/ref.js';
 import { pageStyles, loadingIndicator } from '../page.js';
 import { formatDate } from '../../../shared/intl.js';
 
-import { trash } from '../icons/trash.js';
+await ppp.i18n(import.meta.url);
 
 export const brokersPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>
+    <${'ppp-page-header'} ${ref('header')}>
       <${'ppp-button'}
+        disabled
         appearance="primary"
         slot="controls"
-        @click="${(x) => x.app.navigate({
-          page: 'broker'
-        })}"
+        @click="${(x) =>
+          x.app.navigate({
+            page: 'broker'
+          })}"
       >
         Добавить брокера
       </ppp-button>
@@ -31,17 +34,23 @@ export const brokersPageTemplate = (context, definition) => html`
             return {
               datum,
               cells: [
-                datum._id,
-                i18n.t(`$brokerType.${datum.type}`),
-                formatDate(datum.created_at),
-                formatDate(datum.updated_at ?? datum.created_at),
-                html`
-                  <${'ppp-button'}
-                    class="xsmall"
-                    @click="${() => x.remove(datum._id)}"
-                  >
-                    ${trash()}
-                  </ppp-button>`
+                html`<a
+                  @click="${() => {
+                    x.app.navigate({
+                      page: `broker-${datum.type}`,
+                      broker: datum._id
+                    });
+
+                    return false;
+                  }}"
+                  href="?page=broker-${datum.type}&broker=${datum._id}"
+                >
+                  ${datum.name}
+                </a>`,
+                x.t(`$const.broker.${datum.type}`),
+                formatDate(datum.createdAt),
+                formatDate(datum.updatedAt ?? datum.createdAt),
+                datum.version
               ]
             };
           })}"

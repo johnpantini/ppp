@@ -4,7 +4,7 @@ export class BrokersPage extends PageWithTable {
   columns = [
     {
       label: 'Название',
-      sortBy: (d) => d._id
+      sortBy: (d) => d.name
     },
     {
       label: 'Тип',
@@ -12,14 +12,15 @@ export class BrokersPage extends PageWithTable {
     },
     {
       label: 'Дата создания',
-      sortBy: (d) => d.created_at
+      sortBy: (d) => d.createdAt
     },
     {
       label: 'Последнее изменение',
-      sortBy: (d) => d.updated_at
+      sortBy: (d) => d.updatedAt
     },
     {
-      label: 'Действия'
+      label: 'Версия',
+      sortBy: (d) => d.version
     }
   ];
 
@@ -27,11 +28,14 @@ export class BrokersPage extends PageWithTable {
     return this.app.ppp.user.functions.aggregate(
       {
         collection: 'brokers'
-      }
+      },
+      [
+        {
+          $match: {
+            removed: { $not: { $eq: true } }
+          }
+        }
+      ]
     );
-  }
-
-  async remove(_id) {
-    return this.removeDocument({ collection: 'brokers' }, { _id });
   }
 }
