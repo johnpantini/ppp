@@ -116,9 +116,7 @@ export class ApiPusherPage extends BasePage {
         apiCluster: this.apiCluster.value.trim()
       });
 
-      if (!rPusherCredentials.ok) {
-        await maybeFetchError(rPusherCredentials);
-      }
+      await maybeFetchError(rPusherCredentials);
 
       const iv = generateIV();
       const encryptedSecret = await this.app.ppp.crypto.encrypt(
