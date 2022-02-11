@@ -109,6 +109,33 @@ export class BasePage extends FoundationElement {
     this.style.display = 'none';
     this.app.pageNotFound = true;
   }
+
+  async getMongoDBRealmAccessToken() {
+    const { access_token: mongoDBRealmAccessToken } = await (
+      await fetch(
+        new URL(
+          'fetch',
+          this.app.ppp.keyVault.getKey('service-machine-url')
+        ).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url: 'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
+            body: {
+              username: this.app.ppp.keyVault.getKey('mongo-public-key'),
+              apiKey: this.app.ppp.keyVault.getKey('mongo-private-key')
+            }
+          })
+        }
+      )
+    ).json();
+
+    return mongoDBRealmAccessToken;
+  }
 }
 
 export class PageWithTerminal extends BasePage {
