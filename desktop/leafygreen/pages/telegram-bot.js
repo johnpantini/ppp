@@ -70,6 +70,13 @@ export const telegramBotPageTemplate = (context, definition) => html`
                   ${ref('webhook')}
                 >
                 </ppp-text-field>
+                <${'ppp-button'}
+                  disabled
+                  class="margin-top"
+                  appearance="primary"
+                >
+                  Выбрать конечную точку HTTPS
+                </ppp-button>
               </div>
             </section>
           </div>
