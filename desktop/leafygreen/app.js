@@ -231,8 +231,8 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Внешние API</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
-              ?active="${(x) => x.page === 'brokers' || x.page === 'broker'}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
+              ?active="${(x) => x.page.startsWith('broker')}"
               @click="${(x) =>
                 x.navigate({
                   page: 'brokers'
@@ -264,15 +264,15 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Боты Telegram</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
-              ?active="${(x) => x.page === 'warden'}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
+              ?active="${(x) => x.page.startsWith('endpoint')}"
               @click="${(x) =>
                 x.navigate({
-                  page: 'warden'
+                  page: 'endpoints'
                 })}"
               slot="items"
             >
-              <span slot="title">Warden</span>
+              <span slot="title">Конечные точки HTTPS</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
