@@ -27,27 +27,44 @@ async function validate(element, options) {
     element.state = 'default';
   }
 
-  switch (options.hook) {
-    case 'required':
-      if (
-        typeof value === 'undefined' ||
-        value?.toString().replace(/\s*/g, '') === ''
-      ) {
-        if (element) {
-          element.errorMessage = 'Это поле обязательно';
-          element.state = 'error';
+  if (typeof options.hook === 'function') {
+    const predicateResult = await options.hook(value);
 
-          element?.focus();
-        }
+    if (!predicateResult) {
+      if (element) {
+        element.errorMessage = options.errorMessage;
+        element.state = 'error';
 
-        throw new ValidationError({
-          element,
-          message: 'Форма заполнена некорректно или не полностью.'
-        });
+        element?.focus();
       }
 
-      break;
-  }
+      throw new ValidationError({
+        element,
+        message: options.errorMessage
+      });
+    }
+  } else
+    switch (options.hook) {
+      case 'required':
+        if (
+          typeof value === 'undefined' ||
+          value?.toString().replace(/\s*/g, '') === ''
+        ) {
+          if (element) {
+            element.errorMessage = 'Это поле обязательно';
+            element.state = 'error';
+
+            element?.focus();
+          }
+
+          throw new ValidationError({
+            element,
+            message: 'Форма заполнена некорректно или не полностью.'
+          });
+        }
+
+        break;
+    }
 }
 
 function invalidate(element, options = {}) {
