@@ -180,10 +180,11 @@ pillar_opts: true
 `;
 
       let commands = [
-        'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm ;',
+        'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -q --provides $(rpm -q --whatprovides "system-release(releasever)") | grep "system-release(releasever)" | cut -d " " -f 3).noarch.rpm ;',
         'sudo rm -f /etc/yum.repos.d/salt.repo ;',
         'sudo mkdir -p /etc/salt ;',
-        'sudo dnf -y install epel-release wget git python3 python3-devel libffi-devel tar openssl openssl-devel ;',
+        'sudo dnf -y install epel-release ;',
+        'sudo dnf -y install wget git python3 python3-devel libffi-devel tar openssl openssl-devel ;',
         'sudo dnf -y remove cmake ;',
         'sudo dnf -y group install "Development Tools" ;',
         'wget https://github.com/Kitware/CMake/releases/download/v3.21.3/cmake-3.21.3-linux-$(uname -m).tar.gz -O cmake-3.21.3-linux-$(uname -m).tar.gz ;',
