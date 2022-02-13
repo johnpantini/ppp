@@ -290,8 +290,7 @@ pillar_opts: true
 
       const commands = [
         'sudo salt-call --local state.sls epel ;',
-        'sudo firewall-cmd --permanent --add-port=80/tcp ;',
-        'sudo firewall-cmd --permanent --add-port=443/tcp ;',
+        'sudo firewall-cmd --permanent --add-service=http ;',
         'sudo firewall-cmd --reload ;',
         'sudo dnf -y install certbot ;',
         domains
