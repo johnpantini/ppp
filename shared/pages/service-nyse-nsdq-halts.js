@@ -1,6 +1,6 @@
 /** @decorator */
 
-import { PageWithTerminal } from '../page.js';
+import { SystemdTimerWithSupabasePage } from '../page.js';
 import { validate } from '../validate.js';
 import { FetchError, maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
@@ -8,26 +8,9 @@ import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
 import { Observable, observable } from '../element/observation/observable.js';
 import { Tmpl } from '../tmpl.js';
 
-export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
-  @observable
-  service;
-
+export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
   @observable
   bots;
-
-  @observable
-  servers;
-
-  @observable
-  apis;
-
-  getConnectionString(api) {
-    const { hostname } = new URL(api.url);
-
-    return `postgres://${api.user}:${encodeURIComponent(
-      api.password
-    )}@db.${hostname}:${api.port}/${api.db}`;
-  }
 
   async callSymbolsFunction(returnResult = false) {
     if (!returnResult) this.beginOperation();
@@ -260,16 +243,6 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
     }
   }
 
-  getSQLUrl(file) {
-    const origin = window.location.origin;
-    let scriptUrl = new URL(`sql/${file}`, origin).toString();
-
-    if (origin.endsWith('github.io'))
-      scriptUrl = new URL(`ppp/sql/${file}`, origin).toString();
-
-    return scriptUrl;
-  }
-
   async sql(serviceId) {
     const [sendTelegramMessage, installNyseNsdqHalts] = await Promise.all([
       fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
@@ -492,205 +465,7 @@ export class ServiceNyseNsdqHaltsPage extends PageWithTerminal {
     }
   }
 
-  async restart() {
-    this.beginOperation('Перезапуск сервиса');
-
-    try {
-      const commands = [
-        `sudo systemctl restart ppp@${this.service._id}.timer &&`
-      ].join(' ');
-
-      const ok = await this.executeSSHCommand({
-        serverId: this.service.serverId,
-        commands,
-        commandsToDisplay: commands
-      });
-
-      if (ok) {
-        this.service.state = 'active';
-        Observable.notify(this, 'service');
-
-        await this.app.ppp.user.functions.updateOne(
-          {
-            collection: 'services'
-          },
-          {
-            _id: this.service._id
-          },
-          {
-            $set: {
-              state: 'active',
-              updatedAt: new Date()
-            }
-          }
-        );
-
-        this.succeedOperation();
-      } else {
-        this.failOperation(520);
-      }
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.terminalModal.dismissible = true;
-
-      this.endOperation();
-    }
-  }
-
-  async stop() {
-    this.beginOperation('Остановка сервиса');
-
-    try {
-      const commands = [
-        `sudo systemctl stop ppp@${this.service._id}.timer &&`
-      ].join(' ');
-
-      const ok = await this.executeSSHCommand({
-        serverId: this.service.serverId,
-        commands,
-        commandsToDisplay: commands
-      });
-
-      if (ok) {
-        this.service.state = 'stopped';
-        Observable.notify(this, 'service');
-
-        await this.app.ppp.user.functions.updateOne(
-          {
-            collection: 'services'
-          },
-          {
-            _id: this.service._id
-          },
-          {
-            $set: {
-              state: 'stopped',
-              updatedAt: new Date()
-            }
-          }
-        );
-
-        this.succeedOperation();
-      } else {
-        this.failOperation(520);
-      }
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.terminalModal.dismissible = true;
-
-      this.endOperation();
-    }
-  }
-
   async remove() {
-    this.beginOperation('Удаление сервиса');
-
-    try {
-      const commands = [
-        `sudo systemctl disable ppp@${this.service._id}.service ;`,
-        `sudo systemctl disable ppp@${this.service._id}.timer ;`,
-        `sudo systemctl stop ppp@${this.service._id}.timer ;`,
-        `sudo rm -f /etc/systemd/system/ppp@${this.service._id}.service ;`,
-        `sudo rm -f /etc/systemd/system/ppp@${this.service._id}.timer ;`,
-        'sudo systemctl daemon-reload && sudo systemctl reset-failed && '
-      ].join(' ');
-
-      let server;
-
-      try {
-        server = await this.getServer(this.service.serverId);
-      } catch (e) {
-        const terminal = this.terminalDom.terminal;
-
-        if (e.status === 404)
-          terminal.writeError(`Сервер не найден (${e.status ?? 503})`);
-        else
-          terminal.writeError(
-            `Операция завершилась с ошибкой ${e.status ?? 503}`
-          );
-
-        server = null;
-      }
-
-      let ok;
-
-      try {
-        ok = await this.executeSSHCommand({
-          serverId: server,
-          commands,
-          commandsToDisplay: commands
-        });
-      } catch (e) {
-        ok = true;
-        server = null;
-      }
-
-      if (ok || server === null || server.state === 'failed') {
-        const api = Object.assign(
-          {},
-          this.apis.find((a) => a._id === this.service.apiId)
-        );
-
-        api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
-
-        const queryRequest = await fetch(
-          this.getSQLUrl('remove-nyse-nsdq-halts.sql')
-        );
-
-        const rRemovalSQL = await fetch(
-          new URL(
-            'pg',
-            this.app.ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
-          {
-            cache: 'no-cache',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              query: await new Tmpl().render(this, await queryRequest.text(), {
-                serviceId: this.service._id
-              }),
-              connectionString: this.getConnectionString(api)
-            })
-          }
-        );
-
-        await maybeFetchError(rRemovalSQL);
-
-        this.service.removed = true;
-        this.service.state = 'stopped';
-        Observable.notify(this, 'service');
-
-        await this.app.ppp.user.functions.updateOne(
-          {
-            collection: 'services'
-          },
-          {
-            _id: this.service._id
-          },
-          {
-            $set: {
-              state: 'stopped',
-              removed: true,
-              updatedAt: new Date()
-            }
-          }
-        );
-
-        this.succeedOperation();
-      } else {
-        this.failOperation(520);
-      }
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.terminalModal.dismissible = true;
-
-      this.endOperation();
-    }
+    return super.remove('remove-nyse-nsdq-halts.sql');
   }
 }
