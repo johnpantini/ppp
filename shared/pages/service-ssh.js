@@ -159,7 +159,7 @@ export class ServiceSshPage extends PageWithTerminal {
       }
 
       const ok = await this.executeSSHCommand({
-        serverId: this.server._id,
+        serverId: this.server.value,
         commands:
           (await new Tmpl().render(this, this.installCode.value.trim(), {})) +
           ' && '
