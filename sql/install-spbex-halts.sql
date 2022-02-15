@@ -103,15 +103,23 @@ try {
 }
 $$ language plv8;
 
-create or replace function send_telegram_message_for_spbex_halt_[%#payload.serviceId%](msg text)
+-- Old version
+drop function if exists send_telegram_message_for_spbex_halt_[%#payload.serviceId%](msg text);
+drop function if exists send_telegram_message_for_spbex_halt_[%#payload.serviceId%](msg text, options json);
+
+create or replace function send_telegram_message_for_spbex_halt_[%#payload.serviceId%](msg text, options json)
 returns json as
 $$
-  return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg);
+  return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg, options);
 $$ language plv8;
+
+-- Old version
+drop function if exists format_spbex_halt_message_[%#payload.serviceId%](isin text,
+  ticker text, name text, currency text, date text, url text, start text, finish text);
 
 create or replace function format_spbex_halt_message_[%#payload.serviceId%](isin text,
   ticker text, name text, currency text, date text, url text, start text, finish text)
-returns text as
+returns json as
 $$
   [%#payload.formatterCode%]
 $$ language plv8;
@@ -142,7 +150,10 @@ $$
     const message = plv8.find_function('format_spbex_halt_message_[%#payload.serviceId%]')(NEW.isin, ticker, showName, currency, date,
       NEW.url, start, finish);
 
-    plv8.find_function('send_telegram_message_for_spbex_halt_[%#payload.serviceId%]')(message);
+    if (typeof message === 'string')
+      plv8.find_function('send_telegram_message_for_spbex_halt_[%#payload.serviceId%]')(message, {});
+    else
+      plv8.find_function('send_telegram_message_for_spbex_halt_[%#payload.serviceId%]')(message.text, message.options || {});
   }
 
   return NEW;

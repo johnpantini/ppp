@@ -64,16 +64,25 @@ try {
 }
 $$ language plv8;
 
-create or replace function send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text)
+-- Old version
+drop function if exists send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text);
+drop function if exists send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text, options json);
+
+create or replace function send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text, options json)
 returns json as
 $$
-  return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg);
+  return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg, options);
 $$ language plv8;
+
+-- Old version
+drop function if exists format_nyse_nsdq_halt_message_[%#payload.serviceId%](
+  halt_date text, halt_time text, symbol text, name text, market text, reason_code text, pause_threshold_price text,
+  resumption_date text, resumption_quote_time text, resumption_trade_time text);
 
 create or replace function format_nyse_nsdq_halt_message_[%#payload.serviceId%](
   halt_date text, halt_time text, symbol text, name text, market text, reason_code text, pause_threshold_price text,
   resumption_date text, resumption_quote_time text, resumption_trade_time text)
-returns text as
+returns json as
 $$
   [%#payload.formatterCode%]
 $$ language plv8;
@@ -86,7 +95,10 @@ $$
     NEW.resumption_date, NEW.resumption_quote_time, NEW.resumption_trade_time
   );
 
-  plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%]')(message);
+  if (typeof message === 'string')
+    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%]')(message, {});
+  else
+    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%]')(message.text, message.options || {});
 
   return NEW;
 $$ language plv8;
