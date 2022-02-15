@@ -125,6 +125,7 @@ export class EndpointPage extends BasePage {
               body: {
                 name: this.endpoint.function_name,
                 private: false,
+                run_as_system: true,
                 source
               },
               headers: {
@@ -185,6 +186,7 @@ export class EndpointPage extends BasePage {
               body: {
                 name: this.functionName.value.trim(),
                 private: false,
+                run_as_system: true,
                 source
               },
               headers: {
