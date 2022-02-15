@@ -86,9 +86,38 @@ export class ServiceSpbexHaltsPage extends SystemdTimerWithSupabasePage {
 
       const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
+      // Returns form data
       const temporaryFunction = `function ${funcName}(isin,
         ticker, name, currency, date, url, start, finish) {
-          ${this.formatterCode.code}
+          const closure = () => {${this.formatterCode.code}};
+          const formatted = closure();
+
+          if (typeof formatted === 'string')
+            return \`chat_id=${this.channel.value}&text=\${formatted}&parse_mode=html\`;
+          else {
+            const options = formatted.options || {};
+            let formData = \`chat_id=${this.channel.value}&text=\${formatted.text}\`;
+
+            if (typeof options.parse_mode === 'undefined')
+              formData += '&parse_mode=html';
+
+            if (typeof options.entities !== 'undefined')
+              formData += \`&entities=\${encodeURIComponent(options.entities)}\`;
+
+            if (options.disable_web_page_preview === true)
+              formData += '&disable_web_page_preview=true';
+
+            if (options.disable_notification === true)
+              formData += '&disable_notification=true';
+
+            if (options.protect_content === true)
+              formData += '&protect_content=true';
+
+            if (typeof options.reply_markup !== 'undefined')
+              formData += \`&reply_markup=\${encodeURIComponent(options.reply_markup)}\`;
+
+            return formData;
+          }
         }`;
 
       const bot = Object.assign(
@@ -99,12 +128,12 @@ export class ServiceSpbexHaltsPage extends SystemdTimerWithSupabasePage {
       bot.token = await this.app.ppp.crypto.decrypt(bot.iv, bot.token);
 
       const query = `do $$
-           ${temporaryFunction}
+         ${temporaryFunction}
 
-           plv8.execute(\`select content from http_post('https://api.telegram.org/bot${bot.token}/sendMessage',
-          'chat_id=${this.channel.value}&text=\${${funcName}('US0400476075', 'ARNA',
-          'Arena Pharmaceuticals, Inc.', 'USD', '13.12.2021 14:42', 'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044',
-          '14:45', '15:15')}&parse_mode=html', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
+         plv8.execute(\`select content from http_post('https://api.telegram.org/bot${bot.token}/sendMessage',
+        '\${${funcName}('US0400476075', 'ARNA', 'Arena Pharmaceuticals, Inc.', 'USD', '13.12.2021 14:42',
+        'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044', '14:45', '15:15')}',
+        'application/x-www-form-urlencoded')\`); $$ language plv8`;
 
       const api = Object.assign(
         {},

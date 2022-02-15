@@ -91,7 +91,35 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
       const temporaryFunction = `function ${funcName}(halt_date,
         halt_time, symbol, name, market, reason_code, pause_threshold_price,
         resumption_date, resumption_quote_time, resumption_trade_time) {
-          ${this.formatterCode.code}
+          const closure = () => {${this.formatterCode.code}};
+          const formatted = closure();
+
+          if (typeof formatted === 'string')
+            return \`chat_id=${this.channel.value}&text=\${formatted}&parse_mode=html\`;
+          else {
+            const options = formatted.options || {};
+            let formData = \`chat_id=${this.channel.value}&text=\${formatted.text}\`;
+
+            if (typeof options.parse_mode === 'undefined')
+              formData += '&parse_mode=html';
+
+            if (typeof options.entities !== 'undefined')
+              formData += \`&entities=\${encodeURIComponent(options.entities)}\`;
+
+            if (options.disable_web_page_preview === true)
+              formData += '&disable_web_page_preview=true';
+
+            if (options.disable_notification === true)
+              formData += '&disable_notification=true';
+
+            if (options.protect_content === true)
+              formData += '&protect_content=true';
+
+            if (typeof options.reply_markup !== 'undefined')
+              formData += \`&reply_markup=\${encodeURIComponent(options.reply_markup)}\`;
+
+            return formData;
+          }
         }`;
 
       const bot = Object.assign(
@@ -105,9 +133,8 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
         ${temporaryFunction}
 
         plv8.execute(\`select content from http_post('https://api.telegram.org/bot${bot.token}/sendMessage',
-          'chat_id=${this.channel.value}&text=\${${funcName}('01/19/2022', '19:50:04',
-          'MRLN', 'Marlin Business Services Corp.', 'NASDAQ', 'D',
-          '', '01/21/2022', '00:00:01', '00:00:01')}&parse_mode=html', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
+          '\${${funcName}('01/19/2022', '19:50:04', 'MRLN', 'Marlin Business Services Corp.', 'NASDAQ', 'D',
+          '', '01/21/2022', '00:00:01', '00:00:01')}', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
 
       const api = Object.assign(
         {},
