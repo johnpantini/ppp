@@ -69,7 +69,7 @@ export const servicesPageTemplate = (context, definition) => html`
                     return false;
                   }}"
                   href="?page=server&server=${datum.serverId}"
-                  >${datum.server[0].name}</a
+                  >${datum.server[0]?.name}</a
                 >`,
                 x.t(`$const.service.${datum.type}`),
                 formatDate(datum.createdAt),
