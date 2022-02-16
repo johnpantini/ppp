@@ -133,8 +133,8 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
         ${temporaryFunction}
 
         plv8.execute(\`select content from http_post('https://api.telegram.org/bot${bot.token}/sendMessage',
-          '\${${funcName}('01/19/2022', '19:50:04', 'MRLN', 'Marlin Business Services Corp.', 'NASDAQ', 'D',
-          '', '01/21/2022', '00:00:01', '00:00:01')}', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
+          '\${${funcName}('02/10/2022', '15:37:48', 'ASTR', 'Astra Space Inc Cl A Cmn Stk', 'NASDAQ', 'LUDP',
+          '', '02/10/2022', '15:37:48', '15:42:48')}', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
 
       const api = Object.assign(
         {},
