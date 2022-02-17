@@ -12,9 +12,22 @@ PPP Lib dir:
     - user: pppuser
     - group: ppp
 
+PPP Services dir:
+  file.directory:
+    - name: /opt/ppp/services
+    - user: pppuser
+    - group: ppp
+
 /opt/ppp/lib:
   file.recurse:
     - source: salt://ppp/lib
+    - user: pppuser
+    - group: ppp
+    - replace: True
+
+/opt/ppp/services:
+  file.recurse:
+    - source: salt://ppp/services
     - user: pppuser
     - group: ppp
     - replace: True
