@@ -202,6 +202,7 @@ pillar_opts: true
         'sudo rm -f /etc/salt/minion ;',
         `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ;`,
         'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
+        'sudo salt-call --local state.sls epel ;',
         'sudo salt-call --local state.sls ping && '
       ].join(' ');
 
