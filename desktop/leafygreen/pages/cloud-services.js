@@ -73,54 +73,6 @@ export const cloudServicesPageTemplate = (context, definition) => html`
             ${circleSvg(4)}
           </div>
           <div class="label-group">
-            <h6>Токен Auth0</h6>
-            <${'ppp-banner'} class="inline margin-top" appearance="warning">
-              Токен Auth0
-              требуется только на этапе настройки облачных сервисов, он не
-              сохраняется на сервере.
-            </ppp-banner>
-            <p>Сервис Auth0 служит для авторизации пользователей приложения PPP
-              по
-              логину и паролю, а также хранения ключей других облачных сервисов.
-              <a
-                target="_blank"
-                href="https://pantini.gitbook.io/pantini-co/ppp/auth0">Посмотреть
-                инструкцию</a>.
-            </p>
-          </div>
-          <div class="input-group">
-            <ppp-text-field
-              placeholder="Токен Auth0"
-              value="${(x) => x.app.ppp?.keyVault.getKey('auth0-token')}"
-              ${ref('auth0Token')}
-            ></ppp-text-field>
-          </div>
-        </section>
-        <section>
-          <div class="section-index-icon">
-            ${circleSvg(5)}
-          </div>
-          <div class="label-group">
-            <h6>Email Auth0</h6>
-            <p>Укажите Email пользователя, которого вы создали ранее в сервисе
-              Auth0 по <a
-                target="_blank"
-                href="https://pantini.gitbook.io/pantini-co/ppp/auth0">инструкции</a>.
-            </p>
-          </div>
-          <div class="input-group">
-            <ppp-text-field
-              placeholder="Email пользователя Auth0"
-              value="${(x) => x.app.ppp?.keyVault.getKey('auth0-email')}"
-              ${ref('auth0Email')}
-            ></ppp-text-field>
-          </div>
-        </section>
-        <section>
-          <div class="section-index-icon">
-            ${circleSvg(6)}
-          </div>
-          <div class="label-group">
             <h6>Публичный ключ MongoDB Realm</h6>
             <p>MongoDB Realm обеспечивает приложение PPP хранилищем настроек и
               платформой бессерверных функций. <a target="_blank"
@@ -138,7 +90,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="section-index-icon">
-            ${circleSvg(7)}
+            ${circleSvg(5)}
           </div>
           <div class="label-group">
             <h6>Приватный ключ MongoDB Realm</h6>

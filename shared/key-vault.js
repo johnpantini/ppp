@@ -5,9 +5,6 @@ export function parseJwt(token) {
 }
 
 export const keySet = [
-  'auth0-client-id',
-  'auth0-domain',
-  'auth0-email',
   'github-login',
   'github-token',
   'master-password',
@@ -23,12 +20,6 @@ export const keySet = [
 
 class KeyVault {
   #keys = {};
-
-  hasAuth0Keys() {
-    const keys = ['auth0-client-id', 'auth0-domain'];
-
-    return keys.map((k) => this.getKey(k)).every((i) => !!i);
-  }
 
   ok() {
     return keySet.map((k) => this.getKey(k)).every((i) => !!i);

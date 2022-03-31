@@ -1,6 +1,5 @@
 import { BasePage } from '../page.js';
 import { validate, invalidate } from '../validate.js';
-import { parseJwt } from '../key-vault.js';
 import { maybeFetchError } from '../fetch-error.js';
 
 export async function checkGitHubToken({ token }) {
@@ -35,165 +34,6 @@ export async function checkMongoDBRealmCredentials({
 }
 
 export class CloudServicesPage extends BasePage {
-  async #updateGitHubMilestone({ domain, clientId }) {
-    const rMilestones = await fetch(
-      `https://api.github.com/repos/${this.app.ppp.keyVault.getKey(
-        'github-login'
-      )}/ppp/milestones`,
-      {
-        cache: 'no-cache',
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${this.app.ppp.keyVault.getKey('github-token')}`
-        }
-      }
-    );
-
-    await maybeFetchError(rMilestones);
-    this.progressOperation(95);
-
-    const jMilestones = await rMilestones.json();
-
-    if (!jMilestones.find((m) => m.title.trim() === domain.trim())) {
-      const rUpdateMilestone = await fetch(
-        `https://api.github.com/repos/${this.app.ppp.keyVault.getKey(
-          'github-login'
-        )}/ppp/milestones`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/vnd.github.v3+json',
-            Authorization: `token ${this.app.ppp.keyVault.getKey(
-              'github-token'
-            )}`
-          },
-          body: JSON.stringify({
-            title: domain,
-            description: clientId
-          })
-        }
-      );
-
-      await maybeFetchError(rUpdateMilestone);
-    }
-  }
-
-  async #setUpAuth0App({ auth0Token, userId }) {
-    const domainList = [
-      `https://*.github.io/ppp`,
-      `https://*.github.io/ppp/desktop`,
-      `https://*.github.io/ppp/mobile`,
-      `https://*.pages.dev`,
-      `https://*.pages.dev/desktop`,
-      `https://*.pages.dev/mobile`,
-      `https://*.onrender.com`,
-      `https://*.onrender.com/desktop`,
-      `https://*.onrender.com/mobile`,
-      `https://*.netlify.app`,
-      `https://*.netlify.app/desktop`,
-      `https://*.netlify.app/mobile`,
-      `https://*.vercel.app`,
-      `https://*.vercel.app/desktop.html`,
-      `https://*.vercel.app/mobile.html`,
-      `https://*.ondigitalocean.app`,
-      `https://*.ondigitalocean.app/desktop.html`,
-      `https://*.ondigitalocean.app/mobile.html`,
-      // Development only
-      `https://*.github.io.dev`,
-      `https://*.github.io.dev/desktop`,
-      `https://*.github.io.dev/mobile`
-    ];
-
-    // 1. Get client ID
-    const { aud } = parseJwt(auth0Token);
-    const rClients = await fetch(
-      new URL(
-        `clients?fields=client_id,name&include_fields=true`,
-        aud
-      ).toString(),
-      {
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${auth0Token}`
-        }
-      }
-    );
-
-    await maybeFetchError(rClients);
-
-    const jClients = await rClients.json();
-    const pppApp = jClients?.find((c) => c.name === 'ppp');
-
-    if (!pppApp) {
-      invalidate(this.app.toast, {
-        errorMessage: 'Приложение ppp не найдено в сервисе Auth0.'
-      });
-    }
-
-    this.app.ppp.keyVault.setKey('auth0-client-id', pppApp.client_id);
-    this.progressOperation(85);
-
-    // 2. Save metadata
-    const rSaveMetadata = await fetch(
-      new URL(`users/${userId}`, aud).toString(),
-      {
-        cache: 'no-cache',
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${auth0Token}`
-        },
-        body: JSON.stringify({
-          app_metadata: {
-            'auth0-client-id': pppApp.client_id,
-            'auth0-domain': this.app.ppp.keyVault.getKey('auth0-domain'),
-            'auth0-email': this.app.ppp.keyVault.getKey('auth0-email'),
-            'github-login': this.app.ppp.keyVault.getKey('github-login'),
-            'github-token': this.app.ppp.keyVault.getKey('github-token'),
-            'master-password': this.app.ppp.keyVault.getKey('master-password'),
-            'mongo-api-key': this.app.ppp.keyVault.getKey('mongo-api-key'),
-            'mongo-app-client-id': this.app.ppp.keyVault.getKey(
-              'mongo-app-client-id'
-            ),
-            'mongo-app-id': this.app.ppp.keyVault.getKey('mongo-app-id'),
-            'mongo-group-id': this.app.ppp.keyVault.getKey('mongo-group-id'),
-            'mongo-private-key':
-              this.app.ppp.keyVault.getKey('mongo-private-key'),
-            'mongo-public-key':
-              this.app.ppp.keyVault.getKey('mongo-public-key'),
-            'service-machine-url': this.app.ppp.keyVault.getKey(
-              'service-machine-url'
-            )
-          }
-        })
-      }
-    );
-
-    await maybeFetchError(rSaveMetadata);
-    this.progressOperation(88);
-
-    // 3. Update Auth0 application
-    const rUpdateApp = await fetch(
-      new URL(`clients/${pppApp.client_id}`, aud).toString(),
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${auth0Token}`
-        },
-        body: JSON.stringify({
-          app_type: 'regular_web',
-          token_endpoint_auth_method: 'none',
-          callbacks: domainList,
-          web_origins: domainList,
-          allowed_logout_urls: domainList
-        })
-      }
-    );
-
-    await maybeFetchError(rUpdateApp);
-  }
-
   async #createServerlessFunctions({
     serviceMachineUrl,
     mongoDBRealmAccessToken
@@ -273,7 +113,7 @@ export class CloudServicesPage extends BasePage {
 
         await maybeFetchError(rRemoveFunc);
 
-        this.app.toast.progress.value += Math.floor(25 / funcs.length);
+        this.app.toast.progress.value += Math.floor(35 / funcs.length);
       }
     }
 
@@ -307,7 +147,7 @@ export class CloudServicesPage extends BasePage {
 
       await maybeFetchError(rCreateFunc);
 
-      this.app.toast.progress.value += Math.floor(25 / funcs.length);
+      this.app.toast.progress.value += Math.floor(35 / funcs.length);
     }
   }
 
@@ -332,7 +172,7 @@ export class CloudServicesPage extends BasePage {
     );
 
     await maybeFetchError(rProjectId);
-    this.progressOperation(5);
+    this.progressOperation(5, 'Поиск проекта ppp в MongoDB Realm');
 
     const { roles } = await rProjectId.json();
 
@@ -398,7 +238,7 @@ export class CloudServicesPage extends BasePage {
     );
 
     await maybeFetchError(rAuthProviders);
-    this.progressOperation(15);
+    this.progressOperation(15, 'Создание API-ключа пользователя в MongoDB Realm');
 
     const providers = await rAuthProviders.json();
     const apiKeyProvider = providers.find((p) => (p.type = 'api-key'));
@@ -521,7 +361,7 @@ export class CloudServicesPage extends BasePage {
     );
 
     await maybeFetchError(rCreateAPIKey);
-    this.progressOperation(25);
+    this.progressOperation(25, 'Запись облачных функций');
     this.app.ppp.keyVault.setKey(
       'mongo-api-key',
       (await rCreateAPIKey.json()).key
@@ -541,8 +381,6 @@ export class CloudServicesPage extends BasePage {
       await validate(this.masterPassword);
       await validate(this.serviceMachineUrl);
       await validate(this.gitHubToken);
-      await validate(this.auth0Token);
-      await validate(this.auth0Email);
       await validate(this.mongoPublicKey);
       await validate(this.mongoPrivateKey);
 
@@ -597,56 +435,7 @@ export class CloudServicesPage extends BasePage {
       this.app.ppp.keyVault.setKey('github-login', jGitHub.login);
       this.app.ppp.keyVault.setKey('github-token', this.gitHubToken.value);
 
-      // 2. Check Auth0 management token
-      const { aud } = parseJwt(this.auth0Token.value);
-      const url = new URL(
-        `users-by-email?fields=user_id&include_fields=true&email=${encodeURIComponent(
-          this.auth0Email.value
-        )}`,
-        aud
-      );
-
-      const rAuth0 = await fetch(url.toString(), {
-        cache: 'no-cache',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${this.auth0Token.value}`
-        }
-      });
-
-      // {statusCode: 400, error: 'Bad Request', message: "Query validation error: 'Object didn't pass valida…l (Email address to search for (case-sensitive)).", errorCode: 'invalid_query_string'}
-      if (rAuth0.status === 400) {
-        invalidate(this.auth0Email, {
-          errorMessage: 'Некорректный e-mail',
-          silent: true
-        });
-
-        await maybeFetchError(rAuth0);
-      }
-
-      const jAuth0 = await rAuth0.json();
-
-      if (rAuth0.status === 401 && /expired/i.test(jAuth0?.message)) {
-        invalidate(this.auth0Token, {
-          errorMessage: 'Токен истёк'
-        });
-      } else if (!rAuth0.ok) {
-        invalidate(this.auth0Token, {
-          errorMessage: 'Неверный токен'
-        });
-      }
-
-      if (!jAuth0.length) {
-        invalidate(this.auth0Email, {
-          errorMessage: 'Пользователь не найден'
-        });
-      }
-
-      this.app.ppp.keyVault.setKey('auth0-domain', new URL(aud).hostname);
-      this.app.ppp.keyVault.setKey('auth0-token', this.auth0Token.value);
-      this.app.ppp.keyVault.setKey('auth0-email', this.auth0Email.value);
-
-      // 3. Check MongoDB Realm admin credentials, get the access_token
+      // 2. Check MongoDB Realm admin credentials, get the access_token
       const rMongoDBRealmCredentials = await checkMongoDBRealmCredentials({
         serviceMachineUrl: serviceMachineUrl.origin,
         publicKey: this.mongoPublicKey.value,
@@ -675,29 +464,14 @@ export class CloudServicesPage extends BasePage {
 
       this.progressOperation(0, 'Настройка приложения MongoDB Realm');
 
-      // 4. Create a MongoDB realm API key, setup cloud functions
+      // 3. Create a MongoDB realm API key, setup cloud functions
       await this.#setUpMongoDBRealmApp({
         serviceMachineUrl: serviceMachineUrl.origin,
         mongoDBRealmAccessToken: jMongoDBRealmCredentials.access_token
       });
 
-      this.progressOperation(80, 'Запись учётных данных в приложение Auth0');
-
-      // 5. Store all the credentials inside Auth0 app
-      await this.#setUpAuth0App({
-        auth0Token: this.auth0Token.value,
-        userId: jAuth0[0].user_id
-      });
-
-      this.progressOperation(90);
-
-      await this.#updateGitHubMilestone({
-        domain: new URL(aud).hostname,
-        clientId: this.app.ppp.keyVault.getKey('auth0-client-id')
-      });
-
       this.succeedOperation(
-        'Операция успешно выполнена. Необходимо обновить страницу.'
+        'Операция успешно выполнена. Обновите страницу, чтобы пользоваться приложением'
       );
     } catch (e) {
       this.failOperation(e);
