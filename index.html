@@ -26,19 +26,13 @@
       new URLSearchParams(window.location.search).entries()
     );
 
-    if (params.clear === 'true') {
-      ['auth0-client-id', 'auth0-domain', 'auth0-email'].forEach((key) =>
-        localStorage.removeItem(`ppp-${key}`)
-      );
-    }
-
     if (!/mobile/i.test(navigator.userAgent)) type = 'desktop';
 
     if (window.location.origin.endsWith('github.io'))
       window.location.replace(
         window.location.origin + `/ppp/${type}?page=cloud-services`
       );
-    else if (/(vercel|ondigitalocean)/gi.test(window.location.origin))
+    else if (/(vercel)/gi.test(window.location.origin))
       window.location.replace(
         window.location.origin + `/${type}.html?page=cloud-services`
       );
