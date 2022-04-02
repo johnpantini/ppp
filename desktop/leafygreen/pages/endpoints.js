@@ -27,53 +27,55 @@ export const endpointsPageTemplate = (context, definition) => html`
         ${ref('table')}
         :columns="${(x) => x.columns}"
         :rows="${(x) =>
-          x.rows.map((datum) => {
-            return {
-              datum,
-              cells: [
-                html`<a
-                  @click="${() => {
-                    x.app.navigate({
-                      page: 'endpoint',
-                      endpoint: datum._id
-                    });
+          x.rows
+            .filter((datum) => datum.route !== '/cloud_credentials')
+            .map((datum) => {
+              return {
+                datum,
+                cells: [
+                  html`<a
+                    @click="${() => {
+                      x.app.navigate({
+                        page: 'endpoint',
+                        endpoint: datum._id
+                      });
 
-                    return false;
-                  }}"
-                  href="?page=endpoint&endpoint=${datum._id}"
-                >
-                  ${datum.route}
-                </a>`,
-                html`<a
-                  target="_blank"
-                  href="https://realm.mongodb.com/groups/${x.app.ppp.keyVault.getKey(
-                    'mongo-group-id'
-                  )}/apps/${x.app.ppp.keyVault.getKey(
-                    'mongo-app-id'
-                  )}/endpoints/${datum._id}"
-                  >${datum.route}</a
-                >`,
-                html`<a
-                  target="_blank"
-                  href="https://realm.mongodb.com/groups/${x.app.ppp.keyVault.getKey(
-                    'mongo-group-id'
-                  )}/apps/${x.app.ppp.keyVault.getKey(
-                    'mongo-app-id'
-                  )}/functions/${datum.function_id}"
-                  >${datum.function_name}</a
-                >`,
-                formatDate(datum.last_modified * 1000),
-                html`
-                  <${'ppp-button'}
-                    class="xsmall"
-                    @click="${() =>
-                      x.removeEndpoint(datum._id, datum.function_id)}"
+                      return false;
+                    }}"
+                    href="?page=endpoint&endpoint=${datum._id}"
                   >
-                    ${trash()}
-                  </ppp-button>`
-              ]
-            };
-          })}"
+                    ${datum.route}
+                  </a>`,
+                  html`<a
+                    target="_blank"
+                    href="https://realm.mongodb.com/groups/${x.app.ppp.keyVault.getKey(
+                      'mongo-group-id'
+                    )}/apps/${x.app.ppp.keyVault.getKey(
+                      'mongo-app-id'
+                    )}/endpoints/${datum._id}"
+                    >${datum.route}</a
+                  >`,
+                  html`<a
+                    target="_blank"
+                    href="https://realm.mongodb.com/groups/${x.app.ppp.keyVault.getKey(
+                      'mongo-group-id'
+                    )}/apps/${x.app.ppp.keyVault.getKey(
+                      'mongo-app-id'
+                    )}/functions/${datum.function_id}"
+                    >${datum.function_name}</a
+                  >`,
+                  formatDate(datum.last_modified * 1000),
+                  html`
+                    <${'ppp-button'}
+                      class="xsmall"
+                      @click="${() =>
+                        x.removeEndpoint(datum._id, datum.function_id)}"
+                    >
+                      ${trash()}
+                    </ppp-button>`
+                ]
+              };
+            })}"
       >
       </ppp-table>
       ${when((x) => x.busy, html`${loadingIndicator()}`)}
