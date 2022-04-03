@@ -1235,13 +1235,39 @@ class Fetcher {
 
       return this.fetch({ ...request, path: undefined, url });
     } else if (typeof url === 'string') {
-      const response = await fetch(url, {
-        ...restOfRequest,
-        headers: {
-          ...Fetcher.buildAuthorizationHeader(user, tokenType),
-          ...request.headers
-        }
-      });
+      // Proxy requests thru Heroku
+      const serviceMachineUrl = localStorage.getItem('ppp-service-machine-url');
+
+      let response;
+
+      if (serviceMachineUrl) {
+        response = await fetch(
+          new URL('fetch', serviceMachineUrl).toString(),
+          {
+            cache: 'no-cache',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              url,
+              ...restOfRequest,
+              headers: {
+                ...Fetcher.buildAuthorizationHeader(user, tokenType),
+                ...request.headers
+              }
+            })
+          }
+        );
+      } else {
+        response = await fetch(url, {
+          ...restOfRequest,
+          headers: {
+            ...Fetcher.buildAuthorizationHeader(user, tokenType),
+            ...request.headers
+          }
+        });
+      }
 
       if (response.ok) {
         return response;
