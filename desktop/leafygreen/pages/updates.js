@@ -6,10 +6,10 @@ import { when } from '../../../shared/element/templating/when.js';
 import { html } from '../../../shared/template.js';
 import { css } from '../../../shared/element/styles/css.js';
 import { observable } from '../../../shared/element/observation/observable.js';
-import { assert } from '../../../shared/assert.js';
 import { formatDate } from '../../../shared/intl.js';
 import { pageStyles, loadingIndicator } from '../page.js';
 import { settings } from '../icons/settings.js';
+import { maybeFetchError } from '../../../shared/fetch-error.js';
 
 export class UpdatesPage extends BasePage {
   @observable
@@ -35,14 +35,13 @@ export class UpdatesPage extends BasePage {
   }
 
   async checkForUpdates() {
+    this.beginOperation();
+
     try {
       this.currentCommit = void 0;
       this.targetCommit = void 0;
-      this.busy = true;
-      this.app.toast.source = this;
-      this.toastTitle = 'Обновление PPP';
 
-      const r1 = await fetch(
+      const rTargetRef = await fetch(
         'https://api.github.com/repos/johnpantini/ppp/git/refs/heads/main',
         {
           cache: 'no-cache',
@@ -55,10 +54,10 @@ export class UpdatesPage extends BasePage {
         }
       );
 
-      assert(r1);
+      await maybeFetchError(rTargetRef);
 
-      const targetRef = await r1.json();
-      const r2 = await fetch(targetRef.object.url, {
+      const targetRef = await rTargetRef.json();
+      const rTagretCommit = await fetch(targetRef.object.url, {
         cache: 'no-cache',
         headers: {
           Accept: 'application/vnd.github.v3+json',
@@ -66,21 +65,21 @@ export class UpdatesPage extends BasePage {
         }
       });
 
-      assert(r2);
+      await maybeFetchError(rTagretCommit);
 
-      this.targetCommit = await r2.json();
+      this.targetCommit = await rTagretCommit.json();
 
-      const r3 = await fetch('https://api.github.com/user', {
+      const rGitHubUser = await fetch('https://api.github.com/user', {
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `token ${this.app.ppp.keyVault.getKey('github-token')}`
         }
       });
 
-      assert(r3);
+      await maybeFetchError(rGitHubUser);
 
-      const user = await r3.json();
-      const r4 = await fetch(
+      const user = await rGitHubUser.json();
+      const rCurrentRef = await fetch(
         `https://api.github.com/repos/${user.login}/ppp/git/refs/heads/main`,
         {
           cache: 'no-cache',
@@ -93,10 +92,10 @@ export class UpdatesPage extends BasePage {
         }
       );
 
-      assert(r4);
+      await maybeFetchError(rCurrentRef);
 
-      const currentRef = await r4.json();
-      const r5 = await fetch(currentRef.object.url, {
+      const currentRef = await rCurrentRef.json();
+      const rCurrentCommit = await fetch(currentRef.object.url, {
         cache: 'no-cache',
         headers: {
           Accept: 'application/vnd.github.v3+json',
@@ -104,36 +103,31 @@ export class UpdatesPage extends BasePage {
         }
       });
 
-      assert(r5);
+      await maybeFetchError(rCurrentCommit);
 
-      this.currentCommit = await r5.json();
-      this.busy = false;
+      this.currentCommit = await rCurrentCommit.json();
     } catch (e) {
-      console.error(e);
-
-      this.app.toast.appearance = 'warning';
-      this.app.toast.dismissible = true;
-      this.toastText = 'Операция не выполнена.'
-      this.app.toast.visible = true;
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
     }
   }
 
   async updateApp() {
-    try {
-      this.busy = true;
-      this.app.toast.visible = false;
+    this.beginOperation();
 
-      const r1 = await fetch('https://api.github.com/user', {
+    try {
+      const rGitHubUser = await fetch('https://api.github.com/user', {
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `token ${this.app.ppp.keyVault.getKey('github-token')}`
         }
       });
 
-      assert(r1);
+      await maybeFetchError(rGitHubUser);
 
-      const user = await r1.json();
-      const r2 = await fetch(
+      const user = await rGitHubUser.json();
+      const rUpdateHeads = await fetch(
         `https://api.github.com/repos/${user.login}/ppp/git/refs/heads/main`,
         {
           method: 'PATCH',
@@ -149,9 +143,9 @@ export class UpdatesPage extends BasePage {
         }
       );
 
-      assert(r2);
+      await maybeFetchError(rUpdateHeads);
 
-      const r3 = await fetch(
+      const rPagesBuildRequest = await fetch(
         `https://api.github.com/repos/${user.login}/ppp/pages/builds`,
         {
           method: 'POST',
@@ -164,33 +158,24 @@ export class UpdatesPage extends BasePage {
         }
       );
 
-      assert(r3);
+      await maybeFetchError(rPagesBuildRequest);
 
-      this.app.toast.appearance = 'success';
-      this.app.toast.dismissible = true;
-      this.toastText =
-        'Обновление успешно выполнено, обновите страницу. Изменения будут применены в течение нескольких минут';
-      this.app.toast.visible = true;
-
-      this.busy = false;
       this.updateComplete = true;
+
+      this.succeedOperation('Обновление успешно выполнено, обновите страницу. Изменения будут применены в течение нескольких минут');
     } catch (e) {
-      console.error(e);
-
-      this.busy = false;
-
-      this.app.toast.appearance = 'warning';
-      this.app.toast.dismissible = true;
-      this.toastText = 'Операция не выполнена.'
-      this.app.toast.visible = true;
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
     }
   }
 }
 
 export const updatesPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'}>Обновление</ppp-page-header>
-    <form ${ref('form')} id="updates" name="updates" onsubmit="return false">
+    <${'ppp-page-header'} ${ref('header')}>Обновление PPP
+    </ppp-page-header>
+    <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
         ${when(
           (x) =>
