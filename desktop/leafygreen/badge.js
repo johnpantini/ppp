@@ -13,9 +13,9 @@ export const badgeTemplate = (context, definition) => html`
 
 export const lightgrayBadgeStyles = (context, definition) => css`
   :host([appearance='lightgray']) {
-    border: 1px solid rgb(231, 238, 236);
+    border: 1px solid rgb(232, 237, 235);
     background-color: rgb(249, 251, 250);
-    color: rgb(93, 108, 116);
+    color: rgb(92, 108, 117);
   }
 `;
 
@@ -51,13 +51,13 @@ export const badgeStyles = (context, definition) =>
       font-family: ${bodyFont};
       -webkit-box-align: center;
       align-items: center;
-      font-weight: bold;
-      font-size: 11px;
-      line-height: 20px;
-      border-radius: 50px;
-      height: 20px;
-      padding-left: 9px;
-      padding-right: 9px;
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 16px;
+      border-radius: 5px;
+      height: 18px;
+      padding-left: 6px;
+      padding-right: 6px;
       text-transform: uppercase;
     }
   `.withBehaviors(

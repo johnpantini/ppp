@@ -7,7 +7,6 @@ import { display } from '../../shared/utilities/style/display.js';
 import { html } from '../../shared/template.js';
 import { when } from '../../shared/element/templating/when.js';
 import { appearanceBehavior } from '../../shared/utilities/behaviors.js';
-
 import { infoWithCircle } from './icons/info-with-circle.js';
 import { importantWithCircle } from './icons/important-with-circle.js';
 
@@ -24,37 +23,39 @@ export const bannerTemplate = (context, definition) => html`
 
 export const infoBannerStyles = (context, definition) => css`
   :host([appearance='info']) {
-    color: rgb(26, 86, 126);
-    border-color: rgb(197, 228, 242) rgb(197, 228, 242) rgb(197, 228, 242)
-      rgb(0, 124, 173);
-    background-color: rgb(225, 242, 246);
+    color: rgb(8, 60, 144);
+    border-color: rgb(195, 231, 254) rgb(195, 231, 254) rgb(195, 231, 254)
+      rgb(1, 107, 248);
+    background-color: rgb(225, 247, 255);
   }
 
   :host([appearance='info'])::before {
-    background-color: rgb(0, 124, 173);
+    background: linear-gradient(to left, transparent 6px, rgb(1, 107, 248) 6px);
   }
 
-  :host([appearance='info'])::after {
-    border-color: rgb(197, 228, 242);
-    background-color: rgb(225, 242, 246);
+  :host([appearance='info']) svg {
+    color: rgb(1, 107, 248);
   }
 `;
 
 export const warningBannerStyles = (context, definition) => css`
   :host([appearance='warning']) {
-    color: rgb(134, 104, 29);
-    border-color: rgb(254, 242, 200) rgb(254, 242, 200) rgb(254, 242, 200)
-      rgb(255, 221, 73);
-    background-color: rgb(254, 247, 227);
+    color: rgb(148, 79, 1);
+    border-color: rgb(255, 236, 158) rgb(255, 236, 158) rgb(255, 236, 158)
+      rgb(255, 192, 16);
+    background-color: rgb(254, 247, 219);
   }
 
   :host([appearance='warning'])::before {
-    background-color: rgb(255, 221, 73);
+    background: linear-gradient(
+      to left,
+      transparent 6px,
+      rgb(255, 192, 16) 6px
+    );
   }
 
-  :host([appearance='warning'])::after {
-    border-color: rgb(254, 242, 200);
-    background-color: rgb(254, 247, 227);
+  :host([appearance='warning']) svg {
+    color: rgb(148, 79, 1);
   }
 `;
 
@@ -65,10 +66,10 @@ export const bannerStyles = (context, definition) =>
     :host {
       position: relative;
       min-height: 40px;
-      padding: 9px 12px 9px 20px;
+      padding: 10px 12px 10px 20px;
       border-width: 1px 1px 1px 0;
       border-style: solid;
-      border-radius: 6px;
+      border-radius: 12px;
       font-size: 14px;
       line-height: 20px;
       box-sizing: border-box;
@@ -81,23 +82,11 @@ export const bannerStyles = (context, definition) =>
     :host::before {
       content: '';
       position: absolute;
-      width: 6px;
+      width: 13px;
       top: -1px;
       bottom: -1px;
       left: 0;
-      border-radius: 6px 0 0 6px;
-    }
-
-    :host::after {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: -1px;
-      bottom: -1px;
-      width: 2px;
-      border-top: 1px solid;
-      border-bottom: 1px solid;
-      border-radius: 0.5px 0 0 0.5px;
+      border-radius: 12px 0 0 12px;
     }
 
     svg {

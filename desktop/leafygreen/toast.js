@@ -57,23 +57,23 @@ export const toastTemplate = (context, definition) => html`
 
 export const successToastStyles = (context, definition) => css`
   :host([appearance='success']) {
-    background-color: rgb(228, 244, 228);
+    background-color: rgb(227, 252, 247);
   }
 
   :host([appearance='success']) .container {
-    border: 1px solid rgb(195, 231, 202);
+    border: 1px solid rgb(192, 250, 230);
   }
 
   :host([appearance='success']) .container > svg {
-    color: rgb(9, 128, 76);
+    color: rgb(0, 163, 92);
   }
 
   :host([appearance='success']) .title {
-    color: rgb(17, 97, 73);
+    color: rgb(0, 104, 74);
   }
 
   :host([appearance='success']) .text {
-    color: rgb(17, 97, 73);
+    color: rgb(0, 104, 74);
   }
 
   :host([appearance='success']) .close {
@@ -81,7 +81,7 @@ export const successToastStyles = (context, definition) => css`
   }
 
   :host([appearance='success']) .close:hover::before {
-    background-color: rgb(195, 231, 202);
+    background-color: rgb(192, 250, 230);
   }
 `;
 
@@ -215,7 +215,7 @@ export const toastStyles = (context, definition) =>
       font-size: 16px;
       line-height: 24px;
       letter-spacing: 0;
-      font-weight: bold;
+      font-weight: 700;
     }
 
     .text {
