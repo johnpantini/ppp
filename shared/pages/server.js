@@ -199,6 +199,7 @@ pillar_opts: true
         'sudo -H python3 -m pip install --upgrade --force-reinstall pygit2 ;',
         'sudo ln -fs /usr/local/lib64/libgit2.so.1.3 /usr/lib64/libgit2.so.1.3 ; ',
         'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall salt ;',
+        'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall jinja2==3.0.1;',
         'sudo rm -f /etc/salt/minion ;',
         `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ;`,
         'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
