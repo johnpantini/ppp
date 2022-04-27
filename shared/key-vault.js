@@ -1,3 +1,5 @@
+import { TAG } from './tag.js';
+
 export function parseJwt(token) {
   const [header, payload, signature] = token.split('.');
 
@@ -22,6 +24,8 @@ class KeyVault {
   #keys = {};
 
   ok() {
+    if (this.getKey('tag') !== TAG) return false;
+
     return keySet.map((k) => this.getKey(k)).every((i) => !!i);
   }
 
