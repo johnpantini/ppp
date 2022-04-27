@@ -2,11 +2,10 @@
 
 import { FoundationElement } from './foundation-element.js';
 import { Observable, observable } from './element/observation/observable.js';
-import { invalidate } from './validate.js';
+import { invalidate, validate } from './validate.js';
 import { DOM } from './element/dom.js';
-import { maybeFetchError } from './fetch-error.js';
+import { FetchError, maybeFetchError } from './fetch-error.js';
 import { SUPPORTED_SERVER_TYPES } from './const.js';
-import { assert } from './assert.js';
 import { html, requireComponent } from './template.js';
 import { Tmpl } from './tmpl.js';
 
@@ -209,7 +208,10 @@ export class PageWithTerminal extends BasePage {
     try {
       await this.processChunkedResponse(rSSH);
 
-      assert(rSSH);
+      if (!rSSH.ok) {
+        // noinspection ExceptionCaughtLocallyJS
+        throw new FetchError(rSSH);
+      }
     } catch (e) {
       terminal.writeError(`Операция завершилась с ошибкой ${e.status ?? 503}`);
 
@@ -382,6 +384,68 @@ export class PageWithTable extends BasePage {
       this.endOperation();
     }
   }
+}
+
+export class ServicePage extends PageWithTerminal {
+  @observable
+  service;
+
+  async checkPresence() {
+    const serviceId = this.app.params()?.service;
+
+    if (serviceId) {
+      this.service = await this.app.ppp.user.functions.findOne(
+        {
+          collection: 'services'
+        },
+        {
+          _id: serviceId,
+          type: this.type
+        }
+      );
+
+      if (!this.service) {
+        this.failOperation(404);
+
+        await this.notFound();
+
+        return null;
+      }
+
+      return this.service;
+    }
+  }
+}
+
+export class ServiceWithSecretsPage extends ServicePage {
+  @observable
+  secrets;
+
+  async addSecret() {
+    const value = '';
+
+    if (!this.secrets) this.secrets = [value];
+    else this.secrets.push(value);
+  }
+
+  async getEncryptedSecrets(iv) {
+    const encryptedSecrets = [];
+
+    for (const domSecret of this.domSecrets) {
+      await validate(domSecret);
+
+      encryptedSecrets.push(
+        await this.app.ppp.crypto.encrypt(iv, domSecret.value.trim())
+      );
+    }
+
+    return encryptedSecrets;
+  }
+}
+
+export class SystemdServicePage extends ServiceWithSecretsPage {
+  @observable
+  servers;
 }
 
 export class SystemdTimerPage extends PageWithTerminal {
