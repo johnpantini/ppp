@@ -27,6 +27,7 @@ export const servicesPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
       <${'ppp-button'}
+        disabled
         appearance="primary"
         slot="controls"
         @click="${(x) =>
