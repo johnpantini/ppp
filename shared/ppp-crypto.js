@@ -66,10 +66,14 @@ export function uuidv4() {
 export class PPPCrypto {
   #key;
 
-  async #generateKey() {
+  resetKey() {
+    this.#key = void 0;
+  }
+
+  async #generateKey(password = ppp.keyVault.getKey('master-password')) {
     if (!this.#key) {
       const rawKey = new TextEncoder().encode(
-        ppp.keyVault.getKey('master-password').slice(0, 32).padEnd(32, '.')
+        password.slice(0, 32).padEnd(32, '.')
       );
 
       this.#key = await window.crypto.subtle.importKey(
@@ -84,11 +88,11 @@ export class PPPCrypto {
     return this.#key;
   }
 
-  async encrypt(iv, plaintext) {
+  async encrypt(iv, plaintext, password) {
     if (typeof iv === 'string') iv = stringToBuffer(iv);
 
     const encoded = new TextEncoder().encode(plaintext);
-    const key = await this.#generateKey();
+    const key = await this.#generateKey(password);
     const ciphertext = await window.crypto.subtle.encrypt(
       {
         name: 'AES-GCM',
@@ -101,10 +105,10 @@ export class PPPCrypto {
     return bufferToString(ciphertext);
   }
 
-  async decrypt(iv, ciphertext) {
+  async decrypt(iv, ciphertext, password) {
     if (typeof iv === 'string') iv = stringToBuffer(iv);
 
-    const key = await this.#generateKey();
+    const key = await this.#generateKey(password);
     const decrypted = await window.crypto.subtle.decrypt(
       {
         name: 'AES-GCM',
