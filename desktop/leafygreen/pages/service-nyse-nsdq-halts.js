@@ -88,7 +88,18 @@ const mappings = {
   D: 'Security deletion from NASDAQ / CQS. Инструмент удалён с торгов (делистинг).'
 };
 const formatDateTime = (dateString) => {
-  const [date, timeZ] = new Date(\`\${dateString} GMT-8\`)
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const firstOfMarch = new Date(currentYear, 2, 1);
+  const daysUntilFirstSundayInMarch = (7 - firstOfMarch.getDay()) % 7;
+  const secondSundayInMarch = firstOfMarch.getDate() + daysUntilFirstSundayInMarch + 7;
+  const start = new Date(currentYear, 2, secondSundayInMarch);
+  const firstOfNovember = new Date(currentYear, 10, 1);
+  const daysUntilFirstSundayInNov = (7 - firstOfNovember.getDay()) % 7;
+  const firstSundayInNovember = firstOfNovember.getDate() + daysUntilFirstSundayInNov;
+  const end = new Date(currentYear, 10, firstSundayInNovember);
+  const isDST = currentDate.getTime() <= end.getTime() && currentDate.getTime() >= start.getTime();
+  const [date, timeZ] = new Date(\`\${dateString} GMT-\${isDST ? '7' : '8'}\`)
     .toISOString()
     .split(/T/);
   const [y, m, d] = date.split(/-/);
