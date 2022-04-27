@@ -5,11 +5,86 @@ import { css } from '../../../shared/element/styles/css.js';
 import { when } from '../../../shared/element/templating/when.js';
 import { pageStyles, circleSvg, loadingIndicator } from '../page.js';
 
+const importCloudKeysModalTemplate = html`
+  <ppp-modal ${ref('importCloudKeysModal')} dismissible>
+    <span slot="title">Импортировать ключи</span>
+    <div slot="body">
+      <form ${ref('importCloudKeysModalForm')} onsubmit="return false"
+            novalidate>
+        <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+          <section>
+            <div class="label-group full">
+              <h6>Мастер-пароль</h6>
+              <ppp-text-field
+                type="password"
+                value="${(x) => x.app.ppp?.keyVault.getKey('master-password')}"
+                placeholder="Введите пароль"
+                ${ref('masterPasswordForImport')}
+              ></ppp-text-field>
+            </div>
+          </section>
+          <section class="last">
+            <div class="label-group full">
+              <h6>Компактное представление сохранённых ключей (base64)</h6>
+              <${'ppp-text-field'}
+                placeholder="Вставьте текст"
+                ${ref('cloudCredentialsData')}
+              ></ppp-text-field>
+            </div>
+          </section>
+          ${when((x) => x.busy, html`${loadingIndicator()}`)}
+          <div class="footer-border"></div>
+          <footer>
+            <div class="footer-actions">
+              <${'ppp-button'}
+                @click="${(x) => (x.importCloudKeysModal.visible = false)}">
+                Отмена
+              </ppp-button>
+              <ppp-button
+                style="margin-left: 10px;"
+                appearance="primary"
+                ?disabled="${(x) => x.busy}"
+                type="submit"
+                @click="${(x) => x.tryImportCloudKeys()}"
+              >
+                Импортировать
+              </ppp-button>
+            </div>
+          </footer>
+        </div>
+      </form>
+    </div>
+  </ppp-modal>
+`;
+
 export const cloudServicesPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>Облачные сервисы</ppp-page-header>
     <form ${ref('form')} onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+      <div class="loading-wrapper" ?busy="${(x) => x.busy && !x?.importCloudKeysModal.visible}">
+        ${when(
+          (x) => x.app.ppp?.keyVault.ok(),
+          html`
+            <${'ppp-banner'} class="inline margin-top" appearance="info">
+              Облачные сервисы в порядке. Скопируйте компактное представление
+              ниже для переноса ключей в другие браузеры:
+            </ppp-banner>
+            <${'ppp-copyable'}>
+              ${(x) => x.generateCloudCredentialsString()}
+            </ppp-copyable>
+          `
+        )}
+        ${when(
+          (x) => !x.app.ppp?.keyVault.ok(),
+          html`
+            ${importCloudKeysModalTemplate}
+            <${'ppp-banner'} class="inline margin-top" appearance="warning">
+              Необходимо заново сохранить настройки облачных сервисов. Также
+              можно <a @click="${(x) => x.handleImportCloudKeysClick()}"
+                       href="javascript:void(0)">импортировать ключи</a>.
+            </ppp-banner>
+          `
+        )}
         <section>
           <div class="section-index-icon">
             ${circleSvg(1)}

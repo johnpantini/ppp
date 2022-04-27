@@ -1,6 +1,9 @@
 import { BasePage } from '../page.js';
 import { validate, invalidate } from '../validate.js';
 import { maybeFetchError } from '../fetch-error.js';
+import { bufferToString, generateIV } from '../ppp-crypto.js';
+import { TAG } from '../tag.js';
+import { requireComponent } from '../template.js';
 
 export async function checkGitHubToken({ token }) {
   return fetch('https://api.github.com/user', {
@@ -34,6 +37,207 @@ export async function checkMongoDBRealmCredentials({
 }
 
 export class CloudServicesPage extends BasePage {
+  async handleImportCloudKeysClick() {
+    await requireComponent('ppp-modal');
+
+    this.importCloudKeysModal.visible = true;
+  }
+
+  async tryImportCloudKeys() {
+    this.beginOperation();
+
+    try {
+      await validate(this.masterPasswordForImport);
+      await validate(this.cloudCredentialsData);
+
+      const { s, u } = JSON.parse(atob(this.cloudCredentialsData.value));
+      const { iv, data } = await (
+        await fetch(new URL('fetch', s).toString(), {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'GET',
+            url: u
+          })
+        })
+      ).json();
+
+      this.app.ppp.crypto.resetKey();
+
+      const decryptedCredentials = JSON.parse(
+        await this.app.ppp.crypto.decrypt(
+          iv,
+          data,
+          this.masterPasswordForImport.value.trim()
+        )
+      );
+
+      this.app.ppp.keyVault.setKey(
+        'master-password',
+        this.masterPasswordForImport.value.trim()
+      );
+
+      Object.keys(decryptedCredentials).forEach((k) => {
+        this.app.ppp.keyVault.setKey(k, decryptedCredentials[k]);
+      });
+
+      this.app.ppp.keyVault.setKey('service-machine-url', s);
+      this.succeedOperation(
+        'Операция успешно выполнена. Обновите страницу, чтобы пользоваться приложением'
+      );
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  generateCloudCredentialsString() {
+    return btoa(
+      JSON.stringify({
+        s: this.app.ppp.keyVault.getKey('service-machine-url'),
+        u:
+          this.app.ppp.keyVault
+            .getKey('mongo-location-url')
+            .replace('aws.stitch.mongodb', 'aws.data.mongodb-api') +
+          `/app/${this.app.ppp.keyVault.getKey(
+            'mongo-app-client-id'
+          )}/endpoint/cloud_credentials`
+      })
+    );
+  }
+
+  async #getCloudCredentialsFuncSource() {
+    const iv = generateIV();
+    const cipherText = await this.app.ppp.crypto.encrypt(
+      iv,
+      JSON.stringify({
+        'github-login': this.app.ppp.keyVault.getKey('github-login'),
+        'github-token': this.app.ppp.keyVault.getKey('github-token'),
+        'mongo-api-key': this.app.ppp.keyVault.getKey('mongo-api-key'),
+        'mongo-app-client-id': this.app.ppp.keyVault.getKey(
+          'mongo-app-client-id'
+        ),
+        'mongo-app-id': this.app.ppp.keyVault.getKey('mongo-app-id'),
+        'mongo-group-id': this.app.ppp.keyVault.getKey('mongo-group-id'),
+        'mongo-private-key': this.app.ppp.keyVault.getKey('mongo-private-key'),
+        'mongo-public-key': this.app.ppp.keyVault.getKey('mongo-public-key'),
+        'service-machine-url': this.app.ppp.keyVault.getKey(
+          'service-machine-url'
+        ),
+        tag: TAG
+      })
+    );
+
+    return `exports = function () {
+  return {
+    iv: '${bufferToString(iv)}', data: '${cipherText}'
+  };
+};`;
+  }
+
+  async #createCloudCredentialsEndpoint({
+    serviceMachineUrl,
+    mongoDBRealmAccessToken,
+    functionList
+  }) {
+    const groupId = this.app.ppp.keyVault.getKey('mongo-group-id');
+    const appId = this.app.ppp.keyVault.getKey('mongo-app-id');
+
+    let cloudCredentialsFuncId;
+
+    const func = functionList?.find((f) => f.name === 'cloudCredentials');
+
+    if (func) {
+      cloudCredentialsFuncId = func._id;
+
+      const rUpdateFunc = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'PUT',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${func._id}`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: JSON.stringify({
+              name: 'cloudCredentials',
+              source: await this.#getCloudCredentialsFuncSource(),
+              run_as_system: true
+            })
+          })
+        }
+      );
+
+      await maybeFetchError(rUpdateFunc);
+    } else {
+      const rCreateFunc = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'POST',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: JSON.stringify({
+              name: 'cloudCredentials',
+              source: await this.#getCloudCredentialsFuncSource(),
+              run_as_system: true
+            })
+          })
+        }
+      );
+
+      await maybeFetchError(rCreateFunc);
+
+      const jCreateFunc = await rCreateFunc.json();
+
+      cloudCredentialsFuncId = jCreateFunc._id;
+    }
+
+    const rNewEndpoint = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'POST',
+          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints`,
+          body: {
+            route: '/cloud_credentials',
+            function_name: 'cloudCredentials',
+            function_id: cloudCredentialsFuncId,
+            http_method: 'GET',
+            validation_method: 'NO_VALIDATION',
+            secret_id: '',
+            secret_name: '',
+            create_user_on_auth: false,
+            fetch_custom_user_data: false,
+            respond_result: true,
+            disabled: false
+          },
+          headers: {
+            Authorization: `Bearer ${mongoDBRealmAccessToken}`
+          }
+        })
+      }
+    );
+
+    // Conflict is OK
+    if (rNewEndpoint.status !== 409) await maybeFetchError(rNewEndpoint);
+  }
+
   async #createServerlessFunctions({
     serviceMachineUrl,
     mongoDBRealmAccessToken
@@ -89,9 +293,9 @@ export class CloudServicesPage extends BasePage {
     await maybeFetchError(rFunctionList);
     this.progressOperation(30);
 
-    const functions = await rFunctionList.json();
+    const functionList = await rFunctionList.json();
 
-    for (const f of functions) {
+    for (const f of functionList) {
       if (funcs.find((fun) => fun.name === f.name)) {
         const rRemoveFunc = await fetch(
           new URL('fetch', serviceMachineUrl).toString(),
@@ -113,15 +317,23 @@ export class CloudServicesPage extends BasePage {
 
         await maybeFetchError(rRemoveFunc);
 
-        this.app.toast.progress.value += Math.floor(35 / funcs.length);
+        this.app.toast.progress.value += Math.floor(30 / funcs.length);
       }
     }
 
     for (const f of funcs) {
-      const sourceRequest = await fetch(
-        new URL(f.path, window.location.origin + window.location.pathname)
-      );
-      const source = await sourceRequest.text();
+      let source;
+
+      if (f.path) {
+        const sourceRequest = await fetch(
+          new URL(f.path, window.location.origin + window.location.pathname)
+        );
+
+        source = await sourceRequest.text();
+      } else if (typeof f.source === 'function') {
+        source = await f.source();
+      }
+
       const rCreateFunc = await fetch(
         new URL('fetch', serviceMachineUrl).toString(),
         {
@@ -147,8 +359,16 @@ export class CloudServicesPage extends BasePage {
 
       await maybeFetchError(rCreateFunc);
 
-      this.app.toast.progress.value += Math.floor(35 / funcs.length);
+      this.app.toast.progress.value += Math.floor(30 / funcs.length);
     }
+
+    this.progressOperation(95, 'Сохранение ключей облачных сервисов');
+
+    await this.#createCloudCredentialsEndpoint({
+      serviceMachineUrl,
+      mongoDBRealmAccessToken,
+      functionList
+    });
   }
 
   async #setUpMongoDBRealmApp({ serviceMachineUrl, mongoDBRealmAccessToken }) {
@@ -238,7 +458,10 @@ export class CloudServicesPage extends BasePage {
     );
 
     await maybeFetchError(rAuthProviders);
-    this.progressOperation(15, 'Создание API-ключа пользователя в MongoDB Realm');
+    this.progressOperation(
+      15,
+      'Создание API-ключа пользователя в MongoDB Realm'
+    );
 
     const providers = await rAuthProviders.json();
     const apiKeyProvider = providers.find((p) => (p.type = 'api-key'));
@@ -385,6 +608,7 @@ export class CloudServicesPage extends BasePage {
       await validate(this.mongoPrivateKey);
 
       localStorage.removeItem('ppp-mongo-location-url');
+      this.app.ppp.keyVault.setKey('tag', TAG);
 
       this.app.ppp.keyVault.setKey(
         'master-password',
