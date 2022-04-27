@@ -172,7 +172,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Список</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
+              ?disabled="${(x) => true}"
               ?active="${(x) =>
                 x.page === 'service' || x.page.startsWith('service-')}"
               @click="${(x) =>
