@@ -25,7 +25,6 @@ const newDomainModalTemplate = html`
               </p>
               <${'ppp-text-field'}
                 placeholder="Email"
-                value="${(x) => x.app.ppp?.keyVault.getKey('auth0-email')}"
                 ${ref('certbotEmail')}
               ></ppp-text-field>
             </div>
