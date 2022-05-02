@@ -77,7 +77,9 @@ export class BasePage extends FoundationElement {
       });
     } else {
       invalidate(this.app.toast, {
-        errorMessage: 'Операция не выполнена, подробности в консоли браузера.',
+        errorMessage: e?.richMessage
+          ? e.richMessage
+          : 'Операция не выполнена, подробности в консоли браузера.',
         silent: true
       });
     }
