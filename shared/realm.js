@@ -1235,7 +1235,7 @@ class Fetcher {
 
       return this.fetch({ ...request, path: undefined, url });
     } else if (typeof url === 'string') {
-      // Proxy requests thru Heroku
+      // Proxy requests thru service machine
       const serviceMachineUrl = localStorage.getItem('ppp-service-machine-url');
 
       let response;
