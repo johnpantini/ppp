@@ -117,7 +117,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              placeholder="https://yourapp.herokuapp.com"
+              placeholder="https://example.com"
               value="${(x) =>
                 x.app.ppp?.keyVault.getKey('service-machine-url')}"
               ${ref('serviceMachineUrl')}
