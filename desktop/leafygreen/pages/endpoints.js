@@ -28,7 +28,11 @@ export const endpointsPageTemplate = (context, definition) => html`
         :columns="${(x) => x.columns}"
         :rows="${(x) =>
           x.rows
-            .filter((datum) => datum.route !== '/cloud_credentials')
+            .filter(
+              (datum) =>
+                datum.route !== '/cloud_credentials' &&
+                !datum.route.startsWith('/psina')
+            )
             .map((datum) => {
               return {
                 datum,
@@ -66,13 +70,13 @@ export const endpointsPageTemplate = (context, definition) => html`
                   >`,
                   formatDate(datum.last_modified * 1000),
                   html`
-                    <${'ppp-button'}
-                      class="xsmall"
-                      @click="${() =>
-                        x.removeEndpoint(datum._id, datum.function_id)}"
-                    >
-                      ${trash()}
-                    </ppp-button>`
+                  <${'ppp-button'}
+                    class="xsmall"
+                    @click="${() =>
+                      x.removeEndpoint(datum._id, datum.function_id)}"
+                  >
+                    ${trash()}
+                  </ppp-button>`
                 ]
               };
             })}"
