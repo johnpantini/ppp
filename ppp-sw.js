@@ -115,7 +115,7 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (
-    event.request.url.startsWith(location.origin.split('.')[0]) &&
+    event.request.url.startsWith(location.origin.split('.')[0].split('-')[0]) &&
     event.request.destination === 'script'
   ) {
     return event.respondWith(
