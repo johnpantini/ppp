@@ -163,6 +163,20 @@ export class App extends FoundationElement {
     return new URLSearchParams(filtered).toString();
   }
 
+  setURLSearchParams(params = {}) {
+    const searchParams = new URLSearchParams(window.location.search.substr(1));
+
+    for (const param of Object.keys(params)) {
+      searchParams.set(param, params[param]);
+    }
+
+    window.history.replaceState(
+      '',
+      '',
+      `${window.location.origin}${window.location.pathname}?${searchParams.toString()}`
+    );
+  }
+
   params() {
     return Object.fromEntries(
       new URLSearchParams(window.location.search).entries()
