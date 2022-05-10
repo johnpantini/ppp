@@ -99,6 +99,11 @@ const keysToCodecs = {
     fromExtendedJSON(doc, options) {
       return +doc.$numberLong;
     }
+  },
+  $undefined: {
+    fromExtendedJSON(doc, options) {
+      return void 0;
+    }
   }
 };
 
