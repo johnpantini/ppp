@@ -33,7 +33,7 @@ export class BasePage extends FoundationElement {
     return this.app.ppp.dict.t(key, options);
   }
 
-  beginOperation(toastTitle = this.header.textContent.trim()) {
+  beginOperation(toastTitle = this.header.lastChild?.wholeText?.trim()) {
     this.busy = true;
     this.toastTitle = toastTitle;
     this.toastText = '';
