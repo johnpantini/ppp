@@ -61,7 +61,7 @@ export const cloudServicesPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>Облачные сервисы</ppp-page-header>
     <form ${ref('form')} onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy && !x?.importCloudKeysModal.visible}">
+      <div class="loading-wrapper" ?busy="${(x) => x.busy && !x?.importCloudKeysModal?.visible}">
         ${when(
           (x) => x.app.ppp?.keyVault.ok(),
           html`

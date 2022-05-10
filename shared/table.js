@@ -19,7 +19,7 @@ const datumTemplate = repeat(
 
 // TODO - aria attributes
 export const tableTemplate = (context, definition) => html`
-  <template class="${(x) => (x.rows.length >= 10 ? 'long' : '')}">
+  <template class="${(x) => (x?.rows?.length >= 10 ? 'long' : '')}">
     <table>
       <thead>
         <tr>
@@ -45,7 +45,7 @@ export const tableTemplate = (context, definition) => html`
       </tbody>
     </table>
     ${when(
-      (x) => !x.rows.length,
+      (x) => !x.rows?.length,
       html` <div class="empty-message">Нет записей для отображения.</div>`
     )}
   </template>
