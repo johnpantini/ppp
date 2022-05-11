@@ -77,40 +77,31 @@ export default new (class {
 
     if (!emergency) {
       try {
-        [workspaces, settings, extensions] = await Promise.all([
-          this.user.functions.aggregate(
-            {
-              collection: 'workspaces'
-            },
-            [
-              {
-                $match: {
-                  removed: { $not: { $eq: true } }
-                }
-              }
-            ]
-          ),
-          this.user.functions.findOne(
-            {
-              collection: 'app'
-            },
-            {
-              _id: '@settings'
-            }
-          ),
-          this.user.functions.aggregate(
-            {
-              collection: 'extensions'
-            },
-            [
-              {
-                $match: {
-                  removed: { $not: { $eq: true } }
-                }
-              }
-            ]
-          )
-        ]);
+        const code = `
+          const db = context
+            .services.get('mongodb-atlas')
+            .db('ppp');
+
+          const workspaces = db.collection('workspaces').aggregate(
+            [{$match:{removed:{$not:{$eq:true}}}}]
+          );
+
+          const settings = db.collection('app').findOne(
+            {_id:'@settings'}
+          );
+
+          const extensions = db.collection('extensions').aggregate(
+            [{$match:{removed:{$not:{$eq:true}}}}]
+          );
+
+          return {workspaces, settings, extensions};
+        `;
+
+        const evalRequest = await this.user.functions.eval(code);
+
+        workspaces = evalRequest.workspaces;
+        extensions = evalRequest.extensions;
+        settings = evalRequest.settings;
       } catch (e) {
         console.error(e);
       }
