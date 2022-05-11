@@ -1029,23 +1029,50 @@ class Authenticator {
     this.getDeviceInformation = getDeviceInformation;
   }
 
+  isTokenExpired(jwtToken) {
+    if (jwtToken) {
+      try {
+        const [, payload] = jwtToken.split('.');
+        const { exp: expires } = JSON.parse(atob(payload));
+
+        if (typeof expires === 'number') {
+          return Date.now() + 1000 >= expires * 1000;
+        }
+      } catch {
+        return true;
+      }
+    }
+
+    return true;
+  }
+
   async authenticate(credentials, linkingUser) {
     const deviceInformation = this.getDeviceInformation();
     const isLinking = typeof linkingUser === 'object';
-
     const logInUrl = await this.getLogInUrl(credentials, isLinking);
-    const response = await this.fetcher.fetchJSON({
-      method: 'POST',
-      url: logInUrl,
-      body: {
-        ...credentials.payload,
-        options: {
-          device: deviceInformation.toJSON()
-        }
-      },
-      tokenType: isLinking ? 'access' : 'none',
-      user: linkingUser
-    });
+    let response = JSON.parse(sessionStorage.getItem('realmLogin'));
+
+    if (response !== null && typeof response === 'object') {
+      if (this.isTokenExpired(response.access_token)) response = null;
+    }
+
+    if (!response) {
+      response = await this.fetcher.fetchJSON({
+        method: 'POST',
+        url: logInUrl,
+        body: {
+          ...credentials.payload,
+          options: {
+            device: deviceInformation.toJSON()
+          }
+        },
+        tokenType: isLinking ? 'access' : 'none',
+        user: linkingUser
+      });
+
+      sessionStorage.setItem('realmLogin', JSON.stringify(response));
+    }
+
     // Spread out values from the response and ensure they're valid
     const {
       user_id: userId,
@@ -1241,24 +1268,21 @@ class Fetcher {
       let response;
 
       if (serviceMachineUrl) {
-        response = await fetch(
-          new URL('fetch', serviceMachineUrl).toString(),
-          {
-            cache: 'no-cache',
-            method: 'POST',
+        response = await fetch(new URL('fetch', serviceMachineUrl).toString(), {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url,
+            ...restOfRequest,
             headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              url,
-              ...restOfRequest,
-              headers: {
-                ...Fetcher.buildAuthorizationHeader(user, tokenType),
-                ...request.headers
-              }
-            })
-          }
-        );
+              ...Fetcher.buildAuthorizationHeader(user, tokenType),
+              ...request.headers
+            }
+          })
+        });
       } else {
         response = await fetch(url, {
           ...restOfRequest,
