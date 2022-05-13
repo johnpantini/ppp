@@ -850,6 +850,8 @@ class User {
       // Forget the access and refresh token
       this.accessToken = null;
       this.refreshToken = null;
+
+      sessionStorage.removeItem('realmLogin');
     }
   }
 
