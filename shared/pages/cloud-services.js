@@ -434,7 +434,7 @@ export class CloudServicesPage extends BasePage {
       this.app.ppp.keyVault.setKey('mongo-app-id', pppApp._id);
     } else {
       invalidate(this.app.toast, {
-        errorMessage: 'Приложение ppp не найдено.'
+        errorMessage: 'Приложение ppp не найдено в MongoDB Realm.'
       });
     }
 
@@ -457,7 +457,10 @@ export class CloudServicesPage extends BasePage {
       }
     );
 
-    await maybeFetchError(rAuthProviders);
+    await maybeFetchError(
+      rAuthProviders,
+      'Не удаётся получить список провайдеров авторизации MongoDB Realm.'
+    );
     this.progressOperation(
       15,
       'Создание API-ключа пользователя в MongoDB Realm'
@@ -485,7 +488,10 @@ export class CloudServicesPage extends BasePage {
         }
       );
 
-      await maybeFetchError(rEnableAPIKeyProvider);
+      await maybeFetchError(
+        rEnableAPIKeyProvider,
+        'Не удаётся активировать провайдера API-ключей MongoDB Realm.'
+      );
     }
 
     if (!apiKeyProvider) {
@@ -512,56 +518,13 @@ export class CloudServicesPage extends BasePage {
         }
       );
 
-      await maybeFetchError(rCreateAPIKeyProvider);
+      await maybeFetchError(
+        rCreateAPIKeyProvider,
+        'Не удаётся подключить провайдера API-ключей MongoDB Realm.'
+      );
     }
 
     // 4. Create an API Key
-    const rAPIKeys = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
-      {
-        cache: 'no-cache',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          method: 'GET',
-          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys`,
-          headers: {
-            Authorization: `Bearer ${mongoDBRealmAccessToken}`
-          }
-        })
-      }
-    );
-
-    await maybeFetchError(rAPIKeys);
-    this.progressOperation(20);
-
-    const apiKeys = await rAPIKeys.json();
-    const pppKey = apiKeys.find((k) => k.name === 'ppp');
-
-    if (pppKey) {
-      const rRemoveAPIKey = await fetch(
-        new URL('fetch', serviceMachineUrl).toString(),
-        {
-          cache: 'no-cache',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            method: 'DELETE',
-            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys/${pppKey._id}`,
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            }
-          })
-        }
-      );
-
-      await maybeFetchError(rRemoveAPIKey);
-    }
-
     const rCreateAPIKey = await fetch(
       new URL('fetch', serviceMachineUrl).toString(),
       {
@@ -577,13 +540,16 @@ export class CloudServicesPage extends BasePage {
             Authorization: `Bearer ${mongoDBRealmAccessToken}`
           },
           body: JSON.stringify({
-            name: 'ppp'
+            name: `ppp-${Date.now()}`
           })
         })
       }
     );
 
-    await maybeFetchError(rCreateAPIKey);
+    await maybeFetchError(
+      rCreateAPIKey,
+      'Не удалось создать API-ключ пользователя MongoDB Realm.'
+    );
     this.progressOperation(25, 'Запись облачных функций');
     this.app.ppp.keyVault.setKey(
       'mongo-api-key',
@@ -608,6 +574,7 @@ export class CloudServicesPage extends BasePage {
       await validate(this.mongoPrivateKey);
 
       localStorage.removeItem('ppp-mongo-location-url');
+      sessionStorage.removeItem('realmLogin');
       this.app.ppp.keyVault.setKey('tag', TAG);
 
       this.app.ppp.keyVault.setKey(
