@@ -864,6 +864,7 @@ class User {
       path: routes.api().auth().session().path,
       tokenType: 'refresh'
     });
+
     const { access_token: accessToken } = response;
 
     if (typeof accessToken === 'string') {
@@ -1310,6 +1311,8 @@ class Fetcher {
           user.accessToken = null;
           user.refreshToken = null;
         }
+
+        sessionStorage.removeItem('realmLogin');
 
         // Throw an error with a message extracted from the body
         throw await MongoDBRealmError.fromRequestAndResponse(request, response);
