@@ -33,7 +33,7 @@ window.customElements.define(
         document.getElementById('ppp-loader').content.cloneNode(true)
       );
 
-      this.textContent = 'Загрузка';
+      this.textContent = 'Загрузка...';
       globalThis.loader = this;
     }
   }
