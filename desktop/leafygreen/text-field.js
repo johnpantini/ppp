@@ -190,6 +190,7 @@ export const textFieldStyles = (context, definition) => css`
     color: rgb(33, 49, 60);
     background-color: rgb(255, 255, 255);
     font-family: ${bodyFont};
+    text-transform: inherit;
   }
 
   input[type='search']::-webkit-search-decoration,
