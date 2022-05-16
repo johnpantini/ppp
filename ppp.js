@@ -53,10 +53,30 @@ export default new (class {
 
           return this.#createApplication({ emergency: true });
         } else {
-          return alert(
-            'Не удалось соединиться с MongoDB, попробуйте обновить страницу. Если проблема не решится, вероятно, кластер MongoDB Atlas отключён за неактивность. В таком случае перейдите в панель управления MongoDB Atlas и нажмите Resume, а спустя несколько минут обновите текущую страницу'
-          );
+          document.getElementById('global-loader').classList.add('error');
+
+          if (/Failed to fetch/i.test(e?.message)) {
+            document.getElementById('global-loader').textContent =
+              'Нет связи с сервисной машиной';
+          } else {
+            document.getElementById('global-loader').textContent =
+              'Ошибка загрузки. Подробности в консоли браузера';
+          }
+
+          return;
         }
+      }
+    } else {
+      const params = Object.fromEntries(
+        new URLSearchParams(window.location.search).entries()
+      );
+
+      if (params.page !== 'cloud-services') {
+        window.history.replaceState(
+          '',
+          '',
+          `${window.location.origin}${window.location.pathname}?page=cloud-services`
+        );
       }
     }
 
@@ -104,6 +124,26 @@ export default new (class {
         settings = evalRequest.settings;
       } catch (e) {
         console.error(e);
+        document.getElementById('global-loader').classList.add('error');
+
+        if (/Failed to fetch/i.test(e?.message)) {
+          document.getElementById('global-loader').textContent =
+            'Нет связи с сервисной машиной';
+        } else if (/failed to find refresh token/i.test(e?.message)) {
+          sessionStorage.removeItem('realmLogin');
+          window.location.reload();
+        } else if (/Cannot access member 'db' of undefined/i.test(e?.message)) {
+          document.getElementById('global-loader').textContent =
+            'Хранилище MongoDB Atlas не имеет связи с приложением MongoDB Realm';
+        } else if (/error resolving cluster hostname/i.test(e?.message)) {
+          document.getElementById('global-loader').textContent =
+            'Хранилище MongoDB Atlas отключено за неактивность';
+        } else {
+          document.getElementById('global-loader').textContent =
+            'Ошибка загрузки. Подробности в консоли браузера';
+        }
+
+        return;
       }
     }
 
