@@ -2,6 +2,7 @@ import { createServer } from 'http';
 import { Client as SSHClient } from './ppp-dyno/ssh2/index.js';
 import { fetch } from './salt/states/ppp/lib/fetch.mjs';
 import { Connection } from './ppp-dyno/pg/connection.mjs';
+import pdfjs from './ppp-dyno/pdfjs/legacy/build/pdf.js';
 
 process.on('unhandledRejection', (err) => {
   console.log(err);
@@ -58,6 +59,76 @@ async function $fetch(request, response) {
         }
       })
     );
+    response.end();
+  }
+}
+
+async function pdf(request, response) {
+  if (!/post/i.test(request.method)) {
+    return response.writeHead(405).end();
+  }
+
+  const buffers = [];
+
+  for await (const chunk of request) {
+    buffers.push(chunk);
+  }
+
+  response.setHeader('Content-Type', 'application/json; charset=UTF-8');
+
+  try {
+    const body = JSON.parse(Buffer.concat(buffers).toString());
+
+    if (!body.pdfFile || typeof body.pdfFile !== 'string')
+      return response.writeHead(422).end();
+
+    // { keyName: itemIndex }
+    if (!body.items || typeof body.items !== 'object')
+      return response.writeHead(422).end();
+
+    if (!body.page || typeof body.page !== 'number')
+      return response.writeHead(422).end();
+
+    const loadingTask = pdfjs.getDocument({
+      data: new Uint8Array(Buffer.from(body.pdfFile, 'base64').buffer),
+      cMapUrl: './ppp-dyno/pdfjs/cmaps/',
+      cMapPacked: true,
+      standardFontDataUrl: './ppp-dyno/pdfjs/standard_fonts/'
+    });
+    const pdfDocument = await loadingTask.promise;
+    const result = {};
+
+    if (pdfDocument?.numPages >= body.page) {
+      const page = await pdfDocument.getPage(body.page);
+      const text = await page?.getTextContent();
+      const items = text?.items?.filter((i) => i.str?.trim().length);
+
+      for (const key of Object.keys(body.items)) {
+        const index = body.items[key];
+
+        if (index >= 0) result[key] = items[index];
+      }
+    }
+
+    response.write(JSON.stringify(result));
+    response.end();
+  } catch (e) {
+    console.error(e);
+
+    response.writeHead(400);
+    response.write(
+      JSON.stringify(
+        Object.assign(
+          {
+            e
+          },
+          {
+            message: e.message
+          }
+        )
+      )
+    );
+
     response.end();
   }
 }
@@ -237,6 +308,8 @@ createServer((request, response) => {
       return ssh(request, response);
     case '/pg':
       return pg(request, response);
+    case '/pdf':
+      return pdf(request, response);
     case '/ping':
       response.setHeader('Content-Type', 'text/plain; charset=UTF-8');
       response.write('pong');
