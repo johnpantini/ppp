@@ -90,7 +90,7 @@ async function pdf(request, response) {
       return response.writeHead(422).end();
 
     const loadingTask = pdfjs.getDocument({
-      data: new Uint8Array(Buffer.from(body.pdfFile, 'hex').buffer),
+      data: new Uint8Array(Buffer.from(body.pdfFile, 'base64').buffer),
       cMapUrl: './ppp-dyno/pdfjs/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: './ppp-dyno/pdfjs/standard_fonts/'
