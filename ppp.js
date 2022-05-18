@@ -56,11 +56,17 @@ export default new (class {
           document.getElementById('global-loader').classList.add('error');
 
           if (/Failed to fetch/i.test(e?.message)) {
-            document.getElementById('global-loader').textContent =
-              'Нет связи с сервисной машиной';
+            document
+              .getElementById('global-loader')
+              .setText('Нет связи с сервисной машиной');
+
+            document
+              .getElementById('global-loader')
+              .showInput(this.keyVault.getKey('service-machine-url'));
           } else {
-            document.getElementById('global-loader').textContent =
-              'Ошибка загрузки. Подробности в консоли браузера';
+            document
+              .getElementById('global-loader')
+              .setText('Ошибка загрузки. Подробности в консоли браузера');
           }
 
           return;
@@ -127,20 +133,35 @@ export default new (class {
         document.getElementById('global-loader').classList.add('error');
 
         if (/Failed to fetch/i.test(e?.message)) {
-          document.getElementById('global-loader').textContent =
-            'Нет связи с сервисной машиной';
+          document
+            .getElementById('global-loader')
+            .setText('Нет связи с сервисной машиной');
+
+          document
+            .getElementById('global-loader')
+            .showInput(this.keyVault.getKey('service-machine-url'));
         } else if (/failed to find refresh token/i.test(e?.message)) {
           sessionStorage.removeItem('realmLogin');
           window.location.reload();
         } else if (/Cannot access member 'db' of undefined/i.test(e?.message)) {
-          document.getElementById('global-loader').textContent =
-            'Хранилище MongoDB Atlas не имеет связи с приложением MongoDB Realm';
-        } else if (/error resolving cluster hostname/i.test(e?.message)) {
-          document.getElementById('global-loader').textContent =
-            'Хранилище MongoDB Atlas отключено за неактивность';
+          document
+            .getElementById('global-loader')
+            .setText(
+              'Хранилище MongoDB Atlas не имеет связи с приложением MongoDB Realm'
+            );
+        } else if (
+          /error resolving cluster hostname/i.test(e?.message) ||
+          /error connecting to MongoDB cluster/i.test(e?.message)
+        ) {
+          document
+            .getElementById('global-loader')
+            .setText(
+              'Хранилище MongoDB Atlas не в сети или отключено за неактивность'
+            );
         } else {
-          document.getElementById('global-loader').textContent =
-            'Ошибка загрузки. Подробности в консоли браузера';
+          document
+            .getElementById('global-loader')
+            .setText('Ошибка загрузки. Подробности в консоли браузера');
         }
 
         return;
