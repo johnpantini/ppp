@@ -79,6 +79,8 @@ async function pdf(request, response) {
   try {
     const body = JSON.parse(Buffer.concat(buffers).toString());
 
+    console.log(body);
+
     if (!body.pdfFile || typeof body.pdfFile !== 'string')
       return response.writeHead(422).end();
 
