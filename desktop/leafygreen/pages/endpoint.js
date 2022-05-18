@@ -5,6 +5,7 @@ import { when } from '../../../shared/element/templating/when.js';
 import { css } from '../../../shared/element/styles/css.js';
 import { pageStyles, loadingIndicator } from '../page.js';
 import { uuidv4 } from '../../../shared/ppp-crypto.js';
+import { caretDown } from '../icons/caret-down.js';
 
 const exampleCode = `exports = function({ query, headers, body}, response) {
   return "OK";
@@ -52,6 +53,9 @@ export const endpointPageTemplate = (context, definition) => html`
               <ppp-option value="DELETE">DELETE</ppp-option>
               <ppp-option value="PATCH">PATCH</ppp-option>
               <ppp-option value="*">Любой метод</ppp-option>
+              ${caretDown({
+                slot: 'indicator'
+              })}
             </ppp-select>
           </div>
         </section>
