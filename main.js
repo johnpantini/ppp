@@ -33,8 +33,30 @@ window.customElements.define(
         document.getElementById('ppp-loader').content.cloneNode(true)
       );
 
-      this.textContent = 'Загрузка...';
+      this.setText('Загрузка...');
       globalThis.loader = this;
+
+      this.input = this.shadowRoot.querySelector('input');
+      this.onInput = this.onInput.bind(this);
+
+      this.input.addEventListener('input', this.onInput);
+    }
+
+    onInput(e) {
+      localStorage.setItem('ppp-service-machine-url', e.target.value.trim());
+    }
+
+    disconnectedCallback() {
+      this.input.removeEventListener('input', this.onInput);
+    }
+
+    showInput(text) {
+      this.input.value = text;
+      this.input.removeAttribute('hidden');
+    }
+
+    setText(text) {
+      this.shadowRoot.querySelector('.text').textContent = text;
     }
   }
 );

@@ -101,6 +101,26 @@
       img.loader {
         max-width: 512px;
       }
+
+      input {
+        margin-top: 16px;
+        box-sizing: border-box;
+        width: 320px;
+        height: 36px;
+        border-radius: 4px;
+        padding: 0 12px;
+        font-size: 14px;
+        font-weight: normal;
+        border: 1px solid rgb(137, 151, 155);
+        z-index: 1;
+        outline: none;
+        color: rgb(33, 49, 60);
+        background-color: rgb(255, 255, 255);
+        font-family: -apple-system, BlinkMacSystemFont, Roboto, Segoe UI,
+          'Trebuchet MS', Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue,
+          Icons16, sans-serif;
+        text-transform: inherit;
+      }
     </style>
     <img
       class="loader"
@@ -108,9 +128,8 @@
       alt="Loading"
       src="static/loading.svg"
     />
-    <div class="text">
-      <slot></slot>
-    </div>
+    <div class="text"></div>
+    <input hidden placeholder="URL сервисной машины" />
   </template>
   <script type="module" src="main.js"></script>
   <body>
