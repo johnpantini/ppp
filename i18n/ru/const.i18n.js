@@ -10,13 +10,11 @@ export default function (i18n) {
     $const: {
       api: {
         [SUPPORTED_APIS.SUPABASE]: 'Supabase',
-        [SUPPORTED_APIS.PUSHER]: 'Pusher'
+        [SUPPORTED_APIS.PUSHER]: 'Pusher',
+        [SUPPORTED_APIS.ASTRADB]: 'AstraDB'
       },
       broker: {
-        [SUPPORTED_BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
-        [SUPPORTED_BROKERS.TINKOFF_OPENAPI_V1]: 'Tinkoff Open API V1',
-        [SUPPORTED_BROKERS.UNITED_TRADERS]: 'United Traders',
-        [SUPPORTED_BROKERS.ALPACA_V2]: 'Alpaca Data API V2'
+        [SUPPORTED_BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2'
       },
       server: {
         [SUPPORTED_SERVER_TYPES.PASSWORD]: 'Вход по паролю',
@@ -34,8 +32,7 @@ export default function (i18n) {
       service: {
         [SUPPORTED_SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
         [SUPPORTED_SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NSDQ',
-        [SUPPORTED_SERVICES.HTTPS_WEBSOCKET]: 'HTTPS/WebSocket',
-        [SUPPORTED_SERVICES.SSH]: 'SSH-команды'
+        [SUPPORTED_SERVICES.SUPABASE_PARSER]: 'Парсер (хранение в Supabase)'
       }
     }
   });

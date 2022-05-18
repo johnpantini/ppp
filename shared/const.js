@@ -5,19 +5,16 @@ export const SUPPORTED_SERVER_TYPES = {
 
 export const SUPPORTED_APIS = {
   SUPABASE: 'supabase',
-  PUSHER: 'pusher'
+  PUSHER: 'pusher',
+  ASTRADB: 'astradb'
 };
 
 export const SUPPORTED_SERVICES = {
   SPBEX_HALTS: 'spbex-halts',
   NYSE_NSDQ_HALTS: 'nyse-nsdq-halts',
-  HTTPS_WEBSOCKET: 'https-websocket',
-  SSH: 'ssh'
+  SUPABASE_PARSER: 'supabase-parser'
 };
 
 export const SUPPORTED_BROKERS = {
-  ALOR_OPENAPI_V2: 'alor-openapi-v2',
-  TINKOFF_OPENAPI_V1: 'tinkoff-openapi-v1',
-  UNITED_TRADERS: 'united-traders',
-  ALPACA_V2: 'alpaca-v2'
+  ALOR_OPENAPI_V2: 'alor-openapi-v2'
 };
