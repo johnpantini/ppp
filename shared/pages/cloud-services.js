@@ -586,7 +586,14 @@ export class CloudServicesPage extends BasePage {
 
       // Check service machine URL
       try {
-        serviceMachineUrl = new URL('ping', this.serviceMachineUrl.value);
+        if (!this.serviceMachineUrl.value.trim().startsWith('https://'))
+          this.serviceMachineUrl.value =
+            'https://' + this.serviceMachineUrl.value.trim();
+
+        serviceMachineUrl = new URL(
+          'ping',
+          this.serviceMachineUrl.value.trim()
+        );
 
         const rs = await fetch(serviceMachineUrl.toString());
         const rst = await rs.text();
