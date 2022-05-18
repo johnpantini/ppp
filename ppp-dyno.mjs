@@ -89,8 +89,27 @@ async function pdf(request, response) {
     if (!body.page || typeof body.page !== 'number')
       return response.writeHead(422).end();
 
+    let data;
+
+    if (body.pdfFile.startsWith('http')) {
+      data = new Uint8Array(
+        Buffer.from(
+          (
+            await fetch(body.pdfFile, {
+              headers: {
+                'User-Agent':
+                  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
+              }
+            })
+          ).requestText
+        ).buffer
+      );
+    } else {
+      data = new Uint8Array(Buffer.from(body.pdfFile, 'base64').buffer);
+    }
+
     const loadingTask = pdfjs.getDocument({
-      data: new Uint8Array(Buffer.from(body.pdfFile, 'hex').buffer),
+      data,
       cMapUrl: './ppp-dyno/pdfjs/cmaps/',
       cMapPacked: true,
       standardFontDataUrl: './ppp-dyno/pdfjs/standard_fonts/'
