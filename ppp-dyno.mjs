@@ -1,6 +1,6 @@
 import { createServer } from 'http';
 import { Client as SSHClient } from './ppp-dyno/ssh2/index.js';
-import { fetch } from './salt/states/ppp/lib/fetch.mjs';
+import { fetch, binaryFetch } from './salt/states/ppp/lib/fetch.mjs';
 import { Connection } from './ppp-dyno/pg/connection.mjs';
 import pdfjs from './ppp-dyno/pdfjs/legacy/build/pdf.js';
 
@@ -95,13 +95,13 @@ async function pdf(request, response) {
       data = new Uint8Array(
         Buffer.from(
           (
-            await fetch(body.pdfFile, {
+            await binaryFetch(body.pdfFile, {
               headers: {
                 'User-Agent':
                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.71 Safari/537.36'
               }
             })
-          ).requestText
+          ).chunks
         ).buffer
       );
     } else {
