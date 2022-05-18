@@ -56,33 +56,17 @@ export const servicePageTemplate = (context, definition) => html`
         </ppp-button>
       </ppp-generic-card>
       <ppp-generic-card>
-        <img slot="logo" draggable="false" alt="SSH" style="height: 44px"
-             src="static/ssh.svg"/>
-        <span slot="title">Команды SSH</span>
-        <span
-          slot="description">Произвольный сервис на основе команд оболочки.</span>
-        <${'ppp-button'}
-          slot="action"
-          @click="${(x) =>
-            x.app.navigate({
-              page: `service-${SUPPORTED_SERVICES.SSH}`
-            })}"
-        >
-          Продолжить
-        </ppp-button>
-      </ppp-generic-card>
-      <ppp-generic-card>
-        <img slot="logo" draggable="false" alt="HTTPS/WebSocket"
+        <img slot="logo" draggable="false" alt="Supabase Parser"
              style="height: 40px"
-             src="static/https.svg"/>
-        <span slot="title">HTTPS/WebSocket</span>
-        <span slot="description">Произвольный сервис с доступом по HTTPS/WebSocket.</span>
+             src="static/parser.svg"/>
+        <span slot="title">Парсер с персистентностью</span>
+        <span slot="description">Произвольный парсер с сохранением состояния в Supabase.</span>
         <${'ppp-button'}
           disabled
           slot="action"
           @click="${(x) =>
             x.app.navigate({
-              page: `service-${SUPPORTED_SERVICES.HTTPS_WEBSOCKET}`
+              page: `service-${SUPPORTED_SERVICES.SUPABASE_PARSER}`
             })}"
         >
           Продолжить
