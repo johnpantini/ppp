@@ -42,6 +42,23 @@ export const apiPageTemplate = (context, definition) => html`
           Продолжить
         </ppp-button>
       </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="AstraDB" style="height: 41px"
+             src="static/astradb.svg"/>
+        <span slot="title">DataStax Astra</span>
+        <span slot="description">Облачная база данных на основе Apache Cassandra™. <a
+          target="_blank"
+          href="https://www.datastax.com/products/datastax-astra">Официальный ресурс</a>.</span>
+        <${'ppp-button'}
+          slot="action"
+          @click="${(x) =>
+            x.app.navigate({
+              page: `api-${SUPPORTED_APIS.ASTRADB}`
+            })}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
     </div>
   </template>
 `;
