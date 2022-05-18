@@ -50,24 +50,29 @@ export const codeflaskStyles = (context, definition) => css`
     overflow: hidden;
     z-index: 0;
     border: 1px solid rgb(137, 151, 155);
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: rgb(249, 251, 250);
     transition: all 150ms ease-in-out 0s;
   }
 
-  .root-container:hover {
+  :host .root-container:hover {
     box-shadow: rgb(231 238 236) 0 0 0 3px;
   }
 
   :host([state='error']) .root-container {
-    border: 1px solid rgb(207, 74, 34);
+    border-color: rgb(219, 48, 48);
+  }
+
+  :host([state='error']) .root-container:hover {
+    border-color: rgb(219, 48, 48);
+    box-shadow: rgb(255 205 199) 0 0 0 3px;
   }
 
   .control {
     box-sizing: border-box;
     padding: 10px;
-    font-size: 13px;
-    line-height: 20px;
+    font-size: 15px;
+    line-height: 24px;
     white-space: pre;
     position: absolute;
     top: 0;
@@ -112,8 +117,8 @@ export const codeflaskStyles = (context, definition) => css`
 
   .pre {
     padding: 10px;
-    font-size: 13px;
-    line-height: 20px;
+    font-size: 15px;
+    line-height: 24px;
     white-space: pre;
     position: absolute;
     top: 0;

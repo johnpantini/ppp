@@ -97,10 +97,10 @@ export const baseButtonStyles = (context, definition) =>
       padding: 0;
       margin: 0;
       background-color: transparent;
-      border: 0 solid transparent;
+      border: 1px solid transparent;
       display: inline-flex;
       align-items: stretch;
-      border-radius: 4px;
+      border-radius: 6px;
       transition: all 150ms ease-in-out;
       position: relative;
       text-decoration: none;
@@ -145,62 +145,61 @@ export const baseButtonStyles = (context, definition) =>
 export const defaultButtonStyles = (context, definition) => css`
   :host([appearance='default']) .control {
     background-color: rgb(249, 251, 250);
-    border: 1px solid rgb(137, 151, 155);
-    box-shadow: rgb(6 22 33 / 30%) 0 1px 2px;
-    color: rgb(61, 79, 88);
+    border: 1px solid rgb(136, 147, 151);
+    color: rgb(28, 45, 56);
   }
 
   :host([appearance='default']) .control:hover,
   :host([appearance='default']) .control:active {
-    color: rgb(61, 79, 88);
     background-color: rgb(255, 255, 255);
-    border: 1px solid rgb(93, 108, 116);
-    box-shadow: rgb(0 0 0 / 30%) 0 4px 4px, rgb(231 238 236) 0 0 0 3px;
+    box-shadow: rgb(232 237 235) 0 0 0 3px;
   }
 
   :host([appearance='default']) .start,
   :host([appearance='default']) .end {
-    color: rgb(93, 108, 116);
+    color: rgb(136, 147, 151);
   }
 `;
 
 export const primaryButtonStyles = (context, definition) => css`
   :host([appearance='primary']) .control {
-    background-color: #09804c;
-    box-shadow: 0 2px 3px rgb(19 170 82 / 40%);
+    background-color: #00684a;
+    border-color: #00684a;
     color: #ffffff;
   }
 
   :host([appearance='primary']) .control:hover,
   :host([appearance='primary']) .control:active {
     color: #ffffff;
-    background-color: #116149;
-    box-shadow: 0 2px 3px rgb(19 170 82 / 40%), 0 0 0 3px #c3e7ca;
+    background-color: #00593f;
+    border-color: #00593f;
+    box-shadow: 0 0 0 3px #c0fae6;
   }
 
   :host([appearance='primary']) .start,
   :host([appearance='primary']) .end {
-    color: #e4f4e4;
+    color: #c0fae6;
   }
 `;
 
 export const dangerButtonStyles = (context, definition) => css`
   :host([appearance='danger']) .control {
-    background-color: rgb(207, 74, 34);
-    box-shadow: rgb(207 74 34 / 40%) 0 1px 2px;
+    border: 1px solid rgb(219, 48, 48);
+    background-color: rgb(219, 48, 48);
     color: #ffffff;
   }
 
   :host([appearance='danger']) .control:hover,
   :host([appearance='danger']) .control:active {
     color: #ffffff;
-    background-color: rgb(177, 55, 31);
-    box-shadow: rgb(207 74 34 / 25%) 0 4px 4px, rgb(249 211 197) 0 0 0 3px;
+    background-color: rgb(200, 34, 34);
+    border-color: rgb(200, 34, 34);
+    box-shadow: rgb(255 234 229) 0 0 0 3px;
   }
 
   :host([appearance='danger']) .start,
   :host([appearance='danger']) .end {
-    color: rgb(252, 235, 226);
+    color: rgb(255, 234, 229);
   }
 `;
 
@@ -208,11 +207,10 @@ export const disabledButtonStyles = (context, definition) =>
   css`
     :host([disabled]) button.control,
     :host([disabled]) button.control:hover {
-      background-color: rgb(231, 238, 236);
-      border: 1px solid rgb(231, 238, 236);
-      box-shadow: rgb(184 196 194) 0 0 0 1px;
       cursor: not-allowed;
-      color: rgb(93, 108, 116);
+      background-color: rgb(232, 237, 235);
+      border-color: rgb(193, 199, 198);
+      color: rgb(136, 147, 151);
     }
 
     :host([disabled]) .content-container .start,
@@ -227,7 +225,7 @@ export const buttonStyles = (context, definition) =>
     ${baseButtonStyles(context, definition)}
     ${disabledButtonStyles(context, definition)}
     slot[name='end']::slotted(.spinner-icon) {
-      color: #13aa52;
+      color: #c0fae6;
     }
 
     :host(.xsmall) .control {

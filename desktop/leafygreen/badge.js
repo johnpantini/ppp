@@ -21,25 +21,25 @@ export const lightgrayBadgeStyles = (context, definition) => css`
 
 export const greenBadgeStyles = (context, definition) => css`
   :host([appearance='green']) {
-    border: 1px solid rgb(195, 231, 202);
-    background-color: rgb(228, 244, 228);
-    color: rgb(17, 97, 73);
+    border: 1px solid rgb(192, 250, 230);
+    background-color: rgb(227, 252, 247);
+    color: rgb(0, 104, 74);
   }
 `;
 
 export const redBadgeStyles = (context, definition) => css`
   :host([appearance='red']) {
-    border: 1px solid rgb(249, 211, 197);
-    background-color: rgb(252, 235, 226);
-    color: rgb(143, 34, 27);
+    border: 1px solid rgb(255, 205, 199);
+    background-color: rgb(255, 234, 229);
+    color: rgb(151, 6, 6);
   }
 `;
 
 export const blueBadgeStyles = (context, definition) => css`
   :host([appearance='blue']) {
-    border: 1px solid rgb(197, 228, 242);
-    background-color: rgb(225, 242, 246);
-    color: rgb(26, 86, 126);
+    border: 1px solid rgb(195, 231, 254);
+    background-color: rgb(225, 247, 255);
+    color: rgb(18, 84, 183);
   }
 `;
 

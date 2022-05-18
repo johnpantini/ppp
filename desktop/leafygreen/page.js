@@ -211,7 +211,6 @@ export const emptyStateStyles = css`
     margin: 32px auto auto;
     appearance: none;
     padding: 0;
-    border: 0 solid transparent;
     display: inline-flex;
     -webkit-box-align: stretch;
     align-items: stretch;
@@ -221,9 +220,9 @@ export const emptyStateStyles = css`
     text-decoration: none;
     cursor: pointer;
     z-index: 0;
-    background-color: rgb(9, 128, 76);
-    box-shadow: rgb(19 170 82 / 40%) 0 2px 3px;
-    color: rgb(255, 255, 255);
+    background-color: #00684a;
+    border: 1px solid #00684a;
+    color: #ffffff;
     font-size: 14px;
     height: 36px;
   }

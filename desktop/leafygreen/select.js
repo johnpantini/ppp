@@ -175,28 +175,27 @@ const selectStyles = (context, definition) => css`
     z-index: -1;
     inset: 0;
     pointer-events: none;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
   .control {
     box-sizing: border-box;
     width: 100%;
     height: calc(${heightNumber} * 1px);
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 0 12px;
     font-size: 14px;
     font-weight: normal;
-    border: 1px solid rgb(137, 151, 155);
+    border: 1px solid rgb(136, 147, 151);
     z-index: 1;
     outline: none;
-    color: rgb(33, 49, 60);
-    background: rgb(249, 251, 250);
+    color: rgb(28, 45, 56);
+    background-color: rgb(255, 255, 255);
     font-family: ${bodyFont};
     position: relative;
     user-select: none;
     min-width: 250px;
     vertical-align: top;
-    box-shadow: rgb(6 22 33 / 30%) 0 1px 2px;
     transition: all 150ms ease-in-out 0s;
     align-items: center;
     cursor: pointer;
@@ -219,8 +218,9 @@ const selectStyles = (context, definition) => css`
 
   .listbox {
     background-color: rgb(255, 255, 255);
-    box-shadow: rgb(6 22 33 / 22%) 0 3px 7px 0;
-    border-radius: 3px;
+    border: 1px solid rgb(232, 237, 235);
+    border-radius: 12px;
+    box-shadow: rgb(0 30 43 / 25%) 0 4px 7px 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -253,10 +253,8 @@ const selectStyles = (context, definition) => css`
   }
 
   :host(:not([disabled]):hover) .control {
-    color: rgb(61, 79, 88);
     background-color: rgb(255, 255, 255);
-    border: 1px solid rgb(93, 108, 116);
-    box-shadow: rgb(0 0 0 / 30%) 0 4px 4px, rgb(231 238 236) 0 0 0 3px;
+    box-shadow: rgb(232 237 235) 0 0 0 3px;
   }
 
   :host(:not([disabled])[state='error']) .control {

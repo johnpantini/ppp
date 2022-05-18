@@ -133,28 +133,32 @@ export const textAreaStyles = (context, definition) => css`
     z-index: -1;
     inset: 0;
     pointer-events: none;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
-  :host .root-container:hover textarea:not(:focus) + .interaction-ring {
+  :host .root-container:hover textarea:not(:focus):not([disabled]) + .interaction-ring {
     box-shadow: rgb(231 238 236) 0 0 0 3px;
   }
 
-  // prettier-ignore
-  :host([state='error']) .root-container:hover textarea:not(:focus) + .interaction-ring {
-    box-shadow: rgb(252 235 226) 0 0 0 3px;
+  /* prettier-ignore */
+
+  :host([state='error']) .root-container:hover textarea:not(:focus):not([disabled]) + .interaction-ring {
+    border-color: rgb(219, 48, 48);
+    box-shadow: rgb(255 205 199) 0 0 0 3px;
   }
 
-  // prettier-ignore
-  :host([state='valid']) .root-container:hover textarea:not(:focus) + .interaction-ring {
-    box-shadow: rgb(228 244 228) 0 0 0 3px;
+  /* prettier-ignore */
+
+  :host([state='valid']) .root-container:hover textarea:not(:focus):not([disabled]) + .interaction-ring {
+    box-shadow: rgb(192 250 230) 0 0 0 3px;
+    border-color: rgb(0, 163, 92);
   }
 
   textarea {
     resize: none;
     width: 100%;
     height: 128px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 14px;
     font-weight: normal;
     border: 1px solid rgb(137, 151, 155);
@@ -188,12 +192,12 @@ export const textAreaStyles = (context, definition) => css`
   }
 
   :host([state='error']) textarea {
-    border: 1px solid rgb(207, 74, 34);
+    border-color: rgb(219, 48, 48);
     padding-right: 30px;
   }
 
   :host([state='valid']) textarea {
-    border: 1px solid rgb(19, 170, 82);
+    border-color: rgb(0, 163, 92);
     padding-right: 30px;
   }
 
