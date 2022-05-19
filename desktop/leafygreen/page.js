@@ -490,7 +490,7 @@ export const pageStyles = css`
     grid-template-areas:
         "header header header header"
         "footer footer footer footer";
-    border-radius: 7px;
+    border-radius: 24px;
     position: relative;
     border: 1px solid rgb(231, 238, 236);
     box-shadow: rgb(6 22 33 / 30%) 0 4px 10px -4px;
@@ -509,7 +509,7 @@ export const pageStyles = css`
     top: -1px;
     border-top: inherit;
     border-bottom: inherit;
-    border-radius: 7px 7px 0 0;
+    border-radius: 24px 24px 0 0;
     grid-area: header / header / header / header;
   }
 
@@ -527,7 +527,7 @@ export const pageStyles = css`
   }
 
   .service-details-info {
-    border-radius: 0 0 7px 7px;
+    border-radius: 0 0 24px 24px;
     padding: 24px;
     position: relative;
     grid-area: footer / footer / footer / footer;
