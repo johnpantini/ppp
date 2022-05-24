@@ -1,3 +1,4 @@
+drop function if exists loop_[%#payload.serviceId%]();
 drop function if exists process_nyse_nsdq_halts_[%#payload.serviceId%]() cascade;
 drop trigger if exists nyse_nsdq_halts_insert_trigger_[%#payload.serviceId%] on public.spbex_halts_[%#payload.serviceId%] cascade;
 drop function if exists nyse_nsdq_halts_insert_trigger_[%#payload.serviceId%]() cascade;

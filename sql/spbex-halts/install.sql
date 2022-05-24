@@ -49,7 +49,7 @@ try {
   plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
   plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
 
-  return plv8.execute("select content from http_get('https://spbexchange.ru/ru/about/news.aspx?sectionrss=30')")[0].content
+  return plv8.execute("select content from http_post('[%#payload.rssURL%]', '{\"url\":\"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30\"}', 'application/json')")[0].content
     .match(
       /приостановке организованных торгов ценными бумагами [\s\S]+?<link>(.*?)<\/link>/gi
     )
@@ -82,7 +82,7 @@ create or replace function parse_spbex_halt_[%#payload.serviceId%](url text, isi
 returns json as
 $$
 try {
-  const pageHtml = plv8.execute(`select content from http_get('${url}')`)[0].content;
+  const pageHtml = plv8.execute(`select content from http_post('[%#payload.rssURL%]', '{"url":"${url}"}', 'application/json')`)[0].content;
   const name = pageHtml.match(
     /приостановке организованных торгов ценными бумагами (.*?)<\/h1>/i
   )[1];
@@ -147,6 +147,8 @@ $$
       showName = stock.name;
     }
 
+    showName = showName.replace(/&/g, '%26').replace(/'/g, '%27');
+
     const message = plv8.find_function('format_spbex_halt_message_[%#payload.serviceId%]')(NEW.isin, ticker, showName, currency, date,
       NEW.url, start, finish);
 
@@ -168,6 +170,11 @@ create or replace function process_spbex_halts_[%#payload.serviceId%]()
 returns json as
 $$
 try {
+  const today = new Date();
+
+  if (today.getUTCDay() === 6 || today.getUTCDay() == 0 || (today.getUTCHours() >= 0 && today.getUTCHours() < 4))
+    return {status: 204};
+
   for (const halt of plv8.find_function('parse_spbex_halts_[%#payload.serviceId%]')()) {
     try {
       if (halt.isin)

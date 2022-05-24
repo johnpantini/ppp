@@ -1,16 +1,21 @@
 /** @decorator */
 
-import { SystemdTimerWithSupabasePage } from '../page.js';
 import { validate } from '../validate.js';
-import { FetchError, maybeFetchError } from '../fetch-error.js';
+import { maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
-import { Observable, observable } from '../element/observation/observable.js';
+import { observable } from '../element/observation/observable.js';
 import { Tmpl } from '../tmpl.js';
+import { TradingHaltServicePage } from '../trading-halt-service-page.js';
 
-export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
+export class ServiceNyseNsdqHaltsPage extends TradingHaltServicePage {
   @observable
   bots;
+
+  @observable
+  apis;
+
+  type = SUPPORTED_SERVICES.NYSE_NSDQ_HALTS;
 
   async callSymbolsFunction(returnResult = false) {
     if (!returnResult) this.beginOperation();
@@ -177,32 +182,13 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
 
     this.bots = null;
     this.apis = null;
-    this.servers = null;
 
     this.beginOperation();
 
     try {
-      if (serviceId) {
-        this.service = await this.app.ppp.user.functions.findOne(
-          {
-            collection: 'services'
-          },
-          {
-            _id: serviceId,
-            type: SUPPORTED_SERVICES.NYSE_NSDQ_HALTS
-          }
-        );
+      await this.checkPresence();
 
-        if (!this.service) {
-          this.failOperation(404);
-
-          return await this.notFound();
-        } else {
-          Observable.notify(this, 'service');
-        }
-      }
-
-      [this.bots, this.servers, this.apis] = await Promise.all([
+      [this.bots, this.apis] = await Promise.all([
         this.app.ppp.user.functions.aggregate(
           {
             collection: 'bots'
@@ -213,21 +199,6 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
                 $or: [
                   { removed: { $not: { $eq: true } } },
                   { _id: this.service?.botId }
-                ]
-              }
-            }
-          ]
-        ),
-        this.app.ppp.user.functions.aggregate(
-          {
-            collection: 'servers'
-          },
-          [
-            {
-              $match: {
-                $or: [
-                  { removed: { $not: { $eq: true } } },
-                  { _id: this.service?.serverId }
                 ]
               }
             }
@@ -259,21 +230,18 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
 
       if (!this.bots.length) this.bots = void 0;
 
-      if (!this.servers.length) this.servers = void 0;
-
       if (!this.apis.length) this.apis = void 0;
     } catch (e) {
       this.failOperation(e);
-      await this.notFound();
     } finally {
       this.endOperation();
     }
   }
 
-  async sql(serviceId) {
+  async installationQuery(serviceId, api) {
     const [sendTelegramMessage, installNyseNsdqHalts] = await Promise.all([
       fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl('install-nyse-nsdq-halts.sql')).then((r) => r.text())
+      fetch(this.getSQLUrl('nyse-nsdq-halts/install.sql')).then((r) => r.text())
     ]);
 
     const bot = Object.assign(
@@ -286,43 +254,13 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
     return `${sendTelegramMessage}
       ${await new Tmpl().render(this, installNyseNsdqHalts, {
         serviceId,
+        api,
+        interval: parseInt(this.interval.value),
         channel: this.channel.value,
         symbols: JSON.stringify(symbols),
         formatterCode: this.formatterCode.value,
         botToken: await this.app.ppp.crypto.decrypt(bot.iv, bot.token)
       })}`;
-  }
-
-  async commands(serviceId, api) {
-    let interval = parseInt(this.interval.value);
-
-    if (interval < 1 || isNaN(interval)) interval = 5;
-
-    const curlExpression = `-X POST --header "apiKey: ${api.key}" ${new URL(
-      `rest/v1/rpc/process_nyse_nsdq_halts_${serviceId}`,
-      api.url
-    ).toString()}`;
-
-    const servicePillar = JSON.stringify({
-      service_name: `ppp@${serviceId}`,
-      service_type: SUPPORTED_SERVICES.NYSE_NSDQ_HALTS,
-      service_systemd_type: 'oneshot',
-      exec_start: `/usr/bin/curl --silent ${curlExpression}`
-    });
-
-    const timerPillar = JSON.stringify({
-      service_name: `ppp@${serviceId}`,
-      service_type: SUPPORTED_SERVICES.NYSE_NSDQ_HALTS,
-      on_unit_inactive_sec: `${interval}s`
-    });
-
-    return [
-      'sudo salt-call --local state.sls epel ;',
-      'sudo salt-call --local state.sls ppp ;',
-      `sudo salt-call --local state.sls systemd.service pillar='${servicePillar}' ;`,
-      `sudo salt-call --local state.sls systemd.timer pillar='${timerPillar}' ;`,
-      `[ "$(sudo systemctl is-active ppp@${serviceId}.timer)" != "active" ] && exit 1 || `
-    ].join(' ');
   }
 
   async install() {
@@ -331,7 +269,6 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
     try {
       await validate(this.serviceName);
       await validate(this.api);
-      await validate(this.server);
       await validate(this.interval);
       await validate(this.bot);
       await validate(this.symbolsCode);
@@ -378,7 +315,6 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
             createdAt: new Date(),
             updatedAt: new Date(),
             apiId: this.api.value,
-            serverId: this.server.value,
             botId: this.bot.value,
             interval,
             symbolsCode: this.symbolsCode.value,
@@ -390,21 +326,6 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
         serviceId = insertedId;
       }
 
-      this.busy = false;
-      this.terminalModal.visible = true;
-
-      const terminal = this.terminalDom.terminal;
-
-      terminal.clear();
-      terminal.reset();
-      terminal.writeInfo('Выполняется запрос к базе данных...\r\n', true);
-
-      this.progressOperation(0);
-
-      const sql = await this.sql(serviceId);
-
-      this.progressOperation(10);
-
       const api = Object.assign(
         {},
         this.apis.find((a) => a._id === this.api.value)
@@ -413,45 +334,9 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
       api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
       api.key = await this.app.ppp.crypto.decrypt(api.iv, api.key);
 
-      const rSQL = await fetch(
-        new URL(
-          'pg',
-          this.app.ppp.keyVault.getKey('service-machine-url')
-        ).toString(),
-        {
-          cache: 'no-cache',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query: sql,
-            connectionString: this.getConnectionString(api)
-          })
-        }
-      );
-
-      const message = await rSQL.text();
-
-      if (!rSQL.ok) {
-        terminal.writeError(message);
-
-        // noinspection ExceptionCaughtLocallyJS
-        throw new FetchError({ ...rSQL, ...{ message } });
-      } else terminal.writeln(message);
-
-      terminal.writeln('');
-
-      const commands = await this.commands(serviceId, api);
-      const ok = await this.executeSSHCommand({
-        serverId: this.server.value,
-        commands,
-        commandsToDisplay: commands.replace(
-          /apiKey: ([\s\S]+?)"/,
-          'apiKey: <hidden token>"'
-        ),
-        progress: 50,
-        clearTerminal: false
+      const rInstallationSQL = await this.executeSQL({
+        query: await this.installationQuery(serviceId, api),
+        api
       });
 
       await this.app.ppp.user.functions.updateOne(
@@ -464,11 +349,14 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
         {
           $set: {
             name: this.serviceName.value.trim(),
-            state: ok ? 'active' : 'failed',
+            state: rInstallationSQL.ok
+              ? this.service
+                ? this.service.state
+                : 'stopped'
+              : 'failed',
             version: 1,
             updatedAt: new Date(),
             apiId: this.api.value,
-            serverId: this.server.value,
             botId: this.bot.value,
             interval,
             symbolsCode: this.symbolsCode.value,
@@ -478,10 +366,15 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
         }
       );
 
-      if (ok) {
+      if (rInstallationSQL.ok) {
+        const terminal = this.terminalDom.terminal;
+
+        terminal.writeln('\x1b[32m\r\nppp-sql-ok\r\n\x1b[0m');
+        terminal.writeln('');
+
         this.succeedOperation();
       } else {
-        this.failOperation(520);
+        this.failOperation(rInstallationSQL.status);
       }
     } catch (e) {
       this.failOperation(e);
@@ -490,9 +383,5 @@ export class ServiceNyseNsdqHaltsPage extends SystemdTimerWithSupabasePage {
 
       this.endOperation();
     }
-  }
-
-  async remove() {
-    return super.remove('remove-nyse-nsdq-halts.sql');
   }
 }

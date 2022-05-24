@@ -200,61 +200,28 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             </ppp-select>
             <${'ppp-button'}
               class="margin-top"
-              @click="${(x) => x.app.navigate({
-                page: 'api-supabase'
-              })}"
+              @click="${(x) =>
+                x.app.navigate({
+                  page: 'api-supabase'
+                })}"
               appearance="primary"
             >
-              Подключить API
+              Создать новый профиль API Supabase
             </ppp-button>
           </div>
         </section>
         <section>
           <div class="label-group">
-            <h5>Профиль сервера</h5>
+            <h5>Источник данных</h5>
+            <p>Конечная точка, возвращающая содержимое URL, который будет
+              передаваться в теле запроса.</p>
           </div>
           <div class="input-group">
-            <ppp-select
-              ?disabled="${(x) => !x.servers}"
-              placeholder="Нет доступных профилей"
-              value="${(x) => x.service?.serverId}"
-              ${ref('server')}
-            >
-              ${repeat(
-                (x) => x?.servers,
-                html`
-                  <ppp-option
-                    ?removed="${(x) => x.removed}"
-                    value="${(x) => x._id}"
-                  >
-                    ${(x) => x.name}
-                  </ppp-option>
-                `
-              )}
-              ${when(
-                (x) => x.servers !== null,
-                caretDown({
-                  slot: 'indicator'
-                })
-              )}
-              ${when(
-                (x) => x.servers === null,
-                settings({
-                  slot: 'indicator',
-                  cls: 'spinner-icon'
-                })
-              )}
-            </ppp-select>
-            <ppp-button
-              class="margin-top"
-              @click="${(x) =>
-                x.app.navigate({
-                  page: 'server-selector'
-                })}"
-              appearance="primary"
-            >
-              Добавить сервер
-            </ppp-button>
+            <ppp-text-field
+              placeholder="https://spbexchange.ru/ru/about/news.aspx?sectionrss=30"
+              value="${(x) => x.service?.rssURL}"
+              ${ref('rssURL')}
+            ></ppp-text-field>
           </div>
         </section>
         <section>

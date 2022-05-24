@@ -33,6 +33,10 @@ for (const i of instruments) {
 
 // SPB@US
 symbols.push('SPB');
+symbols.push('CIAN');
+symbols.push('OZON');
+symbols.push('QIWI');
+symbols.push('MTL');
 
 return symbols;`;
 
@@ -190,7 +194,7 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
                 <div class="service-details-info">
                   <div class="service-details-info-container">
                     <span style="grid-column-start: 1;grid-row-start: 1;">
-                      Версия
+                    Версия
                     </span>
                     <div style="grid-column-start: 1;grid-row-start: 2;">
                       ${(x) => x.service.version}
@@ -283,55 +287,7 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
                 })}"
               appearance="primary"
             >
-              Подключить API
-            </ppp-button>
-          </div>
-        </section>
-        <section>
-          <div class="label-group">
-            <h5>Профиль сервера</h5>
-          </div>
-          <div class="input-group">
-            <ppp-select
-              ?disabled="${(x) => !x.servers}"
-              placeholder="Нет доступных профилей"
-              value="${(x) => x.service?.serverId}"
-              ${ref('server')}
-            >
-              ${repeat(
-                (x) => x?.servers,
-                html`
-                  <ppp-option
-                    ?removed="${(x) => x.removed}"
-                    value="${(x) => x._id}"
-                  >
-                    ${(x) => x.name}
-                  </ppp-option>
-                `
-              )}
-              ${when(
-                (x) => x.servers !== null,
-                caretDown({
-                  slot: 'indicator'
-                })
-              )}
-              ${when(
-                (x) => x.servers === null,
-                settings({
-                  slot: 'indicator',
-                  cls: 'spinner-icon'
-                })
-              )}
-            </ppp-select>
-            <ppp-button
-              class="margin-top"
-              @click="${(x) =>
-                x.app.navigate({
-                  page: 'server-selector'
-                })}"
-              appearance="primary"
-            >
-              Добавить сервер
+              Создать новый профиль API Supabase
             </ppp-button>
           </div>
         </section>

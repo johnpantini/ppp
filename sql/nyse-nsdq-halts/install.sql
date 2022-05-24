@@ -43,7 +43,7 @@ try {
         halt_date: parseLine(lines[i]),
         halt_time: parseLine(lines[i + 1]),
         symbol: parseLine(lines[i + 2]),
-        name: parseLine(lines[i + 3]),
+        name: parseLine(lines[i + 3]).replace(/&/g, '%26').replace(/'/g, '%27'),
         market: parseLine(lines[i + 4]),
         reason_code: codes[codes.length - 1],
         pause_threshold_price: parseLine(lines[i + 6]),
@@ -112,6 +112,11 @@ create or replace function process_nyse_nsdq_halts_[%#payload.serviceId%]()
 returns json as
 $$
 try {
+  const today = new Date();
+
+  if (today.getUTCDay() === 6)
+    return {status: 204};
+
   for (const halt of plv8.find_function('parse_nyse_nsdq_halts_[%#payload.serviceId%]')()) {
     try {
       if (halt.symbol && plv8.find_function('get_nyse_nsdq_halts_symbols_[%#payload.serviceId%]')().indexOf(halt.symbol) > -1) {

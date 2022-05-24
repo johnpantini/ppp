@@ -7,10 +7,6 @@ export class ServicesPage extends PageWithTable {
       sortBy: (d) => d.name
     },
     {
-      label: 'Сервер',
-      sortBy: (d) => d.serverId
-    },
-    {
       label: 'Тип',
       sortBy: (d) => d.type
     },
@@ -41,14 +37,6 @@ export class ServicesPage extends PageWithTable {
         {
           $match: {
             removed: { $not: { $eq: true } }
-          }
-        },
-        {
-          $lookup: {
-            from: 'servers',
-            localField: 'serverId',
-            foreignField: '_id',
-            as: 'server'
           }
         }
       ]

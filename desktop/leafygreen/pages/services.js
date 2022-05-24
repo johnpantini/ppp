@@ -27,7 +27,6 @@ export const servicesPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
       <${'ppp-button'}
-        disabled
         appearance="primary"
         slot="controls"
         @click="${(x) =>
@@ -59,18 +58,6 @@ export const servicesPageTemplate = (context, definition) => html`
                   }}"
                   href="?page=service-${datum.type}&service=${datum._id}"
                   >${datum.name}</a
-                >`,
-                html`<a
-                  @click="${() => {
-                    x.app.navigate({
-                      page: 'server',
-                      server: datum.serverId
-                    });
-
-                    return false;
-                  }}"
-                  href="?page=server&server=${datum.serverId}"
-                  >${datum.server[0]?.name}</a
                 >`,
                 x.t(`$const.service.${datum.type}`),
                 formatDate(datum.createdAt),
