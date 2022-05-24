@@ -605,7 +605,7 @@ export class CloudServicesPage extends BasePage {
         }
       } catch (e) {
         invalidate(this.serviceMachineUrl, {
-          errorMessage: 'Неверный или неполный URL'
+          errorMessage: 'Неверный или неполный URL.'
         });
       }
 
