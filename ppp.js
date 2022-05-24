@@ -36,6 +36,18 @@ export default new (class {
   }
 
   async #createApplication({ emergency }) {
+    try {
+      await import(`data:text/javascript,export default '42'`);
+    } catch (e) {
+      document.getElementById('global-loader').classList.add('error');
+
+      document
+        .getElementById('global-loader')
+        .setText('Приложение ppp не поддерживает ваш браузер');
+
+      return;
+    }
+
     if (!emergency) {
       const { getApp, Credentials } = await import('./shared/realm.js');
 
