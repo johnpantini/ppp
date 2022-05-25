@@ -3,7 +3,7 @@ import { Observable } from './element/observation/observable.js';
 import { maybeFetchError } from './fetch-error.js';
 import { ServiceWithSupabasePage } from './page.js';
 
-export class TradingHaltServicePage extends ServiceWithSupabasePage {
+export class SupabaseParserPage extends ServiceWithSupabasePage {
   async performAction({
     file,
     title,
