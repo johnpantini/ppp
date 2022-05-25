@@ -6,9 +6,9 @@ import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
 import { observable } from '../element/observation/observable.js';
 import { Tmpl } from '../tmpl.js';
-import { TradingHaltServicePage } from '../trading-halt-service-page.js';
+import { SupabaseParserPage } from '../supabase-parser-page.js';
 
-export class ServiceNyseNsdqHaltsPage extends TradingHaltServicePage {
+export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
   @observable
   bots;
 

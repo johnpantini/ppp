@@ -170,7 +170,6 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
                       ?disabled="${(x) =>
                         x.busy ||
                         x.service?.removed ||
-                        x.service?.state === 'stopped' ||
                         x.service?.state === 'failed'}"
                       @click="${(x) => x.stop()}">Остановить
                     </ppp-button>
