@@ -217,9 +217,9 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              placeholder="https://spbexchange.ru/ru/about/news.aspx?sectionrss=30"
-              value="${(x) => x.service?.rssURL}"
-              ${ref('rssURL')}
+              placeholder="https://example.com"
+              value="${(x) => x.service?.proxyURL}"
+              ${ref('proxyURL')}
             ></ppp-text-field>
           </div>
         </section>

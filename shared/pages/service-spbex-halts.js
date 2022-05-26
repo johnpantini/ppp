@@ -251,7 +251,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
         api,
         interval: parseInt(this.interval.value),
         channel: this.channel.value.trim(),
-        rssURL: this.rssURL.value.trim(),
+        proxyURL: this.proxyURL.value.trim(),
         instrumentsCode: this.instrumentsCode.value,
         formatterCode: this.formatterCode.value,
         botToken: await this.app.ppp.crypto.decrypt(bot.iv, bot.token)
@@ -264,7 +264,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
     try {
       await validate(this.serviceName);
       await validate(this.api);
-      await validate(this.rssURL);
+      await validate(this.proxyURL);
       await validate(this.interval);
       await validate(this.bot);
       await validate(this.instrumentsCode);
@@ -311,7 +311,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
             createdAt: new Date(),
             updatedAt: new Date(),
             apiId: this.api.value,
-            rssURL: this.rssURL.value.trim(),
+            proxyURL: this.proxyURL.value.trim(),
             botId: this.bot.value,
             interval,
             instrumentsCode: this.instrumentsCode.value,
@@ -354,7 +354,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
             version: 1,
             updatedAt: new Date(),
             apiId: this.api.value,
-            rssURL: this.rssURL.value.trim(),
+            proxyURL: this.proxyURL.value.trim(),
             botId: this.bot.value,
             interval,
             instrumentsCode: this.instrumentsCode.value,
