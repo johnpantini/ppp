@@ -49,7 +49,7 @@ try {
   plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
   plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
 
-  return plv8.execute("select content from http_post('[%#payload.rssURL%]', '{\"url\":\"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30\"}', 'application/json')")[0].content
+  return plv8.execute("select content from http_post('[%#payload.proxyURL%]/fetch', '{\"url\":\"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30\"}', 'application/json')")[0].content
     .match(
       /приостановке организованных торгов ценными бумагами [\s\S]+?<link>(.*?)<\/link>/gi
     )
@@ -82,7 +82,7 @@ create or replace function parse_spbex_halt_[%#payload.serviceId%](url text, isi
 returns json as
 $$
 try {
-  const pageHtml = plv8.execute(`select content from http_post('[%#payload.rssURL%]', '{"url":"${url}"}', 'application/json')`)[0].content;
+  const pageHtml = plv8.execute(`select content from http_post('[%#payload.proxyURL%]/fetch', '{"url":"${url}"}', 'application/json')`)[0].content;
   const name = pageHtml.match(
     /приостановке организованных торгов ценными бумагами (.*?)<\/h1>/i
   )[1];
