@@ -1,10 +1,3 @@
-drop function if exists loop_[%#payload.serviceId%]();
-create or replace function loop_[%#payload.serviceId%]()
-returns void as
-$$
-  try {
-    plv8.execute(`select dblink_disconnect('ppp-[%#payload.serviceId%]');`);
-  } catch (e) {
-    return;
-  }
-$$ language plv8;
+select cron.unschedule('ppp-[%#payload.serviceId%]');
+drop function if exists ppp_interval_[%#payload.serviceId%](duration interval);
+drop function if exists ppp_perform_job_[%#payload.serviceId%]();

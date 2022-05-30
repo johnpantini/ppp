@@ -28,7 +28,7 @@ create or replace function parse_nyse_nsdq_halts_[%#payload.serviceId%]()
 returns json as
 $$
 try {
-  const response = plv8.execute(`select content::json->'result' as result from http(('POST', 'https://www.nasdaqtrader.com/RPCHandler.axd', ARRAY[http_header('Referer', 'https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts')], 'application/json', '{"id":2,"method":"BL_TradeHalt.GetTradeHalts","params":"[]","version":"1.1"}')::http_request)`)[0];
+  const response = plv8.execute(`select content::json->'result' as result from http(('POST', 'https://www.nasdaqtrader.com/RPCHandler.axd', array[http_header('Referer', 'https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts'), http_header('User-Agent', '[%#payload.userAgent%]')], 'application/json', '{"id":2,"method":"BL_TradeHalt.GetTradeHalts","params":"[]","version":"1.1"}')::http_request)`)[0];
   const lines = response.result.split(/\r?\n/);
   const halts = [];
   const parseLine = (l) => l.replace(/<[^>]*>/gi, '').trim();

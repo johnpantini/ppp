@@ -39,17 +39,13 @@ $$ language plv8;
 -- Populate SPBEX instruments immediately
 select populate_spbex_halts_instruments_[%#payload.serviceId%]();
 
-select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0');
-select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0');
-
 create or replace function parse_spbex_halts_[%#payload.serviceId%]()
 returns json as
 $$
 try {
-  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
-  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
+  plv8.execute("select http_set_curlopt('CURLOPT_TIMEOUT_MS', '3000')");
 
-  return plv8.execute("select content from http_post('[%#payload.proxyURL%]/fetch', '{\"url\":\"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30\"}', 'application/json')")[0].content
+  return plv8.execute("select content from http_post('[%#payload.proxyURL%]', '{\"url\":\"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30\", \"userAgent\":\"[%#payload.userAgent%]\"}', 'application/json')")[0].content
     .match(
       /приостановке организованных торгов ценными бумагами [\s\S]+?<link>(.*?)<\/link>/gi
     )
@@ -82,7 +78,9 @@ create or replace function parse_spbex_halt_[%#payload.serviceId%](url text, isi
 returns json as
 $$
 try {
-  const pageHtml = plv8.execute(`select content from http_post('[%#payload.proxyURL%]/fetch', '{"url":"${url}"}', 'application/json')`)[0].content;
+  plv8.execute("select http_set_curlopt('CURLOPT_TIMEOUT_MS', '3000')");
+
+  const pageHtml = plv8.execute(`select content from http_post('[%#payload.proxyURL%]', '{"url":"${url}", "userAgent":"[%#payload.userAgent%]"}', 'application/json')`)[0].content;
   const name = pageHtml.match(
     /приостановке организованных торгов ценными бумагами (.*?)<\/h1>/i
   )[1];

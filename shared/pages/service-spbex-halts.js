@@ -249,6 +249,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
       ${await new Tmpl().render(this, installSpbexHalts, {
         serviceId,
         api,
+        userAgent: navigator.userAgent,
         interval: parseInt(this.interval.value),
         channel: this.channel.value.trim(),
         proxyURL: this.proxyURL.value.trim(),

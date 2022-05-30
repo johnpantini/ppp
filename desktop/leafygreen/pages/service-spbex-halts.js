@@ -211,7 +211,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
-            <h5>Источник данных</h5>
+            <h5>Прокси-ресурс</h5>
             <p>Конечная точка, возвращающая содержимое URL, который будет
               передаваться в теле запроса.</p>
           </div>

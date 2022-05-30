@@ -255,6 +255,7 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
       ${await new Tmpl().render(this, installNyseNsdqHalts, {
         serviceId,
         api,
+        userAgent: navigator.userAgent,
         interval: parseInt(this.interval.value),
         channel: this.channel.value,
         symbols: JSON.stringify(symbols),

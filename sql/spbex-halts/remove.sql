@@ -1,4 +1,6 @@
-drop function if exists loop_[%#payload.serviceId%]();
+select cron.unschedule('ppp-[%#payload.serviceId%]');
+drop function if exists ppp_interval_[%#payload.serviceId%](duration interval);
+drop function if exists ppp_perform_job_[%#payload.serviceId%]();
 drop function if exists process_spbex_halts_[%#payload.serviceId%]() cascade;
 drop trigger if exists spbex_halts_insert_trigger_[%#payload.serviceId%] on public.spbex_halts_[%#payload.serviceId%] cascade;
 drop function if exists spbex_halts_insert_trigger_[%#payload.serviceId%]() cascade;
