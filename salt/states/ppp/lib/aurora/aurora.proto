@@ -1,0 +1,570 @@
+syntax = "proto3";
+
+package aurora;
+
+message DateTime {
+  sint64 Timestamp = 1;
+  sint32 Kind = 2;
+}
+
+message AuthServerAddressRequest {
+  bytes requestId = 1;
+}
+
+message AuthServerAddressResponse {
+  bytes requestId = 1;
+  string clientId = 2;
+  string realm = 3;
+  string authServerAddress = 4;
+  int32 authServerPort = 5;
+  bool isSslEnabled = 6;
+}
+
+enum Product {
+  UnknownProduct = 0;
+  ArcheClient = 1;
+  ArcheManager = 2;
+  NonameTerminal = 4;
+  NonameManager = 5;
+  SystemAdministrator = 13;
+  Terminal = 0xE;
+  DerbyTerminal = 0xF;
+}
+
+enum TradingMode {
+  UnknownMode = 0;
+  RealMoney = 1;
+  Simulation = 2;
+}
+
+message UserLogin {
+  Product Product = 3;
+  string VerInfo = 4;
+  TradingMode Mode = 5;
+  string WindowsVersion = 6;
+  bool Is64BitOs = 7;
+  string ClrVersion = 8;
+  string DotNetVersion = 9;
+  string BiosVersion = 10;
+  string JwtToken = 11;
+}
+
+enum ConnectionFailure
+{
+  InvalidLogin = 0;
+  AlreadyLoggedIn = 1;
+  InvalidVersion = 2;
+}
+
+message ConnectionReject {
+  ConnectionFailure ConnectionFailure = 1;
+  string Message = 2;
+}
+
+enum UserRole
+{
+  Trader = 0;
+  Manager = 1;
+  Administrator = 2;
+  UsersActivationAgent = 3;
+  Challenger = 4;
+  SuperManager = 5;
+  StatementsTrader = 6;
+}
+
+// ActivationDateUtc: {11/4/2019 1:30:35 PM} <Buffer 08 fc bf e1 e9 c6 5b 10 04>
+// ExpirationDateUtc: {4/13/2205 2:30:35 PM} <Buffer 08 fc d9 9c d9 96 b0 03 10 04>
+// creationTime: {1/1/0001 12:00:00 AM} <Buffer 08 01 10 0f>
+// modificationTime {1/1/0001 12:00:00 AM} <Buffer 08 01 10 0f>
+message UserInfoChange {
+  string login = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string email = 4;
+  string description = 6;
+  DateTime activationDateUtc = 7;
+  DateTime expirationDateUtc = 8;
+  UserRole role = 9;
+  DateTime creationTime = 13;
+  DateTime modificationTime = 14;
+  string city = 15;
+  string country = 16;
+  string userId = 17;
+}
+
+message ServerTime {
+  DateTime ServerDateTime = 1;
+}
+
+message ServerInfo {
+  string Address = 1;
+  int32 Port = 2;
+  repeated string Capabilities = 3;
+  string ServerLogin = 4;
+  bool UseBigEndian = 5;
+}
+
+message Dictionary {
+  string key = 1;
+  string value = 2;
+}
+
+message InfrastructureInfo {
+  repeated ServerInfo DataServers = 1;
+  repeated ServerInfo ExecutionServers = 2;
+  ServerInfo FilterServer = 3;
+  ServerInfo ChallengeServer = 4;
+  ServerInfo MessagingServer = 5;
+  repeated Dictionary CapabilitiesToRecommendedDataServerLogins = 7;
+  ServerInfo MetricsServer = 8;
+}
+
+message DataParametersChange {
+  string login = 1;
+  int32 level1Limit = 3;
+  int32 level2Limit = 4;
+  bytes segmentId = 5;
+  string dataServer = 6;
+}
+
+enum RiskManagementStyle {
+  Net = 0;
+  RealizedGross = 1;
+  Unrealized = 2;
+  TotalQty = 3;
+  DayPnL = 4;
+  Fees = 5;
+  None = 6;
+}
+
+message TradingParametersChange {
+  string login = 1;
+  string executionServer = 2;
+  // Guid
+  bytes segmentId = 3;
+  double dayBp = 4;
+  double nightBp = 5;
+  int64 orderShareLimit = 6;
+  int64 positionShareLimit = 7;
+  double stopLoss = 8;
+  int32 maxOpenPositions = 9;
+  double pctAutoFlat = 10;
+  RiskManagementStyle riskStyle = 11;
+  double commissionRate = 12;
+  bool isBlocked = 13;
+  double minBalanceThreshold = 14;
+}
+
+message TokenLogin {
+  TradingMode Mode = 2;
+  string JwtToken = 3;
+}
+
+enum HitType {
+  UnknownHitType = 0;
+  AtBid = 1;
+  AtAsk = 2;
+  AboveAsk = 3;
+  BelowBid = 4;
+  Between = 5;
+}
+
+enum Exchange {
+  NoneExchange = 0;
+  A = 1;
+  AM = 2;
+  AO = 3;
+  ASX = 4;
+  ATS = 5;
+  B = 6;
+  BE = 7;
+  BIT = 8;
+  BL = 9;
+  BMF = 10;
+  BO = 11;
+  BR = 12;
+  BS = 13;
+  BT = 14;
+  BY = 15;
+  C = 16;
+  C2 = 17;
+  CB = 18;
+  CBE = 19;
+  CBX = 20;
+  CF = 21;
+  CH = 22;
+  CHIC = 23;
+  CHIX = 24;
+  CM = 25;
+  CMG = 26;
+  CO = 27;
+  CONF = 28;
+  CQ = 29;
+  CX = 30;
+  CXA = 31;
+  D = 32;
+  DA = 33;
+  DME = 34;
+  DU = 35;
+  DX = 36;
+  EA = 37;
+  EB = 38;
+  EBY = 39;
+  EDA = 40;
+  EDX = 41;
+  EFU = 42;
+  EI = 43;
+  EK = 44;
+  EL = 45;
+  ENG = 46;
+  ESP = 47;
+  ET = 48;
+  ETM = 49;
+  EX = 50;
+  EXO = 51;
+  EXOO = 52;
+  F = 53;
+  FEED = 54;
+  FNEE = 55;
+  FNLT = 56;
+  FNLV = 57;
+  FNSE = 58;
+  FU = 59;
+  H = 60;
+  HA = 61;
+  HE = 62;
+  HF = 63;
+  HK = 64;
+  I = 65;
+  IC = 66;
+  ICE = 67;
+  ISEC = 68;
+  ITA = 69;
+  FA = 70;
+  JQ = 71;
+  KC = 72;
+  KCE = 73;
+  KQ = 74;
+  KS = 75;
+  L = 76;
+  LI = 77;
+  LM = 78;
+  LS = 79;
+  LTCY = 80;
+  M = 81;
+  MC = 82;
+  MEF = 83;
+  MG = 84;
+  MGE = 85;
+  MU = 86;
+  MW = 87;
+  N = 88;
+  NAE = 89;
+  NB = 90;
+  NBE = 91;
+  NG = 92;
+  NL = 93;
+  NQ = 94;
+  NX = 95;
+  NXA = 96;
+  NXC = 97;
+  NXE = 98;
+  NXF = 99;
+  NXG = 100;
+  NXL = 101;
+  O = 102;
+  OB = 103;
+  OC = 104;
+  ON = 105;
+  OS = 106;
+  P = 107;
+  PA = 108;
+  PO = 109;
+  PS = 110;
+  PT = 111;
+  Q = 112;
+  QB = 113;
+  QD = 114;
+  QO = 115;
+  QX = 116;
+  RI = 117;
+  SC = 118;
+  SF = 119;
+  SG = 120;
+  SP = 121;
+  SPO = 122;
+  ST = 123;
+  SX = 124;
+  T = 125;
+  TC = 126;
+  TF = 127;
+  TL = 128;
+  TM = 129;
+  TO = 130;
+  TV = 131;
+  TX = 132;
+  USVB = 133;
+  VN = 134;
+  W = 135;
+  WC = 136;
+  X = 137;
+  XB = 138;
+  XE = 139;
+  XFND = 140;
+  XO = 141;
+  XOMF = 142;
+  XOPV = 143;
+  XSAT = 144;
+  Y = 145;
+  RTS = 146;
+  MCX = 147;
+  UX = 148;
+  VIRTUAL = 149;
+  BTCE = 150;
+  FOREX = 151;
+  ABBA = 152;
+  AIBK = 153;
+  //  BARC = 153;
+  BDBI = 154;
+  BLLI = 155;
+  BLTA = 156;
+  BROK = 157;
+  CITA = 158;
+  CMC = 159;
+  COMP = 160;
+  DRES = 161;
+  DSTI = 162;
+  ECBF = 163;
+  EUAM = 164;
+  FIBI = 165;
+  FXCM = 166;
+  HAPI = 167;
+  IDBT = 168;
+  IGBK = 169;
+  MBT = 170;
+  MDBI = 171;
+  MFXM = 172;
+  MIGF = 173;
+  MIZI = 174;
+  MRIT = 175;
+  OKOB = 176;
+  OZAR = 177;
+  POTA = 178;
+  RADA = 179;
+  RTFX = 180;
+  SAXO = 181;
+  TUBD = 182;
+  TUTF = 183;
+  UBII = 184;
+  UBSW = 185;
+  WBLT = 186;
+  UWCL = 187;
+  NORD = 188;
+  MORN = 189;
+  FCFX = 190;
+  DNOB = 191;
+  DDBK = 192;
+  BNPF = 193;
+  HITBTC = 300;
+  UTEX = 301;
+};
+
+message MarketPrint {
+  double Price = 1;
+  int64 Size = 2;
+  DateTime Time = 3;
+  Exchange Exchange = 4;
+  int64 Volume = 5;
+  double High = 6;
+  double Low = 7;
+  double Open = 8;
+  double Close = 9;
+  string Symbol = 10;
+  HitType Hit = 12;
+  string Condition = 13;
+  bool DoesUpdateLastPrice = 14;
+}
+
+message PriceSizeTime {
+  double Price = 1;
+  int64 Size = 2;
+  bytes Time = 3;
+}
+
+message L2QuoteLine {
+  PriceSizeTime Bid = 2;
+  PriceSizeTime Ask = 3;
+}
+
+message L2QuoteSnapShot {
+  Exchange Feed = 1;
+  repeated L2QuoteLine Quote = 2;
+  string Symbol = 3;
+}
+
+message Level2 {
+  Exchange Feed = 1;
+  repeated L2QuoteLine Quote = 2;
+  string Symbol = 3;
+}
+
+message BidAskQuote {
+  string Symbol = 1;
+  PriceSizeTime Bid = 2;
+  PriceSizeTime Ask = 3;
+}
+
+message NYSEImbalanceUpdate {
+  int64 RegulatoryVolume = 1;
+  // TimeSpan
+  int64 Time = 2;
+  string Symbol = 3;
+  int64 PairedVolume = 4;
+  int64 InitVol = 5;
+  int64 CumVol = 6;
+  double Price = 7;
+}
+
+message L1Quotes {
+  BidAskQuote Quote = 1;
+  double PreviousClose = 7;
+  int64 AvgVolume = 8;
+  double LotSize = 11;
+  MarketPrint LastPrint = 12;
+  bool IsUpTickRuleEnabled = 13;
+  NYSEImbalanceUpdate ImbalanceUpdate = 14;
+  double PriceIncrement = 15;
+  string Section = 16;
+  string SectionDescription = 17;
+  string LongName = 18;
+  string ShortName = 19;
+  string LatName = 20;
+  double MinPrice = 21;
+  double MaxPrice = 22;
+  double BuyDeposit = 23;
+  double SellDeposit = 24;
+  double StepPrice = 26;
+  double ExchangeFee = 27;
+  double ClearingFee = 28;
+}
+
+message NativeAccountIdParametersChange {
+}
+
+message ConnectionPermit {
+}
+
+enum DataTypes {
+  L1 = 0;
+  L2 = 1;
+}
+
+message GetQuoteSnapshot {
+  string Symbol = 1;
+  DataTypes DataType = 2;
+}
+
+message DataSubscriptionRequest {
+  string Symbol = 1;
+  bool Subscribe = 2;
+  DataTypes DataType = 3;
+  bytes RequestId = 4;
+}
+
+enum RequestResultType {
+  UndefinedType = 0;
+  Failed = 1;
+  TimedOut = 2;
+  Succeded = 3;
+  WillNotRespond = 4;
+}
+
+message DataSubscriptionResponse {
+  bytes RequestId = 1;
+  RequestResultType ResultType = 2;
+  string ResultDescription = 3;
+}
+
+message BidAsk {
+  string Symbol = 1;
+  PriceSizeTime Bid = 2;
+  PriceSizeTime Ask = 3;
+}
+
+message L2QuoteUpdatePart {
+  PriceSizeTime HalfQuote = 1;
+  bool IsBid = 2;
+  int32 Index = 3;
+}
+
+message Level2UpdateCache {
+  Exchange Feed = 1;
+  repeated L2QuoteUpdatePart Updates = 2;
+  string Symbol = 3;
+}
+
+message HistoryRequest {
+  string Symbol = 1;
+  bytes RequestId = 2;
+  string UserChannel = 3;
+}
+
+message HistoryResponse {
+  repeated MarketPrint Prints = 1;
+  string Symbol = 2;
+  bytes RequestId = 3;
+  string UserChannel = 4;
+  RequestResultType ResultType = 5;
+}
+
+enum MajorMarkets {
+  Unknown = 0;
+  USMARKET = 1;
+  MICEX = 2;
+  RTSMarket = 3;
+  UXMarket = 4;
+  VIRTUALMarket = 5;
+  OPRA = 6;
+  CME = 7;
+  EUREX = 8;
+  BTCEMarket = 9;
+  FOREXMarket = 10;
+  HITBTCMarket = 11;
+  UTEXMarket = 12;
+}
+
+enum TradeScheduleEventType {
+  MarketClosed = 0;
+  Clearing = -1;
+  Break = -2;
+  PreMarket = 2;
+  Trading = 1;
+  AdditionalTrading = 4;
+  PostMarket = 3;
+  Undefined = -9999;
+}
+
+message MarketEvent {
+  TradeScheduleEventType Type = 1;
+  DateTime Time = 2;
+}
+
+message MarketScheduleResponse  {
+  repeated MarketEvent Events = 1;
+  MajorMarkets Market = 2;
+  bytes RequestId = 3;
+}
+
+message AllSymbolsSnapshot {
+
+}
+
+message BatchDataSubscriptionRequest {
+  repeated string L1List = 1;
+  repeated string L2List = 2;
+  bytes RequestId = 3;
+}
+
+message BatchDataSubscriptionResponse {
+
+}
