@@ -215,6 +215,7 @@ export const toastStyles = (context, definition) =>
       font-size: 16px;
       line-height: 24px;
       letter-spacing: 0;
+      padding-right: 20px;
       font-weight: 700;
     }
 
