@@ -7,7 +7,11 @@ import { pageStyles, loadingIndicator } from '../page.js';
 
 export const apiAstraDbPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>Внешние API - AstraDb
+    <${'ppp-page-header'} ${ref('header')}>
+      ${(x) =>
+        x.api
+          ? `Внешний API - AstraDB - ${x.api?.name}`
+          : 'Внешний API - AstraDB'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
@@ -28,7 +32,8 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
         <section>
           <div class="label-group">
             <h5>Идентификатор базы данных</h5>
-            <p>Можно найти в панели управления базой данных, ключ ASTRA_DB_ID.</p>
+            <p>Можно найти в панели управления базой данных, ключ
+              ASTRA_DB_ID.</p>
           </div>
           <div class="input-group">
             <ppp-text-field
@@ -41,7 +46,8 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
         <section>
           <div class="label-group">
             <h5>Регион базы данных</h5>
-            <p>Можно найти в панели управления базой данных, ключ ASTRA_DB_REGION.</p>
+            <p>Можно найти в панели управления базой данных, ключ
+              ASTRA_DB_REGION.</p>
           </div>
           <div class="input-group">
             <ppp-text-field
@@ -54,7 +60,8 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
         <section>
           <div class="label-group">
             <h5>Пространство ключей</h5>
-            <p>Можно найти в панели управления базой данных, ключ ASTRA_DB_KEYSPACE.</p>
+            <p>Можно найти в панели управления базой данных, ключ
+              ASTRA_DB_KEYSPACE.</p>
           </div>
           <div class="input-group">
             <ppp-text-field

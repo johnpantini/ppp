@@ -7,7 +7,11 @@ import { pageStyles, loadingIndicator } from '../page.js';
 
 export const brokerAlorOpenAPIV2PageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>Брокеры - Alor OpenAPI V2
+    <${'ppp-page-header'} ${ref('header')}>
+      ${(x) =>
+        x.broker
+          ? `Брокер - Alor OpenAPI V2 - ${x.broker?.name}`
+          : 'Брокер - Alor OpenAPI V2'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">

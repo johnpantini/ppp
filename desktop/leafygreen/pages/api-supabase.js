@@ -7,7 +7,11 @@ import { pageStyles, loadingIndicator } from '../page.js';
 
 export const apiSupabasePageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>Внешние API - Supabase
+    <${'ppp-page-header'} ${ref('header')}>
+      ${(x) =>
+        x.api
+          ? `Внешний API - Supabase - ${x.api?.name}`
+          : 'Внешний API - Supabase'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">

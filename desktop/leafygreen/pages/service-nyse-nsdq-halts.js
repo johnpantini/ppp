@@ -142,7 +142,10 @@ return message;`;
 export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
-      Сервисы - торговые паузы NYSE/NASDAQ
+      ${(x) =>
+        x.service
+          ? `Сервис - Торговые паузы NYSE/NASDAQ - ${x.service?.name}`
+          : 'Сервис - Торговые паузы NYSE/NASDAQ'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">

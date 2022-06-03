@@ -29,6 +29,10 @@ const instruments =
     )[0].content
   ).payload.values || [];
 
+instruments.push({symbol: {isin: 'RU000AOJQ9P9', ticker: 'SPBE', showName: 'ПАО "СПБ Биржа"', currency: 'USD'}});
+instruments.push({symbol: {isin: 'US05637B1052', ticker: 'BLZE', showName: 'Backblaze, Inc.', currency: 'USD'}});
+instruments.push({symbol: {isin: 'US33829M1018', ticker: 'FIVE', showName: 'Five Below, Inc.', currency: 'USD'}});
+
 return instruments.map((i) => {
   return {
     isin: i.symbol.isin,
@@ -61,7 +65,10 @@ return \`‼️⏸ Приостановка торгов (SPBEX)
 export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page-header'} ${ref('header')}>
-      Сервисы - торговые паузы SPBEX
+      ${(x) =>
+        x.service
+          ? `Сервис - Торговые паузы SPBEX - ${x.service?.name}`
+          : 'Сервис - Торговые паузы SPBEX'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">

@@ -7,7 +7,11 @@ import { pageStyles, loadingIndicator } from '../page.js';
 
 export const apiPusherPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>Внешние API - Pusher
+    <${'ppp-page-header'} ${ref('header')}>
+      ${(x) =>
+        x.api
+          ? `Внешний API - Pusher - ${x.api?.name}`
+          : 'Внешний API - Pusher'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">

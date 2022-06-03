@@ -13,7 +13,11 @@ const exampleCode = `exports = function({ query, headers, body}, response) {
 
 export const endpointPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>Конечная точка HTTPS
+    <${'ppp-page-header'} ${ref('header')}>
+      ${(x) =>
+        x.endpoint
+          ? `Конечная точка HTTPS - ${x.endpoint?.function_name}`
+          : 'Конечная точка HTTPS'}
     </ppp-page-header>
     <form ${ref('form')} novalidate onsubmit="return false">
       <div class="loading-wrapper" ?busy="${(x) => x.busy}">
