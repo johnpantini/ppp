@@ -1,5 +1,5 @@
 drop function if exists ppp_fetch(url text, options json);
-create or replace function ppp_fetch(url text, options json)
+create or replace function ppp_fetch(url text, options json default '{}')
 returns json as
 $$
   let headersPairs = [];
@@ -9,7 +9,7 @@ $$
     headersPairs.push(`http_header('${h}','${headers[h]}')`);
   }
 
-  const headersString = `array[${headersPairs.join(',')}]`;
+  const headersString = `array[${headersPairs.join(',')}]::http_header[]`;
   let contentType = headers['content-type'] || headers['Content-Type'] || 'null';
 
   if (contentType !== 'null')
