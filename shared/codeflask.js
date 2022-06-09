@@ -37,6 +37,7 @@ export const codeflaskTemplate = (context, definition) => html`
     <div class="root" part="root">
       <div class="root-container">
         <textarea
+          ?disabled="${(x) => x.disabled}"
           spellcheck="false"
           autocapitalize="off"
           autocomplete="off"
@@ -65,6 +66,9 @@ export const codeflaskTemplate = (context, definition) => html`
 export class Codeflask extends FoundationElement {
   @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
+
+  @attr({ mode: 'boolean' })
+  disabled;
 
   @observable
   code;

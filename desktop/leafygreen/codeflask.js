@@ -55,7 +55,7 @@ export const codeflaskStyles = (context, definition) => css`
     transition: all 150ms ease-in-out 0s;
   }
 
-  :host .root-container:hover {
+  :host(:not([disabled])) .root-container:hover {
     box-shadow: rgb(231 238 236) 0 0 0 3px;
   }
 
@@ -92,6 +92,12 @@ export const codeflaskStyles = (context, definition) => css`
     height: 100%;
     scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
     scrollbar-width: thin;
+  }
+
+  :host([disabled]) .control {
+    color: rgb(137, 151, 155);
+    background-color: rgb(231, 238, 236);
+    cursor: not-allowed;
   }
 
   textarea::-webkit-scrollbar {
