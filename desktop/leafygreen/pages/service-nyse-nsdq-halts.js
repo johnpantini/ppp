@@ -310,6 +310,36 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
+            <h5>Тикеры для отслеживания</h5>
+            <p>Функция на языке PLV8, возвращающая массив тикеров для
+              отслеживания. Тикеры вне массива отслеживаться не будут. По
+              умолчанию используется каталог инструментов Тинькофф
+              Инвестиций.</p>
+          </div>
+          <div class="input-group">
+            <${'ppp-codeflask'}
+              :code="${(x) => x.service?.symbolsCode ?? exampleSymbolsCode}"
+              ${ref('symbolsCode')}
+            ></ppp-codeflask>
+            <${'ppp-button'}
+              class="margin-top"
+              @click="${(x) => x.symbolsCode.updateCode(exampleSymbolsCode)}"
+              appearance="primary"
+            >
+              Восстановить значение по умолчанию
+            </ppp-button>
+            <ppp-button
+              class="margin-top"
+              ?disabled="${(x) => x.busy}"
+              @click="${(x) => x.callSymbolsFunction()}"
+              appearance="primary"
+            >
+              Выполнить функцию
+            </ppp-button>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
             <h5>Бот</h5>
             <p>Будет использован для публикации сообщений о торговых паузах.
               Должен обладать соответствующими правами в канале/группе.</p>
@@ -360,56 +390,6 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
-            <h5>Тикеры для отслеживания</h5>
-            <p>Функция на языке PLV8, возвращающая массив тикеров для
-              отслеживания. Тикеры вне массива отслеживаться не будут. По
-              умолчанию используется каталог инструментов Тинькофф
-              Инвестиций.</p>
-          </div>
-          <div class="input-group">
-            <${'ppp-codeflask'}
-              :code="${(x) => x.service?.symbolsCode ?? exampleSymbolsCode}"
-              ${ref('symbolsCode')}
-            ></ppp-codeflask>
-            <${'ppp-button'}
-              class="margin-top"
-              @click="${(x) => x.symbolsCode.updateCode(exampleSymbolsCode)}"
-              appearance="primary"
-            >
-              Восстановить значение по умолчанию
-            </ppp-button>
-            <ppp-button
-              class="margin-top"
-              ?disabled="${(x) => x.busy}"
-              @click="${(x) => x.callSymbolsFunction()}"
-              appearance="primary"
-            >
-              Выполнить функцию
-            </ppp-button>
-          </div>
-        </section>
-        <section>
-          <div class="label-group">
-            <h5>Форматирование</h5>
-            <p>Логика форматирования итогового сообщения на языке PLV8.</p>
-          </div>
-          <div class="input-group">
-            <${'ppp-codeflask'}
-              :code="${(x) => x.service?.formatterCode ?? exampleFormatterCode}"
-              ${ref('formatterCode')}
-            ></ppp-codeflask>
-            <ppp-button
-              class="margin-top"
-              @click="${(x) =>
-                x.formatterCode.updateCode(exampleFormatterCode)}"
-              appearance="primary"
-            >
-              Восстановить значение по умолчанию
-            </ppp-button>
-          </div>
-        </section>
-        <section>
-          <div class="label-group">
             <h5>Канал или группа</h5>
             <p>Идентификатор канала или группы, куда будут отправляться
               уведомления о торговых паузах.</p>
@@ -428,6 +408,27 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
               appearance="primary"
             >
               Отправить тестовое сообщение
+            </ppp-button>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Форматирование уведомлений</h5>
+            <p>Логика форматирования итогового сообщения в Telegram на языке
+              PLV8.</p>
+          </div>
+          <div class="input-group">
+            <${'ppp-codeflask'}
+              :code="${(x) => x.service?.formatterCode ?? exampleFormatterCode}"
+              ${ref('formatterCode')}
+            ></ppp-codeflask>
+            <ppp-button
+              class="margin-top"
+              @click="${(x) =>
+                x.formatterCode.updateCode(exampleFormatterCode)}"
+              appearance="primary"
+            >
+              Восстановить значение по умолчанию
             </ppp-button>
           </div>
         </section>
