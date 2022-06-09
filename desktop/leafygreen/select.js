@@ -204,12 +204,14 @@ const selectStyles = (context, definition) => css`
     min-height: 100%;
   }
 
+  :host([disabled]) {
+    cursor: ${disabledCursor};
+  }
+
   :host([disabled]) .control {
     pointer-events: none;
     background-color: rgb(231, 238, 236);
-    border: 1px solid rgb(184, 196, 194);
-    box-shadow: rgb(184 196 194) 0 0 0 1px;
-    cursor: ${disabledCursor};
+    border: 1px solid rgb(136, 147, 151);
   }
 
   :host([disabled]) .indicator {
