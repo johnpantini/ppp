@@ -1,62 +1,75 @@
 import { $global } from './platform.js';
 
-const updateQueue = [];
+const updateQueue = $global.PPP.getById(1, () => {
+  const tasks = [];
+  const pendingErrors = [];
 
-const pppHTMLPolicy = $global.trustedTypes.createPolicy('ppp-html', {
-  createHTML: (html) => html
-});
-
-let htmlPolicy = pppHTMLPolicy;
-// We use a queue so we can ensure errors are thrown in order.
-const pendingErrors = [];
-
-function throwFirstError() {
-  if (pendingErrors.length) {
-    throw pendingErrors.shift();
-  }
-}
-
-function tryRunTask(task) {
-  try {
-    task.call();
-  } catch (error) {
-    pendingErrors.push(error);
-    setTimeout(throwFirstError, 0);
-  }
-}
-
-function processQueue() {
-  const capacity = 1024;
-  let index = 0;
-
-  while (index < updateQueue.length) {
-    tryRunTask(updateQueue[index]);
-    index++;
-
-    // Prevent leaking memory for long chains of recursive calls to `DOM.queueUpdate`.
-    // If we call `DOM.queueUpdate` within a task scheduled by `DOM.queueUpdate`, the queue will
-    // grow, but to avoid an O(n) walk for every task we execute, we don't
-    // shift tasks off the queue after they have been executed.
-    // Instead, we periodically shift 1024 tasks off the queue.
-    if (index > capacity) {
-      // Manually shift all values starting at the index back to the
-      // beginning of the queue.
-      for (
-        let scan = 0, newLength = updateQueue.length - index;
-        scan < newLength;
-        scan++
-      ) {
-        updateQueue[scan] = updateQueue[scan + index];
-      }
-
-      updateQueue.length -= index;
-      index = 0;
+  function throwFirstError() {
+    if (pendingErrors.length) {
+      throw pendingErrors.shift();
     }
   }
 
-  updateQueue.length = 0;
-}
+  function tryRunTask(task) {
+    try {
+      task.call();
+    } catch (error) {
+      pendingErrors.push(error);
+      setTimeout(throwFirstError, 0);
+    }
+  }
 
+  function process() {
+    const capacity = 1024;
+    let index = 0;
+
+    while (index < tasks.length) {
+      tryRunTask(tasks[index]);
+      index++;
+
+      // Prevent leaking memory for long chains of recursive calls to `DOM.queueUpdate`.
+      // If we call `DOM.queueUpdate` within a task scheduled by `DOM.queueUpdate`, the queue will
+      // grow, but to avoid an O(n) walk for every task we execute, we don't
+      // shift tasks off the queue after they have been executed.
+      // Instead, we periodically shift 1024 tasks off the queue.
+      if (index > capacity) {
+        // Manually shift all values starting at the index back to the
+        // beginning of the queue.
+        for (
+          let scan = 0, newLength = tasks.length - index;
+          scan < newLength;
+          scan++
+        ) {
+          tasks[scan] = tasks[scan + index];
+        }
+
+        tasks.length -= index;
+        index = 0;
+      }
+    }
+
+    tasks.length = 0;
+  }
+
+  function enqueue(callable) {
+    if (tasks.length < 1) {
+      $global.requestAnimationFrame(process);
+    }
+
+    tasks.push(callable);
+  }
+
+  return Object.freeze({
+    enqueue,
+    process
+  });
+});
+/* eslint-disable */
+const pppHTMLPolicy = $global.trustedTypes.createPolicy('ppp-html', {
+  createHTML: (html) => html
+});
+/* eslint-enable */
+let htmlPolicy = pppHTMLPolicy;
 const marker = `ppp-${Math.random().toString(36).substring(2, 8)}`;
 
 /** @internal */
@@ -146,20 +159,20 @@ export const DOM = Object.freeze({
    * Schedules DOM update work in the next async batch.
    * @param callable - The callable function or object to queue.
    */
-  queueUpdate(callable) {
-    if (updateQueue.length < 1) {
-      window.requestAnimationFrame(processQueue);
-    }
-
-    updateQueue.push(callable);
-  },
+  queueUpdate: updateQueue.enqueue,
+  /**
+   * Immediately processes all work previously scheduled
+   * through queueUpdate.
+   * @remarks
+   * This also forces nextUpdate promises
+   * to resolve.
+   */
+  processUpdates: updateQueue.process,
   /**
    * Resolves with the next DOM update.
    */
   nextUpdate() {
-    return new Promise((resolve) => {
-      DOM.queueUpdate(resolve);
-    });
+    return new Promise(updateQueue.enqueue);
   },
   /**
    * Sets an attribute value on an element.

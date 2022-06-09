@@ -1,8 +1,8 @@
-import { attr } from './element/components/attributes.js';
+import { attr, booleanConverter } from './element/components/attributes.js';
 import { DOM } from './element/dom.js';
 import { emptyArray } from './element/platform.js';
 import { observable } from './element/observation/observable.js';
-import { keyCodeEnter } from './web-utilities/key-codes.js';
+import { keyEnter } from './web-utilities/key-codes.js';
 
 const proxySlotName = 'form-associated-proxy';
 const ElementInternalsKey = 'ElementInternals';
@@ -45,21 +45,16 @@ export function FormAssociated(BaseCtor) {
        * the app author, so block these events from emitting.
        */
       this.proxyEventsToBlock = ['change', 'click'];
-      /**
-       * Invoked when a connected component's form or fieldset has its disabled
-       * state changed.
-       * @param disabled - the disabled value of the form / fieldset
-       */
-      this.formDisabledCallback = (disabled) => {
-        this.disabled = disabled;
-      };
-      this.formResetCallback = () => {
-        this.value = this.initialValue;
-        this.dirtyValue = false;
-      };
       this.proxyInitialized = false;
       this.required = false;
       this.initialValue = this.initialValue || '';
+
+      if (!this.elementInternals) {
+        // When elementInternals is not supported, formResetCallback is
+        // bound to an event listener, so ensure the handler's `this`
+        // context is correct.
+        this.formResetCallback = this.formResetCallback.bind(this);
+      }
     }
 
     /**
@@ -161,8 +156,13 @@ export function FormAssociated(BaseCtor) {
         this.proxy.value = this.value;
       }
 
+      this.currentValue = this.value;
       this.setFormValue(this.value);
       this.validate();
+    }
+
+    currentValueChanged() {
+      this.value = this.currentValue;
     }
 
     /**
@@ -274,10 +274,10 @@ export function FormAssociated(BaseCtor) {
 
       if (!this.elementInternals) {
         this.attachProxy();
-      }
 
-      if (this.form) {
-        this.form.addEventListener('reset', this.formResetCallback);
+        if (this.form) {
+          this.form.addEventListener('reset', this.formResetCallback);
+        }
       }
     }
 
@@ -289,7 +289,7 @@ export function FormAssociated(BaseCtor) {
         this.proxy.removeEventListener(name, this.stopPropagation)
       );
 
-      if (this.form) {
+      if (!this.elementInternals && this.form) {
         this.form.removeEventListener('reset', this.formResetCallback);
       }
     }
@@ -331,9 +331,25 @@ export function FormAssociated(BaseCtor) {
     }
 
     /**
+     * Invoked when a connected component's form or fieldset has its disabled
+     * state changed.
+     * @param disabled - the disabled value of the form / fieldset
+     */
+    formDisabledCallback(disabled) {
+      this.disabled = disabled;
+    }
+
+    formResetCallback() {
+      this.value = this.initialValue;
+      this.dirtyValue = false;
+    }
+
+    /**
      * Attach the proxy element to the DOM
      */
     attachProxy() {
+      var _a;
+
       if (!this.proxyInitialized) {
         this.proxyInitialized = true;
         this.proxy.style.display = 'none';
@@ -394,17 +410,15 @@ export function FormAssociated(BaseCtor) {
     }
 
     _keypressHandler(e) {
-      switch (e.keyCode) {
-        case keyCodeEnter:
+      switch (e.key) {
+        case keyEnter:
           if (this.form instanceof HTMLFormElement) {
-            if (e.path[0].tagName !== 'TEXTAREA') {
-              // Implicit submission
-              const defaultButton = this.form.querySelector('[type=submit]');
+            // Implicit submission
+            const defaultButton = this.form.querySelector('[type=submit]');
 
-              defaultButton === null || defaultButton === void 0
-                ? void 0
-                : defaultButton.click();
-            }
+            defaultButton === null || defaultButton === void 0
+              ? void 0
+              : defaultButton.click();
           }
 
           break;
@@ -422,9 +436,114 @@ export function FormAssociated(BaseCtor) {
 
   attr({ mode: 'boolean' })(C.prototype, 'disabled');
   attr({ mode: 'fromView', attribute: 'value' })(C.prototype, 'initialValue');
+  attr({ attribute: 'current-value' })(C.prototype, 'currentValue');
   attr(C.prototype, 'name');
   attr({ mode: 'boolean' })(C.prototype, 'required');
   observable(C.prototype, 'value');
 
   return C;
+}
+
+export function CheckableFormAssociated(BaseCtor) {
+  class C extends FormAssociated(BaseCtor) {}
+
+  class D extends C {
+    constructor(...args) {
+      super(args);
+      /**
+       * Tracks whether the "checked" property has been changed.
+       * This is necessary to provide consistent behavior with
+       * normal input checkboxes
+       */
+      this.dirtyChecked = false;
+      /**
+       * Provides the default checkedness of the input element
+       * Passed down to proxy
+       *
+       * @public
+       * @remarks
+       * HTML Attribute: checked
+       */
+      this.checkedAttribute = false;
+      /**
+       * The checked state of the control.
+       *
+       * @public
+       */
+      this.checked = false;
+      // Re-initialize dirtyChecked because initialization of other values
+      // causes it to become true
+      this.dirtyChecked = false;
+    }
+
+    checkedAttributeChanged() {
+      this.defaultChecked = this.checkedAttribute;
+    }
+
+    /**
+     * @internal
+     */
+    defaultCheckedChanged() {
+      if (!this.dirtyChecked) {
+        // Setting this.checked will cause us to enter a dirty state,
+        // but if we are clean when defaultChecked is changed, we want to stay
+        // in a clean state, so reset this.dirtyChecked
+        this.checked = this.defaultChecked;
+        this.dirtyChecked = false;
+      }
+    }
+
+    checkedChanged(prev, next) {
+      if (!this.dirtyChecked) {
+        this.dirtyChecked = true;
+      }
+
+      this.currentChecked = this.checked;
+      this.updateForm();
+
+      if (this.proxy instanceof HTMLInputElement) {
+        this.proxy.checked = this.checked;
+      }
+
+      if (prev !== undefined) {
+        this.$emit('change');
+      }
+
+      this.validate();
+    }
+
+    currentCheckedChanged(prev, next) {
+      this.checked = this.currentChecked;
+    }
+
+    updateForm() {
+      const value = this.checked ? this.value : null;
+
+      this.setFormValue(value, value);
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.updateForm();
+    }
+
+    formResetCallback() {
+      super.formResetCallback();
+      this.checked = !!this.checkedAttribute;
+      this.dirtyChecked = false;
+    }
+  }
+
+  attr({ attribute: 'checked', mode: 'boolean' })(
+    D.prototype,
+    'checkedAttribute'
+  );
+  attr({ attribute: 'current-checked', converter: booleanConverter })(
+    D.prototype,
+    'currentChecked'
+  );
+  observable(D.prototype, 'defaultChecked');
+  observable(D.prototype, 'checked');
+
+  return D;
 }

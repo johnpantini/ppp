@@ -25,6 +25,49 @@ if ($global.trustedTypes === void 0) {
   $global.trustedTypes = { createPolicy: (n, r) => r };
 }
 
+const propConfig = {
+  configurable: false,
+  enumerable: false,
+  writable: false
+};
+
+if ($global.PPP === void 0) {
+  Reflect.defineProperty(
+    $global,
+    'PPP',
+    Object.assign({ value: Object.create(null) }, propConfig)
+  );
+}
+
+/**
+ * The PPP global.
+ * @internal
+ */
+export const PPP = $global.PPP;
+
+if (PPP.getById === void 0) {
+  const storage = Object.create(null);
+
+  Reflect.defineProperty(
+    PPP,
+    'getById',
+    Object.assign(
+      {
+        value(id, initialize) {
+          let found = storage[id];
+
+          if (found === void 0) {
+            found = initialize ? (storage[id] = initialize()) : null;
+          }
+
+          return found;
+        }
+      },
+      propConfig
+    )
+  );
+}
+
 /**
  * A readonly, empty array.
  * @remarks
