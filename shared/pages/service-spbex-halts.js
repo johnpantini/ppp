@@ -82,8 +82,8 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
     try {
       await validate(this.api);
       await validate(this.bot);
-      await validate(this.formatterCode);
       await validate(this.channel);
+      await validate(this.formatterCode);
 
       const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
@@ -267,10 +267,10 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
       await validate(this.api);
       await validate(this.proxyURL);
       await validate(this.interval);
-      await validate(this.bot);
       await validate(this.instrumentsCode);
-      await validate(this.formatterCode);
+      await validate(this.bot);
       await validate(this.channel);
+      await validate(this.formatterCode);
 
       let interval = parseInt(this.interval.value);
 

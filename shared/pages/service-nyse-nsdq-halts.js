@@ -88,8 +88,8 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
     try {
       await validate(this.api);
       await validate(this.bot);
-      await validate(this.formatterCode);
       await validate(this.channel);
+      await validate(this.formatterCode);
 
       const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
@@ -177,8 +177,6 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
 
   async connectedCallback() {
     super.connectedCallback();
-
-    const serviceId = this.app.params()?.service;
 
     this.bots = null;
     this.apis = null;
@@ -271,10 +269,10 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
       await validate(this.serviceName);
       await validate(this.api);
       await validate(this.interval);
-      await validate(this.bot);
       await validate(this.symbolsCode);
-      await validate(this.formatterCode);
+      await validate(this.bot);
       await validate(this.channel);
+      await validate(this.formatterCode);
 
       let interval = parseInt(this.interval.value);
 
