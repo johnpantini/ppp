@@ -1,6 +1,6 @@
 create or replace function ppp_perform_job_[%#payload.serviceId%]()
 returns json as $$
-  plv8.execute(`select pg_sleep([%#payload.interval%]);`);
+  plv8.execute(`select pg_sleep([%#payload.interval - 1%]);`);
 
   return plv8.find_function('process_nyse_nsdq_halts_[%#payload.serviceId%]')();
 $$ language plv8;
@@ -21,3 +21,6 @@ end;
 $$ language plpgsql;
 
 select cron.schedule('ppp-[%#payload.serviceId%]', '* * * * *', 'select ppp_interval_[%#payload.serviceId%]()');
+
+select dblink_connect('ppp-[%#payload.serviceId%]', 'dbname=[%#payload.api.db%] port=[%#payload.api.port%] host=[%#payload.api.hostname%] user=[%#payload.api.user%] password=[%#payload.api.password%]');
+select dblink_send_query('ppp-[%#payload.serviceId%]', 'select process_nyse_nsdq_halts_[%#payload.serviceId%]();');

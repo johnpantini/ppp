@@ -10,10 +10,9 @@ import { formatDate } from '../../../shared/intl.js';
 import { settings } from '../icons/settings.js';
 import { caretDown } from '../icons/caret-down.js';
 
-const exampleTableSchema = `guid text primary key,
-pub_date text not null,
-title text not null,
+const exampleTableSchema = `title text primary key,
 description text not null,
+pub_date text not null,
 link text not null`;
 const exampleConstsCode = `return [];`;
 const exampleParsingCode = `/**
@@ -31,10 +30,9 @@ const rss = plv8.find_function('ppp_xml_parse')(fetch(url, {
 
 return (rss.rss.channel.item || []).map(item => {
   return {
-    guid: item.guid,
-    pub_date: item.pubDate || item['dc:date'] || new Date().toISOString(),
     title: item.title,
     description: item.description,
+    pub_date: item.pubDate || item['dc:date'] || new Date().toISOString(),
     link: item.link
   };
 }).sort((a, b) => Date.parse(a.pub_date) - Date.parse(b.pub_date));`;

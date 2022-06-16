@@ -152,7 +152,7 @@ $$
 
     if (typeof message === 'string')
       plv8.find_function('send_telegram_message_for_spbex_halt_[%#payload.serviceId%]')(message, {});
-    else
+    else if (typeof message === 'object' && message.text)
       plv8.find_function('send_telegram_message_for_spbex_halt_[%#payload.serviceId%]')(message.text, message.options || {});
   }
 

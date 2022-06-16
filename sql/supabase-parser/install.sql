@@ -30,7 +30,11 @@ $$ language plv8;
 create or replace function send_telegram_message_for_parsed_record_[%#payload.serviceId%](msg text, options json)
 returns json as
 $$
-  return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg, options);
+  const result = plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg, options);
+
+  plv8.execute('select pg_sleep(3)');
+
+  return result;
 $$ language plv8;
 
 create or replace function format_parsed_record_message_[%#payload.serviceId%](record json)
@@ -48,7 +52,7 @@ $$
 
     if (typeof message === 'string')
       plv8.find_function('send_telegram_message_for_parsed_record_[%#payload.serviceId%]')(message, {});
-    else
+    else if (typeof message === 'object' && message.text)
       plv8.find_function('send_telegram_message_for_parsed_record_[%#payload.serviceId%]')(message.text, message.options || {});
   }
 
@@ -100,7 +104,9 @@ create or replace function process_parsed_records_[%#payload.serviceId%]()
 returns json as
 $$
 try {
-  for (const record of plv8.find_function('parse_[%#payload.serviceId%]')(plv8.find_function('get_consts_data_[%#payload.serviceId%]')())) {
+  const records = plv8.find_function('parse_[%#payload.serviceId%]')(plv8.find_function('get_consts_data_[%#payload.serviceId%]')());
+
+  for (const record of records) {
     try {
       const keys = Object.keys(record);
       const vals = [];

@@ -4,7 +4,7 @@ import { validate, ValidationError } from '../validate.js';
 import { maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
-import { Observable, observable } from '../element/observation/observable.js';
+import { observable } from '../element/observation/observable.js';
 import { Tmpl } from '../tmpl.js';
 import { SupabaseParserPage } from '../supabase-parser-page.js';
 
