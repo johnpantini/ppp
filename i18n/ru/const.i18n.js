@@ -11,7 +11,8 @@ export default function (i18n) {
       api: {
         [SUPPORTED_APIS.SUPABASE]: 'Supabase',
         [SUPPORTED_APIS.PUSHER]: 'Pusher',
-        [SUPPORTED_APIS.ASTRADB]: 'AstraDB'
+        [SUPPORTED_APIS.ASTRADB]: 'AstraDB',
+        [SUPPORTED_APIS.SEATABLE]: 'Seatable'
       },
       broker: {
         [SUPPORTED_BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2'

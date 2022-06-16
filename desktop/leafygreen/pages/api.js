@@ -95,6 +95,23 @@ export const apiPageTemplate = (context, definition) => html`
           Продолжить
         </ppp-button>
       </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="Seatable" style="height: 45px"
+             src="static/seatable.svg"/>
+        <span slot="title">Seatable</span>
+        <span slot="description">База данных с табличным интерфейсом. <a
+          target="_blank"
+          href="https://api.seatable.io/">Документация</a>.</span>
+        <${'ppp-button'}
+          slot="action"
+          @click="${(x) =>
+            x.app.navigate({
+              page: `api-${SUPPORTED_APIS.SEATABLE}`
+            })}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
     </div>
   </template>
 `;

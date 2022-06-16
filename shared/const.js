@@ -7,6 +7,7 @@ export const SUPPORTED_APIS = {
   SUPABASE: 'supabase',
   PUSHER: 'pusher',
   ASTRADB: 'astradb',
+  SEATABLE: 'seatable',
   NORTHFLANK: 'northflank',
   ALPACA_REALTIME: 'alpaca-realtime'
 };
