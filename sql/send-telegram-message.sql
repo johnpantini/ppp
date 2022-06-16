@@ -6,7 +6,7 @@ create or replace function send_telegram_message(chat_id text, bot_token text, m
 returns json as
 $$
 try {
-  let formData = `chat_id=${chat_id}&text=${msg}`;
+  let formData = `chat_id=${chat_id}&text=${msg.replace(/'/g, '%27')}`;
 
   if (typeof options.parse_mode === 'undefined')
     formData += '&parse_mode=html';
