@@ -4,7 +4,7 @@ import { validate } from '../validate.js';
 import { maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
-import { observable } from '../element/observation/observable.js';
+import { Observable, observable } from '../element/observation/observable.js';
 import { Tmpl } from '../tmpl.js';
 import { SupabaseParserPage } from '../supabase-parser-page.js';
 
@@ -29,7 +29,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
       const query = `create or replace function ${funcName}()
         returns json as
         $$
-          ${this.instrumentsCode.code}
+          ${this.instrumentsCode.value}
         $$ language plv8;
 
         select ${funcName}();
@@ -90,7 +90,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
       // Returns form data
       const temporaryFunction = `function ${funcName}(isin,
         ticker, name, currency, date, url, start, finish) {
-          const closure = () => {${this.formatterCode.code}};
+          const closure = () => {${this.formatterCode.value}};
           const formatted = closure();
 
           if (typeof formatted === 'string')
@@ -244,13 +244,16 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
       {},
       this.bots.find((b) => b._id === this.bot.value)
     );
+    let interval = parseInt(this.interval.value);
+
+    if (interval < 1 || isNaN(interval)) interval = 5;
 
     return `${sendTelegramMessage}
       ${await new Tmpl().render(this, installSpbexHalts, {
         serviceId,
         api,
         userAgent: navigator.userAgent,
-        interval: parseInt(this.interval.value),
+        interval,
         channel: this.channel.value.trim(),
         proxyURL: this.proxyURL.value.trim(),
         instrumentsCode: this.instrumentsCode.value,
@@ -337,6 +340,14 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
         api
       });
 
+      const state = rInstallationSQL.ok
+        ? this.service
+          ? this.service.state === 'failed'
+            ? 'stopped'
+            : this.service.state
+          : 'stopped'
+        : 'failed';
+
       await this.app.ppp.user.functions.updateOne(
         {
           collection: 'services'
@@ -347,11 +358,7 @@ export class ServiceSpbexHaltsPage extends SupabaseParserPage {
         {
           $set: {
             name: this.serviceName.value.trim(),
-            state: rInstallationSQL.ok
-              ? this.service
-                ? this.service.state
-                : 'stopped'
-              : 'failed',
+            state,
             version: 1,
             updatedAt: new Date(),
             apiId: this.api.value,

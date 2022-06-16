@@ -4,7 +4,7 @@ import { validate } from '../validate.js';
 import { maybeFetchError } from '../fetch-error.js';
 import { uuidv4 } from '../ppp-crypto.js';
 import { SUPPORTED_APIS, SUPPORTED_SERVICES } from '../const.js';
-import { observable } from '../element/observation/observable.js';
+import { Observable, observable } from '../element/observation/observable.js'
 import { Tmpl } from '../tmpl.js';
 import { SupabaseParserPage } from '../supabase-parser-page.js';
 
@@ -29,7 +29,7 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
       const query = `create or replace function ${funcName}()
         returns json as
         $$
-          ${this.symbolsCode.code}
+          ${this.symbolsCode.value}
         $$ language plv8;
 
         select ${funcName}();
@@ -96,7 +96,7 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
       const temporaryFunction = `function ${funcName}(halt_date,
         halt_time, symbol, name, market, reason_code, pause_threshold_price,
         resumption_date, resumption_quote_time, resumption_trade_time) {
-          const closure = () => {${this.formatterCode.code}};
+          const closure = () => {${this.formatterCode.value}};
           const formatted = closure();
 
           if (typeof formatted === 'string')
@@ -248,13 +248,16 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
     );
 
     const symbols = await this.callSymbolsFunction(true);
+    let interval = parseInt(this.interval.value);
+
+    if (interval < 1 || isNaN(interval)) interval = 5;
 
     return `${sendTelegramMessage}
       ${await new Tmpl().render(this, installNyseNsdqHalts, {
         serviceId,
         api,
         userAgent: navigator.userAgent,
-        interval: parseInt(this.interval.value),
+        interval,
         channel: this.channel.value,
         symbols: JSON.stringify(symbols),
         formatterCode: this.formatterCode.value,
@@ -338,6 +341,14 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
         api
       });
 
+      const state = rInstallationSQL.ok
+        ? this.service
+          ? this.service.state === 'failed'
+            ? 'stopped'
+            : this.service.state
+          : 'stopped'
+        : 'failed';
+
       await this.app.ppp.user.functions.updateOne(
         {
           collection: 'services'
@@ -348,11 +359,7 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
         {
           $set: {
             name: this.serviceName.value.trim(),
-            state: rInstallationSQL.ok
-              ? this.service
-                ? this.service.state
-                : 'stopped'
-              : 'failed',
+            state,
             version: 1,
             updatedAt: new Date(),
             apiId: this.api.value,
