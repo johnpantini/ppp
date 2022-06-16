@@ -212,6 +212,7 @@ const selectStyles = (context, definition) => css`
     pointer-events: none;
     background-color: rgb(231, 238, 236);
     border: 1px solid rgb(136, 147, 151);
+    color: rgb(137, 151, 155);
   }
 
   :host([disabled]) .indicator {
