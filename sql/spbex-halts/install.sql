@@ -145,7 +145,7 @@ $$
       showName = stock.name;
     }
 
-    showName = showName.replace(/&/g, '%26').replace(/'/g, '%27');
+    showName = encodeURIComponent(showName).replace(/'/g, '%27');
 
     const message = plv8.find_function('format_spbex_halt_message_[%#payload.serviceId%]')(NEW.isin, ticker, showName, currency, date,
       NEW.url, start, finish);
@@ -156,7 +156,7 @@ $$
       plv8.find_function('send_telegram_message_for_spbex_halt_[%#payload.serviceId%]')(message.text, message.options || {});
   }
 
-  return NEW;
+  return null;
 $$ language plv8;
 
 create or replace trigger spbex_halts_insert_trigger_[%#payload.serviceId%]

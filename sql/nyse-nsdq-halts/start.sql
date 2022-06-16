@@ -6,7 +6,8 @@ returns json as $$
 $$ language plv8;
 
 create or replace function ppp_interval_[%#payload.serviceId%](duration interval default '60 seconds')
-returns bool as $$
+returns bool as
+$$
 declare
   end_time timestamptz := now() + duration;
 begin

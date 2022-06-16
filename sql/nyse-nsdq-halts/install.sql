@@ -43,7 +43,7 @@ try {
         halt_date: parseLine(lines[i]),
         halt_time: parseLine(lines[i + 1]),
         symbol: parseLine(lines[i + 2]),
-        name: parseLine(lines[i + 3]).replace(/&/g, '%26').replace(/'/g, '%27'),
+        name: encodeURIComponent(parseLine(lines[i + 3])).replace(/'/g, '%27'),
         market: parseLine(lines[i + 4]),
         reason_code: codes[codes.length - 1],
         pause_threshold_price: parseLine(lines[i + 6]),
@@ -100,7 +100,7 @@ $$
   else
     plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%]')(message.text, message.options || {});
 
-  return NEW;
+  return null;
 $$ language plv8;
 
 create or replace trigger nyse_nsdq_halts_insert_trigger_[%#payload.serviceId%]
