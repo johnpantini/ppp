@@ -6,7 +6,9 @@ export const SUPPORTED_SERVER_TYPES = {
 export const SUPPORTED_APIS = {
   SUPABASE: 'supabase',
   PUSHER: 'pusher',
-  ASTRADB: 'astradb'
+  ASTRADB: 'astradb',
+  NORTHFLANK: 'northflank',
+  ALPACA_REALTIME: 'alpaca-realtime'
 };
 
 export const SUPPORTED_SERVICES = {

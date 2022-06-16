@@ -26,7 +26,7 @@ export const apiPageTemplate = (context, definition) => html`
         </ppp-button>
       </ppp-generic-card>
       <ppp-generic-card>
-        <img slot="logo" draggable="false" alt="Supabase" style="height: 50px"
+        <img slot="logo" draggable="false" alt="Supabase" style="height: 44px"
              src="static/pusher.svg"/>
         <span slot="title">Pusher</span>
         <span slot="description">Платформа рассылки уведомлений. <a
@@ -54,6 +54,42 @@ export const apiPageTemplate = (context, definition) => html`
           @click="${(x) =>
             x.app.navigate({
               page: `api-${SUPPORTED_APIS.ASTRADB}`
+            })}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="AstraDB" style="height: 41px"
+             src="static/northflank.svg"/>
+        <span slot="title">Northflank</span>
+        <span slot="description">Платформа для создания и развёртывания микросервисов. <a
+          target="_blank"
+          href="https://northflank.com/">Официальный ресурс</a>.</span>
+        <${'ppp-button'}
+          slot="action"
+          disabled
+          @click="${(x) =>
+            x.app.navigate({
+              page: `api-${SUPPORTED_APIS.NORTHFLANK}`
+            })}"
+        >
+          Продолжить
+        </ppp-button>
+      </ppp-generic-card>
+      <ppp-generic-card>
+        <img slot="logo" draggable="false" alt="AstraDB" style="height: 41px"
+             src="static/alpaca.svg"/>
+        <span slot="title">Alpaca Real-time Stock API</span>
+        <span slot="description">API Alpaca в реальном времени для акций. <a
+          target="_blank"
+          href="https://alpaca.markets/docs/api-references/market-data-api/stock-pricing-data/realtime/">Официальный ресурс</a>.</span>
+        <${'ppp-button'}
+          slot="action"
+          disabled
+          @click="${(x) =>
+            x.app.navigate({
+              page: `api-${SUPPORTED_APIS.ALPACA_REALTIME}`
             })}"
         >
           Продолжить
