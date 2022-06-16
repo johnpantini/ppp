@@ -35,6 +35,13 @@ async function validate(element, options) {
         element.errorMessage = options.errorMessage;
         element.state = 'error';
 
+        const folding = element?.closest('.folding');
+
+        if (folding) {
+          folding.classList.add('folding-open');
+        }
+
+        element?.scrollIntoView();
         element?.focus();
       }
 
@@ -54,6 +61,13 @@ async function validate(element, options) {
             element.errorMessage = 'Это поле обязательно';
             element.state = 'error';
 
+            const folding = element?.closest('.folding');
+
+            if (folding) {
+              folding.classList.add('folding-open');
+            }
+
+            element?.scrollIntoView();
             element?.focus();
           }
 
@@ -83,6 +97,13 @@ function invalidate(element, options = {}) {
     element.errorMessage = errorMessage;
     element.state = 'error';
 
+    const folding = element?.closest('.folding');
+
+    if (folding) {
+      folding.classList.add('folding-open');
+    }
+
+    element?.scrollIntoView();
     element?.focus();
   }
 
