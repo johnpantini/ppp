@@ -2,6 +2,9 @@ drop function if exists ppp_fetch(url text, options json);
 create or replace function ppp_fetch(url text, options json default '{}')
 returns json as
 $$
+  if (typeof options === 'undefined')
+    options = {};
+
   let headersPairs = [];
   const headers = options.headers || {};
 
