@@ -112,7 +112,10 @@ try {
       const vals = [];
 
       for (const k of keys) {
-        vals.push(`'${(record[k] || '').toString().replace(/'/g, "''")}'`);
+        if (typeof record[k] === 'boolean' || typeof record[k] === 'number')
+          vals.push(record[k]);
+        else
+          vals.push(`'${(record[k] || '').toString().replace(/'/g, "''")}'`);
       }
 
       plv8.execute(`insert into public.parsed_records_[%#payload.serviceId%](${keys.join(',')}) values(${vals.join(',')}) on conflict do nothing`);
