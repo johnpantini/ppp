@@ -113,8 +113,7 @@ export const notFoundPageStyles = (context, definition) =>
   `;
 
 // noinspection JSUnusedGlobalSymbols
-export const notFoundPage = NotFoundPage.compose({
-  baseName: 'not-found-page',
+export default NotFoundPage.compose({
   template: notFoundPageTemplate,
   styles: notFoundPageStyles
 });
