@@ -1,3 +1,3 @@
-import { BasePage } from '../page.js';
+import { Page } from '../page.js';
 
-export class ApiPage extends BasePage {}
+export class ApiPage extends Page {}

@@ -1,20 +1,18 @@
 import { ApiSeatablePage } from '../../../shared/pages/api-seatable.js';
 import { html } from '../../../shared/template.js';
 import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { pageStyles, loadingIndicator } from '../page.js';
+import { pageStyles } from '../page.js';
 
 export const apiSeatablePageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.api
-          ? `Внешний API - Seatable - ${x.api?.name}`
-          : 'Внешний API - Seatable'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+    <form novalidate>
+      <${'ppp-page'}>
+      <span slot="header">
+        ${(x) =>
+          x.document.name
+            ? `Внешний API - Seatable - ${x.document.name}`
+            : 'Внешний API - Seatable'}
+      </span>
         <section>
           <div class="label-group">
             <h5>Название подключения</h5>
@@ -24,8 +22,8 @@ export const apiSeatablePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="Seatable"
-              value="${(x) => x.api?.name}"
-              ${ref('apiName')}
+              value="${(x) => x.document.name}"
+              ${ref('name')}
             ></ppp-text-field>
           </div>
         </section>
@@ -37,38 +35,18 @@ export const apiSeatablePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="Token"
-              value="${(x) => x.api?.baseToken}"
+              value="${(x) => x.document.baseToken}"
               ${ref('baseToken')}
             ></ppp-text-field>
           </div>
         </section>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy || x.api?.removed}"
-            type="submit"
-            @click="${(x) => x.connectApi()}"
-            appearance="primary"
-          >
-            ${(x) => (x.api ? 'Обновить API' : 'Подключить API')}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const apiSeatablePageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const apiSeatablePage = ApiSeatablePage.compose({
-  baseName: 'api-seatable-page',
+export default ApiSeatablePage.compose({
   template: apiSeatablePageTemplate,
-  styles: apiSeatablePageStyles
+  styles: pageStyles
 });

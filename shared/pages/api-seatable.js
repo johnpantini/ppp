@@ -1,10 +1,6 @@
-/** @decorator */
-
-import { BasePage } from '../page.js';
+import { Page } from '../page.js';
 import { invalidate, validate } from '../validate.js';
-import { generateIV, bufferToString } from '../ppp-crypto.js';
 import { SUPPORTED_APIS } from '../const.js';
-import { Observable, observable } from '../element/observation/observable.js';
 import { maybeFetchError } from '../fetch-error.js';
 
 export async function checkSeatableCredentials({
@@ -24,136 +20,54 @@ export async function checkSeatableCredentials({
   });
 }
 
-export class ApiSeatablePage extends BasePage {
-  @observable
-  api;
+export class ApiSeatablePage extends Page {
+  collection = 'apis';
 
-  async connectedCallback() {
-    super.connectedCallback();
+  async validate() {
+    await validate(this.name);
+    await validate(this.baseToken);
 
-    const apiId = this.app.params()?.api;
+    let r;
 
-    if (apiId) {
-      this.beginOperation();
+    if (
+      !(r = await checkSeatableCredentials({
+        baseToken: this.baseToken.value.trim(),
+        serviceMachineUrl: this.app.ppp.keyVault.getKey('service-machine-url')
+      })).ok
+    ) {
+      invalidate(this.baseToken, {
+        errorMessage: 'Неверный токен'
+      });
 
-      try {
-        this.api = await this.app.ppp.user.functions.findOne(
-          {
-            collection: 'apis'
-          },
-          {
-            _id: apiId,
-            type: SUPPORTED_APIS.SEATABLE
-          }
-        );
-
-        if (!this.api) {
-          this.failOperation(404);
-          await this.notFound();
-        } else {
-          this.api.baseToken = await this.app.ppp.crypto.decrypt(
-            this.api.iv,
-            this.api.baseToken
-          );
-
-          Observable.notify(this, 'api');
-        }
-      } catch (e) {
-        this.failOperation(e);
-      } finally {
-        this.endOperation();
-      }
+      await maybeFetchError(r, 'Неверный токен.');
     }
   }
 
-  async connectApi() {
-    this.beginOperation();
+  async read() {
+    return {
+      type: SUPPORTED_APIS.SEATABLE
+    };
+  }
 
-    try {
-      await validate(this.apiName);
-      await validate(this.baseToken);
+  async find() {
+    return {
+      type: SUPPORTED_APIS.SEATABLE,
+      name: this.name.value.trim()
+    };
+  }
 
-      const rSeatableCredentials = await checkSeatableCredentials({
+  async upsert() {
+    return {
+      $set: {
+        name: this.name.value.trim(),
         baseToken: this.baseToken.value.trim(),
-        serviceMachineUrl: this.app.ppp.keyVault.getKey('service-machine-url')
-      });
-
-      if (!rSeatableCredentials.ok) {
-        invalidate(this.baseToken, {
-          errorMessage: 'Неверный токен',
-          silent: true
-        });
-
-        await maybeFetchError(rSeatableCredentials);
+        version: 1,
+        updatedAt: new Date()
+      },
+      $setOnInsert: {
+        type: SUPPORTED_APIS.SEATABLE,
+        createdAt: new Date()
       }
-
-      const iv = generateIV();
-      const encryptedToken = await this.app.ppp.crypto.encrypt(
-        iv,
-        this.baseToken.value.trim()
-      );
-
-      if (this.api) {
-        await this.app.ppp.user.functions.updateOne(
-          {
-            collection: 'apis'
-          },
-          {
-            _id: this.api._id
-          },
-          {
-            $set: {
-              name: this.apiName.value.trim(),
-              version: 1,
-              iv: bufferToString(iv),
-              baseToken: encryptedToken,
-              updatedAt: new Date()
-            }
-          }
-        );
-      } else {
-        const existingSeatableApi = await this.app.ppp.user.functions.findOne(
-          {
-            collection: 'apis'
-          },
-          {
-            removed: { $not: { $eq: true } },
-            type: SUPPORTED_APIS.SEATABLE,
-            name: this.apiName.value.trim()
-          },
-          {
-            _id: 1
-          }
-        );
-
-        if (existingSeatableApi) {
-          return this.failOperation({
-            href: `?page=api-${SUPPORTED_APIS.SEATABLE}&api=${existingSeatableApi._id}`,
-            error: 'E11000'
-          });
-        }
-
-        await this.app.ppp.user.functions.insertOne(
-          {
-            collection: 'apis'
-          },
-          {
-            name: this.apiName.value.trim(),
-            version: 1,
-            type: SUPPORTED_APIS.SEATABLE,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            iv: bufferToString(iv),
-            baseToken: encryptedToken
-          }
-        );
-      }
-
-      this.succeedOperation();
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.endOperation();
-    }
+    };
   }
 }

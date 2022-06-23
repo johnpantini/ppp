@@ -1,20 +1,18 @@
 import { ApiPusherPage } from '../../../shared/pages/api-pusher.js';
 import { html } from '../../../shared/template.js';
 import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { pageStyles, loadingIndicator } from '../page.js';
+import { pageStyles } from '../page.js';
 
 export const apiPusherPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.api
-          ? `Внешний API - Pusher - ${x.api?.name}`
-          : 'Внешний API - Pusher'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+    <form novalidate>
+      <${'ppp-page'}>
+      <span slot="header">
+        ${(x) =>
+          x.document.name
+            ? `Внешний API - Pusher - ${x.document.name}`
+            : 'Внешний API - Pusher'}
+      </span>
         <section>
           <div class="label-group">
             <h5>Название подключения</h5>
@@ -24,8 +22,8 @@ export const apiPusherPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="Pusher"
-              value="${(x) => x.api?.name}"
-              ${ref('apiName')}
+              value="${(x) => x.document.name}"
+              ${ref('name')}
             ></ppp-text-field>
           </div>
         </section>
@@ -37,8 +35,8 @@ export const apiPusherPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="app_id"
-              value="${(x) => x.api?.appid}"
-              ${ref('appId')}
+              value="${(x) => x.document.appid}"
+              ${ref('appid')}
             ></ppp-text-field>
           </div>
         </section>
@@ -49,8 +47,8 @@ export const apiPusherPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="key"
-              value="${(x) => x.api?.key}"
-              ${ref('apiKey')}
+              value="${(x) => x.document.key}"
+              ${ref('key')}
             ></ppp-text-field>
           </div>
         </section>
@@ -62,8 +60,8 @@ export const apiPusherPageTemplate = (context, definition) => html`
             <ppp-text-field
               type="password"
               placeholder="secret"
-              value="${(x) => x.api?.secret}"
-              ${ref('apiSecret')}
+              value="${(x) => x.document.secret}"
+              ${ref('secret')}
             ></ppp-text-field>
           </div>
         </section>
@@ -75,38 +73,18 @@ export const apiPusherPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="eu"
-              value="${(x) => x.api?.cluster ?? 'eu'}"
-              ${ref('apiCluster')}
+              value="${(x) => x.document.cluster ?? 'eu'}"
+              ${ref('cluster')}
             ></ppp-text-field>
           </div>
         </section>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy || x.api?.removed}"
-            type="submit"
-            @click="${(x) => x.connectApi()}"
-            appearance="primary"
-          >
-            ${(x) => (x.api ? 'Обновить API' : 'Подключить API')}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const apiPusherPageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const apiPusherPage = ApiPusherPage.compose({
-  baseName: 'api-pusher-page',
+export default ApiPusherPage.compose({
   template: apiPusherPageTemplate,
-  styles: apiPusherPageStyles
+  styles: pageStyles
 });

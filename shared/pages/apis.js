@@ -1,6 +1,8 @@
-import { PageWithTable } from '../page.js';
+import { Page } from '../page.js';
 
-export class ApisPage extends PageWithTable {
+export class ApisPage extends Page {
+  collection = 'apis';
+
   columns = [
     {
       label: 'Название',
@@ -26,19 +28,4 @@ export class ApisPage extends PageWithTable {
       label: 'Действия'
     }
   ];
-
-  async data() {
-    return this.app.ppp.user.functions.aggregate(
-      {
-        collection: 'apis'
-      },
-      [
-        {
-          $match: {
-            removed: { $not: { $eq: true } }
-          }
-        }
-      ]
-    );
-  }
 }

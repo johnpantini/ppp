@@ -1,23 +1,19 @@
-/** @decorator */
-
-import { BasePage } from '../page.js';
-import { validate } from '../validate.js';
-import { generateIV, bufferToString } from '../ppp-crypto.js';
+import { Page } from '../page.js';
+import { invalidate, validate } from '../validate.js';
 import { SUPPORTED_APIS } from '../const.js';
-import { Observable, observable } from '../element/observation/observable.js';
 import { maybeFetchError } from '../fetch-error.js';
 
 export async function checkPusherCredentials({
   serviceMachineUrl,
-  appId,
-  apiKey,
-  apiSecret,
-  apiCluster
+  appid,
+  key,
+  secret,
+  cluster
 }) {
   const timestamp = Math.floor(Date.now() / 1000);
-  const key = await window.crypto.subtle.importKey(
+  const hmacKey = await window.crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(apiSecret),
+    new TextEncoder().encode(secret),
     {
       name: 'HMAC',
       hash: { name: 'SHA-256' }
@@ -28,12 +24,12 @@ export async function checkPusherCredentials({
 
   const signatureBuffer = await window.crypto.subtle.sign(
     'HMAC',
-    key,
+    hmacKey,
     new TextEncoder().encode(
       [
         'GET',
-        `/apps/${appId}/channels`,
-        `auth_key=${apiKey}&auth_timestamp=${timestamp}&auth_version=1.0`
+        `/apps/${appid}/channels`,
+        `auth_key=${key}&auth_timestamp=${timestamp}&auth_version=1.0`
       ].join('\n')
     )
   );
@@ -41,7 +37,7 @@ export async function checkPusherCredentials({
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 
-  const params = `auth_key=${apiKey}&auth_timestamp=${timestamp}&auth_version=1.0&auth_signature=${signature}`;
+  const params = `auth_key=${key}&auth_timestamp=${timestamp}&auth_version=1.0&auth_signature=${signature}`;
 
   return fetch(new URL('fetch', serviceMachineUrl).toString(), {
     cache: 'no-cache',
@@ -49,148 +45,72 @@ export async function checkPusherCredentials({
     body: JSON.stringify({
       method: 'GET',
       url: new URL(
-        `/apps/${appId}/channels?${params}`,
-        `https://api-${apiCluster}.pusher.com`
+        `/apps/${appid}/channels?${params}`,
+        `https://api-${cluster}.pusher.com`
       ).toString()
     })
   });
 }
 
-export class ApiPusherPage extends BasePage {
-  @observable
-  api;
+export class ApiPusherPage extends Page {
+  collection = 'apis';
 
-  async connectedCallback() {
-    super.connectedCallback();
+  excludeFromEncryption = ['key'];
 
-    const apiId = this.app.params()?.api;
+  async validate() {
+    await validate(this.name);
+    await validate(this.appid);
+    await validate(this.key);
+    await validate(this.secret);
+    await validate(this.cluster);
 
-    if (apiId) {
-      this.beginOperation();
+    let r;
 
-      try {
-        this.api = await this.app.ppp.user.functions.findOne(
-          {
-            collection: 'apis'
-          },
-          {
-            _id: apiId,
-            type: SUPPORTED_APIS.PUSHER
-          }
-        );
+    if (
+      !(r = await checkPusherCredentials({
+        appid: this.appid.value.trim(),
+        key: this.key.value.trim(),
+        secret: this.secret.value.trim(),
+        cluster: this.cluster.value.trim(),
+        serviceMachineUrl: this.app.ppp.keyVault.getKey('service-machine-url')
+      })).ok
+    ) {
+      invalidate(this.secret, {
+        errorMessage: 'Неверные учётные данные'
+      });
 
-        if (!this.api) {
-          this.failOperation(404);
-          await this.notFound();
-        } else {
-          this.api.secret = await this.app.ppp.crypto.decrypt(
-            this.api.iv,
-            this.api.secret
-          );
-
-          Observable.notify(this, 'api');
-        }
-      } catch (e) {
-        this.failOperation(e);
-      } finally {
-        this.endOperation();
-      }
+      await maybeFetchError(r, 'Неверные учётные данные.');
     }
   }
 
-  async connectApi() {
-    this.beginOperation();
+  async read() {
+    return {
+      type: SUPPORTED_APIS.PUSHER
+    };
+  }
 
-    try {
-      await validate(this.apiName);
-      await validate(this.appId);
-      await validate(this.apiKey);
-      await validate(this.apiSecret);
-      await validate(this.apiCluster);
+  async find() {
+    return {
+      type: SUPPORTED_APIS.PUSHER,
+      name: this.name.value.trim()
+    };
+  }
 
-      const rPusherCredentials = await checkPusherCredentials({
-        serviceMachineUrl: this.app.ppp.keyVault.getKey('service-machine-url'),
-        appId: this.appId.value.trim(),
-        apiKey: this.apiKey.value.trim(),
-        apiSecret: this.apiSecret.value.trim(),
-        apiCluster: this.apiCluster.value.trim()
-      });
-
-      await maybeFetchError(rPusherCredentials);
-
-      const iv = generateIV();
-      const encryptedSecret = await this.app.ppp.crypto.encrypt(
-        iv,
-        this.apiSecret.value.trim()
-      );
-
-      if (this.api) {
-        await this.app.ppp.user.functions.updateOne(
-          {
-            collection: 'apis'
-          },
-          {
-            _id: this.api._id
-          },
-          {
-            $set: {
-              name: this.apiName.value.trim(),
-              appid: this.appId.value.trim(),
-              version: 1,
-              iv: bufferToString(iv),
-              key: this.apiKey.value.trim(),
-              secret: encryptedSecret,
-              cluster: this.apiCluster.value.trim(),
-              updatedAt: new Date()
-            }
-          }
-        );
-      } else {
-        const existingPusherApi = await this.app.ppp.user.functions.findOne(
-          {
-            collection: 'apis'
-          },
-          {
-            removed: { $not: { $eq: true } },
-            type: SUPPORTED_APIS.PUSHER,
-            name: this.apiName.value.trim()
-          },
-          {
-            _id: 1
-          }
-        );
-
-        if (existingPusherApi) {
-          return this.failOperation({
-            href: `?page=api-${SUPPORTED_APIS.PUSHER}&api=${existingPusherApi._id}`,
-            error: 'E11000'
-          });
-        }
-
-        await this.app.ppp.user.functions.insertOne(
-          {
-            collection: 'apis'
-          },
-          {
-            name: this.apiName.value.trim(),
-            version: 1,
-            type: SUPPORTED_APIS.PUSHER,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            appid: this.appId.value.trim(),
-            iv: bufferToString(iv),
-            key: this.apiKey.value.trim(),
-            secret: encryptedSecret,
-            cluster: this.apiCluster.value.trim()
-          }
-        );
+  async upsert() {
+    return {
+      $set: {
+        name: this.name.value.trim(),
+        appid: this.appid.value.trim(),
+        key: this.key.value.trim(),
+        secret: this.secret.value.trim(),
+        cluster: this.cluster.value.trim(),
+        version: 1,
+        updatedAt: new Date()
+      },
+      $setOnInsert: {
+        type: SUPPORTED_APIS.PUSHER,
+        createdAt: new Date()
       }
-
-      this.succeedOperation();
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.endOperation();
-    }
+    };
   }
 }

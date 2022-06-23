@@ -2,9 +2,8 @@ import ppp from '../../../ppp.js';
 import { ApisPage } from '../../../shared/pages/apis.js';
 import { html } from '../../../shared/template.js';
 import { css } from '../../../shared/element/styles/css.js';
-import { when } from '../../../shared/element/templating/when.js';
 import { ref } from '../../../shared/element/templating/ref.js';
-import { pageStyles, loadingIndicator } from '../page.js';
+import { pageStyles } from '../page.js';
 import { formatDate } from '../../../shared/intl.js';
 import { trash } from '../icons/trash.js';
 
@@ -12,10 +11,13 @@ await ppp.i18n(import.meta.url);
 
 export const apisPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
+    <${'ppp-page'}>
+      <span slot="header">
+        Список внешних API
+      </span>
       <${'ppp-button'}
         appearance="primary"
-        slot="controls"
+        slot="header-controls"
         @click="${(x) =>
           x.app.navigate({
             page: 'api'
@@ -23,14 +25,11 @@ export const apisPageTemplate = (context, definition) => html`
       >
         Подключить API
       </ppp-button>
-      Список внешних API
-    </ppp-page-header>
-    <div class="loading-wrapper" ?busy="${(x) => x.busy}">
       <${'ppp-table'}
         ${ref('table')}
         :columns="${(x) => x.columns}"
         :rows="${(x) =>
-          x.rows.map((datum) => {
+          x.documents?.map((datum) => {
             return {
               datum,
               cells: [
@@ -38,12 +37,12 @@ export const apisPageTemplate = (context, definition) => html`
                   @click="${() => {
                     x.app.navigate({
                       page: `api-${datum.type}`,
-                      api: datum._id
+                      document: datum._id
                     });
 
                     return false;
                   }}"
-                  href="?page=api-${datum.type}&api=${datum._id}"
+                  href="?page=api-${datum.type}&document=${datum._id}"
                 >
                   ${datum.name}
                 </a>`,
@@ -54,17 +53,18 @@ export const apisPageTemplate = (context, definition) => html`
                 html`
                   <${'ppp-button'}
                     class="xsmall"
-                    @click="${() => x.simpleRemove('apis', datum._id)}"
+                    @click="${() => x.simpleRemove(datum._id)}"
                   >
                     ${trash()}
-                  </ppp-button>`
+                  </ppp-button>
+                `
               ]
             };
           })}"
       >
       </ppp-table>
-      ${when((x) => x.busy, html`${loadingIndicator()}`)}
-    </div>
+      <span slot="actions"></span>
+    </ppp-page>
   </template>
 `;
 
@@ -77,8 +77,7 @@ export const apisPageStyles = (context, definition) =>
   `;
 
 // noinspection JSUnusedGlobalSymbols
-export const apisPage = ApisPage.compose({
-  baseName: 'apis-page',
+export default ApisPage.compose({
   template: apisPageTemplate,
   styles: apisPageStyles
 });

@@ -1,20 +1,18 @@
 import { ApiAstraDbPage } from '../../../shared/pages/api-astradb.js';
+import { pageStyles } from '../page.js';
 import { html } from '../../../shared/template.js';
 import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { pageStyles, loadingIndicator } from '../page.js';
 
 export const apiAstraDbPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.api
-          ? `Внешний API - AstraDB - ${x.api?.name}`
-          : 'Внешний API - AstraDB'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+    <form novalidate>
+      <${'ppp-page'}>
+      <span slot="header">
+        ${(x) =>
+          x.document.name
+            ? `Внешний API - AstraDB - ${x.document.name}`
+            : 'Внешний API - AstraDB'}
+      </span>
         <section>
           <div class="label-group">
             <h5>Название подключения</h5>
@@ -23,9 +21,9 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              placeholder="AstraDb"
-              value="${(x) => x.api?.name}"
-              ${ref('apiName')}
+              placeholder="Astra"
+              value="${(x) => x.document.name}"
+              ${ref('name')}
             ></ppp-text-field>
           </div>
         </section>
@@ -38,7 +36,7 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="ASTRA_DB_ID"
-              value="${(x) => x.api?.dbID}"
+              value="${(x) => x.document.dbID}"
               ${ref('dbID')}
             ></ppp-text-field>
           </div>
@@ -52,7 +50,7 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="europe-west1"
-              value="${(x) => x.api?.dbRegion}"
+              value="${(x) => x.document.dbRegion}"
               ${ref('dbRegion')}
             ></ppp-text-field>
           </div>
@@ -66,7 +64,7 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="ASTRA_DB_KEYSPACE"
-              value="${(x) => x.api?.dbKeyspace}"
+              value="${(x) => x.document.dbKeyspace}"
               ${ref('dbKeyspace')}
             ></ppp-text-field>
           </div>
@@ -79,38 +77,19 @@ export const apiAstraDbPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="ASTRA_DB_APPLICATION_TOKEN"
-              value="${(x) => x.api?.dbToken}"
+              value="${(x) => x.document.dbToken}"
               ${ref('dbToken')}
             ></ppp-text-field>
           </div>
         </section>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy || x.api?.removed}"
-            type="submit"
-            @click="${(x) => x.connectApi()}"
-            appearance="primary"
-          >
-            ${(x) => (x.api ? 'Обновить API' : 'Подключить API')}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const apiAstraDbPageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const apiAstradbPage = ApiAstraDbPage.compose({
+export default ApiAstraDbPage.compose({
   baseName: 'api-astradb-page',
   template: apiAstraDbPageTemplate,
-  styles: apiAstraDbPageStyles
+  styles: pageStyles
 });

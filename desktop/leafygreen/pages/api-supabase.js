@@ -1,61 +1,66 @@
 import { ApiSupabasePage } from '../../../shared/pages/api-supabase.js';
 import { html } from '../../../shared/template.js';
 import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { pageStyles, loadingIndicator } from '../page.js';
+import { pageStyles } from '../page.js';
 
 export const apiSupabasePageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.api
-          ? `Внешний API - Supabase - ${x.api?.name}`
-          : 'Внешний API - Supabase'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+    <form novalidate>
+      <${'ppp-page'}>
+      <span slot="header">
+        ${(x) =>
+          x.document.name
+            ? `Внешний API - Supabase - ${x.document.name}`
+            : 'Внешний API - Supabase'}
+      </span>
         <section>
           <div class="label-group">
             <h5>Название подключения</h5>
-            <p>Произвольное имя, чтобы ссылаться на этот профиль, когда
-              потребуется.</p>
+            <p>
+              Произвольное имя, чтобы ссылаться на этот профиль, когда
+              потребуется.
+            </p>
           </div>
           <div class="input-group">
             <ppp-text-field
               placeholder="Supabase"
-              value="${(x) => x.api?.name}"
-              ${ref('apiName')}
+              value="${(x) => x.document.name}"
+              ${ref('name')}
             ></ppp-text-field>
           </div>
         </section>
         <section>
           <div class="label-group">
             <h5>URL проекта</h5>
-            <p>Можно найти в панели управления проектом Supabase в подразделе
-              API раздела Settings. Смотрите секцию Config, поле URL.</p>
+            <p>
+              Можно найти в панели управления проектом Supabase в подразделе API
+              раздела Settings. Смотрите секцию Config, поле URL.
+            </p>
           </div>
           <div class="input-group">
             <ppp-text-field
               type="url"
               placeholder="https://ppp.supabase.co"
-              value="${(x) => x.api?.url}"
-              ${ref('apiUrl')}
+              value="${(x) => x.document.url}"
+              ${ref('url')}
             ></ppp-text-field>
           </div>
         </section>
         <section>
           <div class="label-group">
             <h5>Ключ проекта</h5>
-            <p>Можно найти в панели управления проектом Supabase в подразделе
-              API раздела Settings. Смотрите секцию Project API keys, поле anon
-              public. Будет сохранён в зашифрованном виде.</p>
+            <p>
+              Можно найти в панели управления проектом Supabase в подразделе API
+              раздела Settings. Смотрите секцию Project API keys, поле anon
+              public.
+              Будет сохранён в зашифрованном виде.
+            </p>
           </div>
           <div class="input-group">
             <ppp-text-field
               placeholder="Ключ API"
-              value="${(x) => x.api?.key}"
-              ${ref('apiKey')}
+              value="${(x) => x.document.key}"
+              ${ref('key')}
             ></ppp-text-field>
           </div>
         </section>
@@ -67,8 +72,8 @@ export const apiSupabasePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="postgres"
-              value="${(x) => x.api?.db ?? 'postgres'}"
-              ${ref('dbName')}
+              value="${(x) => x.document.db ?? 'postgres'}"
+              ${ref('db')}
             ></ppp-text-field>
           </div>
         </section>
@@ -81,8 +86,8 @@ export const apiSupabasePageTemplate = (context, definition) => html`
             <ppp-text-field
               type="number"
               placeholder="5432"
-              value="${(x) => x.api?.port ?? '5432'}"
-              ${ref('dbPort')}
+              value="${(x) => x.document.port ?? '5432'}"
+              ${ref('port')}
             ></ppp-text-field>
           </div>
         </section>
@@ -94,53 +99,36 @@ export const apiSupabasePageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               placeholder="postgres"
-              value="${(x) => x.api?.user ?? 'postgres'}"
-              ${ref('dbUser')}
+              value="${(x) => x.document.user ?? 'postgres'}"
+              ${ref('user')}
             ></ppp-text-field>
           </div>
         </section>
         <section>
           <div class="label-group">
             <h5>Пароль</h5>
-            <p>Пароль для подключения к базе данных. Будет сохранён в
-              зашифрованном виде.</p>
+            <p>
+              Пароль для подключения к базе данных. Будет сохранён в
+              зашифрованном
+              виде.
+            </p>
           </div>
           <div class="input-group">
             <ppp-text-field
               type="password"
               placeholder="Пароль"
-              value="${(x) => x.api?.password}"
-              ${ref('dbPassword')}
+              value="${(x) => x.document.password}"
+              ${ref('password')}
             ></ppp-text-field>
           </div>
         </section>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy || x.api?.removed}"
-            type="submit"
-            @click="${(x) => x.connectApi()}"
-            appearance="primary"
-          >
-            ${(x) => (x.api ? 'Обновить API' : 'Подключить API')}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const apiSupabasePageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const apiSupabasePage = ApiSupabasePage.compose({
-  baseName: 'api-supabase-page',
+export default ApiSupabasePage.compose({
   template: apiSupabasePageTemplate,
-  styles: apiSupabasePageStyles
+  styles: pageStyles
 });
