@@ -1,5 +1,5 @@
 create table if not exists public.parsed_records_[%#payload.serviceId%](
-  ppp_counter integer generated always as identity,
+  ppp_counter bigint generated always as identity,
   [%#payload.tableSchema%]
 );
 
