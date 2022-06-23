@@ -81,7 +81,7 @@ export const appTemplate = (context, definition) => html`
         <${'ppp-side-nav'} ${ref('sideNav')}
                            ?expanded="${(x) => !x.settings.sideNavCollapsed}">
           <${'ppp-side-nav-item'}
-            ?disabled="${(x) => true}"
+            ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
             @click="${(x) => x.handleNewWorkspaceClick()}"
           >
             ${plus({
@@ -122,7 +122,7 @@ export const appTemplate = (context, definition) => html`
             })}
             <span slot="title">Торговля</span>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'widgets'}"
               @click="${(x) =>
                 x.navigate({
@@ -133,7 +133,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Виджеты</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'instruments'}"
               @click="${(x) =>
                 x.navigate({
@@ -144,7 +144,7 @@ export const appTemplate = (context, definition) => html`
               <span slot="title">Инструменты</span>
             </ppp-side-nav-item>
             <ppp-side-nav-item
-              ?disabled="${(x) => true}"
+              ?disabled="${(x) => !x.ppp?.keyVault.ok()}"
               ?active="${(x) => x.page === 'workspaces'}"
               @click="${(x) =>
                 x.navigate({
