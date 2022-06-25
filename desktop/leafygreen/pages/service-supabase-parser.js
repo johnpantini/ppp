@@ -291,14 +291,17 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           <div class="label-group">
             <h5>Поля таблицы состояния</h5>
             <p>Поля таблицы для хранения обработанных записей. Будут размещены
-              внутри выражения CREATE TABLE.</p>
+              внутри выражения CREATE TABLE. Их нельзя изменить после создания
+              сервиса.</p>
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
+              ?disabled="${(x) => x.service?.tableSchema}"
               :code="${(x) => x.service?.tableSchema ?? exampleTableSchema}"
               ${ref('tableSchema')}
             ></ppp-codeflask>
             <${'ppp-button'}
+              ?disabled="${(x) => x.service?.tableSchema}"
               class="margin-top"
               @click="${(x) => x.tableSchema.updateCode(exampleTableSchema)}"
               appearance="primary"

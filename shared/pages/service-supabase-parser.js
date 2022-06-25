@@ -185,14 +185,25 @@ export class ServiceSupabaseParserPage extends SupabaseParserPage {
 
       // Returns form data
       const temporaryFunction = `function ${funcName}(record) {
-          const closure = () => {${this.formatterCode.value}};
+          const closure = () => {${await new Tmpl().render(
+            this,
+            this.formatterCode.value,
+            {
+              url: this.url.value.trim(),
+              frameUrl: this.frameUrl.value.trim()
+            }
+          )}};
           const formatted = closure();
 
           if (typeof formatted === 'string')
-            return \`chat_id=${this.channel.value}&text=\${formatted.replace(/'/g, '%27')}&parse_mode=html\`;
+            return \`chat_id=${
+              this.channel.value
+            }&text=\${formatted.replace(/'/g, '%27')}&parse_mode=html\`;
           else {
             const options = formatted.options || {};
-            let formData = \`chat_id=${this.channel.value}&text=\${formatted.text.replace(/'/g, '%27')}\`;
+            let formData = \`chat_id=${
+              this.channel.value
+            }&text=\${formatted.text.replace(/'/g, '%27')}\`;
 
             if (typeof options.parse_mode === 'undefined')
               formData += '&parse_mode=html';
