@@ -13,10 +13,9 @@ COPY . ./
 FROM alpine:latest
 RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
-COPY --from=builder /app/start.sh /app/start.sh
+COPY --from=builder /app/main.sh /app/main.sh
 COPY --from=tailscale /app/tailscaled /app/tailscaled
 COPY --from=tailscale /app/tailscale /app/tailscale
 RUN mkdir -p /var/run/tailscale /var/cache/tailscale /var/lib/tailscale
 
-# Run on container startup.
 CMD ["/app/main.sh"]
