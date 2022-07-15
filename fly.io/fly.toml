@@ -1,0 +1,17 @@
+app = "tailscale-fly"
+kill_signal = "SIGINT"
+kill_timeout = 5
+
+[env]
+  PORT = "41641"
+
+[experimental]
+  auto_rollback = false
+  private_network = true
+
+[[services]]
+  internal_port = 41641
+  protocol = "udp"
+
+  [[services.ports]]
+    port = "41641"
