@@ -1,8 +1,9 @@
 import { createServer } from 'http';
-import { Client as SSHClient } from './ppp-dyno/ssh2/index.js';
+import { Client as SSHClient } from './salt/states/ppp/lib/ssh2/index.js';
 import { fetch, binaryFetch } from './salt/states/ppp/lib/fetch.mjs';
-import { Connection } from './ppp-dyno/pg/connection.mjs';
-import pdfjs from './ppp-dyno/pdfjs/legacy/build/pdf.js';
+import { Connection } from './salt/states/ppp/lib/pg/connection.mjs';
+import Redis from './salt/states/ppp/lib/vendor/redis.min.js';
+import pdfjs from './salt/states/ppp/lib/pdfjs/legacy/build/pdf.js';
 
 process.on('unhandledRejection', (err) => {
   console.log(err);
@@ -209,6 +210,70 @@ async function pg(request, response) {
   }
 }
 
+async function redis(request, response) {
+  if (!/post/i.test(request.method)) {
+    return response.writeHead(405).end();
+  }
+
+  const buffers = [];
+
+  for await (const chunk of request) {
+    buffers.push(chunk);
+  }
+
+  response.setHeader('Content-Type', 'application/json; charset=UTF-8');
+
+  try {
+    const body = JSON.parse(Buffer.concat(buffers).toString());
+
+    if (!body.socket || typeof body.socket !== 'object')
+      return response.writeHead(422).end();
+
+    if (!Array.isArray(body.command)) return response.writeHead(422).end();
+
+    const { createClient } = Redis;
+    const client = createClient({
+      socket: body.socket,
+      username: body.username,
+      password: body.password,
+      database: body.database,
+      readonly: body.readonly
+    });
+
+    // To prevent crashes
+    client.once('error', () => {});
+
+    try {
+      await client.connect();
+
+      const result = await client.sendCommand(body.command);
+
+      response.write(JSON.stringify(result));
+      response.end();
+    } finally {
+      client.quit();
+    }
+  } catch (e) {
+    console.error(e);
+
+    response.writeHead(400);
+    response.write(
+      JSON.stringify(
+        Object.assign(
+          {
+            e
+          },
+          {
+            message: e.message
+          }
+        )
+      )
+    );
+
+    response.end();
+  }
+}
+
 async function ssh(request, response) {
   if (!/post/i.test(request.method)) {
     return response.writeHead(405).end();
@@ -327,6 +392,8 @@ createServer((request, response) => {
       return ssh(request, response);
     case '/pg':
       return pg(request, response);
+    case '/redis':
+      return redis(request, response);
     case '/pdf':
       return pdf(request, response);
     case '/ping':
