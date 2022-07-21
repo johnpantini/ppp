@@ -81,16 +81,27 @@ async function validate(element, options) {
     }
 }
 
+/**
+ *
+ * @param element
+ * @param options
+ */
 function invalidate(element, options = {}) {
   const errorMessage = options.errorMessage ?? 'Неизвестная ошибка';
 
-  if (element.$pppController.definition.type.name === 'Toast') {
+  if (element?.$pppController.definition.type.name === 'Toast') {
     element.appearance = 'warning';
     element.dismissible = true;
 
-    if (!element.source.toastTitle) element.source.toastTitle = 'ppp';
+    if (!element.source.toastTitle) element.source.toastTitle = 'PPP';
 
-    element.source.toastText = errorMessage;
+    if (typeof errorMessage !== 'string') {
+      element.source.toastText = errorMessage;
+    } else {
+      element.source.toastText = errorMessage.endsWith('.')
+        ? errorMessage
+        : `${errorMessage}.`;
+    }
 
     element.visible = true;
   } else if (element) {
@@ -107,12 +118,11 @@ function invalidate(element, options = {}) {
     element?.focus();
   }
 
-  if (!options.silent)
+  if (options.raiseException) {
     throw new ValidationError({
-      message: errorMessage,
-      element,
-      status: options.status
+      message: errorMessage
     });
+  }
 }
 
 export { validate, invalidate };
