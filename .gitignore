@@ -109,7 +109,9 @@ dist
 .tern-port
 
 # nginx
-nginx/nginx.exe
-nginx/temp/
-nginx/logs/
-nginx/certs/
+/nginx/*.plist
+/nginx/nginx.exe
+/nginx/temp/
+/nginx/logs/
+/nginx/certs/
+/nginx/nssm.exe
