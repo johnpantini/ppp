@@ -15,7 +15,7 @@ class PDFStream extends Readable {
   }
 
   _read() {
-    // For now we're not controlling the c++ code's data emission, so we only
+    // For now, we're not controlling the c++ code's data emission, so we only
     // call canvas.streamPDFSync once and let it emit data at will.
     this._read = noop;
 
