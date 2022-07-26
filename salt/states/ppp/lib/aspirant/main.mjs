@@ -209,9 +209,7 @@ export default class Aspirant {
         });
       })
       .get('/ping', async (res) => {
-        res
-          .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-          .end('pong');
+        res.writeHeader('Content-Type', 'text/plain;charset=UTF-8').end('pong');
       })
       .listen(PORT, async (listenSocket) => {
         if (listenSocket) {
