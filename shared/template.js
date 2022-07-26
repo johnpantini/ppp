@@ -6,7 +6,7 @@ import ppp from '../ppp.js';
  * @public
  */
 export async function requireComponent(tagName, path, exportName) {
-  const [_, component] = tagName.split(/ppp-/i);
+  const [_, component] = tagName.split(/^ppp-/i);
 
   if (component) {
     const module = await import(
@@ -15,10 +15,14 @@ export async function requireComponent(tagName, path, exportName) {
     const name =
       exportName ?? component.replace(/-./g, (x) => x[1].toUpperCase());
 
-    ppp.DesignSystem.getOrCreate().register(module[name]());
+    ppp.DesignSystem.getOrCreate().register(
+      module[name]?.() ?? module.default?.()
+    );
+
+    return module;
   }
 
-  return true;
+  return null;
 }
 
 /**
