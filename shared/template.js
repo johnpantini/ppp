@@ -39,7 +39,7 @@ export async function requireComponent(tagName, path, exportName) {
  */
 export function html(strings, ...values) {
   values.forEach((v) => {
-    if (/^ppp-/.test(v)) {
+    if (/^ppp-/.test(v) && v !== 'ppp-aspirant') {
       if (v) {
         void requireComponent(v);
       }
