@@ -9,22 +9,9 @@ import { html } from './element/templating/template.js';
 import { ref } from './element/templating/ref.js';
 import { slotted } from './element/templating/slotted.js';
 import { Listbox } from './listbox.js';
-import { endSlotTemplate, startSlotTemplate } from './patterns/start-end.js';
-import { FormAssociated } from './form-associated.js';
-
-class _Select extends Listbox {}
-
-/**
- * A form-associated base class for the Select component.
- *
- * @internal
- */
-export class FormAssociatedSelect extends FormAssociated(_Select) {
-  constructor() {
-    super(...arguments);
-    this.proxy = document.createElement('select');
-  }
-}
+import { startSlotTemplate } from './patterns/start-end.js';
+import { DOM } from './element/dom.js';
+import { when } from './element/templating/when.js';
 
 /**
  * The template for the Select component.
@@ -42,45 +29,78 @@ export const selectTemplate = (context, definition) => html`
     @focusout="${(x, c) => x.focusoutHandler(c.event)}"
     @keydown="${(x, c) => x.keydownHandler(c.event)}"
   >
-    <div
-      aria-activedescendant="${(x) => (x.open ? x.ariaActiveDescendant : null)}"
-      aria-controls="listbox"
-      aria-expanded="${(x) => x.ariaExpanded}"
-      aria-haspopup="listbox"
-      class="control"
-      part="control"
-      role="button"
-      ?disabled="${(x) => x.disabled}"
-    >
-      ${startSlotTemplate(context, definition)}
-      <slot name="button-container">
-        <div class="selected-value" part="selected-value">
-          <slot name="selected-value">${(x) => x.displayValue}</slot>
+    <label part="label" for="control" class="label">
+      <slot name="label"></slot>
+    </label>
+    <p class="description">
+      <slot name="description"></slot>
+    </p>
+    <div class="root" part="root">
+      <div class="root-container">
+        <div
+          aria-activedescendant="${(x) =>
+            x.open ? x.ariaActiveDescendant : null}"
+          aria-controls="listbox"
+          aria-expanded="${(x) => x.ariaExpanded}"
+          aria-haspopup="listbox"
+          class="control"
+          part="control"
+          role="button"
+          ?disabled="${(x) => x.disabled}"
+        >
+          <div class="interaction-ring"></div>
+          ${startSlotTemplate(context, definition)}
+          <slot name="button-container">
+            <div class="selected-value" part="selected-value">
+              <slot name="selected-value">${(x) => x.displayValue}</slot>
+            </div>
+            ${when(
+              (x) => x.state === 'error' && x.errorMessage,
+              html`
+                <div class="indicator" part="indicator">
+                  <slot name="indicator">
+                    ${definition.warningIndicator ?? ''}
+                  </slot>
+                </div>
+              `
+            )}
+            ${when(
+              (x) => x.state === 'default',
+              html`
+                <div class="indicator" part="indicator">
+                  <slot name="indicator"> ${definition.indicator ?? ''}</slot>
+                </div>
+              `
+            )}
+          </slot>
         </div>
-        <div class="indicator" part="indicator">
-          <slot name="indicator"> ${definition.indicator || ''}</slot>
+        <div
+          aria-disabled="${(x) => x.disabled}"
+          class="listbox"
+          id="listbox"
+          part="listbox"
+          role="listbox"
+          ?disabled="${(x) => x.disabled}"
+          ?hidden="${(x) => !x.open}"
+          ${ref('listbox')}
+        >
+          <slot
+            ${slotted({
+              filter: Listbox.slottedOptionFilter,
+              flatten: true,
+              property: 'slottedOptions'
+            })}
+          ></slot>
         </div>
-      </slot>
-      ${endSlotTemplate(context, definition)}
+        <div class="interaction-ring"></div>
+      </div>
     </div>
-    <div
-      aria-disabled="${(x) => x.disabled}"
-      class="listbox"
-      id="listbox"
-      part="listbox"
-      role="listbox"
-      ?disabled="${(x) => x.disabled}"
-      ?hidden="${(x) => !x.open}"
-      ${ref('listbox')}
-    >
-      <slot
-        ${slotted({
-          filter: Listbox.slottedOptionFilter,
-          flatten: true,
-          property: 'slottedOptions'
-        })}
-      ></slot>
-    </div>
+    ${when(
+      (x) => x.state === 'error' && x.errorMessage,
+      html` <div class="helper error">
+        <label>${(x) => x.errorMessage}</label>
+      </div>`
+    )}
   </template>
 `;
 
@@ -108,26 +128,19 @@ export let SelectRole;
  *
  * @public
  */
-export class Select extends FormAssociatedSelect {
+export class Select extends Listbox {
   /**
    * The open attribute.
    *
    * @internal
    */
-  @attr({ attribute: 'open', mode: 'boolean' })
+  @attr({ mode: 'boolean' })
   open;
 
   @attr
   placeholder;
 
   indexWhenOpened;
-
-  /**
-   * The internal value property.
-   *
-   * @internal
-   */
-  _value;
 
   /**
    * Reflects the placement for the listbox when the select is open.
@@ -184,6 +197,29 @@ export class Select extends FormAssociatedSelect {
   @observable
   displayValue;
 
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: value
+   */
+  @attr
+  value;
+
+  /**
+   * When true, the control will be immutable by user interaction. See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly | readonly HTML attribute} for more information.
+   * @public
+   * @remarks
+   * HTML Attribute: readonly
+   */
+  @attr({ mode: 'boolean' })
+  readOnly;
+
+  /**
+   * The name of the select.
+   */
+  @attr
+  name;
+
   constructor() {
     super(...arguments);
     /**
@@ -192,6 +228,7 @@ export class Select extends FormAssociatedSelect {
      * @internal
      */
     this.open = false;
+
     /**
      * Indicates the initial state of the position attribute.
      *
@@ -234,83 +271,34 @@ export class Select extends FormAssociatedSelect {
       this.focusAndScrollOptionIntoView();
       this.indexWhenOpened = this.selectedIndex;
     }
+
+    this.$emit('openchange');
   }
 
-  /**
-   * The value property.
-   *
-   * @public
-   */
-  get value() {
-    Observable.track(this, 'value');
+  update() {
+    if (Array.isArray(this.options)) {
+      this.selectedIndex = this.options.findIndex(
+        (el) => el.value === this.value
+      );
 
-    return this._value;
-  }
-
-  set value(next) {
-    const prev = `${this._value}`;
-
-    if (this.$pppController.isConnected && this.options) {
-      const selectedIndex = this.options.findIndex((el) => el.value === next);
-      const prevSelectedOption = this.options[this.selectedIndex];
-      const nextSelectedOption = this.options[selectedIndex];
-      const prevSelectedValue = prevSelectedOption
-        ? prevSelectedOption.value
-        : null;
-      const nextSelectedValue = nextSelectedOption
-        ? nextSelectedOption.value
-        : null;
-
-      if (selectedIndex === -1 || prevSelectedValue !== nextSelectedValue) {
-        next = this.placeholder;
-        this.selectedIndex = selectedIndex;
-      }
-
-      if (this.firstSelectedOption) {
-        next = this.firstSelectedOption.value;
-      }
-    }
-
-    if (prev !== next) {
-      if (this.options.length) this._value = next;
-      else this._value = void 0;
-
-      super.valueChanged(prev, next);
-      Observable.notify(this, 'value');
-    }
-  }
-
-  updateValue(shouldEmit) {
-    if (this.$pppController.isConnected) {
-      this.value = this.firstSelectedOption
-        ? this.firstSelectedOption.value
-        : void 0;
+      this.setSelectedOptions();
 
       this.displayValue = this.firstSelectedOption
-        ? this.firstSelectedOption.textContent || this.firstSelectedOption.value
+        ? this.firstSelectedOption.textContent ?? this.firstSelectedOption.value
         : this.placeholder;
     }
+  }
 
-    if (shouldEmit) {
+  valueChanged(prev, next) {
+    if (this.$pppController.isConnected && this.options) {
+      this.update();
+
       this.$emit('input');
       this.$emit('change', this, {
         bubbles: true,
         composed: undefined
       });
     }
-  }
-
-  /**
-   * Updates the proxy value when the selected index changes.
-   *
-   * @param prev - the previous selected index
-   * @param next - the next selected index
-   *
-   * @internal
-   */
-  selectedIndexChanged(prev, next) {
-    super.selectedIndexChanged(prev, next);
-    this.updateValue();
   }
 
   /**
@@ -360,17 +348,6 @@ export class Select extends FormAssociatedSelect {
   }
 
   /**
-   * Reset the element to its first selectable option when its parent form is reset.
-   *
-   * @internal
-   */
-  formResetCallback() {
-    this.setProxyOptions();
-    this.setDefaultSelectedOption();
-    this.value = this.firstSelectedOption.value;
-  }
-
-  /**
    * Handle opening and closing the listbox when the select is clicked.
    *
    * @param e - the mouse event
@@ -380,6 +357,8 @@ export class Select extends FormAssociatedSelect {
     if (this.disabled) {
       return;
     }
+
+    if (!this.slottedOptions.length) return;
 
     if (this.open) {
       const captured = e.target.closest(`option, [role=option]`);
@@ -392,8 +371,11 @@ export class Select extends FormAssociatedSelect {
     super.clickHandler(e);
     this.open = !this.open;
 
-    if (!this.open && this.indexWhenOpened !== this.selectedIndex) {
-      this.updateValue(true);
+    if (!this.open) {
+      // OK
+      this.value = this.firstSelectedOption
+        ? this.firstSelectedOption.value
+        : void 0;
     }
 
     return true;
@@ -422,13 +404,24 @@ export class Select extends FormAssociatedSelect {
       this.open = false;
 
       if (this.indexWhenOpened !== this.selectedIndex) {
-        this.updateValue(true);
+        this.update();
       }
     }
   }
 
   /**
-   * Synchronize the form-associated proxy and update the value property of the element.
+   *
+   * @param prev - the previous selected index
+   * @param next - the next selected index
+   *
+   * @internal
+   */
+  selectedIndexChanged(prev, next) {
+    super.selectedIndexChanged(prev, next);
+  }
+
+  /**
+   * Update the value property of the element.
    *
    * @param prev - the previous collection of slotted option elements
    * @param next - the next collection of slotted option elements
@@ -437,31 +430,7 @@ export class Select extends FormAssociatedSelect {
    */
   slottedOptionsChanged(prev, next) {
     super.slottedOptionsChanged(prev, next);
-
-    if (this.initialValue) this.value = this.initialValue;
-
-    this.setProxyOptions();
-    this.updateValue();
-  }
-
-  /**
-   * Reset and fill the proxy to match the component's options.
-   *
-   * @internal
-   */
-  setProxyOptions() {
-    if (this.proxy instanceof HTMLSelectElement && this.options) {
-      this.proxy.options.length = 0;
-      this.options.forEach((option) => {
-        const proxyOption =
-          option.proxy ||
-          (option instanceof HTMLOptionElement ? option.cloneNode() : null);
-
-        if (proxyOption) {
-          this.proxy.appendChild(proxyOption);
-        }
-      });
-    }
+    this.update();
   }
 
   /**
@@ -508,10 +477,13 @@ export class Select extends FormAssociatedSelect {
       }
     }
 
-    if (!this.open && this.indexWhenOpened !== this.selectedIndex) {
-      this.updateValue(true);
-      this.indexWhenOpened = this.selectedIndex;
-    }
+    if (this.open) {
+      if (this.selectedOptions)
+        this.value = this.firstSelectedOption
+          ? this.firstSelectedOption.value
+          : void 0;
+    } else
+      this.update();
 
     return true;
   }

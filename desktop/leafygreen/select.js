@@ -1,6 +1,9 @@
 /** @decorator */
 
-import { Select as FoundationSelect } from '../../shared/select.js';
+import {
+  Select as FoundationSelect,
+  selectTemplate
+} from '../../shared/select.js';
 import { attr } from '../../shared/element/components/attributes.js';
 import { observable } from '../../shared/element/observation/observable.js';
 import { css } from '../../shared/element/styles/css.js';
@@ -8,117 +11,16 @@ import { display } from '../../shared/utilities/style/display.js';
 import { bodyFont, designUnit, heightNumber } from './design-tokens.js';
 import { disabledCursor } from '../../shared/utilities/style/disabled.js';
 import { requireComponent } from '../../shared/template.js';
-import { html } from '../../shared/element/templating/template.js';
-import { when } from '../../shared/element/templating/when.js';
-import {
-  endSlotTemplate,
-  startSlotTemplate
-} from '../../shared/patterns/start-end.js';
-import { ref } from '../../shared/element/templating/ref.js';
-import { slotted } from '../../shared/element/templating/slotted.js';
-import { Listbox } from '../../shared/listbox.js';
 import { warning } from './icons/warning.js';
+import { caretDown } from './icons/caret-down.js'
 
 await requireComponent(
   'ppp-option',
   import.meta.url.replaceAll(/select/gi, 'option')
 );
 
-/**
- * The template for the Select component.
- * @public
- */
-export const selectTemplate = (context, definition) => html`
-  <template
-    class="${(x) => (x.open ? 'open' : '')} ${(x) =>
-      x.disabled ? 'disabled' : ''} ${(x) => x.position}"
-    role="${(x) => x.role}"
-    tabindex="${(x) => (!x.disabled ? '0' : null)}"
-    aria-disabled="${(x) => x.ariaDisabled}"
-    aria-expanded="${(x) => x.ariaExpanded}"
-    @click="${(x, c) => x.clickHandler(c.event)}"
-    @focusout="${(x, c) => x.focusoutHandler(c.event)}"
-    @keydown="${(x, c) => x.keydownHandler(c.event)}"
-  >
-    <label part="label" for="control" class="label">
-      <slot name="label"></slot>
-    </label>
-    <p class="description">
-      <slot name="description"></slot>
-    </p>
-    <div class="root" part="root">
-      <div class="root-container">
-        <div
-          aria-activedescendant="${(x) =>
-            x.open ? x.ariaActiveDescendant : null}"
-          aria-controls="listbox"
-          aria-expanded="${(x) => x.ariaExpanded}"
-          aria-haspopup="listbox"
-          class="control"
-          part="control"
-          role="button"
-          ?disabled="${(x) => x.disabled}"
-        >
-          <div class="interaction-ring"></div>
-          ${startSlotTemplate(context, definition)}
-          <slot name="button-container">
-            <div class="selected-value" part="selected-value">
-              <slot name="selected-value">${(x) => x.displayValue}</slot>
-            </div>
-            ${when(
-              (x) => x.state === 'default',
-              html`
-                <div class="indicator" part="indicator">
-                  <slot name="indicator"> ${definition.indicator || ''}</slot>
-                </div>
-              `
-            )}
-          </slot>
-          ${when(
-            (x) => x.state === 'default',
-            endSlotTemplate(context, definition)
-          )}
-          ${when(
-            (x) => x.state === 'error' && x.errorMessage,
-            html` <div class="end">
-              ${warning({
-                cls: 'error-icon'
-              })}
-            </div>`
-          )}
-        </div>
-        <div
-          aria-disabled="${(x) => x.disabled}"
-          class="listbox"
-          id="listbox"
-          part="listbox"
-          role="listbox"
-          ?disabled="${(x) => x.disabled}"
-          ?hidden="${(x) => !x.open}"
-          ${ref('listbox')}
-        >
-          <slot
-            ${slotted({
-              filter: Listbox.slottedOptionFilter,
-              flatten: true,
-              property: 'slottedOptions'
-            })}
-          ></slot>
-        </div>
-        <div class="interaction-ring"></div>
-      </div>
-    </div>
-    ${when(
-      (x) => x.state === 'error' && x.errorMessage,
-      html` <div class="helper error">
-        <label>${(x) => x.errorMessage}</label>
-      </div>`
-    )}
-  </template>
-`;
-
-// TODO - design tokens, fix scrolling bugs, interaction ring
-const selectStyles = (context, definition) => css`
+// TODO - design tokens
+export const selectStyles = (context, definition) => css`
   ${display('flex')}
   :host {
     flex-direction: column;
@@ -255,7 +157,7 @@ const selectStyles = (context, definition) => css`
     background-color: rgba(0, 0, 0, 0.3);
   }
 
-  :host(:not([disabled]):hover) .control {
+  :host(:not([disabled])) .root:hover .control {
     background-color: rgb(255, 255, 255);
     box-shadow: rgb(232 237 235) 0 0 0 3px;
   }
@@ -356,6 +258,12 @@ const selectStyles = (context, definition) => css`
   :host([state='error']) .control {
     border: 1px solid rgb(207, 74, 34);
   }
+
+  /* prettier-ignore */
+  :host([state='error']:not([disabled])) .root:hover .control {
+    border-color: rgb(219, 48, 48);
+    box-shadow: rgb(255 205 199) 0 0 0 3px;
+  }
 `;
 
 export class Select extends FoundationSelect {
@@ -384,8 +292,9 @@ export class Select extends FoundationSelect {
   }
 }
 
-export const select = Select.compose({
-  baseName: 'select',
+export default Select.compose({
   template: selectTemplate,
-  styles: selectStyles
+  styles: selectStyles,
+  indicator: caretDown(),
+  warningIndicator: warning({ cls: 'error-icon' })
 });
