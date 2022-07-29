@@ -18,7 +18,7 @@ WORKDIR /app
 ENTRYPOINT ["/sbin/tini", "-s", "--"]
 
 COPY --chown=root ./start.sh /app/start.sh
-COPY ./tailscale-ddg-proxy.mjs /app/tailscale-ddg-proxy.mjs
+COPY ./tailscale-proxy.mjs /app/tailscale-proxy.mjs
 COPY --from=tailscale /tailscale/tailscaled /app/tailscaled
 COPY --from=tailscale /tailscale/tailscale /app/tailscale
 
