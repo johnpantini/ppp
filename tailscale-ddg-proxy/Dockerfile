@@ -22,6 +22,8 @@ COPY ./tailscale-ddg-proxy.mjs /app/tailscale-ddg-proxy.mjs
 COPY --from=tailscale /tailscale/tailscaled /app/tailscaled
 COPY --from=tailscale /tailscale/tailscale /app/tailscale
 
+RUN chmod +x /app/start.sh
+
 EXPOSE 24344
 
 CMD ["/app/start.sh"]
