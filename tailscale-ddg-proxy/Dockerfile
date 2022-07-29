@@ -15,7 +15,7 @@ RUN mkdir -p /var/lib/tailscale
 FROM alpine:latest AS base
 RUN apk add --no-cache --update nodejs-current tini
 WORKDIR /app
-ENTRYPOINT ["/sbin/tini", "--"]
+ENTRYPOINT ["/sbin/tini", "-s", "--"]
 
 COPY ./start.sh /app/start.sh
 COPY ./tailscale-ddg-proxy.mjs /app/tailscale-ddg-proxy.mjs
