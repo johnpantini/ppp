@@ -24,5 +24,4 @@ COPY --from=tailscale /tailscale/tailscale /app/tailscale
 
 EXPOSE 24344
 
-USER root
 CMD ["/app/start.sh"]
