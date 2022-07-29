@@ -7,4 +7,4 @@ echo 'Starting up tailscale...'
 
 echo 'Tailscale started.'
 
-/app/node --no-warnings --inspect=0.0.0.0:9229 tailscale-ddg-proxy.mjs
+node --no-warnings --inspect=0.0.0.0:9229 tailscale-ddg-proxy.mjs
