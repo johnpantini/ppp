@@ -1,7 +1,5 @@
 import { createServer } from 'http';
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
 process.on('unhandledRejection', (err) => {
   console.log(err);
   process.exit(1);
@@ -22,7 +20,8 @@ async function handleFetch(request, response) {
     const body = JSON.parse(Buffer.concat(buffers).toString());
     const fetchResponse = await fetch(body.url, {
       method: body.method ?? 'GET',
-      headers: body.headers
+      headers: body.headers,
+      body: body.body
     });
 
     const ct = fetchResponse.headers.get('content-type');
