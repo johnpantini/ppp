@@ -23,4 +23,5 @@ RUN mkdir -p /var/lib/tailscale
 
 EXPOSE 24344
 
+USER root
 CMD ["/app/start.sh"]
