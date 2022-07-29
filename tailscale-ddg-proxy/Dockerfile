@@ -17,7 +17,7 @@ RUN apk add --no-cache --update nodejs-current tini
 WORKDIR /app
 ENTRYPOINT ["/sbin/tini", "-s", "--"]
 
-COPY ./start.sh /app/start.sh
+COPY --chown=root ./start.sh /app/start.sh
 COPY ./tailscale-ddg-proxy.mjs /app/tailscale-ddg-proxy.mjs
 COPY --from=tailscale /tailscale/tailscaled /app/tailscaled
 COPY --from=tailscale /tailscale/tailscale /app/tailscale
@@ -26,4 +26,5 @@ RUN chmod +x /app/start.sh
 
 EXPOSE 24344
 
+USER root
 CMD ["/app/start.sh"]
