@@ -21,5 +21,6 @@ RUN mkdir -p /var/run/tailscale
 RUN mkdir -p /var/cache/tailscale
 RUN mkdir -p /var/lib/tailscale
 
-USER root
+EXPOSE 24344
+
 CMD ["/app/start.sh"]

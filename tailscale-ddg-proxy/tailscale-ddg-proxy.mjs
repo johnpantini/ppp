@@ -20,17 +20,17 @@ async function handleFetch(request, response) {
 
   try {
     const body = JSON.parse(Buffer.concat(buffers).toString());
-    const response = await fetch(body.url, {
+    const fetchResponse = await fetch(body.url, {
       method: body.method ?? 'GET',
       headers: body.headers
     });
 
-    const ct = response.headers['Content-Type'];
+    const ct = fetchResponse.headers.get('content-type');
 
     if (ct) response.setHeader('Content-Type', ct);
 
-    response.writeHead(response.status);
-    response.write(await response.text());
+    response.writeHead(fetchResponse.status);
+    response.write(await fetchResponse.text());
     response.end();
   } catch (e) {
     console.error(e);
