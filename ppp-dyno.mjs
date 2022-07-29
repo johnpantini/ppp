@@ -406,3 +406,12 @@ createServer((request, response) => {
       response.writeHead(404).end();
   }
 }).listen(process.env.PORT ?? 3777);
+
+if (process.env.ENABLE_SOCKS5) {
+  const { server } = await import('./salt/states/ppp/lib/socks5/proxy.mjs');
+
+  const HOST = process.env.SOCKS5_HOST ?? '0.0.0.0';
+  const PORT = process.env.SOCKS5_PORT ?? '3778';
+
+  server.listen(+PORT, HOST);
+}
