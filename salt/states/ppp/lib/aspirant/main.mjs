@@ -282,7 +282,9 @@ export default class Aspirant {
 
             res
               .writeStatus(
-                `${fetchResponse.status} ${STATUS_TO_PHRASE[fetchResponse.status]}`
+                `${fetchResponse.status} ${
+                  STATUS_TO_PHRASE[fetchResponse.status]
+                }`
               )
               .writeHeader('Content-Type', ct)
               .end(await fetchResponse.text());

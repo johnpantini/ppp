@@ -1,10 +1,26 @@
-FROM node:18-bullseye
-RUN apt-get --assume-yes update && apt-get --assume-yes install build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-ENV NODE_ENV=production
+FROM alpine:latest as tailscale
+WORKDIR /tailscale
+COPY . ./
+ENV TSFILE=tailscale_1.28.0_amd64.tgz
+RUN wget https://pkgs.tailscale.com/stable/${TSFILE} && \
+  tar xzf ${TSFILE} --strip-components=1
+COPY . ./
 
-WORKDIR /usr/src/app
+FROM alpine:latest
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN mkdir -p /var/run/tailscale
+RUN mkdir -p /var/cache/tailscale
+RUN mkdir -p /var/lib/tailscale
 
-COPY ./aspirant/ ./aspirant/
+FROM alpine:latest AS base
+RUN apk add --no-cache --update nodejs-current tini gcompat freetype-dev cairo-dev pango-dev libpng libpng-dev jpeg libjpeg-turbo libjpeg-turbo-dev jpeg-dev giflib-dev librsvg-dev
+
+WORKDIR /app
+
+COPY --from=tailscale /tailscale/tailscaled /app/tailscaled
+COPY --from=tailscale /tailscale/tailscale /app/tailscale
+
+COPY --chown=root ./aspirant/ ./aspirant/
 COPY ./uWebSockets.js/ ./uWebSockets.js/
 COPY ./canvas/ ./canvas/
 COPY ./canvas-table/ ./canvas-table/
@@ -17,7 +33,10 @@ COPY ./vendor/lzma/ ./vendor/lzma/
 COPY ./vendor/protobuf.min.js ./vendor/protobuf.min.js
 COPY ./vendor/redis.min.js ./vendor/redis.min.js
 
+RUN chmod +x /app/aspirant/start.sh
+
 EXPOSE 32456
 EXPOSE 9229
 
-CMD [ "node", "--no-warnings", "--inspect=0.0.0.0:9229", "aspirant/main.mjs" ]
+USER root
+CMD ["/app/aspirant/start.sh"]
