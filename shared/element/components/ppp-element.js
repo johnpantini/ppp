@@ -58,7 +58,7 @@ export const PPPElement = Object.assign(createPPPElement(HTMLElement), {
  * that describes the element to define.
  * @public
  */
-export function element(nameOrDef) {
+export function customElement(nameOrDef) {
   return function (type) {
     new PPPElementDefinition(type, nameOrDef).define();
   };

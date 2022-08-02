@@ -18,7 +18,6 @@ export class RefBehavior {
   /**
    * Bind this behavior to the source.
    * @param source - The source to bind to.
-   * @param context - The execution context that the binding is operating within.
    */
   bind(source) {
     source[this.propertyName] = this.target;
@@ -26,9 +25,7 @@ export class RefBehavior {
 
   /**
    * Unbinds this behavior from the source.
-   * @param source - The source to unbind from.
    */
-
   unbind() {}
 }
 

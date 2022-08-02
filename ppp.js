@@ -1,5 +1,6 @@
 import { KeyVault } from './shared/key-vault.js';
-import { PPPCrypto } from './shared/ppp-crypto.js';
+import { bufferToString, generateIV, PPPCrypto } from './shared/ppp-crypto.js';
+import { maybeFetchError } from './shared/fetch-error.js';
 
 export default new (class {
   /**
@@ -115,27 +116,28 @@ export default new (class {
 
     if (!emergency) {
       try {
-        const code = `
-          const db = context
-            .services.get('mongodb-atlas')
-            .db('ppp');
+        const lines = ((context) => {
+          const db = context.services.get('mongodb-atlas').db('ppp');
 
-          const workspaces = db.collection('workspaces').aggregate(
-            [{$match:{removed:{$not:{$eq:true}}}}]
-          );
+          const workspaces = db
+            .collection('workspaces')
+            .find({ removed: { $not: { $eq: true } } }, { _id: 1, name: 1 });
 
-          const settings = db.collection('app').findOne(
-            {_id:'@settings'}
-          );
+          const settings = db.collection('app').findOne({ _id: '@settings' });
 
-          const extensions = db.collection('extensions').aggregate(
-            [{$match:{removed:{$not:{$eq:true}}}}]
-          );
+          const extensions = db
+            .collection('extensions')
+            .find({ removed: { $not: { $eq: true } } });
 
-          return {workspaces, settings, extensions};
-        `;
+          return { workspaces, settings, extensions };
+        })
+          .toString()
+          .split(/\r?\n/);
 
-        const evalRequest = await this.user.functions.eval(code);
+        lines.pop();
+        lines.shift();
+
+        const evalRequest = await this.user.functions.eval(lines.join('\n'));
 
         workspaces = evalRequest.workspaces;
         extensions = evalRequest.extensions;
@@ -170,6 +172,19 @@ export default new (class {
             .setText(
               'Хранилище MongoDB Atlas не в сети или отключено за неактивность'
             );
+        } else if (/function not found: 'eval'/i.test(e?.message)) {
+          document
+            .getElementById('global-loader')
+            .setText(
+              'Сбой настройки облачных сервисов, пожалуйста, подождите...'
+            );
+
+          setTimeout(() => {
+            localStorage.removeItem('ppp-mongo-app-id');
+            localStorage.removeItem('ppp-tag');
+
+            window.location.reload();
+          }, 5000);
         } else {
           document
             .getElementById('global-loader')
@@ -180,30 +195,27 @@ export default new (class {
       }
     }
 
-    const element = document.createElement('ppp-app');
+    const appElement = document.createElement('ppp-app');
 
     if (!emergency) {
-      element.workspaces = workspaces;
-      element.extensions = extensions;
-      element.settings = settings ?? {};
+      appElement.workspaces = workspaces;
+      appElement.extensions = extensions;
+      appElement.settings = settings ?? {};
     }
 
-    element.ppp = this;
+    appElement.ppp = this;
 
-    this.appElement = document.body.insertBefore(
-      element,
-      document.body.firstChild
-    );
+    this.app = document.body.insertBefore(appElement, document.body.firstChild);
 
-    this.appElement.setAttribute('hidden', true);
-    this.appElement.setAttribute('appearance', this.theme);
+    this.app.setAttribute('hidden', true);
+    this.app.setAttribute('appearance', this.theme);
     document.getElementById('global-loader').setAttribute('hidden', true);
-    this.appElement.removeAttribute('hidden');
+    this.app.removeAttribute('hidden');
   }
 
   async i18n(url) {
     const fileName = url
-      .substr(url.lastIndexOf('/') + 1)
+      .substring(url.lastIndexOf('/') + 1)
       .replace('.', '.i18n.');
 
     (await import(`./i18n/${this.locale}/${fileName}`)).default(this.dict);
@@ -219,5 +231,105 @@ export default new (class {
     } else {
       return this.#createApplication({});
     }
+  }
+
+  /**
+   *
+   * @param username
+   * @param apiKey
+   * @param serviceMachineUrl
+   * @throws {FetchError}
+   */
+  async getMongoDBRealmAccessToken({
+    username = this.keyVault.getKey('mongo-public-key'),
+    apiKey = this.keyVault.getKey('mongo-private-key'),
+    serviceMachineUrl = this.keyVault.getKey('service-machine-url')
+  } = {}) {
+    const rMongoDBRealmAccessToken = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          url: 'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
+          body: {
+            username,
+            apiKey
+          }
+        })
+      }
+    );
+
+    await maybeFetchError(
+      rMongoDBRealmAccessToken,
+      'Не удалось авторизоваться в MongoDB Realm. Проверьте ключи.'
+    );
+
+    const { access_token: mongoDBRealmAccessToken } =
+      await rMongoDBRealmAccessToken.json();
+
+    return mongoDBRealmAccessToken;
+  }
+
+  async encrypt(document = {}, excludedKeys = []) {
+    const clone = Object.assign({}, document);
+
+    let iv;
+
+    for (const key in clone) {
+      if (
+        /(token|key|secret|password)$/i.test(key) &&
+        excludedKeys.indexOf(key) < 0
+      ) {
+        if (!iv) {
+          iv = generateIV();
+        }
+
+        clone[key] = await ppp.crypto.encrypt(iv, clone[key]);
+        clone.iv = bufferToString(iv);
+      }
+    }
+
+    return clone;
+  }
+
+  async decrypt(document = {}, excludedKeys = []) {
+    const clone = Object.assign({}, document);
+
+    for (const key in clone) {
+      if (
+        /(token|key|secret|password)$/i.test(key) &&
+        excludedKeys.indexOf(key) < 0
+      ) {
+        clone[key] = await ppp.crypto.decrypt(document.iv, clone[key]);
+      } else if (
+        clone[key] !== null &&
+        typeof clone[key] === 'object' &&
+        clone[key].iv
+      ) {
+        clone[key] = await this.decrypt(clone[key]);
+      }
+    }
+
+    return clone;
+  }
+
+  decryptDocumentsMapping(excludedKeys = []) {
+    return async (d) => {
+      if (Array.isArray(d)) {
+        const mapped = [];
+
+        for (const document of d) {
+          mapped.push(await ppp.decrypt(document, excludedKeys));
+        }
+
+        return mapped;
+      }
+
+      return d;
+    };
   }
 })(document.documentElement.getAttribute('ppp-type'));

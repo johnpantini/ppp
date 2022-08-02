@@ -2,6 +2,7 @@ import { Radio, radioTemplate } from '../../shared/radio.js';
 import { css } from '../../shared/element/styles/css.js';
 import { display } from '../../shared/utilities/style/display.js';
 import { bodyFont } from './design-tokens.js';
+import { disabledCursor } from '../../shared/utilities/style/disabled.js';
 
 // TODO - design tokens
 export const radioStyles = (context, definition) =>
@@ -43,6 +44,21 @@ export const radioStyles = (context, definition) =>
       border-color: rgb(61, 79, 88);
       background-color: rgb(255, 255, 255);
       border-width: 3px;
+    }
+
+    :host([disabled]) {
+      cursor: ${disabledCursor};
+    }
+
+    :host([disabled]) .checked-indicator {
+      pointer-events: none;
+      border-color: rgb(232, 237, 235);
+      background-color: rgb(249, 251, 250);
+    }
+
+    :host([disabled]) .control,
+    :host([disabled]) .label {
+      pointer-events: none;
     }
 
     .checked-indicator::before {

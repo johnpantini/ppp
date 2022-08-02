@@ -10,22 +10,7 @@ import { applyMixins } from './utilities/apply-mixins.js';
 import { html } from './element/templating/template.js';
 import { ref } from './element/templating/ref.js';
 import { slotted } from './element/templating/slotted.js';
-import { FormAssociated } from './form-associated.js';
 import { FoundationElement } from './foundation-element.js';
-
-class _TextArea extends FoundationElement {}
-
-/**
- * A form-associated base class for the TextArea component.
- *
- * @internal
- */
-export class FormAssociatedTextArea extends FormAssociated(_TextArea) {
-  constructor() {
-    super(...arguments);
-    this.proxy = document.createElement('textarea');
-  }
-}
 
 /**
  * Resize mode for a TextArea
@@ -122,7 +107,15 @@ export const textAreaTemplate = (context, definition) => html`
  *
  * @public
  */
-export class TextArea extends FormAssociatedTextArea {
+export class TextArea extends FoundationElement {
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: value
+   */
+  @attr
+  value;
+
   /**
    * When true, the control will be immutable by user interaction. See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly | readonly HTML attribute} for more information.
    * @public
@@ -155,13 +148,6 @@ export class TextArea extends FormAssociatedTextArea {
    */
   @attr({ mode: 'boolean' })
   autofocus;
-
-  /**
-   * The {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id | id} of the {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/form | form} the element is associated to
-   * @public
-   */
-  @attr({ attribute: 'form' })
-  formId;
 
   /**
    * Allows associating a {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/datalist | datalist} to the element by {@link https://developer.mozilla.org/en-US/docs/Web/API/Element/id}.
@@ -198,6 +184,9 @@ export class TextArea extends FormAssociatedTextArea {
    */
   @attr
   name;
+
+  @attr({ mode: 'boolean' })
+  disabled;
 
   /**
    * Sets the placeholder value of the element, generally used to provide a hint to the user.
@@ -247,6 +236,8 @@ export class TextArea extends FormAssociatedTextArea {
 
   constructor() {
     super(...arguments);
+
+    this.value = '';
     /**
      * The resize mode of the element.
      * @public
@@ -268,45 +259,13 @@ export class TextArea extends FormAssociatedTextArea {
     this.handleTextInput = () => {
       this.value = this.control.value;
 
-      if (this.value)
-        this.state = 'default';
+      if (this.value) this.state = 'default';
     };
   }
 
-  readOnlyChanged() {
-    if (this.proxy instanceof HTMLTextAreaElement) {
-      this.proxy.readOnly = this.readOnly;
-    }
-  }
-
-  autofocusChanged() {
-    if (this.proxy instanceof HTMLTextAreaElement) {
-      this.proxy.autofocus = this.autofocus;
-    }
-  }
-
-  listChanged() {
-    if (this.proxy instanceof HTMLTextAreaElement) {
-      this.proxy.setAttribute('list', this.list);
-    }
-  }
-
-  maxlengthChanged() {
-    if (this.proxy instanceof HTMLTextAreaElement) {
-      this.proxy.maxLength = this.maxlength;
-    }
-  }
-
-  minlengthChanged() {
-    if (this.proxy instanceof HTMLTextAreaElement) {
-      this.proxy.minLength = this.minlength;
-    }
-  }
-
-  spellcheckChanged() {
-    if (this.proxy instanceof HTMLTextAreaElement) {
-      this.proxy.spellcheck = this.spellcheck;
-    }
+  valueChanged(prev, next) {
+    if (next === null || next === undefined)
+      this.value = '';
   }
 
   /**

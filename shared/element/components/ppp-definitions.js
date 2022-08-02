@@ -1,10 +1,28 @@
 import { Observable } from '../observation/observable.js';
 import { ElementStyles } from '../styles/element-styles.js';
 import { AttributeDefinition } from './attributes.js';
+import { $global } from '../platform.js';
 
 const defaultShadowOptions = { mode: 'open' };
 const defaultElementOptions = {};
-const pppDefinitions = new Map();
+const pppRegistry = $global.PPP.getById(4, () => {
+  const typeToDefinition = new Map();
+
+  return Object.freeze({
+    register(definition) {
+      if (typeToDefinition.has(definition.type)) {
+        return false;
+      }
+
+      typeToDefinition.set(definition.type, definition);
+
+      return true;
+    },
+    getByType(key) {
+      return typeToDefinition.get(key);
+    }
+  });
+});
 
 /**
  * Defines metadata for a PPPElement.
@@ -22,17 +40,9 @@ export class PPPElementDefinition {
       nameOrConfig = { name: nameOrConfig };
     }
 
-    if (typeof nameOrConfig === 'undefined') nameOrConfig = {};
-
     this.type = type;
     this.name = nameOrConfig.name;
     this.template = nameOrConfig.template;
-
-    if (typeof this.name === 'undefined')
-      this.name = type.name
-        .replace(/([A-Z]($|[a-z]))/g, '-$1')
-        .replace(/(^-|-Element$)/g, '')
-        .toLowerCase();
 
     const attributes = AttributeDefinition.collect(
       type,
@@ -54,7 +64,6 @@ export class PPPElementDefinition {
     this.observedAttributes = observedAttributes;
     this.propertyLookup = propertyLookup;
     this.attributeLookup = attributeLookup;
-
     this.shadowOptions =
       nameOrConfig.shadowOptions === void 0
         ? defaultShadowOptions
@@ -64,7 +73,6 @@ export class PPPElementDefinition {
             Object.assign({}, defaultShadowOptions),
             nameOrConfig.shadowOptions
           );
-
     this.elementOptions =
       nameOrConfig.elementOptions === void 0
         ? defaultElementOptions
@@ -72,7 +80,6 @@ export class PPPElementDefinition {
             Object.assign({}, defaultElementOptions),
             nameOrConfig.elementOptions
           );
-
     this.styles =
       nameOrConfig.styles === void 0
         ? void 0
@@ -84,13 +91,20 @@ export class PPPElementDefinition {
   }
 
   /**
+   * Indicates if this element has been defined in at least one registry.
+   */
+  get isDefined() {
+    return !!pppRegistry.getByType(this.type);
+  }
+
+  /**
    * Defines a custom element based on this definition.
    * @param registry - The element registry to define the element in.
    */
   define(registry = customElements) {
     const type = this.type;
 
-    if (!this.isDefined) {
+    if (pppRegistry.register(this)) {
       const attributes = this.attributes;
       const proto = type.prototype;
 
@@ -102,10 +116,6 @@ export class PPPElementDefinition {
         value: this.observedAttributes,
         enumerable: true
       });
-
-      pppDefinitions.set(type, this);
-
-      this.isDefined = true;
     }
 
     if (!registry.get(this.name)) {
@@ -114,12 +124,10 @@ export class PPPElementDefinition {
 
     return this;
   }
-
-  /**
-   * Gets the element definition associated with the specified type.
-   * @param type - The custom element type to retrieve the definition for.
-   */
-  static forType(type) {
-    return pppDefinitions.get(type);
-  }
 }
+
+/**
+ * Gets the element definition associated with the specified type.
+ * @param type - The custom element type to retrieve the definition for.
+ */
+PPPElementDefinition.forType = pppRegistry.getByType;

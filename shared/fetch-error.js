@@ -1,21 +1,27 @@
 import { CustomError } from './custom-error.js';
 
 export class FetchError extends CustomError {
-  constructor({ message = 'Fetch failed.', status = 400, richMessage }) {
+  constructor({ message, status = 400, pppMessage } = {}) {
     super(message);
 
     this.name = this.constructor.name;
     this.status = status;
-    this.richMessage = richMessage;
+    this.pppMessage = pppMessage;
   }
 }
 
-export async function maybeFetchError(r, richMessage) {
-  if (!r.ok) {
+/**
+ *
+ * @param request - The request object.
+ * @param pppMessage - Additional details message.
+ */
+export async function maybeFetchError(request, pppMessage) {
+  if (!request.ok) {
     // noinspection ExceptionCaughtLocallyJS
     throw new FetchError({
-      ...r,
-      ...{ message: await r.text(), richMessage }
+      ...request,
+      ...{ message: await request.text(), pppMessage }
     });
-  }
+  } else
+    return request;
 }

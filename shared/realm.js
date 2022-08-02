@@ -1274,9 +1274,6 @@ class Fetcher {
         response = await fetch(new URL('fetch', serviceMachineUrl).toString(), {
           cache: 'no-cache',
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
           body: JSON.stringify({
             url,
             ...restOfRequest,

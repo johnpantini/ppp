@@ -4,46 +4,44 @@ import { attr } from './element/components/attributes.js';
 import { Observable, observable } from './element/observation/observable.js';
 import { FoundationElement } from './foundation-element.js';
 import { requireComponent } from './template.js';
-import { invalidate, validate } from './validate.js';
-import { uuidv4 } from './ppp-crypto.js';
 import { debounce } from './ppp-throttle.js';
-import { Tmpl } from './tmpl.js';
 import ppp from '../ppp.js';
 
-function esm(templateStrings, ...substitutions) {
-  let js = templateStrings.raw[0];
-
-  for (let i = 0; i < substitutions.length; i++) {
-    js += substitutions[i] + templateStrings.raw[i + 1];
-  }
-
-  return 'data:text/javascript;text,' + js;
-}
-
 export class App extends FoundationElement {
-  @observable
-  busy;
-
-  @attr
-  appearance;
-
+  /**
+   * The current page.
+   * @type {string}
+   */
   @attr
   page;
 
+  /**
+   * The current workspace.
+   * @type {string}
+   */
   @attr
   workspace;
 
+  /**
+   * The active extension _id.
+   * @type {string}
+   */
   @attr
   extension;
 
+  /**
+   *
+   * @type {array}
+   */
   @observable
   workspaces;
 
+  /**
+   *
+   * @type {array}
+   */
   @observable
   extensions;
-
-  @observable
-  ppp;
 
   @observable
   toastTitle;
@@ -54,22 +52,19 @@ export class App extends FoundationElement {
   @observable
   settings;
 
+  /**
+   * True if the page was loaded.
+   * @type {boolean}
+   */
   @observable
   pageConnected;
 
+  /**
+   * True if the page was not found.
+   * @type {boolean}
+   */
   @observable
   pageNotFound;
-
-  workspaceChanged(oldValue, newValue) {
-    if (newValue) {
-      this.navigate(
-        this.url({
-          page: 'workspace',
-          workspace: newValue || void 0
-        })
-      );
-    }
-  }
 
   toastTitleChanged() {
     Observable.notify(this.toast, 'source');
@@ -80,7 +75,6 @@ export class App extends FoundationElement {
   }
 
   #onPopState() {
-    this.workspace = this.params()?.workspace;
     this.extension = this.params()?.extension;
 
     this.navigate(this.url(this.params()));
@@ -106,7 +100,6 @@ export class App extends FoundationElement {
       this.setSetting('sideNavCollapsed', !newValue);
     };
 
-    this.workspace = this.params()?.workspace;
     this.extension = this.params()?.extension;
 
     const params = this.params();
@@ -164,7 +157,9 @@ export class App extends FoundationElement {
   }
 
   setURLSearchParams(params = {}) {
-    const searchParams = new URLSearchParams(window.location.search.substr(1));
+    const searchParams = new URLSearchParams(
+      window.location.search.substring(1)
+    );
 
     for (const param of Object.keys(params)) {
       searchParams.set(param, params[param]);
@@ -173,7 +168,9 @@ export class App extends FoundationElement {
     window.history.replaceState(
       '',
       '',
-      `${window.location.origin}${window.location.pathname}?${searchParams.toString()}`
+      `${window.location.origin}${
+        window.location.pathname
+      }?${searchParams.toString()}`
     );
   }
 
@@ -193,6 +190,8 @@ export class App extends FoundationElement {
   }
 
   async navigate(url, params = {}) {
+    this.$emit('navigatestart');
+
     this.pageConnected = false;
 
     if (typeof url === 'object') url = this.url(url);
@@ -200,13 +199,16 @@ export class App extends FoundationElement {
     if (url === window.location.pathname + window.location.search)
       params.replace = true;
 
-    if (params.replace) window.history.replaceState({}, '', url);
+    if (params.replace)
+      window.history.replaceState({}, '', params.replaceUrl ?? url);
     else window.history.pushState({}, '', url);
 
+    // Force unload
+    this.page = 'blank';
     this.page = this.params().page;
 
-    if (this.page !== 'workspace') {
-      this.workspace = void 0;
+    if (this.page === 'workspace') {
+      this.workspace = this.params().document;
     }
 
     if (this.page) {
@@ -226,19 +228,18 @@ export class App extends FoundationElement {
               0,
               eUrl.href.lastIndexOf('/')
             );
-            const pageUrl = `${baseExtensionUrl}/${ppp.appType}/${ppp.theme}/pages/${extension.page}.js`;
-            const pageCode = await (
-              await fetch(pageUrl, { cache: 'no-cache' })
-            ).text();
+            const pageUrl = `${baseExtensionUrl}/${ppp.appType}/${ppp.theme}/${this.page}-page.js`;
+            const module = await import(pageUrl);
 
-            await requireComponent(
-              `ppp-${extension.page}-${extension._id}-page`,
-              esm`${await new Tmpl().render(this, pageCode, {
-                baseExtensionUrl,
-                metaUrl: import.meta.url,
-                extension
-              })}`,
-              'default'
+            ppp.DesignSystem.getOrCreate().register(
+              (
+                await module.extension?.({
+                  ppp,
+                  baseExtensionUrl,
+                  metaUrl: import.meta.url,
+                  extension
+                })
+              )()
             );
           } else {
             this.pageNotFound = true;
@@ -248,10 +249,7 @@ export class App extends FoundationElement {
         } else {
           this.extension = void 0;
 
-          await requireComponent(
-            `ppp-${this.page}-page`,
-            `../${ppp.appType}/${ppp.theme}/pages/${this.page}.js`
-          );
+          await requireComponent(`ppp-${this.page}-page`);
         }
 
         this.pageNotFound = false;
@@ -261,66 +259,27 @@ export class App extends FoundationElement {
         this.pageNotFound = true;
       } finally {
         this.pageConnected = true;
+
+        this.$emit('navigateend');
       }
     } else {
+      this.$emit('navigateend');
+
       return this.navigate({ page: 'cloud-services' });
     }
   }
 
   async handleNewWorkspaceClick() {
     await requireComponent('ppp-modal');
+    await requireComponent('ppp-new-workspace-modal-page');
 
     this.newWorkspaceModal.visible = true;
   }
 
-  async createWorkspace() {
-    try {
-      this.busy = true;
-      this.toast.visible = false;
-      this.toast.source = this;
-      this.toastTitle = 'Новый терминал';
+  async showWidgetSelector() {
+    await requireComponent('ppp-modal');
+    await requireComponent('ppp-widget-selector-modal-page');
 
-      this.newWorkspaceModal.visibleChanged = (oldValue, newValue) =>
-        !newValue && (this.toast.visible = false);
-
-      await validate(this.workspaceName);
-
-      const payload = {
-        _id: this.workspaceName.value.trim(),
-        uuid: uuidv4(),
-        comment: this.workspaceComment.value.trim(),
-        created_at: new Date()
-      };
-
-      await this.ppp.user.functions.insertOne(
-        {
-          collection: 'workspaces'
-        },
-        payload
-      );
-
-      this.workspaces.push(payload);
-      Observable.notify(this, 'workspaces');
-
-      this.toast.appearance = 'success';
-      this.toast.dismissible = true;
-      this.toastText = i18n.t('operationDone');
-      this.toast.visible = true;
-    } catch (e) {
-      this.busy = false;
-      console.error(e);
-
-      if (/E11000/i.test(e.error)) {
-        invalidate(this.toast, {
-          errorMessage: 'Пространство с таким названием уже существует'
-        });
-      } else {
-        invalidate(this.toast, {
-          errorMessage: i18n.t('operationFailed')
-        });
-      }
-    } finally {
-      this.busy = false;
-    }
+    this.widgetSelectorModalPage.visible = true;
   }
 }

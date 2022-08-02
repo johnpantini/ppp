@@ -9,22 +9,7 @@ import { html } from './element/templating/template.js';
 import { ref } from './element/templating/ref.js';
 import { slotted } from './element/templating/slotted.js';
 import { endSlotTemplate, startSlotTemplate } from './patterns/start-end.js';
-import { FormAssociated } from './form-associated.js';
 import { FoundationElement } from './foundation-element.js';
-
-class _Button extends FoundationElement {}
-
-/**
- * A form-associated base class for the Button component.
- *
- * @internal
- */
-export class FormAssociatedButton extends FormAssociated(_Button) {
-  constructor() {
-    super(...arguments);
-    this.proxy = document.createElement('input');
-  }
-}
 
 /**
  * The template for the Button component.
@@ -82,7 +67,7 @@ export const buttonTemplate = (context, definition) => html`
  *
  * @public
  */
-export class Button extends FormAssociatedButton {
+export class Button extends FoundationElement {
   /**
    * Determines if the element should receive document focus on page load.
    *
@@ -92,66 +77,6 @@ export class Button extends FormAssociatedButton {
    */
   @attr({ mode: 'boolean' })
   autofocus;
-
-  /**
-   * The id of a form to associate the element to.
-   *
-   * @public
-   * @remarks
-   * HTML Attribute: form
-   */
-  @attr({ attribute: 'form' })
-  formId;
-
-  /**
-   * See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button | <button> element} for more details.
-   *
-   * @public
-   * @remarks
-   * HTML Attribute: formaction
-   */
-  @attr
-  formaction;
-
-  /**
-   * See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button | <button> element} for more details.
-   *
-   * @public
-   * @remarks
-   * HTML Attribute: formenctype
-   */
-  @attr
-  formenctype;
-
-  /**
-   * See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button | <button> element} for more details.
-   *
-   * @public
-   * @remarks
-   * HTML Attribute: formmethod
-   */
-  @attr
-  formmethod;
-
-  /**
-   * See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button | <button> element} for more details.
-   *
-   * @public
-   * @remarks
-   * HTML Attribute: formnovalidate
-   */
-  @attr({ mode: 'boolean' })
-  formnovalidate;
-
-  /**
-   * See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button | <button> element} for more details.
-   *
-   * @public
-   * @remarks
-   * HTML Attribute: formtarget
-   */
-  @attr
-  formtarget;
 
   /**
    * The button type.
@@ -173,32 +98,18 @@ export class Button extends FormAssociatedButton {
   @observable
   defaultSlottedContent;
 
+  @attr({ mode: 'boolean' })
+  disabled;
+
   constructor() {
     super(...arguments);
     /**
      * Submits the parent form
      */
     this.handleSubmission = () => {
-      if (!this.form) {
-        return;
-      }
-
-      const attached = this.proxy.isConnected;
-
-      if (!attached) {
-        this.attachProxy();
-      }
-
-      // Browser support for requestSubmit is not comprehensive
-      // so click the proxy if it isn't supported
-      typeof this.form.requestSubmit === 'function'
-        ? this.form.requestSubmit(this.proxy)
-        : this.proxy.click();
-
-      if (!attached) {
-        this.detachProxy();
-      }
+      this.form?.requestSubmit();
     };
+
     /**
      * Resets the parent form
      */
@@ -207,55 +118,13 @@ export class Button extends FormAssociatedButton {
     };
   }
 
-  formactionChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.formAction = this.formaction;
-    }
-  }
-
-  formenctypeChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.formEnctype = this.formenctype;
-    }
-  }
-
-  formmethodChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.formMethod = this.formmethod;
-    }
-  }
-
-  formnovalidateChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.formNoValidate = this.formnovalidate;
-    }
-  }
-
-  formtargetChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.formTarget = this.formtarget;
-    }
-  }
-
   typeChanged(previous, next) {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.type = this.type;
-    }
-
     next === 'submit' && this.addEventListener('click', this.handleSubmission);
     previous === 'submit' &&
       this.removeEventListener('click', this.handleSubmission);
     next === 'reset' && this.addEventListener('click', this.handleFormReset);
     previous === 'reset' &&
       this.removeEventListener('click', this.handleFormReset);
-  }
-
-  /**
-   * @internal
-   */
-  connectedCallback() {
-    super.connectedCallback();
-    this.proxy.setAttribute('type', this.type);
   }
 }
 

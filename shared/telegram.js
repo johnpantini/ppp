@@ -1,3 +1,9 @@
+export async function checkTelegramBotToken({ token }) {
+  return fetch(`https://api.telegram.org/bot${token}/getMe`, {
+    cache: 'no-cache'
+  });
+}
+
 export class TelegramBot {
   constructor({ token }) {
     this.token = token;

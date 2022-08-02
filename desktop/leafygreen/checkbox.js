@@ -13,6 +13,7 @@ export const checkboxStyles = (context, definition) =>
       outline: none;
       margin: calc(c * 1px) 0;
       user-select: none;
+      cursor: pointer;
     }
 
     :host(:hover) .control {
@@ -25,7 +26,7 @@ export const checkboxStyles = (context, definition) =>
       height: 14px;
       box-sizing: border-box;
       outline: none;
-      cursor: pointer;
+      cursor: inherit;
       border-radius: 3px;
       border: 2px solid rgb(61, 79, 88);
       overflow: hidden;
@@ -35,7 +36,7 @@ export const checkboxStyles = (context, definition) =>
       margin-left: 10px;
       font-family: ${bodyFont};
       font-size: 14px;
-      cursor: pointer;
+      cursor: inherit;
       color: rgb(0, 30, 43);
     }
 

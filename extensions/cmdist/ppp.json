@@ -1,8 +1,0 @@
-{
-  "page": "cmdist",
-  "version": 1,
-  "author": "johnpantini",
-  "repository": "https://github.com/johnpantini/ppp",
-  "title": "Cmdist",
-  "description": "In-browser shell for ppp servers"
-}

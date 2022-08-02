@@ -161,20 +161,20 @@ export const textFieldStyles = (context, definition) => css`
     border-radius: 6px;
   }
 
-  :host .root-container:hover input:not(:focus):not([disabled]) + .interaction-ring {
+  :host(:not([disabled])) .root-container:hover input:not(:focus) + .interaction-ring {
     box-shadow: rgb(232 237 235) 0 0 0 3px;
   }
 
   /* prettier-ignore */
 
-  :host([state='error']) .root-container:hover input:not(:focus):not([disabled]) + .interaction-ring {
+  :host([state='error']:not([disabled])) .root-container:hover input:not(:focus) + .interaction-ring {
     border-color: rgb(219, 48, 48);
     box-shadow: rgb(255 205 199) 0 0 0 3px;
   }
 
   /* prettier-ignore */
 
-  :host([state='valid']) .root-container:hover input:not(:focus) + .interaction-ring {
+  :host([state='valid']:not([disabled])) .root-container:hover input:not(:focus) + .interaction-ring {
     box-shadow: rgb(192 250 230) 0 0 0 3px;
     border-color: rgb(0, 163, 92);
   }
@@ -208,10 +208,14 @@ export const textFieldStyles = (context, definition) => css`
     padding-right: 30px;
   }
 
+  :host([disabled]) {
+    cursor: not-allowed;
+  }
+
   :host([disabled]) input {
     color: rgb(137, 151, 155);
     background-color: rgb(231, 238, 236);
-    cursor: not-allowed;
+    pointer-events: none;
   }
 
   :host([optional]) input {
@@ -237,6 +241,7 @@ export const textFieldStyles = (context, definition) => css`
   }
 
   .helper {
+    text-transform: none;
     font-size: 14px;
     min-height: 20px;
     padding-top: 4px;
@@ -319,8 +324,7 @@ export class TextField extends FoundationTextField {
  *
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/delegatesFocus | delegatesFocus}
  */
-export const textField = TextField.compose({
-  baseName: 'text-field',
+export default TextField.compose({
   template: textFieldTemplate,
   styles: textFieldStyles,
   shadowOptions: {

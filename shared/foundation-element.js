@@ -87,6 +87,13 @@ export class FoundationElement extends PPPElement {
    * @public
    */
   static compose(elementDefinition) {
+    if (!elementDefinition.baseName) {
+      elementDefinition.baseName = this.name
+        .replace(/([A-Z]($|[a-z]))/g, '-$1')
+        .replace(/(^-|-Element$)/g, '')
+        .toLowerCase();
+    }
+
     return (overrideDefinition = {}) =>
       new FoundationElementRegistry(
         this === FoundationElement ? class extends FoundationElement {} : this,

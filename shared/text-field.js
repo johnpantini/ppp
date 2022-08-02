@@ -14,22 +14,7 @@ import { ref } from './element/templating/ref.js';
 import { slotted } from './element/templating/slotted.js';
 import { endSlotTemplate, startSlotTemplate } from './patterns/start-end.js';
 import { whitespaceFilter } from './utilities/whitespace-filter.js';
-import { FormAssociated } from './form-associated.js';
 import { FoundationElement } from './foundation-element.js';
-
-class _TextField extends FoundationElement {}
-
-/**
- * A form-associated base class for the TextField component.
- *
- * @internal
- */
-export class FormAssociatedTextField extends FormAssociated(_TextField) {
-  constructor() {
-    super(...arguments);
-    this.proxy = document.createElement('input');
-  }
-}
 
 /**
  * Text field sub-types
@@ -134,7 +119,24 @@ export const textFieldTemplate = (context, definition) => html`
  *
  * @public
  */
-export class TextField extends FormAssociatedTextField {
+export class TextField extends FoundationElement {
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: value
+   */
+  @attr
+  value;
+
+  @attr({ mode: 'boolean' })
+  disabled;
+
+  /**
+   * The name of the input.
+   */
+  @attr
+  name;
+
   /**
    * When true, the control will be immutable by user interaction. See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly | readonly HTML attribute} for more information.
    * @public
@@ -240,74 +242,8 @@ export class TextField extends FormAssociatedTextField {
      * @remarks
      * HTML Attribute: type
      */
+    this.value = '';
     this.type = TextFieldType.text;
-  }
-
-  readOnlyChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.readOnly = this.readOnly;
-      this.validate();
-    }
-  }
-
-  autofocusChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.autofocus = this.autofocus;
-      this.validate();
-    }
-  }
-
-  placeholderChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.placeholder = this.placeholder;
-    }
-  }
-
-  typeChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.type = this.type;
-      this.validate();
-    }
-  }
-
-  listChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.setAttribute('list', this.list);
-      this.validate();
-    }
-  }
-
-  maxlengthChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.maxLength = this.maxlength;
-      this.validate();
-    }
-  }
-
-  minlengthChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.minLength = this.minlength;
-      this.validate();
-    }
-  }
-
-  patternChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.pattern = this.pattern;
-      this.validate();
-    }
-  }
-
-  sizeChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.size = this.size;
-    }
-  }
-
-  spellcheckChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.spellcheck = this.spellcheck;
-    }
   }
 
   /**
@@ -315,8 +251,6 @@ export class TextField extends FormAssociatedTextField {
    */
   connectedCallback() {
     super.connectedCallback();
-    this.proxy.setAttribute('type', this.type);
-    this.validate();
 
     if (this.autofocus) {
       DOM.queueUpdate(() => {
@@ -330,10 +264,15 @@ export class TextField extends FormAssociatedTextField {
    * @internal
    */
   handleTextInput() {
-    this.value = this.control.value;
+    this.value = this.control.value ?? '';
 
     if (this.value)
       this.state = 'default';
+  }
+
+  valueChanged(prev, next) {
+    if (next === null || next === undefined)
+      this.value = '';
   }
 
   /**

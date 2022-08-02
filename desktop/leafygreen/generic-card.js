@@ -11,7 +11,7 @@ export const genericCardStyles = (context, definition) => css`
     padding: 22px 32px 22px;
     position: relative;
     width: 370px;
-    border-radius: 7px;
+    border-radius: 24px;
     border: 1px solid rgb(231, 238, 236);
     box-shadow: rgba(6, 22, 33, 0.3) 0 4px 10px -4px;
     background-color: white;

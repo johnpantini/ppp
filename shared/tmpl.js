@@ -70,9 +70,9 @@ export class Tmpl {
     );
 
     return data
-      ? f(ctx, data, this)
+      ? f.call(ctx, ctx, data, this)
       : function (data) {
-          return f(ctx, data, this);
+          return f.call(ctx, ctx, data, this);
         };
   }
 }

@@ -73,7 +73,7 @@ export const tableStyles = (context, definition) => css`
 
   .cell a {
     background-color: transparent;
-    color: #006cbc;
+    color: #016bf8;
     text-decoration: none;
   }
 
@@ -96,6 +96,26 @@ export const tableStyles = (context, definition) => css`
     font-style: italic;
     padding: 5px;
     text-align: center;
+  }
+
+  .hotkey {
+    user-select: none;
+    font-family: "Source Code Pro", Menlo, monospace;
+    border: 1px solid rgb(28, 45, 56);
+    border-radius: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: rgb(0, 30, 43);
+    background-color: rgb(255, 255, 255);
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .label-with-hotkey {
+    display: flex;
+    flex-direction: row;
+    gap: 0 6px;
+    align-items: center;
   }
 `;
 

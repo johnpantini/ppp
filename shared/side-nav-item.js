@@ -6,10 +6,10 @@ import { applyMixins } from './utilities/apply-mixins.js';
 import { StartEnd } from './patterns/start-end.js';
 
 export class SideNavItem extends FoundationElement {
-  @attr
+  @attr({ mode: 'boolean' })
   disabled;
 
-  @attr
+  @attr({ mode: 'boolean' })
   active;
 }
 

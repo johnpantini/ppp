@@ -19,3 +19,11 @@ export const genericCardTemplate = (context, definition) => html`
     </div>
   </template>
 `;
+
+export function filterCards(cards, text) {
+  for (const card of Array.from(cards)) {
+    if (!text || new RegExp(text.trim(), 'ig').test(card.textContent))
+      card.style.display = 'initial';
+    else card.style.display = 'none';
+  }
+}

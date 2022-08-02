@@ -5,22 +5,7 @@ import { observable } from './element/observation/observable.js';
 import { html } from './element/templating/template.js';
 import { slotted } from './element/templating/slotted.js';
 import { FoundationElement } from './foundation-element.js';
-import { CheckableFormAssociated } from './form-associated.js';
 import { keySpace } from './web-utilities/key-codes.js';
-
-class _Radio extends FoundationElement {}
-
-/**
- * A form-associated base class for the Radio component.
- *
- * @internal
- */
-export class FormAssociatedRadio extends CheckableFormAssociated(_Radio) {
-  constructor() {
-    super(...arguments);
-    this.proxy = document.createElement('input');
-  }
-}
 
 /**
  * The template for the Radio component.
@@ -61,7 +46,15 @@ export const radioTemplate = (context, definition) => html`
  *
  * @public
  */
-export class Radio extends FormAssociatedRadio {
+export class Radio extends FoundationElement {
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: checked
+   */
+  @attr({ mode: 'boolean' })
+  checked;
+
   /**
    * When true, the control will be immutable by user interaction. See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly | readonly HTML attribute} for more information.
    * @public
@@ -74,8 +67,19 @@ export class Radio extends FormAssociatedRadio {
   /**
    * The name of the radio. See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input#htmlattrdefname | name attribute} for more info.
    */
-  @observable
+  @attr
   name;
+
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: value
+   */
+  @attr
+  value;
+
+  @attr({ mode: 'boolean' })
+  disabled;
 
   /**
    * @internal
@@ -85,13 +89,9 @@ export class Radio extends FormAssociatedRadio {
 
   constructor() {
     super();
-    /**
-     * The element's value to be included in form submission when checked.
-     * Default to "on" to reach parity with input[type="radio"]
-     *
-     * @internal
-     */
-    this.initialValue = 'on';
+
+    this.value = '';
+
     /**
      * @internal
      */
@@ -107,28 +107,6 @@ export class Radio extends FormAssociatedRadio {
 
       return true;
     };
-    this.proxy.setAttribute('type', 'radio');
-  }
-
-  readOnlyChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.readOnly = this.readOnly;
-    }
-  }
-
-  /**
-   * @internal
-   */
-  defaultCheckedChanged() {
-    if (this.$pppController.isConnected && !this.dirtyChecked) {
-      // Setting this.checked will cause us to enter a dirty state,
-      // but if we are clean when defaultChecked is changed, we want to stay
-      // in a clean state, so reset this.dirtyChecked
-      if (!this.isInsideRadioGroup()) {
-        this.checked = this.defaultChecked ?? false;
-        this.dirtyChecked = false;
-      }
-    }
   }
 
   /**
@@ -136,7 +114,6 @@ export class Radio extends FormAssociatedRadio {
    */
   connectedCallback() {
     super.connectedCallback();
-    this.validate();
 
     if (
       this.parentElement?.getAttribute('role') !== 'radiogroup' &&
@@ -146,32 +123,24 @@ export class Radio extends FormAssociatedRadio {
         this.setAttribute('tabindex', '0');
       }
     }
-
-    if (this.checkedAttribute) {
-      if (!this.dirtyChecked) {
-        // Setting this.checked will cause us to enter a dirty state,
-        // but if we are clean when defaultChecked is changed, we want to stay
-        // in a clean state, so reset this.dirtyChecked
-        if (!this.isInsideRadioGroup()) {
-          this.checked = this.defaultChecked ?? false;
-          this.dirtyChecked = false;
-        }
-      }
-    }
   }
 
   isInsideRadioGroup() {
-    const parent = this.closest('[role=radiogroup]');
-
-    return parent !== null;
+    return !!this.closest('[role=radiogroup]');
   }
 
   /**
    * @internal
    */
-  clickHandler(e) {
+  clickHandler() {
     if (!this.disabled && !this.readOnly && !this.checked) {
       this.checked = true;
+    }
+  }
+
+  checkedChanged(prev, next) {
+    if (prev !== undefined) {
+      this.$emit('change');
     }
   }
 }

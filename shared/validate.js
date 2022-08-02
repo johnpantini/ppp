@@ -84,7 +84,9 @@ async function validate(element, options) {
 /**
  *
  * @param element
- * @param options
+ * @param {Object} options
+ * @param {boolean} options.raiseException
+ * @param {boolean} options.skipScrollIntoView
  */
 function invalidate(element, options = {}) {
   const errorMessage = options.errorMessage ?? 'Неизвестная ошибка';
@@ -114,7 +116,10 @@ function invalidate(element, options = {}) {
       folding.classList.add('folding-open');
     }
 
-    element?.scrollIntoView();
+    if (!options.skipScrollIntoView) {
+      element?.scrollIntoView();
+    }
+
     element?.focus();
   }
 

@@ -5,22 +5,7 @@ import { observable } from './element/observation/observable.js';
 import { html } from './element/templating/template.js';
 import { slotted } from './element/templating/slotted.js';
 import { FoundationElement } from './foundation-element.js';
-import { CheckableFormAssociated } from './form-associated.js';
 import { keySpace } from './web-utilities/key-codes.js';
-
-class _Checkbox extends FoundationElement {}
-
-/**
- * A form-associated base class for the Checkbox component.
- *
- * @internal
- */
-export class FormAssociatedCheckbox extends CheckableFormAssociated(_Checkbox) {
-  constructor() {
-    super(...arguments);
-    this.proxy = document.createElement('input');
-  }
-}
 
 /**
  * The template for the Checkbox component.
@@ -66,19 +51,32 @@ export const checkboxTemplate = (context, definition) => html`
  *
  * @public
  */
-export class Checkbox extends FormAssociatedCheckbox {
+export class Checkbox extends FoundationElement {
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: name
+   */
+  @attr
+  name;
+
+  /**
+   * @public
+   * @remarks
+   * HTML Attribute: checked
+   */
+  @attr({ mode: 'boolean' })
+  checked;
+
   /**
    * When true, the control will be immutable by user interaction. See {@link https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/readonly | readonly HTML attribute} for more information.
    * @public
    * @remarks
    * HTML Attribute: readonly
    */
-  @attr({ attribute: "readonly", mode: "boolean" })
+  @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
 
-  /**
-   * @internal
-   */
   @observable
   defaultSlottedNodes;
 
@@ -90,13 +88,7 @@ export class Checkbox extends FormAssociatedCheckbox {
 
   constructor() {
     super();
-    /**
-     * The element's value to be included in form submission when checked.
-     * Default to "on" to reach parity with input[type="checkbox"]
-     *
-     * @internal
-     */
-    this.initialValue = 'on';
+
     /**
      * The indeterminate state of the control
      */
@@ -120,12 +112,11 @@ export class Checkbox extends FormAssociatedCheckbox {
         this.checked = !this.checked;
       }
     };
-    this.proxy.setAttribute('type', 'checkbox');
   }
 
-  readOnlyChanged() {
-    if (this.proxy instanceof HTMLInputElement) {
-      this.proxy.readOnly = this.readOnly;
+  checkedChanged(prev, next) {
+    if (prev !== undefined) {
+      this.$emit('change');
     }
   }
 }

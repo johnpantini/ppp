@@ -213,7 +213,7 @@ export const toastStyles = (context, definition) =>
       font-family: ${bodyFont};
       margin: unset;
       font-size: 16px;
-      line-height: 24px;
+      line-height: 28px;
       letter-spacing: 0;
       padding-right: 20px;
       font-weight: 700;
@@ -223,7 +223,7 @@ export const toastStyles = (context, definition) =>
       font-family: ${bodyFont};
       margin: unset;
       font-size: 16px;
-      line-height: 24px;
+      line-height: 28px;
       letter-spacing: 0;
       font-weight: 400;
     }

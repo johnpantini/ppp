@@ -33,7 +33,6 @@ export const sideNavItemStyles = (context, definition) =>
       padding: 4px 16px;
       box-sizing: border-box;
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
       font-weight: normal;
       text-align: left;
@@ -42,6 +41,13 @@ export const sideNavItemStyles = (context, definition) =>
       transition: background-color 150ms ease-in-out 0s;
       font-size: 14px;
       line-height: 20px;
+    }
+
+    :host(.ellipsis) .content {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 130px;
     }
 
     :host([disabled]) {
@@ -61,22 +67,13 @@ export const sideNavItemStyles = (context, definition) =>
       font-weight: bold;
     }
 
-    slot[name='start']::slotted(.action-icon) {
-      color: #007cad;
-    }
-
     :host([disabled]) slot[name='start']::slotted(.action-icon) {
-      color: rgb(184, 196, 194);
-    }
-
-    :host([disabled]) slot[name='start']::slotted(.balance-icon) {
-      opacity: 0.3;
+      color: rgb(184, 196, 194) !important;
     }
 
     .start,
     .end {
       display: inline-flex;
-      -webkit-box-align: center;
       align-items: center;
     }
 
@@ -89,8 +86,7 @@ export const sideNavItemStyles = (context, definition) =>
     }
   `;
 
-export const sideNavItem = SideNavItem.compose({
-  baseName: 'side-nav-item',
+export default SideNavItem.compose({
   template: sideNavItemTemplate,
   styles: sideNavItemStyles
 });

@@ -32,9 +32,7 @@ export const modalStyles = css`
     padding: 64px 18px;
     overflow-y: auto;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
-    -webkit-box-pack: center;
     justify-content: center;
     width: 100%;
   }
@@ -43,9 +41,9 @@ export const modalStyles = css`
     transition: all 150ms ease-in-out 0s;
     margin: auto;
     max-height: calc(100% - 64px);
-    padding: 32px;
-    border-radius: 7px;
-    box-shadow: rgba(6, 22, 33, 0.6) 0 5px 15px;
+    padding: 40px 36px;
+    border-radius: 24px;
+    box-shadow: rgb(0 30 43 / 60%) 0 8px 20px -8px;
     position: relative;
     color: rgb(33, 49, 60);
     background-color: rgb(255, 255, 255);
@@ -53,6 +51,10 @@ export const modalStyles = css`
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
+  }
+
+  .content:focus-visible {
+    outline: none;
   }
 
   :host([visible]) .content {
@@ -74,10 +76,10 @@ export const modalStyles = css`
     height: 28px;
     width: 28px;
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 18px;
+    right: 18px;
     transition: color 0.15s ease-in-out 0s;
-    color: rgb(93, 108, 116);
+    color: rgb(136, 147, 151);
   }
 
   .close::before {
@@ -91,7 +93,7 @@ export const modalStyles = css`
   }
 
   .close:hover {
-    color: rgb(33, 49, 60);
+    color: rgb(0, 30, 43);
   }
 
   .close:hover::before {
@@ -115,9 +117,7 @@ export const modalStyles = css`
     position: absolute;
     inset: 0;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
-    -webkit-box-pack: center;
     justify-content: center;
   }
 
@@ -137,8 +137,7 @@ export const modalStyles = css`
   }
 `;
 
-export const modal = Modal.compose({
-  baseName: 'modal',
+export default Modal.compose({
   template: modalTemplate,
   styles: modalStyles,
   closeIcon: x()

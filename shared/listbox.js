@@ -9,6 +9,7 @@ import { applyMixins } from './utilities/apply-mixins.js';
 import { isHTMLElement } from './web-utilities/dom.js';
 import { uniqueId } from './utilities/unique-id.js';
 import { html } from './element/templating/template.js';
+import { when } from './element/templating/when.js';
 import { slotted } from './element/templating/slotted.js';
 import { endSlotTemplate, startSlotTemplate } from './patterns/start-end.js';
 
@@ -52,6 +53,14 @@ export const listboxOptionTemplate = (context, definition) => html`
     <span class="content" part="content">
       <slot></slot>
     </span>
+    ${when(
+      (x) => x.selected,
+      html`
+        <slot name="checked-indicator">
+          ${definition.selectedIndicator ?? ''}
+        </slot>
+      `
+    )}
     ${endSlotTemplate(context, definition)}
   </template>
 `;
@@ -164,7 +173,7 @@ export class ListboxOption extends FoundationElement {
      * Track whether the value has been changed from the initial value
      */
     this.dirtyValue = false;
-    this.initialValue = this.initialValue || '';
+    this.initialValue = this.initialValue ?? '';
 
     if (text) {
       this.textContent = text;
@@ -285,6 +294,12 @@ export let ListboxRole;
  */
 export class Listbox extends FoundationElement {
   /**
+   *
+   * @internal
+   */
+  #options;
+
+  /**
    * The index of the selected option
    *
    * @public
@@ -367,7 +382,7 @@ export class Listbox extends FoundationElement {
      *
      * @internal
      */
-    this._options = [];
+    this.#options = [];
     /**
      * A collection of the selected options.
      *
@@ -462,11 +477,11 @@ export class Listbox extends FoundationElement {
   get options() {
     Observable.track(this, 'options');
 
-    return this._options;
+    return this.#options;
   }
 
   set options(value) {
-    this._options = value;
+    this.#options = value;
     Observable.notify(this, 'options');
   }
 
@@ -543,7 +558,6 @@ export class Listbox extends FoundationElement {
   /**
    * Sets an option as selected and gives it focus.
    *
-   * @param index - option index to select
    * @public
    */
   setSelectedOptions() {

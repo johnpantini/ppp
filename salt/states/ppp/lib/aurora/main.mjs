@@ -200,31 +200,37 @@ uWS
               });
 
               ws.connection.on('ConnectionPermit', () => {
-                ws.authenticated = true;
-                !ws.closed &&
+                if (!ws.closed) {
+                  ws.authenticated = true;
+
                   ws.send(
                     JSON.stringify([{ T: 'success', msg: 'authenticated' }])
                   );
+                }
               });
 
               ws.connection.on('Level2', (level2) => {
                 if (!ws.closed) {
-                  ws.send(JSON.stringify(level2.Quote?.map((quoteLine) => {
-                    return {
-                      T: 'q',
-                      S: UTEXTickerToTicker(level2.Symbol),
-                      ax: UTEXExchangeToAlpacaExchange(level2.Feed),
-                      ap: quoteLine.Ask?.Price ?? 0,
-                      as: (quoteLine.Ask?.Size ?? 0) / 100,
-                      bx: UTEXExchangeToAlpacaExchange(level2.Feed),
-                      bp: quoteLine.Bid?.Price ?? 0,
-                      bs: (quoteLine.Bid?.Size ?? 0) / 100,
-                      s: 0,
-                      t: new Date().toISOString(),
-                      c: [],
-                      z: '-'
-                    }
-                  }) ?? []));
+                  ws.send(
+                    JSON.stringify(
+                      level2.Quote?.map((quoteLine) => {
+                        return {
+                          T: 'q',
+                          S: UTEXTickerToTicker(level2.Symbol),
+                          ax: UTEXExchangeToAlpacaExchange(level2.Feed),
+                          ap: quoteLine.Ask?.Price ?? 0,
+                          as: (quoteLine.Ask?.Size ?? 0) / 100,
+                          bx: UTEXExchangeToAlpacaExchange(level2.Feed),
+                          bp: quoteLine.Bid?.Price ?? 0,
+                          bs: (quoteLine.Bid?.Size ?? 0) / 100,
+                          s: 0,
+                          t: new Date().toISOString(),
+                          c: [],
+                          z: '-'
+                        };
+                      }) ?? []
+                    )
+                  );
                 }
               });
 

@@ -15,7 +15,6 @@ import { appearanceBehavior } from '../../shared/utilities/behaviors.js';
 
 import { bodyFont } from './design-tokens.js';
 
-// TODO - ripple
 export const buttonTemplate = (context, definition) => html`
   <template>
     <button
@@ -55,7 +54,6 @@ export const buttonTemplate = (context, definition) => html`
       aria-roledescription="${(x) => x.ariaRoledescription}"
       ${ref('control')}
     >
-      <div class="ripple-container"></div>
       <div class="content-container">
         ${startSlotTemplate(context, definition)}
         <span class="content" part="content">
@@ -70,12 +68,6 @@ export const buttonTemplate = (context, definition) => html`
 export const baseButtonStyles = (context, definition) =>
   css`
     ${display('inline-flex')}
-    .ripple-container {
-      overflow: hidden;
-      border-radius: 3px;
-      position: absolute;
-      inset: 0;
-    }
 
     .content-container {
       display: flex;
@@ -205,8 +197,13 @@ export const dangerButtonStyles = (context, definition) => css`
 
 export const disabledButtonStyles = (context, definition) =>
   css`
+    :host([disabled]) {
+      pointer-events: none;
+    }
+
     :host([disabled]) button.control,
     :host([disabled]) button.control:hover {
+      pointer-events: none;
       cursor: not-allowed;
       background-color: rgb(232, 237, 235);
       border-color: rgb(193, 199, 198);
@@ -224,9 +221,6 @@ export const buttonStyles = (context, definition) =>
   css`
     ${baseButtonStyles(context, definition)}
     ${disabledButtonStyles(context, definition)}
-    slot[name='end']::slotted(.spinner-icon) {
-      color: #c0fae6;
-    }
 
     :host(.xsmall) .control {
       height: 22px;
