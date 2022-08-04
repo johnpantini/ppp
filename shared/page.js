@@ -5,7 +5,6 @@ import { Observable, observable } from './element/observation/observable.js';
 import { invalidate } from './validate.js';
 import { html, requireComponent } from './template.js';
 import { ConflictError, NotFoundError } from './http-errors.js';
-import { bufferToString, generateIV } from './ppp-crypto.js';
 import { attr } from './element/components/attributes.js';
 import { Tmpl } from './tmpl.js';
 import { keyEnter } from './web-utilities/key-codes.js';
@@ -16,6 +15,15 @@ import ppp from '../ppp.js';
  * A minimal base class for PPP Page.
  */
 export class Page extends FoundationElement {
+  /**
+   * Disabled pages do not allow form submission.
+   */
+  @attr({ mode: 'boolean' })
+  disabled;
+
+  /**
+   * If true, the header will be hidden from the page.
+   */
   @attr({ mode: 'boolean' })
   headless;
 
@@ -57,13 +65,10 @@ export class Page extends FoundationElement {
     Observable.notify(ppp.app.toast, 'source');
   }
 
-  // TODO
   constructor() {
     super();
 
     this.page = {};
-    this.document = {};
-    this.documents = [];
   }
 
   t(key, options) {
@@ -383,13 +388,13 @@ export class Page extends FoundationElement {
     }
   }
 
-  async connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
 
     const pppPage = this.shadowRoot.querySelector('ppp-page');
 
     if (pppPage) {
-      // This instance is a subclass view.
+      // This instance is a subclass view (for instance, ppp-some-page).
       this.page = pppPage;
       this.page.view = this.page.view ?? this;
 
@@ -399,20 +404,13 @@ export class Page extends FoundationElement {
       if (ppp.app) {
         ppp.app.pageConnected = true;
       }
-
-      if (typeof this.readDocument === 'function') {
-        await this.readDocument();
-      }
-
-      if (typeof this.populateDocuments === 'function') {
-        await this.populateDocuments();
-      }
     } else {
       // This instance is the ppp-page itself.
       this.page = this;
 
       const parentNode = this.page.parentNode;
 
+      // Automatic form submission via Enter.
       if (/^form$/i.test(parentNode?.tagName)) {
         this.form = parentNode;
         this.form.page = this.page;
@@ -449,11 +447,12 @@ export class PageWithDocument {
   @observable
   document;
 
-  async notFound() {
-    await requireComponent('ppp-not-found-page');
+  ctor() {
+    this.document = {};
+  }
 
-    this.style.display = 'none';
-    ppp.app.pageNotFound = true;
+  connectedCallback() {
+    void this.readDocument();
   }
 
   async readDocument() {
@@ -534,6 +533,14 @@ export class PageWithDocuments {
   @observable
   documents;
 
+  ctor() {
+    this.documents = [];
+  }
+
+  connectedCallback() {
+    void this.populateDocuments();
+  }
+
   async populateDocuments() {
     this.beginOperation();
 
@@ -581,13 +588,18 @@ export class PageWithDocuments {
  *
  * @var {HTMLElement} shiftLockContainer
  */
-export class PageWithShiftLock extends Page {
-  connectedCallback() {
-    super.connectedCallback();
+export class PageWithShiftLock {
+  ctor() {
+    this.onShiftLockKeyUpDown = this.onShiftLockKeyUpDown.bind(this);
+  }
 
-    this.keyDownUpHandler = (event) => {
-      if (event.key === 'Shift' && this.shiftLockContainer) {
-        this.shiftLockContainer.shadowRoot
+  onShiftLockKeyUpDown(event) {
+    if (this.shiftLockContainer && !Array.isArray(this.shiftLockContainer))
+      this.shiftLockContainer = [this.shiftLockContainer];
+
+    if (event.key === 'Shift') {
+      this.shiftLockContainer?.forEach((container) => {
+        container.shadowRoot
           .querySelectorAll('[shiftlock]')
           .forEach((element) => {
             if (event.type === 'keydown') {
@@ -596,21 +608,21 @@ export class PageWithShiftLock extends Page {
               element.setAttribute('disabled', '');
             }
           });
-      }
-    };
+      });
+    }
+  }
 
-    document.addEventListener('keydown', this.keyDownUpHandler, {
+  connectedCallback() {
+    document.addEventListener('keydown', this.onShiftLockKeyUpDown, {
       passive: true
     });
-    document.addEventListener('keyup', this.keyDownUpHandler, {
+    document.addEventListener('keyup', this.onShiftLockKeyUpDown, {
       passive: true
     });
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
-
-    document.removeEventListener('keydown', this.keyDownUpHandler);
-    document.removeEventListener('keyup', this.keyDownUpHandler);
+    document.removeEventListener('keydown', this.onShiftLockKeyUpDown);
+    document.removeEventListener('keyup', this.onShiftLockKeyUpDown);
   }
 }
