@@ -32,23 +32,6 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
-            <h5>Ключ Tailscale</h5>
-            <p>Ключ для авторизации в сети <a href="https://tailscale.com/"
-                                              target="_blank" rel="noopener">Tailscale</a>.
-              Рекомендуется создать
-              эфемерный ключ с возможностью повторных использований.</p>
-          </div>
-          <div class="input-group">
-            <${'ppp-text-field'}
-              type="password"
-              placeholder="tskey-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxx"
-              value="${(x) => x.document.tailscaleKey}"
-              ${ref('tailscaleKey')}
-            ></ppp-text-field>
-          </div>
-        </section>
-        <section>
-          <div class="label-group">
             <h5>Платформа для развёртывания</h5>
             <p>
               <${'ppp-badge'}
@@ -135,6 +118,25 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
             >
               Добавить API Redis
             </ppp-button>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Ключ Tailscale</h5>
+            <p>Ключ для авторизации в сети <a href="https://tailscale.com/"
+                                              target="_blank" rel="noopener">Tailscale</a>,
+              если требуется функциональность прокси-сервера.
+              Рекомендуется создать
+              эфемерный ключ с возможностью повторных использований.</p>
+          </div>
+          <div class="input-group">
+            <${'ppp-text-field'}
+              optional
+              type="password"
+              placeholder="tskey-xxxxxxxxxxxx-xxxxxxxxxxxxxxxxxxxxx"
+              value="${(x) => x.document.tailscaleKey}"
+              ${ref('tailscaleKey')}
+            ></ppp-text-field>
           </div>
         </section>
       </ppp-page>

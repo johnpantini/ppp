@@ -10,11 +10,13 @@ export class ServicePppAspirantPage extends Page {
 
   async validate() {
     await validate(this.name);
-    await validate(this.tailscaleKey);
-    await validate(this.tailscaleKey, {
-      hook: async (value) => value?.startsWith('tskey'),
-      errorMessage: 'Ключ должен начинаться с tskey'
-    });
+
+    if (this.tailscaleKey.value.trim())
+      await validate(this.tailscaleKey, {
+        hook: async (value) => value?.startsWith('tskey'),
+        errorMessage: 'Ключ должен начинаться с tskey'
+      });
+
     await validate(this.deploymentApiId);
     await validate(this.redisApiId);
   }
@@ -136,7 +138,7 @@ export class ServicePppAspirantPage extends Page {
       REDIS_USERNAME: redisApi.username?.toString(),
       REDIS_PASSWORD: redisApi.password?.toString(),
       REDIS_DATABASE: redisApi.database.toString(),
-      TAILSCALE_AUTH_KEY: this.document.tailscaleKey
+      TAILSCALE_AUTH_KEY: this.document.tailscaleKey ?? ''
     };
 
     if (!service) {
@@ -256,7 +258,7 @@ export class ServicePppAspirantPage extends Page {
       {
         $set: {
           name: this.name.value.trim(),
-          tailscaleKey: this.tailscaleKey.value,
+          tailscaleKey: this.tailscaleKey.value.trim(),
           deploymentApiId: this.deploymentApiId.value,
           redisApiId: this.redisApiId.value,
           version: 1,
