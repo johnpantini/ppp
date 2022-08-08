@@ -1,10 +1,5 @@
 import { createServer } from 'http';
 
-process.on('unhandledRejection', (err) => {
-  console.log(err);
-  process.exit(1);
-});
-
 async function handleFetch(request, response) {
   if (!/post/i.test(request.method)) {
     return response.writeHead(405).end();
