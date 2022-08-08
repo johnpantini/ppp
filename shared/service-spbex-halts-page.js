@@ -3,7 +3,6 @@ import { invalidate, validate } from './validate.js';
 import { Tmpl } from './tmpl.js';
 import { SERVICE_STATE, SERVICES } from './const.js';
 import { applyMixins } from './utilities/apply-mixins.js';
-import { Observable } from './element/observation/observable.js';
 import { uuidv4 } from './ppp-crypto.js';
 import ppp from '../ppp.js';
 
@@ -145,9 +144,7 @@ export class ServiceSpbexHaltsPage extends Page {
           const port = json.data?.ports?.find((p) => p.internalPort === 32456);
 
           if (port) {
-            this.document.proxyURL = `https://${port.dns}/fetch`;
-
-            Observable.notify(this, 'document');
+            this.proxyURL.value = `https://${port.dns}/fetch`;
           } else {
             invalidate(this.aspirantId, {
               errorMessage: 'Проблема с получением ссылки - порт не найден',
