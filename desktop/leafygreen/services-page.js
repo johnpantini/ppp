@@ -3,6 +3,7 @@ import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
+import { actionPageMountPoint } from '../../shared/page.js';
 import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
@@ -110,7 +111,7 @@ export const servicesPageTemplate = (context, definition) => html`
                     disabled
                     shiftlock
                     class="xsmall"
-                    @click="${() => x.simpleRemove(datum._id)}"
+                    @click="${() => x.removeService(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -122,6 +123,7 @@ export const servicesPageTemplate = (context, definition) => html`
       </ppp-table>
       <span slot="actions"></span>
     </ppp-page>
+    ${actionPageMountPoint}
   </template>
 `;
 

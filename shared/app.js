@@ -7,6 +7,10 @@ import { requireComponent } from './template.js';
 import { debounce } from './ppp-throttle.js';
 import ppp from '../ppp.js';
 
+function onNavigateStart() {
+  ppp?.app?.terminalModal && (ppp.app.terminalModal.visible = false);
+}
+
 export class App extends FoundationElement {
   /**
    * The current page.
@@ -96,6 +100,10 @@ export class App extends FoundationElement {
   connectedCallback() {
     super.connectedCallback();
 
+    this.addEventListener('navigatestart', onNavigateStart, {
+      passive: true
+    });
+
     this.sideNav.expandedChanged = (oldValue, newValue) => {
       this.setSetting('sideNavCollapsed', !newValue);
     };
@@ -114,6 +122,12 @@ export class App extends FoundationElement {
         replace: true
       }
     );
+  }
+
+  disconnectedCallback() {
+    this.removeEventListener('navigatestart', onNavigateStart);
+
+    super.disconnectedCallback();
   }
 
   @debounce(100)
@@ -281,5 +295,18 @@ export class App extends FoundationElement {
     await requireComponent('ppp-widget-selector-modal-page');
 
     this.widgetSelectorModalPage.visible = true;
+  }
+
+  async openTerminal(title) {
+    await requireComponent('ppp-terminal');
+    await requireComponent('ppp-modal');
+
+    if (title) {
+      this.terminalModalTitle.textContent = title;
+    }
+
+    this.terminalModal.visible = true;
+
+    return this.terminalWindow.terminal;
   }
 }

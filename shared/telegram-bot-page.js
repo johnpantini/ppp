@@ -1,6 +1,5 @@
-import { Page, PageWithDocument } from './page.js';
+import { Page } from './page.js';
 import { invalidate, validate } from './validate.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 import { TelegramBot, checkTelegramBotToken } from './telegram.js';
 import { maybeFetchError } from './fetch-error.js';
 import ppp from '../ppp.js';
@@ -90,5 +89,3 @@ export class TelegramBotPage extends Page {
     };
   }
 }
-
-applyMixins(TelegramBotPage, PageWithDocument);

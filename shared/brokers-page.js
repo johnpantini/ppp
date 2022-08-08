@@ -1,7 +1,7 @@
-import { PageWithDocuments, PageWithShiftLock } from './page.js';
+import { Page, PageWithDocuments, PageWithShiftLock } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 
-export class BrokersPage extends PageWithShiftLock {
+export class BrokersPage extends Page {
   collection = 'brokers';
 
   async populate() {
@@ -10,10 +10,12 @@ export class BrokersPage extends PageWithShiftLock {
       .get('mongodb-atlas')
       .db('ppp')
       .collection('[%#this.page.view.collection%]')
-      .find()
+      .find({
+        removed: { $ne: true }
+      })
       .sort({ updatedAt: -1 });
     };
   }
 }
 
-applyMixins(BrokersPage, PageWithDocuments);
+applyMixins(BrokersPage, PageWithDocuments, PageWithShiftLock);

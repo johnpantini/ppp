@@ -1,8 +1,8 @@
-import { Page, PageWithDocument } from './page.js';
+import { Page, PageWithService } from './page.js';
+import { applyMixins } from './utilities/apply-mixins.js';
 import { invalidate, validate } from './validate.js';
 import { SERVICE_STATE, SERVICES } from './const.js';
 import { maybeFetchError } from './fetch-error.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 import ppp from '../ppp.js';
 
 export class ServicePppAspirantPage extends Page {
@@ -123,13 +123,26 @@ export class ServicePppAspirantPage extends Page {
       (s) => s.name === 'ppp-aspirant'
     );
 
-    this.projectId = project.id;
+    this.projectID = project.id;
+
+    const redisApi = this.redisApiId.datum();
+    const runtimeEnvironment = {
+      NODE_TLS_REJECT_UNAUTHORIZED: '0',
+      ASPIRANT_ID: this.document._id,
+      SERVICE_MACHINE_URL: serviceMachineUrl,
+      REDIS_HOST: redisApi.host,
+      REDIS_PORT: redisApi.port.toString(),
+      REDIS_TLS: !!redisApi.tls ? '1' : '',
+      REDIS_USERNAME: redisApi.username?.toString(),
+      REDIS_PASSWORD: redisApi.password?.toString(),
+      REDIS_DATABASE: redisApi.database.toString(),
+      TAILSCALE_AUTH_KEY: this.document.tailscaleKey
+    };
 
     if (!service) {
-      const redisApi = this.redisApiId.datum();
-
-      await maybeFetchError(
-        await fetch(new URL('fetch', serviceMachineUrl).toString(), {
+      const rNewService = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
           cache: 'no-cache',
           method: 'POST',
           body: JSON.stringify({
@@ -177,23 +190,64 @@ export class ServicePppAspirantPage extends Page {
                   dockerWorkDir: '/salt/states/ppp/lib'
                 }
               },
-              runtimeEnvironment: {
-                NODE_TLS_REJECT_UNAUTHORIZED: '0',
-                ASPIRANT_ID: this.document._id,
-                SERVICE_MACHINE_URL: serviceMachineUrl,
-                REDIS_HOST: redisApi.host,
-                REDIS_PORT: redisApi.port.toString(),
-                REDIS_TLS: !!redisApi.tls ? '1' : '',
-                REDIS_USERNAME: redisApi.username?.toString(),
-                REDIS_PASSWORD: redisApi.password?.toString(),
-                REDIS_DATABASE: redisApi.database.toString(),
-                TAILSCALE_AUTH_KEY: this.document.tailscaleKey
-              }
+              runtimeEnvironment
             })
           })
-        }),
+        }
+      );
+
+      await maybeFetchError(
+        rNewService,
         'Не удалось создать сервис PPP Aspirant, подробности в консоли браузера.'
       );
+
+      this.serviceID = (await rNewService.json()).data.id;
+    } else {
+      this.serviceID = service.id;
+
+      const rGetCurrentEnvironment = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'GET',
+            url: `https://api.northflank.com/v1/projects/${project.id}/services/${this.serviceID}/runtime-environment`,
+            headers: {
+              Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+            }
+          })
+        }
+      );
+
+      await maybeFetchError(
+        rGetCurrentEnvironment,
+        'Не удалось прочитать переменные окружения сервиса.'
+      );
+
+      if (
+        JSON.stringify(
+          (await rGetCurrentEnvironment.json()).data.runtimeEnvironment
+        ) !== JSON.stringify(runtimeEnvironment)
+      ) {
+        await maybeFetchError(
+          await fetch(new URL('fetch', serviceMachineUrl).toString(), {
+            cache: 'no-cache',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'POST',
+              url: `https://api.northflank.com/v1/projects/${project.id}/services/${this.serviceID}/runtime-environment`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+              },
+              body: JSON.stringify({
+                runtimeEnvironment
+              })
+            })
+          })
+        );
+      }
     }
   }
 
@@ -215,14 +269,109 @@ export class ServicePppAspirantPage extends Page {
         }
       },
       this.#deploy,
-      {
+      () => ({
         $set: {
+          projectID: this.projectID,
+          serviceID: this.serviceID,
           state: SERVICE_STATE.ACTIVE,
           updatedAt: new Date()
         }
-      }
+      })
     ];
+  }
+
+  async restart() {
+    if (this.document.state === SERVICE_STATE.STOPPED) {
+      return maybeFetchError(
+        await fetch(
+          new URL(
+            'fetch',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'no-cache',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'POST',
+              url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/resume`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.document.deploymentApi.token}`
+              }
+            })
+          }
+        ),
+        'Не удалось перезапустить сервис.'
+      );
+    } else {
+      return maybeFetchError(
+        await fetch(
+          new URL(
+            'fetch',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'no-cache',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'POST',
+              url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/restart`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.document.deploymentApi.token}`
+              }
+            })
+          }
+        ),
+        'Не удалось перезапустить сервис.'
+      );
+    }
+  }
+
+  async stop() {
+    return maybeFetchError(async () => {
+      const request = await fetch(
+        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'POST',
+            url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/pause`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
+          })
+        }
+      );
+
+      return {
+        request,
+        ok: request.ok || request.status === 409
+      };
+    }, 'Не удалось остановить сервис.');
+  }
+
+  async cleanup() {
+    return maybeFetchError(
+      await fetch(
+        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'DELETE',
+            url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}`,
+            headers: {
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
+          })
+        }
+      ),
+      'Не удалось удалить сервис. Удалите его вручную в панели управления Northflank.'
+    );
   }
 }
 
-applyMixins(ServicePppAspirantPage, PageWithDocument);
+applyMixins(ServicePppAspirantPage, PageWithService);

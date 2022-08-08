@@ -1,9 +1,8 @@
 /** @decorator */
 
-import { Page, PageWithDocument } from './page.js';
+import { Page } from './page.js';
 import { validate } from './validate.js';
 import { Observable, observable } from './element/observation/observable.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 import { DOM } from './element/dom.js';
 import ppp from '../ppp.js';
 
@@ -175,5 +174,3 @@ export class WidgetPage extends Page {
     await this.loadWidget();
   }
 }
-
-applyMixins(WidgetPage, PageWithDocument);

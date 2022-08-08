@@ -20,6 +20,9 @@ export class FoundationElement extends PPPElement {
   constructor() {
     super(...arguments);
     this._presentation = void 0;
+
+    // For partial classes
+    if (typeof this.ctor === 'function') this.ctor.call(this);
   }
 
   /**

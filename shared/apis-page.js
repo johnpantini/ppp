@@ -1,7 +1,7 @@
-import { PageWithDocuments, PageWithShiftLock } from './page.js';
+import { Page, PageWithDocuments, PageWithShiftLock } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 
-export class ApisPage extends PageWithShiftLock {
+export class ApisPage extends Page {
   collection = 'apis';
 
   async populate() {
@@ -18,4 +18,4 @@ export class ApisPage extends PageWithShiftLock {
   }
 }
 
-applyMixins(ApisPage, PageWithDocuments);
+applyMixins(ApisPage, PageWithDocuments, PageWithShiftLock);

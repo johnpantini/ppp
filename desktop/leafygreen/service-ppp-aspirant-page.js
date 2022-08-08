@@ -15,10 +15,7 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
               ? `Сервис - PPP Aspirant - ${x.document.name}`
               : 'Сервис - PPP Aspirant'}
         </span>
-        ${when(
-          (x) => x.document._id,
-          serviceControlsTemplate
-        )}
+        ${when((x) => x.document._id, serviceControlsTemplate)}
         <section>
           <div class="label-group">
             <h5>Название сервиса</h5>
@@ -36,7 +33,10 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
         <section>
           <div class="label-group">
             <h5>Ключ Tailscale</h5>
-            <p>Ключ для авторизации в сети Tailscale</p>
+            <p>Ключ для авторизации в сети <a href="https://tailscale.com/"
+                                              target="_blank" rel="noopener">Tailscale</a>.
+              Рекомендуется создать
+              эфемерный ключ с возможностью повторных использований.</p>
           </div>
           <div class="input-group">
             <${'ppp-text-field'}
@@ -83,7 +83,7 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
                     .sort({ updatedAt: -1 });
                 };
               }}"
-              :map="${() => ppp.decryptDocumentsMapping()}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
             ></ppp-collection-select>
             <${'ppp-button'}
               class="margin-top"
@@ -126,7 +126,7 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
                     .sort({ updatedAt: -1 });
                 };
               }}"
-              :map="${() => ppp.decryptDocumentsMapping()}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
             ></ppp-collection-select>
             <ppp-button
               class="margin-top"

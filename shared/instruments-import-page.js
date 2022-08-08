@@ -1,4 +1,4 @@
-import { Page, PageWithDocument } from './page.js';
+import { Page } from './page.js';
 
 export class InstrumentsImportPage extends Page {
 

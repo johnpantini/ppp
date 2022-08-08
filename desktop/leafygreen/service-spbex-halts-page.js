@@ -2,12 +2,20 @@ import { ServiceSpbexHaltsPage } from '../../shared/service-spbex-halts-page.js'
 import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { when } from '../../shared/element/templating/when.js';
-import { css } from '../../shared/element/styles/css.js';
 import { pageStyles } from './page.js';
 import { serviceControlsTemplate } from './service-page.js';
 import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
+
+const exampleProxyHeaders = `{
+  'User-Agent': '[%#navigator.userAgent%]',
+  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+  'Accept-Language': 'ru-RU,ru;q=0.9',
+  'Cache-Control': 'no-cache',
+  Referer: 'https://spbexchange.ru/ru/about/news.aspx?sectionrss=30',
+  Cookie: ''
+}`;
 
 const exampleInstrumentsCode = `/**
  * Возвращает список инструментов с подробными данными.
@@ -28,6 +36,7 @@ const instruments =
 instruments.push({symbol: {isin: 'RU000AOJQ9P9', ticker: 'SPBE', showName: 'ПАО "СПБ Биржа"', currency: 'USD'}});
 instruments.push({symbol: {isin: 'US05637B1052', ticker: 'BLZE', showName: 'Backblaze, Inc.', currency: 'USD'}});
 instruments.push({symbol: {isin: 'US33829M1018', ticker: 'FIVE', showName: 'Five Below, Inc.', currency: 'USD'}});
+instruments.push({symbol: {isin: 'US72341T1034', ticker: 'PING', showName: 'Ping Identity Holding Corp', currency: 'USD'}});
 
 return instruments.map((i) => {
   return {
@@ -113,7 +122,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                     .sort({ updatedAt: -1 });
                 };
               }}"
-              :map="${() => ppp.decryptDocumentsMapping()}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
             ></ppp-collection-select>
             <${'ppp-button'}
               class="margin-top"
@@ -138,7 +147,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               ${ref('proxyURL')}
             ></ppp-text-field>
             <div
-              style="display: flex; flex-direction: column; gap: 0 0; align-items: start">
+              style="display: flex; flex-direction: column; align-items: start">
               <ppp-collection-select
                 ${ref('aspirantId')}
                 :context="${(x) => x}"
@@ -160,16 +169,38 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                       .sort({ updatedAt: -1 });
                   };
                 }}"
-                :map="${() => ppp.decryptDocumentsMapping()}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-collection-select>
               <${'ppp-button'}
                 class="margin-top"
                 @click="${(x) => x.setProxyURLFromPPPAspirant()}"
                 appearance="primary"
               >
-                Установить прокси-ресурс из сервиса
+                Установить прокси-ресурс из PPP Aspirant
               </ppp-button>
             </div>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Заголовки запроса</h5>
+            <p>Заголовки, которые будут передаваться с запросами к прокси-ресурсу.</p>
+          </div>
+          <div class="input-group">
+            <${'ppp-codeflask'}
+              :code="${(x) =>
+                x.document.proxyHeaders ?? exampleProxyHeaders}"
+              ${ref('proxyHeaders')}
+            ></ppp-codeflask>
+            <${'ppp-button'}
+              class="margin-top"
+              @click="${(x) =>
+                x.proxyHeaders.updateCode(exampleProxyHeaders)}"
+              appearance="primary"
+            >
+              Восстановить значение по умолчанию
+            </ppp-button>
+          </div>
         </section>
         <section>
           <div class="label-group">
@@ -183,6 +214,20 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               placeholder="5"
               value="${(x) => x.document.interval ?? '5'}"
               ${ref('interval')}
+            ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Глубина хранения</h5>
+            <p>Максимальное количество записей для хранения в базе данных.</p>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              type="number"
+              placeholder="50"
+              value="${(x) => x.document.depth ?? '50'}"
+              ${ref('depth')}
             ></ppp-text-field>
           </div>
         </section>
@@ -244,7 +289,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                     .sort({ updatedAt: -1 });
                 };
               }}"
-              :map="${() => ppp.decryptDocumentsMapping()}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
             ></ppp-collection-select>
             <ppp-button
               class="margin-top"
@@ -313,19 +358,8 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
   </template>
 `;
 
-export const serviceSpbexHaltsPageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-    ppp-modal .description {
-      padding: 10px 16px 10px 20px;
-      border-radius: 7px;
-      background-color: rgb(33, 49, 60);
-      border: 1px solid rgb(231, 238, 236);
-    }
-  `;
-
 // noinspection JSUnusedGlobalSymbols
 export default ServiceSpbexHaltsPage.compose({
   template: serviceSpbexHaltsPageTemplate,
-  styles: serviceSpbexHaltsPageStyles
+  styles: pageStyles
 });

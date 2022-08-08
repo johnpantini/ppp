@@ -1,17 +1,46 @@
 /**
  * Apply mixins to a constructor.
- * Sourced from {@link https://www.typescriptlang.org/docs/handbook/mixins.html | TypeScript Documentation }.
  * @public
  */
 export function applyMixins(derivedCtor, ...baseCtors) {
   baseCtors.forEach((baseCtor) => {
     Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
       if (name !== 'constructor') {
-        Object.defineProperty(
+        const deepValue = derivedCtor.prototype[name];
+        const existingDescriptor = Object.getOwnPropertyDescriptor(
           derivedCtor.prototype,
-          name,
-          Object.getOwnPropertyDescriptor(baseCtor.prototype, name)
+          name
         );
+
+        const newDescriptor = Object.getOwnPropertyDescriptor(
+          baseCtor.prototype,
+          name
+        );
+
+        // Fresh property/method
+        if (!existingDescriptor && !deepValue) {
+          Object.defineProperty(derivedCtor.prototype, name, newDescriptor);
+        } else if (typeof existingDescriptor?.value === 'function') {
+          // Own property
+          const _ = newDescriptor.value;
+
+          newDescriptor.value = function () {
+            existingDescriptor.value.apply(this, arguments);
+
+            return _.apply(this, arguments);
+          };
+
+          Object.defineProperty(derivedCtor.prototype, name, newDescriptor);
+        } else if (typeof deepValue === 'function') {
+          // Deep property somewhere in the prototype chain
+          const _ = newDescriptor.value;
+
+          derivedCtor.prototype[name] = function () {
+            deepValue.apply(this, arguments);
+
+            return _.apply(this, arguments);
+          };
+        }
       }
     });
 

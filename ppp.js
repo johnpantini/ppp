@@ -317,7 +317,7 @@ export default new (class {
     return clone;
   }
 
-  decryptDocumentsMapping(excludedKeys = []) {
+  decryptDocumentsTransformation(excludedKeys = []) {
     return async (d) => {
       if (Array.isArray(d)) {
         const mapped = [];

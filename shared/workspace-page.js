@@ -1,8 +1,7 @@
 /** @decorator */
 
-import { Page, PageWithDocument } from './page.js';
+import { Page } from './page.js';
 import { observable } from './element/observation/observable.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 
 export class WorkspacePage extends Page {
   collection = 'workspaces';
@@ -35,5 +34,3 @@ export class WorkspacePage extends Page {
     await super.connectedCallback();
   }
 }
-
-applyMixins(WorkspacePage, PageWithDocument);

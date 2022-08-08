@@ -27,11 +27,11 @@ export default function (i18n) {
         [SERVER_TYPES.KEY]: 'Вход по приватному ключу'
       },
       serverState: {
-        ok: 'В работе',
+        ok: 'Активен',
         failed: 'Неисправен'
       },
       serviceState: {
-        [SERVICE_STATE.ACTIVE]: 'В работе',
+        [SERVICE_STATE.ACTIVE]: 'Активен',
         [SERVICE_STATE.STOPPED]: 'Остановлен',
         [SERVICE_STATE.FAILED]: 'Неисправен',
         'N/A': 'Нет данных'

@@ -24,7 +24,7 @@ export const apiNorthflankPageTemplate = (context, definition) => html`
               placeholder="Northflank"
               value="${(x) => x.document.name}"
               ${ref('name')}
-            ></>
+            ></ppp-text-field>
           </div>
         </section>
         <section>

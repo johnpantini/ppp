@@ -24,7 +24,7 @@ export const brokersPageTemplate = (context, definition) => html`
         Добавить брокера
       </ppp-button>
       <${'ppp-table'}
-        ${ref('table')}
+        ${ref('shiftLockContainer')}
         :columns="${() => [
           {
             label: 'Название',
@@ -86,8 +86,9 @@ export const brokersPageTemplate = (context, definition) => html`
                 html`
                   <${'ppp-button'}
                     disabled
+                    shiftlock
                     class="xsmall"
-                    @click="${() => x.simpleRemove(datum._id)}"
+                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>

@@ -1,10 +1,10 @@
-import { Page, PageWithDocument } from './page.js';
+import { Page, PageWithService, PageWithSupabaseService } from './page.js';
 import { invalidate, validate } from './validate.js';
-import { maybeFetchError } from './fetch-error.js';
-import { uuidv4 } from './ppp-crypto.js';
-import { SERVICES } from './const.js';
+import { Tmpl } from './tmpl.js';
+import { SERVICE_STATE, SERVICES } from './const.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { Observable } from './element/observation/observable.js';
+import { uuidv4 } from './ppp-crypto.js';
 import ppp from '../ppp.js';
 
 export class ServiceSpbexHaltsPage extends Page {
@@ -14,49 +14,11 @@ export class ServiceSpbexHaltsPage extends Page {
     this.beginOperation();
 
     try {
-      await validate(this.api);
+      await validate(this.supabaseApiId);
       await validate(this.instrumentsCode);
-
-      const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
-      // Temporary function, no need to drop
-      const query = `create or replace function ${funcName}()
-        returns json as
-        $$
-          ${this.instrumentsCode.value}
-        $$ language plv8;
-
-        select ${funcName}();
-        `;
-      const api = this.apis.find((a) => a._id === this.api.value);
-      const password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
-      const rTestSQL = await fetch(
-        new URL(
-          'pg',
-          this.app.ppp.keyVault.getKey('service-machine-url')
-        ).toString(),
-        {
-          cache: 'no-cache',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query,
-            connectionString: this.getConnectionString(
-              Object.assign({}, api, { password })
-            )
-          })
-        }
-      );
-
-      await maybeFetchError(rTestSQL);
-
-      console.table(
-        JSON.parse(
-          (await rTestSQL.json()).results.find(
-            (r) => r.command.toUpperCase() === 'SELECT'
-          ).rows[0]
-        )
+      await this.callTemporaryFunction(
+        this.supabaseApiId.datum(),
+        this.instrumentsCode.value
       );
 
       this.succeedOperation(
@@ -69,72 +31,169 @@ export class ServiceSpbexHaltsPage extends Page {
     }
   }
 
+  async sendTestSpbexHaltMessage() {
+    this.beginOperation();
+
+    try {
+      await validate(this.supabaseApiId);
+      await validate(this.botId);
+      await validate(this.channel);
+      await validate(this.formatterCode);
+
+      const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
+
+      // Returns form data
+      const temporaryFunction = `function ${funcName}(isin,
+        ticker, name, currency, date, url, start, finish) {
+          const closure = () => {${this.formatterCode.value}};
+          const formatted = closure();
+
+          if (typeof formatted === 'string')
+            return \`chat_id=${this.channel.value}&text=\${formatted}&parse_mode=html\`;
+          else {
+            const options = formatted.options || {};
+            let formData = \`chat_id=${this.channel.value}&text=\${formatted.text}\`;
+
+            if (typeof options.parse_mode === 'undefined')
+              formData += '&parse_mode=html';
+
+            if (typeof options.entities !== 'undefined')
+              formData += \`&entities=\${encodeURIComponent(options.entities)}\`;
+
+            if (options.disable_web_page_preview === true)
+              formData += '&disable_web_page_preview=true';
+
+            if (options.disable_notification === true)
+              formData += '&disable_notification=true';
+
+            if (options.protect_content === true)
+              formData += '&protect_content=true';
+
+            if (typeof options.reply_markup !== 'undefined')
+              formData += \`&reply_markup=\${encodeURIComponent(options.reply_markup)}\`;
+
+            return formData;
+          }
+        }`;
+
+      const query = `${temporaryFunction}
+         return plv8.execute(\`select content from http_post('https://api.telegram.org/bot${
+           this.botId.datum().token
+         }/sendMessage',
+        '\${${funcName}('US0400476075', 'ARNA', 'Arena Pharmaceuticals, Inc.', 'USD', '13.12.2021 14:42',
+        'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044', '14:45', '15:15')}',
+        'application/x-www-form-urlencoded')\`);`;
+
+      await this.callTemporaryFunction(this.supabaseApiId.datum(), query);
+
+      this.succeedOperation('Сообщение отправлено.');
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
   async setProxyURLFromPPPAspirant() {
-    const datum = this.aspirantId.datum();
+    this.page.loading = true;
 
-    if (!datum) {
-      invalidate(this.aspirantId, {
-        errorMessage: 'Сначала выберите сервис',
-        skipScrollIntoView: true
-      });
-    } else {
-      const deploymentApi = await ppp.user.functions.findOne(
-        {
-          collection: 'apis'
-        },
-        {
-          _id: datum.deploymentApiId
-        },
-        {
-          _id: 0,
-          token: 1,
-          iv: 1
-        }
-      );
+    try {
+      const datum = this.aspirantId.datum();
 
-      if (deploymentApi) {
-        const token = (await ppp.decrypt(deploymentApi)).token;
-
-        // TODO - use real ids
-        const serviceRequest = await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+      if (!datum) {
+        invalidate(this.aspirantId, {
+          errorMessage: 'Сначала выберите сервис',
+          skipScrollIntoView: true
+        });
+      } else {
+        const deploymentApi = await ppp.user.functions.findOne(
           {
-            cache: 'no-cache',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'GET',
-              url: `https://api.northflank.com/v1/projects/ppp/services/ppp-aspirant`,
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            })
+            collection: 'apis'
+          },
+          {
+            _id: datum.deploymentApiId
+          },
+          {
+            _id: 0,
+            token: 1,
+            iv: 1
           }
         );
 
-        const json = await serviceRequest.json();
-        const port = json.data?.ports?.find((p) => p.internalPort === 32456);
+        if (deploymentApi) {
+          const { token } = await ppp.decrypt(deploymentApi);
 
-        if (port) {
-          this.document.proxyURL = `https://${port.dns}/fetch`;
+          const serviceRequest = await fetch(
+            new URL(
+              'fetch',
+              ppp.keyVault.getKey('service-machine-url')
+            ).toString(),
+            {
+              cache: 'no-cache',
+              method: 'POST',
+              body: JSON.stringify({
+                method: 'GET',
+                url: `https://api.northflank.com/v1/projects/${datum.projectID}/services/${datum.serviceID}`,
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              })
+            }
+          );
 
-          Observable.notify(this, 'document');
-        } else {
+          const json = await serviceRequest.json();
+          const port = json.data?.ports?.find((p) => p.internalPort === 32456);
+
+          if (port) {
+            this.document.proxyURL = `https://${port.dns}/fetch`;
+
+            Observable.notify(this, 'document');
+          } else {
+            invalidate(this.aspirantId, {
+              errorMessage: 'Проблема с получением ссылки - порт не найден',
+              skipScrollIntoView: true
+            });
+          }
+        } else
           invalidate(this.aspirantId, {
-            errorMessage: 'Проблема с получением ссылки - порт не найден',
-            skipScrollIntoView: true,
-            raiseException: true
+            errorMessage: 'Проблема с сервисом',
+            skipScrollIntoView: true
           });
-        }
-      } else
-        invalidate(this.aspirantId, {
-          errorMessage: 'Проблема с сервисом',
-          skipScrollIntoView: true,
-          raiseException: true
-        });
+      }
+    } finally {
+      this.page.loading = false;
     }
+  }
+
+  async proxyHeadersToJSONString() {
+    const proxyHeaders = await new Tmpl().render(
+      this,
+      this.document.proxyHeaders,
+      {}
+    );
+
+    const AsyncFunction = Object.getPrototypeOf(
+      async function () {}
+    ).constructor;
+
+    return JSON.stringify(await new AsyncFunction(`return ${proxyHeaders}`)());
+  }
+
+  async #deploy() {
+    const [sendTelegramMessage, deploySpbexHalts] = await Promise.all([
+      fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
+      fetch(this.getSQLUrl(`${SERVICES.SPBEX_HALTS}/deploy.sql`)).then((r) =>
+        r.text()
+      )
+    ]);
+
+    const query = `${sendTelegramMessage}
+      ${await new Tmpl().render(this, deploySpbexHalts, {})}`;
+
+    await this.executeSQL({
+      api: this.document.supabaseApi,
+      query
+    });
   }
 
   async validate() {
@@ -151,10 +210,16 @@ export class ServiceSpbexHaltsPage extends Page {
       });
     }
 
+    await validate(this.proxyHeaders);
     await validate(this.interval);
     await validate(this.interval, {
       hook: async (value) => +value > 0 && +value <= 1000,
       errorMessage: 'Введите значение в диапазоне от 1 до 1000'
+    });
+    await validate(this.depth);
+    await validate(this.depth, {
+      hook: async (value) => +value >= 30 && +value <= 1000,
+      errorMessage: 'Введите значение в диапазоне от 30 до 1000'
     });
     await validate(this.instrumentsCode);
     await validate(this.botId);
@@ -209,21 +274,42 @@ export class ServiceSpbexHaltsPage extends Page {
   }
 
   async update() {
+    const state =
+      this.document.state === SERVICE_STATE.ACTIVE
+        ? SERVICE_STATE.ACTIVE
+        : SERVICE_STATE.STOPPED;
+
     return [
       {
         $set: {
           name: this.name.value.trim(),
+          supabaseApiId: this.supabaseApiId.value,
           proxyURL: this.proxyURL.value.trim(),
+          proxyHeaders: this.proxyHeaders.value,
+          interval: Math.ceil(Math.abs(this.interval.value)),
+          depth: Math.ceil(Math.abs(this.depth.value)),
+          instrumentsCode: this.instrumentsCode.value,
+          botId: this.botId.value,
+          channel: +this.channel.value,
+          formatterCode: this.formatterCode.value,
           version: 1,
+          state: SERVICE_STATE.FAILED,
           updatedAt: new Date()
         },
         $setOnInsert: {
           type: SERVICES.SPBEX_HALTS,
           createdAt: new Date()
         }
-      }
+      },
+      this.#deploy,
+      () => ({
+        $set: {
+          state,
+          updatedAt: new Date()
+        }
+      })
     ];
   }
 }
 
-applyMixins(ServiceSpbexHaltsPage, PageWithDocument);
+applyMixins(ServiceSpbexHaltsPage, PageWithService, PageWithSupabaseService);

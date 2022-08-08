@@ -1,8 +1,7 @@
-import { Page, PageWithDocument } from './page.js';
+import { Page } from './page.js';
 import { invalidate, validate } from './validate.js';
-import ppp from '../ppp.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 import { Observable } from './element/observation/observable.js';
+import ppp from '../ppp.js';
 
 export class NewWorkspaceModalPage extends Page {
   collection = 'workspaces';
@@ -65,5 +64,3 @@ export class NewWorkspaceModalPage extends Page {
     };
   }
 }
-
-applyMixins(NewWorkspaceModalPage, PageWithDocument);

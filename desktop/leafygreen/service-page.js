@@ -53,6 +53,7 @@ export const servicePageTemplate = (context, definition) => html`
             target="_blank"
             href="http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts">RSS-лента пауз</a>.</span>
           <ppp-button
+            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
@@ -117,7 +118,7 @@ export const serviceControlsTemplate = (context, definition) => html`
               x.page.loading ||
               x.document.removed ||
               x.document.state === SERVICE_STATE.FAILED}"
-            @click="${(x) => x.restart()}">Перезапустить
+            @click="${(x) => x.restartService()}">Перезапустить
           </ppp-button>
           <ppp-button
             ?disabled="${(x) =>
@@ -125,12 +126,12 @@ export const serviceControlsTemplate = (context, definition) => html`
               x.document.removed ||
               x.document.state === SERVICE_STATE.FAILED ||
               x.document.state === SERVICE_STATE.STOPPED}"
-            @click="${(x) => x.stop()}">Приостановить
+            @click="${(x) => x.stopService()}">Приостановить
           </ppp-button>
           <ppp-button
             ?disabled="${(x) => x.page.loading || x.document.removed}"
             appearance="danger"
-            @click="${(x) => x.remove()}">Удалить
+            @click="${(x) => x.cleanupService()}">Удалить
           </ppp-button>
         </div>
         <div class="service-details-control">

@@ -170,6 +170,10 @@ export const foldingStyles = css`
   .folding-open .folding-content {
     display: initial;
   }
+
+  .folding-content ppp-checkbox {
+    margin-left: 10px;
+  }
 `;
 
 export const emptyStateStyles = css`
@@ -343,14 +347,10 @@ export const pageStyles = css`
   }
 
   .loading-indicator-content {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    position: sticky;
+    inset: 24px;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
     z-index: 50;
   }
 
@@ -581,6 +581,15 @@ export const pageStyles = css`
     height: 256px;
   }
 
+  .action-page-mount-point {
+    display: none;
+  }
+
+  iframe {
+    margin-top: 15px;
+    border-radius: 7px;
+  }
+
   ${modalStyles}
   ${foldingStyles}
   ${emptyStateStyles}
@@ -606,7 +615,7 @@ export const pageTemplate = (context, definition) => html`
       <section class="last">
         <div class="footer-actions">
           <${'ppp-button'}
-            ?disabled="${(x) => x.loading || x.document.removed}"
+            ?disabled="${(x) => x.loading || x.disabled}"
             type="submit"
             @click="${(x) => x.saveDocument()}"
             appearance="primary"

@@ -1,11 +1,9 @@
 /** @decorator */
 
-import { Page, PageWithDocument } from './page.js';
-import { Observable, observable } from './element/observation/observable.js';
+import { Page } from './page.js';
+import { observable } from './element/observation/observable.js';
 import { debounce } from './ppp-throttle.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 import { validate } from './validate.js';
-import { DOM } from './element/dom.js';
 import ppp from '../ppp.js';
 
 export class InstrumentsManagePage extends Page {
@@ -140,5 +138,3 @@ export class InstrumentsManagePage extends Page {
     };
   }
 }
-
-applyMixins(InstrumentsManagePage, PageWithDocument);

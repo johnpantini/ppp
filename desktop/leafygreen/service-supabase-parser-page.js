@@ -1,14 +1,13 @@
-import { ServiceSupabaseParserPage } from '../../../shared/pages/service-supabase-parser.js';
-import { html } from '../../../shared/template.js';
-import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { repeat } from '../../../shared/element/templating/repeat.js';
-import { pageStyles, loadingIndicator } from '../page.js';
-import { stateAppearance } from './services.js';
-import { formatDate } from '../../../shared/intl.js';
-import { settings } from '../icons/settings.js';
-import { caretDown } from '../icons/caret-down.js';
+import { ServiceSupabaseParserPage } from '../../shared/service-supabase-parser-page.js';
+import { html } from '../../shared/template.js';
+import { ref } from '../../shared/element/templating/ref.js';
+import { when } from '../../shared/element/templating/when.js';
+import { repeat } from '../../shared/element/templating/repeat.js';
+import { pageStyles } from './page.js';
+import { serviceControlsTemplate } from './service-page.js';
+import { settings } from './icons/settings.js';
+import { caretDown } from './icons/caret-down.js';
+import ppp from '../../ppp.js';
 
 const exampleTableSchema = `title text primary key,
 description text not null,
@@ -66,100 +65,19 @@ return \`⏰ \${formatDateTime(record.pub_date)}
 
 export const serviceSupabaseParserPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.service
-          ? `Сервис - Парсер с персистентностью - ${x.service?.name}`
-          : 'Сервис - Парсер с персистентностью'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+    <form novalidate>
+      <${'ppp-page'}>
+        <span slot="header">
+          ${(x) =>
+            x.document.name
+              ? `Сервис - Парсер с персистентностью - ${x.document.name}`
+              : 'Сервис - Парсер с персистентностью'}
+        </span>
+        ${when((x) => x.document._id, serviceControlsTemplate)}
         ${when(
-          (x) => x.service,
-          html`
-            <div class="section-content horizontal-overflow">
-              <div class="service-details">
-                <div class="service-details-controls">
-                  <div class="service-details-control service-details-label">
-                    ${(x) => x.service.name}
-                  </div>
-                  <div
-                    class="service-details-control"
-                    style="justify-content: left"
-                  >
-                    <${'ppp-button'}
-                      ?disabled="${(x) =>
-                        x.busy ||
-                        x.service?.removed ||
-                        x.service?.state === 'failed'}"
-                      @click="${(x) => x.restart()}">Перезапустить
-                    </ppp-button>
-                    <ppp-button
-                      ?disabled="${(x) =>
-                        x.busy ||
-                        x.service?.removed ||
-                        x.service?.state === 'failed'}"
-                      @click="${(x) => x.stop()}">Остановить
-                    </ppp-button>
-                    <ppp-button
-                      ?disabled="${(x) => x.busy || x.service?.removed}"
-                      appearance="danger"
-                      @click="${(x) => x.remove()}">Удалить
-                    </ppp-button>
-                  </div>
-                  <div class="service-details-control">
-                    <${'ppp-badge'}
-                      appearance="${(x) => stateAppearance(x.service.state)}">
-                      ${(x) => x.t(`$const.serviceState.${x.service.state}`)}
-                    </ppp-badge>
-                    <ppp-badge
-                      appearance="blue">
-                      Последняя версия
-                    </ppp-badge>
-                  </div>
-                </div>
-                <div class="service-details-info">
-                  <div class="service-details-info-container">
-                    <span style="grid-column-start: 1;grid-row-start: 1;">
-                      Версия
-                    </span>
-                    <div style="grid-column-start: 1;grid-row-start: 2;">
-                      ${(x) => x.service.version}
-                    </div>
-                    <span style="grid-column-start: 2;grid-row-start: 1;">
-                    Тип
-                    </span>
-                    <div style="grid-column-start: 2;grid-row-start: 2;">
-                      ${(x) => x.t(`$const.service.${x.service.type}`)}
-                    </div>
-                    <span style="grid-column-start: 3;grid-row-start: 1;">
-                    Создан
-                    </span>
-                    <div style="grid-column-start: 3;grid-row-start: 2;">
-                      ${(x) => formatDate(x.service.createdAt)}
-                    </div>
-                    <span style="grid-column-start: 4;grid-row-start: 1;">
-                    Последнее изменение
-                    </span>
-                    <div style="grid-column-start: 4;grid-row-start: 2;">
-                      ${(x) =>
-                        formatDate(x.service.updatedAt ?? x.service.createdAt)}
-                    </div>
-                    <span style="grid-column-start: 5;grid-row-start: 1;">
-                    Удалён
-                    </span>
-                    <div style="grid-column-start: 5;grid-row-start: 2;">
-                      ${(x) => (x.service.removed ? 'Да' : 'Нет')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>`
-        )}
-        ${when(
-          (x) => x.service?.frameUrl,
+          (x) => x.document.frameUrl,
           html` <iframe
-            src="${(x) => x.service.frameUrl}"
+            src="${(x) => x.document.frameUrl}"
             width="100%"
             height="667"
             style="background: transparent; border: 1px solid rgb(136, 147, 151);"
@@ -172,10 +90,10 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               потребуется.</p>
           </div>
           <div class="input-group">
-            <ppp-text-field
+            <${'ppp-text-field'}
               placeholder="Название"
-              value="${(x) => x.service?.name}"
-              ${ref('serviceName')}
+              value="${(x) => x.document.name}"
+              ${ref('name')}
             ></ppp-text-field>
           </div>
         </section>
@@ -184,46 +102,40 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             <h5>Профиль API Supabase</h5>
           </div>
           <div class="input-group">
-            <${'ppp-select'}
-              ?disabled="${(x) => !x.apis}"
-              value="${(x) => x.service?.apiId}"
-              placeholder="Нет доступных профилей"
-              ${ref('api')}
-            >
-              ${repeat(
-                (x) => x?.apis,
-                html`
-                  <ppp-option
-                    ?removed="${(x) => x.removed}"
-                    value="${(x) => x._id}"
-                  >
-                    ${(x) => x.name}
-                  </ppp-option>
-                `
-              )}
-              ${when(
-                (x) => x.apis !== null,
-                caretDown({
-                  slot: 'indicator'
-                })
-              )}
-              ${when(
-                (x) => x.apis === null,
-                settings({
-                  slot: 'indicator',
-                  cls: 'spinner-icon'
-                })
-              )}
-            </ppp-select>
+            <${'ppp-collection-select'}
+              ${ref('apiId')}
+              value="${(x) => x.document.apiId}"
+              :context="${(x) => x}"
+              :preloaded="${(x) => x.document.api ?? ''}"
+              :query="${() => {
+                return (context) => {
+                  return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('apis')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import('./const.js')).APIS.SUPABASE%]`,
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.apiId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+                };
+              }}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
+            ></ppp-collection-select>
             <${'ppp-button'}
               class="margin-top"
-              @click="${(x) =>
-                x.app.navigate({
-                  page: 'api-supabase'
-                })}"
+              @click="${() =>
+                window.open('?page=api-supabase', '_blank').focus()}"
               appearance="primary"
             >
-              Создать новый профиль API Supabase
+              Добавить API Supabase
             </ppp-button>
           </div>
         </section>
@@ -547,62 +459,13 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             </section>
           </div>
         </div>
-        <${'ppp-modal'} ${ref('terminalModal')}>
-          <span slot="title">Настройка сервиса</span>
-          <div slot="body">
-            <div class="description">
-              <${'ppp-terminal'} ${ref('terminalDom')}></ppp-terminal>
-            </div>
-          </div>
-        </ppp-modal>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy || x.service?.removed}"
-            type="submit"
-            @click="${(x) => x.install()}"
-            appearance="primary"
-          >
-            ${(x) =>
-              x.service ? 'Переустановить сервис' : 'Установить сервис'}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const serviceSupabaseParserPageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-    section ppp-codeflask {
-      width: 100%;
-      height: 256px;
-    }
-
-    iframe {
-      margin-top: 15px;
-      border-radius: 7px;
-    }
-
-    .folding-content ppp-checkbox {
-      margin-left: 10px;
-    }
-
-    ppp-modal .description {
-      padding: 10px 16px 10px 20px;
-      border-radius: 7px;
-      background-color: rgb(33, 49, 60);
-      border: 1px solid rgb(231, 238, 236);
-    }
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const serviceSupabaseParserPage = ServiceSupabaseParserPage.compose({
-  baseName: 'service-supabase-parser-page',
+export default ServiceSupabaseParserPage.compose({
   template: serviceSupabaseParserPageTemplate,
-  styles: serviceSupabaseParserPageStyles
+  styles: pageStyles
 });

@@ -1,5 +1,3 @@
--- Old version
-drop function if exists send_telegram_message(chat_id text, bot_token text, msg text);
 drop function if exists send_telegram_message(chat_id text, bot_token text, msg text, options json);
 
 create or replace function send_telegram_message(chat_id text, bot_token text, msg text, options json)

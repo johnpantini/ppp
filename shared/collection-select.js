@@ -142,8 +142,8 @@ export class CollectionSelect extends FoundationElement {
         const code = await new Tmpl().render(this.context, this.#code, {});
         let queryResult = await ppp.user.functions.eval(code);
 
-        if (typeof this.map === 'function')
-          queryResult = await this.map.call(this.context, queryResult);
+        if (typeof this.transform === 'function')
+          queryResult = await this.transform.call(this.context, queryResult);
 
         this.options = this.#formatter().call(this, queryResult);
       } catch (e) {

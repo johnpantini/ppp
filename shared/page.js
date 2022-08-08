@@ -4,17 +4,27 @@ import { FoundationElement } from './foundation-element.js';
 import { Observable, observable } from './element/observation/observable.js';
 import { invalidate } from './validate.js';
 import { html, requireComponent } from './template.js';
+import { ref } from './element/templating/ref.js';
 import { ConflictError, NotFoundError } from './http-errors.js';
 import { attr } from './element/components/attributes.js';
 import { Tmpl } from './tmpl.js';
 import { keyEnter } from './web-utilities/key-codes.js';
 import { DOM } from './element/dom.js';
+import { SERVICE_STATE, SERVICES } from './const.js';
+import { uuidv4 } from './ppp-crypto.js';
+import { FetchError, maybeFetchError } from './fetch-error.js';
 import ppp from '../ppp.js';
 
 /**
  * A minimal base class for PPP Page.
  */
 export class Page extends FoundationElement {
+  /**
+   * The current document.
+   */
+  @observable
+  document;
+
   /**
    * Disabled pages do not allow form submission.
    */
@@ -68,6 +78,7 @@ export class Page extends FoundationElement {
   constructor() {
     super();
 
+    this.document = {};
     this.page = {};
   }
 
@@ -222,9 +233,52 @@ export class Page extends FoundationElement {
     ppp.app.pageNotFound = true;
   }
 
+  async applyChanges(documentUpdateFragment = {}) {
+    const document = this.page.view.document;
+    const ownId = await this.page.view.getDocumentId?.();
+
+    if (document._id ?? ownId) {
+      const encryptedUpdateClause = Object.assign({}, documentUpdateFragment);
+
+      if (encryptedUpdateClause.$set) {
+        encryptedUpdateClause.$set = await this.encrypt(
+          encryptedUpdateClause.$set
+        );
+      }
+
+      await ppp.user.functions.updateOne(
+        {
+          collection: this.page.view.collection
+        },
+        document._id
+          ? {
+              _id: document._id
+            }
+          : ownId,
+        encryptedUpdateClause,
+        {
+          upsert: true
+        }
+      );
+
+      this.page.view.document = Object.assign(
+        {},
+        this.page.view.document,
+        documentUpdateFragment.$set ?? {}
+      );
+    }
+  }
+
   async #applyDocumentUpdates(idClause, results = []) {
-    for (const documentUpdateFragment of results) {
-      if (typeof documentUpdateFragment === 'object') {
+    for (let documentUpdateFragment of results) {
+      const isAnonymousFunc =
+        typeof documentUpdateFragment === 'function' &&
+        !documentUpdateFragment.name;
+
+      if (typeof documentUpdateFragment === 'object' || isAnonymousFunc) {
+        if (isAnonymousFunc)
+          documentUpdateFragment = documentUpdateFragment.call(this.page.view);
+
         const encryptedUpdateClause = Object.assign({}, documentUpdateFragment);
 
         if (encryptedUpdateClause.$set) {
@@ -238,6 +292,8 @@ export class Page extends FoundationElement {
             encryptedUpdateClause.$setOnInsert
           );
         }
+
+        encryptedUpdateClause.$unset = { removed: '' };
 
         await ppp.user.functions.updateOne(
           {
@@ -253,9 +309,13 @@ export class Page extends FoundationElement {
         this.page.view.document = Object.assign(
           {},
           this.page.view.document,
+          { removed: void 0 },
           documentUpdateFragment.$set ?? {}
         );
-      } else if (typeof documentUpdateFragment === 'function') {
+      } else if (
+        typeof documentUpdateFragment === 'function' &&
+        documentUpdateFragment.name
+      ) {
         await documentUpdateFragment.call(this.page.view);
       }
 
@@ -370,9 +430,85 @@ export class Page extends FoundationElement {
     }
   }
 
+  async readDocument() {
+    const documentId =
+      this.getAttribute('data-document-id') ??
+      (await this.page.view.getDocumentId?.()) ??
+      ppp.app.params()?.document;
+
+    if (documentId) {
+      this.beginOperation();
+
+      try {
+        if (typeof this.page.view.read === 'function') {
+          let readMethodResult = await this.page.view.read();
+
+          if (typeof readMethodResult === 'function') {
+            readMethodResult = await new Tmpl().render(
+              this.page.view,
+              readMethodResult.toString(),
+              { documentId }
+            );
+          }
+
+          let document;
+
+          if (typeof readMethodResult === 'string') {
+            const code = readMethodResult.split(/\r?\n/);
+
+            code.pop();
+            code.shift();
+
+            document = await ppp.user.functions.eval(code.join('\n'));
+
+            // [] for empty aggregations
+            if (!document || (Array.isArray(document) && !document.length)) {
+              // noinspection ExceptionCaughtLocallyJS
+              throw new NotFoundError({ documentId });
+            }
+
+            if (Array.isArray(document) && document.length === 1)
+              document = document[0];
+
+            this.document = await this.decrypt(document);
+          } else {
+            this.document = readMethodResult ?? {};
+          }
+        } else if (this.page.view.collection) {
+          this.document = await this.decrypt(
+            await ppp.user.functions.findOne(
+              { collection: this.page.view.collection },
+              {
+                _id: documentId
+              }
+            )
+          );
+
+          if (!this.document) {
+            this.document = {};
+
+            // noinspection ExceptionCaughtLocallyJS
+            throw new NotFoundError({ documentId });
+          }
+        } else {
+          this.document = {};
+        }
+      } catch (e) {
+        this.document = {};
+
+        this.failOperation(e);
+      } finally {
+        this.endOperation();
+      }
+    }
+  }
+
   #keypressHandler(e) {
     switch (e.key) {
       case keyEnter:
+        if (e.path.find((el) => el?.tagName?.toLowerCase() === 'textarea'))
+          return;
+
         // Prevent multiple submissions
         const parentPage = e.path.find(
           (e) => e.$pppController?.definition?.type?.name === 'Page'
@@ -404,6 +540,9 @@ export class Page extends FoundationElement {
       if (ppp.app) {
         ppp.app.pageConnected = true;
       }
+
+      if (!this.hasAttribute('data-disable-auto-read'))
+        void this.readDocument();
     } else {
       // This instance is the ppp-page itself.
       this.page = this;
@@ -440,92 +579,9 @@ export class Page extends FoundationElement {
   }
 }
 
-export class PageWithDocument {
-  /**
-   * The current document.
-   */
-  @observable
-  document;
-
-  ctor() {
-    this.document = {};
-  }
-
-  connectedCallback() {
-    void this.readDocument();
-  }
-
-  async readDocument() {
-    this.beginOperation();
-
-    try {
-      const documentId =
-        (await this.page.view.getDocumentId?.()) ?? ppp.app.params()?.document;
-
-      if (documentId) {
-        if (typeof this.page.view.read === 'function') {
-          let readMethodResult = await this.page.view.read();
-
-          if (typeof readMethodResult === 'function') {
-            readMethodResult = await new Tmpl().render(
-              this.page.view,
-              readMethodResult.toString(),
-              { documentId }
-            );
-          }
-
-          let document;
-
-          if (typeof readMethodResult === 'string') {
-            const code = readMethodResult.split(/\r?\n/);
-
-            code.pop();
-            code.shift();
-
-            document = await ppp.user.functions.eval(code.join('\n'));
-
-            if (!document) {
-              // noinspection ExceptionCaughtLocallyJS
-              throw new NotFoundError({ documentId });
-            }
-
-            if (Array.isArray(document) && document.length === 1)
-              document = document[0];
-
-            this.document = await this.decrypt(document);
-          } else {
-            this.document = readMethodResult ?? {};
-          }
-        } else if (this.page.view.collection) {
-          this.document = await this.decrypt(
-            await ppp.user.functions.findOne(
-              { collection: this.page.view.collection },
-              {
-                _id: documentId
-              }
-            )
-          );
-
-          if (!this.document) {
-            this.document = {};
-
-            // noinspection ExceptionCaughtLocallyJS
-            throw new NotFoundError({ documentId });
-          }
-        } else {
-          this.document = {};
-        }
-      }
-    } catch (e) {
-      this.document = {};
-
-      this.failOperation(e);
-    } finally {
-      this.endOperation();
-    }
-  }
-}
-
+/**
+ * @mixin
+ */
 export class PageWithDocuments {
   /**
    * The current documents to list in a table.
@@ -538,7 +594,8 @@ export class PageWithDocuments {
   }
 
   connectedCallback() {
-    void this.populateDocuments();
+    if (!this.hasAttribute('data-disable-auto-populate'))
+      void this.populateDocuments();
   }
 
   async populateDocuments() {
@@ -582,10 +639,48 @@ export class PageWithDocuments {
       this.endOperation();
     }
   }
+
+  async removeDocumentFromListing(datum) {
+    this.beginOperation('Удаление');
+
+    try {
+      await ppp.user.functions.updateOne(
+        {
+          collection: this.page.view.collection
+        },
+        {
+          _id: datum._id
+        },
+        {
+          $set: {
+            removed: true
+          }
+        },
+        {
+          upsert: true
+        }
+      );
+
+      const index = this.documents.findIndex((d) => d._id === datum._id);
+
+      if (index > -1) {
+        this.documents.splice(index, 1);
+      }
+
+      Observable.notify(this, 'documents');
+
+      this.succeedOperation();
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
 }
 
 /**
  *
+ * @mixin
  * @var {HTMLElement} shiftLockContainer
  */
 export class PageWithShiftLock {
@@ -624,5 +719,273 @@ export class PageWithShiftLock {
   disconnectedCallback() {
     document.removeEventListener('keydown', this.onShiftLockKeyUpDown);
     document.removeEventListener('keyup', this.onShiftLockKeyUpDown);
+  }
+}
+
+/**
+ * @mixin
+ */
+export class PageWithActionPage {
+  @observable
+  actionPageName;
+
+  @observable
+  actionPageDocumentId;
+
+  async actionPageCall({ page, documentId, methodName, methodArguments = [] }) {
+    this.page.loading = true;
+
+    try {
+      this.actionPageName = page;
+      this.actionPageDocumentId = documentId;
+
+      await requireComponent(`ppp-${page}-page`);
+      await this.actionPage.readDocument();
+      await this.actionPage[methodName].apply(this.actionPage, methodArguments);
+
+      this.actionPageName = 'blank';
+    } finally {
+      this.page.loading = false;
+    }
+  }
+}
+
+/**
+ * Allows us to invoke methods of foreign pages.
+ * @type {ViewTemplate}
+ */
+export const actionPageMountPoint = html`
+  <div class="action-page-mount-point">
+    ${(x) => html`
+      <ppp-${x.actionPageName ?? 'blank'}-page
+        data-disable-auto-read
+        data-disable-auto-populate
+        data-document-id="${(x) => x.actionPageDocumentId}"
+        ${ref('actionPage')}
+      >
+      </ppp-${x.actionPageName ?? 'blank'}-page>`}
+  </div>
+`;
+
+/**
+ * @mixin
+ */
+export class PageWithService {
+  async restartService() {
+    this.beginOperation('Перезапуск сервиса');
+
+    try {
+      await this.restart?.();
+      await this.applyChanges({
+        $set: {
+          state: SERVICE_STATE.ACTIVE,
+          updatedAt: new Date()
+        }
+      });
+
+      this.succeedOperation();
+    } catch (e) {
+      await this.applyChanges({
+        $set: {
+          state: SERVICE_STATE.FAILED,
+          updatedAt: new Date()
+        }
+      });
+
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async stopService() {
+    this.beginOperation('Остановка сервиса');
+
+    try {
+      await this.stop?.();
+      await this.applyChanges({
+        $set: {
+          state: SERVICE_STATE.STOPPED,
+          updatedAt: new Date()
+        }
+      });
+
+      this.succeedOperation();
+    } catch (e) {
+      await this.applyChanges({
+        $set: {
+          state: SERVICE_STATE.FAILED,
+          updatedAt: new Date()
+        }
+      });
+
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async cleanupService() {
+    this.beginOperation('Удаление сервиса');
+
+    try {
+      await this.cleanup?.();
+      await this.applyChanges({
+        $set: {
+          state: SERVICE_STATE.STOPPED,
+          removed: true,
+          updatedAt: new Date()
+        }
+      });
+
+      this.succeedOperation();
+    } catch (e) {
+      await this.applyChanges({
+        $set: {
+          state: SERVICE_STATE.FAILED,
+          removed: true,
+          updatedAt: new Date()
+        }
+      });
+
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+}
+
+/**
+ * @mixin
+ */
+export class PageWithSupabaseService {
+  async callTemporaryFunction(api, functionBody) {
+    const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
+    // Temporary function, no need to drop
+    const query = `create or replace function ${funcName}()
+        returns json as
+        $$
+          ${functionBody}
+        $$ language plv8;
+
+        select ${funcName}();
+        `;
+
+    const rExecuteSQL = await fetch(
+      new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query,
+          connectionString: this.getConnectionString(api)
+        })
+      }
+    );
+
+    await maybeFetchError(rExecuteSQL, 'Не удалось выполнить функцию.');
+
+    console.table(
+      JSON.parse(
+        (await rExecuteSQL.json()).results.find(
+          (r) => r.command.toUpperCase() === 'SELECT'
+        ).rows[0]
+      )
+    );
+  }
+
+  getSQLUrl(file) {
+    const origin = window.location.origin;
+    let scriptUrl = new URL(`sql/${file}`, origin).toString();
+
+    if (origin.endsWith('github.io'))
+      scriptUrl = new URL(`ppp/sql/${file}`, origin).toString();
+
+    return scriptUrl;
+  }
+
+  getConnectionString(api) {
+    const { hostname } = new URL(api.url);
+
+    return `postgres://${api.user}:${encodeURIComponent(
+      api.password
+    )}@db.${hostname}:${api.port}/${api.db}`;
+  }
+
+  async executeSQL({ api, query }) {
+    ppp.app.terminalModal.dismissible = false;
+
+    const terminal = await ppp.app.openTerminal();
+
+    try {
+      terminal.clear();
+      terminal.reset();
+      terminal.writeInfo('Выполняется запрос к базе данных...\r\n');
+
+      const rSQL = await fetch(
+        new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query,
+            connectionString: this.getConnectionString(api)
+          })
+        }
+      );
+
+      const text = await rSQL.text();
+
+      if (!rSQL.ok) {
+        console.error(text);
+        terminal.writeError(text);
+
+        // noinspection ExceptionCaughtLocallyJS
+        throw new FetchError({
+          ...rSQL,
+          ...{ message: 'SQL-запрос завершился с ошибкой.' }
+        });
+      } else {
+        terminal.writeln(text);
+        terminal.writeln(
+          '\x1b[32m\r\nОперация выполнена, это окно можно закрыть.\r\n\x1b[0m'
+        );
+      }
+    } finally {
+      ppp.app.terminalModal.dismissible = true;
+    }
+  }
+
+  async action(action) {
+    const query = await new Tmpl().render(
+      this,
+      await (
+        await fetch(this.getSQLUrl(`${this.document.type}/${action}.sql`))
+      ).text(),
+      {}
+    );
+
+    return this.executeSQL({
+      api: this.document.supabaseApi,
+      query
+    });
+  }
+
+  async restart() {
+    return this.action('start');
+  }
+
+  async stop() {
+    return this.action('stop');
+  }
+
+  async cleanup() {
+    return this.action('cleanup');
   }
 }

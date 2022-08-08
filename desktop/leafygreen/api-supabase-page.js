@@ -26,7 +26,7 @@ export const apiSupabasePageTemplate = (context, definition) => html`
               placeholder="Supabase"
               value="${(x) => x.document.name}"
               ${ref('name')}
-            ></>
+            ></ppp-text-field>
           </div>
         </section>
         <section>

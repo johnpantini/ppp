@@ -1,7 +1,6 @@
-import { Page, PageWithDocument } from './page.js';
+import { Page } from './page.js';
 import { invalidate, validate } from './validate.js';
 import { APIS } from './const.js';
-import { applyMixins } from './utilities/apply-mixins.js';
 import ppp from '../ppp.js';
 
 export async function checkRedisCredentials({
@@ -106,5 +105,3 @@ export class ApiRedisPage extends Page {
     };
   }
 }
-
-applyMixins(ApiRedisPage, PageWithDocument);

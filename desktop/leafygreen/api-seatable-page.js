@@ -24,7 +24,7 @@ export const apiSeatablePageTemplate = (context, definition) => html`
               placeholder="Seatable"
               value="${(x) => x.document.name}"
               ${ref('name')}
-            ></>
+            ></ppp-text-field>
           </div>
         </section>
         <section>

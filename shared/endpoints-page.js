@@ -1,9 +1,9 @@
-import { PageWithDocuments, PageWithShiftLock } from './page.js';
+import { Page, PageWithDocuments, PageWithShiftLock } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { maybeFetchError } from './fetch-error.js';
 import ppp from '../ppp.js';
 
-export class EndpointsPage extends PageWithShiftLock {
+export class EndpointsPage extends Page {
   async populate() {
     const groupId = ppp.keyVault.getKey('mongo-group-id');
     const appId = ppp.keyVault.getKey('mongo-app-id');
@@ -32,4 +32,4 @@ export class EndpointsPage extends PageWithShiftLock {
   }
 }
 
-applyMixins(EndpointsPage, PageWithDocuments);
+applyMixins(EndpointsPage, PageWithDocuments, PageWithShiftLock);

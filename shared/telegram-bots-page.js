@@ -1,7 +1,7 @@
-import { PageWithDocuments, PageWithShiftLock } from './page.js';
+import { Page, PageWithDocuments, PageWithShiftLock } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 
-export class TelegramBotsPage extends PageWithShiftLock {
+export class TelegramBotsPage extends Page {
   collection = 'bots';
 
   async populate() {
@@ -10,10 +10,12 @@ export class TelegramBotsPage extends PageWithShiftLock {
       .get('mongodb-atlas')
       .db('ppp')
       .collection('[%#this.page.view.collection%]')
-      .find()
+      .find({
+        removed: { $ne: true }
+      })
       .sort({ updatedAt: -1 });
     };
   }
 }
 
-applyMixins(TelegramBotsPage, PageWithDocuments);
+applyMixins(TelegramBotsPage, PageWithDocuments, PageWithShiftLock);

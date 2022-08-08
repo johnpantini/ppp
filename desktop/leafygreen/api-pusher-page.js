@@ -20,7 +20,7 @@ export const apiPusherPageTemplate = (context, definition) => html`
               потребуется.</p>
           </div>
           <div class="input-group">
-            <ppp-text-field
+            <${'ppp-text-field'}
               placeholder="Pusher"
               value="${(x) => x.document.name}"
               ${ref('name')}

@@ -34,6 +34,16 @@ export const appTemplate = (context, definition) => html`
             <ppp-new-workspace-modal-page></ppp-new-workspace-modal-page>
           </div>
         </ppp-modal>
+        <ppp-modal ${ref('terminalModal')}>
+          <span slot="title" ${ref('terminalModalTitle')}>
+            Ход выполнения операции
+          </span>
+          <div slot="body" class="terminal-modal">
+            <div class="description">
+              <ppp-terminal ${ref('terminalWindow')}></ppp-terminal>
+            </div>
+          </div>
+        </ppp-modal>
       `
     )}
     ${when(
@@ -417,6 +427,13 @@ export const appStyles = (context, definition) =>
 
     .hotkey:hover {
       background-color: rgb(228, 244, 228);
+    }
+
+    .terminal-modal .description {
+      padding: 10px 16px 10px 20px;
+      border-radius: 7px;
+      background-color: rgb(33, 49, 60);
+      border: 1px solid rgb(231, 238, 236);
     }
   `;
 
