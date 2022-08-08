@@ -93,75 +93,6 @@ export class ServiceSpbexHaltsPage extends Page {
     }
   }
 
-  async setProxyURLFromPPPAspirant() {
-    this.page.loading = true;
-
-    try {
-      const datum = this.aspirantId.datum();
-
-      if (!datum) {
-        invalidate(this.aspirantId, {
-          errorMessage: 'Сначала выберите сервис',
-          skipScrollIntoView: true
-        });
-      } else {
-        const deploymentApi = await ppp.user.functions.findOne(
-          {
-            collection: 'apis'
-          },
-          {
-            _id: datum.deploymentApiId
-          },
-          {
-            _id: 0,
-            token: 1,
-            iv: 1
-          }
-        );
-
-        if (deploymentApi) {
-          const { token } = await ppp.decrypt(deploymentApi);
-
-          const serviceRequest = await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
-            {
-              cache: 'no-cache',
-              method: 'POST',
-              body: JSON.stringify({
-                method: 'GET',
-                url: `https://api.northflank.com/v1/projects/${datum.projectID}/services/${datum.serviceID}`,
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
-              })
-            }
-          );
-
-          const json = await serviceRequest.json();
-          const port = json.data?.ports?.find((p) => p.internalPort === 32456);
-
-          if (port) {
-            this.proxyURL.value = `https://${port.dns}/fetch`;
-          } else {
-            invalidate(this.aspirantId, {
-              errorMessage: 'Проблема с получением ссылки - порт не найден',
-              skipScrollIntoView: true
-            });
-          }
-        } else
-          invalidate(this.aspirantId, {
-            errorMessage: 'Проблема с сервисом',
-            skipScrollIntoView: true
-          });
-      }
-    } finally {
-      this.page.loading = false;
-    }
-  }
-
   async proxyHeadersToJSONString() {
     const proxyHeaders = await new Tmpl().render(
       this,
@@ -177,6 +108,11 @@ export class ServiceSpbexHaltsPage extends Page {
   }
 
   async #deploy() {
+    if (!this.document.supabaseApi)
+      this.document.supabaseApi = this.supabaseApiId.datum();
+
+    if (!this.document.bot) this.document.bot = this.botId.datum();
+
     const [sendTelegramMessage, deploySpbexHalts] = await Promise.all([
       fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
       fetch(this.getSQLUrl(`${SERVICES.SPBEX_HALTS}/deploy.sql`)).then((r) =>

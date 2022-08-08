@@ -10,10 +10,6 @@ await ppp.i18n(import.meta.url);
 
 const exampleProxyHeaders = `{
   'User-Agent': '[%#navigator.userAgent%]',
-  Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-  'Accept-Language': 'ru-RU,ru;q=0.9',
-  'Cache-Control': 'no-cache',
-  Referer: 'https://spbexchange.ru/ru/about/news.aspx?sectionrss=30',
   Cookie: ''
 }`;
 
@@ -146,39 +142,6 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
               value="${(x) => x.document.proxyURL}"
               ${ref('proxyURL')}
             ></ppp-text-field>
-            <div
-              style="display: flex; flex-direction: column; align-items: start">
-              <ppp-collection-select
-                ${ref('aspirantId')}
-                :context="${(x) => x}"
-                :placeholder="${() => 'Нажмите, чтобы выбрать сервис'}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('services')
-                      .find({
-                        $and: [
-                          { removed: { $ne: true } },
-                          {
-                            type: `[%#(await import('./const.js')).SERVICES.PPP_ASPIRANT%]`
-                          }
-                        ]
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-collection-select>
-              <${'ppp-button'}
-                class="margin-top"
-                @click="${(x) => x.setProxyURLFromPPPAspirant()}"
-                appearance="primary"
-              >
-                Установить прокси-ресурс из PPP Aspirant
-              </ppp-button>
-            </div>
           </div>
         </section>
         <section>
