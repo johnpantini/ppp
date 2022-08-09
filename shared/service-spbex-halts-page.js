@@ -151,8 +151,8 @@ export class ServiceSpbexHaltsPage extends Page {
     });
     await validate(this.depth);
     await validate(this.depth, {
-      hook: async (value) => +value >= 30 && +value <= 1000,
-      errorMessage: 'Введите значение в диапазоне от 30 до 1000'
+      hook: async (value) => +value >= 30 && +value <= 10000,
+      errorMessage: 'Введите значение в диапазоне от 30 до 10000'
     });
     await validate(this.instrumentsCode);
     await validate(this.botId);

@@ -2,11 +2,8 @@ import { ServiceSupabaseParserPage } from '../../shared/service-supabase-parser-
 import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { when } from '../../shared/element/templating/when.js';
-import { repeat } from '../../shared/element/templating/repeat.js';
 import { pageStyles } from './page.js';
 import { serviceControlsTemplate } from './service-page.js';
-import { settings } from './icons/settings.js';
-import { caretDown } from './icons/caret-down.js';
 import ppp from '../../ppp.js';
 
 const exampleTableSchema = `title text primary key,
@@ -19,7 +16,7 @@ const exampleParsingCode = `/**
  *
  * @param consts - Статические данные, сформированные на этапе сохранения сервиса.
  */
-const url = '[%#payload.url || 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362'%]';
+const url = '[%#ctx.document.url || 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362'%]';
 const fetch = plv8.find_function('ppp_fetch');
 const rss = plv8.find_function('ppp_xml_parse')(fetch(url, {
   headers: {
@@ -47,6 +44,7 @@ const exampleFormatterCode = `/**
  * Функция форматирования сообщения о новой записи в таблице состояния.
  *
  * @param {json} record - Запись, вставленная в таблицу состояния.
+ * @var consts - Статические данные, сформированные на этапе сохранения сервиса.
  */
 const formatDateTime = (pubDate) => {
   const [date, timeZ] = new Date(Date.parse(pubDate || new Date()))
@@ -103,28 +101,28 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-collection-select'}
-              ${ref('apiId')}
-              value="${(x) => x.document.apiId}"
+              ${ref('supabaseApiId')}
+              value="${(x) => x.document.supabaseApiId}"
               :context="${(x) => x}"
-              :preloaded="${(x) => x.document.api ?? ''}"
+              :preloaded="${(x) => x.document.supabaseApi ?? ''}"
               :query="${() => {
                 return (context) => {
                   return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('apis')
-                  .find({
-                    $and: [
-                      {
-                        type: `[%#(await import('./const.js')).APIS.SUPABASE%]`,
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.apiId ?? ''%]` }
-                        ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
+                    .get('mongodb-atlas')
+                    .db('ppp')
+                    .collection('apis')
+                    .find({
+                      $and: [
+                        {
+                          type: `[%#(await import('./const.js')).APIS.SUPABASE%]`,
+                          $or: [
+                            { removed: { $ne: true } },
+                            { _id: `[%#this.document.supabaseApiId ?? ''%]` }
+                          ]
+                        }
+                      ]
+                    })
+                    .sort({ updatedAt: -1 });
                 };
               }}"
               :transform="${() => ppp.decryptDocumentsTransformation()}"
@@ -150,7 +148,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               optional
               type="url"
               placeholder="https://example.com"
-              value="${(x) => x.service?.url}"
+              value="${(x) => x.document.url}"
               ${ref('url')}
             ></ppp-text-field>
           </div>
@@ -166,7 +164,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               optional
               type="url"
               placeholder="https://example.com"
-              value="${(x) => x.service?.frameUrl}"
+              value="${(x) => x.document.frameUrl}"
               ${ref('frameUrl')}
             ></ppp-text-field>
           </div>
@@ -180,7 +178,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             <ppp-text-field
               type="number"
               placeholder="5"
-              value="${(x) => x.service?.interval ?? '5'}"
+              value="${(x) => x.document.interval ?? '5'}"
               ${ref('interval')}
             ></ppp-text-field>
           </div>
@@ -194,7 +192,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             <ppp-text-field
               type="number"
               placeholder="50"
-              value="${(x) => x.service?.depth ?? '50'}"
+              value="${(x) => x.document.depth ?? '50'}"
               ${ref('depth')}
             ></ppp-text-field>
           </div>
@@ -208,12 +206,12 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              ?disabled="${(x) => x.service?.tableSchema}"
-              :code="${(x) => x.service?.tableSchema ?? exampleTableSchema}"
+              ?disabled="${(x) => x.document.tableSchema}"
+              :code="${(x) => x.document.tableSchema ?? exampleTableSchema}"
               ${ref('tableSchema')}
             ></ppp-codeflask>
             <${'ppp-button'}
-              ?disabled="${(x) => x.service?.tableSchema}"
+              ?disabled="${(x) => x.document.tableSchema}"
               class="margin-top"
               @click="${(x) => x.tableSchema.updateCode(exampleTableSchema)}"
               appearance="primary"
@@ -231,7 +229,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              :code="${(x) => x.service?.constsCode ?? exampleConstsCode}"
+              :code="${(x) => x.document.constsCode ?? exampleConstsCode}"
               ${ref('constsCode')}
             ></ppp-codeflask>
             <${'ppp-button'}
@@ -243,7 +241,6 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             </ppp-button>
             <ppp-button
               class="margin-top"
-              ?disabled="${(x) => x.busy}"
               @click="${(x) => x.callConstsFunction()}"
               appearance="primary"
             >
@@ -259,7 +256,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              :code="${(x) => x.service?.parsingCode ?? exampleParsingCode}"
+              :code="${(x) => x.document.parsingCode ?? exampleParsingCode}"
               ${ref('parsingCode')}
             ></ppp-codeflask>
             <${'ppp-button'}
@@ -271,7 +268,6 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             </ppp-button>
             <ppp-button
               class="margin-top"
-              ?disabled="${(x) => x.busy}"
               @click="${(x) => x.callParsingFunction()}"
               appearance="primary"
             >
@@ -299,7 +295,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               <div class="input-group">
                 <${'ppp-codeflask'}
                   :code="${(x) =>
-                    x.service?.insertTriggerCode ?? exampleInsertTriggerCode}"
+                    x.document.insertTriggerCode ?? exampleInsertTriggerCode}"
                   ${ref('insertTriggerCode')}
                 ></ppp-codeflask>
                 <ppp-button
@@ -321,7 +317,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               <div class="input-group">
                 <${'ppp-codeflask'}
                   :code="${(x) =>
-                    x.service?.deleteTriggerCode ?? exampleDeleteTriggerCode}"
+                    x.document.deleteTriggerCode ?? exampleDeleteTriggerCode}"
                   ${ref('deleteTriggerCode')}
                 ></ppp-codeflask>
                 <ppp-button
@@ -348,11 +344,11 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           </div>
           <div class="folding-content">
             <${'ppp-checkbox'}
-              ?checked="${(x) => x.telegramEnabled}"
+              ?checked="${(x) => x.document.telegramEnabled}"
               @change="${(x) =>
-                (x.telegramEnabled = x.telegramEnabledFlag.checked)}"
+                x.scratchSet('telegramEnabled', x.telegramEnabled.checked)}"
               class="margin-top"
-              ${ref('telegramEnabledFlag')}
+              ${ref('telegramEnabled')}
             >
               Также отправлять уведомления в Telegram
             </ppp-checkbox>
@@ -364,44 +360,34 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
                   Должен обладать соответствующими правами в канале/группе.</p>
               </div>
               <div class="input-group">
-                <ppp-select
-                  ?disabled="${(x) => !x.bots || !x.telegramEnabled}"
-                  placeholder="Нет доступных профилей"
-                  value="${(x) => x.service?.botId}"
-                  ${ref('bot')}
-                >
-                  ${repeat(
-                    (x) => x?.bots,
-                    html`
-                      <ppp-option
-                        ?removed="${(x) => x.removed}"
-                        value="${(x) => x._id}"
-                      >
-                        ${(x) => x.name}
-                      </ppp-option>
-                    `
-                  )}
-                  ${when(
-                    (x) => x.bots !== null,
-                    caretDown({
-                      slot: 'indicator'
-                    })
-                  )}
-                  ${when(
-                    (x) => x.bots === null,
-                    settings({
-                      slot: 'indicator',
-                      cls: 'spinner-icon'
-                    })
-                  )}
-                </ppp-select>
+                <ppp-collection-select
+                  ${ref('botId')}
+                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
+                  value="${(x) => x.document.botId}"
+                  :context="${(x) => x}"
+                  :preloaded="${(x) => x.document.bot ?? ''}"
+                  :query="${() => {
+                    return (context) => {
+                      return context.services
+                        .get('mongodb-atlas')
+                        .db('ppp')
+                        .collection('bots')
+                        .find({
+                          $or: [
+                            { removed: { $ne: true } },
+                            { _id: `[%#this.document.botId ?? ''%]` }
+                          ]
+                        })
+                        .sort({ updatedAt: -1 });
+                    };
+                  }}"
+                  :transform="${() => ppp.decryptDocumentsTransformation()}"
+                ></ppp-collection-select>
                 <ppp-button
-                  ?disabled="${(x) => !x.telegramEnabled}"
+                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
                   class="margin-top"
-                  @click="${(x) =>
-                    x.app.navigate({
-                      page: 'telegram-bot'
-                    })}"
+                  @click="${() =>
+                    window.open('?page=telegram-bot', '_blank').focus()}"
                   appearance="primary"
                 >
                   Добавить бота
@@ -416,15 +402,15 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               </div>
               <div class="input-group">
                 <ppp-text-field
-                  ?disabled="${(x) => !x.telegramEnabled}"
+                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
                   type="number"
                   placeholder="Канал или группа"
-                  value="${(x) => x.service?.channel}"
+                  value="${(x) => x.document.channel}"
                   ${ref('channel')}
                 ></ppp-text-field>
                 <ppp-button
                   class="margin-top"
-                  ?disabled="${(x) => x.busy || !x.telegramEnabled}"
+                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
                   @click="${(x) => x.sendTestMessage()}"
                   appearance="primary"
                 >
@@ -441,13 +427,13 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               </div>
               <div class="input-group">
                 <${'ppp-codeflask'}
-                  ?disabled="${(x) => !x.telegramEnabled}"
+                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
                   :code="${(x) =>
-                    x.service?.formatterCode ?? exampleFormatterCode}"
+                    x.document.formatterCode ?? exampleFormatterCode}"
                   ${ref('formatterCode')}
                 ></ppp-codeflask>
                 <ppp-button
-                  ?disabled="${(x) => !x.telegramEnabled}"
+                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
                   class="margin-top"
                   @click="${(x) =>
                     x.formatterCode.updateCode(exampleFormatterCode)}"
