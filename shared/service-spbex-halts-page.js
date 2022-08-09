@@ -125,7 +125,7 @@ export class ServiceSpbexHaltsPage extends Page {
 
     await this.executeSQL({
       api: this.document.supabaseApi,
-      query
+      query: await new Tmpl().render(this, query, {})
     });
   }
 

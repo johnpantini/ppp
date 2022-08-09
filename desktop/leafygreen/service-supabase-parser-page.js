@@ -16,7 +16,7 @@ const exampleParsingCode = `/**
  *
  * @param consts - Статические данные, сформированные на этапе сохранения сервиса.
  */
-const url = '[%#ctx.document.url || 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362'%]';
+const url = '[%#ctx.document.url || 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664'%]';
 const fetch = plv8.find_function('ppp_fetch');
 const rss = plv8.find_function('ppp_xml_parse')(fetch(url, {
   headers: {

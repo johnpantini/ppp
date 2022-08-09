@@ -1,13 +1,15 @@
 import { Page, PageWithService, PageWithSupabaseService } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
-import { validate } from './validate.js';
+import { invalidate, validate } from './validate.js';
 import { SERVICE_STATE, SERVICES } from './const.js';
 import { Tmpl } from './tmpl.js';
+import { uuidv4 } from './ppp-crypto.js';
+import ppp from '../ppp.js';
 
 export class ServiceSupabaseParserPage extends Page {
   collection = 'services';
 
-  async callConstsFunction(returnResult) {
+  async callConstsFunction() {
     this.beginOperation();
 
     try {
@@ -15,8 +17,7 @@ export class ServiceSupabaseParserPage extends Page {
       await validate(this.constsCode);
       await this.callTemporaryFunction(
         this.supabaseApiId.datum(),
-        this.constsCode.value,
-        returnResult
+        this.constsCode.value
       );
 
       this.succeedOperation(
@@ -29,7 +30,7 @@ export class ServiceSupabaseParserPage extends Page {
     }
   }
 
-  async callParsingFunction() {
+  async callParsingFunction(returnResult) {
     this.beginOperation();
 
     try {
@@ -42,17 +43,99 @@ export class ServiceSupabaseParserPage extends Page {
         true
       );
 
-      await this.callTemporaryFunction(
+      const result = await this.callTemporaryFunction(
         this.supabaseApiId.datum(),
         `const consts = ${JSON.stringify(consts)};
 
         ${this.parsingCode.value}
-        `
+        `,
+        returnResult
       );
 
-      this.succeedOperation(
-        'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
-      );
+      if (!returnResult)
+        this.succeedOperation(
+          'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
+        );
+
+      return result;
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async sendTestMessage() {
+    this.beginOperation();
+
+    try {
+      await validate(this.supabaseApiId);
+      await validate(this.botId);
+      await validate(this.channel);
+      await validate(this.formatterCode);
+
+      const [firstRecord] = await this.callParsingFunction(true);
+
+      if (!firstRecord) {
+        console.log(firstRecord);
+
+        invalidate(ppp.app.toast, {
+          errorMessage:
+            'Функция парсинга вернула результат, который не пригоден для форматирования.',
+          raiseException: true
+        });
+      }
+
+      // Once again
+      this.beginOperation();
+
+      const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
+
+      // Returns form data
+      const temporaryFunction = `function ${funcName}(record) {
+        const closure = () => {${this.formatterCode.value}};
+        const formatted = closure();
+
+        if (typeof formatted === 'string')
+          return \`chat_id=${this.channel.value}&text=\${formatted.replace(/'/g, '%27')}&parse_mode=html\`;
+        else {
+          const options = formatted.options || {};
+          let formData = \`chat_id=${this.channel.value}&text=\${formatted.text.replace(/'/g, '%27')}\`;
+
+          if (typeof options.parse_mode === 'undefined')
+            formData += '&parse_mode=html';
+
+          if (typeof options.entities !== 'undefined')
+            formData += \`&entities=\${encodeURIComponent(options.entities)}\`;
+
+          if (options.disable_web_page_preview === true)
+            formData += '&disable_web_page_preview=true';
+
+          if (options.disable_notification === true)
+            formData += '&disable_notification=true';
+
+          if (options.protect_content === true)
+            formData += '&protect_content=true';
+
+          if (typeof options.reply_markup !== 'undefined')
+            formData += \`&reply_markup=\${encodeURIComponent(options.reply_markup)}\`;
+
+          return formData;
+        }
+      }`;
+
+      const query = `${temporaryFunction}
+        const record = ${JSON.stringify(firstRecord)};
+
+        plv8.execute(\`select content from http_post('https://api.telegram.org/bot${
+          this.botId.datum().token
+        }/sendMessage',
+        '\${${funcName}(record)}',
+        'application/x-www-form-urlencoded')\`);`;
+
+      await this.callTemporaryFunction(this.supabaseApiId.datum(), query);
+
+      this.succeedOperation('Сообщение отправлено.');
     } catch (e) {
       this.failOperation(e);
     } finally {
@@ -78,7 +161,7 @@ export class ServiceSupabaseParserPage extends Page {
 
     await this.executeSQL({
       api: this.document.supabaseApi,
-      query
+      query: await new Tmpl().render(this, query, {})
     });
   }
 
