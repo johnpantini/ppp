@@ -80,6 +80,20 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
+            <h5>Источник</h5>
+          </div>
+          <div class="input-group">
+            <${'ppp-select'}
+              ${ref('deploymentSource')}
+              value="main"
+            >
+              <ppp-option value="main">Основная версия</ppp-option>
+              <ppp-option value="johnpantini">Бета-версия</ppp-option>
+            </ppp-select>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
             <h5>Хранилище Redis</h5>
             <p>Персистентность для PPP Aspirant.</p>
           </div>

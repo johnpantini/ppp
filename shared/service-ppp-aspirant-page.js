@@ -182,7 +182,7 @@ export class ServicePppAspirantPage extends Page {
                 )}/ppp`,
                 projectType: 'github',
                 accountLogin: ppp.keyVault.getKey('github-login'),
-                projectBranch: 'johnpantini'
+                projectBranch: this.deploymentSource.value
               },
               buildSettings: {
                 dockerfile: {
