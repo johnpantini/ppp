@@ -88,7 +88,8 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
               value="main"
             >
               <ppp-option value="main">Основная версия</ppp-option>
-              <ppp-option value="johnpantini">Бета-версия</ppp-option>
+              <ppp-option value="johnpantini">Предварительная версия
+              </ppp-option>
             </ppp-select>
           </div>
         </section>
