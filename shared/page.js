@@ -901,11 +901,16 @@ export class PageWithSupabaseService {
 
     await maybeFetchError(rExecuteSQL, 'Не удалось выполнить функцию.');
 
-    const result = JSON.parse(
-      (await rExecuteSQL.json()).results.find(
-        (r) => r.command.toUpperCase() === 'SELECT'
-      ).rows[0]
-    );
+    const json = await rExecuteSQL.json();
+    let result;
+
+    try {
+      result = JSON.parse(
+        json.results.find((r) => r.command.toUpperCase() === 'SELECT').rows[0]
+      );
+    } catch (e) {
+      result = json.results.find((r) => r.command.toUpperCase() === 'SELECT');
+    }
 
     if (returnResult) {
       return result;
