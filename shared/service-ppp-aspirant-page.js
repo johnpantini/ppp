@@ -192,6 +192,13 @@ export class ServicePppAspirantPage extends Page {
                   dockerWorkDir: '/salt/states/ppp/lib'
                 }
               },
+              buildConfiguration: {
+                pathIgnoreRules: [
+                  '*',
+                  '!salt/states/ppp/lib/aspirant',
+                  '!salt/states/ppp/lib/aspirant/*'
+                ]
+              },
               runtimeEnvironment
             })
           })
