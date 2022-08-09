@@ -167,7 +167,7 @@ create or replace function keep_max_record_count_[%#ctx.document._id%]()
 returns trigger as
 $$
 begin
-  execute('delete from public.spbex_halts_[%#ctx.document._id%] where ppp_counter < (select ppp_counter from public.spbex_halts_[%#ctx.document._id%] order by ppp_counter desc limit 1 offset [%#ctx.document.depth%])');
+  execute('delete from public.spbex_halts_[%#ctx.document._id%] where ppp_counter < (select ppp_counter from public.spbex_halts_[%#ctx.document._id%] order by ppp_counter desc limit 1 offset [%#ctx.document.depth - 1%])');
 
   return null;
 end;

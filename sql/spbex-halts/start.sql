@@ -11,9 +11,11 @@ drop function if exists ppp_perform_job_[%#ctx.document._id%]();
 -- Start
 create or replace function ppp_perform_job_[%#ctx.document._id%]()
 returns json as $$
+  const result = plv8.find_function('process_spbex_halts_[%#ctx.document._id%]')();
+
   plv8.execute(`select pg_sleep([%#ctx.document.interval - 1%]);`);
 
-  return plv8.find_function('process_spbex_halts_[%#ctx.document._id%]')();
+  return result;
 $$ language plv8;
 
 create or replace function ppp_interval_[%#ctx.document._id%](duration interval default '60 seconds')

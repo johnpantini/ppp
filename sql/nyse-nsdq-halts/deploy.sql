@@ -1,4 +1,5 @@
-create table if not exists public.nyse_nsdq_halts_[%#payload.serviceId%](
+create table if not exists public.nyse_nsdq_halts_[%#ctx.document._id%](
+  ppp_counter bigint generated always as identity,
   halt_date text,
   halt_time text,
   symbol text,
@@ -12,7 +13,7 @@ create table if not exists public.nyse_nsdq_halts_[%#payload.serviceId%](
   primary key(halt_date, halt_time, symbol, reason_code)
 );
 
-create or replace function get_nyse_nsdq_halts_symbols_[%#payload.serviceId%]()
+create or replace function get_nyse_nsdq_halts_symbols_[%#ctx.document._id%]()
 returns json as
 $$
 try {
@@ -24,7 +25,7 @@ try {
 }
 $$ language plv8;
 
-create or replace function parse_nyse_nsdq_halts_[%#payload.serviceId%]()
+create or replace function parse_nyse_nsdq_halts_[%#ctx.document._id%]()
 returns json as
 $$
 try {
@@ -64,22 +65,20 @@ try {
 }
 $$ language plv8;
 
--- Old version
-drop function if exists send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text);
-drop function if exists send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text, options json);
+drop function if exists send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%](msg text, options json);
 
-create or replace function send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%](msg text, options json)
+create or replace function send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%](msg text, options json)
 returns json as
 $$
   return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg, options);
 $$ language plv8;
 
 -- Old version
-drop function if exists format_nyse_nsdq_halt_message_[%#payload.serviceId%](
+drop function if exists format_nyse_nsdq_halt_message_[%#ctx.document._id%](
   halt_date text, halt_time text, symbol text, name text, market text, reason_code text, pause_threshold_price text,
   resumption_date text, resumption_quote_time text, resumption_trade_time text);
 
-create or replace function format_nyse_nsdq_halt_message_[%#payload.serviceId%](
+create or replace function format_nyse_nsdq_halt_message_[%#ctx.document._id%](
   halt_date text, halt_time text, symbol text, name text, market text, reason_code text, pause_threshold_price text,
   resumption_date text, resumption_quote_time text, resumption_trade_time text)
 returns json as
@@ -87,28 +86,44 @@ $$
   [%#payload.formatterCode%]
 $$ language plv8;
 
-create or replace function nyse_nsdq_halts_insert_trigger_[%#payload.serviceId%]()
+create or replace function nyse_nsdq_halts_insert_trigger_[%#ctx.document._id%]()
 returns trigger as
 $$
-  const message = plv8.find_function('format_nyse_nsdq_halt_message_[%#payload.serviceId%]')(
+  const message = plv8.find_function('format_nyse_nsdq_halt_message_[%#ctx.document._id%]')(
     NEW.halt_date, NEW.halt_time, NEW.symbol, NEW.name, NEW.market, NEW.reason_code, NEW.pause_threshold_price,
     NEW.resumption_date, NEW.resumption_quote_time, NEW.resumption_trade_time
   );
 
   if (typeof message === 'string')
-    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%]')(message, {});
+    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%]')(message, {});
   else if (typeof message === 'object' && message.text)
-    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#payload.serviceId%]')(message.text, message.options || {});
+    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%]')(message.text, message.options || {});
 
   return null;
 $$ language plv8;
 
-create or replace trigger nyse_nsdq_halts_insert_trigger_[%#payload.serviceId%]
+create or replace trigger nyse_nsdq_halts_insert_trigger_[%#ctx.document._id%]
   after insert
-  on public.nyse_nsdq_halts_[%#payload.serviceId%] for each row
-  execute procedure nyse_nsdq_halts_insert_trigger_[%#payload.serviceId%]();
+  on public.nyse_nsdq_halts_[%#ctx.document._id%] for each row
+  execute procedure nyse_nsdq_halts_insert_trigger_[%#ctx.document._id%]();
 
-create or replace function process_nyse_nsdq_halts_[%#payload.serviceId%]()
+-- INSERT (keep row count steady)
+create or replace function keep_max_record_count_[%#ctx.document._id%]()
+returns trigger as
+$$
+begin
+  execute('delete from public.nyse_nsdq_halts_[%#ctx.document._id%] where ppp_counter < (select ppp_counter from public.nyse_nsdq_halts_[%#ctx.document._id%] order by ppp_counter desc limit 1 offset [%#ctx.document.depth - 1%])');
+
+  return null;
+end;
+$$ language plpgsql;
+
+create or replace trigger keep_max_record_count_[%#ctx.document._id%]
+  after insert
+  on public.nyse_nsdq_halts_[%#ctx.document._id%] for each statement
+  execute procedure keep_max_record_count_[%#ctx.document._id%]();
+
+create or replace function process_nyse_nsdq_halts_[%#ctx.document._id%]()
 returns json as
 $$
 try {
@@ -117,10 +132,10 @@ try {
   if (today.getUTCDay() === 6)
     return {status: 204};
 
-  for (const halt of plv8.find_function('parse_nyse_nsdq_halts_[%#payload.serviceId%]')()) {
+  for (const halt of plv8.find_function('parse_nyse_nsdq_halts_[%#ctx.document._id%]')()) {
     try {
-      if (halt.symbol && plv8.find_function('get_nyse_nsdq_halts_symbols_[%#payload.serviceId%]')().indexOf(halt.symbol) > -1) {
-        plv8.execute(`insert into public.nyse_nsdq_halts_[%#payload.serviceId%](halt_date, halt_time, symbol, name,
+      if (halt.symbol && plv8.find_function('get_nyse_nsdq_halts_symbols_[%#ctx.document._id%]')().indexOf(halt.symbol) > -1) {
+        plv8.execute(`insert into public.nyse_nsdq_halts_[%#ctx.document._id%](halt_date, halt_time, symbol, name,
           market, reason_code, pause_threshold_price, resumption_date, resumption_quote_time,
           resumption_trade_time) values('${halt.halt_date}', '${halt.halt_time}', '${halt.symbol}',
           '${halt.name}', '${halt.market}', '${halt.reason_code}', '${halt.pause_threshold_price}', '${halt.resumption_date}',

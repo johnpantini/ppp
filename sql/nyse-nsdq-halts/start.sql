@@ -1,18 +1,31 @@
-create or replace function ppp_perform_job_[%#payload.serviceId%]()
-returns json as $$
-  plv8.execute(`select pg_sleep([%#payload.interval - 1%]);`);
+-- Stop
+do $$
+try {
+  plv8.execute(`select cron.unschedule('ppp-[%#ctx.document._id%]')`);
+} catch(e) {
+  void 0;
+} $$ language plv8;
+drop function if exists ppp_interval_[%#ctx.document._id%](duration interval);
+drop function if exists ppp_perform_job_[%#ctx.document._id%]();
 
-  return plv8.find_function('process_nyse_nsdq_halts_[%#payload.serviceId%]')();
+-- Start
+create or replace function ppp_perform_job_[%#ctx.document._id%]()
+returns json as $$
+  const result = plv8.find_function('process_nyse_nsdq_halts_[%#ctx.document._id%]')();
+
+  plv8.execute(`select pg_sleep([%#ctx.document.interval - 1%]);`);
+
+  return result;
 $$ language plv8;
 
-create or replace function ppp_interval_[%#payload.serviceId%](duration interval default '60 seconds')
+create or replace function ppp_interval_[%#ctx.document._id%](duration interval default '60 seconds')
 returns bool as
 $$
 declare
   end_time timestamptz := now() + duration;
 begin
   while now() < end_time loop
-    perform from dblink('dbname=[%#payload.api.db%] port=[%#payload.api.port%] host=[%#payload.api.hostname%] user=[%#payload.api.user%] password=[%#payload.api.password%]', 'select ppp_perform_job_[%#payload.serviceId%]();') as (res text);
+    perform from dblink('dbname=[%#ctx.document.supabaseApi.db%] port=[%#ctx.document.supabaseApi.port%] host=[%#("db." + new URL(ctx.document.supabaseApi.url).hostname)%] user=[%#ctx.document.supabaseApi.user%] password=[%#ctx.document.supabaseApi.password%]', 'select ppp_perform_job_[%#ctx.document._id%]();') as (res text);
     perform pg_sleep(1);
   end loop;
 
@@ -20,7 +33,7 @@ begin
 end;
 $$ language plpgsql;
 
-select cron.schedule('ppp-[%#payload.serviceId%]', '* * * * *', 'select ppp_interval_[%#payload.serviceId%]()');
+select cron.schedule('ppp-[%#ctx.document._id%]', '* * * * *', 'select ppp_interval_[%#ctx.document._id%]()');
 
-select dblink_connect('ppp-[%#payload.serviceId%]', 'dbname=[%#payload.api.db%] port=[%#payload.api.port%] host=[%#payload.api.hostname%] user=[%#payload.api.user%] password=[%#payload.api.password%]');
-select dblink_send_query('ppp-[%#payload.serviceId%]', 'select process_nyse_nsdq_halts_[%#payload.serviceId%]();');
+select dblink_connect('ppp-[%#ctx.document._id%]', 'dbname=[%#ctx.document.supabaseApi.db%] port=[%#ctx.document.supabaseApi.port%] host=[%#("db." + new URL(ctx.document.supabaseApi.url).hostname)%] user=[%#ctx.document.supabaseApi.user%] password=[%#ctx.document.supabaseApi.password%]');
+select dblink_send_query('ppp-[%#ctx.document._id%]', 'select process_nyse_nsdq_halts_[%#ctx.document._id%]();');
