@@ -20,6 +20,12 @@ import ppp from '../ppp.js';
  */
 export class Page extends FoundationElement {
   /**
+   * The scratchpad is available within the context of a page to store temporary data or computations.
+   */
+  @observable
+  scratch;
+
+  /**
    * The current document.
    */
   @observable
@@ -78,8 +84,15 @@ export class Page extends FoundationElement {
   constructor() {
     super();
 
+    this.scratch = {};
     this.document = {};
     this.page = {};
+  }
+
+  scratchSet(key, value) {
+    this.scratch[key] = value;
+
+    Observable.notify(this, 'scratch');
   }
 
   t(key, options) {
@@ -859,13 +872,13 @@ export class PageWithService {
  * @mixin
  */
 export class PageWithSupabaseService {
-  async callTemporaryFunction(api, functionBody) {
+  async callTemporaryFunction(api, functionBody, returnResult) {
     const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
     // Temporary function, no need to drop
     const query = `create or replace function ${funcName}()
         returns json as
         $$
-          ${functionBody}
+          ${await new Tmpl().render(this, functionBody, {})}
         $$ language plv8;
 
         select ${funcName}();
@@ -888,13 +901,15 @@ export class PageWithSupabaseService {
 
     await maybeFetchError(rExecuteSQL, 'Не удалось выполнить функцию.');
 
-    console.table(
-      JSON.parse(
-        (await rExecuteSQL.json()).results.find(
-          (r) => r.command.toUpperCase() === 'SELECT'
-        ).rows[0]
-      )
+    const result = JSON.parse(
+      (await rExecuteSQL.json()).results.find(
+        (r) => r.command.toUpperCase() === 'SELECT'
+      ).rows[0]
     );
+
+    if (returnResult) {
+      return result;
+    } else console.log(result);
   }
 
   getSQLUrl(file) {
