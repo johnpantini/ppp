@@ -20,7 +20,8 @@ export const collectionSelectTemplate = (context, definition) => html`
   <template>
     <${'ppp-select'}
       ${ref('control')}
-      placeholder="${x => x.placeholder ?? 'Нажмите, чтобы выбрать'}"
+      ?disabled="${(x) => x.disabled}"
+      placeholder="${(x) => x.placeholder ?? 'Нажмите, чтобы выбрать'}"
     >
       <div slot="indicator">
         ${when((x) => x.loading, definition.spinner)}
@@ -31,7 +32,7 @@ export const collectionSelectTemplate = (context, definition) => html`
         )}
       </div>
       <ppp-loading-option :value="${() => ' '}">
-        ${x => x.placeholder ?? 'Нажмите, чтобы выбрать'}
+        ${(x) => x.placeholder ?? 'Нажмите, чтобы выбрать'}
       </ppp-loading-option>
       ${repeat(
         (x) => x.options,
@@ -91,6 +92,9 @@ export class CollectionSelect extends FoundationElement {
    */
   @attr
   value;
+
+  @attr({ mode: 'boolean' })
+  disabled;
 
   constructor(props) {
     super(props);
