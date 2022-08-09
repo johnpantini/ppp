@@ -115,8 +115,6 @@ export class Checkbox extends FoundationElement {
   }
 
   checkedChanged(prev, next) {
-    if (prev !== undefined) {
-      this.$emit('change');
-    }
+    this.$emit('change');
   }
 }
