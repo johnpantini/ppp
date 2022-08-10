@@ -10,7 +10,7 @@ import { attr } from './element/components/attributes.js';
 import { Tmpl } from './tmpl.js';
 import { keyEnter } from './web-utilities/key-codes.js';
 import { DOM } from './element/dom.js';
-import { SERVICE_STATE, SERVICES } from './const.js';
+import { SERVICE_STATE } from './const.js';
 import { uuidv4 } from './ppp-crypto.js';
 import { FetchError, maybeFetchError } from './fetch-error.js';
 import ppp from '../ppp.js';
@@ -873,17 +873,20 @@ export class PageWithService {
  * @mixin
  */
 export class PageWithSupabaseService {
-  async callTemporaryFunction(api, functionBody, returnResult) {
+  async callTemporaryFunction({ api, functionBody, returnResult, extraSQL }) {
     const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
     // Temporary function, no need to drop
-    const query = `create or replace function ${funcName}()
-        returns json as
-        $$
-          ${await new Tmpl().render(this, functionBody, {})}
-        $$ language plv8;
+    const query = `
+      ${extraSQL ? extraSQL : ''}
 
-        select ${funcName}();
-        `;
+      create or replace function ${funcName}()
+      returns json as
+      $$
+        ${await new Tmpl().render(this, functionBody, {})}
+      $$ language plv8;
+
+      select ${funcName}();
+    `;
 
     const rExecuteSQL = await fetch(
       new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
@@ -910,6 +913,7 @@ export class PageWithSupabaseService {
         json.results.find((r) => r.command.toUpperCase() === 'SELECT').rows[0]
       );
     } catch (e) {
+      // For [null]
       result = json.results.find((r) => r.command.toUpperCase() === 'SELECT');
     }
 
