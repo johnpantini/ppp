@@ -55,6 +55,10 @@ export const terminalStyles = css`
     display: block;
   }
 
+  .xterm .xterm-text-layer {
+    width: calc(100% - 16px) !important;
+  }
+
   .xterm .xterm-viewport {
     /* On OS X this is required in order for the scroll bar to appear fully opaque */
     background-color: #000;
