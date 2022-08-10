@@ -282,7 +282,7 @@ export const appTemplate = (context, definition) => html`
                 })}"
               slot="items"
             >
-              <span slot="title">Конечные точки HTTPS</span>
+              <span slot="title">Конечные точки</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>

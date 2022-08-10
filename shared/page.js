@@ -20,7 +20,8 @@ import ppp from '../ppp.js';
  */
 export class Page extends FoundationElement {
   /**
-   * The scratchpad is available within the context of a page to store temporary data or computations.
+   * The scratchpad is available within the context of a page to store
+   * temporary data or computations.
    */
   @observable
   scratch;

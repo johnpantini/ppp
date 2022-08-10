@@ -1,11 +1,8 @@
-import { EndpointPage } from '../../../shared/pages/endpoint.js';
-import { html } from '../../../shared/template.js';
-import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { pageStyles, loadingIndicator } from '../page.js';
-import { uuidv4 } from '../../../shared/ppp-crypto.js';
-import { caretDown } from '../icons/caret-down.js';
+import { EndpointPage } from '../../shared/endpoint-page.js';
+import { html } from '../../shared/template.js';
+import { ref } from '../../shared/element/templating/ref.js';
+import { pageStyles } from './page.js';
+import { uuidv4 } from '../../shared/ppp-crypto.js';
 
 const exampleCode = `exports = function({ query, headers, body}, response) {
   return "OK";
@@ -13,23 +10,23 @@ const exampleCode = `exports = function({ query, headers, body}, response) {
 
 export const endpointPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.endpoint
-          ? `Конечная точка HTTPS - ${x.endpoint?.function_name}`
-          : 'Конечная точка HTTPS'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
+    <form novalidate>
+      <${'ppp-page'}>
+        <span slot="header">
+          ${(x) =>
+            x.document.name
+              ? `Конечная точка - ${x.document.function_name}`
+              : 'Конечная точка'}
+        </span>
         <section>
           <div class="label-group">
             <h5>Маршрут</h5>
             <p>Должен начинаться с /</p>
           </div>
           <div class="input-group">
-            <ppp-text-field
+            <${'ppp-text-field'}
               placeholder="/webhook"
-              value="${(x) => x.endpoint?.route}"
+              value="${(x) => x.document.route}"
               ${ref('route')}
             ></ppp-text-field>
             <${'ppp-button'}
@@ -48,7 +45,7 @@ export const endpointPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-select'}
-              value="${(x) => x.endpoint?.method}"
+              value="${(x) => x.document.method ?? 'POST'}"
               ${ref('method')}
             >
               <ppp-option value="POST">POST</ppp-option>
@@ -57,9 +54,6 @@ export const endpointPageTemplate = (context, definition) => html`
               <ppp-option value="DELETE">DELETE</ppp-option>
               <ppp-option value="PATCH">PATCH</ppp-option>
               <ppp-option value="*">Любой метод</ppp-option>
-              ${caretDown({
-                slot: 'indicator'
-              })}
             </ppp-select>
           </div>
         </section>
@@ -71,57 +65,30 @@ export const endpointPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <ppp-text-field
-              ?disabled="${(x) => x.endpoint?.function_name}"
+              ?disabled="${(x) => x.document.function_name}"
               placeholder="myWebhook"
-              value="${(x) => x.endpoint?.function_name}"
+              value="${(x) => x.document.function_name}"
               ${ref('functionName')}
             ></ppp-text-field>
           </div>
         </section>
         <section>
           <div class="label-group full">
-            <h5>Функция</h5>
+            <h5>Реализация функции</h5>
             <p>Бизнес-логика обработки запроса на языке JavaScript.</p>
             <${'ppp-codeflask'}
-              :code="${(x) => x.endpoint?.source ?? exampleCode}"
+              :code="${(x) => x.document.source ?? exampleCode}"
               ${ref('source')}
             ></ppp-codeflask>
           </div>
         </section>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy}"
-            type="submit"
-            @click="${(x) => x.addEndpoint()}"
-            appearance="primary"
-          >
-            ${(x) =>
-              x.endpoint
-                ? 'Обновить конечную точну'
-                : 'Добавить конечную точку'}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const endpointPageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-    section ppp-codeflask {
-      width: 100%;
-      height: 256px;
-    }
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const endpointPage = EndpointPage.compose({
-  baseName: 'endpoint-page',
+export default EndpointPage.compose({
   template: endpointPageTemplate,
-  styles: endpointPageStyles
+  styles: pageStyles
 });

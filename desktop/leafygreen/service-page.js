@@ -70,7 +70,6 @@ export const servicePageTemplate = (context, definition) => html`
           <span slot="title">Парсер с персистентностью</span>
           <span slot="description">Произвольный парсер с сохранением состояния в Supabase.</span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
