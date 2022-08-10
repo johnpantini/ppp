@@ -15,10 +15,10 @@ export class ServiceSupabaseParserPage extends Page {
     try {
       await validate(this.supabaseApiId);
       await validate(this.constsCode);
-      await this.callTemporaryFunction(
-        this.supabaseApiId.datum(),
-        this.constsCode.value
-      );
+      await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: this.constsCode.value
+      });
 
       this.succeedOperation(
         'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
@@ -37,20 +37,25 @@ export class ServiceSupabaseParserPage extends Page {
       await validate(this.supabaseApiId);
       await validate(this.parsingCode);
 
-      const consts = await this.callTemporaryFunction(
-        this.supabaseApiId.datum(),
-        this.constsCode.value,
-        true
-      );
+      const consts = await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: this.constsCode.value,
+        returnResult: true
+      });
 
-      const result = await this.callTemporaryFunction(
-        this.supabaseApiId.datum(),
-        `const consts = ${JSON.stringify(consts)};
-
-        ${this.parsingCode.value}
+      const result = await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: `const consts = ${JSON.stringify(consts)};
+          ${this.parsingCode.value}
         `,
-        returnResult
-      );
+        returnResult,
+        extraSQL: `
+          ${await fetch(this.getSQLUrl('ppp-fetch.sql')).then((r) => r.text())}
+          ${await fetch(this.getSQLUrl('ppp-xml-parse.sql')).then((r) =>
+            r.text()
+          )}
+        `
+      });
 
       if (!returnResult)
         this.succeedOperation(
@@ -89,10 +94,10 @@ export class ServiceSupabaseParserPage extends Page {
       // Once again
       this.beginOperation();
 
-      const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
+      const temporaryFormatterName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
       // Returns form data
-      const temporaryFunction = `function ${funcName}(record) {
+      const temporaryFormatterBody = `function ${temporaryFormatterName}(record) {
         const closure = () => {${this.formatterCode.value}};
         const formatted = closure();
 
@@ -124,16 +129,19 @@ export class ServiceSupabaseParserPage extends Page {
         }
       }`;
 
-      const query = `${temporaryFunction}
+      const functionBody = `${temporaryFormatterBody}
         const record = ${JSON.stringify(firstRecord)};
 
         plv8.execute(\`select content from http_post('https://api.telegram.org/bot${
           this.botId.datum().token
         }/sendMessage',
-        '\${${funcName}(record)}',
+        '\${${temporaryFormatterName}(record)}',
         'application/x-www-form-urlencoded')\`);`;
 
-      await this.callTemporaryFunction(this.supabaseApiId.datum(), query);
+      await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody
+      });
 
       this.succeedOperation('Сообщение отправлено.');
     } catch (e) {
@@ -151,6 +159,8 @@ export class ServiceSupabaseParserPage extends Page {
 
     const [sendTelegramMessage, deploySpbexHalts] = await Promise.all([
       fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
+      fetch(this.getSQLUrl('ppp-xml-parse.sql')).then((r) => r.text()),
+      fetch(this.getSQLUrl('ppp-fetch.sql')).then((r) => r.text()),
       fetch(this.getSQLUrl(`${SERVICES.SUPABASE_PARSER}/deploy.sql`)).then(
         (r) => r.text()
       )

@@ -15,10 +15,10 @@ export class ServiceSpbexHaltsPage extends Page {
     try {
       await validate(this.supabaseApiId);
       await validate(this.instrumentsCode);
-      await this.callTemporaryFunction(
-        this.supabaseApiId.datum(),
-        this.instrumentsCode.value
-      );
+      await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: this.instrumentsCode.value
+      });
 
       this.succeedOperation(
         'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
@@ -39,10 +39,10 @@ export class ServiceSpbexHaltsPage extends Page {
       await validate(this.channel);
       await validate(this.formatterCode);
 
-      const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
+      const temporaryFormatterName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
       // Returns form data
-      const temporaryFunction = `function ${funcName}(isin,
+      const temporaryFormatterBody = `function ${temporaryFormatterName}(isin,
         ticker, name, currency, date, url, start, finish) {
           const closure = () => {${this.formatterCode.value}};
           const formatted = closure();
@@ -75,15 +75,18 @@ export class ServiceSpbexHaltsPage extends Page {
           }
         }`;
 
-      const query = `${temporaryFunction}
+      const functionBody = `${temporaryFormatterBody}
          return plv8.execute(\`select content from http_post('https://api.telegram.org/bot${
            this.botId.datum().token
          }/sendMessage',
-        '\${${funcName}('US0400476075', 'ARNA', 'Arena Pharmaceuticals, Inc.', 'USD', '13.12.2021 14:42',
+        '\${${temporaryFormatterName}('US0400476075', 'ARNA', 'Arena Pharmaceuticals, Inc.', 'USD', '13.12.2021 14:42',
         'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044', '14:45', '15:15')}',
         'application/x-www-form-urlencoded')\`);`;
 
-      await this.callTemporaryFunction(this.supabaseApiId.datum(), query);
+      await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody
+      });
 
       this.succeedOperation('Сообщение отправлено.');
     } catch (e) {
