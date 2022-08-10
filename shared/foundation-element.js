@@ -1,7 +1,7 @@
 /** @decorator */
 
 import { PPPElement } from './element/components/ppp-element.js';
-import { observable } from './element/observation/observable.js';
+import { Observable, observable } from './element/observation/observable.js'
 import { DesignSystemRegistrationContext } from './design-system/design-system.js';
 import {
   ComponentPresentation,
@@ -20,10 +20,18 @@ export class FoundationElement extends PPPElement {
   constructor() {
     super(...arguments);
     this._presentation = void 0;
+    this.scratch = {};
 
     // For partial classes
     if (typeof this.ctor === 'function') this.ctor.call(this);
   }
+
+  /**
+   * The scratchpad is available within the context of a page to store temporary
+   * data or computations.
+   */
+  @observable
+  scratch;
 
   /**
    * Sets the template of the element instance. When undefined,
@@ -42,6 +50,12 @@ export class FoundationElement extends PPPElement {
    */
   @observable
   styles;
+
+  scratchSet(key, value) {
+    this.scratch[key] = value;
+
+    Observable.notify(this, 'scratch');
+  }
 
   /**
    * A property which resolves the ComponentPresentation instance
