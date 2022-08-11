@@ -308,14 +308,6 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
             </ppp-button>
           </div>
         </section>
-        <${'ppp-modal'} ${ref('terminalModal')}>
-          <span slot="title">Настройка сервиса</span>
-          <div slot="body">
-            <div class="description">
-              <${'ppp-terminal'} ${ref('terminalDom')}></ppp-terminal>
-            </div>
-          </div>
-        </ppp-modal>
       </ppp-page>
     </form>
   </template>
