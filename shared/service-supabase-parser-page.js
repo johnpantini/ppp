@@ -129,8 +129,15 @@ export class ServiceSupabaseParserPage extends Page {
         }
       }`;
 
+      const consts = await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: this.constsCode.value,
+        returnResult: true
+      });
+
       const functionBody = `${temporaryFormatterBody}
         const record = ${JSON.stringify(firstRecord)};
+        const consts = ${JSON.stringify(consts)};
 
         plv8.execute(\`select content from http_post('https://api.telegram.org/bot${
           this.botId.datum().token

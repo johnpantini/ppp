@@ -241,6 +241,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             </ppp-button>
             <ppp-button
               class="margin-top"
+              ?disabled="${(x) => x.page.loading}"
               @click="${(x) => x.callConstsFunction()}"
               appearance="primary"
             >
@@ -268,6 +269,7 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             </ppp-button>
             <ppp-button
               class="margin-top"
+              ?disabled="${(x) => x.page.loading}"
               @click="${(x) => x.callParsingFunction()}"
               appearance="primary"
             >
@@ -410,7 +412,8 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
                 ></ppp-text-field>
                 <ppp-button
                   class="margin-top"
-                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
+                  ?disabled="${(x) =>
+                    !x.scratch.telegramEnabled || x.page.loading}"
                   @click="${(x) => x.sendTestMessage()}"
                   appearance="primary"
                 >
@@ -433,7 +436,8 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
                   ${ref('formatterCode')}
                 ></ppp-codeflask>
                 <ppp-button
-                  ?disabled="${(x) => !x.scratch.telegramEnabled}"
+                  ?disabled="${(x) =>
+                    !x.scratch.telegramEnabled || x.page.loading}"
                   class="margin-top"
                   @click="${(x) =>
                     x.formatterCode.updateCode(exampleFormatterCode)}"
