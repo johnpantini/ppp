@@ -17,7 +17,7 @@ create or replace function get_nyse_nsdq_halts_symbols_[%#ctx.document._id%]()
 returns json as
 $$
 try {
-  return [%#payload.symbols%];
+  return [%#ctx.document.symbols%];
 } catch (e) {
   plv8.elog(NOTICE, e.toString());
 
@@ -29,7 +29,7 @@ create or replace function parse_nyse_nsdq_halts_[%#ctx.document._id%]()
 returns json as
 $$
 try {
-  const response = plv8.execute(`select content::json->'result' as result from http(('POST', 'https://www.nasdaqtrader.com/RPCHandler.axd', array[http_header('Referer', 'https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts'), http_header('User-Agent', '[%#payload.userAgent%]')], 'application/json', '{"id":2,"method":"BL_TradeHalt.GetTradeHalts","params":"[]","version":"1.1"}')::http_request)`)[0];
+  const response = plv8.execute(`select content::json->'result' as result from http(('POST', 'https://www.nasdaqtrader.com/RPCHandler.axd', array[http_header('Referer', 'https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts'), http_header('User-Agent', '[%#navigator.userAgent%]')], 'application/json', '{"id":2,"method":"BL_TradeHalt.GetTradeHalts","params":"[]","version":"1.1"}')::http_request)`)[0];
   const lines = response.result.split(/\r?\n/);
   const halts = [];
   const parseLine = (l) => l.replace(/<[^>]*>/gi, '').trim();
@@ -70,10 +70,9 @@ drop function if exists send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document
 create or replace function send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%](msg text, options json)
 returns json as
 $$
-  return plv8.find_function('send_telegram_message')('[%#payload.channel%]', '[%#payload.botToken%]', msg, options);
+  return plv8.find_function('send_telegram_message')('[%#ctx.document.channel%]', '[%#ctx.document.bot.token%]', msg, options);
 $$ language plv8;
 
--- Old version
 drop function if exists format_nyse_nsdq_halt_message_[%#ctx.document._id%](
   halt_date text, halt_time text, symbol text, name text, market text, reason_code text, pause_threshold_price text,
   resumption_date text, resumption_quote_time text, resumption_trade_time text);
@@ -83,7 +82,7 @@ create or replace function format_nyse_nsdq_halt_message_[%#ctx.document._id%](
   resumption_date text, resumption_quote_time text, resumption_trade_time text)
 returns json as
 $$
-  [%#payload.formatterCode%]
+  [%#ctx.document.formatterCode%]
 $$ language plv8;
 
 create or replace function nyse_nsdq_halts_insert_trigger_[%#ctx.document._id%]()

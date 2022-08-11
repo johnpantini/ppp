@@ -1,15 +1,10 @@
-import ppp from '../../../ppp.js';
-import { ServiceNyseNsdqHaltsPage } from '../../../shared/pages/service-nyse-nsdq-halts.js';
-import { html } from '../../../shared/template.js';
-import { ref } from '../../../shared/element/templating/ref.js';
-import { when } from '../../../shared/element/templating/when.js';
-import { css } from '../../../shared/element/styles/css.js';
-import { repeat } from '../../../shared/element/templating/repeat.js';
-import { pageStyles, loadingIndicator } from '../page.js';
-import { stateAppearance } from './services.js';
-import { formatDate } from '../../../shared/intl.js';
-import { settings } from '../icons/settings.js';
-import { caretDown } from '../icons/caret-down.js';
+import { ServiceNyseNsdqHaltsPage } from '../../shared/service-nyse-nsdq-halts-page.js';
+import { html } from '../../shared/template.js';
+import { ref } from '../../shared/element/templating/ref.js';
+import { when } from '../../shared/element/templating/when.js';
+import { pageStyles } from './page.js';
+import { serviceControlsTemplate } from './service-page.js';
+import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -141,96 +136,15 @@ return message;`;
 
 export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
   <template>
-    <${'ppp-page-header'} ${ref('header')}>
-      ${(x) =>
-        x.service
-          ? `Сервис - Торговые паузы NYSE/NASDAQ - ${x.service?.name}`
-          : 'Сервис - Торговые паузы NYSE/NASDAQ'}
-    </ppp-page-header>
-    <form ${ref('form')} novalidate onsubmit="return false">
-      <div class="loading-wrapper" ?busy="${(x) => x.busy}">
-        ${when(
-          (x) => x.service,
-          html`
-            <div class="section-content horizontal-overflow">
-              <div class="service-details">
-                <div class="service-details-controls">
-                  <div class="service-details-control service-details-label">
-                    ${(x) => x.service.name}
-                  </div>
-                  <div
-                    class="service-details-control"
-                    style="justify-content: left"
-                  >
-                    <${'ppp-button'}
-                      ?disabled="${(x) =>
-                        x.busy ||
-                        x.service?.removed ||
-                        x.service?.state === 'failed'}"
-                      @click="${(x) => x.restart()}">Перезапустить
-                    </ppp-button>
-                    <ppp-button
-                      ?disabled="${(x) =>
-                        x.busy ||
-                        x.service?.removed ||
-                        x.service?.state === 'failed'}"
-                      @click="${(x) => x.stop()}">Остановить
-                    </ppp-button>
-                    <ppp-button
-                      ?disabled="${(x) => x.busy || x.service?.removed}"
-                      appearance="danger"
-                      @click="${(x) => x.remove()}">Удалить
-                    </ppp-button>
-                  </div>
-                  <div class="service-details-control">
-                    <${'ppp-badge'}
-                      appearance="${(x) => stateAppearance(x.service.state)}">
-                      ${(x) => x.t(`$const.serviceState.${x.service.state}`)}
-                    </ppp-badge>
-                    <ppp-badge
-                      appearance="blue">
-                      Последняя версия
-                    </ppp-badge>
-                  </div>
-                </div>
-                <div class="service-details-info">
-                  <div class="service-details-info-container">
-                    <span style="grid-column-start: 1;grid-row-start: 1;">
-                    Версия
-                    </span>
-                    <div style="grid-column-start: 1;grid-row-start: 2;">
-                      ${(x) => x.service.version}
-                    </div>
-                    <span style="grid-column-start: 2;grid-row-start: 1;">
-                    Тип
-                    </span>
-                    <div style="grid-column-start: 2;grid-row-start: 2;">
-                      ${(x) => x.t(`$const.service.${x.service.type}`)}
-                    </div>
-                    <span style="grid-column-start: 3;grid-row-start: 1;">
-                    Создан
-                    </span>
-                    <div style="grid-column-start: 3;grid-row-start: 2;">
-                      ${(x) => formatDate(x.service.createdAt)}
-                    </div>
-                    <span style="grid-column-start: 4;grid-row-start: 1;">
-                    Последнее изменение
-                    </span>
-                    <div style="grid-column-start: 4;grid-row-start: 2;">
-                      ${(x) =>
-                        formatDate(x.service.updatedAt ?? x.service.createdAt)}
-                    </div>
-                    <span style="grid-column-start: 5;grid-row-start: 1;">
-                    Удалён
-                    </span>
-                    <div style="grid-column-start: 5;grid-row-start: 2;">
-                      ${(x) => (x.service.removed ? 'Да' : 'Нет')}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>`
-        )}
+    <form novalidate>
+      <${'ppp-page'}>
+        <span slot="header">
+          ${(x) =>
+            x.document.name
+              ? `Сервис - Торговые паузы NYSE/NASDAQ - ${x.document.name}`
+              : 'Сервис - Торговые паузы NYSE/NASDAQ'}
+        </span>
+        ${when((x) => x.document._id, serviceControlsTemplate)}
         <section>
           <div class="label-group">
             <h5>Название сервиса</h5>
@@ -238,10 +152,10 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
               потребуется.</p>
           </div>
           <div class="input-group">
-            <ppp-text-field
+            <${'ppp-text-field'}
               placeholder="Название"
-              value="${(x) => x.service?.name}"
-              ${ref('serviceName')}
+              value="${(x) => x.document.name}"
+              ${ref('name')}
             ></ppp-text-field>
           </div>
         </section>
@@ -250,46 +164,40 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
             <h5>Профиль API Supabase</h5>
           </div>
           <div class="input-group">
-            <${'ppp-select'}
-              ?disabled="${(x) => !x.apis}"
-              value="${(x) => x.service?.apiId}"
-              placeholder="Нет доступных профилей"
-              ${ref('api')}
-            >
-              ${repeat(
-                (x) => x?.apis,
-                html`
-                  <ppp-option
-                    ?removed="${(x) => x.removed}"
-                    value="${(x) => x._id}"
-                  >
-                    ${(x) => x.name}
-                  </ppp-option>
-                `
-              )}
-              ${when(
-                (x) => x.apis !== null,
-                caretDown({
-                  slot: 'indicator'
-                })
-              )}
-              ${when(
-                (x) => x.apis === null,
-                settings({
-                  slot: 'indicator',
-                  cls: 'spinner-icon'
-                })
-              )}
-            </ppp-select>
+            <${'ppp-collection-select'}
+              ${ref('supabaseApiId')}
+              value="${(x) => x.document.supabaseApiId}"
+              :context="${(x) => x}"
+              :preloaded="${(x) => x.document.supabaseApi ?? ''}"
+              :query="${() => {
+                return (context) => {
+                  return context.services
+                    .get('mongodb-atlas')
+                    .db('ppp')
+                    .collection('apis')
+                    .find({
+                      $and: [
+                        {
+                          type: `[%#(await import('./const.js')).APIS.SUPABASE%]`,
+                          $or: [
+                            { removed: { $ne: true } },
+                            { _id: `[%#this.document.supabaseApiId ?? ''%]` }
+                          ]
+                        }
+                      ]
+                    })
+                    .sort({ updatedAt: -1 });
+                };
+              }}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
+            ></ppp-collection-select>
             <${'ppp-button'}
               class="margin-top"
-              @click="${(x) =>
-                x.app.navigate({
-                  page: 'api-supabase'
-                })}"
+              @click="${() =>
+                window.open('?page=api-supabase', '_blank').focus()}"
               appearance="primary"
             >
-              Создать новый профиль API Supabase
+              Добавить API Supabase
             </ppp-button>
           </div>
         </section>
@@ -303,8 +211,22 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
             <ppp-text-field
               type="number"
               placeholder="5"
-              value="${(x) => x.service?.interval ?? '5'}"
+              value="${(x) => x.document.interval ?? '5'}"
               ${ref('interval')}
+            ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Глубина хранения</h5>
+            <p>Максимальное количество записей для хранения в базе данных.</p>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              type="number"
+              placeholder="50"
+              value="${(x) => x.document.depth ?? '50'}"
+              ${ref('depth')}
             ></ppp-text-field>
           </div>
         </section>
@@ -318,7 +240,7 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              :code="${(x) => x.service?.symbolsCode ?? exampleSymbolsCode}"
+              :code="${(x) => x.document.symbolsCode ?? exampleSymbolsCode}"
               ${ref('symbolsCode')}
             ></ppp-codeflask>
             <${'ppp-button'}
@@ -330,7 +252,7 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
             </ppp-button>
             <ppp-button
               class="margin-top"
-              ?disabled="${(x) => x.busy}"
+              ?disabled="${(x) => x.page.loading}"
               @click="${(x) => x.callSymbolsFunction()}"
               appearance="primary"
             >
@@ -345,43 +267,32 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
               Должен обладать соответствующими правами в канале/группе.</p>
           </div>
           <div class="input-group">
-            <ppp-select
-              ?disabled="${(x) => !x.bots}"
-              placeholder="Нет доступных профилей"
-              value="${(x) => x.service?.botId}"
-              ${ref('bot')}
-            >
-              ${repeat(
-                (x) => x?.bots,
-                html`
-                  <ppp-option
-                    ?removed="${(x) => x.removed}"
-                    value="${(x) => x._id}"
-                  >
-                    ${(x) => x.name}
-                  </ppp-option>
-                `
-              )}
-              ${when(
-                (x) => x.bots !== null,
-                caretDown({
-                  slot: 'indicator'
-                })
-              )}
-              ${when(
-                (x) => x.bots === null,
-                settings({
-                  slot: 'indicator',
-                  cls: 'spinner-icon'
-                })
-              )}
-            </ppp-select>
+            <ppp-collection-select
+              ${ref('botId')}
+              value="${(x) => x.document.botId}"
+              :context="${(x) => x}"
+              :preloaded="${(x) => x.document.bot ?? ''}"
+              :query="${() => {
+                return (context) => {
+                  return context.services
+                    .get('mongodb-atlas')
+                    .db('ppp')
+                    .collection('bots')
+                    .find({
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.botId ?? ''%]` }
+                      ]
+                    })
+                    .sort({ updatedAt: -1 });
+                };
+              }}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
+            ></ppp-collection-select>
             <ppp-button
               class="margin-top"
-              @click="${(x) =>
-                x.app.navigate({
-                  page: 'telegram-bot'
-                })}"
+              @click="${() =>
+                window.open('?page=telegram-bot', '_blank').focus()}"
               appearance="primary"
             >
               Добавить бота
@@ -398,12 +309,12 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
             <ppp-text-field
               type="number"
               placeholder="Канал или группа"
-              value="${(x) => x.service?.channel}"
+              value="${(x) => x.document.channel}"
               ${ref('channel')}
             ></ppp-text-field>
             <ppp-button
               class="margin-top"
-              ?disabled="${(x) => x.busy}"
+              ?disabled="${(x) => x.page.loading}"
               @click="${(x) => x.sendTestNyseNsdqHaltMessage()}"
               appearance="primary"
             >
@@ -419,7 +330,7 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              :code="${(x) => x.service?.formatterCode ?? exampleFormatterCode}"
+              :code="${(x) => x.document.formatterCode ?? exampleFormatterCode}"
               ${ref('formatterCode')}
             ></ppp-codeflask>
             <ppp-button
@@ -432,53 +343,13 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
             </ppp-button>
           </div>
         </section>
-        <${'ppp-modal'} ${ref('terminalModal')}>
-          <span slot="title">Настройка сервиса</span>
-          <div slot="body">
-            <div class="description">
-              <${'ppp-terminal'} ${ref('terminalDom')}></ppp-terminal>
-            </div>
-          </div>
-        </ppp-modal>
-        ${when((x) => x.busy, html`${loadingIndicator()}`)}
-      </div>
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.busy || x.service?.removed}"
-            type="submit"
-            @click="${(x) => x.install()}"
-            appearance="primary"
-          >
-            ${(x) =>
-              x.service ? 'Переустановить сервис' : 'Установить сервис'}
-          </ppp-button>
-        </div>
-      </section>
+      </ppp-page>
     </form>
-    </div>
   </template>
 `;
 
-export const serviceNyseNsdqHaltsPageStyles = (context, definition) =>
-  css`
-    ${pageStyles}
-    section ppp-codeflask {
-      width: 100%;
-      height: 256px;
-    }
-
-    ppp-modal .description {
-      padding: 10px 16px 10px 20px;
-      border-radius: 7px;
-      background-color: rgb(33, 49, 60);
-      border: 1px solid rgb(231, 238, 236);
-    }
-  `;
-
 // noinspection JSUnusedGlobalSymbols
-export const serviceNyseNsdqHaltsPage = ServiceNyseNsdqHaltsPage.compose({
-  baseName: 'service-nyse-nsdq-halts-page',
+export default ServiceNyseNsdqHaltsPage.compose({
   template: serviceNyseNsdqHaltsPageTemplate,
-  styles: serviceNyseNsdqHaltsPageStyles
+  styles: pageStyles
 });

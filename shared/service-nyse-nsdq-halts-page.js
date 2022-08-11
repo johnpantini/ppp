@@ -1,99 +1,27 @@
-/** @decorator */
+import { Page, PageWithService, PageWithSupabaseService } from './page.js';
+import { validate } from './validate.js';
+import { Tmpl } from './tmpl.js';
+import { SERVICE_STATE, SERVICES } from './const.js';
+import { applyMixins } from './utilities/apply-mixins.js';
+import { uuidv4 } from './ppp-crypto.js';
+import ppp from '../ppp.js';
 
-import { validate } from '../validate.js';
-import { maybeFetchError } from '../fetch-error.js';
-import { uuidv4 } from '../ppp-crypto.js';
-import { APIS, SERVICES } from '../const.js';
-import { Observable, observable } from '../element/observation/observable.js'
-import { Tmpl } from '../tmpl.js';
-import { SupabaseParserPage } from '../supabase-parser-page.js';
-
-export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
-  @observable
-  bots;
-
-  @observable
-  apis;
-
-  type = SERVICES.NYSE_NSDQ_HALTS;
-
-  async callSymbolsFunction(returnResult = false) {
-    if (!returnResult) this.beginOperation();
-
-    try {
-      await validate(this.api);
-      await validate(this.symbolsCode);
-
-      const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
-      // Temporary function, no need to drop
-      const query = `create or replace function ${funcName}()
-        returns json as
-        $$
-          ${this.symbolsCode.value}
-        $$ language plv8;
-
-        select ${funcName}();
-        `;
-
-      const api = Object.assign(
-        {},
-        this.apis.find((a) => a._id === this.api.value)
-      );
-
-      api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
-
-      const rTestSQL = await fetch(
-        new URL(
-          'pg',
-          this.app.ppp.keyVault.getKey('service-machine-url')
-        ).toString(),
-        {
-          cache: 'no-cache',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query,
-            connectionString: this.getConnectionString(api)
-          })
-        }
-      );
-
-      await maybeFetchError(rTestSQL);
-
-      const result = JSON.parse(
-        (await rTestSQL.json()).results.find(
-          (r) => r.command.toUpperCase() === 'SELECT'
-        ).rows[0]
-      );
-
-      if (returnResult) {
-        return result;
-      } else console.table(result);
-
-      this.succeedOperation(
-        'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
-      );
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.endOperation();
-    }
-  }
+export class ServiceNyseNsdqHaltsPage extends Page {
+  collection = 'services';
 
   async sendTestNyseNsdqHaltMessage() {
     this.beginOperation();
 
     try {
-      await validate(this.api);
-      await validate(this.bot);
+      await validate(this.supabaseApiId);
+      await validate(this.botId);
       await validate(this.channel);
       await validate(this.formatterCode);
 
-      const funcName = `ppp_${uuidv4().replaceAll('-', '_')}`;
+      const temporaryFormatterName = `ppp_${uuidv4().replaceAll('-', '_')}`;
 
-      const temporaryFunction = `function ${funcName}(halt_date,
+      // Returns form data
+      const temporaryFormatterBody = `function ${temporaryFormatterName}(halt_date,
         halt_time, symbol, name, market, reason_code, pause_threshold_price,
         resumption_date, resumption_quote_time, resumption_trade_time) {
           const closure = () => {${this.formatterCode.value}};
@@ -127,46 +55,19 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
           }
         }`;
 
-      const bot = Object.assign(
-        {},
-        this.bots.find((b) => b._id === this.bot.value)
-      );
+      const functionBody = `${temporaryFormatterBody}
+         return plv8.execute(\`select content from http_post('https://api.telegram.org/bot${
+           this.botId.datum().token
+         }/sendMessage',
+        '\${${temporaryFormatterName}('02/10/2022', '15:37:48', 'ASTR', 'Astra Space Inc Cl A Cmn Stk', 'NASDAQ', 'LUDP',
+          '', '02/10/2022', '15:37:48', '15:42:48')}',
+        'application/x-www-form-urlencoded')\`);`;
 
-      bot.token = await this.app.ppp.crypto.decrypt(bot.iv, bot.token);
+      await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody
+      });
 
-      const query = `do $$
-        ${temporaryFunction}
-
-        plv8.execute(\`select content from http_post('https://api.telegram.org/bot${bot.token}/sendMessage',
-          '\${${funcName}('02/10/2022', '15:37:48', 'ASTR', 'Astra Space Inc Cl A Cmn Stk', 'NASDAQ', 'LUDP',
-          '', '02/10/2022', '15:37:48', '15:42:48')}', 'application/x-www-form-urlencoded')\`); $$ language plv8`;
-
-      const api = Object.assign(
-        {},
-        this.apis.find((a) => a._id === this.api.value)
-      );
-
-      api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
-
-      const rTestSQL = await fetch(
-        new URL(
-          'pg',
-          this.app.ppp.keyVault.getKey('service-machine-url')
-        ).toString(),
-        {
-          cache: 'no-cache',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query,
-            connectionString: this.getConnectionString(api)
-          })
-        }
-      );
-
-      await maybeFetchError(rTestSQL);
       this.succeedOperation('Сообщение отправлено.');
     } catch (e) {
       this.failOperation(e);
@@ -175,219 +76,158 @@ export class ServiceNyseNsdqHaltsPage extends SupabaseParserPage {
     }
   }
 
-  async connectedCallback() {
-    super.connectedCallback();
-
-    this.bots = null;
-    this.apis = null;
-
+  async callSymbolsFunction(returnResult) {
     this.beginOperation();
 
     try {
-      await this.checkPresence();
-
-      [this.bots, this.apis] = await Promise.all([
-        this.app.ppp.user.functions.aggregate(
-          {
-            collection: 'bots'
-          },
-          [
-            {
-              $match: {
-                $or: [
-                  { removed: { $not: { $eq: true } } },
-                  { _id: this.service?.botId }
-                ]
-              }
-            }
-          ]
-        ),
-        this.app.ppp.user.functions.aggregate(
-          {
-            collection: 'apis'
-          },
-          [
-            {
-              $match: {
-                $and: [
-                  {
-                    type: APIS.SUPABASE
-                  },
-                  {
-                    $or: [
-                      { removed: { $not: { $eq: true } } },
-                      { _id: this.service?.apiId }
-                    ]
-                  }
-                ]
-              }
-            }
-          ]
-        )
-      ]);
-
-      if (!this.bots.length) this.bots = void 0;
-
-      if (!this.apis.length) this.apis = void 0;
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.endOperation();
-    }
-  }
-
-  async installationQuery(serviceId, api) {
-    const [sendTelegramMessage, installNyseNsdqHalts] = await Promise.all([
-      fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl('nyse-nsdq-halts/install.sql')).then((r) => r.text())
-    ]);
-
-    const bot = Object.assign(
-      {},
-      this.bots.find((b) => b._id === this.bot.value)
-    );
-
-    const symbols = await this.callSymbolsFunction(true);
-    let interval = parseInt(this.interval.value);
-
-    if (interval < 1 || isNaN(interval)) interval = 5;
-
-    return `${sendTelegramMessage}
-      ${await new Tmpl().render(this, installNyseNsdqHalts, {
-        serviceId,
-        api,
-        userAgent: navigator.userAgent,
-        interval,
-        channel: this.channel.value,
-        symbols: JSON.stringify(symbols),
-        formatterCode: this.formatterCode.value,
-        botToken: await this.app.ppp.crypto.decrypt(bot.iv, bot.token)
-      })}`;
-  }
-
-  async install() {
-    this.beginOperation();
-
-    try {
-      await validate(this.serviceName);
-      await validate(this.api);
-      await validate(this.interval);
+      await validate(this.supabaseApiId);
       await validate(this.symbolsCode);
-      await validate(this.bot);
-      await validate(this.channel);
-      await validate(this.formatterCode);
 
-      let interval = parseInt(this.interval.value);
-
-      if (interval < 1 || isNaN(interval)) interval = 5;
-
-      let serviceId = this.service?._id;
-
-      if (!this.service) {
-        const existingService = await this.app.ppp.user.functions.findOne(
-          {
-            collection: 'services'
-          },
-          {
-            removed: { $not: { $eq: true } },
-            type: SERVICES.NYSE_NSDQ_HALTS,
-            name: this.serviceName.value.trim()
-          },
-          {
-            _id: 1
-          }
-        );
-
-        if (existingService) {
-          return this.failOperation({
-            href: `?page=service-${SERVICES.NYSE_NSDQ_HALTS}&service=${existingService._id}`,
-            error: 'E11000'
-          });
-        }
-
-        const { insertedId } = await this.app.ppp.user.functions.insertOne(
-          {
-            collection: 'services'
-          },
-          {
-            name: this.serviceName.value.trim(),
-            state: 'failed',
-            type: SERVICES.NYSE_NSDQ_HALTS,
-            version: 1,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            apiId: this.api.value,
-            botId: this.bot.value,
-            interval,
-            symbolsCode: this.symbolsCode.value,
-            formatterCode: this.formatterCode.value,
-            channel: +this.channel.value
-          }
-        );
-
-        serviceId = insertedId;
-      }
-
-      const api = Object.assign(
-        {},
-        this.apis.find((a) => a._id === this.api.value)
-      );
-
-      api.password = await this.app.ppp.crypto.decrypt(api.iv, api.password);
-      api.key = await this.app.ppp.crypto.decrypt(api.iv, api.key);
-
-      const rInstallationSQL = await this.executeSQL({
-        query: await this.installationQuery(serviceId, api),
-        api
+      const result = await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: this.symbolsCode.value,
+        returnResult
       });
 
-      const state = rInstallationSQL.ok
-        ? this.service
-          ? this.service.state === 'failed'
-            ? 'stopped'
-            : this.service.state
-          : 'stopped'
-        : 'failed';
+      if (!returnResult)
+        this.succeedOperation(
+          'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
+        );
 
-      await this.app.ppp.user.functions.updateOne(
-        {
-          collection: 'services'
-        },
-        {
-          _id: serviceId
-        },
-        {
-          $set: {
-            name: this.serviceName.value.trim(),
-            state,
-            version: 1,
-            updatedAt: new Date(),
-            apiId: this.api.value,
-            botId: this.bot.value,
-            interval,
-            symbolsCode: this.symbolsCode.value,
-            formatterCode: this.formatterCode.value,
-            channel: +this.channel.value
-          }
-        }
-      );
-
-      if (rInstallationSQL.ok) {
-        const terminal = this.terminalDom.terminal;
-
-        terminal.writeln('\x1b[32m\r\nppp-sql-ok\r\n\x1b[0m');
-        terminal.writeln('');
-
-        this.succeedOperation();
-      } else {
-        this.failOperation(rInstallationSQL.status);
-      }
+      return result;
     } catch (e) {
       this.failOperation(e);
     } finally {
-      this.terminalModal.dismissible = true;
-
       this.endOperation();
     }
   }
+
+  async #deploy() {
+    if (!this.document.supabaseApi)
+      this.document.supabaseApi = this.supabaseApiId.datum();
+
+    if (!this.document.bot) this.document.bot = this.botId.datum();
+
+    const [sendTelegramMessage, deployNyseNsdqHalts] = await Promise.all([
+      fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
+      fetch(this.getSQLUrl(`${SERVICES.NYSE_NSDQ_HALTS}/deploy.sql`)).then(
+        (r) => r.text()
+      )
+    ]);
+
+    this.document.symbols = JSON.stringify(
+      await this.callSymbolsFunction(true)
+    );
+
+    const query = `${sendTelegramMessage}
+      ${await new Tmpl().render(this, deployNyseNsdqHalts, {})}`;
+
+    await this.executeSQL({
+      api: this.document.supabaseApi,
+      query: await new Tmpl().render(this, query, {})
+    });
+  }
+
+  async validate() {
+    await validate(this.name);
+    await validate(this.supabaseApiId);
+    await validate(this.interval);
+    await validate(this.interval, {
+      hook: async (value) => +value > 0 && +value <= 1000,
+      errorMessage: 'Введите значение в диапазоне от 1 до 1000'
+    });
+    await validate(this.depth);
+    await validate(this.depth, {
+      hook: async (value) => +value >= 30 && +value <= 10000,
+      errorMessage: 'Введите значение в диапазоне от 30 до 10000'
+    });
+    await validate(this.symbolsCode);
+    await validate(this.botId);
+    await validate(this.channel);
+    await validate(this.formatterCode);
+  }
+
+  async read() {
+    return (context) => {
+      return context.services
+        .get('mongodb-atlas')
+        .db('ppp')
+        .collection('[%#this.page.view.collection%]')
+        .aggregate([
+          {
+            $match: {
+              _id: new BSON.ObjectId('[%#payload.documentId%]'),
+              type: `[%#(await import('./const.js')).SERVICES.NYSE_NSDQ_HALTS%]`
+            }
+          },
+          {
+            $lookup: {
+              from: 'apis',
+              localField: 'supabaseApiId',
+              foreignField: '_id',
+              as: 'supabaseApi'
+            }
+          },
+          {
+            $unwind: '$supabaseApi'
+          },
+          {
+            $lookup: {
+              from: 'bots',
+              localField: 'botId',
+              foreignField: '_id',
+              as: 'bot'
+            }
+          },
+          {
+            $unwind: '$bot'
+          }
+        ]);
+    };
+  }
+
+  async find() {
+    return {
+      type: SERVICES.NYSE_NSDQ_HALTS,
+      name: this.name.value.trim()
+    };
+  }
+
+  async update() {
+    const state =
+      this.document.state === SERVICE_STATE.ACTIVE
+        ? SERVICE_STATE.ACTIVE
+        : SERVICE_STATE.STOPPED;
+
+    return [
+      {
+        $set: {
+          name: this.name.value.trim(),
+          supabaseApiId: this.supabaseApiId.value,
+          interval: Math.ceil(Math.abs(this.interval.value)),
+          depth: Math.ceil(Math.abs(this.depth.value)),
+          symbolsCode: this.symbolsCode.value,
+          botId: this.botId.value,
+          channel: +this.channel.value,
+          formatterCode: this.formatterCode.value,
+          version: 1,
+          state: SERVICE_STATE.FAILED,
+          updatedAt: new Date()
+        },
+        $setOnInsert: {
+          type: SERVICES.NYSE_NSDQ_HALTS,
+          createdAt: new Date()
+        }
+      },
+      this.#deploy,
+      () => ({
+        $set: {
+          state,
+          updatedAt: new Date()
+        }
+      })
+    ];
+  }
 }
+
+applyMixins(ServiceNyseNsdqHaltsPage, PageWithService, PageWithSupabaseService);
