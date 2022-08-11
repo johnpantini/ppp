@@ -88,7 +88,6 @@ export const modalStyles = css`
     letter-spacing: 0;
     font-weight: 400;
     margin-bottom: 1rem;
-    margin-right: 2rem;
   }
 
   [modal] section {
