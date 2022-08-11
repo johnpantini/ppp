@@ -53,7 +53,6 @@ export const servicePageTemplate = (context, definition) => html`
             target="_blank"
             href="http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts">RSS-лента пауз</a>.</span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
