@@ -157,16 +157,21 @@ export class ServiceSupabaseParserPage extends Page {
 
     if (!this.document.bot) this.document.bot = this.botId.datum();
 
-    const [sendTelegramMessage, deploySpbexHalts] = await Promise.all([
-      fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl('ppp-xml-parse.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl('ppp-fetch.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl(`${SERVICES.SUPABASE_PARSER}/deploy.sql`)).then(
-        (r) => r.text()
-      )
-    ]);
+    const [sendTelegramMessage, pppXmlParse, pppFetch, deploySpbexHalts] =
+      await Promise.all([
+        fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) =>
+          r.text()
+        ),
+        fetch(this.getSQLUrl('ppp-xml-parse.sql')).then((r) => r.text()),
+        fetch(this.getSQLUrl('ppp-fetch.sql')).then((r) => r.text()),
+        fetch(this.getSQLUrl(`${SERVICES.SUPABASE_PARSER}/deploy.sql`)).then(
+          (r) => r.text()
+        )
+      ]);
 
     const query = `${sendTelegramMessage}
+      ${pppXmlParse}
+      ${pppFetch}
       ${await new Tmpl().render(this, deploySpbexHalts, {})}`;
 
     await this.executeSQL({
