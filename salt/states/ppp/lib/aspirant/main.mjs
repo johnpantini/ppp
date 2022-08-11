@@ -92,40 +92,55 @@ export default class Aspirant {
   }
 
   async #sync() {
-    const map = await (await this.#redisCommand(['HGETALL', this.key])).json();
-    let i = 0;
+    try {
+      // Can fail if service machine is not OK
+      const map = await (
+        await this.#redisCommand(['HGETALL', this.key])
+      ).json();
+      let i = 0;
 
-    for (const _id of map) {
-      if (i % 2 === 0) {
-        const { source, env } = JSON.parse(map[i + 1]);
+      for (const _id of map) {
+        if (i % 2 === 0) {
+          const { source, env } = JSON.parse(map[i + 1]);
 
-        await this.#runWorker(_id, { source, env });
+          await this.#runWorker(_id, { source, env });
+        }
+
+        i++;
       }
-
-      i++;
+    } catch (e) {
+      setTimeout(() => this.#sync(), 1000);
     }
   }
 
   async #runWorker(_id, { source, env = {} }) {
-    const currentWorker = this.#workers.get(_id);
+    try {
+      const currentWorker = this.#workers.get(_id);
 
-    if (currentWorker?.worker) {
-      await currentWorker.worker.terminate();
-      currentWorker.worker.unref();
+      if (currentWorker?.worker) {
+        await currentWorker.worker.terminate();
+        currentWorker.worker.unref();
+      }
+
+      this.#workers.set(_id, {
+        source,
+        env,
+        worker: new Worker(
+          new URL(
+            `data:text/javascript,${Buffer.from(source, 'base64').toString()}`
+          ),
+          {
+            env: Object.assign({}, process.env, env)
+          }
+        )
+      });
+    } catch (e) {
+      console.error(e);
+
+      setTimeout(() => {
+        this.#runWorker(_id, { source, env });
+      });
     }
-
-    this.#workers.set(_id, {
-      source,
-      env,
-      worker: new Worker(
-        new URL(
-          `data:text/javascript,${Buffer.from(source, 'base64').toString()}`
-        ),
-        {
-          env: Object.assign({}, process.env, env)
-        }
-      )
-    });
   }
 
   async main() {
