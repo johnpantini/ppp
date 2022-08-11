@@ -3,6 +3,7 @@ import { applyMixins } from './utilities/apply-mixins.js';
 import { invalidate, validate } from './validate.js';
 import { SERVICE_STATE, SERVICES } from './const.js';
 import { maybeFetchError } from './fetch-error.js';
+import { uuidv4 } from './ppp-crypto.js';
 import ppp from '../ppp.js';
 
 export class ServicePppAspirantPage extends Page {
@@ -142,6 +143,7 @@ export class ServicePppAspirantPage extends Page {
     };
 
     if (!service) {
+      const [portName] = uuidv4().split('-');
       const rNewService = await fetch(
         new URL('fetch', serviceMachineUrl).toString(),
         {
@@ -165,7 +167,7 @@ export class ServicePppAspirantPage extends Page {
               },
               ports: [
                 {
-                  name: 'http',
+                  name: 'p' + portName.substring(1),
                   public: true,
                   internalPort: 32456,
                   protocol: 'HTTP'
