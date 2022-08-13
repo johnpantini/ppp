@@ -37,6 +37,9 @@ export class ServiceSupabaseParserPage extends Page {
       await validate(this.supabaseApiId);
       await validate(this.parsingCode);
 
+      this.document.url = this.url.value.trim();
+      this.document.frameUrl = this.frameUrl.value.trim();
+
       const consts = await this.callTemporaryFunction({
         api: this.supabaseApiId.datum(),
         functionBody: this.constsCode.value,
