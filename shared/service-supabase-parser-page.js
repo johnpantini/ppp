@@ -167,7 +167,7 @@ export class ServiceSupabaseParserPage extends Page {
 
     if (!this.document.bot) this.document.bot = this.botId.datum();
 
-    const [sendTelegramMessage, pppXmlParse, pppFetch, deploySpbexHalts] =
+    const [sendTelegramMessage, pppXmlParse, pppFetch, deployParser] =
       await Promise.all([
         fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) =>
           r.text()
@@ -179,10 +179,18 @@ export class ServiceSupabaseParserPage extends Page {
         )
       ]);
 
+    this.document.consts = JSON.stringify(
+      await this.callTemporaryFunction({
+        api: this.supabaseApiId.datum(),
+        functionBody: this.constsCode.value,
+        returnResult: true
+      })
+    );
+
     const query = `${sendTelegramMessage}
       ${pppXmlParse}
       ${pppFetch}
-      ${await new Tmpl().render(this, deploySpbexHalts, {})}`;
+      ${await new Tmpl().render(this, deployParser, {})}`;
 
     await this.executeSQL({
       api: this.document.supabaseApi,

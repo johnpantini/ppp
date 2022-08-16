@@ -7,7 +7,7 @@ create or replace function get_consts_data_[%#ctx.document._id%]()
 returns json as
 $$
 try {
-  [%#ctx.document.constsCode%]
+  return [%#ctx.document.consts%];
 } catch (e) {
   plv8.elog(NOTICE, e.toString());
 
