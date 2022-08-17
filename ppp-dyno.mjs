@@ -40,6 +40,14 @@ async function $fetch(request, response) {
     } else if (typeof body.body === 'object')
       requestOptions.body = JSON.stringify(body.body);
 
+    if (
+      requestOptions.body &&
+      typeof requestOptions.headers['Content-Length'] === 'undefined'
+    )
+      requestOptions.headers['Content-Length'] = Buffer.byteLength(
+        requestOptions.body
+      );
+
     const fetchResponse = await fetch(body.url, requestOptions);
     const ct = fetchResponse.headers['content-type'];
 
