@@ -162,6 +162,21 @@ export const apiPageTemplate = (context, definition) => html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Cloudflare" style="height: 40px"
+               src="static/cloudflare.svg"/>
+          <span slot="title">Cloudflare</span>
+          <span slot="description">Доступ к API Cloudflare Workers.</span>
+          <${'ppp-button'}
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `api-${APIS.CLOUDFLARE}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
       </div>
       <span slot="actions"></span>
     </ppp-page>

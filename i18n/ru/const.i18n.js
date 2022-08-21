@@ -17,7 +17,8 @@ export default function (i18n) {
         [APIS.SEATABLE]: 'Seatable',
         [APIS.ALGOLIA]: 'Algolia',
         [APIS.NORTHFLANK]: 'Northflank',
-        [APIS.REDIS]: 'Redis'
+        [APIS.REDIS]: 'Redis',
+        [APIS.CLOUDFLARE]: 'Cloudflare'
       },
       broker: {
         [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2'

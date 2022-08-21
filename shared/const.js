@@ -11,7 +11,8 @@ export const APIS = {
   NORTHFLANK: 'northflank',
   ALPACA_REALTIME: 'alpaca-realtime',
   ALGOLIA: 'algolia',
-  REDIS: 'redis'
+  REDIS: 'redis',
+  CLOUDFLARE: 'cloudflare'
 };
 
 export const SERVICES = {
@@ -19,7 +20,9 @@ export const SERVICES = {
   SPBEX_HALTS: 'spbex-halts',
   NYSE_NSDQ_HALTS: 'nyse-nsdq-halts',
   SUPABASE_PARSER: 'supabase-parser',
-  PPP_ASPIRANT: 'ppp-aspirant'
+  PPP_ASPIRANT: 'ppp-aspirant',
+  DEPLOYED_PPP_ASPIRANT: 'deployed-ppp-aspirant',
+  PPP_ASPIRANT_WORKER: 'ppp-aspirant-worker'
 };
 
 export const SERVICE_STATE = {
