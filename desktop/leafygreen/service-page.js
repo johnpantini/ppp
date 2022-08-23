@@ -83,12 +83,38 @@ export const servicePageTemplate = (context, definition) => html`
                style="height: 45px"
                src="static/ppp-aspirant.svg"/>
           <span slot="title">PPP Aspirant</span>
-          <span slot="description">Подсистема обслуживания долгоживущих процессов приложения PPP.</span>
+          <span slot="description">Подсистема обслуживания процессов приложения PPP.</span>
+          <div slot="action" class="control-line">
+            <ppp-button
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `service-${SERVICES.PPP_ASPIRANT}`
+                })}"
+            >
+              Настроить в облаке
+            </ppp-button>
+            <ppp-button
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `service-${SERVICES.DEPLOYED_PPP_ASPIRANT}`
+                })}"
+            >
+              Указать адрес
+            </ppp-button>
+          </div>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="PPP Aspirant Worker"
+               style="height: 45px"
+               src="static/ppp-aspirant-worker.svg"/>
+          <span slot="title">PPP Aspirant Worker</span>
+          <span
+            slot="description">Рабочий процесс под управлением PPP Aspirant.</span>
           <ppp-button
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `service-${SERVICES.PPP_ASPIRANT}`
+                page: `service-${SERVICES.PPP_ASPIRANT_WORKER}`
               })}"
           >
             Продолжить

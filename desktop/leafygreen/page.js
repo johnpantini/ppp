@@ -589,6 +589,12 @@ export const pageStyles = css`
     border-radius: 7px;
   }
 
+  .control-line {
+    display: flex;
+    flex-direction: row;
+    gap: 0 8px;
+  }
+
   ${modalStyles}
   ${foldingStyles}
   ${emptyStateStyles}

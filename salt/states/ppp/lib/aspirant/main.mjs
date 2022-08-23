@@ -17,6 +17,7 @@ function readJSON(res, cb) {
         try {
           json = JSON.parse(Buffer.concat([buffer, chunk]).toString());
         } catch (e) {
+          console.error(e);
           res.close();
 
           return;
@@ -27,6 +28,7 @@ function readJSON(res, cb) {
         try {
           json = JSON.parse(chunk.toString());
         } catch (e) {
+          console.error(e);
           res.close();
 
           return;
@@ -44,6 +46,20 @@ function readJSON(res, cb) {
   res.onAborted(() => {
     console.error('Invalid JSON or no data.');
   });
+}
+
+function cors(res) {
+  if (res) {
+    res
+      .writeHeader('Access-Control-Allow-Origin', '*')
+      .writeHeader(
+        'Access-Control-Allow-Methods',
+        'GET, POST, OPTIONS, PUT, PATCH, DELETE'
+      )
+      .writeHeader('Access-Control-Allow-Headers', 'content-type');
+  }
+
+  return res;
 }
 
 export default class Aspirant {
@@ -109,56 +125,76 @@ export default class Aspirant {
         i++;
       }
     } catch (e) {
+      console.error(e);
       setTimeout(() => this.#sync(), 1000);
     }
   }
 
   async #runWorker(_id, { source, env = {} }) {
     try {
-      const currentWorker = this.#workers.get(_id);
+      const currentWorkerData = this.#workers.get(_id);
 
-      if (currentWorker?.worker) {
-        await currentWorker.worker.terminate();
-        currentWorker.worker.unref();
+      if (currentWorkerData?.worker) {
+        await currentWorkerData.worker.terminate();
+        currentWorkerData.worker.unref();
+        this.#workers.delete(_id);
+        delete currentWorkerData?.worker;
       }
 
       this.#workers.set(_id, {
         source,
         env,
-        worker: new Worker(
-          new URL(
-            `data:text/javascript,${Buffer.from(source, 'base64').toString()}`
-          ),
-          {
-            env: Object.assign({}, process.env, env)
-          }
-        )
+        worker: new Worker(new URL(`data:text/javascript,${source}`), {
+          env: Object.assign({}, process.env, env)
+        })
+      });
+
+      this.#workers.get(_id).worker.once('exit', () => {
+        if (this.#workers.has(_id)) {
+          setTimeout(() => {
+            if (this.#workers.has(_id)) {
+              this.#runWorker(_id, { source, env });
+            }
+          }, 1000);
+        }
       });
     } catch (e) {
       console.error(e);
 
-      setTimeout(() => {
-        this.#runWorker(_id, { source, env });
-      });
+      if (this.#workers.has(_id)) {
+        setTimeout(() => {
+          if (this.#workers.has(_id)) {
+            this.#runWorker(_id, { source, env });
+          }
+        }, 1000);
+      }
     }
   }
 
   async main() {
     uWS
       .App({})
-      .post('/worker', async (res) => {
+      .get('/workers', async (res) => {
+        res
+          .writeHeader('Content-Type', 'application/json;charset=UTF-8')
+          .end(JSON.stringify(Object.fromEntries(this.#workers)));
+      })
+      .options('/*', (res) => {
+        return cors(res).writeStatus('200 OK').end();
+      })
+      .post('/workers', async (res) => {
         readJSON(res, async (payload = {}) => {
           try {
             const { _id, source, env = {} } = payload;
 
             if (!_id)
-              return res
+              return cors(res)
                 .writeStatus('400 Bad Request')
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
                 .end('Missing worker _id.');
 
             if (!source)
-              return res
+              return cors(res)
                 .writeStatus('400 Bad Request')
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
                 .end('Missing worker source.');
@@ -175,56 +211,77 @@ export default class Aspirant {
               env
             });
 
-            res
+            cors(res)
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
               .end('200 OK');
           } catch (e) {
             console.error(e);
 
-            res
+            cors(res)
               .writeStatus('500 Internal Server Error')
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
               .end('500 Internal Server Error');
           }
         });
       })
-      .del('/worker', async (res) => {
+      .del('/workers', async (res) => {
         readJSON(res, async (payload = {}) => {
           try {
             const { _id } = payload;
 
             if (!_id)
-              return res
+              return cors(res)
                 .writeStatus('400 Bad Request')
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
                 .end('Missing worker _id.');
 
             await this.#redisCommand(['HDEL', this.key, _id]);
 
-            const currentWorker = this.#workers.get(_id);
-
-            if (currentWorker?.worker) {
-              await currentWorker.worker.terminate();
-              currentWorker.worker.unref();
-            }
+            const currentWorkerData = this.#workers.get(_id);
 
             this.#workers.delete(_id);
 
-            res
+            if (currentWorkerData?.worker) {
+              currentWorkerData.worker.removeAllListeners('exit');
+              await currentWorkerData.worker.terminate();
+              currentWorkerData.worker.unref();
+            }
+
+            cors(res)
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
               .end('200 OK');
           } catch (e) {
             console.error(e);
 
-            res
+            cors(res)
               .writeStatus('500 Internal Server Error')
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
               .end('500 Internal Server Error');
           }
         });
       })
+      .get('/ping_redis', async (res) => {
+        res.onAborted(() => {
+          console.error(res);
+        });
+
+        try {
+          cors(res)
+            .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
+            .end(await (await this.#redisCommand(['PING'])).text());
+        } catch (e) {
+          console.error(e);
+
+          cors(res)
+            .writeStatus('500 Internal Server Error')
+            .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
+            .end('500 Internal Server Error');
+        }
+      })
       .get('/ping', async (res) => {
-        res.writeHeader('Content-Type', 'text/plain;charset=UTF-8').end('pong');
+        cors(res)
+          .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
+          .end('pong');
       })
       .listen(PORT, async (listenSocket) => {
         if (listenSocket) {

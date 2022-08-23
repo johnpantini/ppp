@@ -422,7 +422,7 @@ class CanvasTable {
     }
 
     if (y > canvasHeight && fader.bottom) {
-      var bottomFader = ctx.createLinearGradient(
+      const bottomFader = ctx.createLinearGradient(
         0,
         canvasHeight - fader.size,
         0,
