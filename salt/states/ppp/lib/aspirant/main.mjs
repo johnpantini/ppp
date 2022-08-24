@@ -62,8 +62,16 @@ function cors(res) {
   return res;
 }
 
+async function later(delay) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, delay);
+  });
+}
+
 export default class Aspirant {
   #id;
+
+  #respawnTimeout;
 
   #redisCommand;
 
@@ -77,10 +85,12 @@ export default class Aspirant {
     tls,
     username,
     database,
-    password
+    password,
+    respawnTimeout = 1000
   }) {
     globalThis.Aspirant = this;
 
+    this.#respawnTimeout = respawnTimeout;
     this.#id = id;
     this.#redisCommand = async (command) =>
       fetch(new URL('redis', serviceMachineUrl).toString(), {
@@ -130,44 +140,54 @@ export default class Aspirant {
     }
   }
 
+  #onWorkerExit() {
+    for (const v of globalThis.Aspirant.#workers.values()) {
+      if (v.worker === this) {
+        v.worker.timer = setTimeout(() => {
+          if (globalThis.Aspirant.#workers.has(v._id))
+            void globalThis.Aspirant.#runWorker(v._id, {
+              source: v.source,
+              env: v.env
+            });
+        }, globalThis.Aspirant.#respawnTimeout);
+
+        break;
+      }
+    }
+  }
+
   async #runWorker(_id, { source, env = {} }) {
     try {
-      const currentWorkerData = this.#workers.get(_id);
+      if (this.#workers.has(_id)) {
+        const currentWorkerData = this.#workers.get(_id);
 
-      if (currentWorkerData?.worker) {
+        clearTimeout(currentWorkerData.worker.timer);
+
         await currentWorkerData.worker.terminate();
         currentWorkerData.worker.unref();
+        currentWorkerData.worker.off('exit', this.#onWorkerExit);
         this.#workers.delete(_id);
-        delete currentWorkerData?.worker;
       }
 
       this.#workers.set(_id, {
+        _id,
         source,
         env,
         worker: new Worker(new URL(`data:text/javascript,${source}`), {
-          env: Object.assign({}, process.env, env)
+          env: Object.assign({}, process.env, env),
+          workerData: {
+            aspirant: this
+          }
         })
       });
 
-      this.#workers.get(_id).worker.once('exit', () => {
-        if (this.#workers.has(_id)) {
-          setTimeout(() => {
-            if (this.#workers.has(_id)) {
-              this.#runWorker(_id, { source, env });
-            }
-          }, 1000);
-        }
-      });
+      this.#workers.get(_id).worker.on('exit', this.#onWorkerExit);
     } catch (e) {
       console.error(e);
 
-      if (this.#workers.has(_id)) {
-        setTimeout(() => {
-          if (this.#workers.has(_id)) {
-            this.#runWorker(_id, { source, env });
-          }
-        }, 1000);
-      }
+      setTimeout(() => {
+        this.#runWorker(_id, { source, env });
+      }, this.#respawnTimeout);
     }
   }
 
@@ -237,12 +257,13 @@ export default class Aspirant {
 
             await this.#redisCommand(['HDEL', this.key, _id]);
 
-            const currentWorkerData = this.#workers.get(_id);
+            if (this.#workers.has(_id)) {
+              const currentWorkerData = this.#workers.get(_id);
 
-            this.#workers.delete(_id);
+              clearTimeout(currentWorkerData.worker.timer);
 
-            if (currentWorkerData?.worker) {
-              currentWorkerData.worker.removeAllListeners('exit');
+              this.#workers.delete(_id);
+              currentWorkerData.worker.off('exit', this.#onWorkerExit);
               await currentWorkerData.worker.terminate();
               currentWorkerData.worker.unref();
             }
@@ -305,6 +326,7 @@ else {
     tls: !!process.env.REDIS_TLS,
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
-    database: +process.env.REDIS_DATABASE
+    database: +process.env.REDIS_DATABASE,
+    respawnTimeout: +process.env.RESPAWN_TIMEOUT || 1000
   }).main();
 }
