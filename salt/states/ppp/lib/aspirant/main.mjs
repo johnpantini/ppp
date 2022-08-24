@@ -127,9 +127,9 @@ export default class Aspirant {
 
       for (const _id of map) {
         if (i % 2 === 0) {
-          const { source, env } = JSON.parse(map[i + 1]);
+          const { source, env, reconnectTimeout } = JSON.parse(map[i + 1]);
 
-          await this.#runWorker(_id, { source, env });
+          await this.#runWorker(_id, { source, env, reconnectTimeout });
         }
 
         i++;
@@ -147,16 +147,17 @@ export default class Aspirant {
           if (globalThis.Aspirant.#workers.has(v._id))
             void globalThis.Aspirant.#runWorker(v._id, {
               source: v.source,
-              env: v.env
+              env: v.env,
+              reconnectTimeout: v.reconnectTimeout
             });
-        }, globalThis.Aspirant.#respawnTimeout);
+        }, +v.reconnectTimeout || globalThis.Aspirant.#respawnTimeout);
 
         break;
       }
     }
   }
 
-  async #runWorker(_id, { source, env = {} }) {
+  async #runWorker(_id, { source, env = {}, reconnectTimeout }) {
     try {
       if (this.#workers.has(_id)) {
         const currentWorkerData = this.#workers.get(_id);
@@ -186,8 +187,8 @@ export default class Aspirant {
       console.error(e);
 
       setTimeout(() => {
-        this.#runWorker(_id, { source, env });
-      }, this.#respawnTimeout);
+        this.#runWorker(_id, { source, env, reconnectTimeout });
+      }, +reconnectTimeout || this.#respawnTimeout);
     }
   }
 
@@ -205,7 +206,7 @@ export default class Aspirant {
       .post('/workers', async (res) => {
         readJSON(res, async (payload = {}) => {
           try {
-            const { _id, source, env = {} } = payload;
+            const { _id, source, env = {}, reconnectTimeout } = payload;
 
             if (!_id)
               return cors(res)
@@ -228,7 +229,8 @@ export default class Aspirant {
 
             await this.#runWorker(_id, {
               source,
-              env
+              env,
+              reconnectTimeout
             });
 
             cors(res)
