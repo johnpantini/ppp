@@ -21,6 +21,7 @@ COPY --from=tailscale /tailscale/tailscaled /app/tailscaled
 COPY --from=tailscale /tailscale/tailscale /app/tailscale
 
 COPY --chown=root ./aspirant/ ./aspirant/
+COPY ./aurora/ ./aurora/
 COPY ./uWebSockets.js/ ./uWebSockets.js/
 COPY ./canvas/ ./canvas/
 COPY ./canvas-table/ ./canvas-table/
