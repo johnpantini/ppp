@@ -32,7 +32,8 @@ export const SERVICE_STATE = {
 };
 
 export const BROKERS = {
-  ALOR_OPENAPI_V2: 'alor-openapi-v2'
+  ALOR_OPENAPI_V2: 'alor-openapi-v2',
+  UTEX_AURORA: 'utex-aurora'
 };
 
 export const TRADERS = {

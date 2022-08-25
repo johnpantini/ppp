@@ -31,12 +31,32 @@ export const brokerPageTemplate = (context, definition) => html`
           <span slot="title">Alor Open API V2</span>
           <span slot="description">Торговля через Alor Open API. <a
             target="_blank"
+            rel="noopener"
             href="https://alor.dev/docs">Перейти к документации</a>.</span>
           <${'ppp-button'}
             slot="action"
             @click="${() =>
               ppp.app.navigate({
                 page: `broker-${BROKERS.ALOR_OPENAPI_V2}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="UTEX Aurora"
+               style="height: 32px"
+               src="static/utex.svg"/>
+          <span slot="title">UTEX Aurora</span>
+          <span slot="description">Рыночные данные терминала UTEX Aurora. <a
+            target="_blank"
+            rel="noopener"
+            href="https://utex.io/aurora">Официальный ресурс</a>.</span>
+          <${'ppp-button'}
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.UTEX_AURORA}`
               })}"
           >
             Продолжить

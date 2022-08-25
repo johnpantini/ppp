@@ -21,7 +21,8 @@ export default function (i18n) {
         [APIS.CLOUDFLARE]: 'Cloudflare'
       },
       broker: {
-        [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2'
+        [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
+        [BROKERS.UTEX_AURORA]: 'UTEX Aurora'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',
