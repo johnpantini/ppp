@@ -1,4 +1,6 @@
 import process from 'node:process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import uWS from '../uWebSockets.js/uws.js';
 
@@ -170,19 +172,27 @@ export default class Aspirant {
         this.#workers.delete(_id);
       }
 
+      const PPP_ASPIRANT_FILENAME = fileURLToPath(import.meta.url);
+      const PPP_ASPIRANT_DIRNAME = path.dirname(PPP_ASPIRANT_FILENAME);
+
       this.#workers.set(_id, {
         _id,
         source,
         env,
         worker: new Worker(new URL(`data:text/javascript,${source}`), {
-          env: Object.assign({}, process.env, env),
+          env: Object.assign({ PPP_ASPIRANT_DIRNAME }, process.env, env),
           workerData: {
             aspirant: this
           }
         })
       });
 
-      this.#workers.get(_id).worker.on('exit', this.#onWorkerExit);
+      this.#workers
+        .get(_id)
+        .worker.on('error', (e) => {
+          console.error(e);
+        })
+        .on('exit', this.#onWorkerExit);
     } catch (e) {
       console.error(e);
 
