@@ -273,8 +273,10 @@ async function redis(request, response) {
     try {
       await client.connect();
 
+      const result = await client[body.command]?.apply(client, body.args);
+
       response.write(
-        (await client[body.command]?.apply(client, body.args)) ?? ''
+        typeof result === 'object' ? JSON.stringify(result) : result ?? ''
       );
       response.end();
     } finally {
