@@ -32,7 +32,7 @@ COPY ./ssh2/ ./ssh2/
 COPY ./websocket/ ./websocket/
 COPY ./vendor/lzma/ ./vendor/lzma/
 COPY ./vendor/protobuf.min.js ./vendor/protobuf.min.js
-COPY ./vendor/redis.min.js ./vendor/redis.min.js
+COPY ./vendor/ioredis.min.js ./vendor/ioredis.min.js
 
 RUN chmod +x /app/aspirant/start.sh
 

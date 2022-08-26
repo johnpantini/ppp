@@ -64,12 +64,6 @@ function cors(res) {
   return res;
 }
 
-async function later(delay) {
-  return new Promise(function (resolve) {
-    setTimeout(resolve, delay);
-  });
-}
-
 export default class Aspirant {
   #id;
 
@@ -82,11 +76,11 @@ export default class Aspirant {
   constructor({
     id,
     serviceMachineUrl,
+    tls,
     host,
     port,
-    tls,
     username,
-    database,
+    db,
     password,
     respawnTimeout = 1000
   }) {
@@ -94,7 +88,7 @@ export default class Aspirant {
 
     this.#respawnTimeout = respawnTimeout;
     this.#id = id;
-    this.#redisCommand = async (command) =>
+    this.#redisCommand = async (command, args) =>
       fetch(new URL('redis', serviceMachineUrl).toString(), {
         method: 'POST',
         cache: 'no-cache',
@@ -102,15 +96,20 @@ export default class Aspirant {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          socket: {
+          options: {
             host,
             port,
-            tls
+            tls: tls
+              ? {
+                  servername: host
+                }
+              : void 0,
+            username,
+            db,
+            password
           },
-          username,
-          database,
-          password,
-          command
+          command,
+          args
         })
       });
   }
@@ -123,18 +122,13 @@ export default class Aspirant {
     try {
       // Can fail if service machine is not OK
       const map = await (
-        await this.#redisCommand(['HGETALL', this.key])
+        await this.#redisCommand('hgetall', [this.key])
       ).json();
-      let i = 0;
 
-      for (const _id of map) {
-        if (i % 2 === 0) {
-          const { source, env, reconnectTimeout } = JSON.parse(map[i + 1]);
+      for (const _id of Object.keys(map)) {
+        const { source, env, reconnectTimeout } = JSON.parse(map[_id]);
 
-          await this.#runWorker(_id, { source, env, reconnectTimeout });
-        }
-
-        i++;
+        await this.#runWorker(_id, { source, env, reconnectTimeout });
       }
     } catch (e) {
       console.error(e);
@@ -230,8 +224,7 @@ export default class Aspirant {
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
                 .end('Missing worker source.');
 
-            await this.#redisCommand([
-              'HSET',
+            await this.#redisCommand('hset', [
               this.key,
               _id,
               JSON.stringify({ source, env })
@@ -267,7 +260,7 @@ export default class Aspirant {
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
                 .end('Missing worker _id.');
 
-            await this.#redisCommand(['HDEL', this.key, _id]);
+            await this.#redisCommand('hdel', [this.key, _id]);
 
             if (this.#workers.has(_id)) {
               const currentWorkerData = this.#workers.get(_id);
@@ -301,7 +294,7 @@ export default class Aspirant {
         try {
           cors(res)
             .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-            .end(await (await this.#redisCommand(['PING'])).text());
+            .end(await (await this.#redisCommand('ping')).text());
         } catch (e) {
           console.error(e);
 
@@ -338,7 +331,7 @@ else {
     tls: !!process.env.REDIS_TLS,
     username: process.env.REDIS_USERNAME,
     password: process.env.REDIS_PASSWORD,
-    database: +process.env.REDIS_DATABASE,
+    db: +process.env.REDIS_DATABASE,
     respawnTimeout: +process.env.RESPAWN_TIMEOUT || 1000
   }).main();
 }

@@ -19,15 +19,16 @@ export async function checkRedisCredentials({
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      socket: {
+      options: {
         host,
         port,
-        tls: !!tls
+        tls,
+        username,
+        db: database ?? 0,
+        password
       },
-      username,
-      database: database ?? 0,
-      password,
-      command: ['PING']
+      command: 'ping',
+      args: []
     })
   });
 }
@@ -51,7 +52,11 @@ export class ApiRedisPage extends Page {
           serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
           host: this.host.value.trim(),
           port: Math.abs(+this.port.value),
-          tls: this.tls.checked,
+          tls: this.tls.checked
+            ? {
+                servername: this.host.value.trim()
+              }
+            : void 0,
           database: Math.abs(+this.database.value),
           username: this.username.value.trim(),
           password: this.password.value.trim()

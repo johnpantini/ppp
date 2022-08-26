@@ -31,7 +31,7 @@ export class ServiceDeployedPppAspirantPage extends Page {
         url: this.url.value.trim()
       });
 
-      if (!request.ok || (await request.text()) !== '"PONG"') {
+      if (!request.ok || (await request.text()).toUpperCase() !== 'PONG') {
         invalidate(this.url, {
           errorMessage: 'Неверный адрес',
           raiseException: true

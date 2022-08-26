@@ -100,7 +100,7 @@ export const servicePppAspirantWorkerPageTemplate = (
         <section>
           <div class="label-group">
             <h5>Переменные окружения</h5>
-            <p>Объект JavaScript с переменными окружения, которые будет перданы
+            <p>Объект JavaScript с переменными окружения, которые будет переданы
               в Worker.</p>
           </div>
           <div class="input-group">
