@@ -2,7 +2,7 @@ import { createServer } from 'http';
 import { Client as SSHClient } from './salt/states/ppp/lib/ssh2/index.js';
 import { fetch, binaryFetch } from './salt/states/ppp/lib/fetch.mjs';
 import { Connection } from './salt/states/ppp/lib/pg/connection.mjs';
-import Redis from './salt/states/ppp/lib/vendor/redis.min.js';
+import Redis from './salt/states/ppp/lib/vendor/ioredis.min.js';
 import pdfjs from './salt/states/ppp/lib/pdfjs/legacy/build/pdf.js';
 
 process.on('unhandledRejection', (err) => {
@@ -231,37 +231,58 @@ async function redis(request, response) {
 
   response.setHeader('Content-Type', 'application/json; charset=UTF-8');
 
+  let errorOccurred;
+
   try {
     const body = JSON.parse(Buffer.concat(buffers).toString());
 
-    if (!body.socket || typeof body.socket !== 'object')
+    if (!body.options || typeof body.options !== 'object')
       return response.writeHead(422).end();
 
-    if (!Array.isArray(body.command)) return response.writeHead(422).end();
+    if (!body.command || typeof body.command !== 'string')
+      return response.writeHead(422).end();
 
-    const { createClient } = Redis;
-    const client = createClient({
-      socket: body.socket,
-      username: body.username,
-      password: body.password,
-      database: body.database,
-      readonly: body.readonly
+    if (!Array.isArray(body.args)) body.args = [];
+
+    const client = new Redis(
+      Object.assign({}, body.options, { lazyConnect: true })
+    );
+
+    client.on('error', (e) => {
+      console.dir(e);
+
+      errorOccurred = true;
+
+      response.writeHead(400);
+      response.write(
+        JSON.stringify(
+          Object.assign(
+            {
+              e
+            },
+            {
+              message: e.message
+            }
+          )
+        )
+      );
+
+      response.end();
     });
-
-    // To prevent crashes
-    client.once('error', () => {});
 
     try {
       await client.connect();
 
-      const result = await client.sendCommand(body.command);
-
-      response.write(JSON.stringify(result));
+      response.write(
+        (await client[body.command]?.apply(client, body.args)) ?? ''
+      );
       response.end();
     } finally {
       client.quit();
     }
   } catch (e) {
+    if (errorOccurred) return;
+
     console.error(e);
 
     response.writeHead(400);
