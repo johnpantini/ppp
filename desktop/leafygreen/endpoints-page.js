@@ -1,17 +1,18 @@
 import { EndpointsPage } from '../../shared/endpoints-page.js';
 import { html } from '../../shared/template.js';
+import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
+import { actionPageMountPoint } from '../../shared/page.js';
 import ppp from '../../ppp.js';
 
 export const endpointsPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page'}>
     <span slot="header">
-      Список конечных точек HTTPS
+      Список конечных точек
     </span>
       <${'ppp-button'}
-        disabled
         appearance="primary"
         slot="header-controls"
         @click="${() =>
@@ -19,9 +20,10 @@ export const endpointsPageTemplate = (context, definition) => html`
             page: 'endpoint'
           })}"
       >
-        Добавить конечную точку HTTPS
+        Добавить конечную точку
       </ppp-button>
       <${'ppp-table'}
+        ${ref('shiftLockContainer')}
         :columns="${() => [
           {
             label: 'Маршрут'
@@ -85,6 +87,7 @@ export const endpointsPageTemplate = (context, definition) => html`
                   </a>`,
                   html`<a
                     target="_blank"
+                    rel="noopener"
                     href="https://realm.mongodb.com/groups/${ppp.keyVault.getKey(
                       'mongo-group-id'
                     )}/apps/${ppp.keyVault.getKey(
@@ -97,8 +100,9 @@ export const endpointsPageTemplate = (context, definition) => html`
                   html`
                   <${'ppp-button'}
                     disabled
+                    shiftlock
                     class="xsmall"
-                    @click="${() => x.removeEndpoint(datum._id)}"
+                    @click="${() => x.removeEndpoint(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -110,6 +114,7 @@ export const endpointsPageTemplate = (context, definition) => html`
       </ppp-table>
       <span slot="actions"></span>
     </ppp-page>
+    ${actionPageMountPoint}
   </template>
 `;
 

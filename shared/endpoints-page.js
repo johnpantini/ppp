@@ -1,6 +1,12 @@
-import { Page, PageWithDocuments, PageWithShiftLock } from './page.js';
+import {
+  Page,
+  PageWithActionPage,
+  PageWithDocuments,
+  PageWithShiftLock
+} from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { maybeFetchError } from './fetch-error.js';
+import { Observable } from './element/observation/observable.js';
 import ppp from '../ppp.js';
 
 export class EndpointsPage extends Page {
@@ -26,10 +32,32 @@ export class EndpointsPage extends Page {
               }
             })
           }
-        ), 'Не удалось получить список конечных точек HTTPS.'
+        ),
+        'Не удалось получить список конечных точек.'
       )
     ).json();
   }
+
+  async removeEndpoint(datum) {
+    await this.actionPageCall({
+      page: 'endpoint',
+      documentId: datum._id,
+      methodName: 'remove'
+    });
+
+    const index = this.documents.findIndex((d) => d._id === datum._id);
+
+    if (index > -1) {
+      this.documents.splice(index, 1);
+    }
+
+    Observable.notify(this, 'documents');
+  }
 }
 
-applyMixins(EndpointsPage, PageWithDocuments, PageWithShiftLock);
+applyMixins(
+  EndpointsPage,
+  PageWithDocuments,
+  PageWithShiftLock,
+  PageWithActionPage
+);

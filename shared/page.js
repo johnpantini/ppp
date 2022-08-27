@@ -138,7 +138,16 @@ export class Page extends FoundationElement {
 
     this.lastError = e;
 
-    switch (e?.errorCode ?? e?.name) {
+    switch (e?.errorCode ?? e?.error_code ?? e?.name) {
+      case 'EndpointDuplicateKey':
+        return invalidate(ppp.app.toast, {
+          errorMessage:
+            'Конечная точка с таким методом и маршрутом уже существует.'
+        });
+      case 'FunctionDuplicateName':
+        return invalidate(ppp.app.toast, {
+          errorMessage: 'Функция с таким именем уже существует.'
+        });
       case 'InvalidParameter':
         return invalidate(ppp.app.toast, {
           errorMessage: 'Неверный параметр облачной функции MongoDB Realm.'

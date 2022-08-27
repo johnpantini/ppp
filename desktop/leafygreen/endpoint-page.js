@@ -14,7 +14,7 @@ export const endpointPageTemplate = (context, definition) => html`
       <${'ppp-page'}>
         <span slot="header">
           ${(x) =>
-            x.document.name
+            x.document.function_name
               ? `Конечная точка - ${x.document.function_name}`
               : 'Конечная точка'}
         </span>
@@ -42,10 +42,11 @@ export const endpointPageTemplate = (context, definition) => html`
         <section>
           <div class="label-group">
             <h5>HTTP-метод</h5>
+            <p>Метод для запросов к конечной точке.</p>
           </div>
           <div class="input-group">
             <${'ppp-select'}
-              value="${(x) => x.document.method ?? 'POST'}"
+              value="${(x) => x.document.http_method ?? 'POST'}"
               ${ref('method')}
             >
               <ppp-option value="POST">POST</ppp-option>
@@ -61,7 +62,8 @@ export const endpointPageTemplate = (context, definition) => html`
           <div class="label-group">
             <h5>Название функции</h5>
             <p>Название облачной функции, которая будет обрабатывать запросы к
-              конечной точке.</p>
+              конечной точке. Это значение нельзя будет изменить в
+              дальнейшем.</p>
           </div>
           <div class="input-group">
             <ppp-text-field
