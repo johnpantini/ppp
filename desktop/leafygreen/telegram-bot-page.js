@@ -32,7 +32,8 @@ export const telegramBotPageTemplate = (context, definition) => html`
             <h5>Токен бота</h5>
             <p>
               Будет сохранён в зашифрованном виде. Получить можно у
-              <a target="_blank" href="https://telegram.me/BotFather"
+              <a target="_blank" rel="noopener"
+                 href="https://telegram.me/BotFather"
               >@BotFather</a
               > - отправьте ему команду /newbot
             </p>
@@ -61,7 +62,8 @@ export const telegramBotPageTemplate = (context, definition) => html`
               <div class="label-group">
                 <h5>Webhook</h5>
                 <p>
-                  Укажите webhook для привязки к боту.
+                  Укажите webhook для привязки к боту. Чтобы удалить webhook,
+                  оставьте поле пустым.
                 </p>
               </div>
               <div class="input-group">
@@ -72,13 +74,52 @@ export const telegramBotPageTemplate = (context, definition) => html`
                   ${ref('webhook')}
                 >
                 </ppp-text-field>
-                <${'ppp-button'}
-                  disabled
-                  class="margin-top"
-                  appearance="primary"
-                >
-                  Выбрать конечную точку HTTPS
-                </ppp-button>
+                <div class="control-stack">
+                  <${'ppp-collection-select'}
+                    ${ref('endpointSelector')}
+                    :context="${(x) => x}"
+                    :placeholder="${() =>
+                      'Нажмите, чтобы выбрать конечную точку'}"
+                    :query="${() => {
+                      return (context) => {
+                        return context.http
+                          .get({
+                            url: 'https://realm.mongodb.com/api/admin/v3.0/groups/[%#ppp.keyVault.getKey("mongo-group-id")%]/apps/[%#ppp.keyVault.getKey("mongo-app-id")%]/endpoints',
+                            headers: {
+                              Authorization: [
+                                'Bearer [%#(await ppp.getMongoDBRealmAccessToken())%]'
+                              ]
+                            }
+                          })
+                          .then((response) => EJSON.parse(response.body.text()))
+                          .catch(() => Promise.resolve([]));
+                      };
+                    }}"
+                    :transform="${() => (d) => {
+                      return d
+                        .filter((e) => {
+                          return (
+                            !e.route.startsWith('/cloud_credentials') &&
+                            !e.route.startsWith('/psina')
+                          );
+                        })
+                        .map((e) => {
+                          return {
+                            _id: e._id,
+                            name: e.function_name,
+                            value: e.route
+                          };
+                        });
+                    }}"
+                  ></ppp-collection-select>
+                  <${'ppp-button'}
+                    class="margin-top"
+                    @click="${(x) => x.setWebhookUrlByEndpoint()}"
+                    appearance="primary"
+                  >
+                    Установить ссылку по конечной точке
+                  </ppp-button>
+                </div>
               </div>
             </section>
           </div>

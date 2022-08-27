@@ -7,6 +7,26 @@ import ppp from '../ppp.js';
 export class TelegramBotPage extends Page {
   collection = 'bots';
 
+  async setWebhookUrlByEndpoint() {
+    const datum = this.endpointSelector.datum();
+
+    if (!datum) {
+      invalidate(this.webhook, {
+        errorMessage: 'Сначала выберите конечную точку',
+        skipScrollIntoView: true
+      });
+    } else {
+      this.webhook.state = 'default';
+      this.webhook.value =
+        ppp.keyVault
+          .getKey('mongo-location-url')
+          .replace('aws.stitch.mongodb', 'aws.data.mongodb-api') +
+        `/app/${ppp.keyVault.getKey(
+          'mongo-app-client-id'
+        )}/endpoint${datum.value}`;
+    }
+  }
+
   async validate() {
     await validate(this.name);
     await validate(this.token);

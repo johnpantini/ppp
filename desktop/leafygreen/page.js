@@ -595,6 +595,13 @@ export const pageStyles = css`
     gap: 0 8px;
   }
 
+  .control-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 8px 0;
+  }
+
   ${modalStyles}
   ${foldingStyles}
   ${emptyStateStyles}
