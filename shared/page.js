@@ -444,18 +444,23 @@ export class Page extends FoundationElement {
     }
   }
 
-  async readDocument() {
-    const documentId =
+  async documentId() {
+    return (
       this.getAttribute('data-document-id') ??
       (await this.page.view.getDocumentId?.()) ??
-      ppp.app.params()?.document;
+      ppp.app.params()?.document
+    );
+  }
+
+  async readDocument() {
+    const documentId = await this.documentId();
 
     if (documentId) {
       this.beginOperation();
 
       try {
         if (typeof this.page.view.read === 'function') {
-          let readMethodResult = await this.page.view.read();
+          let readMethodResult = await this.page.view.read(documentId);
 
           if (typeof readMethodResult === 'function') {
             readMethodResult = await new Tmpl().render(
