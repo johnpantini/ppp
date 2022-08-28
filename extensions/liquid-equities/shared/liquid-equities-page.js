@@ -43,7 +43,9 @@ export class LiquidEquitiesPage extends Page {
           'alor-ksur': 1,
           'alor-kpur': 2,
           'alor-ksur-turbo': 4,
-          'alor-kpur-turbo': 5
+          'alor-kpur-turbo': 5,
+          'alor-ksur-spbex-no-overnight': 6,
+          'alor-kpur-spbex-no-overnight': 7
         }[id];
 
         json = await (

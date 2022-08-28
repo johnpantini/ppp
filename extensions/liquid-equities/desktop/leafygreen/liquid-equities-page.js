@@ -50,11 +50,15 @@ export async function extension({ ppp, baseExtensionUrl, metaUrl, extension }) {
           <ppp-tab id="alor-kpur">Алор КПУР</ppp-tab>
           <ppp-tab id="alor-ksur-turbo">Алор КСУР с Турбо</ppp-tab>
           <ppp-tab id="alor-kpur-turbo">Алор КПУР с Турбо</ppp-tab>
+          <ppp-tab id="alor-ksur-spbex-no-overnight">Алор КСУР СПБ без переноса</ppp-tab>
+          <ppp-tab id="alor-kpur-spbex-no-overnight">Алор КПУР СПБ без переноса</ppp-tab>
           <ppp-tab id="tinkoff">Тинькофф</ppp-tab>
           <ppp-tab-panel id="alor-ksur-panel"></ppp-tab-panel>
           <ppp-tab-panel id="alor-kpur-panel"></ppp-tab-panel>
           <ppp-tab-panel id="alor-ksur-turbo-panel"></ppp-tab-panel>
           <ppp-tab-panel id="alor-kpur-turbo-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="alor-ksur-spbex-no-overnight-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="alor-kpur-spbex-no-overnight-panel"></ppp-tab-panel>
           <ppp-tab-panel id="tinkoff-panel"></ppp-tab-panel>
         </ppp-tabs>
         <${'ppp-text-field'}
