@@ -3,25 +3,31 @@ import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
+import { Observable } from '../../shared/element/observation/observable.js';
 import ppp from '../../ppp.js';
 
-// TODO - modal
 export const extensionsPageTemplate = (context, definition) => html`
   <template>
+    <ppp-modal ${ref('newExtensionModal')} dismissible>
+      <span slot="title">Установить дополнение</span>
+      <div slot="body">
+        <ppp-new-extension-modal-page></ppp-new-extension-modal-page>
+      </div>
+    </ppp-modal>
     <${'ppp-page'}>
       <span slot="header">
         Список дополнений
       </span>
       <${'ppp-button'}
-        disabled
         appearance="primary"
         slot="header-controls"
+        @click="${(x) => x.handleNewExtensionClick()}"
       >
         Установить дополнение
       </ppp-button>
       <${'ppp-table'}
         ${ref('shiftLockContainer')}
-        :columns="${(x) => [
+        :columns="${() => [
           {
             label: 'Название',
             sortBy: (d) => d.title
@@ -86,7 +92,18 @@ export const extensionsPageTemplate = (context, definition) => html`
                     shiftlock
                     disabled
                     class="xsmall"
-                    @click="${() => x.simpleRemove(datum._id)}"
+                    @click="${async () => {
+                      const index = ppp.app.extensions.findIndex(
+                        (w) => w._id === datum._id
+                      );
+
+                      if (index > -1) {
+                        ppp.app.extensions.splice(index, 1);
+                        Observable.notify(ppp.app, 'extensions');
+                      }
+
+                      await x.removeDocumentFromListing(datum);
+                    }}"
                   >
                     Удалить
                   </ppp-button>
