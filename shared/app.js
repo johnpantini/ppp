@@ -283,6 +283,15 @@ export class App extends FoundationElement {
     }
   }
 
+  getVisibleModal() {
+    return (
+      ppp.app.shadowRoot.querySelector('ppp-modal[visible]') ??
+      ppp.app.shadowRoot
+      .querySelector(`ppp-${ppp.app.page}-page`)
+      .shadowRoot.querySelector('ppp-modal[visible]')
+    );
+  }
+
   async handleNewWorkspaceClick() {
     await requireComponent('ppp-modal');
     await requireComponent('ppp-new-workspace-modal-page');
@@ -294,7 +303,7 @@ export class App extends FoundationElement {
     await requireComponent('ppp-modal');
     await requireComponent('ppp-widget-selector-modal-page');
 
-    this.widgetSelectorModalPage.visible = true;
+    this.widgetSelectorModal.visible = true;
   }
 
   async openTerminal(title) {
