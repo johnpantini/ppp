@@ -49,7 +49,7 @@ export const appTemplate = (context, definition) => html`
     ${when(
       () => ppp?.keyVault.ok(),
       html`
-        <ppp-modal ${ref('widgetSelectorModalPage')} dismissible>
+        <ppp-modal ${ref('widgetSelectorModal')} dismissible>
           <span slot="title">Разместить виджет</span>
           <div slot="body">
             <div class="description">
