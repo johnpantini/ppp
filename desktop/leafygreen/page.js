@@ -334,23 +334,25 @@ export const pageStyles = css`
 
   .loading-wrapper {
     position: relative;
+    pointer-events: all;
     width: 100%;
     max-width: 100%;
     min-height: 100px;
     flex-grow: 1;
     opacity: 1;
+    z-index: 10;
   }
 
   .loading-wrapper[loading] {
     opacity: 0.5;
+    pointer-events: none;
   }
 
   .loading-indicator-content {
-    position: sticky;
-    inset: 24px;
-    display: flex;
-    justify-content: center;
+    position: fixed;
     z-index: 50;
+    left: calc(50% - 25px);
+    bottom: 25px;
   }
 
   .loading-indicator {
@@ -622,21 +624,21 @@ export const pageTemplate = (context, definition) => html`
     <div class="loading-wrapper" ?loading="${(x) => x.loading}">
       <slot></slot>
       ${when((x) => x.loading, html`${loadingIndicator()}`)}
+      <slot name="actions">
+        <section class="last">
+          <div class="footer-actions">
+            <${'ppp-button'}
+              ?disabled="${(x) => x.loading || x.disabled}"
+              type="submit"
+              @click="${(x) => x.saveDocument()}"
+              appearance="primary"
+            >
+              <slot name="submit-control-text">Сохранить изменения</slot>
+            </ppp-button>
+          </div>
+        </section>
+      </slot>
     </div>
-    <slot name="actions">
-      <section class="last">
-        <div class="footer-actions">
-          <${'ppp-button'}
-            ?disabled="${(x) => x.loading || x.disabled}"
-            type="submit"
-            @click="${(x) => x.saveDocument()}"
-            appearance="primary"
-          >
-            <slot name="submit-control-text">Сохранить изменения</slot>
-          </ppp-button>
-        </div>
-      </section>
-    </slot>
   </template>
 `;
 
