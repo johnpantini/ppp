@@ -21,7 +21,7 @@ export const telegramBotsPageTemplate = (context, definition) => html`
         Добавить бота
       </ppp-button>
       <${'ppp-table'}
-        ${ref('table')}
+        ${ref('shiftLockContainer')}
         :columns="${() => [
           {
             label: 'Название',
@@ -76,9 +76,10 @@ export const telegramBotsPageTemplate = (context, definition) => html`
                 `,
                 html`
                   <${'ppp-button'}
+                    shiftlock
                     disabled
                     class="xsmall"
-                    @click="${() => x.simpleRemove(datum._id)}"
+                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>

@@ -82,7 +82,7 @@ export const widgetsPageTemplate = (context, definition) => html`
                     disabled
                     shiftlock
                     class="xsmall"
-                    @click="${() => x.simpleRemove(datum._id)}"
+                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>

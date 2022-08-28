@@ -3,6 +3,7 @@ import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
+import { Observable } from '../../shared/element/observation/observable.js';
 import ppp from '../../ppp.js';
 
 export const workspacesPageTemplate = (context, definition) => html`
@@ -19,7 +20,7 @@ export const workspacesPageTemplate = (context, definition) => html`
         Новый терминал
       </ppp-button>
       <${'ppp-table'}
-        ${ref('table')}
+        ${ref('shiftLockContainer')}
         :columns="${() => [
           {
             label: 'Название',
@@ -65,9 +66,21 @@ export const workspacesPageTemplate = (context, definition) => html`
                 formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
                   <${'ppp-button'}
+                    shiftlock
                     disabled
                     class="xsmall"
-                    @click="${() => x.simpleRemove(datum._id)}"
+                    @click="${async () => {
+                      const index = ppp.app.workspaces.findIndex(
+                        (w) => w._id === datum._id
+                      );
+
+                      if (index > -1) {
+                        ppp.app.workspaces.splice(index, 1);
+                        Observable.notify(ppp.app, 'workspaces');
+                      }
+
+                      await x.removeDocumentFromListing(datum);
+                    }}"
                   >
                     Удалить
                   </ppp-button>
