@@ -241,8 +241,8 @@ export const sideNavStyles = (context, definition) =>
     }
   `;
 
-export const sideNav = SideNav.compose({
-  baseName: 'side-nav',
+// noinspection JSUnusedGlobalSymbols
+export default SideNav.compose({
   template: sideNavTemplate,
   styles: sideNavStyles
 });

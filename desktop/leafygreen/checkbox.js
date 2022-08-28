@@ -60,8 +60,7 @@ export const checkboxStyles = (context, definition) =>
   `;
 
 // noinspection JSUnusedGlobalSymbols
-export const checkbox = Checkbox.compose({
-  baseName: 'checkbox',
+export default Checkbox.compose({
   template: checkboxTemplate,
   styles: checkboxStyles,
   checkedIndicator: `

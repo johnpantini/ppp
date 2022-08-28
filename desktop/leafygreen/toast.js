@@ -312,8 +312,7 @@ export const toastStyles = (context, definition) =>
     appearanceBehavior('progress', progressToastStyles(context, definition))
   );
 
-export const toast = Toast.compose({
-  baseName: 'toast',
+export default Toast.compose({
   template: toastTemplate,
   styles: toastStyles
 });

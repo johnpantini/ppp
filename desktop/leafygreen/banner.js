@@ -129,8 +129,7 @@ export class Banner extends FoundationElement {
   }
 }
 
-export const banner = Banner.compose({
-  baseName: 'banner',
+export default Banner.compose({
   template: bannerTemplate,
   styles: bannerStyles
 });

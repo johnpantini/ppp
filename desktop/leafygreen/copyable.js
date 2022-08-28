@@ -178,8 +178,7 @@ export const copyableStyles = (context, definition) =>
   `;
 
 // noinspection JSUnusedGlobalSymbols
-export const copyable = Copyable.compose({
-  baseName: 'copyable',
+export default Copyable.compose({
   template: copyableTemplate,
   styles: copyableStyles
 });

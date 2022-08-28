@@ -68,8 +68,7 @@ export const badgeStyles = (context, definition) =>
   );
 
 // noinspection JSUnusedGlobalSymbols
-export const badge = Badge.compose({
-  baseName: 'badge',
+export default Badge.compose({
   template: badgeTemplate,
   styles: badgeStyles
 });

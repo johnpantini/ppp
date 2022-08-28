@@ -86,6 +86,7 @@ export const sideNavItemStyles = (context, definition) =>
     }
   `;
 
+// noinspection JSUnusedGlobalSymbols
 export default SideNavItem.compose({
   template: sideNavItemTemplate,
   styles: sideNavItemStyles

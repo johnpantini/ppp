@@ -132,8 +132,7 @@ const tabPanelStyles = (context, definition) => css`
   }
 `;
 
-export const tabs = Tabs.compose({
-  baseName: 'tabs',
+export default Tabs.compose({
   template: tabsTemplate,
   styles: tabsStyles
 });

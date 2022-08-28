@@ -21,7 +21,6 @@ export const pageHeaderTemplate = (context, definition) => html`
 // TODO - design tokens
 export const pageHeaderStyles = (context, definition) => css`
   ${display('flex')}
-
   :host {
     align-items: center;
     border-bottom: 3px solid #ebebed;
@@ -54,8 +53,8 @@ export const pageHeaderStyles = (context, definition) => css`
   }
 `;
 
-export const pageHeader = PageHeader.compose({
-  baseName: 'page-header',
+// noinspection JSUnusedGlobalSymbols
+export default PageHeader.compose({
   template: pageHeaderTemplate,
   styles: pageHeaderStyles
 });

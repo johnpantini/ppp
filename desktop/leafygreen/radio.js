@@ -102,8 +102,7 @@ export const radioStyles = (context, definition) =>
   `;
 
 // noinspection JSUnusedGlobalSymbols
-export const radio = Radio.compose({
-  baseName: 'radio',
+export default Radio.compose({
   template: radioTemplate,
   styles: radioStyles,
   checkedIndicator: `<div part="checked-indicator" class="checked-indicator"></div><div part="interaction-ring" class="interaction-ring"></div>`

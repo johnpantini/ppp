@@ -8,7 +8,6 @@ import {
 } from '../../shared/tabs.js';
 import { css } from '../../shared/element/styles/css.js';
 import { display } from '../../shared/utilities/style/display.js';
-
 import { bodyFont } from './design-tokens.js';
 import { focusVisible } from '../../shared/utilities/style/focus.js';
 
@@ -123,12 +122,14 @@ const widgetTabPanelStyles = (context, definition) => css`
   }
 `;
 
+// noinspection JSUnusedGlobalSymbols
 export const widgetTabs = Tabs.compose({
   baseName: 'widget-tabs',
   template: tabsTemplate,
   styles: widgetTabsStyles
 });
 
+// noinspection JSUnusedGlobalSymbols
 export const widgetTab = Tab.compose({
   baseName: 'widget-tab',
   template: tabTemplate,

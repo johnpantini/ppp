@@ -100,7 +100,7 @@ export const tableStyles = (context, definition) => css`
 
   .hotkey {
     user-select: none;
-    font-family: "Source Code Pro", Menlo, monospace;
+    font-family: 'Source Code Pro', Menlo, monospace;
     border: 1px solid rgb(28, 45, 56);
     border-radius: 3px;
     padding-left: 5px;
@@ -119,8 +119,7 @@ export const tableStyles = (context, definition) => css`
   }
 `;
 
-export const table = Table.compose({
-  baseName: 'table',
+export default Table.compose({
   template: tableTemplate,
   styles: tableStyles
 });

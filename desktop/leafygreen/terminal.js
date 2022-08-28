@@ -159,8 +159,7 @@ export const terminalStyles = css`
   }
 `;
 
-export const terminal = Terminal.compose({
-  baseName: 'terminal',
+export default Terminal.compose({
   template: terminalTemplate,
   styles: terminalStyles
 });

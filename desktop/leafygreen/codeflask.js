@@ -205,8 +205,7 @@ export const codeflaskStyles = (context, definition) => css`
 `;
 
 // noinspection JSUnusedGlobalSymbols
-export const codeflask = Codeflask.compose({
-  baseName: 'codeflask',
+export default Codeflask.compose({
   template: codeflaskTemplate,
   styles: codeflaskStyles
 });

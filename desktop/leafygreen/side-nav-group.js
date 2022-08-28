@@ -81,8 +81,8 @@ export const sideNavGroupStyles = (context, definition) =>
     }
   `;
 
-export const sideNavGroup = SideNavGroup.compose({
-  baseName: 'side-nav-group',
+// noinspection JSUnusedGlobalSymbols
+export default SideNavGroup.compose({
   template: sideNavGroupTemplate,
   styles: sideNavGroupStyles
 });

@@ -290,8 +290,7 @@ export class Button extends FoundationButton {
  *
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/delegatesFocus | delegatesFocus}
  */
-export const button = Button.compose({
-  baseName: 'button',
+export default Button.compose({
   template: buttonTemplate,
   styles: buttonStyles,
   shadowOptions: {

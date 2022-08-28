@@ -11,7 +11,6 @@ import { display } from '../../shared/utilities/style/display.js';
 import { html } from '../../shared/element/templating/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { when } from '../../shared/element/templating/when.js';
-
 import { bodyFont } from './design-tokens.js';
 
 export const textAreaTemplate = (context, definition) => html`
@@ -135,6 +134,8 @@ export const textAreaStyles = (context, definition) => css`
     pointer-events: none;
     border-radius: 6px;
   }
+
+  /* prettier-ignore */
 
   :host .root-container:hover textarea:not(:focus):not([disabled]) + .interaction-ring {
     box-shadow: rgb(231 238 236) 0 0 0 3px;
@@ -275,8 +276,7 @@ export class TextArea extends FoundationTextArea {
  *
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/delegatesFocus | delegatesFocus}
  */
-export const textArea = TextArea.compose({
-  baseName: 'text-area',
+export default TextArea.compose({
   template: textAreaTemplate,
   styles: textAreaStyles,
   shadowOptions: {

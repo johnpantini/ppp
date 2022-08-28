@@ -41,8 +41,7 @@ const progressStyles = css`
  * @public
  *
  */
-export const progress = Progress.compose({
-  baseName: 'progress',
+export default Progress.compose({
   template: progressTemplate,
   styles: progressStyles
 });

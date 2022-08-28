@@ -38,8 +38,8 @@ export const genericCardStyles = (context, definition) => css`
   }
 `;
 
-export const genericCard = GenericCard.compose({
-  baseName: 'generic-card',
+// noinspection JSUnusedGlobalSymbols
+export default GenericCard.compose({
   template: genericCardTemplate,
   styles: genericCardStyles
 });
