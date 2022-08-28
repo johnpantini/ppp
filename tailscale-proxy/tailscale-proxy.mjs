@@ -55,6 +55,12 @@ createServer((request, response) => {
   }
 
   switch (request.url) {
+    case '/':
+      response.setHeader('Content-Type', 'text/plain; charset=UTF-8');
+      response.write(`https://${request.headers.host}`);
+      response.end();
+
+      break;
     case '/fetch':
       return handleFetch(request, response);
     case '/ping':
