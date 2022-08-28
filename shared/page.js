@@ -106,8 +106,7 @@ export class Page extends FoundationElement {
     this.lastError = null;
 
     if (!toastTitle) {
-      const visibleModal =
-        ppp.app.shadowRoot.querySelector('ppp-modal[visible]');
+      const visibleModal = ppp.app.getVisibleModal();
 
       if (visibleModal) {
         toastTitle = visibleModal
