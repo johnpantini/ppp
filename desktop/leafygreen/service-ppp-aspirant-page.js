@@ -55,7 +55,9 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
                     .find({
                       $and: [
                         {
-                          type: `[%#(await import('./const.js')).APIS.NORTHFLANK%]`,
+                          type: `[%#(await import('./const.js')).APIS.NORTHFLANK%]`
+                        },
+                        {
                           $or: [
                             { removed: { $ne: true } },
                             { _id: `[%#this.document.redisApiId ?? ''%]` }
@@ -113,7 +115,9 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
                     .find({
                       $and: [
                         {
-                          type: `[%#(await import('./const.js')).APIS.REDIS%]`,
+                          type: `[%#(await import('./const.js')).APIS.REDIS%]`
+                        },
+                        {
                           $or: [
                             { removed: { $ne: true } },
                             { _id: `[%#this.document.redisApiId ?? ''%]` }

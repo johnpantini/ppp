@@ -178,7 +178,9 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
                     .find({
                       $and: [
                         {
-                          type: `[%#(await import('./const.js')).APIS.SUPABASE%]`,
+                          type: `[%#(await import('./const.js')).APIS.SUPABASE%]`
+                        },
+                        {
                           $or: [
                             { removed: { $ne: true } },
                             { _id: `[%#this.document.supabaseApiId ?? ''%]` }

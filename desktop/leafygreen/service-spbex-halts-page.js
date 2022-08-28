@@ -107,7 +107,9 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
                     .find({
                       $and: [
                         {
-                          type: `[%#(await import('./const.js')).APIS.SUPABASE%]`,
+                          type: `[%#(await import('./const.js')).APIS.SUPABASE%]`
+                        },
+                        {
                           $or: [
                             { removed: { $ne: true } },
                             { _id: `[%#this.document.supabaseApiId ?? ''%]` }
@@ -147,18 +149,17 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
         <section>
           <div class="label-group">
             <h5>Заголовки запроса</h5>
-            <p>Заголовки, которые будут передаваться с запросами к прокси-ресурсу.</p>
+            <p>Заголовки, которые будут передаваться с запросами к
+              прокси-ресурсу.</p>
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              :code="${(x) =>
-                x.document.proxyHeaders ?? exampleProxyHeaders}"
+              :code="${(x) => x.document.proxyHeaders ?? exampleProxyHeaders}"
               ${ref('proxyHeaders')}
             ></ppp-codeflask>
             <${'ppp-button'}
               class="margin-top"
-              @click="${(x) =>
-                x.proxyHeaders.updateCode(exampleProxyHeaders)}"
+              @click="${(x) => x.proxyHeaders.updateCode(exampleProxyHeaders)}"
               appearance="primary"
             >
               Восстановить значение по умолчанию
