@@ -3,7 +3,7 @@ import { applyMixins } from './utilities/apply-mixins.js';
 import ppp from '../ppp.js';
 
 function onNavigateStart() {
-  ppp.app.widgetSelectorModalPage.visible = false;
+  ppp.app.widgetSelectorModal.visible = false;
 }
 
 export class WidgetSelectorModalPage extends Page {
@@ -15,7 +15,9 @@ export class WidgetSelectorModalPage extends Page {
         .get('mongodb-atlas')
         .db('ppp')
         .collection('[%#this.page.view.collection%]')
-        .find()
+        .find({
+          removed: { $ne: true }
+        })
         .sort({ updatedAt: -1 });
     };
   }

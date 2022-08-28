@@ -11,7 +11,7 @@ export class TelegramBotPage extends Page {
     const datum = this.endpointSelector.datum();
 
     if (!datum) {
-      invalidate(this.webhook, {
+      invalidate(this.endpointSelector, {
         errorMessage: 'Сначала выберите конечную точку',
         skipScrollIntoView: true
       });
