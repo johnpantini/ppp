@@ -1,21 +1,21 @@
 {
-  "name":        "PPP",
-  "short_name":  "PPP",
-  "icons":       [
+  "name": "PPP",
+  "short_name": "PPP",
+  "icons": [
     {
-      "src":   "static/icons/icon-512x512.png",
-      "type":  "image/png",
+      "src": "static/icons/icon-512x512.png",
+      "type": "image/png",
       "sizes": "512x512"
     },
     {
-      "src":   "static/icons/icon-192x192.png",
-      "type":  "image/png",
+      "src": "static/icons/icon-192x192.png",
+      "type": "image/png",
       "sizes": "192x192"
     }
   ],
-  "lang":        "ru-RU",
-  "scope":       "./",
-  "start_url":   "./",
-  "display":     "standalone",
+  "lang": "ru-RU",
+  "scope": "./",
+  "start_url": "./",
+  "display": "standalone",
   "theme_color": "#131722"
 }
