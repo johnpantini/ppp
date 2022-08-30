@@ -14,7 +14,6 @@ export const widgetsPageTemplate = (context, definition) => html`
         Список виджетов
       </span>
       <${'ppp-button'}
-        disabled
         appearance="primary"
         slot="header-controls"
         @click="${() =>

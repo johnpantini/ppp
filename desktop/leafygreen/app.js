@@ -59,7 +59,9 @@ export const appTemplate = (context, definition) => html`
               </ppp-button>&nbsp;
               в соответствующей строке таблицы.
             </div>
-            <ppp-widget-selector-modal-page></ppp-widget-selector-modal-page>
+            <ppp-widget-selector-modal-page ${ref(
+              'widgetSelectorModalPage'
+            )}></ppp-widget-selector-modal-page>
           </div>
         </ppp-modal>
       `

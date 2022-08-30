@@ -304,6 +304,8 @@ export class App extends FoundationElement {
     await requireComponent('ppp-widget-selector-modal-page');
 
     this.widgetSelectorModal.visible = true;
+
+    await this.widgetSelectorModalPage.reload();
   }
 
   async openTerminal(title) {

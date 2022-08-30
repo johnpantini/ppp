@@ -35,6 +35,11 @@ export class WidgetSelectorModalPage extends Page {
 
     super.disconnectedCallback();
   }
+
+  async reload() {
+    if (!this.hasAttribute('data-disable-auto-populate'))
+      await this.page.view.populateDocuments();
+  }
 }
 
 applyMixins(WidgetSelectorModalPage, PageWithDocuments);

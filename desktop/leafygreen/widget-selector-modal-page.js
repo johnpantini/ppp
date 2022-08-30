@@ -1,6 +1,7 @@
 import { WidgetSelectorModalPage } from '../../shared/widget-selector-modal-page.js';
 import { pageStyles } from './page.js';
 import { html } from '../../shared/template.js';
+import { when } from '../../shared/element/templating/when.js';
 import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
@@ -9,6 +10,20 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
   <template>
     <form novalidate>
       <${'ppp-page'} modal headless>
+        ${when(
+          (x) => !x.page.loading && !x.documents.length,
+          html`
+            <${'ppp-banner'} class="inline" appearance="warning"
+                             style="margin-bottom: 1rem">Похоже, у вас нет ни
+              одного виджета. Добавьте и настройте их в <a @click="${() => {
+                ppp.app.navigate({
+                  page: 'widget'
+                });
+              }}}" href="javascript:void(0)">соответствующем
+                разделе</a>.
+            </ppp-banner>
+          `
+        )}
         <${'ppp-table'}
           :columns="${() => [
             {
