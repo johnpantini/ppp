@@ -86,6 +86,9 @@ export class Checkbox extends FoundationElement {
   @observable
   indeterminate;
 
+  @attr({ mode: 'boolean' })
+  disabled;
+
   constructor() {
     super();
 
@@ -107,7 +110,7 @@ export class Checkbox extends FoundationElement {
     /**
      * @internal
      */
-    this.clickHandler = (e) => {
+    this.clickHandler = () => {
       if (!this.disabled && !this.readOnly) {
         this.checked = !this.checked;
       }

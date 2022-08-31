@@ -3,6 +3,7 @@ import { checkboxTemplate } from '../../shared/checkbox.js';
 import { css } from '../../shared/element/styles/css.js';
 import { display } from '../../shared/utilities/style/display.js';
 import { bodyFont } from './design-tokens.js';
+import { disabledCursor } from '../../shared/utilities/style/disabled.js';
 
 // TODO - design tokens
 export const checkboxStyles = (context, definition) =>
@@ -16,7 +17,28 @@ export const checkboxStyles = (context, definition) =>
       cursor: pointer;
     }
 
-    :host(:hover) .control {
+    :host .checked-indicator path {
+      fill: transparent;
+    }
+
+    :host([disabled]) {
+      cursor: ${disabledCursor};
+    }
+
+    :host([disabled]) .checked-indicator path {
+      stroke: rgb(249, 251, 250);
+    }
+
+    :host([disabled]) .control {
+      border: 2px solid rgb(232, 237, 235);
+      background-color: rgb(249, 251, 250);
+    }
+
+    :host([disabled][checked]) .control {
+      background-color: rgb(232, 237, 235);
+    }
+
+    :host(:hover:not([disabled])) .control {
       box-shadow: rgb(232 237 235) 0 0 0 3px;
     }
 
@@ -48,7 +70,7 @@ export const checkboxStyles = (context, definition) =>
       pointer-events: none;
     }
 
-    :host([aria-checked='true']:not(.indeterminate)) .control {
+    :host([aria-checked='true']:not(.indeterminate):not([disabled])) .control {
       border: 2px solid rgb(1, 107, 248);
       background-color: rgb(1, 107, 248);
     }

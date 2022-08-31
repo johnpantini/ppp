@@ -48,6 +48,7 @@ export const radioStyles = (context, definition) =>
 
     :host([disabled]) {
       cursor: ${disabledCursor};
+      pointer-events: none;
     }
 
     :host([disabled]) .checked-indicator {
