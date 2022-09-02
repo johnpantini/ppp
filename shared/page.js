@@ -184,7 +184,7 @@ export class Page extends FoundationElement {
         this.page.notFound();
 
         return invalidate(ppp.app.toast, {
-          errorMessage: e?.message ?? 'Запись с таким ID не существует.'
+          errorMessage: e?.message ?? 'Документ с таким ID не существует.'
         });
       case 'ConflictError':
         return invalidate(ppp.app.toast, {
@@ -361,37 +361,49 @@ export class Page extends FoundationElement {
       if (idClause) {
         await this.#applyDocumentUpdates(idClause, documentUpdateFragments);
       } else {
-        // No _id here, insert first
+        // No _id here, insert first via upsert
         const fragments = [...documentUpdateFragments];
         const firstFragment = fragments.shift();
-        const insertClause = Object.assign(
-          {},
-          firstFragment.$setOnInsert ?? {},
-          firstFragment.$set ?? {}
-        );
-        const encryptedInsertClause = await this.encrypt(
-          Object.assign({}, insertClause)
-        );
-        const { insertedId } = await ppp.user.functions.insertOne(
+        const upsertClause = Object.assign({}, firstFragment);
+        const encryptedUpsertClause = Object.assign({}, upsertClause);
+
+        if (encryptedUpsertClause.$set) {
+          encryptedUpsertClause.$set = await this.encrypt(
+            encryptedUpsertClause.$set
+          );
+        }
+
+        if (encryptedUpsertClause.$setOnInsert) {
+          encryptedUpsertClause.$setOnInsert = await this.encrypt(
+            encryptedUpsertClause.$setOnInsert
+          );
+        }
+
+        const { upsertedId } = await ppp.user.functions.updateOne(
           {
             collection: this.page.view.collection
           },
-          encryptedInsertClause
+          (await this.page.view?.find?.()) ?? { uuid: uuidv4() },
+          encryptedUpsertClause,
+          {
+            upsert: true
+          }
         );
 
         this.page.view.document = Object.assign(
-          { _id: insertedId },
+          { _id: upsertedId },
           this.page.view.document,
-          insertClause
+          upsertClause.$setOnInsert ?? {},
+          upsertClause.$set ?? {}
         );
 
         Observable.notify(this, 'page');
 
         ppp.app.setURLSearchParams({
-          document: insertedId
+          document: upsertedId
         });
 
-        await this.#applyDocumentUpdates({ _id: insertedId }, fragments);
+        await this.#applyDocumentUpdates({ _id: upsertedId }, fragments);
       }
     }
   }
@@ -519,6 +531,10 @@ export class Page extends FoundationElement {
           }
         } else {
           this.document = {};
+        }
+
+        if (typeof this.page.view.transform === 'function') {
+          this.document = await this.page.view.transform(documentId);
         }
       } catch (e) {
         this.document = {};
