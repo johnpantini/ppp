@@ -31,7 +31,7 @@ export const collectionSelectTemplate = (context, definition) => html`
           definition.warningIndicator
         )}
       </div>
-      <ppp-loading-option :value="${() => ' '}">
+      <ppp-loading-option :value="${() => void 0}">
         ${(x) => x.placeholder ?? 'Нажмите, чтобы выбрать'}
       </ppp-loading-option>
       ${repeat(
@@ -92,6 +92,9 @@ export class CollectionSelect extends FoundationElement {
    */
   @attr
   value;
+
+  @attr
+  placeholder;
 
   @attr({ mode: 'boolean' })
   disabled;

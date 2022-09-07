@@ -267,7 +267,7 @@ export class ListboxOption extends FoundationElement {
   get value() {
     Observable.track(this, 'value');
 
-    return this._value ? this._value : this.text;
+    return this._value;
   }
 
   get form() {
