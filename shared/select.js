@@ -490,6 +490,7 @@ export class Select extends Listbox {
 
   connectedCallback() {
     super.connectedCallback();
+
     this.forcedPosition = !!this.positionAttribute;
   }
 }

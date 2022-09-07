@@ -636,10 +636,18 @@ export class Listbox extends FoundationElement {
    * @internal
    */
   clickHandler(e) {
+    const currentIndex = this.selectedIndex;
+
     const captured = e.target.closest(`option, [role=option]`);
 
     if (captured && !captured.disabled) {
-      this.selectedIndex = this.options.indexOf(captured);
+      const newIndex = this.options.indexOf(captured);
+
+      if (newIndex !== currentIndex) {
+        this.selectedIndex = newIndex;
+      } else {
+        this.selectedIndex = 0;
+      }
 
       return true;
     }
