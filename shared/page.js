@@ -536,6 +536,8 @@ export class Page extends FoundationElement {
         if (typeof this.page.view.transform === 'function') {
           this.document = await this.page.view.transform(documentId);
         }
+
+        this.$emit('ready');
       } catch (e) {
         this.document = {};
 
@@ -543,7 +545,8 @@ export class Page extends FoundationElement {
       } finally {
         this.endOperation();
       }
-    }
+    } else
+      this.$emit('ready');
   }
 
   #keypressHandler(e) {
@@ -586,6 +589,8 @@ export class Page extends FoundationElement {
 
       if (!this.hasAttribute('data-disable-auto-read'))
         void this.readDocument();
+      else
+        this.$emit('ready');
     } else {
       // This instance is the ppp-page itself.
       this.page = this;
@@ -639,6 +644,8 @@ export class PageWithDocuments {
   connectedCallback() {
     if (!this.hasAttribute('data-disable-auto-populate'))
       void this.populateDocuments();
+    else
+      this.$emit('ready');
   }
 
   async populateDocuments() {
@@ -674,6 +681,8 @@ export class PageWithDocuments {
       } else {
         this.documents = [];
       }
+
+      this.$emit('ready');
     } catch (e) {
       this.documents = [];
 
