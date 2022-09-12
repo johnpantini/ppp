@@ -41,6 +41,7 @@ export const sideNavItemStyles = (context, definition) =>
       transition: background-color 150ms ease-in-out 0s;
       font-size: 14px;
       line-height: 20px;
+      position: relative;
     }
 
     :host(.ellipsis) .content {
@@ -59,12 +60,31 @@ export const sideNavItemStyles = (context, definition) =>
     :host(:hover) {
       background-color: rgb(231, 238, 236);
       text-decoration: none;
+      color: #016bf8;
     }
 
     :host([active]:not([disabled])) {
       color: rgb(11, 59, 53);
       background-color: rgb(228, 244, 228);
       font-weight: bold;
+    }
+
+    :host(:not([disabled])) .content::before {
+      content: '';
+      position: absolute;
+      background-color: transparent;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 4px;
+      border-radius: 0 6px 6px 0;
+      transition: transform 150ms ease-in-out 0s;
+      transform: scaleY(0.3);
+    }
+
+    :host([active]:not([disabled])) .content::before {
+      transform: scaleY(1);
+      background-color: rgb(0, 163, 92);
     }
 
     :host([disabled]) slot[name='start']::slotted(.action-icon) {
