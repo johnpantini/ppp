@@ -204,6 +204,11 @@ export const textFieldStyles = (context, definition) => css`
     -webkit-appearance: none;
   }
 
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+
   input[type='search'] {
     padding-right: 30px;
   }
