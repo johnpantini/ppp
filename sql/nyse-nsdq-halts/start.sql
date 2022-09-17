@@ -35,6 +35,7 @@ $$ language plpgsql;
 
 select cron.schedule('ppp-[%#ctx.document._id%]', '* * * * *', 'select ppp_interval_[%#ctx.document._id%]()');
 select cron.schedule('ppp-log-run-cleanup', '0 2 * * *', $$delete from cron.job_run_details where end_time < now() - interval '1 day'$$);
+select cron.schedule('ppp-nightly-vacuum', '30 2 * * *', 'vacuum');
 
 select dblink_connect('ppp-[%#ctx.document._id%]', 'dbname=[%#ctx.document.supabaseApi.db%] port=[%#ctx.document.supabaseApi.port%] host=[%#("db." + new URL(ctx.document.supabaseApi.url).hostname)%] user=[%#ctx.document.supabaseApi.user%] password=[%#ctx.document.supabaseApi.password%]');
 select dblink_send_query('ppp-[%#ctx.document._id%]', 'select process_nyse_nsdq_halts_[%#ctx.document._id%]();');
