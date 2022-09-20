@@ -12,26 +12,20 @@ const exampleSymbolsCode = `/**
  * Возвращает массив тикеров для отслеживания.
  *
  */
-const instruments =
-  JSON.parse(
-    plv8.execute(
-      \`select content from http_get('https://api.tinkoff.ru/trading/stocks/list?sortType=ByName&orderType=Asc&country=All')\`
-    )[0].content
-  ).payload.values || [];
+const instruments = [%#JSON.stringify(await (await fetch(ppp.rootUrl +
+  '/instruments/spbex-stocks.json')).json())%];
 
 const symbols = [];
 
 for (const i of instruments) {
-  if (i.symbol.currency === 'USD' && i.symbol.ticker !== 'TCS')
-    symbols.push(i.symbol.ticker.replace('.', ' '));
+  if (i.currency === 'USD' && i.symbol !== 'TCS')
+    symbols.push(i.symbol.replace('.', ' '));
 }
 
-// SPB@US
-symbols.push('SPB');
 symbols.push('CIAN');
 symbols.push('OZON');
-symbols.push('QIWI');
-symbols.push('MTL');
+symbols.push('HHR');
+symbols.push('GDEV');
 
 return symbols;`;
 

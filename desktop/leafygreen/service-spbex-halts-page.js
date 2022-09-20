@@ -22,24 +22,18 @@ const exampleInstrumentsCode = `/**
  * @returns {string} instruments[].name - Название инструмента.
  * @returns {string} instruments[].currency - Валюта инструмента.
  */
-const instruments =
-  JSON.parse(
-    plv8.execute(
-      \`select content from http_get('https://api.tinkoff.ru/trading/stocks/list?sortType=ByName&orderType=Asc&country=All')\`
-    )[0].content
-  ).payload.values || [];
+const instruments = [%#JSON.stringify(await (await fetch(ppp.rootUrl +
+  '/instruments/spbex-stocks.json')).json())%];
 
-instruments.push({symbol: {isin: 'RU000AOJQ9P9', ticker: 'SPBE', showName: 'ПАО "СПБ Биржа"', currency: 'USD'}});
-instruments.push({symbol: {isin: 'US05637B1052', ticker: 'BLZE', showName: 'Backblaze, Inc.', currency: 'USD'}});
-instruments.push({symbol: {isin: 'US33829M1018', ticker: 'FIVE', showName: 'Five Below, Inc.', currency: 'USD'}});
-instruments.push({symbol: {isin: 'US72341T1034', ticker: 'PING', showName: 'Ping Identity Holding Corp', currency: 'USD'}});
+instruments.push({symbol: 'SPBE', isin: 'RU000AOJQ9P9',
+  fullName: 'СПБ Биржа', currency: 'USD'});
 
 return instruments.map((i) => {
   return {
-    isin: i.symbol.isin,
-    ticker: i.symbol.ticker,
-    name: i.symbol.showName.replace("'", "''"),
-    currency: i.symbol.currency
+    isin: i.isin,
+    ticker: i.symbol,
+    name: i.fullName.replace("'", "''"),
+    currency: i.currency
   };
 });`;
 
