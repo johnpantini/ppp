@@ -9,8 +9,17 @@ import ppp from '../ppp.js';
 export class InstrumentsManagePage extends Page {
   collection = 'instruments';
 
+  /**
+   * @children
+   */
   @observable
   exchangeCheckboxes;
+
+  /**
+   * @children
+   */
+  @observable
+  brokerCheckboxes;
 
   /**
    * True if the searching process has been finished.
@@ -53,7 +62,7 @@ export class InstrumentsManagePage extends Page {
       });
   }
 
-  async connectedCallback() {
+  connectedCallback() {
     this.notFound = false;
     this.searchEnded = true;
 
@@ -66,7 +75,7 @@ export class InstrumentsManagePage extends Page {
       this.searchText = '';
     }
 
-    await super.connectedCallback();
+    super.connectedCallback();
   }
 
   getDocumentId() {
@@ -105,6 +114,10 @@ export class InstrumentsManagePage extends Page {
   async validate() {
     await validate(this.symbol);
     await validate(this.fullName);
+    await validate(this.lot);
+    await validate(this.minPriceIncrement);
+
+    if (this.tinkoffCheckbox.checked) await validate(this.tinkoffFigi);
   }
 
   async update() {
@@ -124,12 +137,16 @@ export class InstrumentsManagePage extends Page {
         exchange: this.exchangeCheckboxes
           .filter((c) => c.checked)
           .map((c) => c.name),
+        broker: this.brokerCheckboxes
+          .filter((c) => c.checked)
+          .map((c) => c.name),
         isin: this.isin.value.trim(),
-        lotSize: Math.abs(this.lotSize.value) || 1,
+        lot: Math.abs(this.lot.value) || 1,
         minPriceIncrement: Math.abs(
           this.minPriceIncrement.value?.replace(',', '.')
         ),
         spbexSymbol: this.spbexSymbol.value.trim(),
+        tinkoffFigi: this.tinkoffFigi.value.trim(),
         updatedAt: new Date()
       },
       $setOnInsert: {

@@ -5,8 +5,12 @@ import { ref } from '../../shared/element/templating/ref.js';
 import { children } from '../../shared/element/templating/children.js';
 import { elements } from '../../shared/element/templating/node-observation.js';
 import { when } from '../../shared/element/templating/when.js';
+import { BROKERS } from '../../shared/const.js';
 import { pageStyles } from './page.js';
 import { search } from './icons/search.js';
+import ppp from '../../ppp.js';
+
+await ppp.i18n(import.meta.url);
 
 export const instrumentsManagePageTemplate = (context, definition) => html`
   <template>
@@ -120,7 +124,10 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
               </ppp-checkbox>
               <ppp-checkbox
                 name="spbex"
+                @change="${(x) =>
+                  x.scratchSet('spbexChecked', x.spbexCheckbox.checked)}"
                 ?checked="${(x) => x.document.exchange?.indexOf('spbex') > -1}"
+                ${ref('spbexCheckbox')}
               >
                 СПБ Биржа
               </ppp-checkbox>
@@ -133,74 +140,118 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
             </div>
           </div>
         </section>
-        <div class="folding">
-          <div class="folding-header" @click="${(x, c) =>
-            c.event.target.parentNode.classList.toggle('folding-open')}"
-          >
-            <div class="folding-header-toggle">
-              <img slot="logo" draggable="false" alt="Toggle"
-                   src="static/fa/angle-down.svg"/>
+        <section>
+          <div class="label-group">
+            <h5>Брокеры</h5>
+            <p>Список брокеров, у которых торгуется инструмент.</p>
+          </div>
+          <div class="input-group">
+            <div
+              style="display: flex; flex-direction: column;"
+              ${children({
+                property: 'brokerCheckboxes',
+                filter: elements('ppp-checkbox')
+              })}
+            >
+              <${'ppp-checkbox'}
+                name="${() => BROKERS.ALOR_OPENAPI_V2}"
+                ?checked="${(x) =>
+                  x.document.broker?.indexOf(BROKERS.ALOR_OPENAPI_V2) > -1}"
+              >
+                ${(x) => x.t(`$const.broker.${BROKERS.ALOR_OPENAPI_V2}`)}
+              </ppp-checkbox>
+              <ppp-checkbox
+                name="${() => BROKERS.TINKOFF_INVEST_API}"
+                ?checked="${(x) =>
+                  x.document.broker?.indexOf(BROKERS.TINKOFF_INVEST_API) > -1}"
+                @change="${(x) => {
+                  x.scratchSet('tinkoffChecked', x.tinkoffCheckbox.checked);
+
+                  x.tinkoffFigi.state = 'default';
+                }}"
+                ${ref('tinkoffCheckbox')}
+              >
+                ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
+              </ppp-checkbox>
             </div>
-            <div class="folding-header-text">Биржевые параметры</div>
           </div>
-          <div class="folding-content">
-            <section>
-              <div class="label-group">
-                <h5>ISIN</h5>
-                <p>Международный идентификационный код ценной бумаги.</p>
-              </div>
-              <div class="input-group">
-                <ppp-text-field
-                  placeholder="ISIN"
-                  value="${(x) => x.document.isin}"
-                  ${ref('isin')}
-                ></ppp-text-field>
-              </div>
-            </section>
-            <section>
-              <div class="label-group">
-                <h5>Лотность</h5>
-              </div>
-              <div class="input-group">
-                <ppp-text-field
-                  type="number"
-                  placeholder="1"
-                  value="${(x) => x.document.lotSize}"
-                  ${ref('lotSize')}
-                ></ppp-text-field>
-              </div>
-            </section>
-            <section>
-              <div class="label-group">
-                <h5>Шаг цены</h5>
-              </div>
-              <div class="input-group">
-                <ppp-text-field
-                  type="number"
-                  placeholder="${() =>
-                    new Intl.NumberFormat().format(0.01).toString()}"
-                  value="${(x) => x.document.minPriceIncrement}"
-                  ${ref('minPriceIncrement')}
-                ></ppp-text-field>
-              </div>
-            </section>
-            <section>
-              <div class="label-group">
-                <h5>Тикер на СПБ Бирже</h5>
-                <${'ppp-badge'} appearance="green">
-                  СПБ Биржа
-                </ppp-badge>
-              </div>
-              <div class="input-group">
-                <ppp-text-field
-                  placeholder="Тикер"
-                  value="${(x) => x.document.spbexSymbol}"
-                  ${ref('spbexSymbol')}
-                ></ppp-text-field>
-              </div>
-            </section>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Лотность</h5>
+            <p>Минимальное количество, доступное для покупки.</p>
           </div>
-        </div>
+          <div class="input-group">
+            <ppp-text-field
+              type="number"
+              placeholder="1"
+              value="${(x) => x.document.lot}"
+              ${ref('lot')}
+            ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Шаг цены</h5>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              type="number"
+              placeholder="${() =>
+                new Intl.NumberFormat().format(0.01).toString()}"
+              value="${(x) => x.document.minPriceIncrement}"
+              ${ref('minPriceIncrement')}
+            ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>ISIN</h5>
+            <p>Международный идентификационный код ценной бумаги.</p>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              placeholder="ISIN"
+              optional
+              value="${(x) => x.document.isin}"
+              ${ref('isin')}
+            ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Идентификатор FIGI</h5>
+            <${'ppp-badge'} appearance="green">
+              ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
+            </ppp-badge>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              ?disabled="${(x) => !x.scratch.tinkoffChecked}"
+              placeholder="FIGI"
+              value="${(x) => x.document.tinkoffFigi}"
+              style="text-transform: uppercase"
+              ${ref('tinkoffFigi')}
+            ></ppp-text-field>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Тикер на СПБ Бирже</h5>
+            <${'ppp-badge'} appearance="green">
+              СПБ Биржа
+            </ppp-badge>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              ?disabled="${(x) => !x.scratch.spbexChecked}"
+              optional
+              placeholder="Тикер"
+              value="${(x) => x.document.spbexSymbol}"
+              ${ref('spbexSymbol')}
+            ></ppp-text-field>
+          </div>
+        </section>
         <span slot="submit-control-text">Сохранить инструмент</span>
       </ppp-page>
     </form>

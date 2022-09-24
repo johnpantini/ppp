@@ -5,15 +5,6 @@ import { when } from '../../shared/element/templating/when.js';
 import { pageStyles } from './page.js';
 import ppp from '../../ppp.js';
 
-const getActiveTab = () => {
-  const params = ppp.app.params();
-
-  if (/manage|import|export/i.test(params.tab)) return params.tab;
-  else return 'manage';
-};
-
-void requireComponent(`ppp-instruments-${getActiveTab()}-page`);
-
 export const instrumentsPageTemplate = (context, definition) => html`
   <template>
     <${'ppp-page'}>
@@ -22,9 +13,9 @@ export const instrumentsPageTemplate = (context, definition) => html`
       </span>
       <ppp-tabs
         ${ref('tabs')}
-        activeid="${() => getActiveTab()}"
-        @change="${(x, { event }) => {
-          void requireComponent(`ppp-instruments-${event.detail.id}-page`);
+        activeid="${(x) => x.getActiveTab()}"
+        @change="${async (x, { event }) => {
+          await requireComponent(`ppp-instruments-${event.detail.id}-page`);
 
           ppp.app.setURLSearchParams({
             tab: event.detail.id
@@ -32,7 +23,7 @@ export const instrumentsPageTemplate = (context, definition) => html`
         }}"
       >
         <ppp-tab id="manage">Добавление/редактирование</ppp-tab>
-        <ppp-tab id="import" disabled>Импорт</ppp-tab>
+        <ppp-tab id="import">Импорт</ppp-tab>
         <ppp-tab id="export" disabled>Экспорт</ppp-tab>
         <ppp-tab-panel id="manage-panel"></ppp-tab-panel>
         <ppp-tab-panel id="import-panel"></ppp-tab-panel>
