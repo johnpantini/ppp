@@ -244,7 +244,7 @@
     ],
     "fullName": "Обувь России",
     "isin": "RU000A0JXKG3",
-    "minPriceIncrement": 0.02,
+    "minPriceIncrement": 0.01,
     "type": "stock",
     "currency": "RUB",
     "lot": 10,
@@ -1179,7 +1179,7 @@
     ],
     "fullName": "Ренессанс Страхование",
     "isin": "RU000A0ZZM04",
-    "minPriceIncrement": 0.01,
+    "minPriceIncrement": 0.02,
     "type": "stock",
     "currency": "RUB",
     "lot": 10,
@@ -1245,7 +1245,7 @@
     "exchange": [
       "moex"
     ],
-    "fullName": "ФСК ЕЭС",
+    "fullName": "Россети",
     "isin": "RU000A0JPNN9",
     "minPriceIncrement": 0.00002,
     "type": "stock",
@@ -1315,7 +1315,7 @@
     ],
     "fullName": "Русгрэйн",
     "isin": "RU000A0JPNP4",
-    "minPriceIncrement": 0.002,
+    "minPriceIncrement": 0.005,
     "type": "stock",
     "currency": "RUB",
     "lot": 10,
@@ -1451,7 +1451,7 @@
     ],
     "fullName": "РуссНефть",
     "isin": "RU000A0JSE60",
-    "minPriceIncrement": 0.2,
+    "minPriceIncrement": 0.1,
     "type": "stock",
     "currency": "RUB",
     "lot": 1,
@@ -1857,7 +1857,7 @@
     "exchange": [
       "moex"
     ],
-    "fullName": "Русская аквакультура",
+    "fullName": "ИНАРКТИКА",
     "isin": "RU000A0JQTS3",
     "minPriceIncrement": 0.5,
     "type": "stock",

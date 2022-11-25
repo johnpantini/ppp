@@ -630,24 +630,6 @@
     "tinkoffFigi": "BBG000DSMS70"
   },
   {
-    "symbol": "MTOR",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Meritor Inc",
-    "isin": "US59001K1007",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BH92D1"
-  },
-  {
     "symbol": "BDX",
     "exchange": [
       "nyse-nsdq",
@@ -1422,24 +1404,6 @@
     "tinkoffFigi": "BBG000C19QW1"
   },
   {
-    "symbol": "HNP",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Huaneng Power International",
-    "isin": "US4433041005",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BX5YM0"
-  },
-  {
     "symbol": "RRBI",
     "exchange": [
       "nyse-nsdq",
@@ -2068,24 +2032,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG006GNSZW5"
-  },
-  {
-    "symbol": "AVLR",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Avalara Inc",
-    "isin": "US05338G1067",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000R4Y9C1"
   },
   {
     "symbol": "VOYA",
@@ -2790,6 +2736,24 @@
     "tinkoffFigi": "BBG000FKMP26"
   },
   {
+    "symbol": "BLZE",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Backblaze",
+    "isin": "US05637B1052",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0037X6HX3"
+  },
+  {
     "symbol": "MTD",
     "exchange": [
       "nyse-nsdq",
@@ -3220,24 +3184,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BH3F20"
-  },
-  {
-    "symbol": "CHNG",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Change Healthcare Inc",
-    "isin": "US15912K1007",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0059KNH10"
   },
   {
     "symbol": "HRTX",
@@ -3742,24 +3688,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BWPP85"
-  },
-  {
-    "symbol": "TMX",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Terminix Global Holdings",
-    "isin": "US88087E1001",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG002WMH2F2"
   },
   {
     "symbol": "UHS",
@@ -6534,24 +6462,6 @@
     "tinkoffFigi": "BBG000BFJT36"
   },
   {
-    "symbol": "ZY",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Zymergen Inc.",
-    "isin": "US98985X1000",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0077HPN74"
-  },
-  {
     "symbol": "INCY",
     "exchange": [
       "nyse-nsdq",
@@ -7326,24 +7236,6 @@
     "tinkoffFigi": "BBG00P33SY72"
   },
   {
-    "symbol": "ACH",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Aluminum Corp of China",
-    "isin": "US0222761092",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000CMRVH1"
-  },
-  {
     "symbol": "LFUS",
     "exchange": [
       "nyse-nsdq",
@@ -7864,24 +7756,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG001KFKQM7"
-  },
-  {
-    "symbol": "CDK",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "CDK Global",
-    "isin": "US12508E1010",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG006B6PVN9"
   },
   {
     "symbol": "NTES",
@@ -9106,24 +8980,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PCQQL6"
-  },
-  {
-    "symbol": "NLOK",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "NortonLifeLock Inc",
-    "isin": "US6687711084",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BH2JM1"
   },
   {
     "symbol": "MDT",
@@ -11052,24 +10908,6 @@
     "tinkoffFigi": "BBG000C13CD9"
   },
   {
-    "symbol": "CCXI",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "ChemoCentryx, Inc",
-    "isin": "US16383L1061",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000PTSB12"
-  },
-  {
     "symbol": "TEL",
     "exchange": [
       "nyse-nsdq",
@@ -11304,24 +11142,6 @@
     "tinkoffFigi": "BBG00BVR0D02"
   },
   {
-    "symbol": "PING",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Ping Identity Holding Corp",
-    "isin": "US72341T1034",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00Q3GDB13"
-  },
-  {
     "symbol": "OSUR",
     "exchange": [
       "nyse-nsdq",
@@ -11446,6 +11266,24 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000D2M0Z7"
+  },
+  {
+    "symbol": "ALEC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Alector",
+    "isin": "US0144421072",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00N0PL198"
   },
   {
     "symbol": "FULC",
@@ -15030,24 +14868,6 @@
     "tinkoffFigi": "BBG007NLG4L3"
   },
   {
-    "symbol": "TWTR",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Twitter",
-    "isin": "US90184L1026",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000H6HNW3"
-  },
-  {
     "symbol": "C",
     "exchange": [
       "nyse-nsdq",
@@ -15930,24 +15750,6 @@
     "tinkoffFigi": "BBG013QNJHP8"
   },
   {
-    "symbol": "LFC",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "China Life Insurance",
-    "isin": "US16939P1066",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BBK4B9"
-  },
-  {
     "symbol": "HASI",
     "exchange": [
       "nyse-nsdq",
@@ -16008,7 +15810,7 @@
       "spbex"
     ],
     "fullName": "Solid Biosciences",
-    "isin": "US83422E1055",
+    "isin": "US83422E2046",
     "minPriceIncrement": 0.01,
     "type": "stock",
     "currency": "USD",
@@ -16794,24 +16596,6 @@
     "tinkoffFigi": "BBG000BLNNH6"
   },
   {
-    "symbol": "PLAN",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Anaplan Inc",
-    "isin": "US03272L1089",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG002DZS299"
-  },
-  {
     "symbol": "KKR",
     "exchange": [
       "nyse-nsdq",
@@ -16864,24 +16648,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BGVW60"
-  },
-  {
-    "symbol": "CERN",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Cerner",
-    "isin": "US1567821046",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BFDLV8"
   },
   {
     "symbol": "FAST",
@@ -17820,24 +17586,6 @@
     "tinkoffFigi": "BBG000MJRJJ2"
   },
   {
-    "symbol": "CCMP",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "CMC Materials",
-    "isin": "US12571T1007",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BP3NW2"
-  },
-  {
     "symbol": "CMP",
     "exchange": [
       "nyse-nsdq",
@@ -18358,24 +18106,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0074Q3NK6"
-  },
-  {
-    "symbol": "DRE",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Duke Realty REIT",
-    "isin": "US2644115055",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BHD8S7"
   },
   {
     "symbol": "INVH",
@@ -19158,7 +18888,7 @@
       "spbex"
     ],
     "fullName": "Annaly Capital Management REIT",
-    "isin": "US0357104092",
+    "isin": "US0357108390",
     "minPriceIncrement": 0.01,
     "type": "stock",
     "currency": "USD",
@@ -19908,24 +19638,6 @@
     "tinkoffFigi": "BBG00Y6G6X31"
   },
   {
-    "symbol": "NLSN",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Nielsen Holdings plc",
-    "isin": "GB00BWFY5505",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0088CYPX8"
-  },
-  {
     "symbol": "STOR",
     "exchange": [
       "nyse-nsdq",
@@ -20194,60 +19906,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VPGNR2"
-  },
-  {
-    "symbol": "TPTX",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Turning Point Therapeutics Inc",
-    "isin": "US90041T1088",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00NPL9WH7"
-  },
-  {
-    "symbol": "REGI",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Renewable Energy Group Inc",
-    "isin": "US75972A3014",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0016SSV00"
-  },
-  {
-    "symbol": "GBT",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Global Blood Therapeutics Inc",
-    "isin": "US37890U1088",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00341H6M0"
   },
   {
     "symbol": "KRG",
@@ -20538,24 +20196,6 @@
     "tinkoffFigi": "BBG000HG21Y3"
   },
   {
-    "symbol": "GCP",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "GCP Applied Technologies Inc",
-    "isin": "US36164Y1010",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0082W8Q12"
-  },
-  {
     "symbol": "SRPT",
     "exchange": [
       "nyse-nsdq",
@@ -20572,24 +20212,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BCJ161"
-  },
-  {
-    "symbol": "MANT",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "ManTech International Corp VA",
-    "isin": "US5645631046",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BGF8B5"
   },
   {
     "symbol": "OIS",
@@ -22806,6 +22428,24 @@
     "tinkoffFigi": "BBG0016XJ8S0"
   },
   {
+    "symbol": "AG",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "First Majestic Silver Corp",
+    "isin": "CA32076V1031",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CH7WB8"
+  },
+  {
     "symbol": "MLCO",
     "exchange": [
       "nyse-nsdq",
@@ -23418,24 +23058,6 @@
     "tinkoffFigi": "BBG000JH6683"
   },
   {
-    "symbol": "CTXS",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Citrix Systems",
-    "isin": "US1773761002",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000FQ6PY6"
-  },
-  {
     "symbol": "RY",
     "exchange": [
       "nyse-nsdq",
@@ -24030,24 +23652,6 @@
     "tinkoffFigi": "BBG000NJ96L6"
   },
   {
-    "symbol": "Y",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Alleghany Corp",
-    "isin": "US0171751003",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BX6BJ3"
-  },
-  {
     "symbol": "SCSC",
     "exchange": [
       "nyse-nsdq",
@@ -24388,24 +23992,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BH0106"
-  },
-  {
-    "symbol": "SAIL",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "SailPoint Technologies Holdings",
-    "isin": "US78781P1057",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00J0BBZL0"
   },
   {
     "symbol": "FIGS",
@@ -27234,24 +26820,6 @@
     "tinkoffFigi": "BBG000BFD605"
   },
   {
-    "symbol": "META",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Meta Platforms",
-    "isin": "US30303M1027",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000MM2P62"
-  },
-  {
     "symbol": "AAL",
     "exchange": [
       "nyse-nsdq",
@@ -27574,24 +27142,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BNBDC2"
-  },
-  {
-    "symbol": "CVET",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Covetrus Inc",
-    "isin": "US22304C1009",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00KR691K8"
   },
   {
     "symbol": "FOXA",
@@ -28134,6 +27684,24 @@
     "tinkoffFigi": "BBG000BWS3F3"
   },
   {
+    "symbol": "UDMY",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Udemy",
+    "isin": "US9026851066",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0025DTRN5"
+  },
+  {
     "symbol": "CRI",
     "exchange": [
       "nyse-nsdq",
@@ -28618,24 +28186,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00L2DB535"
-  },
-  {
-    "symbol": "ROLL",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "RBC Bearings Inc",
-    "isin": "US75524B1044",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000GMGNB3"
   },
   {
     "symbol": "CRMT",
@@ -30316,7 +29866,7 @@
       "nyse-nsdq",
       "spbex"
     ],
-    "fullName": "Callaway Golf Company",
+    "fullName": "Topgolf Callaway Brands",
     "isin": "US1311931042",
     "minPriceIncrement": 0.01,
     "type": "stock",
@@ -30941,6 +30491,1284 @@
     "tinkoffFigi": "BBG000PRJCX9"
   },
   {
+    "symbol": "ONL",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Orion Office REIT",
+    "isin": "US68629Y1038",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0118JXCD9"
+  },
+  {
+    "symbol": "AMPH",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Amphastar Pharmaceuticals",
+    "isin": "US03209R1032",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BW90S6"
+  },
+  {
+    "symbol": "RELY",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Remitly Global",
+    "isin": "US75960P1049",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG012C7JST2"
+  },
+  {
+    "symbol": "KDNY",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Chinook Therapeutics",
+    "isin": "US16961L1061",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000DW9ZK5"
+  },
+  {
+    "symbol": "ETD",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Ethan Allen Interiors Inc",
+    "isin": "US2976021046",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BBVDT8"
+  },
+  {
+    "symbol": "CLBK",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Columbia Financial",
+    "isin": "US1976411033",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG003222R31"
+  },
+  {
+    "symbol": "SPNS",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Sapiens International Corporation N.V.",
+    "isin": "KYG7T16G1039",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000G3YP84"
+  },
+  {
+    "symbol": "NI",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "NiSource Inc",
+    "isin": "US65473P1057",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BPZBB6"
+  },
+  {
+    "symbol": "NHI",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "National Health Investors REIT",
+    "isin": "US63633D1046",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CGWSJ3"
+  },
+  {
+    "symbol": "PDS",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Precision Drilling",
+    "isin": "CA74022D4075",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BBK2X9"
+  },
+  {
+    "symbol": "IRWD",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Ironwood Pharmaceuticals",
+    "isin": "US46333X1081",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000GBZ3J2"
+  },
+  {
+    "symbol": "RBC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "RBC Bearings Inc",
+    "isin": "US75524B1044",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000GMGNB3"
+  },
+  {
+    "symbol": "ALGM",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Allegro MicroSystems",
+    "isin": "US01749D1054",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00H5S8391"
+  },
+  {
+    "symbol": "XENE",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Xenon Pharmaceuticals Inc",
+    "isin": "CA98420N1050",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0073DM784"
+  },
+  {
+    "symbol": "CNO",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "CNO Financial Group Inc",
+    "isin": "US12621E1038",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000Q1GK24"
+  },
+  {
+    "symbol": "UUUU",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Energy Fuels",
+    "isin": "CA2926717083",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BXTPV3"
+  },
+  {
+    "symbol": "DCT",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Duck Creek Technologies",
+    "isin": "US2641201064",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00PPWYWJ8"
+  },
+  {
+    "symbol": "AGO",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Assured Guaranty Ltd",
+    "isin": "BMG0585R1060",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CQB185"
+  },
+  {
+    "symbol": "SIRI",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Sirius XM Holdings Inc",
+    "isin": "US82968B1035",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BT0093"
+  },
+  {
+    "symbol": "TLS",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Telos Corporation",
+    "isin": "US87969B1017",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BK34C7"
+  },
+  {
+    "symbol": "FLYW",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Flywire",
+    "isin": "US3024921039",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG002030NC4"
+  },
+  {
+    "symbol": "LYEL",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Lyell Immunopharma",
+    "isin": "US55083R1041",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00RNXFN14"
+  },
+  {
+    "symbol": "GRBK",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Green Brick Partners",
+    "isin": "US3927091013",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000QGYG84"
+  },
+  {
+    "symbol": "VTNR",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Vertex Energy, Inc.",
+    "isin": "US92534K1079",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BGGXH3"
+  },
+  {
+    "symbol": "ISEE",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "IVERIC bio",
+    "isin": "US46583P1021",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0019K7J31"
+  },
+  {
+    "symbol": "LNC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Lincoln National Corp",
+    "isin": "US5341871094",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BNC3Y9"
+  },
+  {
+    "symbol": "RXDX",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Prometheus Biosciences",
+    "isin": "US74349U1088",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00PPP6G54"
+  },
+  {
+    "symbol": "MLNK",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "MeridianLink",
+    "isin": "US58985J1051",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG002ZYMKQ5"
+  },
+  {
+    "symbol": "ENVX",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Enovix",
+    "isin": "US2935941078",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00YC53854"
+  },
+  {
+    "symbol": "CUZ",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Cousins Properties REIT",
+    "isin": "US2227955026",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CW9BM7"
+  },
+  {
+    "symbol": "RLAY",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Relay Therapeutics Inc",
+    "isin": "US75943R1023",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00DSS08K9"
+  },
+  {
+    "symbol": "TVTX",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Travere Therapeutics",
+    "isin": "US89422G1076",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000P9D6W9"
+  },
+  {
+    "symbol": "VAL",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Valaris Limited",
+    "isin": "BMG9460G1015",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG010JW9K49"
+  },
+  {
+    "symbol": "BLDP",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Ballard Power Systems",
+    "isin": "CA0585861085",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BNJRZ8"
+  },
+  {
+    "symbol": "ARI",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Apollo Commercial Real Estate",
+    "isin": "US03762U1051",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000NFPF36"
+  },
+  {
+    "symbol": "SUMO",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Sumo Logic, Inc.",
+    "isin": "US86646P1030",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG002GKBNW5"
+  },
+  {
+    "symbol": "PLL",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Piedmont Lithium",
+    "isin": "US72016P1057",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00YJ7NBQ1"
+  },
+  {
+    "symbol": "RKT",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Rocket Companies",
+    "isin": "US77311W1018",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00VY1MYW7"
+  },
+  {
+    "symbol": "ALT",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Altimmune",
+    "isin": "US02155H2004",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000FXML90"
+  },
+  {
+    "symbol": "PENN",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "PENN Entertainment",
+    "isin": "US7075691094",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CDZLV8"
+  },
+  {
+    "symbol": "ORMP",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Oramed Pharmaceuticals",
+    "isin": "US68403P2039",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000LRYR36"
+  },
+  {
+    "symbol": "UEC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Uranium Energy Corp",
+    "isin": "US9168961038",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000LCK3Q2"
+  },
+  {
+    "symbol": "PLTK",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Playtika Holding Corp.",
+    "isin": "US72815L1070",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00QQ8C789"
+  },
+  {
+    "symbol": "LC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Lending Club",
+    "isin": "US52603A2087",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG001YKDND6"
+  },
+  {
+    "symbol": "HZO",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "MarineMax, Inc.",
+    "isin": "US5679081084",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000C1SRH5"
+  },
+  {
+    "symbol": "AVXL",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Anavex Life Sciences Corp.",
+    "isin": "US0327973006",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000C9K8K4"
+  },
+  {
+    "symbol": "GES",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Guess? Inc",
+    "isin": "US4016171054",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BC26P7"
+  },
+  {
+    "symbol": "AMKR",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Amkor Technology",
+    "isin": "US0316521006",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BCKGW7"
+  },
+  {
+    "symbol": "PSEC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Prospect Capital Corporation",
+    "isin": "US74348T1025",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000Q3RGN4"
+  },
+  {
+    "symbol": "AMR",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Alpha Metallurgical Resources Inc.",
+    "isin": "US0207641061",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00DGWV035"
+  },
+  {
+    "symbol": "SKT",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Tanger Factory Outlet Centers REIT",
+    "isin": "US8754651060",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000D2JB50"
+  },
+  {
+    "symbol": "METC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Ramaco Resources Inc",
+    "isin": "US75134P3038",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00BCQJ2X3"
+  },
+  {
+    "symbol": "TEAM",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Atlassian",
+    "isin": "US0494681010",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00BDQ1H13"
+  },
+  {
+    "symbol": "PMT",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "PennyMac Mortgage Investment REIT",
+    "isin": "US70931T1034",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000DKDWS5"
+  },
+  {
+    "symbol": "ASTS",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "AST SpaceMobile",
+    "isin": "US00217D1000",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00Q402TR2"
+  },
+  {
+    "symbol": "INVA",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Innoviva Inc",
+    "isin": "US45781M1018",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CG9XT7"
+  },
+  {
+    "symbol": "VERU",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Veru Inc",
+    "isin": "US92536C1036",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000G12J78"
+  },
+  {
+    "symbol": "LICY",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Li-Cycle Holdings",
+    "isin": "CA50202P1053",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0122LQVR9"
+  },
+  {
+    "symbol": "RVMD",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "REVOLUTION Medicines Inc",
+    "isin": "US76155X1000",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00829F4P8"
+  },
+  {
+    "symbol": "JAMF",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Jamf Holding Corp",
+    "isin": "US47074L1052",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00VSYYVB8"
+  },
+  {
+    "symbol": "ATEN",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "A10 Networks Inc",
+    "isin": "US0021211018",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0060K22C1"
+  },
+  {
+    "symbol": "PCVX",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Vaxcyte Inc",
+    "isin": "US92243G1085",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG009PHHPL8"
+  },
+  {
+    "symbol": "COHU",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Cohu Inc.",
+    "isin": "US1925761066",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000DKMJ86"
+  },
+  {
+    "symbol": "GOGL",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Golden Ocean Group",
+    "isin": "BMG396372051",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BP83H8"
+  },
+  {
+    "symbol": "PI",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Impinj Inc",
+    "isin": "US4532041096",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000GRK2Z7"
+  },
+  {
+    "symbol": "JOBY",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Joby Aviation",
+    "isin": "KYG651631007",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00X2MYTC2"
+  },
+  {
+    "symbol": "RITM",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Rithm Capital REIT",
+    "isin": "US64828T2015",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG003T1GM03"
+  },
+  {
+    "symbol": "HIMS",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Hims & Hers Health",
+    "isin": "US4330001060",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00Q53VYM7"
+  },
+  {
+    "symbol": "DNA",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Ginkgo Bioworks Holdings",
+    "isin": "US37611X1000",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00YPS1KY3"
+  },
+  {
+    "symbol": "KGC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Kinross Gold",
+    "isin": "CA4969024047",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BB2DM7"
+  },
+  {
+    "symbol": "RXO",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "RXO, Inc.",
+    "isin": "US74982T1034",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0160DYCH4"
+  },
+  {
     "symbol": "SPB",
     "spbexSymbol": "SPB@US",
     "exchange": [
@@ -30966,7 +31794,7 @@
     ],
     "fullName": "СПБ Биржа",
     "isin": "RU000A0JQ9P9",
-    "minPriceIncrement": 0.01,
+    "minPriceIncrement": 0.1,
     "type": "stock",
     "currency": "RUB",
     "lot": 1,
@@ -31000,22 +31828,6 @@
     ],
     "fullName": "Backblaze",
     "isin": "US05637B1052",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2"
-    ]
-  },
-  {
-    "symbol": "ALEC",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Alector",
-    "isin": "US0144421072",
     "minPriceIncrement": 0.01,
     "type": "stock",
     "currency": "USD",
@@ -31073,20 +31885,22 @@
     ]
   },
   {
-    "symbol": "ENSG",
+    "symbol": "GEN",
     "exchange": [
       "nyse-nsdq",
       "spbex"
     ],
-    "fullName": "Ensign Group",
-    "isin": "US29358P1012",
+    "fullName": "Gen Digital",
+    "isin": "US6687711084",
     "minPriceIncrement": 0.01,
     "type": "stock",
     "currency": "USD",
     "lot": 1,
     "broker": [
-      "alor-openapi-v2"
-    ]
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BH2JM1"
   },
   {
     "symbol": "AG",
@@ -31096,22 +31910,6 @@
     ],
     "fullName": "First Majestic Silver Corporation",
     "isin": "CA32076V1031",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2"
-    ]
-  },
-  {
-    "symbol": "UDMY",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Udemy",
-    "isin": "US9026851066",
     "minPriceIncrement": 0.01,
     "type": "stock",
     "currency": "USD",
