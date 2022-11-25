@@ -65,7 +65,7 @@ export const tradersPageTemplate = (context, definition) => html`
                   @click="${() => {
                     ppp.app.navigate({
                       page: `trader-${datum.type}`,
-                      trader: datum._id
+                      document: datum._id
                     });
 
                     return false;

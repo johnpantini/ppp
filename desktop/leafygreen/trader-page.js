@@ -31,37 +31,56 @@ export const traderPageTemplate = (context, definition) => html`
           <div slot="title">
             Alor Open API V2
             <${'ppp-badge'} appearance="blue">
-              Локальный
+              REST/WebSocket
             </ppp-badge>
           </div>
-          <span slot="description">Торговля через профиль Alor Open API V2. Состояние хранится в браузере.</span>
+          <span slot="description">Торговля через брокерский профиль Alor Open API V2.</span>
           <${'ppp-button'}
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `trader-${TRADERS.ALOR_OPENAPI_V2_LOCAL}`
+                page: `trader-${TRADERS.ALOR_OPENAPI_V2}`
               })}"
           >
             Продолжить
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
-          <img slot="logo" draggable="false" alt="Alor" style="height: 40px"
-               src="static/alor.svg"/>
+          <img slot="logo" draggable="false" alt="Tinkoff" style="height: 40px"
+               src="static/tinkoff.svg"/>
           <div slot="title">
-            Alor Open API V2
-            <${'ppp-badge'} appearance="green">
-              Удалённый
+            Tinkoff Invest API
+            <${'ppp-badge'} appearance="blue">
+              gRPC-web
             </ppp-badge>
           </div>
-          <span slot="description">Торговля через профиль Alor Open API V2. Состояние хранится на удалённом сервере.</span>
+          <span
+            slot="description">Торговля через брокерский профиль Tinkoff Invest API.</span>
           <${'ppp-button'}
             disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `trader-${TRADERS.ALOR_OPENAPI_V2_REMOTE}`
+                page: `trader-${TRADERS.TINKOFF_GRPC_WEB}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Custom" style="height: 40px"
+               src="static/functions.svg"/>
+          <div slot="title">
+            Произвольная реализация
+          </div>
+          <span
+            slot="description">Торговля через любой брокерский профиль.</span>
+          <${'ppp-button'}
+            disabled
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.CUSTOM}`
               })}"
           >
             Продолжить
