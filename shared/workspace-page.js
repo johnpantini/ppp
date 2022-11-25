@@ -30,23 +30,25 @@ export class WorkspacePage extends Page {
       'expanded'
     );
 
-    this.onAuxClick = this.onAuxClick.bind(this);
+    this.onDblClick = this.onDblClick.bind(this);
 
-    document.addEventListener('auxclick', this.onAuxClick);
+    document.addEventListener('dblclick', this.onDblClick);
   }
 
   updateWidgetContainment() {
     for (const widget of this.document.widgets) {
-      $(widget.widgetElement).draggable('option', 'containment', [
-        ppp.app.settings.sideNavVisible
-          ? ppp.app.sideNav.expanded
-            ? 183
-            : 48
-          : 0,
-        0,
-        9999,
-        9999
-      ]);
+      if ($(widget.widgetElement).draggable('instance')) {
+        $(widget.widgetElement).draggable('option', 'containment', [
+          ppp.app.settings.sideNavVisible
+            ? ppp.app.sideNav.expanded
+              ? 183
+              : 48
+            : 0,
+          0,
+          9999,
+          9999
+        ]);
+      }
     }
   }
 
@@ -56,8 +58,8 @@ export class WorkspacePage extends Page {
     }
   };
 
-  onAuxClick(event) {
-    if (event.ctrlKey && event.button === 1) {
+  onDblClick(event) {
+    if (event.ctrlKey) {
       const value = !ppp.app.settings.sideNavVisible;
 
       ppp.app.settings['sideNavVisible'] = value;
@@ -76,7 +78,7 @@ export class WorkspacePage extends Page {
       'expanded'
     );
 
-    document.removeEventListener('auxclick', this.onAuxClick);
+    document.removeEventListener('dblclick', this.onDblClick);
   }
 
   // Place widgets when DOM (.workspace) is ready
