@@ -2,6 +2,7 @@ import {
   serialize as eserialize,
   deserialize as edeserialize
 } from './ejson.js';
+import { isJWTTokenExpired } from './ppp-crypto.js';
 
 const SERIALIZATION_OPTIONS = {
   relaxed: false
@@ -1033,20 +1034,7 @@ class Authenticator {
   }
 
   isTokenExpired(jwtToken) {
-    if (jwtToken) {
-      try {
-        const [, payload] = jwtToken.split('.');
-        const { exp: expires } = JSON.parse(atob(payload));
-
-        if (typeof expires === 'number') {
-          return Date.now() + 1000 >= expires * 1000;
-        }
-      } catch {
-        return true;
-      }
-    }
-
-    return true;
+    return isJWTTokenExpired(jwtToken);
   }
 
   async authenticate(credentials, linkingUser) {
