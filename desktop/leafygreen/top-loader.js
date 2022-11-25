@@ -21,7 +21,7 @@ export const topLoaderStyles = (context, definition) =>
       left: 0;
       right: 0;
       width: 100%;
-      height: 3px;
+      height: 5px;
       z-index: 999999;
       transition: opacity 0.4s;
       opacity: 0;
