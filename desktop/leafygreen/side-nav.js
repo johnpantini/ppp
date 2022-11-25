@@ -75,7 +75,7 @@ export const sideNavStyles = (context, definition) =>
     }
 
     :host([expanded]) {
-      width: 184px;
+      width: 183px;
     }
 
     ::-webkit-scrollbar {
@@ -112,11 +112,11 @@ export const sideNavStyles = (context, definition) =>
     }
 
     .nav[expanded] {
-      width: 184px;
+      width: 183px;
     }
 
     :host([hovered]) .nav:not([expanded]) {
-      width: 184px;
+      width: 183px;
       border-right: 1px solid rgb(249, 251, 250);
       box-shadow: rgb(6 22 33 / 10%) 2px 0 4px;
     }
@@ -155,7 +155,7 @@ export const sideNavStyles = (context, definition) =>
     }
 
     .expanded-content > ul {
-      width: 184px;
+      width: 183px;
     }
 
     .collapsed-content > ul li:first-of-type {
@@ -164,9 +164,7 @@ export const sideNavStyles = (context, definition) =>
 
     .collapsed-content > ul li {
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
-      -webkit-box-pack: center;
       justify-content: center;
       height: 40px;
       border-bottom: 1px solid rgb(231, 238, 236);
@@ -205,9 +203,7 @@ export const sideNavStyles = (context, definition) =>
       width: 32px;
       height: 32px;
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
-      -webkit-box-pack: center;
       justify-content: center;
       border-radius: 100%;
       color: rgb(17, 97, 73);
