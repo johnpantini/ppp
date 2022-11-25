@@ -203,7 +203,6 @@ export const toastStyles = (context, definition) =>
 
     .container {
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
       padding: 16px;
       border-radius: 4px;
@@ -275,9 +274,7 @@ export const toastStyles = (context, definition) =>
       position: absolute;
       inset: 0;
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
-      -webkit-box-pack: center;
       justify-content: center;
     }
 

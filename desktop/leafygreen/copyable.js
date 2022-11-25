@@ -72,7 +72,6 @@ export const copyableStyles = (context, definition) =>
       line-height: 24px;
       letter-spacing: 0;
       display: inline-flex;
-      -webkit-box-align: center;
       align-items: center;
       height: 100%;
       width: 100%;
@@ -126,7 +125,6 @@ export const copyableStyles = (context, definition) =>
       margin: 0;
       border: 1px solid rgb(136, 147, 151);
       display: inline-flex;
-      -webkit-box-align: stretch;
       align-items: stretch;
       transition: all 150ms ease-in-out 0s;
       text-decoration: none;
@@ -151,13 +149,7 @@ export const copyableStyles = (context, definition) =>
     .button-content {
       display: grid;
       grid-auto-flow: column;
-      -webkit-box-pack: center;
-      -ms-flex-pack: center;
-      -webkit-justify-content: center;
       justify-content: center;
-      -webkit-align-items: center;
-      -webkit-box-align: center;
-      -ms-flex-align: center;
       align-items: center;
       height: 100%;
       width: 100%;

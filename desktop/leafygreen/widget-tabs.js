@@ -68,8 +68,6 @@ const widgetTabStyles = (context, definition) => css`
     bottom: 0;
     height: 2px;
     border-radius: 4px 4px 0 0;
-    transition: all 150ms ease-in-out 0s;
-    background-color: transparent;
     transform: scaleX(0.8);
   }
 

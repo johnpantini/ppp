@@ -9,6 +9,7 @@ import { when } from './element/templating/when.js';
 import { repeat } from './element/templating/repeat.js';
 import { invalidate } from './validate.js';
 import { Tmpl } from './tmpl.js';
+import { DOM } from './element/dom.js';
 import ppp from '../ppp.js';
 
 await requireComponent(
@@ -110,6 +111,8 @@ export class CollectionSelect extends FoundationElement {
     this.value = this.control.value;
 
     if (this.value) this.state = 'default';
+
+    this.$emit('change');
   }
 
   datum() {
@@ -171,15 +174,19 @@ export class CollectionSelect extends FoundationElement {
   }
 
   preloadedChanged(prev, next) {
-    if (typeof next === 'object') {
-      const formatted = this.#formatter().call(this, next);
+    DOM.queueUpdate(() => {
+      if (typeof next === 'function') next = next.call(this);
 
-      if (!this.options.find((o) => o.value === formatted.value)) {
-        this.options.push(formatted);
+      if (typeof next === 'object') {
+        const formatted = this.#formatter().call(this, next);
 
-        this.control.value = this.value;
+        if (!this.options.find((o) => o.value === formatted.value)) {
+          this.options.push(formatted);
+
+          this.control.value = this.value;
+        }
       }
-    }
+    });
   }
 
   connectedCallback() {

@@ -96,7 +96,6 @@ export const bannerStyles = (context, definition) =>
 
     .content {
       align-self: center;
-      -webkit-box-flex: 1;
       flex-grow: 1;
       margin-left: 15px;
       margin-right: 10px;

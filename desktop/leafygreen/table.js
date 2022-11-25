@@ -44,9 +44,7 @@ export const tableStyles = (context, definition) => css`
 
   .column-header {
     display: flex;
-    -webkit-box-pack: justify;
     justify-content: space-between;
-    -webkit-box-align: center;
     align-items: center;
     min-height: 32px;
   }
@@ -87,7 +85,6 @@ export const tableStyles = (context, definition) => css`
 
   .cell-container {
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     min-height: 40px;
   }

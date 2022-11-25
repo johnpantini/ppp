@@ -1,7 +1,7 @@
 /** @decorator */
 
 import { attr } from './element/components/attributes.js';
-import { Observable, observable } from './element/observation/observable.js';
+import { observable } from './element/observation/observable.js';
 import { ARIAGlobalStatesAndProperties } from './patterns/aria-global.js';
 import { StartEnd } from './patterns/start-end.js';
 import { applyMixins } from './utilities/apply-mixins.js';
@@ -10,7 +10,6 @@ import { ref } from './element/templating/ref.js';
 import { slotted } from './element/templating/slotted.js';
 import { Listbox } from './listbox.js';
 import { startSlotTemplate } from './patterns/start-end.js';
-import { DOM } from './element/dom.js';
 import { when } from './element/templating/when.js';
 
 /**
@@ -293,7 +292,6 @@ export class Select extends Listbox {
     if (this.$pppController.isConnected && this.options) {
       this.update();
 
-      this.$emit('input');
       this.$emit('change', this, {
         bubbles: true,
         composed: undefined

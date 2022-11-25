@@ -71,14 +71,12 @@ export const baseButtonStyles = (context, definition) =>
 
     .content-container {
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
       height: 100%;
       width: 100%;
       pointer-events: none;
       position: relative;
       z-index: 0;
-      -webkit-box-pack: justify;
       justify-content: space-between;
       padding-left: 12px;
       padding-right: 12px;
@@ -120,7 +118,6 @@ export const baseButtonStyles = (context, definition) =>
     .start,
     .end {
       display: inline-flex;
-      -webkit-box-align: center;
       align-items: center;
     }
 

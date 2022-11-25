@@ -57,14 +57,12 @@ export const selectStyles = (context, definition) => css`
   .root {
     position: relative;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     z-index: 0;
   }
 
   .root-container {
     display: inline-flex;
-    -webkit-box-align: stretch;
     align-items: stretch;
     position: relative;
     z-index: 0;

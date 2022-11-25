@@ -57,7 +57,6 @@ export const optionStyles = (context, definition) => css`
 
   .content {
     display: flex;
-    -webkit-box-pack: justify;
     justify-content: space-between;
     width: 100%;
     text-overflow: ellipsis;

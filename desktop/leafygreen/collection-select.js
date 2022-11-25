@@ -8,7 +8,11 @@ import { css } from '../../shared/element/styles/css.js';
 import { warning } from './icons/warning.js';
 
 export const collectionSelectStyles = (context, definition) => css`
- .spinner {
+  :host(:focus-visible) {
+    outline: none;
+  }
+
+  .spinner {
     animation: spin 2s linear infinite;
     color: #168b46;
   }
