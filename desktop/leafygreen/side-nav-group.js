@@ -36,7 +36,6 @@ export const sideNavGroupStyles = (context, definition) =>
     .start,
     .end {
       display: inline-flex;
-      -webkit-box-align: center;
       align-items: center;
     }
 
@@ -52,9 +51,7 @@ export const sideNavGroupStyles = (context, definition) =>
       padding: 16px 16px 8px;
       position: relative;
       display: flex;
-      -webkit-box-align: center;
       align-items: center;
-      -webkit-box-pack: justify;
       justify-content: space-between;
       font-size: 12px;
       line-height: 1em;
@@ -69,7 +66,6 @@ export const sideNavGroupStyles = (context, definition) =>
 
     .title-container {
       display: inline-flex;
-      -webkit-box-align: center;
       align-items: center;
     }
 
