@@ -4,7 +4,8 @@ import {
   SERVICES,
   SERVER_TYPES,
   WIDGET_TYPES,
-  SERVICE_STATE
+  SERVICE_STATE,
+  TRADERS
 } from '../../shared/const.js';
 
 export default function (i18n) {
@@ -22,7 +23,13 @@ export default function (i18n) {
       },
       broker: {
         [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
+        [BROKERS.TINKOFF_INVEST_API]: 'Tinkoff Invest API',
         [BROKERS.UTEX_AURORA]: 'UTEX Aurora'
+      },
+      trader: {
+        [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
+        [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
+        [TRADERS.CUSTOM]: 'Произвольная реализация'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',
@@ -49,8 +56,13 @@ export default function (i18n) {
       },
       widget: {
         [WIDGET_TYPES.ORDER]: 'Заявка',
+        [WIDGET_TYPES.SCALPING_BUTTONS]: 'Скальперские кнопки',
         [WIDGET_TYPES.ACTIVE_ORDERS]: 'Активные заявки',
-        [WIDGET_TYPES.ORDERBOOK]: 'Книга заявок'
+        [WIDGET_TYPES.LIGHT_CHART]: 'Лёгкий график',
+        [WIDGET_TYPES.ORDERBOOK]: 'Книга заявок',
+        [WIDGET_TYPES.TIME_AND_SALES]: 'Лента всех сделок',
+        [WIDGET_TYPES.PORTFOLIO]: 'Портфель',
+        [WIDGET_TYPES.TIMELINE]: 'Лента операций'
       }
     }
   });

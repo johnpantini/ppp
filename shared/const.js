@@ -33,26 +33,37 @@ export const SERVICE_STATE = {
 
 export const BROKERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
+  TINKOFF_INVEST_API: 'tinkoff-invest-api',
   UTEX_AURORA: 'utex-aurora'
 };
 
 export const TRADERS = {
-  ALOR_OPENAPI_V2_LOCAL: 'alor-openapi-v2-local',
-  ALOR_OPENAPI_V2_REMOTE: 'alor-openapi-v2-remote'
+  ALOR_OPENAPI_V2: 'alor-openapi-v2',
+  TINKOFF_GRPC_WEB: 'tinkoff-grpc-web',
+  CUSTOM: 'custom'
+};
+
+export const TRADER_DATUM = {
+  LAST_PRICE: 'last-price',
+  LAST_PRICE_ABSOLUTE_CHANGE: 'last-price-absolute-change',
+  LAST_PRICE_RELATIVE_CHANGE: 'last-price-relative-change',
+  BEST_BID: 'best-bid',
+  BEST_ASK: 'best-ask'
 };
 
 export const WIDGET_TYPES = {
   ORDER: 'order',
+  SCALPING_BUTTONS: 'scalping-buttons',
   ACTIVE_ORDERS: 'active-orders',
   LIGHT_CHART: 'light-chart',
   CHART: 'chart',
   ORDERBOOK: 'orderbook',
-  ORDERBOOK_WITH_POOL: 'orderbook-with-pool',
   TIME_AND_SALES: 'time-and-sales',
   CALENDAR: 'calendar',
   TRADES: 'trades',
   POSITIONS: 'positions',
-  TRADE_HISTORY: 'trade-history',
+  PORTFOLIO: 'portfolio',
+  TIMELINE: 'timeline',
   NOTIFICATIONS: 'notifications',
   SUBSCRIPTIONS: 'subscription',
   RATINGS: 'ratings',
