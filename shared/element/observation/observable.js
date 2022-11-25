@@ -7,7 +7,7 @@ const accessorLookup = new WeakMap();
 
 let watcher = void 0;
 
-let createArrayObserver = (array) => {
+let createArrayObserver = () => {
   throw new Error('Must call enableArrayObservation before observing arrays.');
 };
 
