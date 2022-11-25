@@ -49,13 +49,21 @@ export const appTemplate = (context, definition) => html`
     ${when(
       () => ppp?.keyVault.ok(),
       html`
-        <ppp-modal ${ref('widgetSelectorModal')} dismissible>
+        <ppp-modal ${
+          /**
+           * @var widgetSelectorModal
+           */
+          ref('widgetSelectorModal')
+        } dismissible>
           <span slot="title">Разместить виджет</span>
           <div slot="body">
             <div class="description">
               Чтобы разместить виджет на текущей рабочей области, нажмите кнопку&nbsp;
-              <${'ppp-button'} class="xsmall"
-                               style="position: relative; top: -4px;">Выбрать
+              <${'ppp-button'}
+                class="xsmall"
+                style="position: relative; top: -4px;"
+              >
+                Выбрать
               </ppp-button>&nbsp;
               в соответствующей строке таблицы.
             </div>
@@ -68,8 +76,19 @@ export const appTemplate = (context, definition) => html`
     )}
     <div class="holder">
       <div class="app-container">
-        <${'ppp-side-nav'} ${ref('sideNav')}
-                           ?expanded="${(x) => !x.settings.sideNavCollapsed}">
+        <${'ppp-side-nav'}
+          ${
+            /**
+             * @var sideNav
+             */
+            ref('sideNav')
+          }
+          ?expanded="${(x) => !x.settings.sideNavCollapsed}"
+          style="${(x) =>
+            (x.settings.sideNavVisible ?? true) || x.page !== 'workspace'
+              ? 'display: initial'
+              : 'display: none'}"
+        >
           <${'ppp-side-nav-item'}
             ?disabled="${() => !ppp?.keyVault.ok()}"
             @click="${(x) => x.handleNewWorkspaceClick()}"
@@ -332,24 +351,25 @@ export const appTemplate = (context, definition) => html`
             </ppp-side-nav-item>
           </ppp-side-nav-group>
         </ppp-side-nav>
-        <div class="page-content">${() => html`
-          ${when(
-            (x) => !x.pageConnected,
-            html`
-              <div class="loading-indicator-content">
-                <div class="loading-indicator xlarge"></div>
-              </div>
-            `
-          )}
-          ${(x) => html`
-            <ppp-${
-              x.page + (x.extension ? `-${x.extension}` : '')
-            }-page></ppp-${x.page}-page>`}
-          ${when(
-            (x) => x.pageNotFound && requireComponent('ppp-not-found-page'),
-            html` <ppp-not-found-page></ppp-not-found-page>`
-          )}
-        `}
+        <div ?workspace="${(x) => x.page === 'workspace'}" class="page-content">
+          ${() => html`
+            ${when(
+              (x) => !x.pageConnected,
+              html`
+                <div class="loading-indicator-content">
+                  <div class="loading-indicator xlarge"></div>
+                </div>
+              `
+            )}
+            ${(x) => html`
+              <ppp-${
+                x.page + (x.extension ? `-${x.extension}` : '')
+              }-page></ppp-${x.page}-page>`}
+            ${when(
+              (x) => x.pageNotFound && requireComponent('ppp-not-found-page'),
+              html` <ppp-not-found-page></ppp-not-found-page>`
+            )}
+          `}
         </div>
       </div>
     </div>
@@ -385,15 +405,20 @@ export const appStyles = (context, definition) =>
 
     ppp-side-nav {
       flex-shrink: 0;
-      z-index: 10;
+      z-index: 20;
     }
 
-    .page-content {
+    .page-content:not([workspace]) {
       flex-direction: column;
       min-width: 0;
       padding-left: 20px;
       padding-right: 20px;
       padding-top: 20px;
+    }
+
+    .page-content[workspace] {
+      flex-direction: column;
+      min-width: 0;
     }
 
     .loading-indicator-content {
