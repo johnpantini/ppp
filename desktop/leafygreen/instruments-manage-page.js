@@ -27,7 +27,7 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
           placeholder="Поиск инструмента"
           value="${(x) => x.searchText}"
           @input="${(x, c) => {
-            x.searchText = c.event.target.value;
+            x.searchText = c.event.target.value.toUpperCase();
             x.searchEnded = !x.searchText;
 
             x.search();

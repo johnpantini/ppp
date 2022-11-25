@@ -70,7 +70,7 @@ export class InstrumentsManagePage extends Page {
 
     if (symbol) {
       // Wait for debounce
-      this.searchText = decodeURIComponent(symbol);
+      this.searchText = decodeURIComponent(symbol).toUpperCase();
     } else {
       this.searchText = '';
     }
@@ -80,7 +80,7 @@ export class InstrumentsManagePage extends Page {
 
   getDocumentId() {
     return {
-      symbol: this.searchText ?? ''
+      symbol: (this.searchText ?? '').toUpperCase()
     };
   }
 
