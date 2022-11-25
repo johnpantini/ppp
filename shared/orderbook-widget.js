@@ -1,37 +1,35 @@
-import { Widget } from './widget.js';
-import { html, requireComponent } from './template.js';
-import { WIDGET_TYPES } from './const.js';
+/** @decorator */
+
+import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
+import { html, requireComponent } from './template.js';
 import { validate } from './validate.js';
-import { DOM } from './element/dom.js';
+import { WIDGET_TYPES } from './const.js';
 
 export const orderbookWidgetTemplate = (context, definition) => html`
   <template>
     <div class="widget-root">
-      <div class="widget-header" ${ref('dragPanel')}>
+      <div class="widget-header">
         <div class="widget-instrument-area">
-          <div class="widget-group-selector">
-            <div class="widget-group-selector-button"></div>
-          </div>
+          <${'ppp-widget-group-control'}
+            :widget="${(x) => x}"
+            selection="${(x) => x.document?.group}"
+            ${ref('groupControl')}
+          ></ppp-widget-group-control>
           <div class="instrument-search-holder">
-            <input
-              class="instrument-search-field"
-              type="text"
-              placeholder="Тикер"
-              maxlength="20"
-              autocomplete="off"
-              value=""
-            />
+            <${'ppp-widget-search-control'}
+              :widget="${(x) => x}"
+              ${ref('searchControl')}
+            ></ppp-widget-search-control>
           </div>
-          <div class="instrument-quote-line">
-            <span class="price positive">147.04</span>
-            <span class="positive">+0.69</span>
-            <span class="positive">+0.47%</span>
+          <div class="widget-header-name"
+               title="${(x) => x.document?.name ?? ''}">
+            <span>${(x) => x.document?.name ?? ''}</span>
           </div>
           <div class="widget-header-controls">
             <img
               draggable="false"
-              alt="Close"
+              alt="Закрыть"
               class="widget-close-button"
               src="static/widgets/close.svg"
               @click="${(x) => x.close()}"
@@ -39,12 +37,17 @@ export const orderbookWidgetTemplate = (context, definition) => html`
           </div>
         </div>
       </div>
-      <div class="widget-body">${(x) => x.document.depth}</div>
+      <div class="widget-body">
+        <div class="widget-empty-state-holder">
+          <img draggable="false" src="static/empty-widget-state.svg"/>
+          <span>Виджет сейчас недоступен.</span>
+        </div>
+      </div>
     </div>
   </template>
 `;
 
-export class PppOrderbookWidget extends Widget {
+export class PppOrderbookWidget extends WidgetWithInstrument {
   async validate() {
     await validate(this.container.depth);
     await validate(this.container.depth, {
@@ -63,20 +66,22 @@ export class PppOrderbookWidget extends Widget {
   }
 }
 
-export async function widgetData(definition = {}) {
+export async function widgetDefinition(definition = {}) {
   await requireComponent('ppp-radio');
   await requireComponent('ppp-radio-group');
 
   return {
     type: WIDGET_TYPES.ORDERBOOK,
     collection: 'PPP',
-    title: html`Книга заявок 2D`,
-    tags: ['Цена', 'Объём'],
+    title: html`Книга заявок`,
+    tags: ['Цена', 'Объём', 'Пул ликвидности'],
     description: html`<span class="positive">Книга заявок</span> отображает
-      таблицу лимитных заявок финансового инструмента на покупку и продажу.
-      Данный виджет подходит для отображения информации в двух измерениях: цена
-      и объём.`,
+      таблицу лимитных заявок финансового инструмента на покупку и продажу.`,
     customElement: PppOrderbookWidget.compose(definition),
+    maxHeight: 512,
+    maxWidth: 365,
+    minHeight: 365,
+    minWidth: 275,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
@@ -110,18 +115,8 @@ export async function widgetData(definition = {}) {
           <${'ppp-text-field'}
             type="number"
             placeholder="20"
-            value="${(x) => {
-              const value = x.document.depth ?? 20;
-
-              DOM.queueUpdate(() =>
-                x.syncWidget((x.widgetElement.document.depth = value))
-              );
-
-              return value;
-            }}"
+            value="${(x) => x.document.depth ?? 20}"
             ${ref('depth')}
-            @input="${(x) =>
-              x.syncWidget((x.widgetElement.document.depth = +x.depth.value))}"
           ></ppp-text-field>
         </div>
       </div>

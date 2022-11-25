@@ -1,24 +1,19 @@
 import { css } from '../../shared/element/styles/css.js';
 import { widgetStyles } from './widget.js';
 import {
-  orderWidgetTemplate,
+  portfolioWidgetTemplate,
   widgetDefinition as baseWidgetDefinition
-} from '../../shared/order-widget.js';
+} from '../../shared/portfolio-widget.js';
 
 // noinspection JSUnusedGlobalSymbols
 export async function widgetDefinition({ ppp, baseWidgetUrl }) {
-  const orderWidgetStyles = (context, definition) => css`
-    .price-placeholder {
-      position: absolute;
-      z-index: 2;
-    }
-
+  const portfolioWidgetStyles = (context, definition) => css`
     ${widgetStyles}
   `;
 
   return baseWidgetDefinition({
-    template: orderWidgetTemplate,
-    styles: orderWidgetStyles,
+    template: portfolioWidgetTemplate,
+    styles: portfolioWidgetStyles,
     shadowOptions: null
   });
 }

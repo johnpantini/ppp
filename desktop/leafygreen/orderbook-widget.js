@@ -1,14 +1,19 @@
 import { css } from '../../shared/element/styles/css.js';
 import { widgetStyles } from './widget.js';
-import { orderbookWidgetTemplate, widgetData } from '../../shared/orderbook-widget.js';
+import {
+  orderbookWidgetTemplate,
+  widgetDefinition as baseWidgetDefinition
+} from '../../shared/orderbook-widget.js';
 
-export async function widget({ ppp, baseWidgetUrl }) {
+// noinspection JSUnusedGlobalSymbols
+export async function widgetDefinition({ ppp, baseWidgetUrl }) {
   const orderbookWidgetStyles = (context, definition) => css`
     ${widgetStyles}
   `;
 
-  return widgetData({
+  return baseWidgetDefinition({
     template: orderbookWidgetTemplate,
-    styles: orderbookWidgetStyles
+    styles: orderbookWidgetStyles,
+    shadowOptions: null
   });
 }
