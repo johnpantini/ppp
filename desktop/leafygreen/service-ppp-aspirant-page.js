@@ -60,7 +60,7 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
                         {
                           $or: [
                             { removed: { $ne: true } },
-                            { _id: `[%#this.document.redisApiId ?? ''%]` }
+                            { _id: `[%#this.document.deploymentApiId ?? ''%]` }
                           ]
                         }
                       ]

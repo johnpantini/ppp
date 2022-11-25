@@ -26,7 +26,7 @@ const instruments = [%#JSON.stringify(await (await fetch(ppp.rootUrl +
   '/instruments/spbex-stocks.json')).json())%];
 
 instruments.push({symbol: 'SPBE', isin: 'RU000AOJQ9P9',
-  fullName: 'СПБ Биржа', currency: 'USD'});
+  fullName: 'СПБ Биржа', currency: 'RUB'});
 
 return instruments.map((i) => {
   return {
