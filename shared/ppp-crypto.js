@@ -1,5 +1,22 @@
 import ppp from '../ppp.js';
 
+export function isJWTTokenExpired(jwtToken) {
+  if (jwtToken) {
+    try {
+      const [, payload] = jwtToken.split('.');
+      const { exp: expires } = JSON.parse(atob(payload));
+
+      if (typeof expires === 'number') {
+        return Date.now() + 1000 >= expires * 1000;
+      }
+    } catch {
+      return true;
+    }
+  }
+
+  return true;
+}
+
 export function stringToBuffer(base64) {
   const string = window.atob(base64);
   const buffer = new ArrayBuffer(string.length);
