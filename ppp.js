@@ -348,14 +348,8 @@ export default new (class {
     if (document) {
       const module = await import(
         {
-          [TRADERS.ALOR_OPENAPI_V2]: new URL(
-            'shared/traders/alor-openapi-v2.js',
-            this.rootUrl
-          ),
-          [TRADERS.TINKOFF_GRPC_WEB]: new URL(
-            'shared/traders/tinkoff-grpc-web.js',
-            this.rootUrl
-          ),
+          [TRADERS.ALOR_OPENAPI_V2]: `${this.rootUrl}/shared/traders/alor-openapi-v2.js`,
+          [TRADERS.TINKOFF_GRPC_WEB]: `${this.rootUrl}/shared/traders/tinkoff-grpc-web.js`,
           [TRADERS.CUSTOM]: document.url
         }[document.type]
       );
