@@ -556,7 +556,7 @@ export class Page extends FoundationElement {
           return;
 
         // Prevent multiple submissions
-        const parentPage = e.path.find(
+        const parentPage = e.composedPath().find(
           (e) => e.$pppController?.definition?.type?.name === 'Page'
         );
 
