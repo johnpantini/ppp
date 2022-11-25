@@ -6,6 +6,7 @@ import { pageStyles } from './page.js';
 import { css } from '../../shared/element/styles/css.js';
 import { bodyFont } from './design-tokens.js';
 import { when } from '../../shared/element/templating/when.js';
+import ppp from '../../ppp.js';
 
 await requireComponent('ppp-text-field');
 await requireComponent('ppp-widget-type-radio-group');
@@ -13,10 +14,21 @@ await requireComponent('ppp-widget-type-radio-group');
 export const widgetPageTemplate = (context, definition) => html`
   <template>
     <form novalidate>
+      <${'ppp-top-loader'} ${ref('topLoader')}></ppp-top-loader>
       <${'ppp-page'}>
-      <span slot="header">
-        ${(x) => (x.document.name ? `Виджет - ${x.document.name}` : 'Виджет')}
-      </span>
+        <span slot="header">
+          ${(x) => (x.document.name ? `Виджет - ${x.document.name}` : 'Виджет')}
+        </span>
+        <${'ppp-button'}
+          appearance="primary"
+          slot="header-controls"
+          @click="${() =>
+            ppp.app.navigate({
+              page: 'widgets'
+            })}"
+        >
+          К списку виджетов
+        </ppp-button>
         <div class="content">
           <nav>
             <div class="nav-inner">
@@ -53,6 +65,17 @@ export const widgetPageTemplate = (context, definition) => html`
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
                                 x.document._id &&
+                                x.document.type !== 'scalping-buttons'}"
+                              value="scalping-buttons"
+                            >
+                              <span slot="text">Скальперские кнопки</span>
+                              <img draggable="false" alt="Скальперские кнопки"
+                                   slot="icon"
+                                   src="static/widgets/scalping-buttons.svg"/>
+                            </ppp-widget-type-radio>
+                            <ppp-widget-type-radio
+                              ?disabled="${(x) =>
+                                x.document._id &&
                                 x.document.type !== 'active-orders'}"
                               value="active-orders"
                             >
@@ -64,13 +87,13 @@ export const widgetPageTemplate = (context, definition) => html`
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
                                 x.document._id &&
-                                x.document.type !== 'lightweight-chart'}"
-                              value="lightweight-chart"
+                                x.document.type !== 'light-chart'}"
+                              value="light-chart"
                             >
                               <span slot="text">Лёгкий график</span>
                               <img draggable="false" alt="Лёгкий график"
                                    slot="icon"
-                                   src="static/widgets/lightweight-chart.svg"/>
+                                   src="static/widgets/light-chart.svg"/>
                             </ppp-widget-type-radio>
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
@@ -79,26 +102,7 @@ export const widgetPageTemplate = (context, definition) => html`
                               value="orderbook"
                             >
                               <div slot="text">
-                                Книга заявок 2D
-                                <div class="widget-type-tags">
-                                  <${'ppp-badge'} appearance="blue">Цена
-                                  </ppp-badge>
-                                  <${'ppp-badge'} appearance="blue">Объём
-                                  </ppp-badge>
-                                </div>
-                              </div>
-                              <img draggable="false" alt="Книга заявок 2D"
-                                   slot="icon"
-                                   src="static/widgets/orderbook.svg"/>
-                            </ppp-widget-type-radio>
-                            <ppp-widget-type-radio
-                              ?disabled="${(x) =>
-                                x.document._id &&
-                                x.document.type !== 'orderbook-with-pool'}"
-                              value="orderbook-with-pool"
-                            >
-                              <div slot="text">
-                                Книга заявок 3D
+                                Книга заявок
                                 <div class="widget-type-tags">
                                   <${'ppp-badge'} appearance="blue">Цена
                                   </ppp-badge>
@@ -109,7 +113,7 @@ export const widgetPageTemplate = (context, definition) => html`
                                   </ppp-badge>
                                 </div>
                               </div>
-                              <img draggable="false" alt="Книга заявок 3D"
+                              <img draggable="false" alt="Книга заявок"
                                    slot="icon"
                                    src="static/widgets/orderbook.svg"/>
                             </ppp-widget-type-radio>
@@ -119,7 +123,18 @@ export const widgetPageTemplate = (context, definition) => html`
                                 x.document.type !== 'time-and-sales'}"
                               value="time-and-sales"
                             >
-                              <span slot="text">Лента всех сделок</span>
+                              <div slot="text">
+                                Лента всех сделок
+                                <div class="widget-type-tags">
+                                  <${'ppp-badge'} appearance="blue">Цена
+                                  </ppp-badge>
+                                  <${'ppp-badge'} appearance="blue">Объём
+                                  </ppp-badge>
+                                  <${'ppp-badge'} appearance="blue">Пул
+                                    ликвидности
+                                  </ppp-badge>
+                                </div>
+                              </div>
                               <img draggable="false" alt="Лента всех сделок"
                                    slot="icon"
                                    src="static/widgets/time-and-sales.svg"/>
@@ -138,17 +153,19 @@ export const widgetPageTemplate = (context, definition) => html`
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
                                 x.document._id &&
-                                x.document.type !== 'trade-history'}"
-                              value="trade-history"
+                                x.document.type !== 'timeline'}"
+                              value="timeline"
                             >
-                              <span slot="text">История операций</span>
+                              <span slot="text">Лента операций</span>
                               <img draggable="false" alt="История операций"
                                    slot="icon"
                                    src="static/widgets/trade-history.svg"/>
                             </ppp-widget-type-radio>
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
-                                x.document._id && x.document.type !== 'custom'}"
+                                true ||
+                                (x.document._id &&
+                                  x.document.type !== 'custom')}"
                               value="custom"
                             >
                               <div slot="text">
@@ -181,7 +198,7 @@ export const widgetPageTemplate = (context, definition) => html`
                           <div class="widget-settings-section">
                             <div class="widget-settings-label-group">
                               <h5>Название</h5>
-                              <p>Будет отображаться в списке виджетов</p>
+                              <p>Будет отображаться в списке виджетов.</p>
                             </div>
                             <div class="widget-settings-input-group">
                               <ppp-text-field
@@ -189,6 +206,59 @@ export const widgetPageTemplate = (context, definition) => html`
                                 value="${(x) => x.document.name}"
                                 ${ref('name')}
                               ></ppp-text-field>
+                            </div>
+                          </div>
+                          <div class="widget-settings-section">
+                            <div class="widget-settings-label-group">
+                              <h5>Интеграция с Pusher</h5>
+                              <p>Для управления виджетом из внешних систем.</p>
+                            </div>
+                            <div class="widget-settings-input-group">
+                              <${'ppp-collection-select'}
+                                ${ref('pusherApiId')}
+                                disabled
+                                placeholder="Опционально, нажмите для выбора"
+                                value="${(x) => x.document.pusherApiId}"
+                                :context="${(x) => x}"
+                                :preloaded="${(x) =>
+                                  x.document.pusherApi ?? ''}"
+                                :query="${() => {
+                                  return (context) => {
+                                    return context.services
+                                      .get('mongodb-atlas')
+                                      .db('ppp')
+                                      .collection('apis')
+                                      .find({
+                                        $and: [
+                                          {
+                                            type: `[%#(await import('./const.js')).APIS.PUSHER%]`
+                                          },
+                                          {
+                                            $or: [
+                                              { removed: { $ne: true } },
+                                              {
+                                                _id: `[%#this.document.pusherApiId ?? ''%]`
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      })
+                                      .sort({ updatedAt: -1 });
+                                  };
+                                }}"
+                                :transform="${() =>
+                                  ppp.decryptDocumentsTransformation(['key'])}"
+                              ></ppp-collection-select>
+                              <${'ppp-button'}
+                                class="margin-top"
+                                @click="${() =>
+                                  window
+                                    .open('?page=api-pusher', '_blank')
+                                    .focus()}"
+                                appearance="primary"
+                              >
+                                Добавить API Pusher
+                              </ppp-button>
                             </div>
                           </div>
                           ${when(
@@ -226,7 +296,7 @@ export const widgetPageTemplate = (context, definition) => html`
                       <div class="drawer-body">
                         <div class="drawer-body-inner">
                           ${when(
-                            (x) => !x.widget.settings,
+                            (x) => !x.widgetDefinition.settings,
                             html`
                               <${'ppp-banner'}
                                 appearance="warning">
@@ -235,8 +305,8 @@ export const widgetPageTemplate = (context, definition) => html`
                             `
                           )}
                           ${when(
-                            (x) => x.widget.settings,
-                            (x) => x.widget.settings
+                            (x) => x.widgetDefinition.settings,
+                            (x) => x.widgetDefinition.settings
                           )}
                         </div>
                       </div>
@@ -244,6 +314,24 @@ export const widgetPageTemplate = (context, definition) => html`
                   </div>
                 </form>
               </div>
+              <${'ppp-checkbox'}
+                ${ref('autoApplyModifications')}
+                @change="${(x) =>
+                  ppp.app.setSetting(
+                    'autoApplyModifications',
+                    x.autoApplyModifications.checked
+                  )}"
+                ?checked="${() =>
+                  ppp.app.settings.autoApplyModifications ?? true}"
+              >
+                Применять изменения автоматически
+              </ppp-checkbox>
+              <button
+                class="apply-modifications"
+                @click="${(x) => x.applyModifications()}"
+              >
+                <div class="text">Применить изменения</div>
+              </button>
               <button
                 class="save-widget"
                 type="submit"
@@ -263,13 +351,28 @@ export const widgetPageTemplate = (context, definition) => html`
               <div class="widget-holder">
                 <h4>Предварительный просмотр</h4>
                 <h2 class="widget-name">
-                  <span class="positive">${(x) => x.widget.title}</span>
+                  ${when(
+                    (x) => x.widgetDefinition.title,
+                    html`
+                      <span class="positive">
+                        ${(x) => x.widgetDefinition.title}
+                      </span>
+                    `
+                  )}
+                  ${when(
+                    (x) => !x.widgetDefinition.title,
+                    html`
+                      <span class="positive">
+                        Идёт загрузка, подождите...
+                      </span>
+                    `
+                  )}
                 </h2>
                 ${when(
-                  (x) => x.widget.tags,
+                  (x) => x.widgetDefinition.tags,
                   html` <div class="widget-tags">
                     ${repeat(
-                      (x) => x.widget.tags,
+                      (x) => x.widgetDefinition.tags,
                       html`
                           <${'ppp-badge'} class="widget-tags" appearance="blue">
                             ${(x) => x}
@@ -278,14 +381,27 @@ export const widgetPageTemplate = (context, definition) => html`
                     )}
                   </div>`
                 )}
-                <div class="widget-info">${(x) => x.widget.description}</div>
+                <div class="widget-info">
+                  ${(x) => x.widgetDefinition.description}
+                </div>
                 ${when(
-                  (x) => x.widget.loaded,
+                  (x) => x.page.loading || x.loading,
                   html`
                     <hr class="divider" />
                     <div class="widget-area">
+                      Виджет загружается, подождите...
+                    </div>
+                  `
+                )}
+                ${when(
+                  (x) => !x.page.loading && !x.loading && x.getWidgetTagName(),
+                  html`
+                    <hr class="divider" />
+                    <div class="widget-area" ${ref('widgetArea')}>
                       ${(x) => html`
                         <ppp-${x.getWidgetTagName()}
+                          preview
+                          :widgetDefinition="${(x) => x.widgetDefinition ?? {}}"
                           :container="${(x) => x}"
                           ${ref('widgetElement')}
                         ></ppp-${x.getWidgetTagName()}>`}
@@ -293,14 +409,14 @@ export const widgetPageTemplate = (context, definition) => html`
                   `
                 )}
                 ${when(
-                  (x) => x.widget.collection,
+                  (x) => x.widgetDefinition.collection,
                   html`
                     <hr class="divider" />
                     <div class="summary">
                       <div class="summary-left">Коллекция</div>
                       <div class="summary-right">
                         <span class="positive"
-                          >${(x) => x.widget.collection}</span
+                          >${(x) => x.widgetDefinition.collection}</span
                         >
                       </div>
                     </div>
@@ -413,14 +529,6 @@ export const widgetPageStyles = (context, definition) => css`
     margin-top: 5px;
   }
 
-  .save-widget {
-    font-size: 17px;
-    height: auto;
-    margin: 24px 0;
-    padding: 10px;
-    width: 100%;
-  }
-
   .widget-settings {
     background-color: rgb(255, 255, 255);
     border: 1px solid rgb(232, 237, 235);
@@ -437,10 +545,11 @@ export const widgetPageStyles = (context, definition) => css`
     color: rgb(92, 108, 117);
   }
 
-  .save-widget {
+  .save-widget,
+  .apply-modifications {
     font-size: 17px;
     height: auto;
-    margin: 24px 0;
+    margin: 24px 0 8px;
     padding: 10px;
     width: 100%;
     appearance: none;
@@ -460,6 +569,16 @@ export const widgetPageStyles = (context, definition) => css`
     font-weight: 500;
   }
 
+  .save-widget {
+    margin-top: 0;
+  }
+
+  .apply-modifications {
+    background-color: #ffc439;
+    color: rgb(17, 17, 17);
+    border: 1px solid transparent;
+  }
+
   .save-widget:hover {
     color: rgb(255, 255, 255);
     background-color: rgb(0, 89, 63);
@@ -467,7 +586,12 @@ export const widgetPageStyles = (context, definition) => css`
     box-shadow: rgb(192, 250, 230) 0 0 0 3px;
   }
 
-  .save-widget .text {
+  .apply-modifications:hover {
+    box-shadow: inset 0 0 100px 100px rgb(0 0 0 / 5%);
+  }
+
+  .save-widget .text,
+  .apply-modifications .text {
     display: grid;
     grid-auto-flow: column;
     justify-content: center;
