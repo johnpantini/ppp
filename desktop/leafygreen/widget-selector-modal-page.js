@@ -28,7 +28,7 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
           :columns="${() => [
             {
               label: 'Название',
-              sortBy: (d) => d._id
+              sortBy: (d) => d.name
             },
             {
               label: 'Тип',
@@ -47,13 +47,25 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
               return {
                 datum,
                 cells: [
-                  datum.name,
+                  html`<a
+                    @click="${() => {
+                      ppp.app.navigate({
+                        page: 'widget',
+                        document: datum._id
+                      });
+
+                      return false;
+                    }}"
+                    href="?page=widget&document=${datum._id}"
+                  >
+                    ${datum.name}
+                  </a>`,
                   x.t(`$const.widget.${datum.type}`),
                   datum.collection,
                   html`
                     <${'ppp-button'}
                       class="xsmall"
-                      @click="${() => console.log(datum._id)}"
+                      @click="${() => x.selectWidget(datum)}"
                     >
                       Выбрать
                     </ppp-button>
