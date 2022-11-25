@@ -1,6 +1,7 @@
 import { KeyVault } from './shared/key-vault.js';
 import { bufferToString, generateIV, PPPCrypto } from './shared/ppp-crypto.js';
 import { maybeFetchError } from './shared/fetch-error.js';
+import { APIS, TRADERS } from './shared/const.js';
 
 export default new (class {
   /**
@@ -15,6 +16,10 @@ export default new (class {
   locales = ['ru'];
 
   crypto = new PPPCrypto();
+
+  traders = new Map();
+
+  scratch = new Map();
 
   constructor(appType) {
     globalThis.ppp = this;
@@ -304,7 +309,13 @@ export default new (class {
         /(token|key|secret|password)$/i.test(key) &&
         excludedKeys.indexOf(key) < 0
       ) {
-        clone[key] = await ppp.crypto.decrypt(document.iv, clone[key]);
+        try {
+          clone[key] = await ppp.crypto.decrypt(document.iv, clone[key]);
+        } catch (e) {
+          if (!(key === 'key' && clone?.type === APIS.PUSHER)) {
+            throw e;
+          }
+        }
       } else if (
         clone[key] !== null &&
         typeof clone[key] === 'object' &&
@@ -331,5 +342,29 @@ export default new (class {
 
       return d;
     };
+  }
+
+  async getOrCreateTrader(document) {
+    if (document) {
+      const module = await import(
+        {
+          [TRADERS.ALOR_OPENAPI_V2]: new URL(
+            'shared/traders/alor-openapi-v2.js',
+            this.rootUrl
+          ),
+          [TRADERS.TINKOFF_GRPC_WEB]: new URL(
+            'shared/traders/tinkoff-grpc-web.js',
+            this.rootUrl
+          ),
+          [TRADERS.CUSTOM]: document.url
+        }[document.type]
+      );
+
+      if (!this.traders.has(document._id)) {
+        this.traders.set(document._id, new module.default(document));
+      }
+
+      return this.traders.get(document._id);
+    }
   }
 })(document.documentElement.getAttribute('ppp-type'));
