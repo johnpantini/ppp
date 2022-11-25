@@ -10,7 +10,7 @@ export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
   });
 }
 
-export class BrokerAlorOpenapiV2Page extends Page {
+export class BrokerAlorOpenAPIV2Page extends Page {
   collection = 'brokers';
 
   async validate() {

@@ -1,4 +1,4 @@
-import { BrokerAlorOpenapiV2Page } from '../../shared/broker-alor-openapi-v2-page.js';
+import { BrokerAlorOpenAPIV2Page } from '../../shared/broker-alor-openapi-v2-page.js';
 import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
@@ -56,7 +56,7 @@ export const brokerAlorOpenAPIV2PageTemplate = (context, definition) => html`
 `;
 
 // noinspection JSUnusedGlobalSymbols
-export default BrokerAlorOpenapiV2Page.compose({
+export default BrokerAlorOpenAPIV2Page.compose({
   baseName: 'broker-alor-openapi-v2-page',
   template: brokerAlorOpenAPIV2PageTemplate,
   styles: pageStyles
