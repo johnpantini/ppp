@@ -18,10 +18,10 @@ export class LiquidEquitiesPage extends Page {
     this.instruments = [];
   }
 
-  async connectedCallback() {
+  connectedCallback() {
     super.connectedCallback();
 
-    await this.fetchInstruments('alor-ksur');
+    void this.fetchInstruments('alor-ksur');
   }
 
   async handleTabChange({ event }) {
