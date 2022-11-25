@@ -2,85 +2,15 @@
 
 import {
   TextArea as FoundationTextArea,
-  TextAreaResize
+  textAreaTemplate
 } from '../../shared/text-area.js';
 import { attr } from '../../shared/element/components/attributes.js';
 import { observable } from '../../shared/element/observation/observable.js';
 import { css } from '../../shared/element/styles/css.js';
 import { display } from '../../shared/utilities/style/display.js';
-import { html } from '../../shared/element/templating/template.js';
-import { ref } from '../../shared/element/templating/ref.js';
-import { when } from '../../shared/element/templating/when.js';
 import { bodyFont } from './design-tokens.js';
 
-export const textAreaTemplate = (context, definition) => html`
-  <template
-    class="
-            ${(x) => (x.readOnly ? 'readonly' : '')}
-            ${(x) =>
-      x.resize !== TextAreaResize.none ? `resize-${x.resize}` : ''}"
-  >
-    <label part="label" for="control" class="label">
-      <slot name="label"></slot>
-    </label>
-    <p class="description">
-      <slot name="description"></slot>
-    </p>
-    <div class="root" part="root">
-      <div class="root-container">
-        <textarea
-          part="control"
-          class="control"
-          id="control"
-          ?autofocus="${(x) => x.autofocus}"
-          cols="${(x) => x.cols}"
-          ?disabled="${(x) => x.disabled}"
-          list="${(x) => x.list}"
-          maxlength="${(x) => x.maxlength}"
-          minlength="${(x) => x.minlength}"
-          name="${(x) => x.name}"
-          placeholder="${(x) => x.placeholder}"
-          ?readonly="${(x) => x.readOnly}"
-          ?required="${(x) => x.required}"
-          rows="${(x) => x.rows}"
-          ?spellcheck="${(x) => x.spellcheck}"
-          :value="${(x) => x.value}"
-          aria-atomic="${(x) => x.ariaAtomic}"
-          aria-busy="${(x) => x.ariaBusy}"
-          aria-controls="${(x) => x.ariaControls}"
-          aria-current="${(x) => x.ariaCurrent}"
-          aria-describedBy="${(x) => x.ariaDescribedby}"
-          aria-details="${(x) => x.ariaDetails}"
-          aria-disabled="${(x) => x.ariaDisabled}"
-          aria-errormessage="${(x) => x.ariaErrormessage}"
-          aria-flowto="${(x) => x.ariaFlowto}"
-          aria-haspopup="${(x) => x.ariaHaspopup}"
-          aria-hidden="${(x) => x.ariaHidden}"
-          aria-invalid="${(x) => x.ariaInvalid}"
-          aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
-          aria-label="${(x) => x.ariaLabel}"
-          aria-labelledby="${(x) => x.ariaLabelledby}"
-          aria-live="${(x) => x.ariaLive}"
-          aria-owns="${(x) => x.ariaOwns}"
-          aria-relevant="${(x) => x.ariaRelevant}"
-          aria-roledescription="${(x) => x.ariaRoledescription}"
-          @input="${(x, c) => x.handleTextInput()}"
-          @change="${(x) => x.handleChange()}"
-          ${ref('control')}
-        ></textarea>
-        <div class="interaction-ring"></div>
-      </div>
-    </div>
-    ${when(
-      (x) => x.state === 'error' && !!x.errorMessage,
-      html` <div class="helper error">
-        <label>${(x) => x.errorMessage}</label>
-      </div>`
-    )}
-  </template>
-`;
-
-// TODO - design tokens, scrollbars
+// TODO - design tokens
 export const textAreaStyles = (context, definition) => css`
   ${display('flex')}
   :host {
@@ -112,14 +42,12 @@ export const textAreaStyles = (context, definition) => css`
   .root {
     position: relative;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     z-index: 0;
   }
 
   .root-container {
     display: inline-flex;
-    -webkit-box-align: stretch;
     align-items: stretch;
     position: relative;
     z-index: 0;
@@ -224,7 +152,6 @@ export const textAreaStyles = (context, definition) => css`
   .end {
     position: absolute;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     right: 12px;
     z-index: 1;

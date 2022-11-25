@@ -1,110 +1,16 @@
 /** @decorator */
 
-import { TextField as FoundationTextField } from '../../shared/text-field.js';
+import {
+  TextField as FoundationTextField,
+  textFieldTemplate
+} from '../../shared/text-field.js';
 import { observable } from '../../shared/element/observation/observable.js';
-import { html } from '../../shared/element/templating/template.js';
 import { attr } from '../../shared/element/components/attributes.js';
-import { ref } from '../../shared/element/templating/ref.js';
-import { when } from '../../shared/element/templating/when.js';
-import { endSlotTemplate } from '../../shared/patterns/start-end.js';
 import { css } from '../../shared/element/styles/css.js';
 import { display } from '../../shared/utilities/style/display.js';
 import { bodyFont, heightNumber } from './design-tokens.js';
 import { warning } from './icons/warning.js';
 import { checkmark } from './icons/checkmark.js';
-
-// TODO - startTemplate
-export const textFieldTemplate = (context, definition) => html`
-  <template class="${(x) => (x.readOnly ? 'readonly' : '')}">
-    <label part="label" for="control" class="label">
-      <slot name="label"></slot>
-    </label>
-    <p class="description">
-      <slot name="description"></slot>
-    </p>
-    <div class="root" part="root">
-      <div class="root-container">
-        <input
-          class="control"
-          part="control"
-          id="control"
-          @input="${(x) => x.handleTextInput()}"
-          @change="${(x) => x.handleChange()}"
-          ?autofocus="${(x) => x.autofocus}"
-          ?disabled="${(x) => x.disabled}"
-          list="${(x) => x.list}"
-          maxlength="${(x) => x.maxlength}"
-          minlength="${(x) => x.minlength}"
-          pattern="${(x) => x.pattern}"
-          placeholder="${(x) => x.placeholder}"
-          ?readonly="${(x) => x.readOnly}"
-          ?required="${(x) => x.required}"
-          size="${(x) => x.size}"
-          ?spellcheck="${(x) => x.spellcheck}"
-          :value="${(x) => x.value}"
-          type="${(x) => x.type}"
-          aria-atomic="${(x) => x.ariaAtomic}"
-          aria-busy="${(x) => x.ariaBusy}"
-          aria-controls="${(x) => x.ariaControls}"
-          aria-current="${(x) => x.ariaCurrent}"
-          aria-describedBy="${(x) => x.ariaDescribedby}"
-          aria-details="${(x) => x.ariaDetails}"
-          aria-disabled="${(x) => x.ariaDisabled}"
-          aria-errormessage="${(x) => x.ariaErrormessage}"
-          aria-flowto="${(x) => x.ariaFlowto}"
-          aria-haspopup="${(x) => x.ariaHaspopup}"
-          aria-hidden="${(x) => x.ariaHidden}"
-          aria-invalid="${(x) => x.ariaInvalid}"
-          aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
-          aria-label="${(x) => x.ariaLabel}"
-          aria-labelledby="${(x) => x.ariaLabelledby}"
-          aria-live="${(x) => x.ariaLive}"
-          aria-owns="${(x) => x.ariaOwns}"
-          aria-relevant="${(x) => x.ariaRelevant}"
-          aria-roledescription="${(x) => x.ariaRoledescription}"
-          ${ref('control')}
-        />
-        <div class="interaction-ring"></div>
-      </div>
-      ${when(
-        (x) => x.state === 'default',
-        endSlotTemplate(context, definition)
-      )}
-      ${when(
-        (x) => x.state === 'error' && x.errorMessage,
-        html` <div class="end">
-          ${warning({
-            cls: 'error-icon'
-          })}
-        </div>`
-      )}
-      ${when(
-        (x) => x.optional,
-        html`
-          <div class="end">
-            <div class="optional-text">
-              <p>Опционально</p>
-            </div>
-          </div>
-        `
-      )}
-      ${when(
-        (x) => x.state === 'valid',
-        html` <div class="end">
-          ${checkmark({
-            cls: 'checkmark-icon'
-          })}
-        </div>`
-      )}
-    </div>
-    ${when(
-      (x) => x.state === 'error' && x.errorMessage,
-      html` <div class="helper error">
-        <label>${(x) => x.errorMessage}</label>
-      </div>`
-    )}
-  </template>
-`;
 
 // TODO - design tokens
 export const textFieldStyles = (context, definition) => css`
@@ -138,14 +44,12 @@ export const textFieldStyles = (context, definition) => css`
   .root {
     position: relative;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     z-index: 0;
   }
 
   .root-container {
     display: inline-flex;
-    -webkit-box-align: stretch;
     align-items: stretch;
     position: relative;
     z-index: 0;
@@ -160,6 +64,8 @@ export const textFieldStyles = (context, definition) => css`
     pointer-events: none;
     border-radius: 6px;
   }
+
+  /* prettier-ignore */
 
   :host(:not([disabled])) .root-container:hover input:not(:focus) + .interaction-ring {
     box-shadow: rgb(232 237 235) 0 0 0 3px;
@@ -267,7 +173,6 @@ export const textFieldStyles = (context, definition) => css`
   .end {
     position: absolute;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     right: 12px;
     z-index: 1;
@@ -334,5 +239,11 @@ export default TextField.compose({
   styles: textFieldStyles,
   shadowOptions: {
     delegatesFocus: true
-  }
+  },
+  errorIcon: warning({
+    cls: 'error-icon'
+  }),
+  checkMarkIcon: checkmark({
+    cls: 'checkmark-icon'
+  })
 });

@@ -34,7 +34,6 @@ export const codeflaskStyles = (context, definition) => css`
   .root {
     position: relative;
     display: flex;
-    -webkit-box-align: center;
     align-items: center;
     z-index: 0;
     height: 100%;
@@ -42,7 +41,6 @@ export const codeflaskStyles = (context, definition) => css`
 
   .root-container {
     display: inline-flex;
-    -webkit-box-align: stretch;
     align-items: stretch;
     position: absolute;
     width: 100%;

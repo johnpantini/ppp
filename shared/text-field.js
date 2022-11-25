@@ -11,13 +11,12 @@ import { StartEnd } from './patterns/start-end.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { html } from './element/templating/template.js';
 import { ref } from './element/templating/ref.js';
-import { slotted } from './element/templating/slotted.js';
 import { endSlotTemplate, startSlotTemplate } from './patterns/start-end.js';
-import { whitespaceFilter } from './utilities/whitespace-filter.js';
 import { FoundationElement } from './foundation-element.js';
+import { when } from './element/templating/when.js';
 
 /**
- * Text field sub-types
+ * Text field subtype
  * @public
  */
 export let TextFieldType;
@@ -51,65 +50,88 @@ export let TextFieldType;
  */
 export const textFieldTemplate = (context, definition) => html`
   <template class="${(x) => (x.readOnly ? 'readonly' : '')}">
-    <label
-      part="label"
-      for="control"
-      class="${(x) =>
-        x.defaultSlottedNodes && x.defaultSlottedNodes.length
-          ? 'label'
-          : 'label hidden'}"
-    >
-      <slot
-        ${slotted({
-          property: 'defaultSlottedNodes',
-          filter: whitespaceFilter
-        })}
-      ></slot>
+    <label part="label" for="control" class="label">
+      <slot name="label"></slot>
     </label>
+    <p class="description">
+      <slot name="description"></slot>
+    </p>
     <div class="root" part="root">
-      ${startSlotTemplate(context, definition)}
-      <input
-        class="control"
-        part="control"
-        id="control"
-        @input="${(x) => x.handleTextInput()}"
-        @change="${(x) => x.handleChange()}"
-        ?autofocus="${(x) => x.autofocus}"
-        ?disabled="${(x) => x.disabled}"
-        list="${(x) => x.list}"
-        maxlength="${(x) => x.maxlength}"
-        minlength="${(x) => x.minlength}"
-        pattern="${(x) => x.pattern}"
-        placeholder="${(x) => x.placeholder}"
-        ?readonly="${(x) => x.readOnly}"
-        ?required="${(x) => x.required}"
-        size="${(x) => x.size}"
-        ?spellcheck="${(x) => x.spellcheck}"
-        :value="${(x) => x.value}"
-        type="${(x) => x.type}"
-        aria-atomic="${(x) => x.ariaAtomic}"
-        aria-busy="${(x) => x.ariaBusy}"
-        aria-controls="${(x) => x.ariaControls}"
-        aria-current="${(x) => x.ariaCurrent}"
-        aria-describedBy="${(x) => x.ariaDescribedby}"
-        aria-details="${(x) => x.ariaDetails}"
-        aria-disabled="${(x) => x.ariaDisabled}"
-        aria-errormessage="${(x) => x.ariaErrormessage}"
-        aria-flowto="${(x) => x.ariaFlowto}"
-        aria-haspopup="${(x) => x.ariaHaspopup}"
-        aria-hidden="${(x) => x.ariaHidden}"
-        aria-invalid="${(x) => x.ariaInvalid}"
-        aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
-        aria-label="${(x) => x.ariaLabel}"
-        aria-labelledby="${(x) => x.ariaLabelledby}"
-        aria-live="${(x) => x.ariaLive}"
-        aria-owns="${(x) => x.ariaOwns}"
-        aria-relevant="${(x) => x.ariaRelevant}"
-        aria-roledescription="${(x) => x.ariaRoledescription}"
-        ${ref('control')}
-      />
-      ${endSlotTemplate(context, definition)}
+      <div class="root-container">
+        ${startSlotTemplate(context, definition)}
+        <input
+          class="control"
+          part="control"
+          id="control"
+          @input="${(x) => x.handleTextInput()}"
+          @change="${(x) => x.handleChange()}"
+          ?autofocus="${(x) => x.autofocus}"
+          ?disabled="${(x) => x.disabled}"
+          list="${(x) => x.list}"
+          maxlength="${(x) => x.maxlength}"
+          minlength="${(x) => x.minlength}"
+          pattern="${(x) => x.pattern}"
+          placeholder="${(x) => x.placeholder}"
+          ?readonly="${(x) => x.readOnly}"
+          ?required="${(x) => x.required}"
+          size="${(x) => x.size}"
+          ?spellcheck="${(x) => x.spellcheck}"
+          :value="${(x) => x.value}"
+          type="${(x) => x.type}"
+          aria-atomic="${(x) => x.ariaAtomic}"
+          aria-busy="${(x) => x.ariaBusy}"
+          aria-controls="${(x) => x.ariaControls}"
+          aria-current="${(x) => x.ariaCurrent}"
+          aria-describedBy="${(x) => x.ariaDescribedby}"
+          aria-details="${(x) => x.ariaDetails}"
+          aria-disabled="${(x) => x.ariaDisabled}"
+          aria-errormessage="${(x) => x.ariaErrormessage}"
+          aria-flowto="${(x) => x.ariaFlowto}"
+          aria-haspopup="${(x) => x.ariaHaspopup}"
+          aria-hidden="${(x) => x.ariaHidden}"
+          aria-invalid="${(x) => x.ariaInvalid}"
+          aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
+          aria-label="${(x) => x.ariaLabel}"
+          aria-labelledby="${(x) => x.ariaLabelledby}"
+          aria-live="${(x) => x.ariaLive}"
+          aria-owns="${(x) => x.ariaOwns}"
+          aria-relevant="${(x) => x.ariaRelevant}"
+          aria-roledescription="${(x) => x.ariaRoledescription}"
+          ${ref('control')}
+        />
+        <div class="interaction-ring"></div>
+      </div>
+      ${when(
+        (x) => x.state === 'default',
+        endSlotTemplate(context, definition)
+      )}
+      ${when(
+        (x) => x.state === 'error' && x.errorMessage,
+        html` <div class="end">${definition.errorIcon ?? ''}</div> `
+      )}
+      ${when(
+        (x) => x.optional,
+        html`
+          <div class="end">
+            <div class="optional-text">
+              <p>${definition.optionalText ?? 'Опционально'}</p>
+            </div>
+          </div>
+        `
+      )}
+      ${when(
+        (x) => x.state === 'valid',
+        html` <div class="end">${definition.checkMarkIcon ?? ''}</div>`
+      )}
     </div>
+    ${when(
+      (x) => x.state === 'error' && x.errorMessage,
+      html`
+        <div class="helper error">
+          <label>${(x) => x.errorMessage}</label>
+        </div>
+      `
+    )}
   </template>
 `;
 
@@ -220,7 +242,7 @@ export class TextField extends FoundationElement {
   size;
 
   /**
-   * Controls whether or not to enable spell checking for the input field, or if the default spell checking configuration should be used.
+   * Controls whether to enable spell checking for the input field, or if the default spell checking configuration should be used.
    * @public
    * @remarks
    * HTMLAttribute: size
@@ -266,13 +288,11 @@ export class TextField extends FoundationElement {
   handleTextInput() {
     this.value = this.control.value ?? '';
 
-    if (this.value)
-      this.state = 'default';
+    if (this.value) this.state = 'default';
   }
 
   valueChanged(prev, next) {
-    if (next === null || next === undefined)
-      this.value = '';
+    if (next === null || next === undefined) this.value = '';
   }
 
   /**

@@ -9,8 +9,8 @@ import { DelegatesARIATextbox } from './text-field.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { html } from './element/templating/template.js';
 import { ref } from './element/templating/ref.js';
-import { slotted } from './element/templating/slotted.js';
 import { FoundationElement } from './foundation-element.js';
+import { when } from './element/templating/when.js';
 
 /**
  * Resize mode for a TextArea
@@ -47,57 +47,63 @@ export const textAreaTemplate = (context, definition) => html`
             ${(x) =>
       x.resize !== TextAreaResize.none ? `resize-${x.resize}` : ''}"
   >
-    <label
-      part="label"
-      for="control"
-      class="${(x) =>
-        x.defaultSlottedNodes && x.defaultSlottedNodes.length
-          ? 'label'
-          : 'label hidden'}"
-    >
-      <slot ${slotted('defaultSlottedNodes')}></slot>
+    <label part="label" for="control" class="label">
+      <slot name="label"></slot>
     </label>
-    <textarea
-      part="control"
-      class="control"
-      id="control"
-      ?autofocus="${(x) => x.autofocus}"
-      cols="${(x) => x.cols}"
-      ?disabled="${(x) => x.disabled}"
-      form="${(x) => x.form}"
-      list="${(x) => x.list}"
-      maxlength="${(x) => x.maxlength}"
-      minlength="${(x) => x.minlength}"
-      name="${(x) => x.name}"
-      placeholder="${(x) => x.placeholder}"
-      ?readonly="${(x) => x.readOnly}"
-      ?required="${(x) => x.required}"
-      rows="${(x) => x.rows}"
-      ?spellcheck="${(x) => x.spellcheck}"
-      :value="${(x) => x.value}"
-      aria-atomic="${(x) => x.ariaAtomic}"
-      aria-busy="${(x) => x.ariaBusy}"
-      aria-controls="${(x) => x.ariaControls}"
-      aria-current="${(x) => x.ariaCurrent}"
-      aria-describedBy="${(x) => x.ariaDescribedby}"
-      aria-details="${(x) => x.ariaDetails}"
-      aria-disabled="${(x) => x.ariaDisabled}"
-      aria-errormessage="${(x) => x.ariaErrormessage}"
-      aria-flowto="${(x) => x.ariaFlowto}"
-      aria-haspopup="${(x) => x.ariaHaspopup}"
-      aria-hidden="${(x) => x.ariaHidden}"
-      aria-invalid="${(x) => x.ariaInvalid}"
-      aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
-      aria-label="${(x) => x.ariaLabel}"
-      aria-labelledby="${(x) => x.ariaLabelledby}"
-      aria-live="${(x) => x.ariaLive}"
-      aria-owns="${(x) => x.ariaOwns}"
-      aria-relevant="${(x) => x.ariaRelevant}"
-      aria-roledescription="${(x) => x.ariaRoledescription}"
-      @input="${(x, c) => x.handleTextInput()}"
-      @change="${(x) => x.handleChange()}"
-      ${ref('control')}
-    ></textarea>
+    <p class="description">
+      <slot name="description"></slot>
+    </p>
+    <div class="root" part="root">
+      <div class="root-container">
+        <textarea
+          part="control"
+          class="control"
+          id="control"
+          ?autofocus="${(x) => x.autofocus}"
+          cols="${(x) => x.cols}"
+          ?disabled="${(x) => x.disabled}"
+          list="${(x) => x.list}"
+          maxlength="${(x) => x.maxlength}"
+          minlength="${(x) => x.minlength}"
+          name="${(x) => x.name}"
+          placeholder="${(x) => x.placeholder}"
+          ?readonly="${(x) => x.readOnly}"
+          ?required="${(x) => x.required}"
+          rows="${(x) => x.rows}"
+          ?spellcheck="${(x) => x.spellcheck}"
+          :value="${(x) => x.value}"
+          aria-atomic="${(x) => x.ariaAtomic}"
+          aria-busy="${(x) => x.ariaBusy}"
+          aria-controls="${(x) => x.ariaControls}"
+          aria-current="${(x) => x.ariaCurrent}"
+          aria-describedBy="${(x) => x.ariaDescribedby}"
+          aria-details="${(x) => x.ariaDetails}"
+          aria-disabled="${(x) => x.ariaDisabled}"
+          aria-errormessage="${(x) => x.ariaErrormessage}"
+          aria-flowto="${(x) => x.ariaFlowto}"
+          aria-haspopup="${(x) => x.ariaHaspopup}"
+          aria-hidden="${(x) => x.ariaHidden}"
+          aria-invalid="${(x) => x.ariaInvalid}"
+          aria-keyshortcuts="${(x) => x.ariaKeyshortcuts}"
+          aria-label="${(x) => x.ariaLabel}"
+          aria-labelledby="${(x) => x.ariaLabelledby}"
+          aria-live="${(x) => x.ariaLive}"
+          aria-owns="${(x) => x.ariaOwns}"
+          aria-relevant="${(x) => x.ariaRelevant}"
+          aria-roledescription="${(x) => x.ariaRoledescription}"
+          @input="${(x, c) => x.handleTextInput()}"
+          @change="${(x) => x.handleChange()}"
+          ${ref('control')}
+        ></textarea>
+        <div class="interaction-ring"></div>
+      </div>
+    </div>
+    ${when(
+      (x) => x.state === 'error' && !!x.errorMessage,
+      html` <div class="helper error">
+        <label>${(x) => x.errorMessage}</label>
+      </div>`
+    )}
   </template>
 `;
 
@@ -264,8 +270,7 @@ export class TextArea extends FoundationElement {
   }
 
   valueChanged(prev, next) {
-    if (next === null || next === undefined)
-      this.value = '';
+    if (next === null || next === undefined) this.value = '';
   }
 
   /**
