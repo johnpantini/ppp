@@ -35,9 +35,12 @@ export const widgetTypeRadioStyles = (context, definition) => css`
     width: 100%;
     padding: 15px;
     cursor: pointer;
-    border: 1px solid rgb(137, 151, 155);
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgb(136, 147, 151);
+    border-image: initial;
     border-radius: 4px;
-    transition: border 100ms ease-in-out 0s;
+    transition: all 150ms ease-in-out 0s;
   }
 
   :host([disabled]) .control {
@@ -46,13 +49,13 @@ export const widgetTypeRadioStyles = (context, definition) => css`
     cursor: ${disabledCursor};
   }
 
+  :host(:not([checked]):not([disabled])) .control:hover {
+    box-shadow: rgb(232 237 235) 0 0 0 3px;
+  }
+
   :host([checked]) .control {
-    transition: all 150ms ease-in-out 0s;
-    border: none;
-    z-index: -1;
-    inset: 0;
     box-shadow: rgb(19 170 82) 0 0 0 3px;
-    border-radius: 3px;
+    border-color: transparent;
   }
 
   .content {
