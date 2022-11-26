@@ -120,7 +120,7 @@ export class ServicePppAspirantPage extends Page {
 
     await maybeFetchError(
       rServiceList,
-      'Не удалось получить список сервисов проекта ppp.'
+      'Не удалось получить список сервисов проекта PPP.'
     );
 
     const service = (await rServiceList.json()).data.services.find(
@@ -257,7 +257,7 @@ export class ServicePppAspirantPage extends Page {
                 runtimeEnvironment
               })
             })
-          })
+          }), 'Не удалось обновить переменные окружения сервиса.'
         );
       }
     }

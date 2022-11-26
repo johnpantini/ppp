@@ -51,7 +51,10 @@ export class UpdatesPage extends Page {
         }
       );
 
-      await maybeFetchError(rTargetRef);
+      await maybeFetchError(
+        rTargetRef,
+        'Не удалось получить ссылку HEAD на ветку main официального репозитория ppp.'
+      );
 
       const targetRef = await rTargetRef.json();
       const rTargetCommit = await fetch(targetRef.object.url, {
@@ -62,7 +65,10 @@ export class UpdatesPage extends Page {
         }
       });
 
-      await maybeFetchError(rTargetCommit);
+      await maybeFetchError(
+        rTargetCommit,
+        'Не удалось получить последний commit ветки main официального репозитория ppp.'
+      );
 
       this.targetCommit = await rTargetCommit.json();
 
@@ -73,7 +79,10 @@ export class UpdatesPage extends Page {
         }
       });
 
-      await maybeFetchError(rGitHubUser);
+      await maybeFetchError(
+        rGitHubUser,
+        'Не удалось получить профиль пользователя GitHub. Проверьте токен в облачных сервисах.'
+      );
 
       const user = await rGitHubUser.json();
       const rCurrentRef = await fetch(
@@ -87,7 +96,10 @@ export class UpdatesPage extends Page {
         }
       );
 
-      await maybeFetchError(rCurrentRef);
+      await maybeFetchError(
+        rCurrentRef,
+        'Не удалось получить ссылку HEAD на ветку main в текущем репозитории.'
+      );
 
       const currentRef = await rCurrentRef.json();
       const rCurrentCommit = await fetch(currentRef.object.url, {
@@ -98,7 +110,10 @@ export class UpdatesPage extends Page {
         }
       });
 
-      await maybeFetchError(rCurrentCommit);
+      await maybeFetchError(
+        rCurrentCommit,
+        'Не удалось получить последний commit ветки main в текущем репозитории.'
+      );
 
       this.currentCommit = await rCurrentCommit.json();
     } catch (e) {
@@ -119,7 +134,10 @@ export class UpdatesPage extends Page {
         }
       });
 
-      await maybeFetchError(rGitHubUser);
+      await maybeFetchError(
+        rGitHubUser,
+        'Не удалось получить профиль пользователя GitHub. Проверьте токен в облачных сервисах.'
+      );
 
       const user = await rGitHubUser.json();
       const rUpdateHeads = await fetch(
@@ -136,7 +154,10 @@ export class UpdatesPage extends Page {
         }
       );
 
-      await maybeFetchError(rUpdateHeads);
+      await maybeFetchError(
+        rUpdateHeads,
+        'Не удалось изменить ссылку HEAD на ветку main в текущем репозитории.'
+      );
 
       const rPagesBuildRequest = await fetch(
         `https://api.github.com/repos/${user.login}/ppp/pages/builds`,
@@ -149,7 +170,10 @@ export class UpdatesPage extends Page {
         }
       );
 
-      await maybeFetchError(rPagesBuildRequest);
+      await maybeFetchError(
+        rPagesBuildRequest,
+        'Не удалось выполнить запрос на принудительную сборку GitHub Pages.'
+      );
 
       this.updateComplete = true;
 

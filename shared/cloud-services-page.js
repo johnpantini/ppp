@@ -100,7 +100,10 @@ export async function createCloudCredentialsEndpoint({
       }
     );
 
-    await maybeFetchError(rUpdateFunc);
+    await maybeFetchError(
+      rUpdateFunc,
+      'Не удалось обновить функцию конечной точки компактного представления ключей.'
+    );
   } else {
     const rCreateFunc = await fetch(
       new URL('fetch', serviceMachineUrl).toString(),
@@ -125,7 +128,10 @@ export async function createCloudCredentialsEndpoint({
       }
     );
 
-    await maybeFetchError(rCreateFunc);
+    await maybeFetchError(
+      rCreateFunc,
+      'Не удалось создать функцию конечной точки компактного представления ключей.'
+    );
 
     const jCreateFunc = await rCreateFunc.json();
 
@@ -161,7 +167,11 @@ export async function createCloudCredentialsEndpoint({
   );
 
   // Conflict is OK
-  if (rNewEndpoint.status !== 409) await maybeFetchError(rNewEndpoint);
+  if (rNewEndpoint.status !== 409)
+    await maybeFetchError(
+      rNewEndpoint,
+      'Не удалось создать конечную точку компактного представления ключей.'
+    );
 }
 
 export class CloudServicesPage extends Page {
@@ -239,7 +249,10 @@ export class CloudServicesPage extends Page {
       }
     );
 
-    await maybeFetchError(rFunctionList);
+    await maybeFetchError(
+      rFunctionList,
+      'Не удалось получить список облачных функций.'
+    );
     this.progressOperation(30);
 
     const functionList = await rFunctionList.json();
@@ -264,7 +277,10 @@ export class CloudServicesPage extends Page {
           }
         );
 
-        await maybeFetchError(rRemoveFunc);
+        await maybeFetchError(
+          rRemoveFunc,
+          `Не удалось удалить облачную функцию ${f.name}.`
+        );
 
         ppp.app.toast.progress.value += Math.floor(30 / funcs.length);
       }
@@ -306,7 +322,10 @@ export class CloudServicesPage extends Page {
         }
       );
 
-      await maybeFetchError(rCreateFunc);
+      await maybeFetchError(
+        rCreateFunc,
+        `Не удалось создать облачную функцию ${f.name}.`
+      );
 
       ppp.app.toast.progress.value += Math.floor(30 / funcs.length);
     }
@@ -340,8 +359,11 @@ export class CloudServicesPage extends Page {
       }
     );
 
-    await maybeFetchError(rProjectId);
-    this.progressOperation(5, 'Поиск проекта ppp в MongoDB Realm');
+    await maybeFetchError(
+      rProjectId,
+      'Не удалось получить ID проекта PPP в MongoDB Realm.'
+    );
+    this.progressOperation(5, 'Поиск проекта PPP в MongoDB Realm');
 
     const { roles } = await rProjectId.json();
 
@@ -373,7 +395,10 @@ export class CloudServicesPage extends Page {
       })
     });
 
-    await maybeFetchError(rAppId);
+    await maybeFetchError(
+      rAppId,
+      'Не удалось получить ID приложения PPP в MongoDB Realm.'
+    );
     this.progressOperation(10);
 
     const apps = await rAppId.json();
