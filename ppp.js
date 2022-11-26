@@ -170,7 +170,8 @@ export default new (class {
             );
         } else if (
           /error resolving cluster hostname/i.test(e?.message) ||
-          /error connecting to MongoDB cluster/i.test(e?.message)
+          /error connecting to MongoDB cluster/i.test(e?.message) ||
+          /server selection error/i.test(e?.message)
         ) {
           document
             .getElementById('global-loader')
