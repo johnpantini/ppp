@@ -80,7 +80,8 @@ export class TraderAlorOpenAPIV2Page extends Page {
   async find() {
     return {
       type: TRADERS.ALOR_OPENAPI_V2,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

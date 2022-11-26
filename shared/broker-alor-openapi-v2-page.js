@@ -47,7 +47,8 @@ export class BrokerAlorOpenAPIV2Page extends Page {
   async find() {
     return {
       type: BROKERS.ALOR_OPENAPI_V2,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

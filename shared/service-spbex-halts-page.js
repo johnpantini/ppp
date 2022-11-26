@@ -205,7 +205,8 @@ export class ServiceSpbexHaltsPage extends Page {
   async find() {
     return {
       type: SERVICES.SPBEX_HALTS,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

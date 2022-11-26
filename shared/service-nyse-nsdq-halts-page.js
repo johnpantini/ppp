@@ -189,7 +189,8 @@ export class ServiceNyseNsdqHaltsPage extends Page {
   async find() {
     return {
       type: SERVICES.NYSE_NSDQ_HALTS,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

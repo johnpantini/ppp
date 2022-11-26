@@ -96,7 +96,8 @@ export class ApiPusherPage extends Page {
   async find() {
     return {
       type: APIS.PUSHER,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

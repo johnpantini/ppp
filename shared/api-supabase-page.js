@@ -99,7 +99,8 @@ export class ApiSupabasePage extends Page {
   async find() {
     return {
       type: APIS.SUPABASE,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

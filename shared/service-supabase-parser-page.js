@@ -271,7 +271,8 @@ export class ServiceSupabaseParserPage extends Page {
   async find() {
     return {
       type: SERVICES.SUPABASE_PARSER,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

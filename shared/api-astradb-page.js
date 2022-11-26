@@ -45,7 +45,8 @@ export class ApiAstraDbPage extends Page {
   async find() {
     return {
       type: APIS.ASTRADB,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

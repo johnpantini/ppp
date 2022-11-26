@@ -86,7 +86,8 @@ export class ApiRedisPage extends Page {
   async find() {
     return {
       type: APIS.REDIS,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

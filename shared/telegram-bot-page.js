@@ -72,7 +72,8 @@ export class TelegramBotPage extends Page {
 
   async find() {
     return {
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

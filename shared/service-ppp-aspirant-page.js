@@ -64,7 +64,8 @@ export class ServicePppAspirantPage extends Page {
   async find() {
     return {
       type: SERVICES.PPP_ASPIRANT,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

@@ -63,7 +63,8 @@ export class ServiceDeployedPppAspirantPage extends Page {
   async find() {
     return {
       type: SERVICES.DEPLOYED_PPP_ASPIRANT,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

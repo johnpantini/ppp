@@ -74,7 +74,8 @@ export class BrokerUtexAuroraPage extends Page {
   async find() {
     return {
       type: BROKERS.UTEX_AURORA,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 
