@@ -2,6 +2,7 @@ import { Page, PageWithDocuments } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { Observable } from './element/observation/observable.js';
 import { uuidv4 } from './ppp-crypto.js';
+import { later } from './later.js';
 import ppp from '../ppp.js';
 
 function onNavigateStart() {
@@ -68,31 +69,32 @@ export class WidgetSelectorModalPage extends Page {
 
       try {
         await workspacePage.placeWidget(widget);
+        await ppp.user.functions.updateOne(
+          {
+            collection: 'workspaces'
+          },
+          {
+            _id: ppp.app.params().document
+          },
+          {
+            $push: {
+              widgets: {
+                _id: datum._id,
+                uniqueID,
+                x: 0,
+                y: 0,
+                zIndex: workspacePage.zIndex
+              }
+            }
+          }
+        );
+
+        ppp.app.widgetSelectorModal.visible = false;
+
+        await later(250);
       } finally {
         workspacePage.locked = false;
       }
-
-      await ppp.user.functions.updateOne(
-        {
-          collection: 'workspaces'
-        },
-        {
-          _id: ppp.app.params().document
-        },
-        {
-          $push: {
-            widgets: {
-              _id: datum._id,
-              uniqueID,
-              x: 0,
-              y: 0,
-              zIndex: workspacePage.zIndex
-            }
-          }
-        }
-      );
-
-      ppp.app.widgetSelectorModal.visible = false;
     } catch (e) {
       this.failOperation(e);
     } finally {
