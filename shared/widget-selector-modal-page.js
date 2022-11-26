@@ -63,7 +63,15 @@ export class WidgetSelectorModalPage extends Page {
       ].zIndex = workspacePage.zIndex + 1;
 
       Observable.notify(workspacePage, 'document');
-      await workspacePage.placeWidget(widget);
+
+      workspacePage.locked = true;
+
+      try {
+        await workspacePage.placeWidget(widget);
+      } finally {
+        workspacePage.locked = false;
+      }
+
       await ppp.user.functions.updateOne(
         {
           collection: 'workspaces'

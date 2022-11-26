@@ -3,6 +3,7 @@
 import { Page } from './page.js';
 import { Denormalization } from './ppp-denormalize.js';
 import { Observable, observable } from './element/observation/observable.js';
+import { DOM } from './element/dom.js';
 import ppp from '../ppp.js';
 
 export class WorkspacePage extends Page {
@@ -96,7 +97,7 @@ export class WorkspacePage extends Page {
 
         for (const w of widgets) {
           // Skip first widget added from modal
-          if (w.type) await this.placeWidget(w);
+          if (!this.locked && w.type) await this.placeWidget(w);
         }
       } catch (e) {
         this.failOperation(e);
@@ -309,9 +310,15 @@ export class WorkspacePage extends Page {
     domElement.widgetDefinition = widgetDocument.widgetDefinition;
     domElement.document = widgetDocument;
 
-    widgetDocument.widgetElement = this.workspace.appendChild(domElement);
-    widgetDocument.widgetElement.container = this;
-    widgetDocument.widgetElement.topLoader = this.topLoader;
-    widgetDocument.widgetElement.classList.add('widget');
+    return new Promise((resolve) => {
+      DOM.queueUpdate(() => {
+        widgetDocument.widgetElement = this.workspace.appendChild(domElement);
+        widgetDocument.widgetElement.container = this;
+        widgetDocument.widgetElement.topLoader = this.topLoader;
+        widgetDocument.widgetElement.classList.add('widget');
+      });
+
+      resolve();
+    });
   }
 }
