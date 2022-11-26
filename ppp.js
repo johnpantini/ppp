@@ -232,7 +232,7 @@ export default new (class {
     (await import(`./i18n/${this.locale}/shared.i18n.js`)).default(this.dict);
 
     if (!this.keyVault.ok()) {
-      await this.#createApplication({ emergency: true });
+      return this.#createApplication({ emergency: true });
     } else {
       return this.#createApplication({});
     }
