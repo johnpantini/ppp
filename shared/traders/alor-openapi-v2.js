@@ -533,6 +533,9 @@ export default class {
 
     if (/PROHIBITION_CH/i.test(message)) return 'Заявка заблокирована биржей.';
 
+    if (/Command Timeout/i.test(message))
+      return 'Время ожидания ответа истекло. Торги не проводятся?';
+
     let match = message.match(/can not be less than ([0-9.]+)/i)?.[1];
 
     if (match) {
