@@ -209,7 +209,7 @@ export const updatesPageTemplate = (context, definition) => html`
             <section class="last">
               <div class="footer-actions">
                 <${'ppp-button'}
-                  ?disabled="${(x) => c || x.updateComplete}"
+                  ?disabled="${(x) => x.page.loading || x.updateComplete}"
                   type="submit"
                   @click="${(x) => x.updateApp()}"
                   appearance="primary"
