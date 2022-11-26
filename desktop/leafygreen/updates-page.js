@@ -53,7 +53,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rTargetRef,
-        'Не удалось получить ссылку HEAD на ветку main официального репозитория ppp.'
+        'Не удалось получить ссылку HEAD на ветку main официального репозитория PPP.'
       );
 
       const targetRef = await rTargetRef.json();
@@ -67,7 +67,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rTargetCommit,
-        'Не удалось получить последний commit ветки main официального репозитория ppp.'
+        'Не удалось получить последний commit ветки main официального репозитория PPP.'
       );
 
       this.targetCommit = await rTargetCommit.json();
