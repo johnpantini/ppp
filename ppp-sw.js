@@ -3,9 +3,8 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 1;
-
-const CACHE_NAME = 'offline';
+const OFFLINE_VERSION = 2;
+const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
 function removeDecorators(source) {
@@ -86,7 +85,7 @@ self.onmessage = (event) => {
 self.addEventListener('install', (event) => {
   event.waitUntil(
     (async () => {
-      const cache = await caches.open(CACHE_NAME);
+      const cache = await caches.open(PPP_CACHE_NAME);
 
       // Setting {cache: 'reload'} in the new request will ensure that the
       // response isn't fulfilled from the HTTP cache; i.e., it will be from
@@ -113,14 +112,24 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', async (event) => {
+  // If no fetch handlers call event.respondWith(), the request will be handled
+  // by the browser as if there were no service worker involvement.
   if (
-    !/vendor/i.test(event.request.url) &&
-    event.request.destination === 'script'
+    event.request.destination === 'image' &&
+    event.request.url?.endsWith('.png')
+  ) {
+    return;
+  }
+
+  if (
+    event.request.destination &&
+    event.request.method === 'GET' &&
+    event.request.url.startsWith(location.origin)
   ) {
     return event.respondWith(
       (async () => {
-        try {
+        if (location.origin.endsWith('.io.dev')) {
           return await fetch(event.request).then(async (r) => {
             const ct = r.headers.get('content-type');
             const text = await r.text();
@@ -139,46 +148,49 @@ self.addEventListener('fetch', (event) => {
               return new Response(text, init);
             }
           });
-        } catch (error) {
-          // TODO - add offline logic
         }
-      })()
-    );
-  }
 
-  // We only want to call event.respondWith() if this is a navigation request
-  // for an HTML page.
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      (async () => {
-        try {
-          // First, try to use the navigation preload response if it's supported.
+        if (event.request.mode === 'navigate') {
           const preloadResponse = await event.preloadResponse;
 
           if (preloadResponse) {
             return preloadResponse;
           }
-
-          // Always try the network first.
-          return await fetch(event.request);
-        } catch (error) {
-          // catch is only triggered if an exception is thrown, which is likely
-          // due to a network error.
-          // If fetch() returns a valid HTTP response with a response code in
-          // the 4xx or 5xx range, the catch() will NOT be called.
-          console.log('Fetch failed; returning offline page instead.', error);
-
-          const cache = await caches.open(CACHE_NAME);
-
-          return await cache.match(OFFLINE_URL);
         }
+
+        const cache = await caches.open(PPP_CACHE_NAME);
+        const cachedResponse = await cache.match(event.request);
+
+        const fetchedResponse = fetch(event.request).then(
+          async (networkResponse) => {
+            const clone = networkResponse.clone();
+            const ct = clone.headers.get('content-type');
+            const text = await clone.text();
+            const init = {
+              status: clone.status,
+              statusText: clone.statusText,
+              headers: clone.headers
+            };
+
+            if (
+              ct?.startsWith('application/javascript') &&
+              text.startsWith('/** @decorator */')
+            ) {
+              const r = new Response(removeDecorators(text), init);
+
+              void cache.put(event.request, r.clone());
+
+              return r;
+            } else {
+              void cache.put(event.request, new Response(text, init));
+
+              return networkResponse;
+            }
+          }
+        );
+
+        return cachedResponse ?? fetchedResponse;
       })()
     );
   }
-
-  // If our if() condition is false, then this fetch handler won't intercept the
-  // request. If there are any other fetch handlers registered, they will get a
-  // chance to call event.respondWith(). If no fetch handlers call
-  // event.respondWith(), the request will be handled by the browser as if there
-  // were no service worker involvement.
 });
