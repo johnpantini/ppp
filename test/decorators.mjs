@@ -154,7 +154,7 @@ function removeDecorators(source) {
         currentClass = nextLine.split(/class /)[1].split(/\s/)[0];
 
         decorators.push({
-          d: line.substr(1),
+          d: line.substring(1),
           c: currentClass,
           t: 'class'
         });
@@ -163,7 +163,7 @@ function removeDecorators(source) {
         const t = /\)\s+{/.test(nextLine) ? 'method' : 'prop';
 
         decorators.unshift({
-          d: line.substr(1),
+          d: line.substring(1),
           c: currentClass,
           t,
           l: nextLine

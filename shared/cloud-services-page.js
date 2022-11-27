@@ -204,31 +204,31 @@ export class CloudServicesPage extends Page {
     const groupId = ppp.keyVault.getKey('mongo-group-id');
     const appId = ppp.keyVault.getKey('mongo-app-id');
     const funcs = [
-      { name: 'eval', path: 'functions/mongodb/eval.js' },
-      { name: 'aggregate', path: 'functions/mongodb/aggregate.js' },
-      { name: 'bulkWrite', path: 'functions/mongodb/bulk-write.js' },
-      { name: 'count', path: 'functions/mongodb/count.js' },
-      { name: 'deleteMany', path: 'functions/mongodb/delete-many.js' },
-      { name: 'deleteOne', path: 'functions/mongodb/delete-one.js' },
-      { name: 'distinct', path: 'functions/mongodb/distinct.js' },
-      { name: 'find', path: 'functions/mongodb/find.js' },
-      { name: 'findOne', path: 'functions/mongodb/find-one.js' },
+      { name: 'eval', path: 'shared/functions/mongodb/eval.js' },
+      { name: 'aggregate', path: 'shared/functions/mongodb/aggregate.js' },
+      { name: 'bulkWrite', path: 'shared/functions/mongodb/bulk-write.js' },
+      { name: 'count', path: 'shared/functions/mongodb/count.js' },
+      { name: 'deleteMany', path: 'shared/functions/mongodb/delete-many.js' },
+      { name: 'deleteOne', path: 'shared/functions/mongodb/delete-one.js' },
+      { name: 'distinct', path: 'shared/functions/mongodb/distinct.js' },
+      { name: 'find', path: 'shared/functions/mongodb/find.js' },
+      { name: 'findOne', path: 'shared/functions/mongodb/find-one.js' },
       {
         name: 'findOneAndDelete',
-        path: 'functions/mongodb/find-one-and-delete.js'
+        path: 'shared/functions/mongodb/find-one-and-delete.js'
       },
       {
         name: 'findOneAndReplace',
-        path: 'functions/mongodb/find-one-and-replace.js'
+        path: 'shared/functions/mongodb/find-one-and-replace.js'
       },
       {
         name: 'findOneAndUpdate',
-        path: 'functions/mongodb/find-one-and-update.js'
+        path: 'shared/functions/mongodb/find-one-and-update.js'
       },
-      { name: 'insertMany', path: 'functions/mongodb/insert-many.js' },
-      { name: 'insertOne', path: 'functions/mongodb/insert-one.js' },
-      { name: 'updateMany', path: 'functions/mongodb/update-many.js' },
-      { name: 'updateOne', path: 'functions/mongodb/update-one.js' }
+      { name: 'insertMany', path: 'shared/functions/mongodb/insert-many.js' },
+      { name: 'insertOne', path: 'shared/functions/mongodb/insert-one.js' },
+      { name: 'updateMany', path: 'shared/functions/mongodb/update-many.js' },
+      { name: 'updateOne', path: 'shared/functions/mongodb/update-one.js' }
     ];
 
     const rFunctionList = await fetch(
