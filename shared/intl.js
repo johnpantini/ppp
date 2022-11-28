@@ -68,6 +68,15 @@ export function formatRelativeChange(change) {
   }).format(change);
 }
 
+export function formatPercentage(change) {
+  if (typeof change !== 'number' || isNaN(change)) return '—';
+
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'percent',
+    maximumFractionDigits: 3
+  }).format(change);
+}
+
 export function formatQuantity(quantity) {
   if (typeof quantity !== 'number' || isNaN(quantity)) return '—';
 
