@@ -48,7 +48,8 @@ export const TRADER_DATUM = {
   LAST_PRICE_ABSOLUTE_CHANGE: 'last-price-absolute-change',
   LAST_PRICE_RELATIVE_CHANGE: 'last-price-relative-change',
   BEST_BID: 'best-bid',
-  BEST_ASK: 'best-ask'
+  BEST_ASK: 'best-ask',
+  ORDERBOOK: 'orderbook'
 };
 
 export const WIDGET_TYPES = {
