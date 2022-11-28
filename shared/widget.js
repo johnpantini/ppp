@@ -41,7 +41,7 @@ export class Widget extends FoundationElement {
     if (!this.preview) {
       $(this)
         .draggable({
-          grid: [3, 3],
+          grid: [1, 1],
           containment: [
             ppp.app.settings.sideNavVisible
               ? parseInt(
@@ -62,7 +62,7 @@ export class Widget extends FoundationElement {
             this.style.zIndex = ++this.container.zIndex;
           },
           stop: (event, ui) => {
-            $(this).draggable('option', 'grid', [3, 3]);
+            $(this).draggable('option', 'grid', [1, 1]);
 
             return this.onDragEnd(event, ui);
           }
@@ -72,12 +72,12 @@ export class Widget extends FoundationElement {
           maxWidth: this.widgetDefinition.maxWidth ?? 365,
           minHeight: this.widgetDefinition.minHeight ?? 395,
           minWidth: this.widgetDefinition.minWidth ?? 275,
-          grid: [3, 3],
+          grid: [1, 1],
           start: (event) => {
             if (event.ctrlKey) $(this).resizable('option', 'grid', [1, 1]);
           },
           stop: (event, ui) => {
-            $(this).resizable('option', 'grid', [3, 3]);
+            $(this).resizable('option', 'grid', [1, 1]);
 
             this.onResizeEnd(event, ui);
           }
@@ -94,14 +94,20 @@ export class Widget extends FoundationElement {
       );
     } else {
       this.parentNode.style.width = `${
+        this.widgetDefinition.defaultWidth ??
         this.widgetDefinition.minWidth ?? 275
       }px`;
       this.parentNode.style.height = `${
-        this.widgetDefinition.minHeight ?? 395
+        this.widgetDefinition.defaultHeight ??
+        this.widgetDefinition.minHeight ??
+        395
       }px`;
 
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
+
+      if (this.container.savedInstrument)
+        this.instrument = this.container.savedInstrument;
     }
   }
 

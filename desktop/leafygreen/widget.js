@@ -110,8 +110,12 @@ export const widgetStyles = (context, definition) =>
     }
 
     .widget-empty-state-holder img {
-      width: 80px;
-      height: 80px;
+      width: 70%;
+      height: 70%;
+      min-width: 32px;
+      min-height: 32px;
+      max-width: 80px;
+      max-height: 80px;
       margin-left: 16px;
     }
 
