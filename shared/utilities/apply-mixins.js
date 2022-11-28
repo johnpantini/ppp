@@ -50,4 +50,6 @@ export function applyMixins(derivedCtor, ...baseCtors) {
       derivedCtor.attributes = existing.concat(baseCtor.attributes);
     }
   });
+
+  return derivedCtor;
 }
