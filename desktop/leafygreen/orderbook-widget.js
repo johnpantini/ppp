@@ -8,6 +8,122 @@ import {
 // noinspection JSUnusedGlobalSymbols
 export async function widgetDefinition({ ppp, baseWidgetUrl }) {
   const orderbookWidgetStyles = (context, definition) => css`
+    *,
+    :after,
+    :before {
+      box-sizing: inherit;
+    }
+
+    .orderbook-table {
+      min-width: 140px;
+      width: 100%;
+      padding: 0;
+      user-select: none;
+      border-collapse: collapse;
+    }
+
+    .orderbook-table th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      width: 50%;
+      height: 28px;
+      padding: 4px 8px;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 20px;
+      white-space: nowrap;
+      background: #fff;
+    }
+
+    .orderbook-table th::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      display: block;
+      background-color: rgb(231, 238, 236);
+    }
+
+    .bid-title {
+      left: 8px;
+      text-align: left;
+      position: absolute;
+      top: 4px;
+      color: rgb(19, 193, 123);
+    }
+
+    .ask-title {
+      right: 8px;
+      text-align: right;
+      position: absolute;
+      top: 4px;
+      color: rgb(187, 51, 64);
+    }
+
+    .bid-title,
+    .ask-title {
+      font-weight: 500;
+    }
+
+    .spread {
+      left: 50%;
+      transform: translateX(-50%);
+      font-weight: 400;
+      color: rgba(90, 118, 143);
+      position: absolute;
+      top: 4px;
+    }
+
+    .orderbook-table td {
+      --pro-orderbook-ask-color: rgba(213, 54, 69, 0.3);
+      --pro-orderbook-bid-color: rgba(11, 176, 109, 0.3);
+      width: 50%;
+      padding: 0;
+      border: none;
+      border-bottom: 1px solid rgb(231, 238, 236);
+      background: transparent;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .ask-line,
+    .bid-line {
+      width: 100%;
+      display: flex;
+      padding: 2px 4px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ask-line:hover,
+    .bid-line:hover {
+      background: rgba(223, 230, 237, 0.7);
+    }
+
+    .bid-line {
+      flex-direction: row-reverse;
+    }
+
+    .volume {
+      color: rgb(90, 118, 143);
+    }
+
+    .spacer {
+      width: 0;
+      margin: 0 auto;
+      user-select: none;
+    }
+
+    .price {
+      margin-right: 8px;
+      color: rgb(90, 118, 143);
+    }
+
     ${widgetStyles}
   `;
 
