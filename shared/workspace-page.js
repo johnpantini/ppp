@@ -294,9 +294,15 @@ export class WorkspacePage extends Page {
 
     domElement.style.left = `${parseInt(widgetDocument.x ?? '0')}px`;
     domElement.style.top = `${parseInt(widgetDocument.y ?? '0')}px`;
-    domElement.style.width = `${parseInt(widgetDocument.width ?? minWidth)}px`;
+    domElement.style.width = `${parseInt(
+      widgetDocument.width ??
+        widgetDocument.widgetDefinition.defaultWidth ??
+        minWidth
+    )}px`;
     domElement.style.height = `${parseInt(
-      widgetDocument.height ?? minHeight
+      widgetDocument.height ??
+        widgetDocument.widgetDefinition.defaultHeight ??
+        minHeight
     )}px`;
 
     if (typeof widgetDocument.zIndex === 'number') {
