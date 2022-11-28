@@ -11,8 +11,9 @@ import {
   formatRelativeChange,
   formatAbsoluteChange,
   formatAmount,
-  priceCurrencySymbol
-} from './intl.js';
+  formatPrice,
+  priceCurrencySymbol, formatPriceWithoutCurrency,
+} from './intl.js'
 import ppp from '../ppp.js';
 
 await Promise.all([
@@ -294,12 +295,14 @@ export const orderWidgetTemplate = (context, definition) => html`
                             ${(x) => x.notificationText ?? ''}
                           </div>
                         </div>
-                        <div class="widget-notification-close-button">
+                        <div
+                          class="widget-notification-close-button"
+                          @click="${(x) => (x.notificationVisible = false)}"
+                        >
                           <img
                             draggable="false"
                             alt="Закрыть"
                             src="static/widgets/close.svg"
-                            @click="${(x) => (x.notificationVisible = false)}"
                           />
                         </div>
                       </div>
@@ -438,6 +441,19 @@ export class PppOrderWidget extends WidgetWithInstrument {
         'widgets.$.activeTab': event.detail.id
       }
     });
+  }
+
+  formatPrice(price) {
+    return formatPrice(price, this.instrument);
+  }
+
+  setPrice(price) {
+    if (price > 0) {
+      this.price.value = formatPriceWithoutCurrency(price, this.instrument);
+
+      this.calculateTotalAmount();
+      this.price.focus();
+    }
   }
 
   async buyOrSell(direction) {
