@@ -14,6 +14,8 @@ export class WidgetPage extends Page {
 
   denormalization = new Denormalization();
 
+  savedInstrument;
+
   @observable
   loading;
 
@@ -316,6 +318,8 @@ export class WidgetPage extends Page {
     try {
       let documentAfterChanges;
 
+      this.savedInstrument = this.widgetElement?.instrument;
+
       if (typeof this.widgetElement?.update === 'function') {
         const updates = await this.widgetElement?.update();
 
@@ -494,6 +498,8 @@ export class WidgetPage extends Page {
 
   async handleWidgetTypeChange(event) {
     if (!this.document._id) {
+      this.savedInstrument = void 0;
+
       const name = this.name.value.trim();
 
       this.document.type = event.target.value;
