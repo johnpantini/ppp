@@ -2,10 +2,6 @@
 
 import { Widget } from './widget.js';
 import { observable } from './element/observation/observable.js';
-import {
-  formatPrice,
-  formatPriceWithoutCurrency
-} from './intl.js';
 import ppp from '../ppp.js';
 
 export class WidgetWithInstrument extends Widget {
@@ -88,19 +84,6 @@ export class WidgetWithInstrument extends Widget {
           ordered: false
         }
       );
-    }
-  }
-
-  formatPrice(price) {
-    return formatPrice(price, this.instrument);
-  }
-
-  setPrice(price) {
-    if (price > 0) {
-      this.price.value = formatPriceWithoutCurrency(price, this.instrument);
-
-      this.calculateTotalAmount();
-      this.price.focus();
     }
   }
 
