@@ -160,7 +160,6 @@ self.addEventListener('fetch', async (event) => {
 
         const cache = await caches.open(PPP_CACHE_NAME);
         const cachedResponse = await cache.match(event.request);
-
         const fetchedResponse = fetch(event.request).then(
           async (networkResponse) => {
             const clone = networkResponse.clone();

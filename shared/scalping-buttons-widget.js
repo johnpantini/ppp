@@ -59,7 +59,7 @@ export async function widgetDefinition(definition = {}) {
     customElement: PppScalpingButtonsWidget.compose(definition),
     maxHeight: 512,
     maxWidth: 365,
-    minHeight: 150,
+    minHeight: 120,
     minWidth: 275
   };
 }
