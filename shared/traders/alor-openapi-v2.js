@@ -2,567 +2,514 @@ import { isJWTTokenExpired, uuidv4 } from '../ppp-crypto.js';
 import { TradingError } from '../trading-error.js';
 import { TRADER_DATUM } from '../const.js';
 import { later } from '../later.js';
-import {
-  getInstrumentPrecision,
-  cyrillicToLatin,
-  formatPrice
-} from '../intl.js';
-import ppp from '../../ppp.js';
+import { TraderWithSimpleSearch } from './trader-with-simple-search.js';
+import { Trader } from './common-trader.js';
+import { applyMixins } from '../utilities/apply-mixins.js';
+import { formatPrice } from '../intl.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
  * @typedef {Object} AlorOpenAPIV2Trader
  */
-export default class {
-  #jwt;
 
-  #slug = uuidv4().split('-')[0];
+export default applyMixins(
+  class extends Trader {
+    #jwt;
 
-  #counter = Date.now();
+    #slug = uuidv4().split('-')[0];
 
-  #pendingConnection;
+    #counter = Date.now();
 
-  #pendingJWTRequest;
+    #pendingConnection;
 
-  document = {};
+    #pendingJWTRequest;
 
-  subs = {
-    quotes: new Map()
-  };
+    document = {};
 
-  refs = {
-    quotes: new Map()
-  };
+    subs = {
+      quotes: new Map(),
+      orderbook: new Map()
+    };
 
-  connection;
+    refs = {
+      quotes: new Map(),
+      orderbook: new Map()
+    };
 
-  subsAndRefs = {
-    [TRADER_DATUM.LAST_PRICE]: [this.subs.quotes, this.refs.quotes],
-    [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: [
-      this.subs.quotes,
-      this.refs.quotes
-    ],
-    [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: [
-      this.subs.quotes,
-      this.refs.quotes
-    ],
-    [TRADER_DATUM.BEST_BID]: [this.subs.quotes, this.refs.quotes],
-    [TRADER_DATUM.BEST_ASK]: [this.subs.quotes, this.refs.quotes]
-  };
+    #guids = new Map();
 
-  constructor(document) {
-    this.document = document;
-  }
+    connection;
 
-  async syncAccessToken() {
-    try {
-      if (this.#jwt && !isJWTTokenExpired(this.#jwt)) return true;
-      else if (this.#pendingJWTRequest) return this.#pendingJWTRequest;
+    constructor(document) {
+      super();
 
-      this.#pendingJWTRequest = fetch(
-        `https://oauth.alor.ru/refresh?token=${this.document.broker.refreshToken}`,
-        {
-          method: 'POST'
-        }
-      );
-
-      const { AccessToken } = await (await this.#pendingJWTRequest).json();
-
-      this.#jwt = AccessToken;
-
-      this.#pendingJWTRequest = null;
-
-      return false;
-    } catch (e) {
-      this.#pendingJWTRequest = null;
-
-      return new Promise((resolve) => {
-        setTimeout(async () => {
-          await this.syncAccessToken();
-
-          resolve();
-        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-      });
+      this.document = document;
     }
-  }
 
-  #reqId() {
-    return `${this.document.portfolio};${this.#slug}-${++this.#counter}`;
-  }
+    async syncAccessToken() {
+      try {
+        if (this.#jwt && !isJWTTokenExpired(this.#jwt)) return true;
+        else if (this.#pendingJWTRequest) return this.#pendingJWTRequest;
 
-  #getSymbol(instrument = {}) {
-    if (this.document.exchange === 'SPBX' && instrument.spbexSymbol)
-      return instrument.spbexSymbol;
-    else return instrument.symbol;
-  }
-
-  #fixPrice(instrument, price) {
-    const precision = getInstrumentPrecision(instrument);
-
-    price = parseFloat(price?.replace(',', '.'));
-
-    if (!price || isNaN(price)) price = 0;
-
-    return price.toFixed(precision).toString();
-  }
-
-  async placeMarketOrder({ instrument, quantity, direction }) {
-    await this.syncAccessToken();
-
-    const orderRequest = await fetch(
-      'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/market',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          instrument: {
-            symbol: this.#getSymbol(instrument),
-            exchange: this.document.exchange
-          },
-          side: direction.toLowerCase(),
-          type: 'market',
-          quantity,
-          user: {
-            portfolio: this.document.portfolio
+        this.#pendingJWTRequest = fetch(
+          `https://oauth.alor.ru/refresh?token=${this.document.broker.refreshToken}`,
+          {
+            method: 'POST'
           }
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-ALOR-REQID': this.#reqId(),
-          Authorization: `Bearer ${this.#jwt}`
-        }
-      }
-    );
-    const order = await orderRequest.json();
+        );
 
-    if (order.message === 'success') {
-      return {
-        orderID: order.orderNumber
-      };
-    } else {
-      throw new TradingError({
-        message: order.message
-      });
-    }
-  }
+        const { AccessToken } = await (await this.#pendingJWTRequest).json();
 
-  /**
-   *
-   * @param instrument
-   * @param price
-   * @param quantity
-   * @param direction
-   */
-  async placeLimitOrder({ instrument, price, quantity, direction }) {
-    await this.syncAccessToken();
+        this.#jwt = AccessToken;
 
-    const orderRequest = await fetch(
-      'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit',
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          instrument: {
-            symbol: this.#getSymbol(instrument),
-            exchange: this.document.exchange
-          },
-          side: direction.toLowerCase(),
-          type: 'limit',
-          price: this.#fixPrice(instrument, price),
-          quantity,
-          user: {
-            portfolio: this.document.portfolio
-          }
-        }),
-        headers: {
-          'Content-Type': 'application/json',
-          'X-ALOR-REQID': this.#reqId(),
-          Authorization: `Bearer ${this.#jwt}`
-        }
-      }
-    );
-    const order = await orderRequest.json();
+        this.#pendingJWTRequest = null;
 
-    if (order.message === 'success') {
-      return {
-        orderID: order.orderNumber
-      };
-    } else {
-      throw new TradingError({
-        message: order.message
-      });
-    }
-  }
+        return false;
+      } catch (e) {
+        this.#pendingJWTRequest = null;
 
-  async #connectWebSocket(reconnect) {
-    if (this.#pendingConnection) {
-      return this.#pendingConnection;
-    } else {
-      return (this.#pendingConnection = new Promise((resolve) => {
-        if (!reconnect && this.connection) {
-          resolve(this.connection);
-        } else {
-          this.connection = new WebSocket('wss://api.alor.ru/ws');
-
-          this.connection.onopen = () => {
-            for (const [instrumentId, { instrument, guid, refCount }] of this
-              .refs.quotes) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.quotes[instrumentId.guid] = guid;
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'QuotesSubscribe',
-                    code: this.#getSymbol(instrument),
-                    exchange: this.document.exchange,
-                    format: 'Simple',
-                    guid,
-                    token: this.#jwt
-                  })
-                );
-              }
-            }
-
-            resolve(this.connection);
-          };
-
-          this.connection.onclose = async () => {
-            await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+        return new Promise((resolve) => {
+          setTimeout(async () => {
             await this.syncAccessToken();
 
-            this.#pendingConnection = null;
-
-            await this.#connectWebSocket(true);
-          };
-
-          this.connection.onerror = () => this.connection.close();
-
-          this.connection.onmessage = ({ data }) => {
-            const payload = JSON.parse(data);
-
-            if (payload.data && payload.data.last_price) {
-              return this.onQuotesMessage({ data: payload.data });
-            }
-          };
-        }
-      }));
-    }
-  }
-
-  async instrumentChanged(source, oldValue, newValue) {
-    await this.syncAccessToken();
-
-    if (this.subs.quotes.has(source)) {
-      for (const { field } of this.subs.quotes.get(source)) {
-        source[field] = '—';
-
-        if (oldValue) {
-          this.removeRef(oldValue, this.refs.quotes);
-        }
-
-        if (newValue) {
-          this.addRef(newValue, this.refs.quotes);
-        }
-      }
-    }
-
-    if (newValue?._id) {
-      // Handle no real subscription case
-      this.onQuotesMessage({
-        data: this.refs.quotes.get(newValue._id)?.lastData
-      });
-    }
-  }
-
-  onQuotesMessage({ data }) {
-    if (data) {
-      for (const [source, fields] of this.subs.quotes) {
-        for (const { field, datum } of fields) {
-          if (data.symbol === this.#getSymbol(source.instrument)) {
-            if (source.instrument?._id) {
-              const ref = this.refs.quotes.get(source.instrument._id);
-
-              ref.lastData = data;
-            }
-
-            switch (datum) {
-              case TRADER_DATUM.LAST_PRICE:
-                source[field] = data.last_price;
-
-                break;
-              case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
-                source[field] = data.change;
-
-                break;
-              case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE:
-                source[field] = data.change_percent;
-
-                break;
-              case TRADER_DATUM.BEST_BID:
-                source[field] = data.bid;
-
-                break;
-              case TRADER_DATUM.BEST_ASK:
-                source[field] = data.ask;
-
-                break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  addRef(instrument, refs) {
-    if (instrument?._id && refs) {
-      const ref = refs.get(instrument._id);
-
-      if (typeof ref === 'undefined') {
-        const guid = this.#reqId();
-
-        refs.set(instrument._id, {
-          refCount: 1,
-          guid,
-          instrument
+            resolve();
+          }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
         });
-
-        if (refs === this.refs.quotes) {
-          this.connection.send(
-            JSON.stringify({
-              opcode: 'QuotesSubscribe',
-              code: this.#getSymbol(instrument),
-              exchange: this.document.exchange,
-              format: 'Simple',
-              token: this.#jwt,
-              guid
-            })
-          );
-        }
-      } else {
-        ref.refCount++;
       }
     }
-  }
 
-  removeRef(instrument, refs) {
-    if (instrument?._id && refs) {
-      const ref = refs.get(instrument._id);
+    #reqId() {
+      return `${this.document.portfolio};${this.#slug}-${++this.#counter}`;
+    }
 
-      if (typeof ref !== 'undefined') {
-        if (ref.refCount > 0) {
-          ref.refCount--;
-        }
+    #getSymbol(instrument = {}) {
+      if (this.document.exchange === 'SPBX' && instrument.spbexSymbol)
+        return instrument.spbexSymbol;
+      else return instrument.symbol;
+    }
 
-        if (ref.refCount === 0) {
-          if (this.connection.readyState === WebSocket.OPEN) {
-            if (refs === this.refs.quotes) {
-              this.connection.send(
-                JSON.stringify({
-                  opcode: 'unsubscribe',
-                  token: this.#jwt,
-                  guid: ref.guid
-                })
-              );
+    async placeMarketOrder({ instrument, quantity, direction }) {
+      await this.syncAccessToken();
+
+      const orderRequest = await fetch(
+        'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/market',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            instrument: {
+              symbol: this.#getSymbol(instrument),
+              exchange: this.document.exchange
+            },
+            side: direction.toLowerCase(),
+            type: 'market',
+            quantity,
+            user: {
+              portfolio: this.document.portfolio
             }
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-ALOR-REQID': this.#reqId(),
+            Authorization: `Bearer ${this.#jwt}`
           }
-
-          refs.delete(instrument._id);
         }
+      );
+      const order = await orderRequest.json();
+
+      if (order.message === 'success') {
+        return {
+          orderID: order.orderNumber
+        };
+      } else {
+        throw new TradingError({
+          message: order.message
+        });
       }
     }
-  }
 
-  async subscribeField({ source, field, datum }) {
-    const [subs, refs] = this.subsAndRefs[datum];
+    /**
+     *
+     * @param instrument
+     * @param price
+     * @param quantity
+     * @param direction
+     */
+    async placeLimitOrder({ instrument, price, quantity, direction }) {
+      await this.syncAccessToken();
 
-    if (subs) {
-      const array = subs.get(source);
+      const orderRequest = await fetch(
+        'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit',
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            instrument: {
+              symbol: this.#getSymbol(instrument),
+              exchange: this.document.exchange
+            },
+            side: direction.toLowerCase(),
+            type: 'limit',
+            price: this.fixPrice(instrument, price),
+            quantity,
+            user: {
+              portfolio: this.document.portfolio
+            }
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-ALOR-REQID': this.#reqId(),
+            Authorization: `Bearer ${this.#jwt}`
+          }
+        }
+      );
+      const order = await orderRequest.json();
 
-      if (Array.isArray(array)) {
-        if (!array.find((e) => e.field === field)) array.push({ field, datum });
+      if (order.message === 'success') {
+        return {
+          orderID: order.orderNumber
+        };
       } else {
-        subs.set(source, [{ field, datum }]);
+        throw new TradingError({
+          message: order.message
+        });
       }
+    }
 
+    async #connectWebSocket(reconnect) {
+      if (this.#pendingConnection) {
+        return this.#pendingConnection;
+      } else {
+        return (this.#pendingConnection = new Promise((resolve) => {
+          if (!reconnect && this.connection) {
+            resolve(this.connection);
+          } else {
+            this.connection = new WebSocket('wss://api.alor.ru/ws');
+
+            this.connection.onopen = () => {
+              // 1. Quotes
+              for (const [instrumentId, { instrument, refCount }] of this.refs
+                .quotes) {
+                if (refCount > 0) {
+                  const guid = this.#reqId();
+
+                  this.refs.quotes[instrumentId.guid] = guid;
+                  this.#guids.set(guid, {
+                    instrument,
+                    refs: this.refs.quotes
+                  });
+
+                  this.connection.send(
+                    JSON.stringify({
+                      opcode: 'QuotesSubscribe',
+                      code: this.#getSymbol(instrument),
+                      exchange: this.document.exchange,
+                      format: 'Simple',
+                      guid,
+                      token: this.#jwt
+                    })
+                  );
+                }
+              }
+
+              // 2. Orderbook
+              for (const [instrumentId, { instrument, refCount }] of this.refs
+                .orderbook) {
+                if (refCount > 0) {
+                  const guid = this.#reqId();
+
+                  this.refs.orderbook[instrumentId.guid] = guid;
+                  this.#guids.set(guid, {
+                    instrument,
+                    refs: this.refs.orderbook
+                  });
+
+                  this.connection.send(
+                    JSON.stringify({
+                      opcode: 'OrderBookGetAndSubscribe',
+                      code: this.#getSymbol(instrument),
+                      exchange: this.document.exchange,
+                      depth: 20,
+                      format: 'Simple',
+                      token: this.#jwt,
+                      guid
+                    })
+                  );
+                }
+              }
+
+              resolve(this.connection);
+            };
+
+            this.connection.onclose = async () => {
+              await later(
+                Math.max(this.document.reconnectTimeout ?? 1000, 1000)
+              );
+              await this.syncAccessToken();
+
+              this.#pendingConnection = null;
+
+              await this.#connectWebSocket(true);
+            };
+
+            this.connection.onerror = () => this.connection.close();
+
+            this.connection.onmessage = ({ data }) => {
+              const payload = JSON.parse(data);
+              const refs = this.#guids.get(payload.guid)?.refs;
+
+              if (payload.data) {
+                payload.data.guid = payload.guid;
+              }
+
+              if (payload.data && refs === this.refs.quotes) {
+                return this.onQuotesMessage({ data: payload.data });
+              } else if (payload.data && refs === this.refs.orderbook) {
+                return this.onOrderbookMessage({ data: payload.data });
+              }
+            };
+          }
+        }));
+      }
+    }
+
+    subsAndRefs(datum) {
+      return {
+        [TRADER_DATUM.LAST_PRICE]: [this.subs.quotes, this.refs.quotes],
+        [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: [
+          this.subs.quotes,
+          this.refs.quotes
+        ],
+        [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: [
+          this.subs.quotes,
+          this.refs.quotes
+        ],
+        [TRADER_DATUM.BEST_BID]: [this.subs.quotes, this.refs.quotes],
+        [TRADER_DATUM.BEST_ASK]: [this.subs.quotes, this.refs.quotes],
+        [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook]
+      }[datum];
+    }
+
+    async subscribeField({ source, field, datum }) {
       await this.syncAccessToken();
       await this.#connectWebSocket();
 
-      this.addRef(source?.instrument, refs);
+      return super.subscribeField({ source, field, datum });
     }
-  }
 
-  async subscribeFields({ source, fieldDatumPairs = {} }) {
-    for (const [field, datum] of Object.entries(fieldDatumPairs)) {
-      await this.subscribeField({ source, field, datum });
+    async unsubscribeField({ source, field, datum }) {
+      await this.syncAccessToken();
+
+      return super.unsubscribeField({ source, field, datum });
     }
-  }
 
-  async unsubscribeField({ source, field, datum }) {
-    const [subs, refs] = this.subsAndRefs[datum];
+    async addFirstRef(instrument, refs, ref) {
+      const guid = this.#reqId();
 
-    if (subs) {
-      const array = subs.get(source);
-      const index = array?.findIndex?.(
-        (e) => e.field === field && e.datum === datum
-      );
+      this.#guids.set(guid, {
+        instrument,
+        refs
+      });
 
-      if (index > -1) {
-        array.splice(index, 1);
+      refs.set(instrument._id, {
+        refCount: 1,
+        guid,
+        instrument
+      });
 
-        if (!array.length) {
-          subs.delete(source);
-        }
-
-        await this.syncAccessToken();
-        this.removeRef(source?.instrument, refs);
+      if (refs === this.refs.quotes) {
+        this.connection.send(
+          JSON.stringify({
+            opcode: 'QuotesSubscribe',
+            code: this.#getSymbol(instrument),
+            exchange: this.document.exchange,
+            format: 'Simple',
+            token: this.#jwt,
+            guid
+          })
+        );
+      } else if (refs === this.refs.orderbook) {
+        this.connection.send(
+          JSON.stringify({
+            opcode: 'OrderBookGetAndSubscribe',
+            code: this.#getSymbol(instrument),
+            exchange: this.document.exchange,
+            depth: 20,
+            format: 'Simple',
+            token: this.#jwt,
+            guid
+          })
+        );
       }
     }
-  }
 
-  async unsubscribeFields({ source, fieldDatumPairs = {} }) {
-    for (const [field, datum] of Object.entries(fieldDatumPairs)) {
-      await this.unsubscribeField({ source, field, datum });
+    async removeLastRef(instrument, refs, ref) {
+      if (this.connection.readyState === WebSocket.OPEN) {
+        this.#guids.delete(ref.guid);
+
+        if (refs === this.refs.quotes || refs === this.refs.orderbook) {
+          this.connection.send(
+            JSON.stringify({
+              opcode: 'unsubscribe',
+              token: this.#jwt,
+              guid: ref.guid
+            })
+          );
+        }
+      }
     }
-  }
 
-  #getExchange(traderExchange) {
-    switch (traderExchange) {
-      case 'SPBX':
-        return 'spbex';
-      case 'MOEX':
-        return 'moex';
-      default:
-        return '';
+    async instrumentChanged(source, oldValue, newValue) {
+      await this.syncAccessToken();
+      await super.instrumentChanged(source, oldValue, newValue);
+
+      if (newValue?._id) {
+        // Handle no real subscription case
+        this.onQuotesMessage({
+          data: this.refs.quotes.get(newValue._id)?.lastData
+        });
+
+        this.onOrderbookMessage({
+          data: this.refs.orderbook.get(newValue._id)?.lastData
+        });
+      }
     }
-  }
 
-  async search(searchText) {
-    if (searchText?.trim()) {
-      searchText = searchText.trim();
+    onOrderbookMessage({ data }) {
+      if (data) {
+        const instrument = this.#guids.get(data.guid)?.instrument;
 
-      const lines = ((context) => {
-        const collection = context.services
-          .get('mongodb-atlas')
-          .db('ppp')
-          .collection('instruments');
+        if (instrument) {
+          for (const [source, fields] of this.subs.orderbook) {
+            const ref = this.refs.orderbook.get(source.instrument?._id);
 
-        const exactSymbolMatch = collection
-          .find({
-            $and: [
-              {
-                exchange: '$exchange'
-              },
-              {
-                $or: [
-                  {
-                    symbol: '$text'
-                  },
-                  {
-                    symbol: '$latin'
-                  }
-                ]
+            if (ref) ref.lastData = data;
+
+            for (const { field, datum } of fields) {
+              switch (datum) {
+                case TRADER_DATUM.ORDERBOOK:
+                  source[field] = {
+                    bids: data.bids,
+                    asks: data.asks
+                  };
+
+                  break;
               }
-            ]
-          })
-          .limit(1);
+            }
+          }
+        }
+      }
+    }
 
-        const regexSymbolMatch = collection
-          .find({
-            $and: [
-              {
-                exchange: '$exchange'
-              },
-              {
-                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
+    onQuotesMessage({ data }) {
+      if (data) {
+        const instrument = this.#guids.get(data.guid)?.instrument;
+
+        if (instrument) {
+          for (const [source, fields] of this.subs.quotes) {
+            if (instrument._id === source.instrument?._id) {
+              const ref = this.refs.quotes.get(source.instrument?._id);
+
+              if (ref) ref.lastData = data;
+
+              for (const { field, datum } of fields) {
+                switch (datum) {
+                  case TRADER_DATUM.LAST_PRICE:
+                    source[field] = data.last_price;
+
+                    break;
+                  case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
+                    source[field] = data.change;
+
+                    break;
+                  case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE:
+                    source[field] = data.change_percent;
+
+                    break;
+                  case TRADER_DATUM.BEST_BID:
+                    source[field] = data.bid;
+
+                    break;
+                  case TRADER_DATUM.BEST_ASK:
+                    source[field] = data.ask;
+
+                    break;
+                }
               }
-            ]
-          })
-          .limit(20);
-
-        const regexFullNameMatch = collection
-          .find({
-            $and: [
-              {
-                exchange: '$exchange'
-              },
-              {
-                fullName: { $regex: '($text|$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
-      })
-        .toString()
-        .split(/\r?\n/);
-
-      lines.pop();
-      lines.shift();
-
-      return ppp.user.functions.eval(
-        lines
-          .join('\n')
-          .replaceAll('$exchange', this.#getExchange(this.document.exchange))
-          .replaceAll('$text', searchText.toUpperCase())
-          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
-      );
-    }
-  }
-
-  async formatError(instrument, error) {
-    const message = error.message;
-
-    if (/Invalid quantity/i.test(message) || /BAD_AMOUNT/i.test(message))
-      return 'Указано неверное количество.';
-
-    if (
-      /(HALT_INSTRUMENT|INSTR_NOTRADE)/i.test(message) ||
-      /Security is in break period/i.test(message) ||
-      /Security is not currently trading/i.test(message)
-    )
-      return 'Инструмент сейчас не торгуется.';
-
-    if (/BAD_FLAGS/i.test(message)) return 'Ошибка параметров заявки.';
-
-    if (/Provided json can't be properly deserialised/i.test(message))
-      return 'Неверная цена или количество.';
-
-    if (/BAD_PRICE_LIMITS/i.test(message))
-      return 'Цена вне лимитов по инструменту.';
-
-    if (/PROHIBITION_CH/i.test(message)) return 'Заявка заблокирована биржей.';
-
-    if (/Command Timeout/i.test(message))
-      return 'Время ожидания ответа истекло. Торги не проводятся?';
-
-    let match = message.match(/can not be less than ([0-9.]+)/i)?.[1];
-
-    if (match) {
-      return `Для этого инструмента цена не может быть ниже ${formatPrice(
-        +match,
-        instrument
-      )}`;
+            }
+          }
+        }
+      }
     }
 
-    match = message.match(/can not be greater than ([0-9.]+)/i)?.[1];
-
-    if (match) {
-      return `Для этого инструмента цена не может быть выше ${formatPrice(
-        +match,
-        instrument
-      )}`;
+    getExchange() {
+      switch (this.document.exchange) {
+        case 'SPBX':
+          return 'spbex';
+        case 'MOEX':
+          return 'moex';
+        default:
+          return '';
+      }
     }
 
-    match = message.match(/Minimum price step: ([0-9.]+)/i)?.[1];
+    async formatError(instrument, error) {
+      const message = error.message;
 
-    if (match) {
-      return `Минимальный шаг цены ${formatPrice(+match, instrument)}`;
+      if (/Invalid quantity/i.test(message) || /BAD_AMOUNT/i.test(message))
+        return 'Указано неверное количество.';
+
+      if (
+        /(HALT_INSTRUMENT|INSTR_NOTRADE)/i.test(message) ||
+        /Security is in break period/i.test(message) ||
+        /Security is not currently trading/i.test(message)
+      )
+        return 'Инструмент сейчас не торгуется.';
+
+      if (/BAD_FLAGS/i.test(message)) return 'Ошибка параметров заявки.';
+
+      if (/Provided json can't be properly deserialised/i.test(message))
+        return 'Неверная цена или количество.';
+
+      if (/BAD_PRICE_LIMITS/i.test(message))
+        return 'Цена вне лимитов по инструменту.';
+
+      if (/PROHIBITION_CH/i.test(message))
+        return 'Заявка заблокирована биржей.';
+
+      if (/Order was canceled before it was posted/i.test(message))
+        return 'Заявка была отменена биржей.';
+
+      if (/Command Timeout/i.test(message))
+        return 'Время ожидания ответа истекло. Торги не проводятся?';
+
+      let match = message.match(/can not be less than ([0-9.]+)/i)?.[1];
+
+      if (match) {
+        return `Для этого инструмента цена не может быть ниже ${formatPrice(
+          +match,
+          instrument
+        )}`;
+      }
+
+      match = message.match(/can not be greater than ([0-9.]+)/i)?.[1];
+
+      if (match) {
+        return `Для этого инструмента цена не может быть выше ${formatPrice(
+          +match,
+          instrument
+        )}`;
+      }
+
+      match = message.match(/Minimum price step: ([0-9.]+)/i)?.[1];
+
+      if (match) {
+        return `Минимальный шаг цены ${formatPrice(+match, instrument)}`;
+      }
+
+      if (/Заявка/i.test(message))
+        return message.endsWith('.') ? message : message + '.';
+
+      return 'Неизвестная ошибка, смотрите консоль браузера.';
     }
-
-    if (/Заявка/i.test(message))
-      return message.endsWith('.') ? message : message + '.';
-
-    return 'Неизвестная ошибка, смотрите консоль браузера.';
-  }
-}
+  },
+  TraderWithSimpleSearch
+);
