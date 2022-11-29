@@ -50,6 +50,7 @@ export class WidgetSearchControl extends OffClickElement {
   selectInstrument(instrument) {
     this.widget.instrument = instrument;
     this.open = false;
+    this.suggestInput.value = '';
   }
 
   handleClick({ event }) {
