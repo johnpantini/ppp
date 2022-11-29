@@ -49,19 +49,36 @@ export const workspacesPageTemplate = (context, definition) => html`
             return {
               datum,
               cells: [
-                html`<a
-                  @click="${() => {
-                    ppp.app.navigate({
-                      page: 'workspace',
-                      document: datum._id
-                    });
+                html`
+                  <div style="display: flex; flex-direction: column; gap: 4px">
+                    <a
+                      @click="${() => {
+                        ppp.app.navigate({
+                          page: 'workspace-manage',
+                          document: datum._id
+                        });
 
-                    return false;
-                  }}"
-                  href="?page=workspace&document=${datum._id}"
-                >
-                  ${datum.name}
-                </a>`,
+                        return false;
+                      }}"
+                      href="?page=workspace-manage&document=${datum._id}"
+                    >
+                      ${datum.name}
+                    </a>
+                    <${'ppp-button'}
+                      class="xsmall"
+                      @click="${() => {
+                        ppp.app.navigate({
+                          page: 'workspace',
+                          document: datum._id
+                        });
+
+                        return false;
+                      }}"
+                    >
+                      Перейти в терминал
+                    </ppp-button>
+                  </div>
+                `,
                 formatDate(datum.createdAt),
                 formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
