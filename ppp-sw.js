@@ -3,7 +3,7 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 2;
+const OFFLINE_VERSION = 3;
 const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
@@ -130,7 +130,9 @@ self.addEventListener('fetch', async (event) => {
     return event.respondWith(
       (async () => {
         if (location.origin.endsWith('.io.dev')) {
-          return await fetch(event.request).then(async (r) => {
+          return await fetch(event.request, {
+            cache: 'no-cache'
+          }).then(async (r) => {
             const ct = r.headers.get('content-type');
             const text = await r.text();
             const init = {
@@ -160,33 +162,33 @@ self.addEventListener('fetch', async (event) => {
 
         const cache = await caches.open(PPP_CACHE_NAME);
         const cachedResponse = await cache.match(event.request);
-        const fetchedResponse = fetch(event.request).then(
-          async (networkResponse) => {
-            const clone = networkResponse.clone();
-            const ct = clone.headers.get('content-type');
-            const text = await clone.text();
-            const init = {
-              status: clone.status,
-              statusText: clone.statusText,
-              headers: clone.headers
-            };
+        const fetchedResponse = fetch(event.request, {
+          cache: 'no-cache'
+        }).then(async (networkResponse) => {
+          const clone = networkResponse.clone();
+          const ct = clone.headers.get('content-type');
+          const text = await clone.text();
+          const init = {
+            status: clone.status,
+            statusText: clone.statusText,
+            headers: clone.headers
+          };
 
-            if (
-              ct?.startsWith('application/javascript') &&
-              text.startsWith('/** @decorator */')
-            ) {
-              const r = new Response(removeDecorators(text), init);
+          if (
+            ct?.startsWith('application/javascript') &&
+            text.startsWith('/** @decorator */')
+          ) {
+            const r = new Response(removeDecorators(text), init);
 
-              void cache.put(event.request, r.clone());
+            void cache.put(event.request, r.clone());
 
-              return r;
-            } else {
-              void cache.put(event.request, new Response(text, init));
+            return r;
+          } else {
+            void cache.put(event.request, new Response(text, init));
 
-              return networkResponse;
-            }
+            return networkResponse;
           }
-        );
+        });
 
         return cachedResponse ?? fetchedResponse;
       })()
