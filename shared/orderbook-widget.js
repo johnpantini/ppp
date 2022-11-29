@@ -228,10 +228,13 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         )} (${formatPercentage((bestAsk - bestBid) / bestBid)})`;
       }
 
-      const max = Math.max(
+      let max = Math.max(
         newValue.bids?.length ?? 0,
         newValue.asks?.length ?? 0
       );
+
+      if (max > this.document.depth)
+        max = this.document.depth;
 
       this.quoteLines = [];
       this.maxSeenVolume = 0;
