@@ -174,6 +174,10 @@ export default applyMixins(
       }
     }
 
+    async allTrades({ instrument }) {
+      await this.syncAccessToken();
+    }
+
     async #connectWebSocket(reconnect) {
       if (this.#pendingConnection) {
         return this.#pendingConnection;
@@ -379,19 +383,21 @@ export default applyMixins(
 
         if (instrument) {
           for (const [source, fields] of this.subs.orderbook) {
-            const ref = this.refs.orderbook.get(source.instrument?._id);
+            if (instrument._id === source.instrument?._id) {
+              const ref = this.refs.orderbook.get(source.instrument?._id);
 
-            if (ref) ref.lastData = data;
+              if (ref) ref.lastData = data;
 
-            for (const { field, datum } of fields) {
-              switch (datum) {
-                case TRADER_DATUM.ORDERBOOK:
-                  source[field] = {
-                    bids: data.bids,
-                    asks: data.asks
-                  };
+              for (const { field, datum } of fields) {
+                switch (datum) {
+                  case TRADER_DATUM.ORDERBOOK:
+                    source[field] = {
+                      bids: data.bids,
+                      asks: data.asks
+                    };
 
-                  break;
+                    break;
+                }
               }
             }
           }
