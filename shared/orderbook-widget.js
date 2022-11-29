@@ -9,7 +9,6 @@ import { observable } from './element/observation/observable.js';
 import { when } from './element/templating/when.js';
 import { repeat } from './element/templating/repeat.js';
 import {
-  formatPrice,
   formatPercentage,
   formatPriceWithoutCurrency,
   priceCurrencySymbol

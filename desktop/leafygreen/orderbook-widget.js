@@ -78,8 +78,8 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
     }
 
     .orderbook-table td {
-      --pro-orderbook-ask-color: rgba(213, 54, 69, 0.3);
-      --pro-orderbook-bid-color: rgba(11, 176, 109, 0.3);
+      --pro-orderbook-ask-color: rgba(219, 48, 48, 0.3);
+      --pro-orderbook-bid-color: rgba(0, 163, 92, 0.3);
       width: 50%;
       padding: 0;
       border: none;
