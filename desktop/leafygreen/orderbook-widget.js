@@ -11,7 +11,7 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
     *,
     :after,
     :before {
-      box-sizing: inherit;
+      box-sizing: border-box;
     }
 
     .orderbook-table {

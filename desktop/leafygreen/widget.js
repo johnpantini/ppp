@@ -62,7 +62,8 @@ export const widgetStyles = (context, definition) =>
       margin-left: 4px;
     }
 
-    .instrument-quote-line, .widget-header-name {
+    .instrument-quote-line,
+    .widget-header-name {
       display: flex;
       align-items: center;
       overflow: hidden;
@@ -144,6 +145,20 @@ export const widgetStyles = (context, definition) =>
       flex-direction: column;
       flex-shrink: 1;
       height: calc(100% - 30px);
+      overflow: auto;
+    }
+
+    .widget-body::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .widget-body::-webkit-scrollbar-track {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .widget-body::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
     }
 
     .widget-company-card {

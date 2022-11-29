@@ -277,8 +277,8 @@ export const widgetSearchControlStyles = (context, definition) => css`
   }
 
   .menu::-webkit-scrollbar {
-    width: 2px;
-    height: 2px;
+    width: 4px;
+    height: 4px;
   }
 
   .menu::-webkit-scrollbar-track {
