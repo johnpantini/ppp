@@ -28,12 +28,14 @@ export default applyMixins(
 
     subs = {
       quotes: new Map(),
-      orderbook: new Map()
+      orderbook: new Map(),
+      allTrades: new Map()
     };
 
     refs = {
       quotes: new Map(),
-      orderbook: new Map()
+      orderbook: new Map(),
+      allTrades: new Map()
     };
 
     #guids = new Map();
@@ -48,24 +50,43 @@ export default applyMixins(
 
     async syncAccessToken() {
       try {
-        if (this.#jwt && !isJWTTokenExpired(this.#jwt)) return true;
-        else if (this.#pendingJWTRequest) return this.#pendingJWTRequest;
+        if (isJWTTokenExpired(this.#jwt)) this.#jwt = void 0;
 
-        this.#pendingJWTRequest = fetch(
-          `https://oauth.alor.ru/refresh?token=${this.document.broker.refreshToken}`,
-          {
-            method: 'POST'
-          }
-        );
+        if (this.#jwt) return;
 
-        const { AccessToken } = await (await this.#pendingJWTRequest).json();
+        if (this.#pendingJWTRequest) {
+          await this.#pendingJWTRequest;
+        } else {
+          this.#pendingJWTRequest = fetch(
+            `https://oauth.alor.ru/refresh?token=${this.document.broker.refreshToken}`,
+            {
+              method: 'POST'
+            }
+          )
+            .then((request) => request.json())
+            .then(({ AccessToken }) => {
+              this.#jwt = AccessToken;
+              this.#pendingJWTRequest = null;
+            })
+            .catch((e) => {
+              console.error(e);
 
-        this.#jwt = AccessToken;
+              this.#pendingJWTRequest = null;
 
-        this.#pendingJWTRequest = null;
+              return new Promise((resolve) => {
+                setTimeout(async () => {
+                  await this.syncAccessToken();
 
-        return false;
+                  resolve();
+                }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+              });
+            });
+
+          await this.#pendingJWTRequest;
+        }
       } catch (e) {
+        console.error(e);
+
         this.#pendingJWTRequest = null;
 
         return new Promise((resolve) => {
@@ -174,8 +195,39 @@ export default applyMixins(
       }
     }
 
-    async allTrades({ instrument }) {
+    async allTrades({ instrument, depth }) {
       await this.syncAccessToken();
+
+      const qs = `format=Simple&take=${parseInt(depth)}&descending=true`;
+      const request = await fetch(
+        `https://api.alor.ru/md/v2/Securities/${
+          this.document.exchange
+        }/${encodeURIComponent(this.#getSymbol(instrument))}/alltrades?${qs}`,
+        {
+          cache: 'no-cache',
+          headers: {
+            Authorization: `Bearer ${this.#jwt}`
+          }
+        }
+      );
+
+      if (request.status === 200)
+        return (await request.json())?.map((t) => {
+          return {
+            orderId: t.id,
+            side: t.side,
+            time: t.time,
+            timestamp: t.timestamp,
+            symbol: t.symbol,
+            price: t.price,
+            volume: t.qty
+          };
+        });
+      else {
+        throw new TradingError({
+          message: await (await request).text()
+        });
+      }
     }
 
     async #connectWebSocket(reconnect) {
@@ -240,6 +292,32 @@ export default applyMixins(
                 }
               }
 
+              // 3. All trades
+              for (const [instrumentId, { instrument, refCount }] of this.refs
+                .allTrades) {
+                if (refCount > 0) {
+                  const guid = this.#reqId();
+
+                  this.refs.allTrades[instrumentId.guid] = guid;
+                  this.#guids.set(guid, {
+                    instrument,
+                    refs: this.refs.allTrades
+                  });
+
+                  this.connection.send(
+                    JSON.stringify({
+                      opcode: 'AllTradesGetAndSubscribe',
+                      code: this.#getSymbol(instrument),
+                      exchange: this.document.exchange,
+                      depth: 0,
+                      format: 'Simple',
+                      token: this.#jwt,
+                      guid
+                    })
+                  );
+                }
+              }
+
               resolve(this.connection);
             };
 
@@ -268,6 +346,8 @@ export default applyMixins(
                 return this.onQuotesMessage({ data: payload.data });
               } else if (payload.data && refs === this.refs.orderbook) {
                 return this.onOrderbookMessage({ data: payload.data });
+              } else if (payload.data && refs === this.refs.allTrades) {
+                return this.onAllTradesMessage({ data: payload.data });
               }
             };
           }
@@ -288,7 +368,8 @@ export default applyMixins(
         ],
         [TRADER_DATUM.BEST_BID]: [this.subs.quotes, this.refs.quotes],
         [TRADER_DATUM.BEST_ASK]: [this.subs.quotes, this.refs.quotes],
-        [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook]
+        [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
+        [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades]
       }[datum];
     }
 
@@ -342,6 +423,18 @@ export default applyMixins(
             guid
           })
         );
+      } else if (refs === this.refs.allTrades) {
+        this.connection.send(
+          JSON.stringify({
+            opcode: 'AllTradesGetAndSubscribe',
+            code: this.#getSymbol(instrument),
+            exchange: this.document.exchange,
+            depth: 0,
+            format: 'Simple',
+            token: this.#jwt,
+            guid
+          })
+        );
       }
     }
 
@@ -349,7 +442,11 @@ export default applyMixins(
       if (this.connection.readyState === WebSocket.OPEN) {
         this.#guids.delete(ref.guid);
 
-        if (refs === this.refs.quotes || refs === this.refs.orderbook) {
+        if (
+          refs === this.refs.quotes ||
+          refs === this.refs.orderbook ||
+          refs === this.refs.allTrades
+        ) {
           this.connection.send(
             JSON.stringify({
               opcode: 'unsubscribe',
@@ -436,6 +533,35 @@ export default applyMixins(
                     break;
                   case TRADER_DATUM.BEST_ASK:
                     source[field] = data.ask;
+
+                    break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    onAllTradesMessage({ data }) {
+      if (data) {
+        const instrument = this.#guids.get(data.guid)?.instrument;
+
+        if (instrument) {
+          for (const [source, fields] of this.subs.allTrades) {
+            if (instrument._id === source.instrument?._id) {
+              for (const { field, datum } of fields) {
+                switch (datum) {
+                  case TRADER_DATUM.MARKET_PRINT:
+                    source[field] = {
+                      orderId: data.id,
+                      side: data.side,
+                      time: data.time,
+                      timestamp: data.timestamp,
+                      symbol: data.symbol,
+                      price: data.price,
+                      volume: data.qty
+                    };
 
                     break;
                 }
