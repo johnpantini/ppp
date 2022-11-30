@@ -31,7 +31,7 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       height: 28px;
       padding: 4px 8px;
       font-weight: 500;
-      font-size: 13px;
+      font-size: 12px;
       line-height: 20px;
       white-space: nowrap;
       background: #fff;

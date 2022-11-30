@@ -87,6 +87,24 @@ export class WidgetWithInstrument extends Widget {
     }
   }
 
+  broadCastPrice(price) {
+    if (price > 0 && !this.preview) {
+      const widgets = Array.from(
+        this.container.shadowRoot.querySelectorAll('.widget')
+      ).filter(
+        (w) =>
+          w !== this.widget &&
+          typeof w.setPrice === 'function' &&
+          w?.groupControl.selection === this.groupControl.selection &&
+          w.instrument
+      );
+
+      widgets.forEach((w) => w.setPrice(price));
+    }
+
+    return true;
+  }
+
   calculateTotalAmount() {
     this.totalAmount =
       parseFloat(this.price.value.replace(',', '.')) *

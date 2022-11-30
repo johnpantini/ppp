@@ -158,19 +158,7 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
         ?.getAttribute('price')
     );
 
-    if (price > 0 && !this.preview) {
-      const widgets = Array.from(
-        this.container.shadowRoot.querySelectorAll('.widget')
-      ).filter(
-        (w) =>
-          w !== this.widget &&
-          typeof w.setPrice === 'function' &&
-          w?.groupControl.selection === this.groupControl.selection &&
-          w.instrument
-      );
-
-      widgets.forEach((w) => w.setPrice(price));
-    }
+    return this.broadCastPrice(price);
   }
 
   printChanged(oldValue, newValue) {
