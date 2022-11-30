@@ -666,7 +666,7 @@ export default applyMixins(
             if (data.symbol === this.#getSymbol(source.instrument)) {
               switch (datum) {
                 case TRADER_DATUM.POSITION_SIZE:
-                  source[field] = data.qty * data.lotSize;
+                  source[field] = data.qty;
 
                   break;
                 case TRADER_DATUM.POSITION_AVERAGE:

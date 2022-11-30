@@ -117,8 +117,7 @@ export const orderWidgetTemplate = (context, definition) => html`
                   </span>
                 </div>
                 <div class="widget-company-card-item">
-                  <span>В портфеле: ${(x) =>
-                    x.formatQuantity(x.positionSize ?? 0)}</span>
+                  <span>В портфеле: ${(x) => x.formatPositionSize()}</span>
                   <span>Средняя: ${(x) =>
                     x.formatPrice(x.positionAverage ?? 0)}</span>
                 </div>
@@ -434,7 +433,8 @@ export class PppOrderWidget extends WidgetWithInstrument {
     return {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
-        level1TraderId: this.container.level1TraderId.value
+        level1TraderId: this.container.level1TraderId.value,
+        displaySizeInUnits: this.container.displaySizeInUnits.checked
       }
     };
   }
@@ -464,6 +464,20 @@ export class PppOrderWidget extends WidgetWithInstrument {
       this.calculateTotalAmount();
       this.price.focus();
     }
+  }
+
+  formatPositionSize() {
+    let size = 0;
+    let suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
+
+    if (this.instrument) {
+      size = this.positionSize ?? 0;
+
+      if (this.document.displaySizeInUnits)
+        size *= this.instrument.lot ?? 1;
+    }
+
+    return `${size} ${suffix}`;
   }
 
   async buyOrSell(direction) {
@@ -581,6 +595,17 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Параметры отображения</h5>
+        </div>
+        <${'ppp-checkbox'}
+          ?checked="${(x) => x.document.displaySizeInUnits}"
+          ${ref('displaySizeInUnits')}
+        >
+          Показывать количество инструмента в портфеле в штуках
+        </${'ppp-checkbox'}>
       </div>
     `
   };
