@@ -1,6 +1,26 @@
 import { getInstrumentPrecision } from '../intl.js';
+import { TRADER_DATUM } from '../const.js';
 
 export class Trader {
+  valueForEmptyDatum(datum) {
+    switch (datum) {
+      case TRADER_DATUM.POSITION_SIZE:
+        return 0;
+      case TRADER_DATUM.POSITION_AVERAGE:
+        return 0;
+    }
+
+    return '—';
+  }
+
+  getDatumGlobalReferenceName(datum) {
+    switch (datum) {
+      case TRADER_DATUM.POSITION_SIZE:
+      case TRADER_DATUM.POSITION_AVERAGE:
+        return 'POSITIONS';
+    }
+  }
+
   fixPrice(instrument, price) {
     const precision = getInstrumentPrecision(instrument);
 
@@ -23,7 +43,18 @@ export class Trader {
         subs.set(source, [{ field, datum }]);
       }
 
-      await this.addRef(source?.instrument, refs);
+      const globalRefName = this.getDatumGlobalReferenceName(datum);
+
+      if (globalRefName) {
+        await this.addRef(
+          {
+            _id: globalRefName
+          },
+          refs
+        );
+      } else {
+        await this.addRef(source?.instrument, refs);
+      }
     }
   }
 
@@ -49,7 +80,18 @@ export class Trader {
           subs.delete(source);
         }
 
-        await this.removeRef(source?.instrument, refs);
+        const globalRefName = this.getDatumGlobalReferenceName(datum);
+
+        if (globalRefName) {
+          await this.removeRef(
+            {
+              _id: globalRefName
+            },
+            refs
+          );
+        } else {
+          await this.removeRef(source?.instrument, refs);
+        }
       }
     }
   }
@@ -94,8 +136,10 @@ export class Trader {
       const sub = this.subs[key];
 
       if (sub.has(source)) {
-        for (const { field } of sub.get(source)) {
-          source[field] = '—';
+        for (const { field, datum } of sub.get(source)) {
+          source[field] = this.valueForEmptyDatum?.(datum) ?? '—';
+
+          if (this.getDatumGlobalReferenceName(datum)) continue;
 
           if (oldValue) {
             await this.removeRef(oldValue, this.refs[key]);

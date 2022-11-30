@@ -26,14 +26,18 @@ export default applyMixins(
 
     document = {};
 
+    positions = {};
+
     subs = {
       quotes: new Map(),
+      positions: new Map(),
       orderbook: new Map(),
       allTrades: new Map()
     };
 
     refs = {
       quotes: new Map(),
+      positions: new Map(),
       orderbook: new Map(),
       allTrades: new Map()
     };
@@ -230,6 +234,12 @@ export default applyMixins(
       }
     }
 
+    async portfolio() {
+      return Object.keys(this.positions).map((symbol) => {
+        return {};
+      });
+    }
+
     async #connectWebSocket(reconnect) {
       if (this.#pendingConnection) {
         return this.#pendingConnection;
@@ -247,7 +257,7 @@ export default applyMixins(
                 if (refCount > 0) {
                   const guid = this.#reqId();
 
-                  this.refs.quotes[instrumentId.guid] = guid;
+                  this.refs.quotes.get(instrumentId).guid = guid;
                   this.#guids.set(guid, {
                     instrument,
                     refs: this.refs.quotes
@@ -272,7 +282,7 @@ export default applyMixins(
                 if (refCount > 0) {
                   const guid = this.#reqId();
 
-                  this.refs.orderbook[instrumentId.guid] = guid;
+                  this.refs.orderbook.get(instrumentId).guid = guid;
                   this.#guids.set(guid, {
                     instrument,
                     refs: this.refs.orderbook
@@ -298,7 +308,7 @@ export default applyMixins(
                 if (refCount > 0) {
                   const guid = this.#reqId();
 
-                  this.refs.allTrades[instrumentId.guid] = guid;
+                  this.refs.allTrades.get(instrumentId).guid = guid;
                   this.#guids.set(guid, {
                     instrument,
                     refs: this.refs.allTrades
@@ -310,6 +320,33 @@ export default applyMixins(
                       code: this.#getSymbol(instrument),
                       exchange: this.document.exchange,
                       depth: 0,
+                      format: 'Simple',
+                      token: this.#jwt,
+                      guid
+                    })
+                  );
+                }
+              }
+
+              // 4. Positions
+              this.positions = {};
+
+              for (const [instrumentId, { instrument, refCount }] of this.refs
+                .positions) {
+                if (refCount > 0) {
+                  const guid = this.#reqId();
+
+                  this.refs.positions.get(instrumentId).guid = guid;
+                  this.#guids.set(guid, {
+                    instrument,
+                    refs: this.refs.positions
+                  });
+
+                  this.connection.send(
+                    JSON.stringify({
+                      opcode: 'PositionsGetAndSubscribeV2',
+                      portfolio: this.document.portfolio,
+                      exchange: this.document.exchange,
                       format: 'Simple',
                       token: this.#jwt,
                       guid
@@ -348,6 +385,8 @@ export default applyMixins(
                 return this.onOrderbookMessage({ data: payload.data });
               } else if (payload.data && refs === this.refs.allTrades) {
                 return this.onAllTradesMessage({ data: payload.data });
+              } else if (payload.data && refs === this.refs.positions) {
+                return this.onPositionsMessage({ data: payload.data });
               }
             };
           }
@@ -369,15 +408,34 @@ export default applyMixins(
         [TRADER_DATUM.BEST_BID]: [this.subs.quotes, this.refs.quotes],
         [TRADER_DATUM.BEST_ASK]: [this.subs.quotes, this.refs.quotes],
         [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
-        [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades]
+        [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades],
+        [TRADER_DATUM.POSITION_SIZE]: [
+          this.subs.positions,
+          this.refs.positions
+        ],
+        [TRADER_DATUM.POSITION_AVERAGE]: [
+          this.subs.positions,
+          this.refs.positions
+        ]
       }[datum];
     }
 
     async subscribeField({ source, field, datum }) {
       await this.syncAccessToken();
       await this.#connectWebSocket();
+      await super.subscribeField({ source, field, datum });
 
-      return super.subscribeField({ source, field, datum });
+      switch (datum) {
+        case TRADER_DATUM.POSITION_SIZE:
+        case TRADER_DATUM.POSITION_AVERAGE: {
+          for (const symbol of Object.keys(this.positions)) {
+            this.onPositionsMessage({
+              data: this.positions[symbol],
+              fromCache: true
+            });
+          }
+        }
+      }
     }
 
     async unsubscribeField({ source, field, datum }) {
@@ -435,6 +493,19 @@ export default applyMixins(
             guid
           })
         );
+      } else if (refs === this.refs.positions) {
+        this.positions = {};
+
+        this.connection.send(
+          JSON.stringify({
+            opcode: 'PositionsGetAndSubscribeV2',
+            portfolio: this.document.portfolio,
+            exchange: this.document.exchange,
+            format: 'Simple',
+            token: this.#jwt,
+            guid
+          })
+        );
       }
     }
 
@@ -445,7 +516,8 @@ export default applyMixins(
         if (
           refs === this.refs.quotes ||
           refs === this.refs.orderbook ||
-          refs === this.refs.allTrades
+          refs === this.refs.allTrades ||
+          refs === this.refs.positions
         ) {
           this.connection.send(
             JSON.stringify({
@@ -454,6 +526,10 @@ export default applyMixins(
               guid: ref.guid
             })
           );
+        }
+
+        if (refs === this.refs.positions) {
+          this.positions = {};
         }
       }
     }
@@ -471,6 +547,15 @@ export default applyMixins(
         this.onOrderbookMessage({
           data: this.refs.orderbook.get(newValue._id)?.lastData
         });
+      }
+
+      if (this.subs.positions.has(source)) {
+        for (const symbol of Object.keys(this.positions)) {
+          this.onPositionsMessage({
+            data: this.positions[symbol],
+            fromCache: true
+          });
+        }
       }
     }
 
@@ -565,6 +650,29 @@ export default applyMixins(
 
                     break;
                 }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    onPositionsMessage({ data, fromCache }) {
+      if (data) {
+        if (!fromCache) this.positions[data.symbol] = data;
+
+        for (const [source, fields] of this.subs.positions) {
+          for (const { field, datum } of fields) {
+            if (data.symbol === this.#getSymbol(source.instrument)) {
+              switch (datum) {
+                case TRADER_DATUM.POSITION_SIZE:
+                  source[field] = data.qty * data.lotSize;
+
+                  break;
+                case TRADER_DATUM.POSITION_AVERAGE:
+                  source[field] = data.avgPrice;
+
+                  break;
               }
             }
           }

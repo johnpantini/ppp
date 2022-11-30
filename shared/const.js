@@ -50,7 +50,9 @@ export const TRADER_DATUM = {
   BEST_BID: 'best-bid',
   BEST_ASK: 'best-ask',
   ORDERBOOK: 'orderbook',
-  MARKET_PRINT: 'market-print'
+  MARKET_PRINT: 'market-print',
+  POSITION_SIZE: 'position-size',
+  POSITION_AVERAGE: 'position-average'
 };
 
 export const WIDGET_TYPES = {

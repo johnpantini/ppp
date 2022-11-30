@@ -12,8 +12,9 @@ import {
   formatAbsoluteChange,
   formatAmount,
   formatPrice,
-  priceCurrencySymbol, formatPriceWithoutCurrency,
-} from './intl.js'
+  priceCurrencySymbol,
+  formatPriceWithoutCurrency
+} from './intl.js';
 import ppp from '../ppp.js';
 
 await Promise.all([
@@ -116,8 +117,10 @@ export const orderWidgetTemplate = (context, definition) => html`
                   </span>
                 </div>
                 <div class="widget-company-card-item">
-                  <span>Лотов: ${(x) => x.formatQuantity(x.quantity)}</span>
-                  <span>Средняя: ${(x) => x.formatPrice(x.averagePrice)}</span>
+                  <span>В портфеле: ${(x) =>
+                    x.formatQuantity(x.positionSize ?? 0)}</span>
+                  <span>Средняя: ${(x) =>
+                    x.formatPrice(x.positionAverage ?? 0)}</span>
                 </div>
               </div>
               <div class="widget-nbbo-line">
@@ -344,9 +347,6 @@ export class PppOrderWidget extends WidgetWithInstrument {
   lastPriceRelativeChange;
 
   @observable
-  averagePrice;
-
-  @observable
   bestBid;
 
   @observable
@@ -370,6 +370,12 @@ export class PppOrderWidget extends WidgetWithInstrument {
   @observable
   marginSellingPowerQuantity;
 
+  @observable
+  positionSize;
+
+  @observable
+  positionAverage;
+
   async connectedCallback() {
     super.connectedCallback();
 
@@ -386,7 +392,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK
+          bestAsk: TRADER_DATUM.BEST_ASK,
+          positionSize: TRADER_DATUM.POSITION_SIZE,
+          positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
     }
@@ -401,7 +409,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK
+          bestAsk: TRADER_DATUM.BEST_ASK,
+          positionSize: TRADER_DATUM.POSITION_SIZE,
+          positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
     }

@@ -3,7 +3,9 @@
 import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
 import { html } from './template.js';
-import { WIDGET_TYPES } from './const.js';
+import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
+import { validate } from './validate.js';
+import ppp from '../ppp.js';
 
 export const portfolioWidgetTemplate = (context, definition) => html`
   <template>
@@ -37,16 +39,53 @@ export const portfolioWidgetTemplate = (context, definition) => html`
         </div>
       </div>
       <div class="widget-body">
-        <div class="widget-empty-state-holder">
-          <img draggable="false" src="static/empty-widget-state.svg"/>
-          <span>Виджет сейчас недоступен.</span>
-        </div>
+
       </div>
     </div>
   </template>
 `;
 
-export class PppPortfolioWidget extends WidgetWithInstrument {}
+export class PppPortfolioWidget extends WidgetWithInstrument {
+  async connectedCallback() {
+    super.connectedCallback();
+
+    this.trades = [];
+    this.portfolioTrader = await ppp.getOrCreateTrader(
+      this.document.portfolioTrader
+    );
+    this.searchControl.trader = this.portfolioTrader;
+
+    if (this.portfolioTrader) {
+      await this.portfolioTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {}
+      });
+    }
+  }
+
+  async disconnectedCallback() {
+    if (this.portfolioTrader) {
+      await this.portfolioTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {}
+      });
+    }
+
+    super.disconnectedCallback();
+  }
+
+  async validate() {
+    await validate(this.container.portfolioTraderId);
+  }
+
+  async update() {
+    return {
+      $set: {
+        portfolioTraderId: this.container.portfolioTraderId.value
+      }
+    };
+  }
+}
 
 export async function widgetDefinition(definition = {}) {
   return {
@@ -58,7 +97,38 @@ export async function widgetDefinition(definition = {}) {
     customElement: PppPortfolioWidget.compose(definition),
     maxHeight: 1200,
     maxWidth: 1920,
+    defaultWidth: 512,
     minHeight: 365,
-    minWidth: 275
+    minWidth: 275,
+    settings: html`
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер портфеля</h5>
+          <p>Трейдер, который будет источником портфельных данных.</p>
+        </div>
+        <ppp-collection-select
+          ${ref('portfolioTraderId')}
+          value="${(x) => x.document.portfolioTraderId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('traders')
+                .find({
+                  $or: [
+                    { removed: { $ne: true } },
+                    { _id: `[%#this.document.portfolioTraderId ?? ''%]` }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-collection-select>
+      </div>
+    `
   };
 }
