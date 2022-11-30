@@ -5,7 +5,7 @@ import { ref } from './element/templating/ref.js';
 import { html } from './template.js';
 import { validate } from './validate.js';
 import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
-import { observable } from './element/observation/observable.js';
+import { Observable, observable } from './element/observation/observable.js';
 import { when } from './element/templating/when.js';
 import { repeat } from './element/templating/repeat.js';
 import {
@@ -135,9 +135,15 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
 
     if (this.tradesTrader) {
       if (this.instrument) {
-        this.trades = await this.tradesTrader.allTrades({
-          instrument: this.instrument,
-          depth: this.document.depth
+        this.trades = (
+          await this.tradesTrader.allTrades({
+            instrument: this.instrument,
+            depth: this.document.depth
+          })
+        )?.filter((t) => {
+          if (this.document.threshold) {
+            return t.volume >= this.document.threshold;
+          } else return true;
         });
       }
 
@@ -163,11 +169,20 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
 
   printChanged(oldValue, newValue) {
     if (newValue?.price) {
+      if (
+        this.document.threshold &&
+        newValue?.volume < this.document.threshold
+      ) {
+        return;
+      }
+
       this.trades.unshift(newValue);
 
       while (this.trades.length > this.document.depth) {
         this.trades.pop();
       }
+
+      Observable.notify(this, 'trades');
     }
   }
 
@@ -189,9 +204,15 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
 
     if (this.tradesTrader) {
       if (this.instrument) {
-        this.trades = await this.tradesTrader.allTrades({
-          instrument: this.instrument,
-          depth: this.document.depth
+        this.trades = (
+          await this.tradesTrader.allTrades({
+            instrument: this.instrument,
+            depth: this.document.depth
+          })
+        )?.filter((t) => {
+          if (this.document.threshold) {
+            return t.volume >= this.document.threshold;
+          } else return true;
         });
       }
 
@@ -206,13 +227,21 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
       hook: async (value) => +value > 0 && +value <= 300,
       errorMessage: 'Введите значение в диапазоне от 1 до 300'
     });
+
+    if (this.container.threshold.value) {
+      await validate(this.container.threshold, {
+        hook: async (value) => +value >= 0 && +value <= 10000000,
+        errorMessage: 'Введите значение в диапазоне от 0 до 10000000'
+      });
+    }
   }
 
   async update() {
     return {
       $set: {
         depth: Math.abs(this.container.depth.value),
-        tradesTraderId: this.container.tradesTraderId.value
+        tradesTraderId: this.container.tradesTraderId.value,
+        threshold: this.container.threshold.value
       }
     };
   }
@@ -275,6 +304,22 @@ export async function widgetDefinition(definition = {}) {
             placeholder="20"
             value="${(x) => x.document.depth ?? 20}"
             ${ref('depth')}
+          ></ppp-text-field>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Фильтр объёма</h5>
+          <p>Сделки с объёмом меньше указанного не будут отображены в ленте.
+            Чтобы всегда отображать все сделки, введите 0 или не заполняйте
+            поле.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <${'ppp-text-field'}
+            type="number"
+            placeholder="Фильтр объёма"
+            value="${(x) => x.document.threshold ?? ''}"
+            ${ref('threshold')}
           ></ppp-text-field>
         </div>
       </div>
