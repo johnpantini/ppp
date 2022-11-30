@@ -77,6 +77,10 @@ export const widgetTypeRadioStyles = (context, definition) => css`
   [name='icon']::slotted(img) {
     height: 20px;
   }
+
+  :host([disabled]) {
+    display: none;
+  }
 `;
 
 // noinspection JSUnusedGlobalSymbols
