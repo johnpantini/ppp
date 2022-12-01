@@ -108,7 +108,8 @@ export class WidgetWithInstrument extends Widget {
   calculateTotalAmount() {
     this.totalAmount =
       parseFloat(this.price.value.replace(',', '.')) *
-      parseInt(this.quantity.value);
+      parseInt(this.quantity.value) *
+      this.instrument.lot;
   }
 
   handlePriceInput({ event }) {

@@ -31769,6 +31769,992 @@
     "tinkoffFigi": "BBG0160DYCH4"
   },
   {
+    "symbol": "338",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Sinopec Shanghai Petrochemical",
+    "isin": "CNE1000004C8",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 1000,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BCHHM0"
+  },
+  {
+    "symbol": "175",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Geely Automobile Holdings",
+    "isin": "KYG3777B1032",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BZ3PX4"
+  },
+  {
+    "symbol": "291",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Resources Beer",
+    "isin": "HK0291001490",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BKWM80"
+  },
+  {
+    "symbol": "2269",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Wuxi Biologics",
+    "isin": "KYG970081173",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00GTY47H0"
+  },
+  {
+    "symbol": "700",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Tencent Holdings",
+    "isin": "KYG875721634",
+    "minPriceIncrement": 0.2,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BJ35N5"
+  },
+  {
+    "symbol": "9992",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Pop Mart",
+    "isin": "KYG7170M1033",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00Y9WVZ76"
+  },
+  {
+    "symbol": "2319",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Mengniu Dairy",
+    "isin": "KYG210961051",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000PXTGY5"
+  },
+  {
+    "symbol": "1109",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Resources Land",
+    "isin": "KYG2108Y1052",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000HPNDX5"
+  },
+  {
+    "symbol": "1299",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "AIA Group",
+    "isin": "HK0000069689",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0016XR1Q8"
+  },
+  {
+    "symbol": "1347",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Hua Hong Semiconductor",
+    "isin": "HK0000218211",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0078Q6BC4"
+  },
+  {
+    "symbol": "2020",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Anta Sports Products",
+    "isin": "KYG040111059",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000QWR4M8"
+  },
+  {
+    "symbol": "3800",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "GCL Technology",
+    "isin": "KYG3774X1088",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000TRZNP2"
+  },
+  {
+    "symbol": "3",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Hong Kong and China Gas Co.",
+    "isin": "HK0003000038",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BDWT45"
+  },
+  {
+    "symbol": "16",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Sun Hung Kai Properties",
+    "isin": "HK0016000132",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BF0155"
+  },
+  {
+    "symbol": "857",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "PetroChina",
+    "isin": "CNE1000003W8",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BFNTD0"
+  },
+  {
+    "symbol": "3690",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Meituan",
+    "isin": "KYG596691041",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00LLV9WW6"
+  },
+  {
+    "symbol": "6618",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "JD Health International",
+    "isin": "KYG5074A1004",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00Y6QRNM7"
+  },
+  {
+    "symbol": "6098",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Country Garden Services",
+    "isin": "KYG2453A1085",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00L3B3R02"
+  },
+  {
+    "symbol": "960",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Longfor",
+    "isin": "KYG5635P1090",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CHNH78"
+  },
+  {
+    "symbol": "2388",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Bank of China (Hong Kong)",
+    "isin": "HK2388011192",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000F6F1G3"
+  },
+  {
+    "symbol": "9988",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Alibaba",
+    "isin": "KYG017191142",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00QV37ZP9"
+  },
+  {
+    "symbol": "268",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Kingdee International Software",
+    "isin": "KYG525681477",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000FQH8C6"
+  },
+  {
+    "symbol": "9888",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Baidu",
+    "isin": "KYG070341048",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00ZMFX1S5"
+  },
+  {
+    "symbol": "9626",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Bilibili",
+    "isin": "KYG1098A1013",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00ZNW65W3"
+  },
+  {
+    "symbol": "968",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Xinyi Solar",
+    "isin": "KYG9829N1025",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG001XVDJ15"
+  },
+  {
+    "symbol": "27",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Galaxy Entertainment Group",
+    "isin": "HK0027032686",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BG5LL6"
+  },
+  {
+    "symbol": "992",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Lenovo",
+    "isin": "HK0992009065",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BG4QM5"
+  },
+  {
+    "symbol": "688",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Overseas Land & Investment",
+    "isin": "HK0688002218",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BGD8W4"
+  },
+  {
+    "symbol": "2618",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "JD Logistics",
+    "isin": "KYG5074S1012",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG010RJL3B5"
+  },
+  {
+    "symbol": "2313",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Shenzhou International Group",
+    "isin": "KYG8087W1015",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000JSJ2F6"
+  },
+  {
+    "symbol": "9618",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "JD.com",
+    "isin": "KYG8208B1014",
+    "minPriceIncrement": 0.2,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00VC6RYV6"
+  },
+  {
+    "symbol": "388",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Hong Kong Exchanges and Clearing",
+    "isin": "HK0388045442",
+    "minPriceIncrement": 0.2,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BGW354"
+  },
+  {
+    "symbol": "1810",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Xiaomi",
+    "isin": "KYG9830T1067",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00KVTBY91"
+  },
+  {
+    "symbol": "2382",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Sunny Optical Technology",
+    "isin": "KYG8586D1097",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000C16952"
+  },
+  {
+    "symbol": "1113",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "CK Asset Holdings",
+    "isin": "KYG2177B1014",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG007WDD4B5"
+  },
+  {
+    "symbol": "2600",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Aluminum Corp of China",
+    "isin": "CNE1000001T8",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CN0Y73"
+  },
+  {
+    "symbol": "881",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Zhongsheng",
+    "isin": "KYG9894K1085",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000QCN464"
+  },
+  {
+    "symbol": "288",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "WH Group",
+    "isin": "KYG960071028",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00699M8Q7"
+  },
+  {
+    "symbol": "9866",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "NIO Inc",
+    "isin": "KYG6525F1028",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG015PB0HH9"
+  },
+  {
+    "symbol": "1",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "CK Hutchison Holdings",
+    "isin": "KYG217651051",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0087DLDQ6"
+  },
+  {
+    "symbol": "1928",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Sands China",
+    "isin": "KYG7800X1079",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000PSNMN1"
+  },
+  {
+    "symbol": "6969",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Smoore International",
+    "isin": "KYG8245V1023",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00VSF90M3"
+  },
+  {
+    "symbol": "1024",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Kuaishou Technology",
+    "isin": "KYG532631028",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00YYT9BD6"
+  },
+  {
+    "symbol": "2331",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Li-Ning",
+    "isin": "KYG5496K1242",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000PTX047"
+  },
+  {
+    "symbol": "1093",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "CSPC Pharmaceutical",
+    "isin": "HK1093012172",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000C3N3B5"
+  },
+  {
+    "symbol": "2015",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Li Auto",
+    "isin": "KYG5479M1050",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0120WC125"
+  },
+  {
+    "symbol": "836",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Resources Power",
+    "isin": "HK0836012952",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000C1DC75"
+  },
+  {
+    "symbol": "1177",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Sino Biopharmaceutical",
+    "isin": "KYG8167W1380",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000C6XDL4"
+  },
+  {
+    "symbol": "241",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Alibaba Health Information Technology",
+    "isin": "BMG0171K1018",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BDZJK6"
+  },
+  {
+    "symbol": "9868",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "XPeng",
+    "isin": "KYG982AW1003",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG011LRHTM7"
+  },
+  {
+    "symbol": "1368",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Xtep",
+    "isin": "KYG982771092",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000PJKKM9"
+  },
+  {
+    "symbol": "2628",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Life Insurance",
+    "isin": "CNE1000002L3",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000FD8023"
+  },
+  {
+    "symbol": "669",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Techtronic Industries",
+    "isin": "HK0669013440",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BFGXV9"
+  },
+  {
+    "symbol": "9999",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "NetEase",
+    "isin": "KYG6427A1022",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00V6PS1F0"
+  },
+  {
+    "symbol": "2688",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "ENN Energy",
+    "isin": "KYG3066L1014",
+    "minPriceIncrement": 0.1,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000N6X3L4"
+  },
+  {
+    "symbol": "3888",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Kingsoft",
+    "isin": "KYG5264Y1089",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000TF4XZ9"
+  },
+  {
+    "symbol": "1801",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Innovent Biologics",
+    "isin": "KYG4818G1010",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00M8832B5"
+  },
+  {
+    "symbol": "2007",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Country Garden Holdings",
+    "isin": "KYG245241032",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000QQCY41"
+  },
+  {
     "symbol": "SPB",
     "spbexSymbol": "SPB@US",
     "exchange": [
