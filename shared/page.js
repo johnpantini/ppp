@@ -456,6 +456,10 @@ export class Page extends FoundationElement {
         await this.#updateDocument();
       }
 
+      if (typeof this.page.view.afterUpdate === 'function') {
+        await this.page.view.afterUpdate();
+      }
+
       this.succeedOperation();
     } catch (e) {
       this.failOperation(e);
@@ -545,8 +549,7 @@ export class Page extends FoundationElement {
       } finally {
         this.endOperation();
       }
-    } else
-      this.$emit('ready');
+    } else this.$emit('ready');
   }
 
   #keypressHandler(e) {
@@ -556,9 +559,9 @@ export class Page extends FoundationElement {
           return;
 
         // Prevent multiple submissions
-        const parentPage = e.composedPath().find(
-          (e) => e.$pppController?.definition?.type?.name === 'Page'
-        );
+        const parentPage = e
+          .composedPath()
+          .find((e) => e.$pppController?.definition?.type?.name === 'Page');
 
         if (parentPage && this.form.page === parentPage)
           if (this.form instanceof HTMLFormElement) {
@@ -589,8 +592,7 @@ export class Page extends FoundationElement {
 
       if (!this.hasAttribute('data-disable-auto-read'))
         void this.readDocument();
-      else
-        this.$emit('ready');
+      else this.$emit('ready');
     } else {
       // This instance is the ppp-page itself.
       this.page = this;
@@ -644,8 +646,7 @@ export class PageWithDocuments {
   connectedCallback() {
     if (!this.hasAttribute('data-disable-auto-populate'))
       void this.populateDocuments();
-    else
-      this.$emit('ready');
+    else this.$emit('ready');
   }
 
   async populateDocuments() {

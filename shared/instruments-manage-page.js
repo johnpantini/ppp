@@ -56,6 +56,8 @@ export class InstrumentsManagePage extends Page {
 
   @debounce(500)
   search() {
+    this.notFound = false;
+
     if (this.searchText)
       void this.readDocument().finally(() => {
         this.searchEnded = true;
@@ -153,5 +155,39 @@ export class InstrumentsManagePage extends Page {
         createdAt: new Date()
       }
     };
+  }
+
+  async afterUpdate() {
+    const openRequest = indexedDB.open('ppp', 1);
+
+    return new Promise((resolve, reject) => {
+      openRequest.onupgradeneeded = () => {
+        const db = openRequest.result;
+
+        if (!db.objectStoreNames.contains('instruments')) {
+          db.createObjectStore('instruments', { keyPath: 'symbol' });
+        }
+
+        db.onerror = (event) => {
+          console.error(event.target.error);
+
+          reject(
+            new Error('Не удалось сохранить инструмент в локальном хранилище.')
+          );
+        };
+      };
+
+      openRequest.onsuccess = () => {
+        const db = openRequest.result;
+        const tx = db.transaction('instruments', 'readwrite');
+        const instruments = tx.objectStore('instruments');
+
+        instruments.put(this.document);
+
+        tx.oncomplete = () => {
+          resolve();
+        };
+      };
+    });
   }
 }
