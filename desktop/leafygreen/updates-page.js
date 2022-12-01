@@ -53,7 +53,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rTargetRef,
-        'Не удалось получить ссылку HEAD на ветку main официального репозитория PPP.'
+        'Не удалось получить ссылку HEAD на ветку main официального репозитория PPP. Убедитесь, что токен GitHub не истёк.'
       );
 
       const targetRef = await rTargetRef.json();
@@ -81,7 +81,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rGitHubUser,
-        'Не удалось получить профиль пользователя GitHub. Проверьте токен в облачных сервисах.'
+        'Не удалось получить профиль пользователя GitHub.'
       );
 
       const user = await rGitHubUser.json();
@@ -136,7 +136,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rGitHubUser,
-        'Не удалось получить профиль пользователя GitHub. Проверьте токен в облачных сервисах.'
+        'Не удалось получить профиль пользователя GitHub.'
       );
 
       const user = await rGitHubUser.json();
