@@ -15,20 +15,6 @@ export class Widget extends FoundationElement {
   @observable
   document;
 
-  @observable
-  notificationVisible;
-
-  @observable
-  notificationTitle;
-
-  @observable
-  notificationText;
-
-  @observable
-  notificationStatus;
-
-  #notificationTimeout;
-
   constructor() {
     super();
 
@@ -202,31 +188,5 @@ export class Widget extends FoundationElement {
 
       this.remove();
     }
-  }
-
-  success({ title, text }) {
-    this.notificationStatus = 'success';
-    this.notificationTitle = title;
-    this.notificationText = text;
-    this.notificationVisible = true;
-
-    clearTimeout(this.#notificationTimeout);
-
-    this.#notificationTimeout = setTimeout(() => {
-      this.notificationVisible = false;
-    }, 3000);
-  }
-
-  error({ title, text }) {
-    this.notificationStatus = 'error';
-    this.notificationTitle = title;
-    this.notificationText = text;
-    this.notificationVisible = true;
-
-    clearTimeout(this.#notificationTimeout);
-
-    this.#notificationTimeout = setTimeout(() => {
-      this.notificationVisible = false;
-    }, 3000);
   }
 }

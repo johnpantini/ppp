@@ -269,50 +269,9 @@ export const orderWidgetTemplate = (context, definition) => html`
                 </div>
               </div>
             </div>
-            <div class="widget-notifications-area">
-              <div class="widget-notification-ps">
-                <div class="widget-notification-holder">
-                  ${when(
-                    (x) => x.notificationVisible && x.notificationTitle,
-                    html`
-                      <div
-                        class="widget-notification"
-                        status="${(x) => x.notificationStatus ?? 'success'}"
-                      >
-                        <div class="widget-notification-icon">
-                          <img
-                            draggable="false"
-                            alt="Ошибка"
-                            src="${(x) =>
-                              `static/widgets/notifications-${
-                                x.notificationStatus ?? 'success'
-                              }.svg`}"
-                          />
-                        </div>
-                        <div class="widget-notification-text-container">
-                          <div class="widget-notification-title">
-                            ${(x) => x.notificationTitle ?? ''}
-                          </div>
-                          <div class="widget-notification-text">
-                            ${(x) => x.notificationText ?? ''}
-                          </div>
-                        </div>
-                        <div
-                          class="widget-notification-close-button"
-                          @click="${(x) => (x.notificationVisible = false)}"
-                        >
-                          <img
-                            draggable="false"
-                            alt="Закрыть"
-                            src="static/widgets/close.svg"
-                          />
-                        </div>
-                      </div>
-                    `
-                  )}
-                </div>
-              </div>
-            </div>
+            <${'ppp-widget-notifications-area'}
+              ${ref('notificationsArea')}
+            ></ppp-widget-notifications-area>
           `
         )}
         ${when(
@@ -505,13 +464,13 @@ export class PppOrderWidget extends WidgetWithInstrument {
         });
       }
 
-      return this.success({
+      return this.notificationsArea.success({
         title: 'Заявка выставлена'
       });
     } catch (e) {
       console.log(e);
 
-      return this.error({
+      return this.notificationsArea.error({
         title: 'Заявка не выставлена',
         text: await this.ordersTrader?.formatError?.(this.instrument, e)
       });
@@ -532,7 +491,7 @@ export async function widgetDefinition(definition = {}) {
       чтобы выставлять рыночные, лимитные и отложенные биржевые заявки.`,
     customElement: PppOrderWidget.compose(definition),
     maxHeight: 512,
-    maxWidth: 512,
+    maxWidth: 275 * 2,
     minHeight: 375,
     minWidth: 275,
     settings: html`
