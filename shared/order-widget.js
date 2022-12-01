@@ -459,7 +459,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   setPrice(price) {
     if (price > 0) {
-      this.price.value = formatPriceWithoutCurrency(price, this.instrument);
+      this.price.value = price.toString().replace('.', ',');
 
       this.calculateTotalAmount();
       this.price.focus();
@@ -473,8 +473,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
     if (this.instrument) {
       size = this.positionSize ?? 0;
 
-      if (this.document.displaySizeInUnits)
-        size *= this.instrument.lot ?? 1;
+      if (this.document.displaySizeInUnits) size *= this.instrument.lot ?? 1;
     }
 
     return `${size} ${suffix}`;
