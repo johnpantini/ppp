@@ -87,7 +87,7 @@ export class WidgetWithInstrument extends Widget {
     }
   }
 
-  broadCastPrice(price) {
+  broadcastPrice(price) {
     if (price > 0 && !this.preview) {
       const widgets = Array.from(
         this.container.shadowRoot.querySelectorAll('.widget')

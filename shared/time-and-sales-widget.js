@@ -174,7 +174,7 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
         ?.getAttribute('price')
     );
 
-    return this.broadCastPrice(price);
+    return this.broadcastPrice(price);
   }
 
   printChanged(oldValue, newValue) {

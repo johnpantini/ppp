@@ -200,7 +200,7 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         ?.getAttribute('price')
     );
 
-    return this.broadCastPrice(price);
+    return this.broadcastPrice(price);
   }
 
   orderbookChanged(oldValue, newValue) {
