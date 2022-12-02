@@ -54,7 +54,7 @@ const widgetNotificationsAreaStyles = (context, definition) => css`
   :host {
     width: 100%;
     position: absolute;
-    bottom: 55px;
+    bottom: 20px;
     left: 0;
     z-index: 20;
     will-change: contents;
