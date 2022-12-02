@@ -5,6 +5,16 @@ import { ref } from './element/templating/ref.js';
 import { html } from './template.js';
 import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
 import { validate } from './validate.js';
+import { Observable, observable } from './element/observation/observable.js';
+import { when } from './element/templating/when.js';
+import { repeat } from './element/templating/repeat.js';
+import {
+  currencyName,
+  formatAmount,
+  formatPrice,
+  formatQuantity,
+  formatRelativeChange
+} from './intl.js';
 import ppp from '../ppp.js';
 
 export const portfolioWidgetTemplate = (context, definition) => html`
@@ -39,26 +49,237 @@ export const portfolioWidgetTemplate = (context, definition) => html`
         </div>
       </div>
       <div class="widget-body">
-
+        <div class="portfolio-header">
+          <div class="portfolio-name-section">
+            <div style="display: flex">
+              <div class="portfolio-name-section-header">
+                ${(x) => x.getPortfolioName()}
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="portfolio-table">
+          <thead>
+          <tr>
+            <th>Инструмент</th>
+            <th>Всего, шт.</th>
+            <th>Средняя</th>
+            <th>Доход</th>
+            <th>Доход, %</th>
+            <th>За день</th>
+            <th>За день, %</th>
+          </tr>
+          </thead>
+          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
+          ${repeat(
+            (_, c) => [42],
+            html`
+              ${when(
+                (x, c) => c.parent.balances?.size,
+                html`
+                  <tr class="table-group">
+                    <td colspan="1">Валютные балансы</td>
+                  </tr>
+                  ${repeat(
+                    (__, r) =>
+                      Array.from(r.parent.balances?.values()).sort((a, b) =>
+                        a.symbol.localeCompare(b.symbol)
+                      ),
+                    html`
+                      <tr class="portfolio-row">
+                        <td class="cell capitalize">
+                          <div class="portfolio-row-logo-with-name">
+                            <div
+                              class="portfolio-row-logo"
+                              style="${(cell) =>
+                                `background-image:url(${
+                                  'static/currency/' + cell.symbol + '.svg'
+                                })`}"
+                            ></div>
+                            <div class="portfolio-row-name">
+                              ${(cell) => currencyName(cell.symbol)}
+                            </div>
+                          </div>
+                        </td>
+                        <td class="cell">
+                          ${(cell) => formatQuantity(cell.size)}
+                        </td>
+                        <td class="cell"></td>
+                        <td class="cell"></td>
+                        <td class="cell"></td>
+                        <td class="cell"></td>
+                        <td class="cell"></td>
+                      </tr>
+                    `
+                  )}
+                `
+              )}
+            `
+          )}
+          </tbody>
+          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
+          ${repeat(
+            (_, c) => [42],
+            html`
+              ${when(
+                (x, c) => c.parent.stocks?.size,
+                html`
+                  <tr class="table-group">
+                    <td colspan="1">Акции</td>
+                  </tr>
+                  ${repeat(
+                    (__, r) =>
+                      Array.from(r.parent.stocks?.values()).sort((a, b) =>
+                        a.instrument.symbol.localeCompare(b.instrument.symbol)
+                      ),
+                    html`
+                      <tr class="portfolio-row">
+                        <td class="cell capitalize">
+                          <div class="portfolio-row-logo-with-name">
+                            <div
+                              class="portfolio-row-logo"
+                              style="${(cell) =>
+                                `background-image:url(${
+                                  'static/instruments/' +
+                                  cell.instrument.isin +
+                                  '.svg'
+                                })`}"
+                            ></div>
+                            <div class="portfolio-row-name">
+                              ${(cell) => cell.instrument.fullName}
+                            </div>
+                          </div>
+                        </td>
+                        <td class="cell">
+                          ${(cell) => formatQuantity(cell.size * cell.lot)}
+                        </td>
+                        <td class="cell">
+                          ${(cell) =>
+                            formatPrice(cell.averagePrice, cell.instrument)}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.unrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatAmount(
+                              cell.unrealizedProfit,
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.unrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatRelativeChange(
+                              cell.unrealizedProfit /
+                                (cell.averagePrice *
+                                  cell.size *
+                                  cell.instrument.lot),
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.dailyUnrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatAmount(
+                              cell.dailyUnrealizedProfit,
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.dailyUnrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatRelativeChange(
+                              cell.dailyUnrealizedProfit /
+                                (cell.averagePrice *
+                                  cell.size *
+                                  cell.instrument.lot),
+                              cell.instrument.currency
+                            )}
+                        </td>
+                      </tr>
+                    `
+                  )}
+                `
+              )}
+            `
+          )}
+          </tbody>
+        </table>
+        ${when(
+          (x) => !x.balances?.size && !x.stocks?.size && !x.zombies?.size,
+          html`
+            <div class="widget-empty-state-holder">
+              <img draggable="false" src="static/empty-widget-state.svg" />
+              <span>Нет позиций в портфеле.</span>
+            </div>
+          `
+        )}
+        <${'ppp-widget-notifications-area'}
+          ${ref('notificationsArea')}
+        ></ppp-widget-notifications-area>
       </div>
     </div>
   </template>
 `;
 
 export class PppPortfolioWidget extends WidgetWithInstrument {
+  @observable
+  portfolioTrader;
+
+  @observable
+  position;
+
+  @observable
+  balances;
+
+  @observable
+  stocks;
+
+  @observable
+  zombies;
+
+  onTraderError() {
+    this.notificationsArea.error({
+      title: 'Портфель',
+      text: 'Возникла проблема с отображением инструментов. Смотрите консоль браузера.'
+    });
+  }
+
   async connectedCallback() {
     super.connectedCallback();
 
-    this.trades = [];
+    this.balances = new Map();
+    this.stocks = new Map();
+    this.zombies = new Map();
+
     this.portfolioTrader = await ppp.getOrCreateTrader(
       this.document.portfolioTrader
     );
     this.searchControl.trader = this.portfolioTrader;
 
     if (this.portfolioTrader) {
+      this.portfolioTrader.onError = this.onTraderError.bind(this);
+
       await this.portfolioTrader.subscribeFields?.({
         source: this,
-        fieldDatumPairs: {}
+        fieldDatumPairs: {
+          position: TRADER_DATUM.POSITION
+        }
       });
     }
   }
@@ -67,11 +288,45 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
     if (this.portfolioTrader) {
       await this.portfolioTrader.unsubscribeFields?.({
         source: this,
-        fieldDatumPairs: {}
+        fieldDatumPairs: {
+          position: TRADER_DATUM.POSITION
+        }
       });
     }
 
     super.disconnectedCallback();
+  }
+
+  handlePortfolioTableClick({ event }) {}
+
+  positionChanged(oldValue, newValue) {
+    if (newValue) {
+      if (newValue.isBalance) {
+        if (newValue.size !== 0) this.balances.set(newValue.symbol, newValue);
+        else this.balances.delete(newValue.symbol);
+
+        Observable.notify(this, 'balances');
+      } else if (!newValue.instrument?.type) {
+        if (newValue.size !== 0) this.zombies.set(newValue.symbol, newValue);
+        else this.zombies.delete(newValue.symbol);
+
+        Observable.notify(this, 'zombies');
+      } else {
+        switch (newValue.instrument.type) {
+          case 'stock':
+            if (newValue.size !== 0) this.stocks.set(newValue.symbol, newValue);
+            else this.stocks.delete(newValue.symbol);
+
+            Observable.notify(this, 'stocks');
+
+            break;
+        }
+      }
+    }
+  }
+
+  getPortfolioName() {
+    return '';
   }
 
   async validate() {
@@ -81,7 +336,8 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
   async update() {
     return {
       $set: {
-        portfolioTraderId: this.container.portfolioTraderId.value
+        portfolioTraderId: this.container.portfolioTraderId.value,
+        hideBalances: this.container.hideBalances.checked
       }
     };
   }
@@ -97,8 +353,9 @@ export async function widgetDefinition(definition = {}) {
     customElement: PppPortfolioWidget.compose(definition),
     maxHeight: 1200,
     maxWidth: 1920,
-    defaultWidth: 512,
-    minHeight: 365,
+    defaultWidth: 620,
+    defaultHeight: 375,
+    minHeight: 120,
     minWidth: 275,
     settings: html`
       <div class="widget-settings-section">
@@ -128,6 +385,18 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Параметры отображения</h5>
+        </div>
+        <${'ppp-checkbox'}
+          disabled
+          ?checked="${(x) => x.document.hideBalances}"
+          ${ref('hideBalances')}
+        >
+          Скрывать валютные балансы
+        </${'ppp-checkbox'}>
       </div>
     `
   };
