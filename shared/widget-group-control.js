@@ -59,6 +59,12 @@ export class WidgetGroupControl extends OffClickElement {
           'widgets.$.group': group?.toString()
         }
       });
+    } else if (!this.selection) {
+      void this.widget.applyChanges({
+        $set: {
+          'widgets.$.group': null
+        }
+      });
     }
   }
 }
