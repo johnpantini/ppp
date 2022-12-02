@@ -22,6 +22,9 @@ export class TraderWithSimpleSearch {
                 exchange: '$exchange'
               },
               {
+                broker: '$broker'
+              },
+              {
                 $or: [
                   {
                     symbol: '$text'
@@ -42,6 +45,9 @@ export class TraderWithSimpleSearch {
                 exchange: '$exchange'
               },
               {
+                broker: '$broker'
+              },
+              {
                 symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
               }
             ]
@@ -53,6 +59,9 @@ export class TraderWithSimpleSearch {
             $and: [
               {
                 exchange: '$exchange'
+              },
+              {
+                broker: '$broker'
               },
               {
                 fullName: { $regex: '($text|$latin)', $options: 'i' }
@@ -73,6 +82,7 @@ export class TraderWithSimpleSearch {
         lines
           .join('\n')
           .replaceAll('$exchange', this.getExchange?.() ?? '')
+          .replaceAll('$broker', this.getBroker?.() ?? '')
           .replaceAll('$text', searchText.toUpperCase())
           .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
       );
