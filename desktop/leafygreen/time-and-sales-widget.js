@@ -83,6 +83,10 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       color: rgb(90, 118, 143);
     }
 
+    ppp-ppp-order-widget ppp-widget-notifications-area {
+      bottom: 55px;
+    }
+
     ${widgetStyles}
   `;
 

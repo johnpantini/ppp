@@ -52,43 +52,41 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
           html`
             <table class="trades-table">
               <thead>
-                <tr>
-                  <th>Цена</th>
-                  <th>Количество</th>
-                  <th>Время</th>
-                </tr>
+              <tr>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Время</th>
+              </tr>
               </thead>
               <tbody @click="${(x, c) => x.handleTableClick(c)}">
-                ${repeat(
-                  (x) => x.trades ?? [],
-                  html`
-                    <tr
-                      class="price-line"
-                      side="${(x) => x.side}"
-                      price="${(x) => x.price}"
-                    >
-                      <td>
-                        <div class="cell">
-                          ${(x, c) =>
-                            formatPriceWithoutCurrency(
-                              x.price,
-                              c.parent.instrument
-                            )}
-                        </div>
-                      </td>
-                      <td>
-                        <div class="cell">
-                          ${(x) => formatQuantity(x.volume ?? 0)}
-                        </div>
-                      </td>
-                      <td>
-                        <div class="cell">
-                          ${(x) => formatDate(x.timestamp)}
-                        </div>
-                      </td>
-                    </tr>
-                  `
-                )}
+              ${repeat(
+                (x) => x.trades ?? [],
+                html`
+                  <tr
+                    class="price-line"
+                    side="${(x) => x.side}"
+                    price="${(x) => x.price}"
+                  >
+                    <td>
+                      <div class="cell">
+                        ${(x, c) =>
+                          formatPriceWithoutCurrency(
+                            x.price,
+                            c.parent.instrument
+                          )}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        ${(x) => formatQuantity(x.volume ?? 0)}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">${(x) => formatDate(x.timestamp)}</div>
+                    </td>
+                  </tr>
+                `
+              )}
               </tbody>
             </table>
             ${when(
@@ -100,6 +98,9 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
                 </div>
               `
             )}
+            <${'ppp-widget-notifications-area'}
+              ${ref('notificationsArea')}
+            ></ppp-widget-notifications-area>
           `
         )}
         ${when(
@@ -135,16 +136,25 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
 
     if (this.tradesTrader) {
       if (this.instrument) {
-        this.trades = (
-          await this.tradesTrader.allTrades({
-            instrument: this.instrument,
-            depth: this.document.depth
-          })
-        )?.filter((t) => {
-          if (this.document.threshold) {
-            return t.volume >= this.document.threshold;
-          } else return true;
-        });
+        try {
+          this.trades = (
+            await this.tradesTrader.allTrades({
+              instrument: this.instrument,
+              depth: this.document.depth
+            })
+          )?.filter((t) => {
+            if (this.document.threshold) {
+              return t.volume >= this.document.threshold;
+            } else return true;
+          });
+        } catch (e) {
+          console.error(e);
+
+          return this.notificationsArea.error({
+            title: 'Лента всех сделок',
+            text: 'Не удалось загрузить историю сделок.'
+          });
+        }
       }
 
       await this.tradesTrader.subscribeFields?.({
