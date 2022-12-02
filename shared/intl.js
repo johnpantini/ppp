@@ -118,3 +118,9 @@ export function priceCurrencySymbol(instrument) {
       .trim();
   } else return '';
 }
+
+export function currencyName(currencyCode) {
+  const currencyNames = new Intl.DisplayNames(['ru-RU'], { type: 'currency' });
+
+  return currencyNames.of(currencyCode);
+}
