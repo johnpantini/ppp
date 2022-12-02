@@ -321,18 +321,18 @@ export class WidgetPage extends Page {
       this.savedInstrument = this.widgetElement?.instrument;
 
       if (typeof this.widgetElement?.update === 'function') {
-        const updates = await this.widgetElement?.update();
+        const updates = await this.widgetElement?.update({ preview: true });
 
         documentAfterChanges = await this.denormalization.denormalize(
           Object.assign({}, this.document, updates.$set ?? {}, {
-            name: this.name.value.trim(),
+            name: this.name.value,
             pusherApiId: this.pusherApiId.value
           })
         );
       } else {
         documentAfterChanges = await this.denormalization.denormalize(
           Object.assign({}, this.document, {
-            name: this.name.value.trim(),
+            name: this.name.value,
             pusherApiId: this.pusherApiId.value
           })
         );
