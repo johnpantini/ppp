@@ -363,6 +363,22 @@ export const widgetStyles = (context, definition) =>
       position: relative;
     }
 
+    tr.table-group {
+      word-wrap: break-word;
+      font-size: 12px;
+      line-height: 20px;
+      font-weight: 500;
+      letter-spacing: 0;
+      color: rgb(90, 118, 143);
+    }
+
+    tr.table-group td {
+      text-align: left;
+      padding: 4px 8px;
+      max-width: 134px;
+      white-space: nowrap;
+    }
+
     .ui-draggable-handle {
       touch-action: none;
     }
