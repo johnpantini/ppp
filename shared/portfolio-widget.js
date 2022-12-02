@@ -70,7 +70,7 @@ export const portfolioWidgetTemplate = (context, definition) => html`
             <th>За день, %</th>
           </tr>
           </thead>
-          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
+          <tbody>
           ${repeat(
             (_, c) => [42],
             html`
@@ -117,7 +117,7 @@ export const portfolioWidgetTemplate = (context, definition) => html`
             `
           )}
           </tbody>
-          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
+          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c, 'stock')}">
           ${repeat(
             (_, c) => [42],
             html`
@@ -133,7 +133,10 @@ export const portfolioWidgetTemplate = (context, definition) => html`
                         a.instrument.symbol.localeCompare(b.instrument.symbol)
                       ),
                     html`
-                      <tr class="portfolio-row">
+                      <tr
+                        class="portfolio-row"
+                        symbol="${(cell) => cell.instrument.symbol}"
+                      >
                         <td class="cell capitalize">
                           <div class="portfolio-row-logo-with-name">
                             <div
@@ -297,7 +300,60 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
-  handlePortfolioTableClick({ event }) {}
+  async handlePortfolioTableClick({ event }, instrumentType) {
+    if (this.groupControl.selection && !this.preview) {
+      const symbol = event
+        .composedPath()
+        .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
+        ?.getAttribute('symbol');
+
+      if (symbol) {
+        this.topLoader.start();
+
+        try {
+          const instrument = await ppp.user.functions.findOne(
+            {
+              collection: 'instruments'
+            },
+            {
+              type: instrumentType,
+              symbol
+            }
+          );
+
+          if (instrument) {
+            Array.from(this.container.shadowRoot.querySelectorAll('.widget'))
+              .filter(
+                (w) =>
+                  w !== this &&
+                  w?.instrument._id !== instrument._id &&
+                  w?.groupControl.selection === this.groupControl.selection
+              )
+              .forEach((w) => (w.instrument = instrument));
+          } else {
+            this.notificationsArea.error({
+              title: 'Портфель',
+              text: 'Инструмент не найден в базе данных.'
+            });
+          }
+        } catch (e) {
+          console.log(e);
+
+          this.notificationsArea.error({
+            title: 'Портфель',
+            text: 'Ошибка поиска инструмента в базе данных.'
+          });
+        } finally {
+          this.topLoader.stop();
+        }
+      } else {
+        this.notificationsArea.error({
+          title: 'Портфель',
+          text: 'Инструмент не найден в локальном хранилище.'
+        });
+      }
+    }
+  }
 
   positionChanged(oldValue, newValue) {
     if (newValue) {
