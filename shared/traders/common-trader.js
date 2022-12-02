@@ -15,6 +15,7 @@ export class Trader {
 
   getDatumGlobalReferenceName(datum) {
     switch (datum) {
+      case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE:
         return 'POSITIONS';

@@ -51,6 +51,7 @@ export const TRADER_DATUM = {
   BEST_ASK: 'best-ask',
   ORDERBOOK: 'orderbook',
   MARKET_PRINT: 'market-print',
+  POSITION: 'position',
   POSITION_SIZE: 'position-size',
   POSITION_AVERAGE: 'position-average'
 };
