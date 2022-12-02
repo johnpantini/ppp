@@ -12,8 +12,7 @@ import {
   formatAbsoluteChange,
   formatAmount,
   formatPrice,
-  priceCurrencySymbol,
-  formatPriceWithoutCurrency
+  priceCurrencySymbol
 } from './intl.js';
 import ppp from '../ppp.js';
 
@@ -339,7 +338,6 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
     this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
     this.level1Trader = await ppp.getOrCreateTrader(this.document.level1Trader);
-
     this.searchControl.trader = this.ordersTrader;
 
     if (this.level1Trader) {
