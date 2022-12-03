@@ -326,7 +326,7 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
               .filter(
                 (w) =>
                   w !== this &&
-                  w?.instrument._id !== instrument._id &&
+                  w?.instrument?._id !== instrument._id &&
                   w?.groupControl.selection === this.groupControl.selection
               )
               .forEach((w) => (w.instrument = instrument));
