@@ -97,6 +97,15 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       color: rgb(90, 118, 143);
       font-size: 12px;
       white-space: nowrap;
+      position: relative;
+      vertical-align: middle;
+    }
+
+    .portfolio-table .cell ppp-button {
+      position: absolute;
+      z-index: 10;
+      right: 0;
+      top: 3px;
     }
 
     .portfolio-table .cell.positive {

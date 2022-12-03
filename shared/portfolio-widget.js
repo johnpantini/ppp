@@ -70,9 +70,9 @@ export const portfolioWidgetTemplate = (context, definition) => html`
             <th>За день, %</th>
           </tr>
           </thead>
-          <tbody>
+          <tbody @click="${(x, c) => x.handleBalancesTableClick(c)}">
           ${repeat(
-            (_, c) => [42],
+            (widget, c) => [widget],
             html`
               ${when(
                 (x, c) => c.parent.balances?.size,
@@ -102,6 +102,16 @@ export const portfolioWidgetTemplate = (context, definition) => html`
                           </div>
                         </td>
                         <td class="cell">
+                          ${when(
+                            (___, d) => d.parent.document.hideBalances,
+                            html`
+                              <${'ppp-button'}
+                                class="xsmall"
+                              >
+                                Скрыто
+                              </ppp-button>
+                            `
+                          )}
                           ${(cell) => formatQuantity(cell.size)}
                         </td>
                         <td class="cell"></td>
@@ -300,6 +310,14 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  handleBalancesTableClick({ event }) {
+    const button = event
+      .composedPath()
+      .find((n) => n.tagName?.toLowerCase?.() === 'ppp-button');
+
+    button?.remove();
+  }
+
   async handlePortfolioTableClick({ event }, instrumentType) {
     if (this.groupControl.selection && !this.preview) {
       const symbol = event
@@ -447,7 +465,6 @@ export async function widgetDefinition(definition = {}) {
           <h5>Параметры отображения</h5>
         </div>
         <${'ppp-checkbox'}
-          disabled
           ?checked="${(x) => x.document.hideBalances}"
           ${ref('hideBalances')}
         >
