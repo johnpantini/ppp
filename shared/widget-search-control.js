@@ -58,7 +58,7 @@ export class WidgetSearchControl extends OffClickElement {
           this.activeItem = items[activeItemIndex + 1];
 
           this.activeItem?.scrollIntoView?.({
-            block: 'end'
+            block: 'nearest'
           });
         } else if (event.key === 'ArrowUp' && activeItemIndex > 0) {
           this.activeItem = items[activeItemIndex - 1];
