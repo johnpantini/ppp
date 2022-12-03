@@ -315,7 +315,7 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
       .composedPath()
       .find((n) => n.tagName?.toLowerCase?.() === 'ppp-button');
 
-    button?.remove();
+    button && (button.style.display = 'none');
   }
 
   async handlePortfolioTableClick({ event }, instrumentType) {
