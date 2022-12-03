@@ -22,14 +22,16 @@ export class Denormalization {
     const keysToClear = [];
 
     for (const [k, v] of Object.entries(document)) {
-      if (v) result[k] = v;
+      if (k.endsWith('Id') && typeof v === 'string') {
+        const newKey = k.substring(0, k.length - 2);
 
-      if (k.endsWith('Id') && v) {
+        result[newKey] = void 0;
+
         const ref = this.refs[v];
 
-        if (ref) {
-          const newKey = k.substring(0, k.length - 2);
+        result[k] = v;
 
+        if (ref) {
           result[newKey] = ref;
 
           if (ref.iv) {
@@ -44,9 +46,13 @@ export class Denormalization {
           } else {
             result[newKey] = await this.denormalize(result[newKey]);
           }
+        } else {
+          result[k] = v;
         }
-      } else if (k.endsWith('Id') && !v) {
+      } else if (k.endsWith('Id') && typeof v === 'undefined') {
         keysToClear.push(k.substring(0, k.length - 2));
+      } else {
+        result[k] = v;
       }
     }
 
