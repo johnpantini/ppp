@@ -41,7 +41,7 @@ async function validate(element, options) {
           folding.classList.add('folding-open');
         }
 
-        element?.scrollIntoView();
+        element?.scrollIntoView({ behavior: 'smooth' });
         element?.focus();
       }
 
@@ -67,7 +67,7 @@ async function validate(element, options) {
               folding.classList.add('folding-open');
             }
 
-            element?.scrollIntoView();
+            element?.scrollIntoView({ behavior: 'smooth' });
             element?.focus();
           }
 
@@ -117,7 +117,7 @@ function invalidate(element, options = {}) {
     }
 
     if (!options.skipScrollIntoView) {
-      element?.scrollIntoView();
+      element?.scrollIntoView({ behavior: 'smooth' });
     }
 
     element?.focus();
