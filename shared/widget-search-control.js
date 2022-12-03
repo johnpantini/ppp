@@ -17,6 +17,9 @@ export class WidgetSearchControl extends OffClickElement {
   widget;
 
   @observable
+  activeItem;
+
+  @observable
   ticker;
 
   @observable
@@ -37,8 +40,44 @@ export class WidgetSearchControl extends OffClickElement {
   }
 
   documentKeydownHandler(event) {
+    if (!event.composedPath().find((n) => n === this)) return;
+
     if (event.key === 'Escape') {
       this.open = false;
+    } else if (event.key === 'Enter') {
+      this.activeItem && this.activeItem.click();
+    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      const items = Array.from(this.menuHolder.querySelectorAll('.menu-item'));
+
+      if (items.length) {
+        const activeItemIndex = items.findIndex((i) =>
+          i.classList.contains('active')
+        );
+
+        if (event.key === 'ArrowDown' && activeItemIndex < items.length - 1) {
+          this.activeItem = items[activeItemIndex + 1];
+
+          this.activeItem?.scrollIntoView?.({
+            block: 'end'
+          });
+        } else if (event.key === 'ArrowUp' && activeItemIndex > 0) {
+          this.activeItem = items[activeItemIndex - 1];
+
+          this.activeItem?.scrollIntoView?.({
+            block: 'nearest'
+          });
+        }
+      }
+    }
+  }
+
+  activeItemChanged(oldValue, newValue) {
+    if (oldValue) {
+      oldValue.classList.remove('active');
+    }
+
+    if (newValue) {
+      newValue.classList.add('active');
     }
   }
 
@@ -107,7 +146,12 @@ export class WidgetSearchControl extends OffClickElement {
           this.bonds = bonds.sort((a, b) =>
             a.fullName.localeCompare(b.fullName)
           );
+
           this.searching = false;
+
+          DOM.queueUpdate(() => {
+            this.activeItem = this.menuHolder.querySelector('.menu-item');
+          });
         })
         .catch((error) => {
           console.error(error);
@@ -118,6 +162,7 @@ export class WidgetSearchControl extends OffClickElement {
           this.searching = false;
         });
     } else {
+      this.activeItem = null;
       this.stocks = [];
       this.bonds = [];
       this.ticker = null;

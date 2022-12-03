@@ -73,7 +73,7 @@ export const widgetSearchControlTemplate = (context, definition) => html`
           <div class="divider"></div>
         `
       )}
-      <div class="menu-holder">
+      <div class="menu-holder" ${ref('menuHolder')}>
         <div class="menu">
           ${when(
             (x) => !x.ticker && !x.stocks.length && !x.bonds.length,
@@ -314,6 +314,7 @@ export const widgetSearchControlStyles = (context, definition) => css`
     cursor: pointer;
   }
 
+  .menu-item.active,
   .menu-item:hover {
     background-color: rgb(243, 245, 248);
   }
