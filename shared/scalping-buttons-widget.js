@@ -50,7 +50,7 @@ export class PppScalpingButtonsWidget extends WidgetWithInstrument {}
 
 export async function widgetDefinition(definition = {}) {
   return {
-    type: WIDGET_TYPES.TIMELINE,
+    type: WIDGET_TYPES.SCALPING_BUTTONS,
     collection: 'PPP',
     title: html`Скальперские кнопки`,
     description: html`<span class="positive">Скальперские кнопки</span>
