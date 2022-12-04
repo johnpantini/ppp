@@ -12,6 +12,12 @@ export class SideNav extends FoundationElement {
   expanded;
 
   @attr({ mode: 'boolean' })
+  static;
+
+  @attr({ mode: 'boolean' })
+  inline;
+
+  @attr({ mode: 'boolean' })
   hovered;
 
   @observable
@@ -20,28 +26,30 @@ export class SideNav extends FoundationElement {
   collapseToggle;
 
   constructor() {
-    super(...arguments);
+    super();
 
     this.topLevelItems = [];
   }
 
   connectedCallback() {
-    super.connectedCallback(...arguments);
+    super.connectedCallback();
 
     const parent = this;
 
-    ['pointerleave', 'pointercancel'].forEach((type) => {
-      this.collapseToggle.addEventListener(
-        type,
-        (event) => {
-          if (event.relatedTarget && !event.relatedTarget.closest('.wrapper'))
-            parent.hovered = false;
-        },
-        {
-          passive: true
-        }
-      );
-    });
+    if (!this.static) {
+      ['pointerleave', 'pointercancel'].forEach((type) => {
+        this.collapseToggle.addEventListener(
+          type,
+          (event) => {
+            if (event.relatedTarget && !event.relatedTarget.closest('.wrapper'))
+              parent.hovered = false;
+          },
+          {
+            passive: true
+          }
+        );
+      });
+    }
 
     setTimeout(() => {
       this.ready = true;

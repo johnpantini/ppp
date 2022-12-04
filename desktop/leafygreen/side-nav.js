@@ -5,14 +5,13 @@ import { html } from '../../shared/template.js';
 import { repeat } from '../../shared/element/templating/repeat.js';
 import { slotted } from '../../shared/element/templating/slotted.js';
 import { ref } from '../../shared/element/templating/ref.js';
-
+import { when } from '../../shared/element/templating/when.js';
 import { chevronLeft } from './icons/chevron-left.js';
 import { chevronRight } from './icons/chevron-right.js';
 
-// TODO - aria attributes
 export const sideNavTemplate = (context, definition) => html`
   <template>
-    <div class="wrapper">
+    <div class="wrapper" ?inline="${(x) => x.inline}">
       <nav
         class="nav"
         ?expanded="${(x) => x.expanded}"
@@ -35,39 +34,51 @@ export const sideNavTemplate = (context, definition) => html`
             ></slot>
           </ul>
         </div>
-        <div class="collapsed-content">
-          <ul>
-            ${repeat(
-              (x) => x.topLevelItems,
-              html` <li>${(x) => html`${x.firstElementChild.outerHTML}`}</li>`
-            )}
-          </ul>
-        </div>
+        ${when(
+          (x) => !x.static,
+          html`
+            <div class="collapsed-content">
+              <ul>
+                ${repeat(
+                  (x) => x.topLevelItems,
+                  html` <li>
+                    ${(x) => html`${x.firstElementChild.outerHTML}`}
+                  </li>`
+                )}
+              </ul>
+            </div>
+          `
+        )}
       </nav>
-      <button
-        ${ref('collapseToggle')}
-        class="collapse-toggle"
-        ?expanded="${(x) => x.expanded}"
-        @click="${(x) => (x.expanded = !x.expanded)}"
-      >
-        <div class="icon-wrapper">
-          ${(x) =>
-            x.expanded
-              ? chevronLeft({ role: 'presentation' })
-              : chevronRight({ role: 'presentation' })}
-        </div>
-      </button>
+      ${when(
+        (x) => !x.static,
+        html`
+          <button
+            ${ref('collapseToggle')}
+            class="collapse-toggle"
+            ?expanded="${(x) => x.expanded}"
+            @click="${(x) => (x.expanded = !x.expanded)}"
+          >
+            <div class="icon-wrapper">
+              ${(x) =>
+                x.expanded
+                  ? chevronLeft({ role: 'presentation' })
+                  : chevronRight({ role: 'presentation' })}
+            </div>
+          </button>
+        `
+      )}
     </div>
   </template>
 `;
 
-// TODO - design tokens
 export const sideNavStyles = (context, definition) =>
   css`
     ${notDefined}
     :host {
       width: 48px;
       position: relative;
+      user-select: none;
     }
 
     :host([ready]) {
@@ -97,6 +108,12 @@ export const sideNavStyles = (context, definition) =>
       bottom: 0;
       left: 0;
       display: flex;
+    }
+
+    .wrapper[inline] {
+      position: absolute;
+      width: 183px;
+      height: 100%;
     }
 
     .nav {
@@ -152,6 +169,10 @@ export const sideNavStyles = (context, definition) =>
       overflow: hidden auto;
       position: absolute;
       inset: 0;
+    }
+
+    :host([inline]) .expanded-content > ul {
+      padding: 0;
     }
 
     .expanded-content > ul {
