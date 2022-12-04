@@ -51,6 +51,12 @@ export class Page extends FoundationElement {
   page;
 
   /**
+   * If true, the loading of the page has been completed.
+   */
+  @observable
+  ready;
+
+  /**
    * The current loading status.
    * @type {boolean}
    */
@@ -181,7 +187,8 @@ export class Page extends FoundationElement {
           errorMessage: e?.pppMessage ?? e?.message ?? 'Ошибка загрузки.'
         });
       case 'NotFoundError':
-        this.page.notFound();
+        if (typeof this.page.notFound === 'function') this.page.notFound();
+        else this.notFound?.();
 
         return invalidate(ppp.app.toast, {
           errorMessage: e?.message ?? 'Документ с таким ID не существует.'
@@ -542,6 +549,8 @@ export class Page extends FoundationElement {
         }
 
         this.$emit('ready');
+        this.ready = true;
+        Observable.notify(this.page, 'view');
       } catch (e) {
         this.document = {};
 
@@ -549,7 +558,11 @@ export class Page extends FoundationElement {
       } finally {
         this.endOperation();
       }
-    } else this.$emit('ready');
+    } else {
+      this.$emit('ready');
+      this.ready = true;
+      Observable.notify(this.page, 'view');
+    }
   }
 
   #keypressHandler(e) {
@@ -592,7 +605,11 @@ export class Page extends FoundationElement {
 
       if (!this.hasAttribute('data-disable-auto-read'))
         void this.readDocument();
-      else this.$emit('ready');
+      else {
+        this.$emit('ready');
+        this.ready = true;
+        Observable.notify(this.page, 'view');
+      }
     } else {
       // This instance is the ppp-page itself.
       this.page = this;
@@ -646,7 +663,11 @@ export class PageWithDocuments {
   connectedCallback() {
     if (!this.hasAttribute('data-disable-auto-populate'))
       void this.populateDocuments();
-    else this.$emit('ready');
+    else {
+      this.$emit('ready');
+      this.ready = true;
+      Observable.notify(this.page, 'view');
+    }
   }
 
   async populateDocuments() {
@@ -684,6 +705,8 @@ export class PageWithDocuments {
       }
 
       this.$emit('ready');
+      this.ready = true;
+      Observable.notify(this.page, 'view');
     } catch (e) {
       this.documents = [];
 
