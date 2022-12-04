@@ -161,13 +161,13 @@ export class WidgetPage extends Page {
 
     const $set = {
       name: this.name.value.trim(),
+      reportedType: this.widgetDefinition.type,
       pusherApiId: this.pusherApiId.value,
       updatedAt: new Date()
     };
 
     const $setOnInsert = {
       type: this.document.type,
-      reportedType: this.widgetDefinition.type,
       collection: this.widgetDefinition.collection,
       createdAt: new Date()
     };
