@@ -59,6 +59,11 @@ export const tableStyles = (context, definition) => css`
     color: rgb(61, 79, 88);
   }
 
+  :host([selectable]) .row:hover {
+    background-color: rgb(249, 251, 250);
+    cursor: pointer;
+  }
+
   .cell {
     min-width: 40px;
     padding: 8px;

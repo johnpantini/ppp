@@ -38,7 +38,7 @@ export const tableTemplate = (context, definition) => html`
       <tbody>
         ${repeat(
           (x) => x.sort(x.rows),
-          html` <tr role="row" class="row">
+          html` <tr role="row" class="row" :datum="${(x) => x.datum}">
             ${datumTemplate}
           </tr>`
         )}
