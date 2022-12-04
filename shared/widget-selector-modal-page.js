@@ -1,8 +1,11 @@
+/** @decorator */
+
 import { Page, PageWithDocuments } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { Observable } from './element/observation/observable.js';
 import { uuidv4 } from './ppp-crypto.js';
 import { later } from './later.js';
+import { observable } from './element/observation/observable.js';
 import ppp from '../ppp.js';
 
 function onNavigateStart() {
@@ -12,6 +15,9 @@ function onNavigateStart() {
 export class WidgetSelectorModalPage extends Page {
   collection = 'widgets';
 
+  @observable
+  activeItem;
+
   async populate() {
     return (context) => {
       return context.services
@@ -19,18 +25,28 @@ export class WidgetSelectorModalPage extends Page {
         .db('ppp')
         .collection('[%#this.page.view.collection%]')
         .find({
-          removed: { $ne: true }
+          removed: { $ne: true },
+          reportedType: '[%#this.page.view.activeItem%]'
         })
         .sort({ updatedAt: -1 });
     };
   }
 
+  async activeItemChanged(oldValue, newValue) {
+    ppp.app.setSetting('widgetSelectorChoice', newValue);
+
+    if (oldValue) await this.populateDocuments();
+  }
+
   connectedCallback() {
+    this.activeItem = ppp.app.settings.widgetSelectorChoice ?? 'order';
+
     ppp.app.addEventListener('navigatestart', onNavigateStart, {
       passive: true
     });
 
-    return super.connectedCallback();
+    this.setAttribute('data-disable-auto-populate', true);
+    super.connectedCallback();
   }
 
   disconnectedCallback() {
@@ -39,9 +55,28 @@ export class WidgetSelectorModalPage extends Page {
     super.disconnectedCallback();
   }
 
+  async handleTypeSelectorClick({ event }) {
+    const item = event
+      .composedPath()
+      .find((n) => n.tagName?.toLowerCase?.() === 'ppp-side-nav-item');
+
+    if (item) {
+      this.activeItem = item.getAttribute('slug');
+    }
+  }
+
+  async handleWidgetListClick({ event }) {
+    if (
+      !event.composedPath().find((n) => n.tagName?.toLowerCase?.() === 'button')
+    ) {
+      const datum = event.composedPath().find((n) => n.datum).datum;
+
+      await this.selectWidget(datum);
+    }
+  }
+
   async reload() {
-    if (!this.hasAttribute('data-disable-auto-populate'))
-      await this.page.view.populateDocuments();
+    await this.page.view.populateDocuments();
   }
 
   async selectWidget(datum) {
@@ -51,6 +86,7 @@ export class WidgetSelectorModalPage extends Page {
       const workspacePage =
         ppp.app.shadowRoot.querySelector('ppp-workspace-page');
 
+      // Refs will be OK
       const widget = await workspacePage.denormalization.denormalize(datum);
       const uniqueID = uuidv4();
 
