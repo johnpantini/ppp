@@ -41,12 +41,26 @@ export const workspacePageTemplate = (context, definition) => html`
                 <div class="text">Разместить виджет</div>
               </button>
               <footer>
-                Чтобы в дальнейшем добавлять виджеты на рабочую область,
-                выберите терминал в боковом меню и нажмите&nbsp;<code
-                class="hotkey"
-                slot="end"
-              >+W</code
-              >
+                <div
+                  style="display: flex; flex-direction: column; text-align: center; gap: 8px">
+                  <div>
+                    Чтобы в дальнейшем добавлять виджеты на рабочую область,
+                    выберите терминал в боковом меню и нажмите&nbsp;<code
+                    class="hotkey"
+                    slot="end"
+                  >+W</code
+                  >
+                  </div>
+                  <div>
+                    Для того, чтобы скрыть боковую панель и увеличить доступное
+                    рабочее пространство, выполните двойной щелчок мышью с
+                    зажатой клавишей&nbsp;<code
+                    class="hotkey"
+                    slot="end"
+                  >Ctrl</code
+                  >
+                  </div>
+                </div>
               </footer>
             </div>
             <span slot="actions"></span>
