@@ -49,27 +49,24 @@ export const appTemplate = (context, definition) => html`
     ${when(
       () => ppp?.keyVault.ok(),
       html`
-        <ppp-modal ${
-          /**
-           * @var widgetSelectorModal
-           */
-          ref('widgetSelectorModal')
-        } dismissible>
+        <ppp-modal
+          ${
+            /**
+             * @var widgetSelectorModal
+             */
+            ref('widgetSelectorModal')
+          }
+          dismissible
+        >
           <span slot="title">Разместить виджет</span>
           <div slot="body">
             <div class="description">
-              Чтобы разместить виджет на текущей рабочей области, нажмите кнопку&nbsp;
-              <${'ppp-button'}
-                class="xsmall"
-                style="position: relative; top: -4px;"
-              >
-                Выбрать
-              </ppp-button>&nbsp;
-              в соответствующей строке таблицы.
+              Чтобы разместить виджет на текущей рабочей области, найдите
+              виджет, используя боковое меню, а затем нажмите на строку в таблице.
             </div>
-            <ppp-widget-selector-modal-page ${ref(
-              'widgetSelectorModalPage'
-            )}></ppp-widget-selector-modal-page>
+            <ppp-widget-selector-modal-page
+              ${ref('widgetSelectorModalPage')}
+            ></ppp-widget-selector-modal-page>
           </div>
         </ppp-modal>
       `
