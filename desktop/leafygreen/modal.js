@@ -19,6 +19,21 @@ export const modalStyles = css`
     opacity: 0;
     z-index: 100;
     visibility: hidden;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.4);
+    scrollbar-width: thin;
+  }
+
+  :host-context(*)::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  :host-context(*)::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  :host-context(*)::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.4);
   }
 
   :host([visible]) {
