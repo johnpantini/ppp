@@ -292,7 +292,7 @@ export async function widgetDefinition(definition = {}) {
     type: WIDGET_TYPES.ORDERBOOK,
     collection: 'PPP',
     title: html`Книга заявок`,
-    tags: ['Цена', 'Объём', 'Пул ликвидности'],
+    tags: ['Биржевой стакан'],
     description: html`<span class="positive">Книга заявок</span> отображает
       таблицу лимитных заявок финансового инструмента на покупку и продажу.`,
     customElement: PppOrderbookWidget.compose(definition),

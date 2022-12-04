@@ -104,12 +104,8 @@ export const widgetPageTemplate = (context, definition) => html`
                               <div slot="text">
                                 Книга заявок
                                 <div class="widget-type-tags">
-                                  <${'ppp-badge'} appearance="blue">Цена
-                                  </ppp-badge>
-                                  <${'ppp-badge'} appearance="blue">Объём
-                                  </ppp-badge>
-                                  <${'ppp-badge'} appearance="blue">Пул
-                                    ликвидности
+                                  <${'ppp-badge'} appearance="blue">Биржевой
+                                    стакан
                                   </ppp-badge>
                                 </div>
                               </div>
@@ -126,12 +122,8 @@ export const widgetPageTemplate = (context, definition) => html`
                               <div slot="text">
                                 Лента всех сделок
                                 <div class="widget-type-tags">
-                                  <${'ppp-badge'} appearance="blue">Цена
-                                  </ppp-badge>
-                                  <${'ppp-badge'} appearance="blue">Объём
-                                  </ppp-badge>
-                                  <${'ppp-badge'} appearance="blue">Пул
-                                    ликвидности
+                                  <${'ppp-badge'} appearance="blue">Лента
+                                    обезличенных сделок
                                   </ppp-badge>
                                 </div>
                               </div>
@@ -153,13 +145,24 @@ export const widgetPageTemplate = (context, definition) => html`
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
                                 x.document._id &&
+                                x.document.type !== 'instruments'}"
+                              value="instruments"
+                            >
+                              <span slot="text">Инструменты</span>
+                              <img draggable="false" alt="Инструменты"
+                                   slot="icon"
+                                   src="static/widgets/instruments.svg"/>
+                            </ppp-widget-type-radio>
+                            <ppp-widget-type-radio
+                              ?disabled="${(x) =>
+                                x.document._id &&
                                 x.document.type !== 'timeline'}"
                               value="timeline"
                             >
                               <span slot="text">Лента операций</span>
                               <img draggable="false" alt="История операций"
                                    slot="icon"
-                                   src="static/widgets/trade-history.svg"/>
+                                   src="static/widgets/timeline.svg"/>
                             </ppp-widget-type-radio>
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>

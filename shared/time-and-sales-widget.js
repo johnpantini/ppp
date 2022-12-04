@@ -262,7 +262,7 @@ export async function widgetDefinition(definition = {}) {
     type: WIDGET_TYPES.TIME_AND_SALES,
     collection: 'PPP',
     title: html`Лента всех сделок`,
-    tags: ['Цена', 'Объём', 'Пул ликвидности'],
+    tags: ['Лента обезличенных сделок'],
     description: html`<span class="positive">Лента всех сделок</span> отображает
       обезличенные сделки с финансовым инструментом по всем доступным рыночным
       центрам.`,
