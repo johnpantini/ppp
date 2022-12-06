@@ -91,6 +91,12 @@ export const sideNavItemStyles = (context, definition) =>
       color: rgb(184, 196, 194) !important;
     }
 
+    .content {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
     .start,
     .end {
       display: inline-flex;
