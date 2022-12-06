@@ -60,6 +60,8 @@ export class Widget extends FoundationElement {
           minWidth: this.widgetDefinition.minWidth ?? 275,
           grid: [1, 1],
           start: (event) => {
+            this.style.zIndex = ++this.container.zIndex;
+
             if (event.ctrlKey) $(this).resizable('option', 'grid', [1, 1]);
           },
           stop: (event, ui) => {
