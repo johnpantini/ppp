@@ -53,7 +53,8 @@ export const TRADER_DATUM = {
   MARKET_PRINT: 'market-print',
   POSITION: 'position',
   POSITION_SIZE: 'position-size',
-  POSITION_AVERAGE: 'position-average'
+  POSITION_AVERAGE: 'position-average',
+  CURRENT_ORDER: 'current-order'
 };
 
 export const WIDGET_TYPES = {
