@@ -267,7 +267,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async cancelOrder(order) {
+  async cancelLimitOrder(order) {
     if (order.orderType === 'limit') {
       await this.syncAccessToken();
 
@@ -297,6 +297,32 @@ class AlorOpenAPIV2Trader extends Trader {
 
   async cancelAllLimitOrders() {
     await this.syncAccessToken();
+
+    const request = await fetch(
+      `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.#jwt}`
+        }
+      }
+    );
+
+    if (request.status === 200) {
+      const orders = await request.json();
+
+      for (const o of orders) {
+        if (o.status === 'working') {
+          o.orderType = o.type;
+          o.orderId = o.id;
+
+          await this.cancelLimitOrder(o);
+        }
+      }
+    } else {
+      throw new TradingError({
+        message: await (await request).text()
+      });
+    }
   }
 
   async #connectWebSocket(reconnect) {

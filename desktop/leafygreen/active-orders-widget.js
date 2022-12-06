@@ -20,8 +20,7 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
     }
 
     .active-orders-widget-cancel-orders {
-      opacity: 0.2;
-      cursor: not-allowed;
+      cursor: pointer;
       min-height: 24px;
       min-width: 24px;
       padding: 4px 8px;
@@ -36,6 +35,11 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       vertical-align: middle;
       justify-content: center;
       background-color: rgb(243, 245, 248);
+      transition: background-color 150ms ease-in-out 0s;
+    }
+
+    .active-orders-widget-cancel-orders:hover {
+      background-color: rgb(223, 230, 237);
     }
 
     .active-orders-widget-cancel-orders span {

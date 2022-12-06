@@ -65,7 +65,6 @@ export const activeOrdersWidgetTemplate = (context, definition) => html`
             </ppp-widget-radio-box-group>
           </div>
           <button
-            disabled
             class="active-orders-widget-cancel-orders"
             title="Отменить все заявки"
             @click="${(x) => x.cancelAllOrders()}"
@@ -231,7 +230,7 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
-      await this.ordersTrader?.cancelOrder?.(order);
+      await this.ordersTrader?.cancelLimitOrder?.(order);
 
       this.notificationsArea.success({
         title: 'Заявка отменена'
@@ -249,13 +248,14 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   async cancelAllOrders() {
-    // TODO
-    return;
-
     this.topLoader.start();
 
     try {
       await this.ordersTrader?.cancelAllLimitOrders?.();
+
+      this.notificationsArea.success({
+        title: 'Заявки отменены'
+      });
     } catch (e) {
       console.log(e);
 
