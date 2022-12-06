@@ -14,6 +14,7 @@ import {
   formatPrice,
   priceCurrencySymbol
 } from './intl.js';
+import { debounce } from './ppp-throttle.js';
 import ppp from '../ppp.js';
 
 await Promise.all([
@@ -229,13 +230,13 @@ export const orderWidgetTemplate = (context, definition) => html`
                     <div class="widget-summary-line">
                       <span>Доступно</span>
                       <span class="positive">
-                        ${(x) => x.formatPrice(x.buyingPowerQuantity)}
+                        ${(x) => x.buyingPowerQuantity ?? '—'}
                       </span>
                     </div>
                     <div class="widget-summary-line">
                       <span>С плечом</span>
                       <span class="positive">
-                        ${(x) => x.formatPrice(x.marginBuyingPowerQuantity)}
+                        ${(x) => x.marginBuyingPowerQuantity ?? '—'}
                       </span>
                     </div>
                   </div>
@@ -243,13 +244,13 @@ export const orderWidgetTemplate = (context, definition) => html`
                     <div class="widget-summary-line">
                       <span>Доступно</span>
                       <span class="negative">
-                        ${(x) => x.formatPrice(x.sellingPowerQuantity)}
+                        ${(x) => x.sellingPowerQuantity ?? '—'}
                       </span>
                     </div>
                     <div class="widget-summary-line">
                       <span>С плечом</span>
                       <span class="negative">
-                        ${(x) => x.formatPrice(x.marginSellingPowerQuantity)}
+                        ${(x) => x.marginSellingPowerQuantity ?? '—'}
                       </span>
                     </div>
                   </div>
@@ -426,6 +427,49 @@ export class PppOrderWidget extends WidgetWithInstrument {
       this.calculateTotalAmount();
       this.price.focus();
     }
+  }
+
+  @debounce(250)
+  calculateEstimate() {
+    if (this.instrument && typeof this.ordersTrader?.estimate === 'function') {
+      this.marginBuyingPowerQuantity = '—';
+      this.marginSellingPowerQuantity = '—';
+      this.commission = '—';
+      this.buyingPowerQuantity = '—';
+      this.sellingPowerQuantity = '—';
+
+      const price = parseFloat(this.price.value.replace(',', '.'));
+
+      if (!isNaN(price) && price) {
+        this.ordersTrader
+          .estimate(
+            this.instrument,
+            parseFloat(this.price.value.replace(',', '.')),
+            parseInt(this.quantity.value || '0')
+          )
+          .then((estimate) => {
+            this.marginBuyingPowerQuantity = estimate.marginBuyingPowerQuantity;
+            this.marginSellingPowerQuantity =
+              estimate.marginSellingPowerQuantity;
+            this.commission = estimate.commission;
+            this.buyingPowerQuantity = estimate.buyingPowerQuantity;
+            this.sellingPowerQuantity = estimate.sellingPowerQuantity;
+          })
+          .catch((error) => {
+            console.log(error);
+
+            this.error({
+              title: 'Ошибка заявки',
+              text: 'Не удалось рассчитать комиссию.'
+            });
+          });
+      }
+    }
+  }
+
+  calculateTotalAmount() {
+    super.calculateTotalAmount();
+    this.calculateEstimate();
   }
 
   setQuantity(quantity) {

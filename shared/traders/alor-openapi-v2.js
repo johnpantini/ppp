@@ -267,6 +267,45 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  async estimate(instrument, price, quantity) {
+    await this.syncAccessToken();
+
+    const request = await fetch(
+      'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/estimate',
+      {
+        method: 'POST',
+        cache: 'no-cache',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.#jwt}`
+        },
+        body: JSON.stringify({
+          portfolio: this.document.portfolio,
+          ticker: this.#getSymbol(instrument),
+          exchange: this.document.exchange,
+          price,
+          lotQuantity: quantity
+        })
+      }
+    );
+
+    if (request.status === 200) {
+      const response = await request.json();
+
+      return {
+        marginSellingPowerQuantity: response.quantityToSell,
+        marginBuyingPowerQuantity: response.quantityToBuy,
+        sellingPowerQuantity: response.notMarginQuantityToSell,
+        buyingPowerQuantity: response.notMarginQuantityToBuy,
+        commission: response.commission
+      };
+    } else {
+      throw new TradingError({
+        message: await (await request).text()
+      });
+    }
+  }
+
   async cancelLimitOrder(order) {
     if (order.orderType === 'limit') {
       await this.syncAccessToken();
