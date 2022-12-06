@@ -19,6 +19,8 @@ export class Trader {
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE:
         return 'POSITIONS';
+      case TRADER_DATUM.CURRENT_ORDER:
+        return 'ORDERS';
     }
   }
 
