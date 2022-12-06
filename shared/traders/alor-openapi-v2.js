@@ -31,10 +31,13 @@ class AlorOpenAPIV2Trader extends Trader {
 
   document = {};
 
-  positions = {};
+  positions = new Map();
+
+  orders = new Map();
 
   subs = {
     quotes: new Map(),
+    orders: new Map(),
     positions: new Map(),
     orderbook: new Map(),
     allTrades: new Map()
@@ -42,6 +45,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
   refs = {
     quotes: new Map(),
+    orders: new Map(),
     positions: new Map(),
     orderbook: new Map(),
     allTrades: new Map()
@@ -172,7 +176,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (order.message === 'success') {
       return {
-        orderID: order.orderNumber
+        orderId: order.orderNumber
       };
     } else {
       throw new TradingError({
@@ -219,7 +223,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (order.message === 'success') {
       return {
-        orderID: order.orderNumber
+        orderId: order.orderNumber
       };
     } else {
       throw new TradingError({
@@ -261,6 +265,38 @@ class AlorOpenAPIV2Trader extends Trader {
         message: await (await request).text()
       });
     }
+  }
+
+  async cancelOrder(order) {
+    if (order.orderType === 'limit') {
+      await this.syncAccessToken();
+
+      const qs = `portfolio=${this.document.portfolio}&exchange=${this.document.exchange}&stop=false&format=Simple`;
+      const request = await fetch(
+        `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/${order.orderId}?${qs}`,
+        {
+          method: 'DELETE',
+          cache: 'no-cache',
+          headers: {
+            Authorization: `Bearer ${this.#jwt}`
+          }
+        }
+      );
+
+      if (request.status === 200)
+        return {
+          orderId: order.orderId
+        };
+      else {
+        throw new TradingError({
+          message: await (await request).text()
+        });
+      }
+    }
+  }
+
+  async cancelAllLimitOrders() {
+    await this.syncAccessToken();
   }
 
   async #connectWebSocket(reconnect) {
@@ -352,7 +388,7 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             // 4. Positions
-            this.positions = {};
+            this.positions.clear();
 
             for (const [instrumentId, { instrument, refCount }] of this.refs
               .positions) {
@@ -368,6 +404,31 @@ class AlorOpenAPIV2Trader extends Trader {
                 this.connection.send(
                   JSON.stringify({
                     opcode: 'PositionsGetAndSubscribeV2',
+                    portfolio: this.document.portfolio,
+                    exchange: this.document.exchange,
+                    format: 'Simple',
+                    token: this.#jwt,
+                    guid
+                  })
+                );
+              }
+            }
+
+            // 5. Current orders
+            for (const [instrumentId, { instrument, refCount }] of this.refs
+              .orders) {
+              if (refCount > 0) {
+                const guid = this.#reqId();
+
+                this.refs.orders.get(instrumentId).guid = guid;
+                this.#guids.set(guid, {
+                  instrument,
+                  refs: this.refs.orders
+                });
+
+                this.connection.send(
+                  JSON.stringify({
+                    opcode: 'OrdersGetAndSubscribeV2',
                     portfolio: this.document.portfolio,
                     exchange: this.document.exchange,
                     format: 'Simple',
@@ -408,6 +469,8 @@ class AlorOpenAPIV2Trader extends Trader {
               return this.onAllTradesMessage({ data: payload.data });
             } else if (payload.data && refs === this.refs.positions) {
               return this.onPositionsMessage({ data: payload.data });
+            } else if (payload.data && refs === this.refs.orders) {
+              return this.onOrdersMessage({ data: payload.data });
             }
           };
         }
@@ -435,7 +498,8 @@ class AlorOpenAPIV2Trader extends Trader {
       [TRADER_DATUM.POSITION_AVERAGE]: [
         this.subs.positions,
         this.refs.positions
-      ]
+      ],
+      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders]
     }[datum];
   }
 
@@ -444,7 +508,10 @@ class AlorOpenAPIV2Trader extends Trader {
     await this.#connectWebSocket();
     await super.subscribeField({ source, field, datum });
 
-    if (datum === TRADER_DATUM.POSITION) {
+    if (
+      datum === TRADER_DATUM.POSITION ||
+      datum === TRADER_DATUM.CURRENT_ORDER
+    ) {
       await this.#cacheRequestPendingSuccess;
     }
 
@@ -452,12 +519,24 @@ class AlorOpenAPIV2Trader extends Trader {
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE: {
-        for (const symbol of Object.keys(this.positions)) {
+        for (const [symbol, data] of this.positions) {
           this.onPositionsMessage({
-            data: this.positions[symbol],
+            data,
             fromCache: true
           });
         }
+
+        break;
+      }
+      case TRADER_DATUM.CURRENT_ORDER: {
+        for (const [symbol, data] of this.orders) {
+          this.onOrdersMessage({
+            data,
+            fromCache: true
+          });
+        }
+
+        break;
       }
     }
   }
@@ -518,11 +597,24 @@ class AlorOpenAPIV2Trader extends Trader {
         })
       );
     } else if (refs === this.refs.positions) {
-      this.positions = {};
+      this.positions.clear();
 
       this.connection.send(
         JSON.stringify({
           opcode: 'PositionsGetAndSubscribeV2',
+          portfolio: this.document.portfolio,
+          exchange: this.document.exchange,
+          format: 'Simple',
+          token: this.#jwt,
+          guid
+        })
+      );
+    } else if (refs === this.refs.orders) {
+      this.orders.clear();
+
+      this.connection.send(
+        JSON.stringify({
+          opcode: 'OrdersGetAndSubscribeV2',
           portfolio: this.document.portfolio,
           exchange: this.document.exchange,
           format: 'Simple',
@@ -541,7 +633,8 @@ class AlorOpenAPIV2Trader extends Trader {
         refs === this.refs.quotes ||
         refs === this.refs.orderbook ||
         refs === this.refs.allTrades ||
-        refs === this.refs.positions
+        refs === this.refs.positions ||
+        refs === this.refs.orders
       ) {
         this.connection.send(
           JSON.stringify({
@@ -553,7 +646,11 @@ class AlorOpenAPIV2Trader extends Trader {
       }
 
       if (refs === this.refs.positions) {
-        this.positions = {};
+        this.positions.clear();
+      }
+
+      if (refs === this.refs.orders) {
+        this.orders.clear();
       }
     }
   }
@@ -573,10 +670,11 @@ class AlorOpenAPIV2Trader extends Trader {
       });
     }
 
+    // Broadcast positions for order widgets (at least).
     if (this.subs.positions.has(source)) {
-      for (const symbol of Object.keys(this.positions)) {
+      for (const [symbol, data] of this.positions) {
         this.onPositionsMessage({
-          data: this.positions[symbol],
+          data,
           fromCache: true
         });
       }
@@ -681,9 +779,73 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  #findInstrumentInCacheAndPutToPayload(symbol, source, field, payload) {
+    const tx = this.#cacheRequest.result.transaction('instruments', 'readonly');
+    const store = tx.objectStore('instruments');
+    const storeRequest = store.get(symbol);
+
+    storeRequest.onsuccess = (event) => {
+      if (event.target.result) {
+        const instrument = event.target.result;
+
+        if (
+          instrument.exchange?.indexOf(
+            this.getExchange(this.document.exchange)
+          ) > -1
+        ) {
+          payload.instrument = instrument;
+          source[field] = payload;
+        } else {
+          // Try with suffix
+          const symbolWithSuffix = `${symbol}~${this.document.exchange}`;
+          const storeRequestWithSuffix = store.get(symbolWithSuffix);
+
+          storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
+            if (eventWithSuffix.target.result) {
+              payload.instrument = eventWithSuffix.target.result;
+              source[field] = payload;
+            } else {
+              payload.instrument = {
+                symbol: symbolWithSuffix
+              };
+              source[field] = payload;
+            }
+          };
+
+          storeRequestWithSuffix.onerror = (eventWithSuffix) => {
+            console.error(eventWithSuffix.target.error);
+
+            payload.instrument = {
+              symbol: symbolWithSuffix
+            };
+            source[field] = payload;
+
+            this.onError?.(eventWithSuffix.target.error);
+          };
+        }
+      } else {
+        payload.instrument = {
+          symbol
+        };
+        source[field] = payload;
+      }
+    };
+
+    storeRequest.onerror = (event) => {
+      console.error(event.target.error);
+
+      payload.instrument = {
+        symbol
+      };
+      source[field] = payload;
+
+      this.onError?.(event.target.error);
+    };
+  }
+
   onPositionsMessage({ data, fromCache }) {
     if (data) {
-      if (!fromCache) this.positions[data.symbol] = data;
+      if (!fromCache) this.positions.set(data.symbol, data);
 
       for (const [source, fields] of this.subs.positions) {
         for (const { field, datum } of fields) {
@@ -707,70 +869,12 @@ class AlorOpenAPIV2Trader extends Trader {
             if (isBalance) {
               source[field] = payload;
             } else {
-              const tx = this.#cacheRequest.result.transaction(
-                'instruments',
-                'readonly'
+              this.#findInstrumentInCacheAndPutToPayload(
+                data.symbol,
+                source,
+                field,
+                payload
               );
-              const store = tx.objectStore('instruments');
-              const storeRequest = store.get(data.symbol);
-
-              storeRequest.onsuccess = (event) => {
-                if (event.target.result) {
-                  const instrument = event.target.result;
-
-                  if (
-                    instrument.exchange?.indexOf(
-                      this.getExchange(this.document.exchange)
-                    ) > -1
-                  ) {
-                    payload.instrument = instrument;
-                    source[field] = payload;
-                  } else {
-                    // Try with suffix
-                    const symbolWithSuffix = `${data.symbol}~${this.document.exchange}`;
-                    const storeRequestWithSuffix = store.get(symbolWithSuffix);
-
-                    storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
-                      if (eventWithSuffix.target.result) {
-                        payload.instrument = eventWithSuffix.target.result;
-                        source[field] = payload;
-                      } else {
-                        payload.instrument = {
-                          symbol: symbolWithSuffix
-                        };
-                        source[field] = payload;
-                      }
-                    };
-
-                    storeRequestWithSuffix.onerror = (eventWithSuffix) => {
-                      console.error(eventWithSuffix.target.error);
-
-                      payload.instrument = {
-                        symbol: symbolWithSuffix
-                      };
-                      source[field] = payload;
-
-                      this.onError?.(eventWithSuffix.target.error);
-                    };
-                  }
-                } else {
-                  payload.instrument = {
-                    symbol: data.symbol
-                  };
-                  source[field] = payload;
-                }
-              };
-
-              storeRequest.onerror = (event) => {
-                console.error(event.target.error);
-
-                payload.instrument = {
-                  symbol: data.symbol
-                };
-                source[field] = payload;
-
-                this.onError?.(event.target.error);
-              };
             }
           } else if (data.symbol === this.#getSymbol(source.instrument)) {
             switch (datum) {
@@ -783,6 +887,39 @@ class AlorOpenAPIV2Trader extends Trader {
 
                 break;
             }
+          }
+        }
+      }
+    }
+  }
+
+  onOrdersMessage({ data, fromCache }) {
+    if (data) {
+      if (!fromCache) this.orders.set(data.symbol, data);
+
+      for (const [source, fields] of this.subs.orders) {
+        for (const { field, datum } of fields) {
+          if (datum === TRADER_DATUM.CURRENT_ORDER) {
+            const payload = {
+              orderId: data.id,
+              symbol: data.symbol,
+              exchange: data.exchange,
+              orderType: data.type,
+              side: data.side,
+              status: data.status,
+              placedAt: data.transTime,
+              endsAt: data.endTime,
+              quantity: data.qty,
+              filled: data.filled,
+              price: data.price
+            };
+
+            this.#findInstrumentInCacheAndPutToPayload(
+              data.symbol,
+              source,
+              field,
+              payload
+            );
           }
         }
       }

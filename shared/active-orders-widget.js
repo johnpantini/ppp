@@ -2,8 +2,18 @@
 
 import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
-import { html } from './template.js';
-import { WIDGET_TYPES } from './const.js';
+import { html, requireComponent } from './template.js';
+import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
+import { Observable, observable } from './element/observation/observable.js';
+import { validate } from './validate.js';
+import { when } from './element/templating/when.js';
+import { repeat } from './element/templating/repeat.js';
+import { cancelOrders } from '../desktop/leafygreen/icons/cancel-orders.js';
+import { trash } from '../desktop/leafygreen/icons/trash.js';
+import { formatAmount, formatPrice, formatQuantity } from './intl.js';
+import ppp from '../ppp.js';
+
+await requireComponent('ppp-widget-radio-box-group');
 
 export const activeOrdersWidgetTemplate = (context, definition) => html`
   <template>
@@ -37,16 +47,270 @@ export const activeOrdersWidgetTemplate = (context, definition) => html`
         </div>
       </div>
       <div class="widget-body">
-        <div class="widget-empty-state-holder">
-          <img draggable="false" src="static/empty-widget-state.svg"/>
-          <span>Виджет сейчас недоступен.</span>
+        <div class="active-orders-widget-controls">
+          <div class="active-orders-widget-tabs">
+            <ppp-widget-radio-box-group
+              class="order-type-selector"
+              @change="${(x) => x.handleOrderTypeChange()}"
+              value="${(x) => x.document.activeTab ?? 'all'}"
+              ${ref('orderTypeSelector')}
+            >
+              <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
+              <ppp-widget-box-radio value="limit"
+              >Лимитные
+              </ppp-widget-box-radio>
+              <ppp-widget-box-radio value="stop" disabled
+              >Отложенные
+              </ppp-widget-box-radio>
+            </ppp-widget-radio-box-group>
+          </div>
+          <button
+            disabled
+            class="active-orders-widget-cancel-orders"
+            title="Отменить все заявки"
+            @click="${(x) => x.cancelAllOrders()}"
+          >
+            <span> ${cancelOrders()} </span>
+          </button>
         </div>
+        <div class="active-orders-widget-order-list">
+          ${when(
+            (x) => x.empty,
+            html`
+              <div class="widget-empty-state-holder">
+                <img draggable="false" src="static/empty-widget-state.svg" />
+                <span>Активных заявок нет.</span>
+              </div>
+            `
+          )}
+          <div class="active-orders-widget-order-list-inner">
+            ${repeat(
+              (x) => x.getOrdersArray(),
+              html`
+                <div class="active-order-holder">
+                  <div class="active-order-holder-inner">
+                    <div class="active-order-card" side="${(x) => x.side}">
+                      <div class="active-order-card-side-indicator"></div>
+                      <div class="active-order-card-payload">
+                        <div class="active-order-card-logo">
+                          <div
+                            style="${(o) =>
+                              `background-image:url(${
+                                'static/instruments/' +
+                                o.instrument.isin +
+                                '.svg'
+                              })`}"
+                          ></div>
+                          ${(o) => o.instrument?.fullName?.[0] ?? ''}
+                        </div>
+                        <div class="active-order-card-text">
+                          <div class="active-order-card-text-name-price">
+                            <div class="active-order-card-text-name">
+                              <span>
+                                <div>
+                                  ${(o) => o.instrument?.fullName ?? o.symbol}
+                                </div>
+                              </span>
+                            </div>
+                            <span>
+                              ${(o) =>
+                                formatAmount(
+                                  o.instrument?.lot *
+                                    o.price *
+                                    (o.quantity - o.filled),
+                                  o.instrument?.currency
+                                )}
+                            </span>
+                          </div>
+                          <div class="active-order-card-text-side-rest">
+                            <div
+                              class="active-order-card-text-side ${(o) =>
+                                o.side === 'buy' ? 'positive' : 'negative'}"
+                            >
+                              ${(o) =>
+                                o.side === 'buy' ? 'Покупка' : 'Продажа'}
+                            </div>
+                            <span>
+                              <div>
+                                ${(o, c) => c.parent.formatRestQuantity(o)}
+                                <span class="active-order-card-dot-divider"
+                                  >•</span
+                                >
+                                ${(o) => formatPrice(o.price, o.instrument)}
+                              </div>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="active-order-card-actions">
+                        <button @click="${(o, c) => c.parent.cancelOrder(o)}">
+                          <span> ${trash()} </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `
+            )}
+          </div>
+        </div>
+        <${'ppp-widget-notifications-area'}
+          ${ref('notificationsArea')}
+        ></ppp-widget-notifications-area>
       </div>
     </div>
   </template>
 `;
 
-export class PppActiveOrdersWidget extends WidgetWithInstrument {}
+export class PppActiveOrdersWidget extends WidgetWithInstrument {
+  @observable
+  ordersTrader;
+
+  @observable
+  currentOrder;
+
+  @observable
+  orders;
+
+  @observable
+  empty;
+
+  currentOrderChanged(oldValue, newValue) {
+    if (newValue?.orderId) {
+      if (newValue.orderType === 'limit') {
+        if (newValue.quantity === newValue.filled)
+          this.orders.delete(newValue.orderId);
+        else this.orders.set(newValue.orderId, newValue);
+
+        Observable.notify(this, 'orders');
+      }
+    }
+  }
+
+  instrumentChanged() {
+    super.instrumentChanged();
+
+    Observable.notify(this, 'orders');
+  }
+
+  getOrdersArray() {
+    const orders = [];
+
+    for (const [k, order] of this.orders ?? []) {
+      if (order.status !== 'working') continue;
+
+      if (this.instrument) {
+        if (order.instrument.symbol === this.instrument.symbol) {
+          orders.push(order);
+        }
+      } else orders.push(order);
+    }
+
+    this.empty = orders.length === 0;
+
+    return orders.sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));
+  }
+
+  handleOrderTypeChange() {
+    void this.applyChanges({
+      $set: {
+        'widgets.$.activeTab': this.orderTypeSelector.value
+      }
+    });
+  }
+
+  formatRestQuantity(order) {
+    if (order.filled === 0) return formatQuantity(order.quantity);
+    else
+      return `${formatQuantity(order.filled)} из ${formatQuantity(
+        order.quantity
+      )}`;
+  }
+
+  async cancelOrder(order) {
+    this.topLoader.start();
+
+    try {
+      await this.ordersTrader?.cancelOrder?.(order);
+
+      this.notificationsArea.success({
+        title: 'Заявка отменена'
+      });
+    } catch (e) {
+      console.log(e);
+
+      this.notificationsArea.error({
+        title: 'Активные заявки',
+        text: 'Не удалось отменить заявку.'
+      });
+    } finally {
+      this.topLoader.stop();
+    }
+  }
+
+  async cancelAllOrders() {
+    // TODO
+    return;
+
+    this.topLoader.start();
+
+    try {
+      await this.ordersTrader?.cancelAllLimitOrders?.();
+    } catch (e) {
+      console.log(e);
+
+      this.notificationsArea.error({
+        title: 'Активные заявки',
+        text: 'Не удалось отменить заявки.'
+      });
+    } finally {
+      this.topLoader.stop();
+    }
+  }
+
+  async connectedCallback() {
+    super.connectedCallback();
+
+    this.empty = true;
+    this.orders = new Map();
+    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
+    this.searchControl.trader = this.ordersTrader;
+
+    if (this.ordersTrader) {
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
+    }
+  }
+
+  async disconnectedCallback() {
+    if (this.ordersTrader) {
+      await this.ordersTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
+    }
+
+    super.disconnectedCallback();
+  }
+
+  async validate() {
+    await validate(this.container.ordersTraderId);
+  }
+
+  async update() {
+    return {
+      $set: {
+        ordersTraderId: this.container.ordersTraderId.value
+      }
+    };
+  }
+}
 
 export async function widgetDefinition(definition = {}) {
   return {
@@ -57,9 +321,42 @@ export async function widgetDefinition(definition = {}) {
       <span class="positive">Активные заявки</span> отображает текущие лимитные
       и отложенные заявки, которые ещё не исполнены и не отменены.`,
     customElement: PppActiveOrdersWidget.compose(definition),
-    maxHeight: 512,
+    maxHeight: 1200,
     maxWidth: 365,
-    minHeight: 365,
-    minWidth: 275
+    defaultHeight: 400,
+    minHeight: 132,
+    minWidth: 242,
+    settings: html`
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер лимитных заявок</h5>
+          <p>
+            Трейдер, который будет источником списка активных лимитных заявок.
+          </p>
+        </div>
+        <ppp-collection-select
+          ${ref('ordersTraderId')}
+          value="${(x) => x.document.ordersTraderId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('traders')
+                .find({
+                  $or: [
+                    { removed: { $ne: true } },
+                    { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-collection-select>
+      </div>
+    `
   };
 }
