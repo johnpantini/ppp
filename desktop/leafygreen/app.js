@@ -62,7 +62,8 @@ export const appTemplate = (context, definition) => html`
           <div slot="body">
             <div class="description">
               Чтобы разместить виджет на текущей рабочей области, найдите
-              виджет, используя боковое меню, а затем нажмите на строку в таблице.
+              виджет, используя боковое меню, а затем нажмите на строку в
+              таблице.
             </div>
             <ppp-widget-selector-modal-page
               ${ref('widgetSelectorModalPage')}
@@ -235,7 +236,9 @@ export const appTemplate = (context, definition) => html`
                       ?active="${(x, c) => c.parent.extension === x._id}"
                       slot="items"
                     >
-                      <span slot="title">${(x) => x.title}</span>
+                      <span slot="title" title="${(x) => x.title}">
+                        ${(x) => x.title}
+                      </span>
                     </ppp-side-nav-item>
                   `
                 )}
