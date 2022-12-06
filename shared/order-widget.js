@@ -116,7 +116,12 @@ export const orderWidgetTemplate = (context, definition) => html`
                   </span>
                 </div>
                 <div class="widget-company-card-item">
-                  <span>В портфеле: ${(x) => x.formatPositionSize()}</span>
+                  <span
+                    style="cursor: pointer"
+                    @click="${(x) => x.setQuantity(x.positionSize)}"
+                  >
+                    В портфеле: ${(x) => x.formatPositionSize()}
+                  </span>
                   <span>Средняя: ${(x) =>
                     x.formatPrice(x.positionAverage ?? 0)}</span>
                 </div>
@@ -420,6 +425,15 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
       this.calculateTotalAmount();
       this.price.focus();
+    }
+  }
+
+  setQuantity(quantity) {
+    if (quantity > 0) {
+      this.quantity.value = parseInt(quantity);
+
+      this.calculateTotalAmount();
+      this.quantity.focus();
     }
   }
 
