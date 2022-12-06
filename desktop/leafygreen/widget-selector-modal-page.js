@@ -56,6 +56,7 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
                 <ppp-side-nav-item
                   slot="items"
                   slug="scalping-buttons"
+                  title="Скальперские кнопки"
                   ?active="${(x) => x.activeItem === 'scalping-buttons'}"
                 >
                   <img draggable="false" alt="Скальперские кнопки"

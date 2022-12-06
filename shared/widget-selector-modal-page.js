@@ -69,9 +69,11 @@ export class WidgetSelectorModalPage extends Page {
     if (
       !event.composedPath().find((n) => n.tagName?.toLowerCase?.() === 'button')
     ) {
-      const datum = event.composedPath().find((n) => n.datum).datum;
+      const datum = event.composedPath().find((n) => n.datum)?.datum;
 
-      await this.selectWidget(datum);
+      if (datum) {
+        await this.selectWidget(datum);
+      }
     }
   }
 
