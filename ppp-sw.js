@@ -3,7 +3,7 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 3;
+const OFFLINE_VERSION = 4;
 const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
@@ -116,8 +116,10 @@ self.addEventListener('fetch', async (event) => {
   // If no fetch handlers call event.respondWith(), the request will be handled
   // by the browser as if there were no service worker involvement.
   if (
-    event.request.destination === 'image' &&
-    event.request.url?.endsWith('.png')
+    (event.request.destination === 'image' &&
+      event.request.url?.endsWith('.png')) ||
+    event.request.url?.endsWith('.sql') ||
+    event.request.url?.endsWith('.json')
   ) {
     return;
   }
