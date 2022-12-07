@@ -113,7 +113,6 @@ export const traderAlorOpenAPIV2PageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               optional
-              type="number"
               placeholder="0,025"
               value="${(x) => x.document.flatCommissionRate}"
               ${ref('flatCommissionRate')}
