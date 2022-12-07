@@ -13,6 +13,13 @@ export class TraderAlorOpenAPIV2Page extends Page {
     await validate(this.brokerId);
     await validate(this.portfolio);
 
+    if (this.flatCommissionRate.value.trim()) {
+      await validate(this.flatCommissionRate, {
+        hook: async (value) => +value > 0 + value <= 100,
+        errorMessage: 'Введите значение в диапазоне от 0 до 100'
+      });
+    }
+
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
@@ -94,6 +101,9 @@ export class TraderAlorOpenAPIV2Page extends Page {
         exchange: this.exchange.value,
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
+          : void 0,
+        flatCommissionRate: this.flatCommissionRate.value
+          ? Math.abs(parseFloat(this.flatCommissionRate.value.replace(',', '.')))
           : void 0,
         useWebsocket: this.useWebsocket.checked,
         version: 1,

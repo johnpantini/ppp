@@ -29,6 +29,18 @@ export function formatPrice(price, instrument) {
   }).format(price);
 }
 
+export function formatCommission(commission, instrument) {
+  if (!instrument || typeof commission !== 'number' || isNaN(commission))
+    return '—';
+
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: instrument.currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 3
+  }).format(commission);
+}
+
 export function formatPriceWithoutCurrency(price, instrument) {
   if (!instrument || typeof price !== 'number' || isNaN(price)) return '—';
 

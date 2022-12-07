@@ -12,6 +12,7 @@ import {
   formatAbsoluteChange,
   formatAmount,
   formatPrice,
+  formatCommission,
   priceCurrencySymbol
 } from './intl.js';
 import { debounce } from './ppp-throttle.js';
@@ -218,7 +219,7 @@ export const orderWidgetTemplate = (context, definition) => html`
                     <span>${(x) =>
                       x.orderTypeTabs.activeid === 'market'
                         ? 'по факту сделки'
-                        : x.formatPrice(x.commission)}</span>
+                        : formatCommission(x.commission, x.instrument)}</span>
                   </div>
                 </div>
               </div>
@@ -383,8 +384,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
-
     this.level1Trader?.instrumentChanged?.(this, oldValue, newValue);
+
+    this.calculateEstimate();
   }
 
   async validate() {
@@ -441,19 +443,27 @@ export class PppOrderWidget extends WidgetWithInstrument {
       const price = parseFloat(this.price.value.replace(',', '.'));
 
       if (!isNaN(price) && price) {
+        const quantity = parseInt(this.quantity.value || '0');
+
         this.ordersTrader
-          .estimate(
-            this.instrument,
-            parseFloat(this.price.value.replace(',', '.')),
-            parseInt(this.quantity.value || '0')
-          )
+          .estimate(this.instrument, price, quantity)
           .then((estimate) => {
             this.marginBuyingPowerQuantity = estimate.marginBuyingPowerQuantity;
             this.marginSellingPowerQuantity =
               estimate.marginSellingPowerQuantity;
-            this.commission = estimate.commission;
             this.buyingPowerQuantity = estimate.buyingPowerQuantity;
             this.sellingPowerQuantity = estimate.sellingPowerQuantity;
+
+            const flatCommissionRate =
+              this.ordersTrader?.document?.flatCommissionRate ?? void 0;
+
+            if (typeof flatCommissionRate === 'undefined') {
+              this.commission = estimate.commission;
+            } else {
+              this.commission =
+                (price * quantity * this.instrument.lot * flatCommissionRate) /
+                100;
+            }
           })
           .catch((error) => {
             console.log(error);

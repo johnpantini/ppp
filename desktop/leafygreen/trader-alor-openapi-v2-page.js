@@ -3,10 +3,7 @@ import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 
-export const traderAlorOpenAPIV2PageTemplate = (
-  context,
-  definition
-) => html`
+export const traderAlorOpenAPIV2PageTemplate = (context, definition) => html`
   <template>
     <form novalidate>
       <${'ppp-page'}>
@@ -105,6 +102,22 @@ export const traderAlorOpenAPIV2PageTemplate = (
               <${'ppp-radio'} value="SPBX">СПБ Биржа</ppp-radio>
               <ppp-radio value="MOEX">Московская биржа</ppp-radio>
             </ppp-radio-group>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Комиссия плоского тарифа</h5>
+            <p>Укажите в % комиссию вашего тарифа, если он отличается от
+              стандартных, предлагаемых брокером.</p>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              optional
+              type="number"
+              placeholder="0,025"
+              value="${(x) => x.document.flatCommissionRate}"
+              ${ref('flatCommissionRate')}
+            ></ppp-text-field>
           </div>
         </section>
         <section>
