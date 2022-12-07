@@ -130,10 +130,12 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
           <div class="label-group">
             <h5>Прокси-ресурс</h5>
             <p>Конечная точка, возвращающая содержимое URL, который будет
-              передаваться в теле запроса.</p>
+              передаваться в теле запроса. Чтобы использовать прямые запросы, не
+              заполняйте поле.</p>
           </div>
           <div class="input-group">
             <ppp-text-field
+              optional
               placeholder="https://example.com"
               value="${(x) => x.document.proxyURL}"
               ${ref('proxyURL')}
@@ -144,7 +146,7 @@ export const serviceSpbexHaltsPageTemplate = (context, definition) => html`
           <div class="label-group">
             <h5>Заголовки запроса</h5>
             <p>Заголовки, которые будут передаваться с запросами к
-              прокси-ресурсу.</p>
+              прокси-ресурсу (или напрямую).</p>
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}

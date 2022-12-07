@@ -46,7 +46,22 @@ $$
 try {
   plv8.execute("select http_set_curlopt('CURLOPT_TIMEOUT_MS', '3000')");
 
-  return plv8.execute(`select content from http_post('[%#ctx.document.proxyURL%]', '{"url":"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30","headers":[%#await ctx.proxyHeadersToJSONString()%]}', 'application/json')`)[0].content
+  let content;
+
+  if ('[%#ctx.document.proxyURL%]'.trim()) {
+    content = plv8.execute(`select content from http_post('[%#ctx.document.proxyURL%]', '{"url":"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30","headers":[%#await ctx.proxyHeadersToJSONString()%]}', 'application/json')`)[0].content;
+  } else {
+    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
+    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
+
+    const fetch = plv8.find_function('ppp_fetch');
+
+    content = fetch('https://spbexchange.ru/ru/about/news.aspx?sectionrss=30', {
+      headers: [%#await ctx.proxyHeadersToJSONString()%]
+    }).responseText;
+  }
+
+  return content
     .match(
       /приостановке организованных торгов ценными бумагами [\s\S]+?<link>(.*?)<\/link>/gi
     )
@@ -81,7 +96,21 @@ $$
 try {
   plv8.execute("select http_set_curlopt('CURLOPT_TIMEOUT_MS', '3000')");
 
-  const pageHtml = plv8.execute(`select content from http_post('[%#ctx.document.proxyURL%]', '{"url":"${url}","headers":[%#await ctx.proxyHeadersToJSONString()%]}', 'application/json')`)[0].content;
+  let pageHtml;
+
+  if ('[%#ctx.document.proxyURL%]'.trim()) {
+    pageHtml = plv8.execute(`select content from http_post('[%#ctx.document.proxyURL%]', '{"url":"${url}","headers":[%#await ctx.proxyHeadersToJSONString()%]}', 'application/json')`)[0].content;
+  } else {
+    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
+    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
+
+    const fetch = plv8.find_function('ppp_fetch');
+
+    pageHtml = fetch(url, {
+      headers: [%#await ctx.proxyHeadersToJSONString()%]
+    }).responseText;
+  }
+
   const name = pageHtml.match(
     /приостановке организованных торгов ценными бумагами (.*?)<\/h1>/i
   )[1];

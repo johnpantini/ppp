@@ -116,14 +116,22 @@ export class ServiceSpbexHaltsPage extends Page {
 
     if (!this.document.bot) this.document.bot = this.botId.datum();
 
-    const [sendTelegramMessage, deploySpbexHalts] = await Promise.all([
-      fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
-      fetch(this.getSQLUrl(`${SERVICES.SPBEX_HALTS}/deploy.sql`)).then((r) =>
-        r.text()
-      )
-    ]);
+    const [sendTelegramMessage, pppFetch, deploySpbexHalts] = await Promise.all(
+      [
+        fetch(this.getSQLUrl('send-telegram-message.sql'), {
+          cache: 'no-cache'
+        }).then((r) => r.text()),
+        fetch(this.getSQLUrl('ppp-fetch.sql'), { cache: 'no-cache' }).then(
+          (r) => r.text()
+        ),
+        fetch(this.getSQLUrl(`${SERVICES.SPBEX_HALTS}/deploy.sql`), {
+          cache: 'no-cache'
+        }).then((r) => r.text())
+      ]
+    );
 
     const query = `${sendTelegramMessage}
+      ${pppFetch}
       ${await new Tmpl().render(this, deploySpbexHalts, {})}`;
 
     await this.executeSQL({
@@ -135,15 +143,16 @@ export class ServiceSpbexHaltsPage extends Page {
   async validate() {
     await validate(this.name);
     await validate(this.supabaseApiId);
-    await validate(this.proxyURL);
 
-    try {
-      new URL(this.proxyURL.value);
-    } catch (e) {
-      invalidate(this.proxyURL, {
-        errorMessage: 'Неверный или неполный URL',
-        raiseException: true
-      });
+    if (this.proxyURL.value.trim()) {
+      try {
+        new URL(this.proxyURL.value);
+      } catch (e) {
+        invalidate(this.proxyURL, {
+          errorMessage: 'Неверный или неполный URL',
+          raiseException: true
+        });
+      }
     }
 
     await validate(this.proxyHeaders);
