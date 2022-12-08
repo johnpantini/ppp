@@ -8,6 +8,7 @@ import { bodyFont } from './design-tokens.js';
 import { when } from '../../shared/element/templating/when.js';
 import ppp from '../../ppp.js';
 
+await requireComponent('ppp-collection-select');
 await requireComponent('ppp-text-field');
 await requireComponent('ppp-widget-type-radio-group');
 

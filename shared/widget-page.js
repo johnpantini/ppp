@@ -7,7 +7,6 @@ import { DOM } from './element/dom.js';
 import { NotFoundError } from './http-errors.js';
 import { Denormalization } from './ppp-denormalize.js';
 import { debounce } from './ppp-throttle.js';
-import { requireComponent } from './template.js';
 import ppp from '../ppp.js';
 
 export class WidgetPage extends Page {
@@ -225,8 +224,6 @@ export class WidgetPage extends Page {
   }
 
   async loadWidget(url = this.getWidgetUrl()) {
-    await requireComponent('ppp-collection-select');
-
     this.loading = true;
 
     if (!url && this.document.type === 'custom') {
