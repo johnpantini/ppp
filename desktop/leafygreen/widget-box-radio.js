@@ -27,7 +27,6 @@ export const widgetBoxRadioStyles = (context, definition) => css`
     border: 1px solid rgb(223, 230, 237);
     border-radius: 4px;
     padding: 0 10px;
-    transition: background-color 150ms ease-in-out 0s;
   }
 
   :host([disabled]) .control {

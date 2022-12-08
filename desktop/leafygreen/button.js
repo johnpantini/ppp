@@ -91,7 +91,6 @@ export const baseButtonStyles = (context, definition) =>
       display: inline-flex;
       align-items: stretch;
       border-radius: 6px;
-      transition: all 150ms ease-in-out;
       position: relative;
       text-decoration: none;
       cursor: pointer;
