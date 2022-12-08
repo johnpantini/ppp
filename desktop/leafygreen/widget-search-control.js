@@ -192,11 +192,11 @@ export const widgetSearchControlStyles = (context, definition) => css`
     border-radius: 4px;
     box-shadow: 0 7px 20px 0 rgb(0 0 0 / 20%);
     transform: translate(0px, -6px);
-    visibility: hidden;
+    display: none;
   }
 
   :host([open]) .popup {
-    visibility: visible;
+    display: initial;
   }
 
   .suggest-area {

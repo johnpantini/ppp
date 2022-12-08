@@ -89,6 +89,18 @@ export class WidgetSearchControl extends OffClickElement {
   openChanged(oldValue, newValue) {
     if (newValue) this.widget.style.overflow = 'visible';
     else this.widget.style.overflow = 'hidden';
+
+    if (this.widget.preview) {
+      if (newValue) {
+        this.widget.style.position = 'absolute';
+        this.widget.parentNode.style.height = `${
+          parseInt(this.widget.style.height) + 8
+        }px`;
+      } else {
+        this.widget.style.position = 'relative';
+        this.widget.parentNode.style.height = null;
+      }
+    }
   }
 
   selectInstrument(instrument) {
