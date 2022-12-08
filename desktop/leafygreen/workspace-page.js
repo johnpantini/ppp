@@ -109,6 +109,7 @@ export const workspacePageStyles = (context, definition) => css`
 
   .widget {
     position: absolute !important;
+    overflow: hidden;
   }
 `;
 
