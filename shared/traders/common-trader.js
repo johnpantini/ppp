@@ -27,7 +27,7 @@ export class Trader {
   fixPrice(instrument, price) {
     const precision = getInstrumentPrecision(instrument);
 
-    price = parseFloat(price?.replace(',', '.'));
+    price = parseFloat(price?.toString?.()?.replace(',', '.'));
 
     if (!price || isNaN(price)) price = 0;
 
