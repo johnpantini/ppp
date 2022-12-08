@@ -59,8 +59,11 @@ export const activeOrdersWidgetTemplate = (context, definition) => html`
               <ppp-widget-box-radio value="limit"
               >Лимитные
               </ppp-widget-box-radio>
-              <ppp-widget-box-radio value="stop" disabled
-              >Отложенные
+              <ppp-widget-box-radio
+                value="stop"
+                disabled
+              >
+                Отложенные
               </ppp-widget-box-radio>
             </ppp-widget-radio-box-group>
           </div>
@@ -94,13 +97,18 @@ export const activeOrdersWidgetTemplate = (context, definition) => html`
                         <div class="active-order-card-logo">
                           <div
                             style="${(o) =>
-                              `background-image:url(${
-                                'static/instruments/' +
-                                o.instrument.isin +
-                                '.svg'
-                              })`}"
+                              o.instrument.isin
+                                ? `background-image:url(${
+                                    'static/instruments/' +
+                                    o.instrument.isin +
+                                    '.svg'
+                                  })`
+                                : ''}"
                           ></div>
-                          ${(o) => o.instrument?.fullName?.[0] ?? ''}
+                          ${(o) =>
+                            o.instrument?.fullName?.[0] ??
+                            o.instrument.symbol[0] ??
+                            ''}
                         </div>
                         <div class="active-order-card-text">
                           <div class="active-order-card-text-name-price">
@@ -324,6 +332,7 @@ export async function widgetDefinition(definition = {}) {
     maxHeight: 1200,
     maxWidth: 365,
     defaultHeight: 400,
+    defaultWidth: 280,
     minHeight: 132,
     minWidth: 242,
     settings: html`

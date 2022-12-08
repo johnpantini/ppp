@@ -152,14 +152,18 @@ export const portfolioWidgetTemplate = (context, definition) => html`
                             <div
                               class="portfolio-row-logo"
                               style="${(cell) =>
-                                `background-image:url(${
-                                  'static/instruments/' +
-                                  cell.instrument.isin +
-                                  '.svg'
-                                })`}"
+                                cell.instrument.isin
+                                  ? `background-image:url(${
+                                      'static/instruments/' +
+                                      cell.instrument.isin +
+                                      '.svg'
+                                    })`
+                                  : ''}"
                             ></div>
                             <div class="portfolio-row-name">
-                              ${(cell) => cell.instrument.fullName}
+                              ${(cell) =>
+                                cell.instrument.fullName ??
+                                cell.instrument.symbol}
                             </div>
                           </div>
                         </td>
