@@ -220,8 +220,8 @@ export const serviceNyseNsdqHaltsPageTemplate = (context, definition) => html`
           <div class="input-group">
             <ppp-text-field
               type="number"
-              placeholder="50"
-              value="${(x) => x.document.depth ?? '50'}"
+              placeholder="1000"
+              value="${(x) => x.document.depth ?? '1000'}"
               ${ref('depth')}
             ></ppp-text-field>
           </div>
