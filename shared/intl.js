@@ -22,6 +22,8 @@ export function formatDate(date) {
 export function formatPrice(price, instrument) {
   if (!instrument || typeof price !== 'number' || isNaN(price)) return '—';
 
+  if (!instrument.currency) return '—';
+
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
     currency: instrument.currency,
@@ -32,6 +34,8 @@ export function formatPrice(price, instrument) {
 export function formatCommission(commission, instrument) {
   if (!instrument || typeof commission !== 'number' || isNaN(commission))
     return '—';
+
+  if (!instrument.currency) return '—';
 
   return new Intl.NumberFormat('ru-RU', {
     style: 'currency',
@@ -118,7 +122,7 @@ export function cyrillicToLatin(text) {
 }
 
 export function priceCurrencySymbol(instrument) {
-  if (instrument) {
+  if (instrument?.currency) {
     return (0)
       .toLocaleString('ru-RU', {
         style: 'currency',
@@ -132,6 +136,8 @@ export function priceCurrencySymbol(instrument) {
 }
 
 export function currencyName(currencyCode) {
+  if (!currencyCode) return '—';
+
   const currencyNames = new Intl.DisplayNames(['ru-RU'], { type: 'currency' });
 
   return currencyNames.of(currencyCode);
