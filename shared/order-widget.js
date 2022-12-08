@@ -361,6 +361,39 @@ export class PppOrderWidget extends WidgetWithInstrument {
         }
       });
     }
+
+    if (this.ordersTrader) {
+      this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
+
+      if (this.document.pusherApi) {
+        const connection = await ppp.getOrCreatePusherConnection(
+          this.document.pusherApi
+        );
+
+        if (connection) {
+          connection
+            .channel('telegram')
+            ?.bind('ticker', this.pusherTelegramHandler);
+        }
+      }
+    }
+  }
+
+  async selectSymbol(symbol) {
+    if (this.ordersTrader) {
+      await this.findAndSelectSymbol(
+        {
+          type: 'stock',
+          symbol,
+          exchange: this.ordersTrader.getExchange()
+        },
+        true
+      );
+    }
+  }
+
+  pusherTelegramHandler(data) {
+    void this.selectSymbol(data.t);
   }
 
   async disconnectedCallback() {
@@ -377,6 +410,20 @@ export class PppOrderWidget extends WidgetWithInstrument {
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
+    }
+
+    if (this.ordersTrader) {
+      if (this.document.pusherApi) {
+        const connection = await ppp.getOrCreatePusherConnection(
+          this.document.pusherApi
+        );
+
+        if (connection) {
+          connection
+            .channel('telegram')
+            ?.unbind('ticker', this.pusherTelegramHandler);
+        }
+      }
     }
 
     super.disconnectedCallback();
@@ -399,6 +446,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
         level1TraderId: this.container.level1TraderId.value,
+        pusherApiId: this.container.pusherApiId.value,
         displaySizeInUnits: this.container.displaySizeInUnits.checked
       }
     };
@@ -547,8 +595,6 @@ export class PppOrderWidget extends WidgetWithInstrument {
 }
 
 export async function widgetDefinition(definition = {}) {
-  await requireComponent('ppp-collection-select');
-
   return {
     type: WIDGET_TYPES.ORDER,
     collection: 'PPP',
@@ -619,6 +665,53 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Интеграция с Pusher</h5>
+          <p>Для управления виджетом из внешних систем.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <ppp-collection-select
+            ${ref('pusherApiId')}
+            placeholder="Опционально, нажмите для выбора"
+            value="${(x) => x.document.pusherApiId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.pusherApi ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('apis')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import('./const.js')).APIS.PUSHER%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.pusherApiId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation(['key'])}"
+          ></ppp-collection-select>
+          <${'ppp-button'}
+            class="margin-top"
+            @click="${() => window.open('?page=api-pusher', '_blank').focus()}"
+            appearance="primary"
+          >
+            Добавить API Pusher
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

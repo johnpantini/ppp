@@ -20,6 +20,32 @@ export class WidgetWithInstrument extends Widget {
     }
   }
 
+  async findAndSelectSymbol(findClause = {}, selectOnThis = false) {
+    const instrument = await ppp.user.functions.findOne(
+      {
+        collection: 'instruments'
+      },
+      findClause
+    );
+
+    if (instrument) {
+      if (selectOnThis) {
+        this.instrument = instrument;
+      }
+
+      Array.from(this.container.shadowRoot.querySelectorAll('.widget'))
+        .filter(
+          (w) =>
+            w !== this &&
+            w?.instrument?._id !== instrument._id &&
+            w?.groupControl.selection === this.groupControl.selection
+        )
+        .forEach((w) => (w.instrument = instrument));
+    }
+
+    return instrument;
+  }
+
   instrumentChanged() {
     if (this.preview) return;
 

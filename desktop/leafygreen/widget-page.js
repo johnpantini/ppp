@@ -190,7 +190,7 @@ export const widgetPageTemplate = (context, definition) => html`
                     <div class="drawer">
                       <div class="drawer-header">
                         <div class="drawer-header-inner">
-                          <h3>Базовые настройки</h3>
+                          <h3>Основные настройки</h3>
                         </div>
                         <div class="drawer-arrow">
                           <div class="drawer-arrow-bg"></div>
@@ -209,59 +209,6 @@ export const widgetPageTemplate = (context, definition) => html`
                                 value="${(x) => x.document.name}"
                                 ${ref('name')}
                               ></ppp-text-field>
-                            </div>
-                          </div>
-                          <div class="widget-settings-section">
-                            <div class="widget-settings-label-group">
-                              <h5>Интеграция с Pusher</h5>
-                              <p>Для управления виджетом из внешних систем.</p>
-                            </div>
-                            <div class="widget-settings-input-group">
-                              <${'ppp-collection-select'}
-                                ${ref('pusherApiId')}
-                                disabled
-                                placeholder="Опционально, нажмите для выбора"
-                                value="${(x) => x.document.pusherApiId}"
-                                :context="${(x) => x}"
-                                :preloaded="${(x) =>
-                                  x.document.pusherApi ?? ''}"
-                                :query="${() => {
-                                  return (context) => {
-                                    return context.services
-                                      .get('mongodb-atlas')
-                                      .db('ppp')
-                                      .collection('apis')
-                                      .find({
-                                        $and: [
-                                          {
-                                            type: `[%#(await import('./const.js')).APIS.PUSHER%]`
-                                          },
-                                          {
-                                            $or: [
-                                              { removed: { $ne: true } },
-                                              {
-                                                _id: `[%#this.document.pusherApiId ?? ''%]`
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      })
-                                      .sort({ updatedAt: -1 });
-                                  };
-                                }}"
-                                :transform="${() =>
-                                  ppp.decryptDocumentsTransformation(['key'])}"
-                              ></ppp-collection-select>
-                              <${'ppp-button'}
-                                class="margin-top"
-                                @click="${() =>
-                                  window
-                                    .open('?page=api-pusher', '_blank')
-                                    .focus()}"
-                                appearance="primary"
-                              >
-                                Добавить API Pusher
-                              </ppp-button>
                             </div>
                           </div>
                           ${when(

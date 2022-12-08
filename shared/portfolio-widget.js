@@ -323,7 +323,7 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
   }
 
   async handlePortfolioTableClick({ event }, instrumentType) {
-    if (this.groupControl.selection && !this.preview) {
+    if (this.groupControl.selection && !this.preview && this.portfolioTrader) {
       const symbol = event
         .composedPath()
         .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
@@ -333,26 +333,13 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
         this.topLoader.start();
 
         try {
-          const instrument = await ppp.user.functions.findOne(
-            {
-              collection: 'instruments'
-            },
-            {
-              type: instrumentType,
-              symbol
-            }
-          );
+          const instrument = await this.findAndSelectSymbol({
+            type: instrumentType,
+            symbol,
+            exchange: this.portfolioTrader.getExchange()
+          });
 
-          if (instrument) {
-            Array.from(this.container.shadowRoot.querySelectorAll('.widget'))
-              .filter(
-                (w) =>
-                  w !== this &&
-                  w?.instrument?._id !== instrument._id &&
-                  w?.groupControl.selection === this.groupControl.selection
-              )
-              .forEach((w) => (w.instrument = instrument));
-          } else {
+          if (!instrument) {
             this.notificationsArea.error({
               title: 'Портфель',
               text: 'Инструмент не найден в базе данных.'

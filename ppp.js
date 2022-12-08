@@ -19,6 +19,8 @@ export default new (class {
 
   traders = new Map();
 
+  pusherConnections = new Map();
+
   scratch = new Map();
 
   constructor(appType) {
@@ -357,6 +359,25 @@ export default new (class {
 
       if (!this.traders.has(document._id)) {
         this.traders.set(document._id, new module.default(document));
+      }
+
+      return this.traders.get(document._id);
+    }
+  }
+
+  async getOrCreatePusherConnection(document) {
+    if (document) {
+      await import(`${ppp.rootUrl}/vendor/pusher-with-encryption.min.js`);
+
+      if (!this.traders.has(document._id)) {
+        this.traders.set(
+          document._id,
+          new Pusher(document.key, {
+            cluster: document.cluster
+          })
+        );
+
+        this.traders.get(document._id).subscribe('telegram');
       }
 
       return this.traders.get(document._id);
