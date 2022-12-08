@@ -468,7 +468,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
           .catch((error) => {
             console.log(error);
 
-            this.error({
+            this.notificationsArea.error({
               title: 'Ошибка заявки',
               text: 'Не удалось рассчитать комиссию.'
             });
@@ -506,7 +506,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   async buyOrSell(direction) {
     if (!this.ordersTrader) {
-      return this.error({
+      return this.notificationsArea.error({
         title: 'Ошибка заявки',
         text: 'Отсутствует трейдер для выставления заявок.'
       });
