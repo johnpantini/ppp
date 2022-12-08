@@ -16,6 +16,10 @@ export class WidgetPage extends Page {
 
   savedInstrument;
 
+  savedWidth;
+
+  savedHeight;
+
   @observable
   loading;
 
@@ -265,17 +269,13 @@ export class WidgetPage extends Page {
   }
 
   connectedCallback() {
-    this.addEventListener('ready', this.onDocumentReady, {
-      passive: true
-    });
+    this.addEventListener('ready', this.onDocumentReady);
 
     super.connectedCallback();
   }
 
   disconnectedCallback() {
-    this.removeEventListener('ready', this.onDocumentReady, {
-      passive: true
-    });
+    this.removeEventListener('ready', this.onDocumentReady);
 
     this.removeEventListener('change', this.onChange, {
       passive: true
@@ -319,6 +319,8 @@ export class WidgetPage extends Page {
       let documentAfterChanges;
 
       this.savedInstrument = this.widgetElement?.instrument;
+      this.savedWidth = parseInt(this.widgetElement?.style?.width);
+      this.savedHeight = parseInt(this.widgetElement?.style?.height);
 
       if (typeof this.widgetElement?.update === 'function') {
         const updates = await this.widgetElement?.update({ preview: true });
@@ -499,6 +501,8 @@ export class WidgetPage extends Page {
   async handleWidgetTypeChange(event) {
     if (!this.document._id) {
       this.savedInstrument = void 0;
+      this.savedWidth = void 0;
+      this.savedHeight = void 0;
 
       const name = this.name.value.trim();
 

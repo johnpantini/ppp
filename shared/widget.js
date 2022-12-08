@@ -21,7 +21,7 @@ export class Widget extends FoundationElement {
     this.document = {};
   }
 
-  connectedCallback() {
+  async connectedCallback() {
     super.connectedCallback();
 
     if (!this.preview) {
@@ -81,21 +81,45 @@ export class Widget extends FoundationElement {
         }
       );
     } else {
-      this.parentNode.style.width = `${
-        this.widgetDefinition.defaultWidth ??
-        this.widgetDefinition.minWidth ?? 275
-      }px`;
-      this.parentNode.style.height = `${
-        this.widgetDefinition.defaultHeight ??
-        this.widgetDefinition.minHeight ??
-        395
-      }px`;
+      this.style.position = 'relative';
+      this.style.display = 'block';
+
+      if (this.container.savedWidth > 0)
+        this.style.width = `${this.container.savedWidth}px`;
+      else {
+        this.style.width = `${
+          this.widgetDefinition.defaultWidth ??
+          this.widgetDefinition.minWidth ??
+          275
+        }px`;
+      }
+
+      if (this.container.savedHeight > 0)
+        this.style.height = `${this.container.savedHeight}px`;
+      else {
+        this.style.height = `${
+          this.widgetDefinition.defaultHeight ??
+          this.widgetDefinition.minHeight ??
+          395
+        }px`;
+      }
 
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
 
       if (this.container.savedInstrument)
         this.instrument = this.container.savedInstrument;
+
+      await import(`${ppp.rootUrl}/vendor/jquery.slim.min.js`);
+      await import(`${ppp.rootUrl}/vendor/jquery-ui.min.js`);
+
+      $(this).resizable({
+        maxHeight: this.widgetDefinition.maxHeight ?? 512,
+        maxWidth: this.widgetDefinition.maxWidth ?? 365,
+        minHeight: this.widgetDefinition.minHeight ?? 395,
+        minWidth: this.widgetDefinition.minWidth ?? 275,
+        grid: [1, 1]
+      });
     }
   }
 

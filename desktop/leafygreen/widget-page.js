@@ -762,6 +762,11 @@ export const widgetPageStyles = (context, definition) => css`
   .widget-type-tags {
     margin-top: 5px;
   }
+
+  ppp-codeflask {
+    width: 100%;
+    height: 120px;
+  }
 `;
 
 // noinspection JSUnusedGlobalSymbols

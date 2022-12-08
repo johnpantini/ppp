@@ -17,6 +17,27 @@ export const widgetStyles = (context, definition) =>
       user-select: none;
     }
 
+    .widget-area {
+      scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
+      scrollbar-width: thin;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding-bottom: 8px;
+    }
+
+    .widget-area::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .widget-area::-webkit-scrollbar-track {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .widget-area::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
     .widget-header {
       color: #09132c;
       cursor: move;
