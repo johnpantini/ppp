@@ -306,6 +306,77 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  async modifyLimitOrders({ instrument, side, value }) {
+    await this.syncAccessToken();
+
+    const ordersRequest = await fetch(
+      `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
+      {
+        headers: {
+          Authorization: `Bearer ${this.#jwt}`
+        }
+      }
+    );
+
+    if (ordersRequest.status === 200) {
+      const orders = await ordersRequest.json();
+
+      for (const o of orders) {
+        if (o.status === 'working' && o.side === side) {
+          if (instrument && o.symbol !== this.#getSymbol(instrument)) continue;
+
+          const orderInstrument =
+            await this.#findInstrumentInCacheAndPutToPayload(
+              o.symbol,
+              {},
+              'payload',
+              {}
+            );
+
+          if (orderInstrument?.symbol) {
+            const modifyOrderRequest = await fetch(
+              `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit/${o.id}`,
+              {
+                method: 'PUT',
+                body: JSON.stringify({
+                  instrument: {
+                    symbol: this.#getSymbol(orderInstrument),
+                    exchange: this.document.exchange
+                  },
+                  side,
+                  type: 'limit',
+                  price: this.fixPrice(
+                    orderInstrument,
+                    o.price + orderInstrument.minPriceIncrement * value
+                  ),
+                  quantity: o.qty,
+                  user: {
+                    portfolio: this.document.portfolio
+                  }
+                }),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-ALOR-REQID': this.#reqId(),
+                  Authorization: `Bearer ${this.#jwt}`
+                }
+              }
+            );
+
+            if (modifyOrderRequest.status !== 200) {
+              throw new TradingError({
+                message: await (await modifyOrderRequest).text()
+              });
+            }
+          }
+        }
+      }
+    } else {
+      throw new TradingError({
+        message: await (await ordersRequest).text()
+      });
+    }
+  }
+
   async cancelLimitOrder(order) {
     if (order.orderType === 'limit') {
       await this.syncAccessToken();
@@ -845,67 +916,80 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   #findInstrumentInCacheAndPutToPayload(symbol, source, field, payload) {
-    const tx = this.#cacheRequest.result.transaction('instruments', 'readonly');
-    const store = tx.objectStore('instruments');
-    const storeRequest = store.get(symbol);
+    return new Promise((resolve, reject) => {
+      if (/@/.test(symbol)) [symbol] = symbol.split('@');
 
-    storeRequest.onsuccess = (event) => {
-      if (event.target.result) {
-        const instrument = event.target.result;
+      const tx = this.#cacheRequest.result.transaction(
+        'instruments',
+        'readonly'
+      );
+      const store = tx.objectStore('instruments');
+      const storeRequest = store.get(symbol);
 
-        if (
-          instrument.exchange?.indexOf(
-            this.getExchange(this.document.exchange)
-          ) > -1
-        ) {
-          payload.instrument = instrument;
-          source[field] = payload;
-        } else {
-          // Try with suffix
-          const symbolWithSuffix = `${symbol}~${this.document.exchange}`;
-          const storeRequestWithSuffix = store.get(symbolWithSuffix);
+      storeRequest.onsuccess = (event) => {
+        if (event.target.result) {
+          const instrument = event.target.result;
 
-          storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
-            if (eventWithSuffix.target.result) {
-              payload.instrument = eventWithSuffix.target.result;
-              source[field] = payload;
-            } else {
+          if (
+            instrument.exchange?.indexOf(
+              this.getExchange(this.document.exchange)
+            ) > -1
+          ) {
+            payload.instrument = instrument;
+            source[field] = payload;
+          } else {
+            // Try with suffix
+            const symbolWithSuffix = `${symbol}~${this.document.exchange}`;
+            const storeRequestWithSuffix = store.get(symbolWithSuffix);
+
+            storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
+              if (eventWithSuffix.target.result) {
+                payload.instrument = eventWithSuffix.target.result;
+                source[field] = payload;
+              } else {
+                payload.instrument = {
+                  symbol: symbolWithSuffix
+                };
+                source[field] = payload;
+              }
+            };
+
+            storeRequestWithSuffix.onerror = (eventWithSuffix) => {
+              console.error(eventWithSuffix.target.error);
+
               payload.instrument = {
                 symbol: symbolWithSuffix
               };
               source[field] = payload;
-            }
-          };
 
-          storeRequestWithSuffix.onerror = (eventWithSuffix) => {
-            console.error(eventWithSuffix.target.error);
+              this.onError?.(eventWithSuffix.target.error);
 
-            payload.instrument = {
-              symbol: symbolWithSuffix
+              reject(event.target.error);
             };
-            source[field] = payload;
-
-            this.onError?.(eventWithSuffix.target.error);
+          }
+        } else {
+          payload.instrument = {
+            symbol
           };
+          source[field] = payload;
         }
-      } else {
+
+        resolve(payload.instrument);
+      };
+
+      storeRequest.onerror = (event) => {
+        console.error(event.target.error);
+
         payload.instrument = {
           symbol
         };
         source[field] = payload;
-      }
-    };
 
-    storeRequest.onerror = (event) => {
-      console.error(event.target.error);
+        this.onError?.(event.target.error);
 
-      payload.instrument = {
-        symbol
+        reject(event.target.error);
       };
-      source[field] = payload;
-
-      this.onError?.(event.target.error);
-    };
+    });
   }
 
   onPositionsMessage({ data, fromCache }) {
