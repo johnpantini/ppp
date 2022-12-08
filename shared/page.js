@@ -118,8 +118,6 @@ export class Page extends FoundationElement {
         toastTitle = visibleModal
           .querySelector('[slot="title"]')
           ?.textContent?.trim();
-
-        // toastTitle = visibleModal.querySelector('');
       } else {
         toastTitle = ppp.app.shadowRoot
           .querySelector('.page-content')
@@ -132,10 +130,11 @@ export class Page extends FoundationElement {
 
     Observable.notify(this, 'page');
 
-    this.toastTitle = toastTitle;
-    this.toastText = 'Операция выполняется';
     ppp.app.toast.visible = false;
     ppp.app.toast.source = this;
+
+    this.toastTitle = toastTitle;
+    this.toastText = 'Операция выполняется';
   }
 
   failOperation(e) {
@@ -228,17 +227,22 @@ export class Page extends FoundationElement {
     if (!ppp.app) return;
 
     ppp.app.toast.appearance = 'progress';
-    this.toastText = toastText;
+
     DOM.queueUpdate(() => (ppp.app.toast.progress.value = progress));
     ppp.app.toast.dismissible = false;
     ppp.app.toast.visible = true;
+    ppp.app.toast.source = this;
+
+    this.toastText = toastText;
   }
 
   succeedOperation(toastText = 'Операция успешно выполнена.') {
     ppp.app.toast.appearance = 'success';
     ppp.app.toast.dismissible = true;
-    this.toastText = toastText;
     ppp.app.toast.visible = true;
+    ppp.app.toast.source = this;
+
+    this.toastText = toastText;
   }
 
   endOperation() {
