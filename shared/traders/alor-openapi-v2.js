@@ -334,6 +334,8 @@ class AlorOpenAPIV2Trader extends Trader {
             );
 
           if (orderInstrument?.symbol) {
+            console.log(o)
+
             const modifyOrderRequest = await fetch(
               `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit/${o.id}`,
               {
@@ -349,7 +351,7 @@ class AlorOpenAPIV2Trader extends Trader {
                     orderInstrument,
                     o.price + orderInstrument.minPriceIncrement * value
                   ),
-                  quantity: o.qty,
+                  quantity: o.qty - o.filled,
                   user: {
                     portfolio: this.document.portfolio
                   }
