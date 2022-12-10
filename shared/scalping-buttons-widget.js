@@ -79,7 +79,11 @@ export const scalpingButtonsWidgetTemplate = (context, definition) => html`
             @click="${(x, c) => x.handleBuySellButtonClick(c, 'buy')}"
           >
             ${repeat(
-              (x) => x.document.buySideButtonsTemplate?.split(/\r?\n/),
+              (x) =>
+                (
+                  x.document.buySideButtonsTemplate ??
+                  defaultBuySideButtonsTemplate
+                )?.split(/\r?\n/),
               html`
                 <div class="${(x) => (x?.trim() ? '' : 'empty')}">
                   ${repeat(
@@ -106,7 +110,11 @@ export const scalpingButtonsWidgetTemplate = (context, definition) => html`
             @click="${(x, c) => x.handleBuySellButtonClick(c, 'sell')}"
           >
             ${repeat(
-              (x) => x.document.sellSideButtonsTemplate?.split(/\r?\n/),
+              (x) =>
+                (
+                  x.document.sellSideButtonsTemplate ??
+                  defaultSellSideButtonsTemplate
+                )?.split(/\r?\n/),
               html`
                 <div class="${(x) => (x?.trim() ? '' : 'empty')}">
                   ${repeat(
