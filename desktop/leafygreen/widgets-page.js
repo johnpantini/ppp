@@ -32,7 +32,7 @@ export const widgetsPageTemplate = (context, definition) => html`
           },
           {
             label: 'Тип',
-            sortBy: (d) => d.type
+            sortBy: (d) => d.reportedType
           },
           {
             label: 'Коллекция',
@@ -72,7 +72,19 @@ export const widgetsPageTemplate = (context, definition) => html`
                 >
                   ${datum.name}
                 </a>`,
-                x.t(`$const.widget.${datum.type}`),
+                datum.type === 'custom'
+                  ? html`
+                    <div
+                      style="display: flex; flex-direction: column; gap: 4px 0">
+                      <div>
+                        ${(_) => x.t(`$const.widget.${datum.reportedType}`)}
+                      </div>
+                      <${'ppp-badge'} appearance="blue">
+                        По ссылке
+                      </ppp-badge>
+                    </div>
+                  `
+                  : x.t(`$const.widget.${datum.reportedType}`),
                 datum.collection,
                 formatDate(datum.createdAt),
                 formatDate(datum.updatedAt ?? datum.createdAt),

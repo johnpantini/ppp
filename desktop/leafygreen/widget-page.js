@@ -8,8 +8,10 @@ import { bodyFont } from './design-tokens.js';
 import { when } from '../../shared/element/templating/when.js';
 import ppp from '../../ppp.js';
 
-await requireComponent('ppp-collection-select');
-await requireComponent('ppp-text-field');
+await Promise.all([
+  await requireComponent('ppp-collection-select'),
+  await requireComponent('ppp-text-field')
+]);
 await requireComponent('ppp-widget-type-radio-group');
 
 export const widgetPageTemplate = (context, definition) => html`
@@ -167,16 +169,14 @@ export const widgetPageTemplate = (context, definition) => html`
                             </ppp-widget-type-radio>
                             <ppp-widget-type-radio
                               ?disabled="${(x) =>
-                                true ||
-                                (x.document._id &&
-                                  x.document.type !== 'custom')}"
+                                x.document._id && x.document.type !== 'custom'}"
                               value="custom"
                             >
                               <div slot="text">
-                                Загружаемый
+                                По ссылке
                                 <div class="widget-type-tags">
-                                  <${'ppp-badge'} appearance="blue">Произвольная
-                                    реализация
+                                  <${'ppp-badge'} appearance="blue">Загружаемый
+                                    виджет
                                   </ppp-badge>
                                 </div>
                               </div>
@@ -226,6 +226,7 @@ export const widgetPageTemplate = (context, definition) => html`
                                     type="url"
                                     placeholder="https://example.com/widget.js"
                                     value="${(x) => x.document.url}"
+                                    ?disabled="${(x) => x.document._id}"
                                     ${ref('url')}
                                   ></ppp-text-field>
                                 </div>

@@ -1,7 +1,7 @@
 /** @decorator */
 
 import { Page } from './page.js';
-import { validate } from './validate.js';
+import { invalidate, validate } from './validate.js';
 import { Observable, observable } from './element/observation/observable.js';
 import { DOM } from './element/dom.js';
 import { NotFoundError } from './http-errors.js';
@@ -37,9 +37,23 @@ export class WidgetPage extends Page {
   async validate() {
     await validate(this.name);
 
-    if (this.document.type === 'custom') await validate(this.url);
+    if (this.document.type === 'custom' && this.url?.isConnected) {
+      await validate(this.url);
 
-    if (typeof this.widgetElement.validate === 'function')
+      try {
+        new URL(this.url.value);
+        await fetch(this.url.value, {
+          cache: 'no-cache'
+        });
+      } catch (e) {
+        invalidate(this.url, {
+          errorMessage: 'Неверный или неполный URL',
+          raiseException: true
+        });
+      }
+    }
+
+    if (typeof this.widgetElement?.validate === 'function')
       return this.widgetElement.validate();
   }
 
@@ -184,7 +198,7 @@ export class WidgetPage extends Page {
       $setOnInsert
     };
 
-    if (typeof this.widgetElement.update === 'function') {
+    if (typeof this.widgetElement?.update === 'function') {
       widgetUpdateResult = await this.widgetElement.update();
 
       if (typeof widgetUpdateResult === 'object') {
@@ -217,7 +231,10 @@ export class WidgetPage extends Page {
     }
 
     if (type === 'custom') {
-      return this.url?.value?.trim() ?? '';
+      if (this.document.url)
+        return this.document.url;
+
+      return this.url?.value ? new URL(this.url?.value).toString() : '';
     } else {
       return `${ppp.rootUrl}/${ppp.appType}/${ppp.theme}/${type}-widget.js`;
     }
@@ -228,11 +245,12 @@ export class WidgetPage extends Page {
 
     if (!url && this.document.type === 'custom') {
       this.widgetDefinition.settings = null;
-      this.widgetDefinition.title = 'Загружаемый виджет';
-      this.widgetDefinition.tags = ['Произвольная реализация'];
+      this.widgetDefinition.title = 'По ссылке';
+      this.widgetDefinition.tags = ['Загружаемый виджет'];
       this.widgetDefinition.collection = null;
+      this.widgetDefinition.loaded = false;
       this.widgetDefinition.description =
-        'Укажите URL в секции базовых настроек, чтобы продолжить.';
+        'Укажите URL в секции базовых настроек и примените изменения (если не включено автоматическое принятие), чтобы продолжить.';
 
       this.loading = false;
 
@@ -256,6 +274,7 @@ export class WidgetPage extends Page {
           this.widgetDefinition.customElement()
         );
 
+        this.widgetDefinition.loaded = true;
         this.loading = false;
 
         Observable.notify(this, 'widgetDefinition');
@@ -275,14 +294,8 @@ export class WidgetPage extends Page {
 
   disconnectedCallback() {
     this.removeEventListener('ready', this.onDocumentReady);
-
-    this.removeEventListener('change', this.onChange, {
-      passive: true
-    });
-
-    this.removeEventListener('input', this.onChange, {
-      passive: true
-    });
+    this.removeEventListener('change', this.onChange);
+    this.removeEventListener('input', this.onChange);
 
     super.disconnectedCallback();
   }
@@ -321,19 +334,36 @@ export class WidgetPage extends Page {
       this.savedWidth = parseInt(this.widgetElement?.style?.width);
       this.savedHeight = parseInt(this.widgetElement?.style?.height);
 
+      const urlObject = {};
+
+      if (this.document.type === 'custom' && this.url?.isConnected) {
+        urlObject.url = this.url.value ?? '';
+      }
+
       if (typeof this.widgetElement?.update === 'function') {
         const updates = await this.widgetElement?.update({ preview: true });
 
         documentAfterChanges = await this.denormalization.denormalize(
-          Object.assign({}, this.document, updates.$set ?? {}, {
-            name: this.name.value
-          })
+          Object.assign(
+            {},
+            this.document,
+            updates.$set ?? {},
+            {
+              name: this.name.value
+            },
+            urlObject
+          )
         );
       } else {
         documentAfterChanges = await this.denormalization.denormalize(
-          Object.assign({}, this.document, {
-            name: this.name.value
-          })
+          Object.assign(
+            {},
+            this.document,
+            {
+              name: this.name.value
+            },
+            urlObject
+          )
         );
       }
 
@@ -345,15 +375,35 @@ export class WidgetPage extends Page {
 
       await validate(this.name);
 
+      if (this.document.type === 'custom' && this.url?.isConnected) {
+        await validate(this.url);
+
+        try {
+          new URL(this.url.value);
+          await fetch(this.url.value, {
+            cache: 'no-cache'
+          });
+        } catch (e) {
+          invalidate(this.url, {
+            errorMessage: 'Неверный или неполный URL',
+            raiseException: true
+          });
+        }
+      }
+
+      if (this.document.type === 'custom' && !this.widgetDefinition.loaded) {
+        await this.loadWidget();
+      }
+
       if (typeof this.widgetElement?.validate === 'function')
-        await this.widgetElement?.validate();
+        await this.widgetElement.validate();
     } finally {
       // Force widget connectedCallback
       DOM.queueUpdate(() => (this.page.loading = false));
     }
   }
 
-  @debounce(500)
+  @debounce(1000)
   onChangeDelayed(event) {
     this.page.loading = true;
 
@@ -484,13 +534,8 @@ export class WidgetPage extends Page {
       Observable.notify(this, 'document');
 
       DOM.queueUpdate(() => {
-        this.addEventListener('change', this.onChange, {
-          passive: true
-        });
-
-        this.addEventListener('input', this.onChange, {
-          passive: true
-        });
+        this.addEventListener('change', this.onChange);
+        this.addEventListener('input', this.onChange);
       });
     }
   }

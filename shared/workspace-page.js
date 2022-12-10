@@ -264,7 +264,7 @@ export class WorkspacePage extends Page {
     const type = widget.type;
 
     if (type === 'custom') {
-      return widget.url?.value?.trim() ?? '';
+      return new URL(widget.url).toString();
     } else {
       return `${ppp.rootUrl}/${ppp.appType}/${ppp.theme}/${widget.type}-widget.js`;
     }
