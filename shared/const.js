@@ -80,5 +80,6 @@ export const WIDGET_TYPES = {
   SCREENER: 'screener',
   PARSER: 'parser',
   NEWS: 'news',
+  FRAME: 'frame',
   OTHER: 'other'
 };
