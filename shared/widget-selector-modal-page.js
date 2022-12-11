@@ -81,6 +81,22 @@ export class WidgetSelectorModalPage extends Page {
     await this.page.view.populateDocuments();
   }
 
+  isPredefinedWidgetType(widgetType) {
+    return (
+      [
+        'order',
+        'scalping-buttons',
+        'active-orders',
+        'light-chart',
+        'orderbook',
+        'time-and-sales',
+        'portfolio',
+        'instruments',
+        'timeline'
+      ].indexOf(widgetType) > -1
+    );
+  }
+
   async selectWidget(datum) {
     this.beginOperation('Размещение виджета');
 

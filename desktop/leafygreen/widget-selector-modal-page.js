@@ -13,7 +13,11 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
     <form novalidate>
       <${'ppp-page'} modal headless>
         ${when(
-          (x) => x.ready && !x.page.loading && !x.documents.length,
+          (x) =>
+            x.isPredefinedWidgetType(x.activeItem) &&
+            x.ready &&
+            !x.page.loading &&
+            !x.documents.length,
           html`
             <${'ppp-banner'}
               class="inline"
@@ -141,6 +145,28 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
                        slot="start"
                        src="static/widgets/timeline.svg"/>
                   <span slot="title">Лента операций</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slot="items"
+                  slug="frame"
+                  ?active="${(x) => x.activeItem === 'frame'}"
+                >
+                  <img draggable="false" alt="Фрейм"
+                       style="height: 16px"
+                       slot="start"
+                       src="static/widgets/custom.svg"/>
+                  <span slot="title">Фрейм</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slot="items"
+                  slug="other"
+                  ?active="${(x) => x.activeItem === 'other'}"
+                >
+                  <img draggable="false" alt="Специальный виджет"
+                       style="height: 16px"
+                       slot="start"
+                       src="static/widgets/custom.svg"/>
+                  <span slot="title">Специальный виджет</span>
                 </ppp-side-nav-item>
               </ppp-side-nav-group>
             </ppp-side-nav>
