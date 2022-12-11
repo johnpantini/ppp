@@ -37,6 +37,13 @@ export class WidgetPage extends Page {
   async validate() {
     await validate(this.name);
 
+    if (typeof this.widgetDefinition?.customElement !== 'function') {
+      invalidate(this.url, {
+        errorMessage: 'Этот виджет не может быть загружен.',
+        raiseException: true
+      });
+    }
+
     if (this.document.type === 'custom' && this.url?.isConnected) {
       await validate(this.url);
 
@@ -46,6 +53,8 @@ export class WidgetPage extends Page {
           cache: 'no-cache'
         });
       } catch (e) {
+        this.widgetDefinition = {};
+
         invalidate(this.url, {
           errorMessage: 'Неверный или неполный URL',
           raiseException: true
@@ -218,7 +227,7 @@ export class WidgetPage extends Page {
   getWidgetTagName() {
     if (this.document.type === 'custom' && !this.document.url) return null;
 
-    if (typeof this.widgetDefinition.customElement === 'function') {
+    if (typeof this.widgetDefinition?.customElement === 'function') {
       return this.widgetDefinition.customElement().definition.baseName;
     }
   }
@@ -231,8 +240,7 @@ export class WidgetPage extends Page {
     }
 
     if (type === 'custom') {
-      if (this.document.url)
-        return this.document.url;
+      if (this.document.url) return this.document.url;
 
       return this.url?.value ? new URL(this.url?.value).toString() : '';
     } else {
@@ -269,6 +277,13 @@ export class WidgetPage extends Page {
           ppp,
           baseWidgetUrl
         });
+
+        if (typeof this.widgetDefinition?.customElement !== 'function') {
+          invalidate(this.url, {
+            errorMessage: 'Этот виджет не может быть загружен.',
+            raiseException: true
+          });
+        }
 
         ppp.DesignSystem.getOrCreate().register(
           this.widgetDefinition.customElement()
@@ -331,8 +346,11 @@ export class WidgetPage extends Page {
       let documentAfterChanges;
 
       this.savedInstrument = this.widgetElement?.instrument;
-      this.savedWidth = parseInt(this.widgetElement?.style?.width);
-      this.savedHeight = parseInt(this.widgetElement?.style?.height);
+
+      if (this.widgetElement.isConnected) {
+        this.savedWidth = parseInt(this.widgetElement?.style?.width);
+        this.savedHeight = parseInt(this.widgetElement?.style?.height);
+      }
 
       const urlObject = {};
 
@@ -384,6 +402,8 @@ export class WidgetPage extends Page {
             cache: 'no-cache'
           });
         } catch (e) {
+          this.widgetDefinition = {};
+
           invalidate(this.url, {
             errorMessage: 'Неверный или неполный URL',
             raiseException: true
@@ -542,6 +562,7 @@ export class WidgetPage extends Page {
 
   async handleWidgetTypeChange(event) {
     if (!this.document._id) {
+      this.widgetDefinition = {};
       this.savedInstrument = void 0;
       this.savedWidth = void 0;
       this.savedHeight = void 0;

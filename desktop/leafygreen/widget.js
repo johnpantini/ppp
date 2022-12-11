@@ -145,6 +145,8 @@ export const widgetStyles = (context, definition) =>
       color: rgba(9, 19, 44, 0.5);
       font-size: 12px;
       margin-top: 4px;
+      padding: 0 10px;
+      text-align: center;
     }
 
     .widget-close-button {
