@@ -160,6 +160,7 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
                 <ppp-side-nav-item
                   slot="items"
                   slug="other"
+                  title="Специальный виджет"
                   ?active="${(x) => x.activeItem === 'other'}"
                 >
                   <img draggable="false" alt="Специальный виджет"
