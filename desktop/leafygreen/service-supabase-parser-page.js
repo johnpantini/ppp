@@ -2,6 +2,7 @@ import { ServiceSupabaseParserPage } from '../../shared/service-supabase-parser-
 import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { when } from '../../shared/element/templating/when.js';
+import { css } from '../../shared/element/styles/css.js';
 import { pageStyles } from './page.js';
 import { serviceControlsTemplate } from './service-page.js';
 import ppp from '../../ppp.js';
@@ -456,8 +457,16 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
   </template>
 `;
 
+export const serviceSupabaseParserPageStyles = (context, definition) => css`
+  ${pageStyles}
+  iframe {
+    margin-top: 15px;
+    border-radius: 7px;
+  }
+`;
+
 // noinspection JSUnusedGlobalSymbols
 export default ServiceSupabaseParserPage.compose({
   template: serviceSupabaseParserPageTemplate,
-  styles: pageStyles
+  styles: serviceSupabaseParserPageStyles
 });

@@ -581,11 +581,6 @@ export const pageStyles = css`
     display: none;
   }
 
-  iframe {
-    margin-top: 15px;
-    border-radius: 7px;
-  }
-
   .control-line {
     display: flex;
     flex-direction: row;
