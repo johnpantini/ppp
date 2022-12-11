@@ -49,11 +49,13 @@ export class ApiSupabasePage extends Page {
     await validate(this.password);
 
     if (
-      !( await checkSupabaseCredentials({
-        url: this.url.value.trim(),
-        key: this.key.value.trim(),
-        serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
-      })).ok
+      !(
+        await checkSupabaseCredentials({
+          url: this.url.value.trim(),
+          key: this.key.value.trim(),
+          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+        })
+      ).ok
     ) {
       invalidate(this.key, {
         errorMessage: 'Неверный ключ проекта',
