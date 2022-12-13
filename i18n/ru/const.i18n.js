@@ -5,7 +5,8 @@ import {
   SERVER_TYPES,
   WIDGET_TYPES,
   SERVICE_STATE,
-  TRADERS
+  TRADERS,
+  SERVER_STATE
 } from '../../shared/const.js';
 
 export default function (i18n) {
@@ -36,8 +37,8 @@ export default function (i18n) {
         [SERVER_TYPES.KEY]: 'Вход по приватному ключу'
       },
       serverState: {
-        ok: 'Активен',
-        failed: 'Неисправен'
+        [SERVER_STATE.OK]: 'Настроен',
+        [SERVER_STATE.FAILED]: 'Неисправен'
       },
       serviceState: {
         [SERVICE_STATE.ACTIVE]: 'Активен',

@@ -3,6 +3,11 @@ export const SERVER_TYPES = {
   KEY: 'key'
 };
 
+export const SERVER_STATE = {
+  OK: 'ok',
+  FAILED: 'failed'
+};
+
 export const APIS = {
   SUPABASE: 'supabase',
   PUSHER: 'pusher',
