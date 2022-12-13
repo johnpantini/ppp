@@ -625,9 +625,7 @@ export class Page extends FoundationElement {
         this.form = parentNode;
         this.form.page = this.page;
 
-        this.addEventListener('keypress', this.#keypressHandler, {
-          passive: true
-        });
+        this.addEventListener('keypress', this.#keypressHandler);
 
         parentNode.insertAdjacentHTML(
           'afterbegin',
@@ -788,12 +786,8 @@ export class PageWithShiftLock {
   }
 
   connectedCallback() {
-    document.addEventListener('keydown', this.onShiftLockKeyUpDown, {
-      passive: true
-    });
-    document.addEventListener('keyup', this.onShiftLockKeyUpDown, {
-      passive: true
-    });
+    document.addEventListener('keydown', this.onShiftLockKeyUpDown);
+    document.addEventListener('keyup', this.onShiftLockKeyUpDown);
   }
 
   disconnectedCallback() {

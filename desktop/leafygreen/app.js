@@ -305,6 +305,17 @@ export const appTemplate = (context, definition) => html`
             >
               <span slot="title">Конечные точки</span>
             </ppp-side-nav-item>
+            <ppp-side-nav-item
+              ?disabled="${() => !ppp?.keyVault.ok()}"
+              ?active="${(x) => x.page.startsWith('server')}"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'servers'
+                })}"
+              slot="items"
+            >
+              <span slot="title">Серверы</span>
+            </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             ${settings({
@@ -470,17 +481,11 @@ export class App extends BaseApp {
   constructor() {
     super(...arguments);
 
-    document.addEventListener(
-      'keydown',
-      (e) => {
-        if (e.code === keyCodeEscape) {
-          this.toast.visible = false;
-        }
-      },
-      {
-        passive: true
+    document.addEventListener('keydown', (e) => {
+      if (e.code === keyCodeEscape) {
+        this.toast.visible = false;
       }
-    );
+    });
 
     void requireComponent('ppp-toast');
   }

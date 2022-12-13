@@ -92,17 +92,13 @@ export class App extends FoundationElement {
     this.settings = {};
     this.page = this.params().page ?? 'cloud-services';
 
-    window.addEventListener('popstate', this.#onPopState.bind(this), {
-      passive: true
-    });
+    window.addEventListener('popstate', this.#onPopState.bind(this));
   }
 
   connectedCallback() {
     super.connectedCallback();
 
-    this.addEventListener('navigatestart', onNavigateStart, {
-      passive: true
-    });
+    this.addEventListener('navigatestart', onNavigateStart);
 
     this.sideNav.expandedChanged = (oldValue, newValue) => {
       this.setSetting('sideNavCollapsed', !newValue);

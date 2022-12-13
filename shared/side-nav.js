@@ -1,40 +1,40 @@
 /** @decorator */
 
-import { attr } from './element/components/attributes.js';
-import { observable } from './element/observation/observable.js';
-import { FoundationElement } from './foundation-element.js';
+import { attr } from './element/components/attributes.js'
+import { observable } from './element/observation/observable.js'
+import { FoundationElement } from './foundation-element.js'
 
 export class SideNav extends FoundationElement {
   @attr({ mode: 'boolean' })
-  ready;
+  ready
 
   @attr({ mode: 'boolean' })
-  expanded;
+  expanded
 
   @attr({ mode: 'boolean' })
-  static;
+  static
 
   @attr({ mode: 'boolean' })
-  inline;
+  inline
 
   @attr({ mode: 'boolean' })
-  hovered;
+  hovered
 
   @observable
-  topLevelItems;
+  topLevelItems
 
-  collapseToggle;
+  collapseToggle
 
-  constructor() {
-    super();
+  constructor () {
+    super()
 
-    this.topLevelItems = [];
+    this.topLevelItems = []
   }
 
-  connectedCallback() {
-    super.connectedCallback();
+  connectedCallback () {
+    super.connectedCallback()
 
-    const parent = this;
+    const parent = this
 
     if (!this.static) {
       ['pointerleave', 'pointercancel'].forEach((type) => {
@@ -42,27 +42,24 @@ export class SideNav extends FoundationElement {
           type,
           (event) => {
             if (event.relatedTarget && !event.relatedTarget.closest('.wrapper'))
-              parent.hovered = false;
+              parent.hovered = false
           },
-          {
-            passive: true
-          }
-        );
-      });
+        )
+      })
     }
 
     setTimeout(() => {
-      this.ready = true;
-    }, 200);
+      this.ready = true
+    }, 200)
   }
 
-  handlePointerEnter() {
-    this.hovered = true;
+  handlePointerEnter () {
+    this.hovered = true
   }
 
-  handlePointerLeave(c) {
-    if (!this.expanded && c.event.relatedTarget === this.collapseToggle) return;
+  handlePointerLeave (c) {
+    if (!this.expanded && c.event.relatedTarget === this.collapseToggle) return
 
-    this.hovered = false;
+    this.hovered = false
   }
 }

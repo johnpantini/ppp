@@ -75,9 +75,6 @@ export class Widget extends FoundationElement {
         'pointerdown',
         () => {
           this.style.zIndex = ++this.container.zIndex;
-        },
-        {
-          passive: true
         }
       );
     } else {

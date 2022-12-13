@@ -20,27 +20,16 @@ export class OffClickElement extends FoundationElement {
   }
 }
 
-document.addEventListener(
-  'pointerdown',
-  (event) => {
-    ELEMENTS.forEach((e) => {
-      if (!event.composedPath().find((n) => n === e)) {
-        e?.documentOffClickHandler.call(e, event);
-      }
-    });
-  },
-  {
-    passive: true
-  }
-);
-document.addEventListener(
-  'keydown',
-  (event) => {
-    ELEMENTS.forEach((e) => {
-      e?.documentKeydownHandler.call(e, event);
-    });
-  },
-  {
-    passive: true
-  }
-);
+document.addEventListener('pointerdown', (event) => {
+  ELEMENTS.forEach((e) => {
+    if (!event.composedPath().find((n) => n === e)) {
+      e?.documentOffClickHandler.call(e, event);
+    }
+  });
+});
+
+document.addEventListener('keydown', (event) => {
+  ELEMENTS.forEach((e) => {
+    e?.documentKeydownHandler.call(e, event);
+  });
+});

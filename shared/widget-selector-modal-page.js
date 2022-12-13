@@ -41,9 +41,7 @@ export class WidgetSelectorModalPage extends Page {
   connectedCallback() {
     this.activeItem = ppp.app.settings.widgetSelectorChoice ?? 'order';
 
-    ppp.app.addEventListener('navigatestart', onNavigateStart, {
-      passive: true
-    });
+    ppp.app.addEventListener('navigatestart', onNavigateStart);
 
     this.setAttribute('data-disable-auto-populate', true);
     super.connectedCallback();

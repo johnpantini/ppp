@@ -198,15 +198,10 @@ export class CollectionSelect extends FoundationElement {
 
     this.control.addEventListener(
       'openchange',
-      this.#onControlOpenChanged.bind(this),
-      {
-        passive: true
-      }
+      this.#onControlOpenChanged.bind(this)
     );
 
-    this.control.addEventListener('change', this.#onControlChange.bind(this), {
-      passive: true
-    });
+    this.control.addEventListener('change', this.#onControlChange.bind(this));
 
     if (typeof this.query === 'function') {
       this.#code = this.query.toString().split(/\r?\n/);
