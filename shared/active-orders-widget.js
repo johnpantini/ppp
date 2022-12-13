@@ -56,8 +56,10 @@ export const activeOrdersWidgetTemplate = (context, definition) => html`
               ${ref('orderTypeSelector')}
             >
               <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
-              <ppp-widget-box-radio value="limit"
-              >Лимитные
+              <ppp-widget-box-radio
+                value="limit"
+              >
+                Лимитные
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 value="stop"
