@@ -4,18 +4,18 @@ import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
 import { actionPageMountPoint } from '../../shared/page.js';
+import { SERVICE_STATE } from '../../shared/const.js';
 import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
 
 export function stateAppearance(state) {
   switch (state) {
-    case 'ok':
-    case 'active':
+    case SERVICE_STATE.ACTIVE:
       return 'green';
-    case 'stopped':
+    case SERVICE_STATE.STOPPED:
       return 'lightgray';
-    case 'failed':
+    case SERVICE_STATE.FAILED:
       return 'red';
   }
 
