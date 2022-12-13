@@ -402,7 +402,14 @@ export class PppTimelineWidget extends WidgetWithInstrument {
       const topLevelMap = this.timeline.get(topLevelKey);
 
       if (topLevelMap.has(newValue.parentId)) {
-        topLevelMap.get(newValue.parentId).push(newValue);
+        const parent = topLevelMap.get(newValue.parentId);
+
+        if (
+          !parent.find(
+            (operation) => operation.operationId === newValue.operationId
+          )
+        )
+          parent.push(newValue);
       } else {
         topLevelMap.set(newValue.parentId, [newValue]);
       }
