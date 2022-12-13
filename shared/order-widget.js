@@ -120,7 +120,7 @@ export const orderWidgetTemplate = (context, definition) => html`
                 <div class="widget-company-card-item">
                   <span
                     style="cursor: pointer"
-                    @click="${(x) => x.setQuantity(x.positionSize)}"
+                    @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
                   >
                     В портфеле: ${(x) => x.formatPositionSize()}
                   </span>
