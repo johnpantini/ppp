@@ -6,6 +6,20 @@ export function getInstrumentPrecision(instrument) {
   return frac ? frac.length : 0;
 }
 
+export function formatDateWithOptions(date, options = {}) {
+  if (!date) return '—';
+
+  return new Intl.DateTimeFormat(
+    'ru-RU',
+    Object.assign(
+      {
+        hour12: false
+      },
+      options
+    )
+  ).format(new Date(date));
+}
+
 export function formatDate(date) {
   if (!date) return '—';
 
