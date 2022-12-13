@@ -538,6 +538,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
   }
 
   calculateTotalAmount() {
+    if (!this.instrument)
+      return;
+
     this.totalAmount =
       parseFloat(this.price.value.replace(',', '.')) *
       parseInt(this.quantity.value) *
