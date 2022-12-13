@@ -54,7 +54,8 @@ export const TRADER_DATUM = {
   POSITION: 'position',
   POSITION_SIZE: 'position-size',
   POSITION_AVERAGE: 'position-average',
-  CURRENT_ORDER: 'current-order'
+  CURRENT_ORDER: 'current-order',
+  TIMELINE_ITEM: 'timeline-item'
 };
 
 export const WIDGET_TYPES = {
@@ -82,4 +83,10 @@ export const WIDGET_TYPES = {
   NEWS: 'news',
   FRAME: 'frame',
   OTHER: 'other'
+};
+
+// https://tinkoff.github.io/investAPI/operations/#operationtype
+export const TIMELINE_OPERATION_TYPE = {
+  BUY: 15,
+  SELL: 22
 };
