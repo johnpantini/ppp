@@ -21,6 +21,8 @@ export class Trader {
         return 'POSITIONS';
       case TRADER_DATUM.CURRENT_ORDER:
         return 'ORDERS';
+      case TRADER_DATUM.TIMELINE_ITEM:
+        return 'TIMELINE';
     }
   }
 

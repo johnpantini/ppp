@@ -2,7 +2,7 @@
 
 import { isJWTTokenExpired, uuidv4 } from '../ppp-crypto.js';
 import { TradingError } from '../trading-error.js';
-import { BROKERS, TRADER_DATUM } from '../const.js';
+import { BROKERS, TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../const.js';
 import { later } from '../later.js';
 import { TraderWithSimpleSearch } from './trader-with-simple-search.js';
 import { Trader } from './common-trader.js';
@@ -35,11 +35,14 @@ class AlorOpenAPIV2Trader extends Trader {
 
   orders = new Map();
 
+  timeline = new Map();
+
   subs = {
     quotes: new Map(),
     orders: new Map(),
     positions: new Map(),
     orderbook: new Map(),
+    timeline: new Map(),
     allTrades: new Map()
   };
 
@@ -48,6 +51,7 @@ class AlorOpenAPIV2Trader extends Trader {
     orders: new Map(),
     positions: new Map(),
     orderbook: new Map(),
+    timeline: new Map(),
     allTrades: new Map()
   };
 
@@ -578,6 +582,31 @@ class AlorOpenAPIV2Trader extends Trader {
               }
             }
 
+            // 6. Timeline
+            for (const [instrumentId, { instrument, refCount }] of this.refs
+              .timeline) {
+              if (refCount > 0) {
+                const guid = this.#reqId();
+
+                this.refs.timeline.get(instrumentId).guid = guid;
+                this.#guids.set(guid, {
+                  instrument,
+                  refs: this.refs.timeline
+                });
+
+                this.connection.send(
+                  JSON.stringify({
+                    opcode: 'TradesGetAndSubscribeV2',
+                    portfolio: this.document.portfolio,
+                    exchange: this.document.exchange,
+                    format: 'Simple',
+                    token: this.#jwt,
+                    guid
+                  })
+                );
+              }
+            }
+
             resolve(this.connection);
           };
 
@@ -610,6 +639,8 @@ class AlorOpenAPIV2Trader extends Trader {
               return this.onPositionsMessage({ data: payload.data });
             } else if (payload.data && refs === this.refs.orders) {
               return this.onOrdersMessage({ data: payload.data });
+            } else if (payload.data && refs === this.refs.timeline) {
+              return this.onTimelineMessage({ data: payload.data });
             }
           };
         }
@@ -638,7 +669,8 @@ class AlorOpenAPIV2Trader extends Trader {
         this.subs.positions,
         this.refs.positions
       ],
-      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders]
+      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders],
+      [TRADER_DATUM.TIMELINE_ITEM]: [this.subs.timeline, this.refs.timeline]
     }[datum];
   }
 
@@ -649,7 +681,8 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (
       datum === TRADER_DATUM.POSITION ||
-      datum === TRADER_DATUM.CURRENT_ORDER
+      datum === TRADER_DATUM.CURRENT_ORDER ||
+      datum === TRADER_DATUM.TIMELINE_ITEM
     ) {
       await this.#cacheRequestPendingSuccess;
     }
@@ -670,6 +703,16 @@ class AlorOpenAPIV2Trader extends Trader {
       case TRADER_DATUM.CURRENT_ORDER: {
         for (const [symbol, data] of this.orders) {
           this.onOrdersMessage({
+            data,
+            fromCache: true
+          });
+        }
+
+        break;
+      }
+      case TRADER_DATUM.TIMELINE_ITEM: {
+        for (const [_, data] of this.timeline) {
+          this.onTimelineMessage({
             data,
             fromCache: true
           });
@@ -761,6 +804,19 @@ class AlorOpenAPIV2Trader extends Trader {
           guid
         })
       );
+    } else if (refs === this.refs.timeline) {
+      this.timeline.clear();
+
+      this.connection.send(
+        JSON.stringify({
+          opcode: 'TradesGetAndSubscribeV2',
+          portfolio: this.document.portfolio,
+          exchange: this.document.exchange,
+          format: 'Simple',
+          token: this.#jwt,
+          guid
+        })
+      );
     }
   }
 
@@ -773,7 +829,8 @@ class AlorOpenAPIV2Trader extends Trader {
         refs === this.refs.orderbook ||
         refs === this.refs.allTrades ||
         refs === this.refs.positions ||
-        refs === this.refs.orders
+        refs === this.refs.orders ||
+        refs === this.refs.timeline
       ) {
         this.connection.send(
           JSON.stringify({
@@ -790,6 +847,10 @@ class AlorOpenAPIV2Trader extends Trader {
 
       if (refs === this.refs.orders) {
         this.orders.clear();
+      }
+
+      if (refs === this.refs.timeline) {
+        this.timeline.clear();
       }
     }
   }
@@ -1064,6 +1125,39 @@ class AlorOpenAPIV2Trader extends Trader {
               quantity: data.qty,
               filled: data.filled,
               price: data.price
+            };
+
+            this.#findInstrumentInCacheAndPutToPayload(
+              data.symbol,
+              source,
+              field,
+              payload
+            );
+          }
+        }
+      }
+    }
+  }
+
+  onTimelineMessage({ data, fromCache }) {
+    if (data) {
+      if (!fromCache) this.timeline.set(data.id, data);
+
+      for (const [source, fields] of this.subs.timeline) {
+        for (const { field, datum } of fields) {
+          if (datum === TRADER_DATUM.TIMELINE_ITEM) {
+            const payload = {
+              operationId: data.id,
+              parentId: data.orderno,
+              symbol: data.symbol,
+              type:
+                data.side === 'buy'
+                  ? TIMELINE_OPERATION_TYPE.BUY
+                  : TIMELINE_OPERATION_TYPE.SELL,
+              exchange: data.exchange,
+              quantity: data.qty,
+              price: data.price,
+              createdAt: data.date
             };
 
             this.#findInstrumentInCacheAndPutToPayload(
