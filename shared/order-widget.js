@@ -2,7 +2,7 @@
 
 import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
-import { observable } from './element/observation/observable.js';
+import { Observable, observable } from './element/observation/observable.js'
 import { html, requireComponent } from './template.js';
 import { when } from './element/templating/when.js';
 import { validate } from './validate.js';
@@ -164,6 +164,7 @@ export const orderWidgetTemplate = (context, definition) => html`
                         maxlength="12"
                         @input="${(x, c) => x.handlePriceInput(c)}"
                         @keydown="${(x, c) => x.handlePriceKeydown(c)}"
+                        value="${(x) => x.document?.lastPrice ?? ''}"
                       >
                         <span slot="end">${(x) =>
                           priceCurrencySymbol(x.instrument)}</span>
@@ -186,18 +187,38 @@ export const orderWidgetTemplate = (context, definition) => html`
                     <div class="widget-flex-line">
                       <${'ppp-widget-text-field'}
                         ${ref('quantity')}
+                        type="number"
+                        autocomplete="off"
+                        min="1"
+                        max="1000000000"
+                        precision="0"
                         maxlength="8"
-                        @keydown="${(x, c) => x.handleQuantityKeydown(c)}"
+                        @wheel="${(x, c) => x.handleQuantityWheel(c)}"
                         @input="${(x, c) => x.handleQuantityInput(c)}"
+                        @paste="${(x, c) => x.handleQuantityPaste(c)}"
+                        @keydown="${(x, c) => x.handleQuantityKeydown(c)}"
                         class="${(x) =>
                           'lot-size-' + x.instrument?.lot?.toString()?.length ??
                           1}"
+                        value="${(x) => x.document?.lastQuantity ?? ''}"
                       >
                         <span slot="end">${(x) =>
                           x.instrument?.lot
                             ? '×' + x.instrument.lot
                             : ''}</span>
                       </ppp-widget-text-field>
+                      <div class="order-widget-step-controls">
+                        <button
+                          @click="${(x) => x.stepUp()}"
+                        >
+                          ${definition.incrementIcon ?? ''}
+                        </button>
+                        <button
+                          @click="${(x) => x.stepDown()}"
+                        >
+                          ${definition.decrementIcon ?? ''}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -377,23 +398,8 @@ export class PppOrderWidget extends WidgetWithInstrument {
         }
       }
     }
-  }
 
-  async selectSymbol(symbol) {
-    if (this.ordersTrader) {
-      await this.findAndSelectSymbol(
-        {
-          type: 'stock',
-          symbol,
-          exchange: this.ordersTrader.getExchange()
-        },
-        true
-      );
-    }
-  }
-
-  pusherTelegramHandler(data) {
-    void this.selectSymbol(data.t);
+    this.calculateTotalAmount();
   }
 
   async disconnectedCallback() {
@@ -429,6 +435,23 @@ export class PppOrderWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  async selectSymbol(symbol) {
+    if (this.ordersTrader) {
+      await this.findAndSelectSymbol(
+        {
+          type: 'stock',
+          symbol,
+          exchange: this.ordersTrader.getExchange()
+        },
+        true
+      );
+    }
+  }
+
+  pusherTelegramHandler(data) {
+    void this.selectSymbol(data.t);
+  }
+
   instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
     this.level1Trader?.instrumentChanged?.(this, oldValue, newValue);
@@ -447,7 +470,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
         ordersTraderId: this.container.ordersTraderId.value,
         level1TraderId: this.container.level1TraderId.value,
         pusherApiId: this.container.pusherApiId.value,
-        displaySizeInUnits: this.container.displaySizeInUnits.checked
+        displaySizeInUnits: this.container.displaySizeInUnits.checked,
+        changePriceQuantityViaMouseWheel:
+          this.container.changePriceQuantityViaMouseWheel.checked
       }
     };
   }
@@ -464,19 +489,6 @@ export class PppOrderWidget extends WidgetWithInstrument {
         'widgets.$.activeTab': event.detail.id
       }
     });
-  }
-
-  formatPrice(price) {
-    return formatPrice(price, this.instrument);
-  }
-
-  setPrice(price) {
-    if (price > 0) {
-      this.price.value = price.toString().replace('.', ',');
-
-      this.calculateTotalAmount();
-      this.price.focus();
-    }
   }
 
   @debounce(250)
@@ -526,8 +538,44 @@ export class PppOrderWidget extends WidgetWithInstrument {
   }
 
   calculateTotalAmount() {
-    super.calculateTotalAmount();
+    this.totalAmount =
+      parseFloat(this.price.value.replace(',', '.')) *
+      parseInt(this.quantity.value) *
+      this.instrument.lot;
+
     this.calculateEstimate();
+  }
+
+  handlePriceKeydown({ event }) {
+    return true;
+  }
+
+  formatPrice(price) {
+    return formatPrice(price, this.instrument);
+  }
+
+  setPrice(price) {
+    if (price > 0) {
+      this.price.value = price.toString().replace('.', ',');
+
+      this.calculateTotalAmount();
+      this.price.focus();
+      this.saveLastPriceValue();
+    }
+  }
+
+  @debounce(250)
+  saveLastPriceValue() {
+    void this.applyChanges({
+      $set: {
+        'widgets.$.lastPrice': this.price.value
+      }
+    });
+  }
+
+  handlePriceInput() {
+    this.calculateTotalAmount();
+    this.saveLastPriceValue();
   }
 
   setQuantity(quantity) {
@@ -536,6 +584,75 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
       this.calculateTotalAmount();
       this.quantity.focus();
+      this.saveLastQuantity();
+    }
+  }
+
+  @debounce(250)
+  saveLastQuantity() {
+    void this.applyChanges({
+      $set: {
+        'widgets.$.lastQuantity': this.quantity.value
+      }
+    });
+  }
+
+  handleQuantityInput() {
+    if (+this.quantity.value === 0) this.quantity.value = '';
+
+    while (this.quantity.value.charAt(0) === '0') {
+      this.quantity.value = this.quantity.value.substring(1);
+    }
+
+    this.calculateTotalAmount();
+    this.saveLastQuantity();
+  }
+
+  handleQuantityPaste({ event }) {
+    const data = event.clipboardData.getData('text/plain');
+
+    if (+data === 0 && !this.quantity.value) return false;
+
+    return parseInt(data) === +data && data >= 0 && +data <= 1000000000;
+  }
+
+  handleQuantityKeydown({ event }) {
+    if (event.key === '0' && !this.quantity.value) return false;
+
+    switch (event.key) {
+      case 'e':
+      case '-':
+      case '+':
+      case '.':
+      case ',':
+        return false;
+    }
+
+    return true;
+  }
+
+  stepUp() {
+    this.quantity.control.stepUp();
+
+    this.quantity.value = this.quantity.control.value;
+
+    this.calculateTotalAmount();
+    this.saveLastQuantity();
+  }
+
+  stepDown() {
+    this.quantity.control.stepDown();
+
+    this.quantity.value = this.quantity.control.value;
+
+    this.calculateTotalAmount();
+    this.saveLastQuantity();
+  }
+
+  handleQuantityWheel({ event }) {
+    if (this.document.changePriceQuantityViaMouseWheel) {
+      if (event.deltaY < 0) this.stepUp();
+      else this.stepDown();
     }
   }
 
@@ -603,7 +720,7 @@ export async function widgetDefinition(definition = {}) {
       чтобы выставлять рыночные, лимитные и отложенные биржевые заявки.`,
     customElement: PppOrderWidget.compose(definition),
     maxHeight: 512,
-    maxWidth: 275 * 2,
+    maxWidth: 550,
     minHeight: 375,
     minWidth: 275,
     settings: html`
@@ -715,13 +832,19 @@ export async function widgetDefinition(definition = {}) {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Параметры отображения</h5>
+          <h5>Параметры отображения и работы</h5>
         </div>
         <${'ppp-checkbox'}
           ?checked="${(x) => x.document.displaySizeInUnits}"
           ${ref('displaySizeInUnits')}
         >
           Показывать количество инструмента в портфеле в штуках
+        </${'ppp-checkbox'}>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.changePriceQuantityViaMouseWheel}"
+          ${ref('changePriceQuantityViaMouseWheel')}
+        >
+          Изменять цену и количество колесом мыши
         </${'ppp-checkbox'}>
       </div>
     `

@@ -50,12 +50,11 @@ export const widgetTextFieldStyles = (context, definition) => css`
     box-sizing: border-box;
     width: 100%;
     height: 32px;
-    border-radius: 4px;
+    border-radius: 4px 0 0 4px;
     padding: 0 0 1px 8px;
     font-size: 12px;
     font-weight: normal;
     border: 1px solid #d9dae0;
-    transition: border-color 150ms ease-in-out 0s;
     z-index: 1;
     outline: none;
     line-height: 24px;

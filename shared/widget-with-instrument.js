@@ -130,27 +130,4 @@ export class WidgetWithInstrument extends Widget {
 
     return true;
   }
-
-  calculateTotalAmount() {
-    this.totalAmount =
-      parseFloat(this.price.value.replace(',', '.')) *
-      parseInt(this.quantity.value) *
-      this.instrument.lot;
-  }
-
-  handlePriceInput({ event }) {
-    this.calculateTotalAmount();
-  }
-
-  handleQuantityInput({ event }) {
-    this.calculateTotalAmount();
-  }
-
-  handlePriceKeydown({ event }) {
-    return true;
-  }
-
-  handleQuantityKeydown({ event }) {
-    return true;
-  }
 }

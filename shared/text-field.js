@@ -66,8 +66,11 @@ export const textFieldTemplate = (context, definition) => html`
           @input="${(x) => x.handleTextInput()}"
           @change="${(x) => x.handleChange()}"
           ?autofocus="${(x) => x.autofocus}"
+          autocomplete="${(x) => x.autocomplete}"
           ?disabled="${(x) => x.disabled}"
           list="${(x) => x.list}"
+          min="${(x) => x.min}"
+          max="${(x) => x.max}"
           maxlength="${(x) => x.maxlength}"
           minlength="${(x) => x.minlength}"
           pattern="${(x) => x.pattern}"
@@ -249,6 +252,32 @@ export class TextField extends FoundationElement {
    */
   @attr({ mode: 'boolean' })
   spellcheck;
+
+  /**
+   * @public
+   * @remarks
+   * HTMLAttribute: autocomplete
+   */
+  @attr()
+  autocomplete;
+
+  /**
+   * The minimum allowed value.
+   * @public
+   * @remarks
+   * HTMLAttribute: min
+   */
+  @attr({ converter: nullableNumberConverter })
+  min;
+
+  /**
+   * The maximum allowed value.
+   * @public
+   * @remarks
+   * HTMLAttribute: max
+   */
+  @attr({ converter: nullableNumberConverter })
+  max;
 
   /**
    * @internal

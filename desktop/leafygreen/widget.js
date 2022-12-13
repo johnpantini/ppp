@@ -336,6 +336,8 @@ export const widgetStyles = (context, definition) =>
     .widget-flex-line {
       width: 100%;
       display: flex;
+      flex-direction: row;
+      align-items: stretch;
     }
 
     .widget-summary {
