@@ -2,21 +2,26 @@
 
 import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
-import { Observable, observable } from './element/observation/observable.js'
+import { observable } from './element/observation/observable.js';
 import { html, requireComponent } from './template.js';
 import { when } from './element/templating/when.js';
 import { validate } from './validate.js';
 import { WIDGET_TYPES, TRADER_DATUM } from './const.js';
+import { DOM } from './element/dom.js';
 import {
   formatRelativeChange,
   formatAbsoluteChange,
   formatAmount,
   formatPrice,
   formatCommission,
-  priceCurrencySymbol
+  priceCurrencySymbol,
+  getInstrumentPrecision,
+  decimalSeparator
 } from './intl.js';
 import { debounce } from './ppp-throttle.js';
 import ppp from '../ppp.js';
+
+const decSeparator = decimalSeparator();
 
 await Promise.all([
   requireComponent('ppp-widget-tabs'),
@@ -158,17 +163,44 @@ export const orderWidgetTemplate = (context, definition) => html`
                     <div class="widget-text-label">Цена исполнения</div>
                     <div class="widget-flex-line">
                       <${'ppp-widget-text-field'}
-                        ${ref('price')}
+                        type="text"
+                        autocomplete="off"
+                        min="0"
+                        max="1000000000"
+                        step="${(x) =>
+                          x.instrument.minPriceIncrement ?? '0.01'}"
+                        precision="${(x) =>
+                          getInstrumentPrecision(x.instrument)}"
                         ?disabled="${(x) =>
                           x.orderTypeTabs.activeid === 'market'}"
                         maxlength="12"
+                        @wheel="${(x, c) => x.handlePriceWheel(c)}"
                         @input="${(x, c) => x.handlePriceInput(c)}"
                         @keydown="${(x, c) => x.handlePriceKeydown(c)}"
-                        value="${(x) => x.document?.lastPrice ?? ''}"
+                        @paste="${(x, c) => x.handlePricePaste(c)}"
+                        @beforeinput="${(x, c) => x.handlePriceBeforeInput(c)}"
+                        value="${(x) =>
+                          (x.document?.lastPrice ?? '').replace(
+                            '.',
+                            decSeparator
+                          )}"
+                        ${ref('price')}
                       >
                         <span slot="end">${(x) =>
                           priceCurrencySymbol(x.instrument)}</span>
                       </ppp-widget-text-field>
+                      <div class="order-widget-step-controls">
+                        <button
+                          @click="${(x) => x.stepUp(false)}"
+                        >
+                          ${definition.incrementIcon ?? ''}
+                        </button>
+                        <button
+                          @click="${(x) => x.stepDown(false)}"
+                        >
+                          ${definition.decrementIcon ?? ''}
+                        </button>
+                      </div>
                       ${when(
                         (x) => x.orderTypeTabs.activeid === 'market',
                         html`
@@ -186,7 +218,6 @@ export const orderWidgetTemplate = (context, definition) => html`
                     <div class="widget-text-label">Количество</div>
                     <div class="widget-flex-line">
                       <${'ppp-widget-text-field'}
-                        ${ref('quantity')}
                         type="number"
                         autocomplete="off"
                         min="1"
@@ -201,6 +232,7 @@ export const orderWidgetTemplate = (context, definition) => html`
                           'lot-size-' + x.instrument?.lot?.toString()?.length ??
                           1}"
                         value="${(x) => x.document?.lastQuantity ?? ''}"
+                        ${ref('quantity')}
                       >
                         <span slot="end">${(x) =>
                           x.instrument?.lot
@@ -209,12 +241,12 @@ export const orderWidgetTemplate = (context, definition) => html`
                       </ppp-widget-text-field>
                       <div class="order-widget-step-controls">
                         <button
-                          @click="${(x) => x.stepUp()}"
+                          @click="${(x) => x.stepUp(true)}"
                         >
                           ${definition.incrementIcon ?? ''}
                         </button>
                         <button
-                          @click="${(x) => x.stepDown()}"
+                          @click="${(x) => x.stepDown(true)}"
                         >
                           ${definition.decrementIcon ?? ''}
                         </button>
@@ -538,8 +570,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
   }
 
   calculateTotalAmount() {
-    if (!this.instrument)
-      return;
+    if (!this.instrument) return;
 
     this.totalAmount =
       parseFloat(this.price.value.replace(',', '.')) *
@@ -549,7 +580,52 @@ export class PppOrderWidget extends WidgetWithInstrument {
     this.calculateEstimate();
   }
 
+  handlePricePaste({ event }) {
+    const data = event.clipboardData.getData('text/plain').replace(',', '.');
+
+    return (
+      !/[e/-/+]/i.test(data) && +data === parseFloat(data.replace(',', '.'))
+    );
+  }
+
+  handlePriceBeforeInput({ event }) {
+    if (event.data) {
+      return /[0-9.,]/.test(event.data);
+    }
+
+    return true;
+  }
+
+  handlePriceWheel({ event }) {
+    if (this.document.changePriceQuantityViaMouseWheel) {
+      if (event.deltaY < 0) this.stepUp(false);
+      else this.stepDown(false);
+    }
+  }
+
+  handlePriceInput() {
+    if (this.price.value === decSeparator || this.price.value === '.')
+      this.price.value = '';
+
+    this.price.value = this.price.value
+      .replaceAll('.', decSeparator)
+      .replaceAll(/^00/gi, '0')
+      .replace(new RegExp(decSeparator, 'g'), (val, index, str) =>
+        index === str.indexOf(decSeparator) ? val : ''
+      );
+
+    this.calculateTotalAmount();
+    this.saveLastPriceValue();
+  }
+
   handlePriceKeydown({ event }) {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+
+      if (event.key === 'ArrowUp') this.stepUp(false);
+      else this.stepDown(false);
+    }
+
     return true;
   }
 
@@ -559,7 +635,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   setPrice(price) {
     if (price > 0) {
-      this.price.value = price.toString().replace('.', ',');
+      this.price.value = price.toString().replace('.', decSeparator);
 
       this.calculateTotalAmount();
       this.price.focus();
@@ -571,14 +647,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
   saveLastPriceValue() {
     void this.applyChanges({
       $set: {
-        'widgets.$.lastPrice': this.price.value
+        'widgets.$.lastPrice': this.price.value.replace(',', '.')
       }
     });
-  }
-
-  handlePriceInput() {
-    this.calculateTotalAmount();
-    this.saveLastPriceValue();
   }
 
   setQuantity(quantity) {
@@ -634,28 +705,54 @@ export class PppOrderWidget extends WidgetWithInstrument {
     return true;
   }
 
-  stepUp() {
-    this.quantity.control.stepUp();
+  stepUpOrDown(quantity = true, up = true) {
+    if (quantity) {
+      up ? this.quantity.control.stepUp() : this.quantity.control.stepDown();
 
-    this.quantity.value = this.quantity.control.value;
+      this.quantity.value = this.quantity.control.value;
 
-    this.calculateTotalAmount();
-    this.saveLastQuantity();
+      this.quantity.control.focus();
+      this.calculateTotalAmount();
+      this.saveLastQuantity();
+    } else {
+      if (this.price.value.endsWith(decSeparator))
+        this.price.value = this.price.value.replace(/.$/, '');
+
+      this.price.value = this.price.value.replace(',', '.');
+      this.price.control.type = 'number';
+
+      DOM.queueUpdate(() => {
+        up ? this.price.control.stepUp() : this.price.control.stepDown();
+        this.price.control.type = 'text';
+
+        const length = this.price.control.value.length;
+
+        this.price.control.setSelectionRange(length, length);
+
+        this.price.value = this.price.control.value.replace?.(
+          '.',
+          decSeparator
+        );
+
+        this.price.control.focus();
+        this.calculateTotalAmount();
+        this.saveLastPriceValue();
+      });
+    }
   }
 
-  stepDown() {
-    this.quantity.control.stepDown();
+  stepUp(quantity = true) {
+    this.stepUpOrDown(quantity, true);
+  }
 
-    this.quantity.value = this.quantity.control.value;
-
-    this.calculateTotalAmount();
-    this.saveLastQuantity();
+  stepDown(quantity = true) {
+    this.stepUpOrDown(quantity, false);
   }
 
   handleQuantityWheel({ event }) {
     if (this.document.changePriceQuantityViaMouseWheel) {
-      if (event.deltaY < 0) this.stepUp();
-      else this.stepDown();
+      if (event.deltaY < 0) this.stepUp(true);
+      else this.stepDown(true);
     }
   }
 
