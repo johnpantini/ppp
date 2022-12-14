@@ -156,3 +156,11 @@ export function currencyName(currencyCode) {
 
   return currencyNames.of(currencyCode);
 }
+
+export function decimalSeparator() {
+  const numberWithDecimalSeparator = 1.1;
+
+  return Intl.NumberFormat('ru-RU')
+    .formatToParts(numberWithDecimalSeparator)
+    .find((part) => part.type === 'decimal').value;
+}
