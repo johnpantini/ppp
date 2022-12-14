@@ -15,22 +15,20 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
         <${'ppp-banner'}
           class="inline"
           appearance="${(x) =>
-            (x.isPredefinedWidgetType(x.activeItem) ? x.documents.length : true)
+            (!x.isPredefinedWidgetType(x.activeItem) || x.documents.length)
               ? 'info'
               : 'warning'}"
           style="margin-bottom: 1rem"
         >
           <div style="display: ${(x) =>
-            (x.isPredefinedWidgetType(x.activeItem) ? x.documents.length : true)
+            (!x.isPredefinedWidgetType(x.activeItem) || x.documents.length)
               ? 'initial'
               : 'none'}">
             Найдите виджет, используя боковое меню, а затем нажмите на строку в
             таблице, чтобы разместить в терминале.
           </div>
           <div style="display: ${(x) =>
-            !(x.isPredefinedWidgetType(x.activeItem)
-              ? x.documents.length
-              : true)
+            (x.isPredefinedWidgetType(x.activeItem) && !x.documents.length)
               ? 'initial'
               : 'none'}">
             Похоже, у вас нет ни одного виджета данного типа. Добавьте и
