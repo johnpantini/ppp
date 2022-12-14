@@ -28,6 +28,7 @@ export const serversPageTemplate = (context, definition) => html`
       </span>
       <${'ppp-button'}
         appearance="primary"
+        disabled
         slot="header-controls"
         @click="${() =>
           ppp.app.navigate({
