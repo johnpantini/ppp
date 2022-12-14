@@ -12,30 +12,38 @@ export const widgetSelectorModalPageTemplate = (context, definition) => html`
   <template>
     <form novalidate>
       <${'ppp-page'} modal headless>
-        ${when(
-          (x) =>
-            x.isPredefinedWidgetType(x.activeItem) &&
-            x.ready &&
-            !x.page.loading &&
-            !x.documents.length,
-          html`
-            <${'ppp-banner'}
-              class="inline"
-              appearance="warning"
-              style="margin-bottom: 1rem"
-            >
-              Похоже, у вас нет ни одного виджета данного типа. Добавьте и
-              настройте их в <a
-              @click="${(x) => {
-                ppp.app.navigate({
-                  page: 'widget',
-                  type: x.activeItem
-                });
-              }}}" href="javascript:void(0)">соответствующем
-              разделе</a>.
-            </ppp-banner>
-          `
-        )}
+        <${'ppp-banner'}
+          class="inline"
+          appearance="${(x) =>
+            (x.isPredefinedWidgetType(x.activeItem) ? x.documents.length : true)
+              ? 'info'
+              : 'warning'}"
+          style="margin-bottom: 1rem"
+        >
+          <div style="display: ${(x) =>
+            (x.isPredefinedWidgetType(x.activeItem) ? x.documents.length : true)
+              ? 'initial'
+              : 'none'}">
+            Найдите виджет, используя боковое меню, а затем нажмите на строку в
+            таблице, чтобы разместить в терминале.
+          </div>
+          <div style="display: ${(x) =>
+            !(x.isPredefinedWidgetType(x.activeItem)
+              ? x.documents.length
+              : true)
+              ? 'initial'
+              : 'none'}">
+            Похоже, у вас нет ни одного виджета данного типа. Добавьте и
+            настройте их в <a
+            @click="${(x) => {
+              ppp.app.navigate({
+                page: 'widget',
+                type: x.activeItem
+              });
+            }}}" href="javascript:void(0)">соответствующем
+            разделе</a>.
+          </div>
+        </ppp-banner>
         <div class="selectors">
           <div class="selector-holder">
             <${'ppp-side-nav'}
@@ -234,6 +242,10 @@ export const widgetSelectorModalPageStyles = (context, definition) => css`
   ${pageStyles}
   [name='start']::slotted(img) {
     height: 20px;
+  }
+
+  ppp-banner {
+    width: 810px;
   }
 
   ppp-side-nav {
