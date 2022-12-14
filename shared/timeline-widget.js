@@ -96,7 +96,8 @@ export const timelineWidgetTemplate = (context, definition) => html`
                                 style="${(x, c) =>
                                   c.parentContext.parent.getLogo(x)}"
                               ></div>
-                              1
+                              ${(x, c) =>
+                                c.parentContext.parent.getLogoFallback(x)}
                             </div>
                             <div class="timeline-item-card-text">
                               <div class="timeline-item-card-text-name-price">
@@ -230,6 +231,21 @@ export class PppTimelineWidget extends WidgetWithInstrument {
               'static/instruments/' + firstOperation.instrument.isin + '.svg'
             })`
           : '';
+
+      default:
+        return '';
+    }
+  }
+
+  getLogoFallback(operations) {
+    const [firstOperation] = operations;
+
+    switch (firstOperation.type) {
+      case TIMELINE_OPERATION_TYPE.BUY:
+      case TIMELINE_OPERATION_TYPE.SELL:
+        return (
+          firstOperation.instrument.symbol?.[0] ?? firstOperation.symbol[0]
+        );
 
       default:
         return '';
