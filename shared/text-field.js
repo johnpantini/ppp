@@ -71,6 +71,8 @@ export const textFieldTemplate = (context, definition) => html`
           list="${(x) => x.list}"
           min="${(x) => x.min}"
           max="${(x) => x.max}"
+          precision="${(x) => x.precision}"
+          step="${(x) => x.step}"
           maxlength="${(x) => x.maxlength}"
           minlength="${(x) => x.minlength}"
           pattern="${(x) => x.pattern}"
@@ -278,6 +280,22 @@ export class TextField extends FoundationElement {
    */
   @attr({ converter: nullableNumberConverter })
   max;
+
+  /**
+   * @public
+   * @remarks
+   * HTMLAttribute: precision
+   */
+  @attr({ converter: nullableNumberConverter })
+  precision;
+
+  /**
+   * @public
+   * @remarks
+   * HTMLAttribute: step
+   */
+  @attr({ converter: nullableNumberConverter })
+  step;
 
   /**
    * @internal
