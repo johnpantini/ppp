@@ -37,7 +37,6 @@ function calcEditDistances(
   const rowCount = oldEnd - oldStart + 1;
   const columnCount = currentEnd - currentStart + 1;
   const distances = new Array(rowCount);
-
   let north;
   let west;
 
@@ -80,14 +79,12 @@ function spliceOperationsFromEditDistances(distances) {
     if (i === 0) {
       edits.push(EDIT_ADD);
       j--;
-
       continue;
     }
 
     if (j === 0) {
       edits.push(EDIT_DELETE);
       i--;
-
       continue;
     }
 
@@ -107,7 +104,6 @@ function spliceOperationsFromEditDistances(distances) {
         edits.push(EDIT_LEAVE);
       } else {
         edits.push(EDIT_UPDATE);
-
         current = northWest;
       }
 
@@ -116,12 +112,10 @@ function spliceOperationsFromEditDistances(distances) {
     } else if (min === west) {
       edits.push(EDIT_DELETE);
       i--;
-
       current = west;
     } else {
       edits.push(EDIT_ADD);
       j--;
-
       current = north;
     }
   }
@@ -250,7 +244,6 @@ export function calcSplices(
   const ops = spliceOperationsFromEditDistances(
     calcEditDistances(current, currentStart, currentEnd, old, oldStart, oldEnd)
   );
-
   const splices = [];
   let splice = void 0;
   let index = currentStart;
@@ -261,7 +254,6 @@ export function calcSplices(
       case EDIT_LEAVE:
         if (splice !== void 0) {
           splices.push(splice);
-
           splice = void 0;
         }
 
@@ -353,7 +345,6 @@ function mergeSplice(splices, index, removed, addedCount) {
           const prepend = splice.removed.slice(0, current.index - splice.index);
 
           $push.apply(prepend, currentRemoved);
-
           currentRemoved = prepend;
         }
 
@@ -378,7 +369,6 @@ function mergeSplice(splices, index, removed, addedCount) {
     } else if (splice.index < current.index) {
       // Insert splice here.
       inserted = true;
-
       splices.splice(i, 0, splice);
       i++;
 

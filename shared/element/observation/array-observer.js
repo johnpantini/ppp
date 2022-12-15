@@ -35,13 +35,19 @@ function adjustIndex(changeRecord, array) {
 class ArrayObserver extends SubscriberSet {
   constructor(source) {
     super(source);
-
     this.oldCollection = void 0;
     this.splices = void 0;
     this.needsQueue = true;
     this.call = this.flush;
+    Reflect.defineProperty(source, '$pppController', {
+      value: this,
+      enumerable: false
+    });
+  }
 
-    source.$pppController = this;
+  subscribe(subscriber) {
+    this.flush();
+    super.subscribe(subscriber);
   }
 
   addSplice(splice) {
@@ -53,7 +59,6 @@ class ArrayObserver extends SubscriberSet {
 
     if (this.needsQueue) {
       this.needsQueue = false;
-
       DOM.queueUpdate(this);
     }
   }
@@ -63,7 +68,6 @@ class ArrayObserver extends SubscriberSet {
 
     if (this.needsQueue) {
       this.needsQueue = false;
-
       DOM.queueUpdate(this);
     }
   }
@@ -96,6 +100,7 @@ class ArrayObserver extends SubscriberSet {
   }
 }
 
+/* eslint-disable prefer-rest-params */
 /**
  * Enables the array observation mechanism.
  * @remarks
@@ -110,21 +115,32 @@ export function enableArrayObservation() {
   }
 
   arrayObservationEnabled = true;
-
   Observable.setArrayObserverFactory((collection) => {
     return new ArrayObserver(collection);
   });
 
-  const arrayProto = Array.prototype;
-  const pop = arrayProto.pop;
-  const push = arrayProto.push;
-  const reverse = arrayProto.reverse;
-  const shift = arrayProto.shift;
-  const sort = arrayProto.sort;
-  const splice = arrayProto.splice;
-  const unshift = arrayProto.unshift;
+  const proto = Array.prototype;
 
-  arrayProto.pop = function () {
+  // Don't patch Array if it has already been patched
+  // by another copy of fast-element.
+  if (proto.$pppPatch) {
+    return;
+  }
+
+  Reflect.defineProperty(proto, '$pppPatch', {
+    value: 1,
+    enumerable: false
+  });
+
+  const pop = proto.pop;
+  const push = proto.push;
+  const reverse = proto.reverse;
+  const shift = proto.shift;
+  const sort = proto.sort;
+  const splice = proto.splice;
+  const unshift = proto.unshift;
+
+  proto.pop = function () {
     const notEmpty = this.length > 0;
     const methodCallResult = pop.apply(this, arguments);
     const o = this.$pppController;
@@ -135,8 +151,7 @@ export function enableArrayObservation() {
 
     return methodCallResult;
   };
-
-  arrayProto.push = function () {
+  proto.push = function () {
     const methodCallResult = push.apply(this, arguments);
     const o = this.$pppController;
 
@@ -151,8 +166,7 @@ export function enableArrayObservation() {
 
     return methodCallResult;
   };
-
-  arrayProto.reverse = function () {
+  proto.reverse = function () {
     let oldArray;
     const o = this.$pppController;
 
@@ -169,8 +183,7 @@ export function enableArrayObservation() {
 
     return methodCallResult;
   };
-
-  arrayProto.shift = function () {
+  proto.shift = function () {
     const notEmpty = this.length > 0;
     const methodCallResult = shift.apply(this, arguments);
     const o = this.$pppController;
@@ -181,8 +194,7 @@ export function enableArrayObservation() {
 
     return methodCallResult;
   };
-
-  arrayProto.sort = function () {
+  proto.sort = function () {
     let oldArray;
     const o = this.$pppController;
 
@@ -199,8 +211,7 @@ export function enableArrayObservation() {
 
     return methodCallResult;
   };
-
-  arrayProto.splice = function () {
+  proto.splice = function () {
     const methodCallResult = splice.apply(this, arguments);
     const o = this.$pppController;
 
@@ -219,8 +230,7 @@ export function enableArrayObservation() {
 
     return methodCallResult;
   };
-
-  arrayProto.unshift = function () {
+  proto.unshift = function () {
     const methodCallResult = unshift.apply(this, arguments);
     const o = this.$pppController;
 
@@ -231,3 +241,5 @@ export function enableArrayObservation() {
     return methodCallResult;
   };
 }
+
+/* eslint-enable prefer-rest-params */
