@@ -3,7 +3,6 @@ import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
-import { actionPageMountPoint } from '../../shared/page.js';
 import { SERVER_STATE } from '../../shared/const.js';
 import ppp from '../../ppp.js';
 
@@ -28,7 +27,6 @@ export const serversPageTemplate = (context, definition) => html`
       </span>
       <${'ppp-button'}
         appearance="primary"
-        disabled
         slot="header-controls"
         @click="${() =>
           ppp.app.navigate({
@@ -111,7 +109,7 @@ export const serversPageTemplate = (context, definition) => html`
                     disabled
                     shiftlock
                     class="xsmall"
-                    @click="${() => x.removeServer(datum)}"
+                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -123,7 +121,6 @@ export const serversPageTemplate = (context, definition) => html`
       </ppp-table>
       <span slot="actions"></span>
     </ppp-page>
-    ${actionPageMountPoint}
   </template>
 `;
 
