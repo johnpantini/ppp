@@ -1,3 +1,3 @@
-import { CanvasTable } from '../salt/states/ppp/lib/canvas-table/index.mjs';
+import { Canvas } from '../salt/states/ppp/lib/canvas/index.js';
 
-console.log(CanvasTable);
+console.log(Canvas);
