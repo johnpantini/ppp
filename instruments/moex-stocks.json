@@ -340,6 +340,23 @@
     "tinkoffFigi": "BBG0029SG1C1"
   },
   {
+    "symbol": "WUSH",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Whoosh",
+    "isin": "RU000A105EX7",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "TCS00A105EX7"
+  },
+  {
     "symbol": "KMAZ",
     "exchange": [
       "moex"
@@ -1245,7 +1262,7 @@
     "exchange": [
       "moex"
     ],
-    "fullName": "Россети",
+    "fullName": "ФСК Россети",
     "isin": "RU000A0JPNN9",
     "minPriceIncrement": 0.00002,
     "type": "stock",

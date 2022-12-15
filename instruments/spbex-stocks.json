@@ -25043,7 +25043,7 @@
       "nyse-nsdq",
       "spbex"
     ],
-    "fullName": "UUFP Industries, Inc",
+    "fullName": "UFP Industries, Inc",
     "isin": "US90278Q1085",
     "minPriceIncrement": 0.01,
     "type": "stock",
@@ -31786,6 +31786,23 @@
     "tinkoffFigi": "BBG000BCHHM0"
   },
   {
+    "symbol": "1997",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Wharf Real Estate",
+    "isin": "KYG9593A1040",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00J76TKS1"
+  },
+  {
     "symbol": "175",
     "exchange": [
       "spbex"
@@ -31818,6 +31835,23 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BKWM80"
+  },
+  {
+    "symbol": "386",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Petroleum & Chemical Corp",
+    "isin": "CNE1000002Q2",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000MQF8G6"
   },
   {
     "symbol": "2269",
@@ -31854,6 +31888,23 @@
     "tinkoffFigi": "BBG000BJ35N5"
   },
   {
+    "symbol": "868",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Xinyi Glass Holdings",
+    "isin": "KYG9828G1082",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000LG6G08"
+  },
+  {
     "symbol": "9992",
     "exchange": [
       "spbex"
@@ -31886,6 +31937,23 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PXTGY5"
+  },
+  {
+    "symbol": "2518",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Autohome",
+    "isin": "KYG066341028",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00ZHT7FY2"
   },
   {
     "symbol": "1109",
@@ -31973,6 +32041,23 @@
     "tinkoffFigi": "BBG000TRZNP2"
   },
   {
+    "symbol": "1044",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Hengan Group",
+    "isin": "KYG4402L1510",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000CJXNB5"
+  },
+  {
     "symbol": "3",
     "exchange": [
       "spbex"
@@ -32058,6 +32143,23 @@
     "tinkoffFigi": "BBG00Y6QRNM7"
   },
   {
+    "symbol": "267",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "CITIC",
+    "isin": "HK0267001375",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BF0V40"
+  },
+  {
     "symbol": "6098",
     "exchange": [
       "spbex"
@@ -32073,6 +32175,23 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00L3B3R02"
+  },
+  {
+    "symbol": "12",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Henderson Land",
+    "isin": "HK0012000102",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BDWF36"
   },
   {
     "symbol": "960",
@@ -32107,6 +32226,40 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000F6F1G3"
+  },
+  {
+    "symbol": "3988",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Bank of China",
+    "isin": "CNE1000001Z5",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000NQGF05"
+  },
+  {
+    "symbol": "1876",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Budweiser Brewing",
+    "isin": "KYG1674K1013",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00P4RBR99"
   },
   {
     "symbol": "9988",
@@ -32245,6 +32398,23 @@
     "tinkoffFigi": "BBG000BGD8W4"
   },
   {
+    "symbol": "9633",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Nongfu Spring",
+    "isin": "CNE100004272",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00WR0QPZ7"
+  },
+  {
     "symbol": "2618",
     "exchange": [
       "spbex"
@@ -32260,6 +32430,23 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG010RJL3B5"
+  },
+  {
+    "symbol": "2318",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Ping An",
+    "isin": "CNE1000003X6",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000GD4N44"
   },
   {
     "symbol": "2313",
@@ -32345,6 +32532,23 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000C16952"
+  },
+  {
+    "symbol": "101",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Hang Lung",
+    "isin": "HK0101000591",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BDTCX4"
   },
   {
     "symbol": "1113",
@@ -32466,6 +32670,23 @@
     "tinkoffFigi": "BBG000PSNMN1"
   },
   {
+    "symbol": "66",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "MTR Corporation",
+    "isin": "HK0066009694",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000MKLJD1"
+  },
+  {
     "symbol": "6969",
     "exchange": [
       "spbex"
@@ -32500,6 +32721,57 @@
     "tinkoffFigi": "BBG00YYT9BD6"
   },
   {
+    "symbol": "939",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Construction Bank",
+    "isin": "CNE1000002H1",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000NW2S18"
+  },
+  {
+    "symbol": "1398",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "ICBC",
+    "isin": "CNE1000003G1",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000Q16VR4"
+  },
+  {
+    "symbol": "1929",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Chow Tai Fook Jewellery",
+    "isin": "KYG211461085",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00299NPM1"
+  },
+  {
     "symbol": "2331",
     "exchange": [
       "spbex"
@@ -32515,6 +32787,40 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PTX047"
+  },
+  {
+    "symbol": "3968",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Merchants Bank",
+    "isin": "CNE1000002M1",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000DVPPK1"
+  },
+  {
+    "symbol": "1378",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Hongqiao Group",
+    "isin": "KYG211501005",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG001DMCGS5"
   },
   {
     "symbol": "1093",
@@ -32585,6 +32891,23 @@
     "tinkoffFigi": "BBG000C6XDL4"
   },
   {
+    "symbol": "1088",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "China Shenhua Energy",
+    "isin": "CNE1000002R0",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000BX4MS1"
+  },
+  {
     "symbol": "241",
     "exchange": [
       "spbex"
@@ -32619,6 +32942,23 @@
     "tinkoffFigi": "BBG011LRHTM7"
   },
   {
+    "symbol": "3692",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "Hansoh Pharmaceutical",
+    "isin": "KYG549581067",
+    "minPriceIncrement": 0.02,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 100,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00P78Y7N1"
+  },
+  {
     "symbol": "1368",
     "exchange": [
       "spbex"
@@ -32651,6 +32991,23 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000FD8023"
+  },
+  {
+    "symbol": "1038",
+    "exchange": [
+      "spbex"
+    ],
+    "fullName": "CK Infrastructure Holdings",
+    "isin": "BMG2178K1009",
+    "minPriceIncrement": 0.05,
+    "type": "stock",
+    "currency": "HKD",
+    "lot": 10,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG000H3CDH4"
   },
   {
     "symbol": "669",
