@@ -156,7 +156,7 @@ pillar_opts: true
   }
 
   async removeDomain(domain) {
-    this.beginOperation('Удаление домена');6
+    this.beginOperation('Удаление домена');
 
     try {
       if (this.document.domains?.length) {
