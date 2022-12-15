@@ -1,7 +1,9 @@
-import { Page, PageWithSSHTerminal } from './page.js';
+import { Page, PageWithSSHTerminal, PageWithShiftLock } from './page.js';
 import { validate } from './validate.js';
 import { SERVER_STATE, SERVER_TYPES } from './const.js';
 import { applyMixins } from './utilities/apply-mixins.js';
+import { requireComponent } from './template.js';
+import { Observable } from './element/observation/observable.js';
 import ppp from '../ppp.js';
 
 export class ServerPage extends Page {
@@ -60,11 +62,11 @@ pillar_opts: true
       'cd libgit2-1.5.0/ ; cmake . ; make -j$(nproc); sudo make install ;',
       'sudo -H python3 -m pip install --upgrade pip setuptools wheel six ;',
       'sudo dnf -y reinstall python3-six ;',
-      'sudo -H python3 -m pip install --upgrade --force-reinstall cffi ;',
+      'sudo -H python3 -m pip install --upgrade --force-reinstall cffi==1.15.1 ;',
       'sudo -H python3 -m pip install --upgrade --force-reinstall pygit2 ;',
       'sudo ln -fs /usr/local/lib64/libgit2.so.1.5 /usr/lib64/libgit2.so.1.5 ; ',
       'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall salt ;',
-      'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall jinja2==3.1.2;',
+      'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall jinja2==3.1.2 ;',
       'sudo rm -f /etc/salt/minion ;',
       `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ;`,
       'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
@@ -93,9 +95,9 @@ pillar_opts: true
     await validate(this.port);
     await validate(this.username);
 
-    if (this.authType.value === SERVER_TYPES.PASSWORD)
-      await validate(this.password);
-    else await validate(this.key);
+    if (this.authType.value === SERVER_TYPES.KEY) {
+      await validate(this.key);
+    }
   }
 
   async read() {
@@ -145,6 +147,45 @@ pillar_opts: true
       })
     ];
   }
+
+  async handleNewDomainClick() {
+    await requireComponent('ppp-modal');
+    await requireComponent('ppp-new-domain-modal-page');
+
+    this.newDomainModal.visible = true;
+  }
+
+  async removeDomain(domain) {
+    this.beginOperation('Удаление домена');6
+
+    try {
+      if (this.document.domains?.length) {
+        await ppp.user.functions.updateOne(
+          {
+            collection: 'servers'
+          },
+          {
+            _id: this.document._id
+          },
+          {
+            $pull: {
+              domains: {
+                $in: [domain]
+              }
+            }
+          }
+        );
+
+        this.document.domains.splice(this.document.domains.indexOf(domain), 1);
+        Observable.notify(this, 'document');
+        this.succeedOperation();
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
 }
 
-applyMixins(ServerPage, PageWithSSHTerminal);
+applyMixins(ServerPage, PageWithSSHTerminal, PageWithShiftLock);

@@ -1,11 +1,24 @@
 import { ServerPage } from '../../shared/server-page.js';
 import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
+import { when } from '../../shared/element/templating/when.js';
 import { pageStyles } from './page.js';
 import { SERVER_TYPES } from '../../shared/const.js';
 
 export const serverPageTemplate = (context, definition) => html`
   <template>
+    ${when(
+      (x) => x.document._id,
+      html`
+        <ppp-modal ${ref('newDomainModal')} dismissible style="z-index: 80">
+        <span slot="title">Добавить домены</span>
+        <div slot="body">
+          <ppp-new-domain-modal-page :parent="${(x) => x}">
+          </ppp-new-domain-modal-page>
+        </div>
+        </ppp-modal>
+      `
+    )}
     <form novalidate>
       <${'ppp-page'}>
         <span slot="header">
@@ -155,6 +168,79 @@ export const serverPageTemplate = (context, definition) => html`
             </section>
           </div>
         </div>
+        ${when(
+          (x) => x.document._id,
+          html`
+            <div class="folding">
+              <div class="folding-header" @click="${(x, c) =>
+                c.event.target.parentNode.classList.toggle('folding-open')}"
+              >
+                <div class="folding-header-toggle">
+                  <img slot="logo" draggable="false" alt="Toggle"
+                       src="static/fa/angle-down.svg"/>
+                </div>
+                <div class="folding-header-text">Домены</div>
+              </div>
+              <div class="folding-content">
+                <section>
+                  <div class="label-group">
+                    <h5>Список доменов</h5>
+                    <p>
+                      Домены, привязанные к серверу.
+                    </p>
+                    <${'ppp-button'}
+                      class="margin-top"
+                      @click="${(x) => x.handleNewDomainClick()}"
+                      appearance="primary"
+                    >
+                      Добавить домены
+                    </ppp-button>
+                  </div>
+                  <div class="input-group">
+                    <${'ppp-table'}
+                      ${ref('shiftLockContainer')}
+                      :columns="${() => [
+                        {
+                          label: 'Домен'
+                        },
+                        {
+                          label: html`
+                            <div
+                              style="display: flex; flex-direction: row; gap: 0 6px; align-items: center"
+                            >
+                              <span>Действия</span
+                              ><code class="hotkey">Shift</code>
+                            </div>
+                          `
+                        }
+                      ]}"
+                      :rows="${(x) =>
+                        (x.document.domains || []).map((datum) => {
+                          return {
+                            datum,
+                            cells: [
+                              html`<a target="_blank" href="https://${datum}"
+                                >${datum}</a
+                              >`,
+                              html`
+                                <${'ppp-button'}
+                                  disabled
+                                  shiftlock
+                                  class="xsmall"
+                                  @click="${() => x.removeDomain(datum)}"
+                                >
+                                  Удалить
+                                </ppp-button>`
+                            ]
+                          };
+                        })}"
+                    >
+                    </ppp-table>
+                </section>
+              </div>
+            </div>
+          `
+        )}
       </ppp-page>
     </form>
   </template>
