@@ -174,6 +174,47 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
+            <h5>Интеграция с Pusher</h5>
+            <p>Опциональная интеграция, позволяющая принимать сообщения от
+              парсера в канал ppp платформы Pusher.</p>
+          </div>
+          <div class="input-group">
+            <ppp-collection-select
+              ${ref('pusherApiId')}
+              placeholder="Опционально, нажмите для выбора"
+              value="${(x) => x.document.pusherApiId}"
+              :context="${(x) => x}"
+              :preloaded="${(x) => x.document.pusherApi ?? ''}"
+              :query="${() => {
+                return (context) => {
+                  return context.services
+                    .get('mongodb-atlas')
+                    .db('ppp')
+                    .collection('apis')
+                    .find({
+                      $and: [
+                        {
+                          type: `[%#(await import('./const.js')).APIS.PUSHER%]`
+                        },
+                        {
+                          $or: [
+                            { removed: { $ne: true } },
+                            {
+                              _id: `[%#this.document.pusherApiId ?? ''%]`
+                            }
+                          ]
+                        }
+                      ]
+                    })
+                    .sort({ updatedAt: -1 });
+                };
+              }}"
+              :transform="${() => ppp.decryptDocumentsTransformation(['key'])}"
+            ></ppp-collection-select>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
             <h5>Интервал опроса</h5>
             <p>Периодичность парсинга. Задаётся в секундах.</p>
           </div>

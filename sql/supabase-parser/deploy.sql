@@ -49,20 +49,47 @@ $$ language plv8;
 create or replace function parsed_records_insert_trigger_[%#ctx.document._id%]()
 returns trigger as
 $$
-  if ([%#ctx.document.telegramEnabled%]) {
-    const message = plv8.find_function('format_parsed_record_message_[%#ctx.document._id%]')(NEW);
+  try {
+    if ([%#!!ctx.document.pusherApiId%]) {
+      const timestamp = Math.floor(Date.now() / 1000);
 
-    if (typeof message === 'string')
-      plv8.find_function('send_telegram_message_for_parsed_record_[%#ctx.document._id%]')(message, {});
-    else if (typeof message === 'object' && message.text)
-      plv8.find_function('send_telegram_message_for_parsed_record_[%#ctx.document._id%]')(message.text, message.options || {});
+      const pusherBody = JSON.stringify({
+        name: 'supabase-parser',
+        channel: 'ppp',
+        data: JSON.stringify(NEW, (key, value) => typeof value === 'bigint' ? value.toString() : value)
+      });
+
+      const bodyMd5 = plv8.execute(`select encode(digest('${pusherBody}', 'md5'), 'hex')`)[0].encode;
+      let params = `auth_key=[%#ctx.document.pusherApi.key%]&auth_timestamp=${timestamp}&auth_version=1.0&body_md5=${bodyMd5}`;
+
+      const authData = ['POST', '/apps/[%#ctx.document.pusherApi.appid%]/events', params].join('\n');
+      const authSignature = plv8.execute(`select encode(hmac('${authData}', '[%#ctx.document.pusherApi.secret%]',
+        'sha256'), 'hex')`)[0].encode;
+
+      params += `&auth_signature=${authSignature}`;
+
+      plv8.execute(`select content from http(('POST', 'https://api-[%#ctx.document.pusherApi.cluster%].pusher.com/apps/[%#ctx.document.pusherApi.appid%]/events?${params}', array[http_header('Content-Type', 'application/json')], 'application/json', '${pusherBody}')::http_request);`);
+    }
+
+    if ([%#ctx.document.telegramEnabled%]) {
+      const message = plv8.find_function('format_parsed_record_message_[%#ctx.document._id%]')(NEW);
+
+      if (typeof message === 'string')
+        plv8.find_function('send_telegram_message_for_parsed_record_[%#ctx.document._id%]')(message, {});
+      else if (typeof message === 'object' && message.text)
+        plv8.find_function('send_telegram_message_for_parsed_record_[%#ctx.document._id%]')(message.text, message.options || {});
+    }
+
+    const TABLE_NAME = 'public.parsed_records_[%#ctx.document._id%]';
+
+    [%#ctx.document.insertTriggerCode%]
+
+    return null;
+  } catch(e) {
+    plv8.elog(ERROR, e.toString());
+
+    return null;
   }
-
-  const TABLE_NAME = 'public.parsed_records_[%#ctx.document._id%]';
-
-  [%#ctx.document.insertTriggerCode%]
-
-  return null;
 $$ language plv8;
 
 create or replace trigger parsed_records_insert_trigger_[%#ctx.document._id%]

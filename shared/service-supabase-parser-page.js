@@ -165,6 +165,9 @@ export class ServiceSupabaseParserPage extends Page {
     if (!this.document.supabaseApi)
       this.document.supabaseApi = this.supabaseApiId.datum();
 
+    if (!this.document.pusherApi)
+      this.document.pusherApi = this.pusherApiId.datum();
+
     if (!this.document.bot) this.document.bot = this.botId.datum();
 
     const [sendTelegramMessage, pppXmlParse, pppFetch, deployParser] =
@@ -255,6 +258,20 @@ export class ServiceSupabaseParserPage extends Page {
           },
           {
             $lookup: {
+              from: 'apis',
+              localField: 'pusherApiId',
+              foreignField: '_id',
+              as: 'pusherApi'
+            }
+          },
+          {
+            $unwind: {
+              path: '$pusherApi',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $lookup: {
               from: 'bots',
               localField: 'botId',
               foreignField: '_id',
@@ -289,6 +306,7 @@ export class ServiceSupabaseParserPage extends Page {
           supabaseApiId: this.supabaseApiId.value,
           url: this.url.value.trim(),
           frameUrl: this.frameUrl.value.trim(),
+          pusherApiId: this.pusherApiId.value,
           interval: Math.ceil(Math.abs(this.interval.value)),
           depth: Math.ceil(Math.abs(this.depth.value)),
           tableSchema: this.tableSchema.value,

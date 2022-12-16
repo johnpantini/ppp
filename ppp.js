@@ -378,6 +378,7 @@ export default new (class {
         );
 
         this.traders.get(document._id).subscribe('telegram');
+        this.traders.get(document._id).subscribe('ppp');
       }
 
       return this.traders.get(document._id);
