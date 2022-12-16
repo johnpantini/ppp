@@ -1,3 +1,3 @@
-import { Canvas } from '../salt/states/ppp/lib/canvas/index.js';
+import canvasModule from '../salt/states/ppp/lib/canvas/index.js';
 
-console.log(Canvas);
+console.log(canvasModule.createCanvas);

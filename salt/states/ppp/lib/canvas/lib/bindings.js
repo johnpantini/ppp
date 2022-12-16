@@ -40,6 +40,8 @@ const GLIBC = 'glibc';
  */
 const MUSL = 'musl';
 
+const isFileMusl = (f) => f.includes('libc.musl-') || f.includes('ld-musl-');
+
 const familyFromReport = () => {
   const report = getReport();
 
