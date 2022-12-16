@@ -127,7 +127,7 @@ self.addEventListener('fetch', async (event) => {
   if (
     event.request.destination &&
     event.request.method === 'GET' &&
-    event.request.url.startsWith(location.origin)
+    (/\.js$/i.test(event.request.url) || /\?page=/i.test(event.request.url))
   ) {
     return event.respondWith(
       (async () => {
@@ -144,7 +144,7 @@ self.addEventListener('fetch', async (event) => {
             };
 
             if (
-              /javascript/ig.test(ct) &&
+              /javascript/gi.test(ct) &&
               text.startsWith('/** @decorator */')
             ) {
               return new Response(removeDecorators(text), init);
@@ -176,10 +176,7 @@ self.addEventListener('fetch', async (event) => {
             headers: clone.headers
           };
 
-          if (
-            /javascript/ig.test(ct) &&
-            text.startsWith('/** @decorator */')
-          ) {
+          if (/javascript/gi.test(ct) && text.startsWith('/** @decorator */')) {
             const r = new Response(removeDecorators(text), init);
 
             void cache.put(event.request, r.clone());
