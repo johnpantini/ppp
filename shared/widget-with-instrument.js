@@ -38,7 +38,7 @@ export class WidgetWithInstrument extends Widget {
           (w) =>
             w !== this &&
             w?.instrument?._id !== instrument._id &&
-            w?.groupControl.selection === this.groupControl.selection
+            w?.groupControl?.selection === this.groupControl?.selection
         )
         .forEach((w) => (w.instrument = instrument));
     }
