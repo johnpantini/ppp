@@ -144,7 +144,7 @@ self.addEventListener('fetch', async (event) => {
             };
 
             if (
-              ct?.startsWith('application/javascript') &&
+              /javascript/ig.test(ct) &&
               text.startsWith('/** @decorator */')
             ) {
               return new Response(removeDecorators(text), init);
@@ -177,7 +177,7 @@ self.addEventListener('fetch', async (event) => {
           };
 
           if (
-            ct?.startsWith('application/javascript') &&
+            /javascript/ig.test(ct) &&
             text.startsWith('/** @decorator */')
           ) {
             const r = new Response(removeDecorators(text), init);
