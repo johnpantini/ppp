@@ -54,7 +54,7 @@ $$
       const timestamp = Math.floor(Date.now() / 1000);
 
       const pusherBody = JSON.stringify({
-        name: 'supabase-parser',
+        name: '[%#ctx.document._id%]:insert',
         channel: 'ppp',
         data: JSON.stringify(NEW, (key, value) => typeof value === 'bigint' ? value.toString() : value)
       });
