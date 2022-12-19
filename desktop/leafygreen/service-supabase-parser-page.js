@@ -211,6 +211,13 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
               }}"
               :transform="${() => ppp.decryptDocumentsTransformation(['key'])}"
             ></ppp-collection-select>
+            <${'ppp-button'}
+              class="margin-top"
+              @click="${() => window.open('?page=api-pusher', '_blank').focus()}"
+              appearance="primary"
+            >
+              Добавить API Pusher
+            </ppp-button>
           </div>
         </section>
         <section>
