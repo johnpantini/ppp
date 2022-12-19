@@ -367,7 +367,9 @@ export default new (class {
 
   async getOrCreatePusherConnection(document) {
     if (document) {
-      await import(`${ppp.rootUrl}/vendor/pusher-with-encryption.min.js`);
+      await import(`${ppp.rootUrl}/vendor/pusher.min.js`);
+
+      Pusher.logToConsole = false;
 
       if (!this.traders.has(document._id)) {
         this.traders.set(
