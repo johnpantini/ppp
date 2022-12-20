@@ -467,6 +467,7 @@ export const appStyles = (context, definition) =>
       border-radius: 7px;
       background-color: rgb(33, 49, 60);
       border: 1px solid rgb(231, 238, 236);
+      margin-bottom: 0;
     }
   `;
 
