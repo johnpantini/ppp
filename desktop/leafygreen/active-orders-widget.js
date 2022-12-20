@@ -88,6 +88,10 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       padding-top: 0;
     }
 
+    .active-order-holder:last-child {
+      padding-bottom: 8px;
+    }
+
     .active-order-holder-inner {
       cursor: default;
     }

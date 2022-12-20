@@ -90,7 +90,7 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
               </tbody>
             </table>
             ${when(
-              (x) => !x.trades.length,
+              (x) => !x.trades?.length,
               html`
                 <div class="widget-empty-state-holder">
                   <img draggable="false" src="static/empty-widget-state.svg" />
@@ -300,6 +300,13 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

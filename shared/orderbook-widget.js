@@ -220,8 +220,7 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         newValue.asks?.length ?? 0
       );
 
-      if (max > this.document.depth)
-        max = this.document.depth;
+      if (max > this.document.depth) max = this.document.depth;
 
       this.quoteLines = [];
       this.maxSeenVolume = 0;
@@ -331,6 +330,13 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

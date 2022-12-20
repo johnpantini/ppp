@@ -184,6 +184,37 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
   @observable
   empty;
 
+  async connectedCallback() {
+    super.connectedCallback();
+
+    this.empty = true;
+    this.orders = new Map();
+    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
+    this.searchControl.trader = this.ordersTrader;
+
+    if (this.ordersTrader) {
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
+    }
+  }
+
+  async disconnectedCallback() {
+    if (this.ordersTrader) {
+      await this.ordersTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
+    }
+
+    super.disconnectedCallback();
+  }
+
   currentOrderChanged(oldValue, newValue) {
     if (newValue?.orderId) {
       if (newValue.orderType === 'limit') {
@@ -278,37 +309,6 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
     }
   }
 
-  async connectedCallback() {
-    super.connectedCallback();
-
-    this.empty = true;
-    this.orders = new Map();
-    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
-    this.searchControl.trader = this.ordersTrader;
-
-    if (this.ordersTrader) {
-      await this.ordersTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
-        }
-      });
-    }
-  }
-
-  async disconnectedCallback() {
-    if (this.ordersTrader) {
-      await this.ordersTrader.unsubscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
-        }
-      });
-    }
-
-    super.disconnectedCallback();
-  }
-
   async validate() {
     await validate(this.container.ordersTraderId);
   }
@@ -367,6 +367,13 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
       </div>
     `
   };

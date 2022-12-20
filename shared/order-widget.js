@@ -471,7 +471,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
     if (this.ordersTrader) {
       await this.findAndSelectSymbol(
         {
-          type: 'stock',
+          type: this.document.instrumentType ?? 'stock',
           symbol,
           exchange: this.ordersTrader.getExchange()
         },
@@ -828,7 +828,7 @@ export async function widgetDefinition(definition = {}) {
         <div class="widget-settings-label-group">
           <h5>Трейдер заявок</h5>
           <p>
-            Трейдер, который будет выставлять зявки, а также фильтровать
+            Трейдер, который будет выставлять заявки, а также фильтровать
             инструменты в поиске.
           </p>
         </div>
@@ -854,6 +854,13 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
@@ -882,6 +889,13 @@ export async function widgetDefinition(definition = {}) {
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
