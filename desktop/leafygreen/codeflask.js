@@ -99,8 +99,8 @@ export const codeflaskStyles = (context, definition) => css`
   }
 
   textarea::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 4px;
+    height: 4px;
   }
 
   textarea::-webkit-scrollbar-track {
