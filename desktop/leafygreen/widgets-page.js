@@ -75,7 +75,7 @@ export const widgetsPageTemplate = (context, definition) => html`
                 datum.type === 'custom'
                   ? html`
                     <div
-                      style="display: flex; flex-direction: column; gap: 4px 0">
+                      style="display: flex; flex-direction: column; gap: 4px 0; align-items: flex-start">
                       <div>
                         ${(_) => x.t(`$const.widget.${datum.reportedType}`)}
                       </div>
