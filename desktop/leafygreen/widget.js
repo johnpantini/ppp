@@ -179,116 +179,6 @@ export const widgetStyles = (context, definition) =>
       background-color: rgba(0, 0, 0, 0.3);
     }
 
-    .widget-company-card {
-      width: 100%;
-      padding: 10px 10px 0 10px;
-      font-size: 12px;
-      text-align: left;
-      line-height: 1.5;
-    }
-
-    .widget-company-card-item {
-      color: rgba(9, 19, 44, 0.7);
-      display: flex;
-      align-items: center;
-      line-height: 20px;
-      justify-content: space-between;
-    }
-
-    .widget-company-card-item:first-child {
-      font-size: 16px;
-      color: #09132c;
-    }
-
-    .company-name {
-      font-weight: bold;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 70%;
-    }
-
-    .company-last-price {
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .widget-nbbo-line {
-      color: #09132c;
-      width: 100%;
-      display: flex;
-      font-size: 13px;
-      line-height: 22px;
-      padding: 10px;
-      font-weight: 500;
-    }
-
-    .widget-nbbo-line-bid {
-      flex: 1 1 0;
-      color: rgb(19, 193, 123);
-      cursor: pointer;
-      padding: 2px 10px;
-      position: relative;
-      background: rgba(0, 163, 92, 0.2);
-      text-align: left;
-      border-bottom-left-radius: 4px;
-      border-top-left-radius: 4px;
-    }
-
-    .widget-nbbo-line-ask {
-      flex: 1 1 0;
-      color: rgb(187, 51, 64);
-      cursor: pointer;
-      padding: 2px 10px;
-      background: rgba(219, 48, 48, 0.2);
-      text-align: right;
-      border-bottom-right-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-
-    .widget-nbbo-line-icon-holder {
-      cursor: default;
-      top: 0;
-      color: #09132c;
-      right: 0;
-      bottom: 0;
-      padding: 2px;
-      position: absolute;
-      transform: translate(50%, 0);
-      background: #fcfcfc;
-      border-radius: 50%;
-      font-weight: 500;
-    }
-
-    .widget-nbbo-line-icon-fallback {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: rgb(140, 167, 190);
-      background-color: rgb(223, 230, 237);
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      position: relative;
-      word-wrap: break-word;
-      font-size: 13px;
-      line-height: 16px;
-      font-weight: 500;
-      letter-spacing: 0;
-      box-sizing: border-box;
-      text-transform: uppercase;
-    }
-
-    .widget-nbbo-line-icon-logo {
-      width: 22px;
-      height: 22px;
-      left: 0;
-      top: 0;
-      position: absolute;
-      border-radius: 50%;
-      background-size: 100%;
-    }
-
     .widget-section {
       width: 100%;
       padding: 0 10px;
@@ -386,6 +276,38 @@ export const widgetStyles = (context, definition) =>
     .widget-footer {
       padding: 8px 0;
       position: relative;
+    }
+
+    .widget-card-list {
+      height: 100%;
+      width: 100%;
+      position: relative;
+      overflow-x: hidden;
+      scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
+      scrollbar-width: thin;
+    }
+
+    .widget-card-list::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    .widget-card-list::-webkit-scrollbar-track {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .widget-card-list::-webkit-scrollbar-thumb {
+      background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    .widget-card-list-inner {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px 0;
     }
 
     tr.table-group {
