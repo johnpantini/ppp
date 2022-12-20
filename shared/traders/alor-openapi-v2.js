@@ -138,7 +138,7 @@ class AlorOpenAPIV2Trader extends Trader {
     return `${this.document.portfolio};${this.#slug}-${++this.#counter}`;
   }
 
-  #getSymbol(instrument = {}) {
+  getSymbol(instrument = {}) {
     let symbol;
 
     if (this.document.exchange === 'SPBX' && instrument.spbexSymbol)
@@ -159,7 +159,7 @@ class AlorOpenAPIV2Trader extends Trader {
         method: 'POST',
         body: JSON.stringify({
           instrument: {
-            symbol: this.#getSymbol(instrument),
+            symbol: this.getSymbol(instrument),
             exchange: this.document.exchange
           },
           side: direction.toLowerCase(),
@@ -205,7 +205,7 @@ class AlorOpenAPIV2Trader extends Trader {
         method: 'POST',
         body: JSON.stringify({
           instrument: {
-            symbol: this.#getSymbol(instrument),
+            symbol: this.getSymbol(instrument),
             exchange: this.document.exchange
           },
           side: direction.toLowerCase(),
@@ -243,7 +243,7 @@ class AlorOpenAPIV2Trader extends Trader {
     const request = await fetch(
       `https://api.alor.ru/md/v2/Securities/${
         this.document.exchange
-      }/${encodeURIComponent(this.#getSymbol(instrument))}/alltrades?${qs}`,
+      }/${encodeURIComponent(this.getSymbol(instrument))}/alltrades?${qs}`,
       {
         cache: 'no-cache',
         headers: {
@@ -285,7 +285,7 @@ class AlorOpenAPIV2Trader extends Trader {
         },
         body: JSON.stringify({
           portfolio: this.document.portfolio,
-          ticker: this.#getSymbol(instrument),
+          ticker: this.getSymbol(instrument),
           exchange: this.document.exchange,
           price,
           lotQuantity: quantity
@@ -327,15 +327,10 @@ class AlorOpenAPIV2Trader extends Trader {
 
       for (const o of orders) {
         if (o.status === 'working' && o.side === side) {
-          if (instrument && o.symbol !== this.#getSymbol(instrument)) continue;
+          if (instrument && o.symbol !== this.getSymbol(instrument)) continue;
 
           const orderInstrument =
-            await this.#findInstrumentInCacheAndPutToPayload(
-              o.symbol,
-              {},
-              'payload',
-              {}
-            );
+            await this.#findInstrumentInCacheAndPutToPayload(o.symbol);
 
           if (
             orderInstrument?.symbol ??
@@ -347,7 +342,7 @@ class AlorOpenAPIV2Trader extends Trader {
                 method: 'PUT',
                 body: JSON.stringify({
                   instrument: {
-                    symbol: this.#getSymbol(orderInstrument),
+                    symbol: this.getSymbol(orderInstrument),
                     exchange: this.document.exchange
                   },
                   side,
@@ -468,7 +463,7 @@ class AlorOpenAPIV2Trader extends Trader {
                 this.connection.send(
                   JSON.stringify({
                     opcode: 'QuotesSubscribe',
-                    code: this.#getSymbol(instrument),
+                    code: this.getSymbol(instrument),
                     exchange: this.document.exchange,
                     format: 'Simple',
                     guid,
@@ -493,7 +488,7 @@ class AlorOpenAPIV2Trader extends Trader {
                 this.connection.send(
                   JSON.stringify({
                     opcode: 'OrderBookGetAndSubscribe',
-                    code: this.#getSymbol(instrument),
+                    code: this.getSymbol(instrument),
                     exchange: this.document.exchange,
                     depth: 20,
                     format: 'Simple',
@@ -519,7 +514,7 @@ class AlorOpenAPIV2Trader extends Trader {
                 this.connection.send(
                   JSON.stringify({
                     opcode: 'AllTradesGetAndSubscribe',
-                    code: this.#getSymbol(instrument),
+                    code: this.getSymbol(instrument),
                     exchange: this.document.exchange,
                     depth: 0,
                     format: 'Simple',
@@ -747,7 +742,7 @@ class AlorOpenAPIV2Trader extends Trader {
       this.connection.send(
         JSON.stringify({
           opcode: 'QuotesSubscribe',
-          code: this.#getSymbol(instrument),
+          code: this.getSymbol(instrument),
           exchange: this.document.exchange,
           format: 'Simple',
           token: this.#jwt,
@@ -758,7 +753,7 @@ class AlorOpenAPIV2Trader extends Trader {
       this.connection.send(
         JSON.stringify({
           opcode: 'OrderBookGetAndSubscribe',
-          code: this.#getSymbol(instrument),
+          code: this.getSymbol(instrument),
           exchange: this.document.exchange,
           depth: 20,
           format: 'Simple',
@@ -770,7 +765,7 @@ class AlorOpenAPIV2Trader extends Trader {
       this.connection.send(
         JSON.stringify({
           opcode: 'AllTradesGetAndSubscribe',
-          code: this.#getSymbol(instrument),
+          code: this.getSymbol(instrument),
           exchange: this.document.exchange,
           depth: 0,
           format: 'Simple',
@@ -979,7 +974,12 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  #findInstrumentInCacheAndPutToPayload(symbol, source, field, payload) {
+  async #findInstrumentInCacheAndPutToPayload(
+    symbol,
+    source = {},
+    field = 'payload',
+    payload = {}
+  ) {
     return new Promise((resolve, reject) => {
       if (/@/.test(symbol)) [symbol] = symbol.split('@');
 
@@ -1056,6 +1056,12 @@ class AlorOpenAPIV2Trader extends Trader {
     });
   }
 
+  async findInstrumentInCache(
+    symbol
+  ) {
+    return this.#findInstrumentInCacheAndPutToPayload(symbol);
+  }
+
   onPositionsMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.positions.set(data.symbol, data);
@@ -1089,7 +1095,7 @@ class AlorOpenAPIV2Trader extends Trader {
                 payload
               );
             }
-          } else if (data.symbol === this.#getSymbol(source.instrument)) {
+          } else if (data.symbol === this.getSymbol(source.instrument)) {
             switch (datum) {
               case TRADER_DATUM.POSITION_SIZE:
                 source[field] = data.qty;
