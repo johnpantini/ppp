@@ -168,7 +168,7 @@ export const orderWidgetTemplate = (context, definition) => html`
                         min="0"
                         max="1000000000"
                         step="${(x) =>
-                          x.instrument.minPriceIncrement ?? '0.01'}"
+                          x.instrument?.minPriceIncrement ?? '0.01'}"
                         precision="${(x) =>
                           getInstrumentPrecision(x.instrument)}"
                         ?disabled="${(x) =>
