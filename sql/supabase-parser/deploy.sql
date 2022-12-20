@@ -30,7 +30,7 @@ $$ language plv8;
 create or replace function send_telegram_message_for_parsed_record_[%#ctx.document._id%](msg text, options json)
 returns json as
 $$
-  const result = plv8.find_function('send_telegram_message')('[%#ctx.document.channel ?? void 0%]', '[%#ctx.document.bot.token ?? void 0%]', msg, options);
+  const result = plv8.find_function('send_telegram_message')('[%#ctx.document.channel ?? void 0%]', '[%#ctx.document.bot?.token ?? void 0%]', msg, options);
 
   plv8.execute('select pg_sleep(3)');
 
@@ -60,15 +60,15 @@ $$
       });
 
       const bodyMd5 = plv8.execute(`select encode(digest('${pusherBody}', 'md5'), 'hex')`)[0].encode;
-      let params = `auth_key=[%#ctx.document.pusherApi.key%]&auth_timestamp=${timestamp}&auth_version=1.0&body_md5=${bodyMd5}`;
+      let params = `auth_key=[%#ctx.document.pusherApi?.key%]&auth_timestamp=${timestamp}&auth_version=1.0&body_md5=${bodyMd5}`;
 
-      const authData = ['POST', '/apps/[%#ctx.document.pusherApi.appid%]/events', params].join('\n');
-      const authSignature = plv8.execute(`select encode(hmac('${authData}', '[%#ctx.document.pusherApi.secret%]',
+      const authData = ['POST', '/apps/[%#ctx.document.pusherApi?.appid%]/events', params].join('\n');
+      const authSignature = plv8.execute(`select encode(hmac('${authData}', '[%#ctx.document.pusherApi?.secret%]',
         'sha256'), 'hex')`)[0].encode;
 
       params += `&auth_signature=${authSignature}`;
 
-      plv8.execute(`select content from http(('POST', 'https://api-[%#ctx.document.pusherApi.cluster%].pusher.com/apps/[%#ctx.document.pusherApi.appid%]/events?${params}', array[http_header('Content-Type', 'application/json')], 'application/json', '${pusherBody}')::http_request);`);
+      plv8.execute(`select content from http(('POST', 'https://api-[%#ctx.document.pusherApi?.cluster%].pusher.com/apps/[%#ctx.document.pusherApi?.appid%]/events?${params}', array[http_header('Content-Type', 'application/json')], 'application/json', '${pusherBody}')::http_request);`);
     }
 
     if ([%#ctx.document.telegramEnabled%]) {

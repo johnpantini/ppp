@@ -279,7 +279,10 @@ export class ServiceSupabaseParserPage extends Page {
             }
           },
           {
-            $unwind: '$bot'
+            $unwind: {
+              path: '$bot',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
