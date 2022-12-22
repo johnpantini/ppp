@@ -347,7 +347,7 @@ export class WidgetPage extends Page {
 
       this.savedInstrument = this.widgetElement?.instrument;
 
-      if (this.widgetElement.isConnected) {
+      if (this.widgetElement?.isConnected) {
         this.savedWidth = parseInt(this.widgetElement?.style?.width);
         this.savedHeight = parseInt(this.widgetElement?.style?.height);
       }
