@@ -20,7 +20,7 @@ async function formatter(event, message) {
   if (
     event &&
     event !==
-      `[%#(await ppp.user.functions.findOne({collection:'services'},{removed:{$not:{$eq:true}},name:'The Fly SPBEX'},{_id:1}))?._id%]:insert`
+      `[%#(await ppp.user.functions.findOne({collection:'services'},{removed:{$ne:true},name:'The Fly SPBEX'},{_id:1}))?._id%]:insert`
   )
     return;
 
@@ -72,12 +72,25 @@ async function formatter(event, message) {
   }
 
   const symbols = message.tickers?.split?.(',') ?? [];
-  let instrument = this.instrument;
+  let instrument;
 
-  if (!this.instrument && symbols.length === 1) {
+  if (!this.document.disableInstrumentFiltering) instrument = this.instrument;
+
+  if (!instrument && symbols.length === 1) {
     instrument = await this.instrumentTrader?.findInstrumentInCache?.(
       symbols[0]
     );
+  } else if (
+    !instrument &&
+    this.document.disableInstrumentFiltering &&
+    symbols.length > 1
+  ) {
+    if (
+      symbols.some(
+        (s) => s === this.instrumentTrader?.getSymbol?.(this.instrument)
+      )
+    )
+      instrument = this.instrument;
   }
 
   if (instrument && instrument.symbol.startsWith('$')) instrument = void 0;
@@ -88,6 +101,9 @@ async function formatter(event, message) {
 
   return {
     id: message.ppp_counter,
+    '@click':
+      instrument &&
+      ((x, c) => c.parent.trySelectSymbol(instrument.symbol, 'stock')),
     iconLayout: `<div slot="icon" style="${
       instrument?.isin
         ? `background-image:url(${
@@ -102,7 +118,16 @@ async function formatter(event, message) {
     leftTitle: `<span slot="title-left" title="${message.title}">${message.title}</span>`,
     leftSubtitle: `<div slot="subtitle-left" title="${symbols.join(
       ' '
-    )}">${symbols.join('<span class="dot-divider">•</span>')}</div>`,
+    )}">${symbols
+      .map((s) => {
+        if (symbols.length === 1) return s;
+        else {
+          return `<span class="clickable" onclick="event.composedPath().find(n =>
+            n?.tagName?.toLowerCase?.() === 'ppp-psina-pusher-subscription-widget')
+            ?.trySelectSymbol(this.textContent, 'stock')">${s}</span>`;
+        }
+      })
+      .join('<span class="dot-divider">•</span>')}</div>`,
     rightTitle: `<span slot="title-right">${rightTitle}</span>`,
     rightSubtitle: `<span slot="subtitle-right">${formatDateWithOptions(
       new Date(
@@ -130,7 +155,8 @@ async function history() {
   //   const [service] = await ppp.user.functions.aggregate({collection:'services'}, [
   //     {
   //       $match: {
-  //         name: 'The Fly SPBEX'
+  //         name: 'The Fly SPBEX',
+  //         removed: { $ne:true }
   //       }
   //     },
   //     {
@@ -154,7 +180,11 @@ async function history() {
 
   let symbolToFilter;
 
-  if (this.instrument && this.instrumentTrader) {
+  if (
+    !this.document.disableInstrumentFiltering &&
+    this.instrument &&
+    this.instrumentTrader
+  ) {
     symbolToFilter = this.instrumentTrader.getSymbol(this.instrument);
   }
 

@@ -58,7 +58,7 @@ export const widgetCardStyles = (context, definition) => css`
     min-height: 36px;
     height: auto;
     background-color: rgb(243, 245, 248);
-    transition: background-color 300ms ease-in-out;
+    transition: background-color 100ms ease-in-out;
     color: #323e4a;
     padding: 0 12px;
     border-radius: 4px;
@@ -73,6 +73,15 @@ export const widgetCardStyles = (context, definition) => css`
   }
 
   :host(.new) .card {
+    background-color: rgba(11, 144, 255, 0.2);
+    transition: none;
+  }
+
+  :host([clickable]) .card {
+    cursor: pointer;
+  }
+
+  :host([clickable]) .card:hover {
     background-color: rgba(11, 144, 255, 0.2);
     transition: none;
   }
