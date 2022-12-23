@@ -5,7 +5,7 @@ import { ref } from './element/templating/ref.js';
 import { html, requireComponent } from './template.js';
 import { validate } from './validate.js';
 import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
-import { observable } from './element/observation/observable.js';
+import { Observable, observable } from './element/observation/observable.js';
 import { when } from './element/templating/when.js';
 import { repeat } from './element/templating/repeat.js';
 import {
@@ -71,7 +71,7 @@ export const orderbookWidgetTemplate = (context, definition) => html`
                     <tr>
                       <td
                         style="${(x, c) =>
-                          `background: linear-gradient( to left, var(--pro-orderbook-bid-color) 0%, var(--pro-orderbook-bid-color) ${c.parent.calcGradientPercentage(
+                          `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
                             x.bid?.volume
                           )}%, transparent ${c.parent.calcGradientPercentage(
                             x.bid?.volume
@@ -82,6 +82,16 @@ export const orderbookWidgetTemplate = (context, definition) => html`
                           price="${(x) => x.bid?.price}"
                         >
                           <div class="volume">${(x) => x.bid?.volume}</div>
+                          ${when(
+                            (x) => x.bid?.my > 0,
+                            html`
+                              <div class="my-order">
+                                <span>
+                                  <span>${(x) => x.bid.my}</span>
+                                </span>
+                              </div>
+                            `
+                          )}
                           <div class="spacer"></div>
                           <div class="price">
                             ${(x, c) =>
@@ -94,7 +104,7 @@ export const orderbookWidgetTemplate = (context, definition) => html`
                       </td>
                       <td
                         style="${(x, c) =>
-                          `background: linear-gradient( to right, var(--pro-orderbook-ask-color) 0%, var(--pro-orderbook-ask-color) ${c.parent.calcGradientPercentage(
+                          `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
                             x.ask?.volume
                           )}%, transparent ${c.parent.calcGradientPercentage(
                             x.ask?.volume
@@ -105,6 +115,16 @@ export const orderbookWidgetTemplate = (context, definition) => html`
                           price="${(x) => x.ask?.price}"
                         >
                           <div class="volume">${(x) => x.ask?.volume}</div>
+                          ${when(
+                            (x) => x.ask?.my > 0,
+                            html`
+                              <div class="my-order">
+                                <span>
+                                  <span>${(x) => x.ask.my}</span>
+                                </span>
+                              </div>
+                            `
+                          )}
                           <div class="spacer"></div>
                           <div class="price">
                             ${(x, c) =>
@@ -150,7 +170,19 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
   bookTrader;
 
   @observable
+  ordersTrader;
+
+  @observable
+  currentOrder;
+
+  @observable
   orderbook;
+
+  // Use this when orders change.
+  #lastOrderBookValue;
+
+  @observable
+  orders;
 
   @observable
   quoteLines;
@@ -165,8 +197,11 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
 
     this.spreadString = '—';
     this.maxSeenVolume = 0;
+    this.orders = new Map();
     this.quoteLines = [];
     this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
+    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
+
     this.searchControl.trader = this.bookTrader;
 
     if (this.bookTrader) {
@@ -174,6 +209,15 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         source: this,
         fieldDatumPairs: {
           orderbook: TRADER_DATUM.ORDERBOOK
+        }
+      });
+    }
+
+    if (this.ordersTrader) {
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
         }
       });
     }
@@ -189,7 +233,47 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
       });
     }
 
+    if (this.ordersTrader) {
+      await this.ordersTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
+    }
+
     super.disconnectedCallback();
+  }
+
+  currentOrderChanged(oldValue, newValue) {
+    let needToChangeOrderbook;
+
+    if (newValue?.orderId) {
+      if (newValue.orderType === 'limit') {
+        if (
+          newValue.quantity === newValue.filled ||
+          newValue.status !== 'working'
+        ) {
+          if (this.orders.has(newValue.orderId)) {
+            this.orders.delete(newValue.orderId);
+
+            needToChangeOrderbook = true;
+          }
+        } else if (newValue.status === 'working') {
+          this.orders.set(newValue.orderId, newValue);
+
+          needToChangeOrderbook = true;
+        }
+
+        if (
+          needToChangeOrderbook &&
+          this.instrument &&
+          newValue.instrument.symbol === this.instrument.symbol
+        ) {
+          this.orderbookChanged(null, this.#lastOrderBookValue);
+        }
+      }
+    }
   }
 
   handleTableClick({ event }) {
@@ -203,11 +287,109 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
     return this.broadcastPrice(price);
   }
 
+  #getMyOrdersPricesAndSizes() {
+    const buyOrdersPricesAndSizes = new Map();
+    const sellOrdersPricesAndSizes = new Map();
+
+    if (this.instrument) {
+      for (const [_, order] of this.orders) {
+        if (
+          order.status === 'working' &&
+          order.filled < order.quantity &&
+          order.instrument?.symbol === this.instrument.symbol
+        ) {
+          const map = {
+            buy: buyOrdersPricesAndSizes,
+            sell: sellOrdersPricesAndSizes
+          }[order.side];
+
+          const existingValue = map.get(order.price);
+
+          if (typeof existingValue !== 'number') {
+            map.set(order.price, order.quantity - order.filled);
+          } else {
+            map.set(order.price, existingValue + order.quantity - order.filled);
+          }
+        }
+      }
+    }
+
+    return { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes };
+  }
+
   orderbookChanged(oldValue, newValue) {
-    if (newValue && this.instrument) {
-      if (newValue.bids?.length && newValue.asks?.length) {
-        const bestBid = newValue.bids[0]?.price;
-        const bestAsk = newValue.asks[0]?.price;
+    if (oldValue !== null && newValue)
+      this.#lastOrderBookValue = ppp.structuredClone(newValue);
+
+    const orderbook = ppp.structuredClone(newValue);
+
+    if (orderbook && this.instrument) {
+      const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
+        this.#getMyOrdersPricesAndSizes();
+
+      // 1. Buy orders, descending
+      for (const [price, volume] of buyOrdersPricesAndSizes) {
+        let insertAtTheEnd = true;
+
+        for (let i = 0; i < orderbook.bids?.length; i++) {
+          const bookPriceAtThisLevel = orderbook.bids[i].price;
+
+          if (price === bookPriceAtThisLevel) {
+            orderbook.bids[i].my = volume;
+
+            if (orderbook.bids[i].volume < volume)
+              orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+
+            insertAtTheEnd = false;
+
+            break;
+          } else if (price > bookPriceAtThisLevel) {
+            orderbook.bids.splice(i, 0, { price, volume, my: volume });
+
+            insertAtTheEnd = false;
+
+            break;
+          }
+        }
+
+        if (insertAtTheEnd) {
+          orderbook.bids.push({ price, volume, my: volume });
+        }
+      }
+
+      // 2. Sell orders, ascending
+      for (const [price, volume] of sellOrdersPricesAndSizes) {
+        let insertAtTheEnd = true;
+
+        for (let i = 0; i < orderbook.asks?.length; i++) {
+          const bookPriceAtThisLevel = orderbook.asks[i].price;
+
+          if (price === bookPriceAtThisLevel) {
+            orderbook.asks[i].my = volume;
+
+            if (orderbook.asks[i].volume < volume)
+              orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+
+            insertAtTheEnd = false;
+
+            break;
+          } else if (price < bookPriceAtThisLevel) {
+            orderbook.asks.splice(i, 0, { price, volume, my: volume });
+
+            insertAtTheEnd = false;
+
+            break;
+          }
+        }
+
+        if (insertAtTheEnd) {
+          orderbook.asks.push({ price, volume, my: volume });
+        }
+      }
+
+      if (orderbook.bids?.length && orderbook.asks?.length) {
+        const bestBid = orderbook.bids[0]?.price;
+        const bestAsk = orderbook.asks[0]?.price;
 
         this.spreadString = `${formatPriceWithoutCurrency(
           bestAsk - bestBid,
@@ -216,8 +398,8 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
       }
 
       let max = Math.max(
-        newValue.bids?.length ?? 0,
-        newValue.asks?.length ?? 0
+        orderbook.bids?.length ?? 0,
+        orderbook.asks?.length ?? 0
       );
 
       if (max > this.document.depth) max = this.document.depth;
@@ -226,8 +408,8 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
       this.maxSeenVolume = 0;
 
       for (let i = 0; i < max; i++) {
-        const bid = newValue.bids[i] ?? null;
-        const ask = newValue.asks[i] ?? null;
+        const bid = orderbook.bids[i] ?? null;
+        const ask = orderbook.asks[i] ?? null;
 
         if (bid) {
           this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
@@ -242,6 +424,8 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
           ask
         });
       }
+
+      Observable.notify(this, 'quoteLines');
     } else this.spreadString = '—';
   }
 
@@ -261,10 +445,12 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
     super.instrumentChanged(oldValue, newValue);
 
     this.bookTrader?.instrumentChanged?.(this, oldValue, newValue);
+    Observable.notify(this, 'orders');
   }
 
   async validate() {
     await validate(this.container.bookTraderId);
+    await validate(this.container.ordersTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 50,
@@ -275,9 +461,10 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
   async update() {
     return {
       $set: {
+        bookTraderId: this.container.bookTraderId.value,
+        ordersTraderId: this.container.ordersTraderId.value,
         depth: Math.abs(this.container.depth.value),
-        displayMode: this.container.displayMode.value,
-        bookTraderId: this.container.bookTraderId.value
+        displayMode: this.container.displayMode.value
       }
     };
   }
@@ -323,6 +510,42 @@ export async function widgetDefinition(definition = {}) {
                   $or: [
                     { removed: { $ne: true } },
                     { _id: `[%#this.document.bookTraderId ?? ''%]` }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер активных заявок</h5>
+          <p>Трейдер, который будет отображать собственные заявки (количество)
+            на ценовых уровнях.</p>
+        </div>
+        <ppp-collection-select
+          ${ref('ordersTraderId')}
+          value="${(x) => x.document.ordersTraderId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('traders')
+                .find({
+                  $or: [
+                    { removed: { $ne: true } },
+                    { _id: `[%#this.document.ordersTraderId ?? ''%]` }
                   ]
                 })
                 .sort({ updatedAt: -1 });

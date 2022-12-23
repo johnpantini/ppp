@@ -78,8 +78,8 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
     }
 
     .orderbook-table td {
-      --pro-orderbook-ask-color: rgba(219, 48, 48, 0.3);
-      --pro-orderbook-bid-color: rgba(0, 163, 92, 0.3);
+      --orderbook-ask-color: rgba(219, 48, 48, 0.3);
+      --orderbook-bid-color: rgba(0, 163, 92, 0.3);
       width: 50%;
       padding: 0;
       border: none;
@@ -111,6 +111,39 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
 
     .volume {
       color: rgb(90, 118, 143);
+    }
+
+    .my-order {
+      display: inline-block;
+    }
+
+    .ask-line .my-order {
+      margin-left: 4px;
+    }
+
+    .bid-line .my-order {
+      margin-right: 4px;
+    }
+
+    .my-order > span {
+      cursor: pointer;
+      background-color: rgb(51, 111, 238);
+      color: #fff;
+      border-radius: 24px;
+      font-size: 11px;
+      line-height: 16px;
+      min-height: 16px;
+      min-width: 16px;
+      padding: 1px 4px;
+    }
+
+    .my-order > span > span {
+      min-height: 16px;
+      margin: 0 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      word-wrap: normal;
     }
 
     .spacer {
