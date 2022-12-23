@@ -34,12 +34,34 @@ export const traderPageTemplate = (context, definition) => html`
               REST/WebSocket
             </ppp-badge>
           </div>
-          <span slot="description">Торговля через брокерский профиль Alor Open API V2.</span>
+          <span slot="description">Торговля и рыночные данные через брокерский профиль Alor Open API V2.</span>
           <${'ppp-button'}
             slot="action"
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.ALOR_OPENAPI_V2}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Tinkoff" style="height: 40px"
+               src="static/tinkoff.svg"/>
+          <div slot="title">
+            Tinkoff Invest API
+            <${'ppp-badge'} appearance="blue">
+              REST
+            </ppp-badge>
+          </div>
+          <span
+            slot="description">Торговля через брокерский профиль Tinkoff Invest API.</span>
+          <${'ppp-button'}
+            disabled
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.TINKOFF_REST}`
               })}"
           >
             Продолжить
@@ -74,7 +96,7 @@ export const traderPageTemplate = (context, definition) => html`
             Произвольная реализация
           </div>
           <span
-            slot="description">Торговля через любой брокерский профиль.</span>
+            slot="description">Собственная реализация трейдера.</span>
           <${'ppp-button'}
             disabled
             slot="action"
