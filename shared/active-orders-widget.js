@@ -292,7 +292,9 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
-      await this.ordersTrader?.cancelAllLimitOrders?.();
+      await this.ordersTrader?.cancelAllLimitOrders?.({
+        instrument: this.instrument
+      });
 
       this.notificationsArea.success({
         title: 'Заявки отменены'

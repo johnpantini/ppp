@@ -407,7 +407,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async cancelAllLimitOrders() {
+  async cancelAllLimitOrders({ instrument }) {
     await this.syncAccessToken();
 
     const request = await fetch(
@@ -424,6 +424,8 @@ class AlorOpenAPIV2Trader extends Trader {
 
       for (const o of orders) {
         if (o.status === 'working') {
+          if (instrument && o.symbol !== this.getSymbol(instrument)) continue;
+
           o.orderType = o.type;
           o.orderId = o.id;
 
@@ -1056,9 +1058,7 @@ class AlorOpenAPIV2Trader extends Trader {
     });
   }
 
-  async findInstrumentInCache(
-    symbol
-  ) {
+  async findInstrumentInCache(symbol) {
     return this.#findInstrumentInCacheAndPutToPayload(symbol);
   }
 
