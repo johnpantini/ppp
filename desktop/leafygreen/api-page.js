@@ -163,7 +163,8 @@ export const apiPageTemplate = (context, definition) => html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
-          <img slot="logo" draggable="false" alt="Cloudflare" style="height: 40px"
+          <img slot="logo" draggable="false" alt="Cloudflare"
+               style="height: 40px"
                src="static/cloudflare.svg"/>
           <span slot="title">Cloudflare</span>
           <span slot="description">Доступ к API Cloudflare Workers.</span>

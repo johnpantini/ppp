@@ -375,7 +375,9 @@ export default new (class {
         this.traders.set(
           document._id,
           new Pusher(document.key, {
-            cluster: document.cluster
+            cluster: document.cluster,
+            enabledTransports: ['ws', 'wss'],
+            disabledTransports: ['xhr_streaming', 'xhr_polling', 'sockjs']
           })
         );
 
