@@ -218,9 +218,14 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
   currentOrderChanged(oldValue, newValue) {
     if (newValue?.orderId) {
       if (newValue.orderType === 'limit') {
-        if (newValue.quantity === newValue.filled)
+        if (
+          newValue.quantity === newValue.filled ||
+          newValue.status !== 'working'
+        )
           this.orders.delete(newValue.orderId);
-        else this.orders.set(newValue.orderId, newValue);
+        else if (newValue.status === 'working') {
+          this.orders.set(newValue.orderId, newValue);
+        }
 
         Observable.notify(this, 'orders');
       }
