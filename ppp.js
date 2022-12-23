@@ -43,19 +43,15 @@ export default new (class {
     void this.start();
   }
 
-  async #createApplication({ emergency }) {
-    // try {
-    //   await import(`data:text/javascript,export default '42'`);
-    // } catch (e) {
-    //   document.getElementById('global-loader').classList.add('error');
-    //
-    //   document
-    //     .getElementById('global-loader')
-    //     .setText('Приложение ppp не поддерживает ваш браузер');
-    //
-    //   return;
-    // }
+  structuredClone(value) {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(value);
+    } else {
+      return JSON.parse(JSON.stringify(value));
+    }
+  }
 
+  async #createApplication({ emergency }) {
     if (!emergency) {
       const { getApp, Credentials } = await import('./shared/realm.js');
 
