@@ -44,6 +44,7 @@ export const BROKERS = {
 
 export const TRADERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
+  TINKOFF_REST: 'tinkoff-rest',
   TINKOFF_GRPC_WEB: 'tinkoff-grpc-web',
   CUSTOM: 'custom'
 };
