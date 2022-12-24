@@ -17,7 +17,7 @@ export class Tmpl {
     this.encReg = /[<>&"'\x00]/g;
   }
 
-  async render(ctx, str, data) {
+  async render(ctx, str, data = {}) {
     this.encode = (s) => {
       return (!s ? '' : '' + s).replace(
         this.encReg,
