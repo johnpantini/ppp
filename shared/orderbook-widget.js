@@ -485,6 +485,7 @@ export async function widgetDefinition(definition = {}) {
     maxHeight: 512,
     maxWidth: 365,
     defaultHeight: 375,
+    defaultWidth: 280,
     minHeight: 120,
     minWidth: 200,
     settings: html`
