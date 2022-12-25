@@ -309,6 +309,11 @@ export default class Aspirant {
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
           .end('pong');
       })
+      .get('/', async (res) => {
+        cors(res)
+          .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
+          .end(this.#id);
+      })
       .listen(PORT, async (listenSocket) => {
         if (listenSocket) {
           console.log(`Listening to port ${PORT}`);
