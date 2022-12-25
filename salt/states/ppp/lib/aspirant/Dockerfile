@@ -37,7 +37,6 @@ COPY ./vendor/ioredis.min.js ./vendor/ioredis.min.js
 RUN chmod +x /app/aspirant/start.sh
 
 EXPOSE 32456
-EXPOSE 9229
 
 USER root
 CMD ["/app/aspirant/start.sh"]
