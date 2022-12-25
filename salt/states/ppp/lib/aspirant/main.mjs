@@ -314,7 +314,7 @@ export default class Aspirant {
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
           .end(this.#id);
       })
-      .listen(PORT, async (listenSocket) => {
+      .listen('0.0.0.0', PORT, async (listenSocket) => {
         if (listenSocket) {
           console.log(`Listening to port ${PORT}`);
         }
