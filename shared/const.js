@@ -25,7 +25,8 @@ export const SERVICES = {
   SPBEX_HALTS: 'spbex-halts',
   NYSE_NSDQ_HALTS: 'nyse-nsdq-halts',
   SUPABASE_PARSER: 'supabase-parser',
-  PPP_ASPIRANT: 'ppp-aspirant',
+  CLOUD_PPP_ASPIRANT: 'cloud-ppp-aspirant',
+  SYSTEMD_PPP_ASPIRANT: 'systemd-ppp-aspirant',
   DEPLOYED_PPP_ASPIRANT: 'deployed-ppp-aspirant',
   PPP_ASPIRANT_WORKER: 'ppp-aspirant-worker'
 };

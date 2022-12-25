@@ -79,27 +79,69 @@ export const servicePageTemplate = (context, definition) => html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
-          <img slot="logo" draggable="false" alt="PPP Aspirant"
+          <img slot="logo" draggable="false" alt="PPP Aspirant (в облаке)"
                style="height: 45px"
                src="static/ppp-aspirant.svg"/>
-          <span slot="title">PPP Aspirant</span>
+          <div slot="title">
+            PPP Aspirant
+            <${'ppp-badge'} appearance="blue">
+              В облаке
+            </ppp-badge>
+          </div>
           <span slot="description">Подсистема обслуживания процессов приложения PPP.</span>
           <div slot="action" class="control-line">
             <ppp-button
               @click="${() =>
                 ppp.app.navigate({
-                  page: `service-${SERVICES.PPP_ASPIRANT}`
+                  page: `service-${SERVICES.CLOUD_PPP_ASPIRANT}`
                 })}"
             >
-              Настроить в облаке
+              Продолжить
             </ppp-button>
+          </div>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="PPP Aspirant (по адресу)"
+               style="height: 45px"
+               src="static/ppp-aspirant.svg"/>
+          <div slot="title">
+            PPP Aspirant
+            <${'ppp-badge'} appearance="blue">
+              По адресу
+            </ppp-badge>
+          </div>
+          <span slot="description">Подсистема обслуживания процессов приложения PPP.</span>
+          <div slot="action" class="control-line">
             <ppp-button
               @click="${() =>
                 ppp.app.navigate({
                   page: `service-${SERVICES.DEPLOYED_PPP_ASPIRANT}`
                 })}"
             >
-              Указать адрес
+              Продолжить
+            </ppp-button>
+          </div>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="PPP Aspirant (systemd)"
+               style="height: 45px"
+               src="static/ppp-aspirant.svg"/>
+          <div slot="title">
+            PPP Aspirant
+            <${'ppp-badge'} appearance="blue">
+              systemd
+            </ppp-badge>
+          </div>
+          <span slot="description">Подсистема обслуживания процессов приложения PPP.</span>
+          <div slot="action" class="control-line">
+            <ppp-button
+              disabled
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `service-${SERVICES.SYSTEMD_PPP_ASPIRANT}`
+                })}"
+            >
+              Продолжить
             </ppp-button>
           </div>
         </ppp-generic-card>

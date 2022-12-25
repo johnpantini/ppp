@@ -51,7 +51,8 @@ export default function (i18n) {
         [SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
         [SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NASDAQ',
         [SERVICES.SUPABASE_PARSER]: 'Парсер с персистентностью',
-        [SERVICES.PPP_ASPIRANT]: 'PPP Aspirant',
+        [SERVICES.CLOUD_PPP_ASPIRANT]: 'PPP Aspirant (в облаке)',
+        [SERVICES.SYSTEMD_PPP_ASPIRANT]: 'PPP Aspirant (systemd)',
         [SERVICES.DEPLOYED_PPP_ASPIRANT]: 'PPP Aspirant (по адресу)',
         [SERVICES.PPP_ASPIRANT_WORKER]: 'PPP Aspirant Worker'
       },

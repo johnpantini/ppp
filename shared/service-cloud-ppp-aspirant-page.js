@@ -6,7 +6,7 @@ import { maybeFetchError } from './fetch-error.js';
 import { uuidv4 } from './ppp-crypto.js';
 import ppp from '../ppp.js';
 
-export class ServicePppAspirantPage extends Page {
+export class ServiceCloudPppAspirantPage extends Page {
   collection = 'services';
 
   async validate() {
@@ -32,7 +32,7 @@ export class ServicePppAspirantPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('./const.js')).SERVICES.PPP_ASPIRANT%]`
+              type: `[%#(await import('./const.js')).SERVICES.CLOUD_PPP_ASPIRANT%]`
             }
           },
           {
@@ -63,7 +63,7 @@ export class ServicePppAspirantPage extends Page {
 
   async find() {
     return {
-      type: SERVICES.PPP_ASPIRANT,
+      type: SERVICES.CLOUD_PPP_ASPIRANT,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -257,7 +257,8 @@ export class ServicePppAspirantPage extends Page {
                 runtimeEnvironment
               })
             })
-          }), 'Не удалось обновить переменные окружения сервиса.'
+          }),
+          'Не удалось обновить переменные окружения сервиса.'
         );
       }
     }
@@ -276,7 +277,7 @@ export class ServicePppAspirantPage extends Page {
           updatedAt: new Date()
         },
         $setOnInsert: {
-          type: SERVICES.PPP_ASPIRANT,
+          type: SERVICES.CLOUD_PPP_ASPIRANT,
           createdAt: new Date()
         }
       },
@@ -386,4 +387,4 @@ export class ServicePppAspirantPage extends Page {
   }
 }
 
-applyMixins(ServicePppAspirantPage, PageWithService);
+applyMixins(ServiceCloudPppAspirantPage, PageWithService);

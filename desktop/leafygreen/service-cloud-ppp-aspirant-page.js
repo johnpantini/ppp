@@ -1,19 +1,24 @@
-import { ServicePppAspirantPage } from '../../shared/service-ppp-aspirant-page.js';
+import { ServiceCloudPppAspirantPage } from '../../shared/service-cloud-ppp-aspirant-page.js';
 import { html } from '../../shared/template.js';
 import { when } from '../../shared/element/templating/when.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { serviceControlsTemplate } from './service-page.js';
 
-export const servicePppAspirantPageTemplate = (context, definition) => html`
+export const serviceCloudPppAspirantPageTemplate = (context, definition) => html`
   <template>
     <form novalidate>
       <${'ppp-page'}>
         <span slot="header">
-          ${(x) =>
-            x.document.name
-              ? `Сервис - PPP Aspirant - ${x.document.name}`
-              : 'Сервис - PPP Aspirant'}
+          <div class="control-stack">
+            ${(x) =>
+              x.document.name
+                ? `Сервис - PPP Aspirant - ${x.document.name}`
+                : 'Сервис - PPP Aspirant'}
+            <${'ppp-badge'} appearance="blue">
+              В облаке
+            </ppp-badge>
+          </div>
         </span>
         ${when((x) => x.document._id, serviceControlsTemplate)}
         <section>
@@ -164,7 +169,7 @@ export const servicePppAspirantPageTemplate = (context, definition) => html`
 `;
 
 // noinspection JSUnusedGlobalSymbols
-export default ServicePppAspirantPage.compose({
-  template: servicePppAspirantPageTemplate,
+export default ServiceCloudPppAspirantPage.compose({
+  template: serviceCloudPppAspirantPageTemplate,
   styles: pageStyles
 });

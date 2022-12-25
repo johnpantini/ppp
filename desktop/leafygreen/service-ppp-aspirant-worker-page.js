@@ -64,10 +64,13 @@ export const servicePppAspirantWorkerPageTemplate = (
                         {
                           $or: [
                             {
+                              type: `[%#(await import('./const.js')).SERVICES.CLOUD_PPP_ASPIRANT%]`
+                            },
+                            {
                               type: `[%#(await import('./const.js')).SERVICES.DEPLOYED_PPP_ASPIRANT%]`
                             },
                             {
-                              type: `[%#(await import('./const.js')).SERVICES.PPP_ASPIRANT%]`
+                              type: `[%#(await import('./const.js')).SERVICES.SYSTEMD_PPP_ASPIRANT%]`
                             }
                           ]
                         },
