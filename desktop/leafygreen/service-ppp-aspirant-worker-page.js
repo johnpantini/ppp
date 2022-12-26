@@ -7,7 +7,7 @@ import { serviceControlsTemplate } from './service-page.js';
 import ppp from '../../ppp.js';
 
 const exampleEnvironmentCode = `{
-  SERVICE_MACHINE_URL: '[%#ppp.keyVault.getKey("service-machine-url")%]';
+  SERVICE_MACHINE_URL: '[%#ppp.keyVault.getKey("service-machine-url")%]'
 }`;
 
 const exampleSourceCode = `console.log(process.env.SERVICE_MACHINE_URL);`;

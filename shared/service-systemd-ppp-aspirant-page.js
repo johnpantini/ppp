@@ -29,11 +29,12 @@ export class ServiceSystemdPppAspirantPage extends Page {
 
           await this.executeSSHCommandsSilently({
             server: this.document.server,
-            commands: `sudo salt-call --local http.query ${inspectorUrlEndpoint} --out json &&`
+            commands: `curl ${inspectorUrlEndpoint} &&`
           });
 
-          const rawInspectorUrl =
-            this.terminalOutput.match(/"(ws:[\s\S]+)"/i)[1];
+          const rawInspectorUrl = this.terminalOutput.match(
+            /(ws:\/\/[:0-9.a-z\/-]+)/i
+          )[1];
 
           if (rawInspectorUrl) {
             const inspectorUrl = new URL(rawInspectorUrl);

@@ -1,4 +1,4 @@
-import { Page, PageWithService } from './page.js';
+import { Page, PageWithService, PageWithSSHTerminal } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { validate, invalidate } from './validate.js';
 import { SERVICE_STATE, SERVICES } from './const.js';
@@ -55,6 +55,20 @@ export class ServicePppAspirantWorkerPage extends Page {
           },
           {
             $unwind: '$aspirantService'
+          },
+          {
+            $lookup: {
+              from: 'servers',
+              localField: 'aspirantService.serverId',
+              foreignField: '_id',
+              as: 'server'
+            }
+          },
+          {
+            $unwind: {
+              path: '$server',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -106,15 +120,18 @@ export class ServicePppAspirantWorkerPage extends Page {
     if (!this.document.aspirantService)
       this.document.aspirantService = this.aspirantServiceId.datum();
 
-    if (this.document.aspirantService.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
-      url = this.document.aspirantService.url;
-    } else {
+    const aspirantService = this.document.aspirantService;
+
+    if (aspirantService.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
+      url = aspirantService.url;
+    } else if (aspirantService.type === SERVICES.CLOUD_PPP_ASPIRANT) {
+      // Northflank
       const aspirantApi = await ppp.user.functions.findOne(
         {
           collection: 'apis'
         },
         {
-          _id: this.document.aspirantService.deploymentApiId
+          _id: aspirantService.deploymentApiId
         }
       );
 
@@ -131,7 +148,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             method: 'POST',
             body: JSON.stringify({
               method: 'GET',
-              url: `https://api.northflank.com/v1/projects/${this.document.aspirantService.projectID}/services/${this.document.aspirantService.serviceID}`,
+              url: `https://api.northflank.com/v1/projects/${aspirantService.projectID}/services/${aspirantService.serviceID}`,
               headers: {
                 Authorization: `Bearer ${token}`
               }
@@ -143,7 +160,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         const port = json.data?.ports?.find((p) => p.internalPort === 32456);
 
         if (port) {
-          url = `https://${port.dns}/fetch`;
+          url = `https://${port.dns}`;
         } else {
           invalidate(this.aspirantServiceId, {
             errorMessage:
@@ -156,6 +173,16 @@ export class ServicePppAspirantWorkerPage extends Page {
           errorMessage: 'Проблема с сервисом PPP Aspirant',
           raiseException: true
         });
+    } else if (aspirantService.type === SERVICES.SYSTEMD_PPP_ASPIRANT) {
+      await this.executeSSHCommandsSilently({
+        server: this.document.server,
+        commands:
+          'sudo salt-call --local network.ip_addrs cidr="100.0.0.0/8" --out json &&'
+      });
+
+      const [ip] = JSON.parse(this.terminalOutput.split('}')[0] + '}').local;
+
+      url = `http://${ip}:${aspirantService.port}`;
     }
 
     return url;
@@ -163,31 +190,50 @@ export class ServicePppAspirantWorkerPage extends Page {
 
   async #aspirantRequest(url, { method, headers, body }) {
     const aspirantUrl = await this.getAspirantUrl();
-    const requestUrl =
-      this.document.aspirantService.type === SERVICES.DEPLOYED_PPP_ASPIRANT
-        ? new URL(url, aspirantUrl).toString()
-        : new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString();
-    const requestOptions =
-      this.document.aspirantService.type === SERVICES.DEPLOYED_PPP_ASPIRANT
-        ? {
-            cache: 'no-cache',
-            method,
-            headers,
+    const aspirantService = this.document.aspirantService;
+
+    let requestUrl;
+    let requestOptions;
+
+    if (aspirantService.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
+      requestUrl = new URL(url, aspirantUrl).toString();
+      requestOptions = {
+        cache: 'no-cache',
+        method,
+        headers,
+        body
+      };
+    } else if (aspirantService.type === SERVICES.CLOUD_PPP_ASPIRANT) {
+      requestUrl = new URL(
+        'fetch',
+        ppp.keyVault.getKey('service-machine-url')
+      ).toString();
+      requestOptions = {
+        cache: 'no-cache',
+        method: 'POST',
+        body: JSON.stringify({
+          method,
+          url: new URL(url, aspirantUrl).toString(),
+          headers,
+          body
+        })
+      };
+    } else if (aspirantService.type === SERVICES.SYSTEMD_PPP_ASPIRANT) {
+      requestUrl = new URL(url, aspirantUrl).toString();
+
+      if (
+        !(await this.executeSSHCommandsSilently({
+          server: this.document.server,
+          commands: `sudo salt-call --local http.query ${requestUrl} method=${method} data='${JSON.stringify(
             body
-          }
-        : {
-            cache: 'no-cache',
-            method: 'POST',
-            body: JSON.stringify({
-              method,
-              url: new URL(url, aspirantUrl).toString(),
-              headers,
-              body
-            })
-          };
+          ).replaceAll(/'/gi, `'\\''`)}' &&`
+        }))
+      ) {
+        throw new Error('Не удалось выполнить действие.');
+      }
+
+      return;
+    }
 
     await maybeFetchError(
       await fetch(requestUrl, requestOptions),
@@ -210,14 +256,12 @@ export class ServicePppAspirantWorkerPage extends Page {
         env: new Function(
           `return ${await new Tmpl().render(
             this.page.view,
-            this.document.environmentCode,
-            {}
+            this.document.environmentCode
           )}`
         )(),
         source: await new Tmpl().render(
           this.page.view,
-          this.document.sourceCode,
-          {}
+          this.document.sourceCode
         )
       })
     });
@@ -237,4 +281,4 @@ export class ServicePppAspirantWorkerPage extends Page {
   }
 }
 
-applyMixins(ServicePppAspirantWorkerPage, PageWithService);
+applyMixins(ServicePppAspirantWorkerPage, PageWithSSHTerminal, PageWithService);
