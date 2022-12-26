@@ -187,6 +187,9 @@ export default class Aspirant {
         .worker.on('error', (e) => {
           console.error(e);
         })
+        .on('message', (value) => {
+          console.log(value);
+        })
         .on('exit', this.#onWorkerExit);
     } catch (e) {
       console.error(e);
