@@ -1100,20 +1100,67 @@ export class PageWithSSHTerminal {
 
       this.terminalOutput += string;
 
-      // Error message
-      if (string.startsWith('{"e"'))
-        try {
-          terminal.write(
-            '\x1b[31m' + JSON.parse(string).e.message + '\x1b[0m\r\n'
-          );
-        } catch (e) {
-          terminal.write(string);
-        }
-      else terminal.write(string);
+      if (terminal) {
+        // Error message
+        if (string.startsWith('{"e"')) {
+          try {
+            terminal.write(
+              '\x1b[31m' + JSON.parse(string).e.message + '\x1b[0m\r\n'
+            );
+          } catch (e) {
+            terminal.write(string);
+          }
+        } else terminal.write(string);
+      }
     }
 
     if (!result.done) {
       return this.readChunk(reader, decoder, terminal);
+    }
+  }
+
+  async executeSSHCommandsSilently({ server = {}, commands }) {
+    try {
+      commands += `echo '\x1b[32m\r\nppp-ssh-ok\r\n\x1b[0m'`;
+
+      // Only for development
+      if (location.origin.endsWith('.github.io.dev')) {
+        commands = commands.replaceAll(
+          'salt-call --local',
+          'salt-call --local -c /srv/salt'
+        );
+      }
+
+      server.cmd = commands;
+
+      if (server.authType === SERVER_TYPES.PASSWORD) {
+        server.key = void 0;
+        server.privateKey = void 0;
+      } else if (server.authType === SERVER_TYPES.KEY) {
+        server.password = void 0;
+        server.privateKey = server.key;
+      }
+
+      const rSSH = await fetch(
+        new URL('ssh', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          method: 'POST',
+          body: JSON.stringify(server)
+        }
+      );
+
+      await this.processChunkedResponse(rSSH);
+
+      if (!rSSH.ok) {
+        console.dir(rSSH);
+
+        // noinspection ExceptionCaughtLocallyJS
+        throw new FetchError(rSSH);
+      }
+
+      return /ppp-ssh-ok/i.test(this.terminalOutput);
+    } catch (e) {
+      console.error(e);
     }
   }
 

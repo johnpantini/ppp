@@ -135,7 +135,6 @@ export const servicePageTemplate = (context, definition) => html`
           <span slot="description">Подсистема обслуживания процессов приложения PPP.</span>
           <div slot="action" class="control-line">
             <ppp-button
-              disabled
               @click="${() =>
                 ppp.app.navigate({
                   page: `service-${SERVICES.SYSTEMD_PPP_ASPIRANT}`
