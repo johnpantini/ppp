@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import uWS from '../uWebSockets.js/uws.js';
+import * as inspector from 'node:inspector';
 
 const PORT = process.env.PORT ?? 32456;
 
@@ -308,6 +309,11 @@ export default class Aspirant {
         cors(res)
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
           .end('pong');
+      })
+      .get('/inspector_url', async (res) => {
+        cors(res)
+          .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
+          .end(inspector.url());
       })
       .get('/', async (res) => {
         cors(res)
