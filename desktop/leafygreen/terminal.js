@@ -3,6 +3,7 @@ import { css } from '../../shared/element/styles/css.js';
 
 export const terminalStyles = css`
   .xterm {
+    cursor: text;
     position: relative;
     user-select: none;
     -ms-user-select: none;
@@ -43,6 +44,7 @@ export const terminalStyles = css`
   }
 
   .xterm .composition-view {
+    /* TODO: Composition position got messed up somewhere */
     background: #000;
     color: #fff;
     display: none;
@@ -55,10 +57,6 @@ export const terminalStyles = css`
     display: block;
   }
 
-  .xterm .xterm-text-layer {
-    width: calc(100% - 16px) !important;
-  }
-
   .xterm .xterm-viewport {
     /* On OS X this is required in order for the scroll bar to appear fully opaque */
     background-color: #000;
@@ -69,8 +67,6 @@ export const terminalStyles = css`
     left: 0;
     top: 0;
     bottom: 0;
-    scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
-    scrollbar-width: thin;
   }
 
   .xterm .xterm-screen {
@@ -96,16 +92,13 @@ export const terminalStyles = css`
     line-height: normal;
   }
 
-  .xterm {
-    cursor: text;
-  }
-
   .xterm.enable-mouse-events {
     /* When mouse events are enabled (eg. tmux), revert to the standard pointer cursor */
     cursor: default;
   }
 
-  .xterm.xterm-cursor-pointer {
+  .xterm.xterm-cursor-pointer,
+  .xterm .xterm-cursor-pointer {
     cursor: pointer;
   }
 
@@ -120,7 +113,6 @@ export const terminalStyles = css`
     left: 0;
     top: 0;
     bottom: 0;
-    right: 0;
     z-index: 10;
     color: transparent;
   }
@@ -137,12 +129,46 @@ export const terminalStyles = css`
     opacity: 0.5;
   }
 
-  .xterm-underline {
+  .xterm-underline-1 {
     text-decoration: underline;
+  }
+
+  .xterm-underline-2 {
+    text-decoration: double underline;
+  }
+
+  .xterm-underline-3 {
+    text-decoration: wavy underline;
+  }
+
+  .xterm-underline-4 {
+    text-decoration: dotted underline;
+  }
+
+  .xterm-underline-5 {
+    text-decoration: dashed underline;
   }
 
   .xterm-strikethrough {
     text-decoration: line-through;
+  }
+
+  .xterm-screen .xterm-decoration-container .xterm-decoration {
+    z-index: 6;
+    position: absolute;
+  }
+
+  .xterm-decoration-overview-ruler {
+    z-index: 7;
+    position: absolute;
+    top: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  .xterm-decoration-top {
+    z-index: 2;
+    position: relative;
   }
 
   .xterm .xterm-viewport::-webkit-scrollbar {
