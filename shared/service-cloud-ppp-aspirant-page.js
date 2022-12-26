@@ -137,7 +137,7 @@ export class ServiceCloudPppAspirantPage extends Page {
       REDIS_HOST: redisApi.host,
       REDIS_PORT: redisApi.port.toString(),
       REDIS_TLS: !!redisApi.tls ? '1' : '',
-      REDIS_USERNAME: redisApi.username?.toString(),
+      REDIS_USERNAME: redisApi.username?.toString() ?? 'default',
       REDIS_PASSWORD: redisApi.password?.toString(),
       REDIS_DATABASE: redisApi.database.toString(),
       TAILSCALE_AUTH_KEY: this.document.tailscaleKey ?? ''
