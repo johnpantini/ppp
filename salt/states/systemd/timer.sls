@@ -1,5 +1,5 @@
-{% if pillar['service_name'] is defined and pillar['service_type'] is defined %}
-/etc/systemd/system/{{ pillar['service_name'] }}.timer:
+{% if pillar['serviceName'] is defined and pillar['serviceType'] is defined %}
+/etc/systemd/system/{{ pillar['serviceName'] }}.timer:
   file.managed:
     - source: salt://ppp/systemd/ppp@.timer
     - template: jinja
@@ -10,9 +10,6 @@ systemctl daemon-reload:
 systemctl reset-failed:
   cmd.run: []
 
-systemctl enable {{ pillar['service_name'] }}.timer:
-  cmd.run: []
-
-systemctl restart {{ pillar['service_name'] }}.timer:
+systemctl enable {{ pillar['serviceName'] }}.timer:
   cmd.run: []
 {% endif %}

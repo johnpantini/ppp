@@ -27,6 +27,11 @@ KillSignal=2
 {% if pillar['workingDirectory'] != 'oneshot' %}
 WorkingDirectory={{ pillar['workingDirectory'] }}
 {% endif %}
+{% if pillar['environment'] is defined %}
+{% for k, v in pillar['environment'].items() %}
+Environment="{{ k }}={{ v }}"
+{% endfor %}
+{% endif %}
 RestartSec=1s
 Restart=always
 {% endif %}
