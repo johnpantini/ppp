@@ -56,7 +56,8 @@ export const serviceSystemdPppAspirantPageTemplate = (
         <section>
           <div class="label-group">
             <h5>Сервер</h5>
-            <p>Поддерживаются только RHEL-совместимые операционные системы.</p>
+            <p>Поддерживаются только RHEL-совместимые операционные системы.
+              Сервер должен находиться в сети Tailscale.</p>
           </div>
           <div class="input-group">
             <${'ppp-collection-select'}
