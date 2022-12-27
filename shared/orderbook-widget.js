@@ -458,10 +458,10 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
   }
 
   async instrumentChanged(oldValue, newValue) {
-    this.orderbookChanged(this.#lastOrderBookValue, {
+    this.orderbook = {
       bids: [],
       asks: []
-    });
+    };
 
     super.instrumentChanged(oldValue, newValue);
 

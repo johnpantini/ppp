@@ -355,11 +355,6 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
         } finally {
           this.topLoader.stop();
         }
-      } else {
-        this.notificationsArea.error({
-          title: 'Портфель',
-          text: 'Инструмент не найден в локальном хранилище.'
-        });
       }
     }
   }

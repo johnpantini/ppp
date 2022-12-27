@@ -127,10 +127,15 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
   @observable
   trades;
 
+  constructor(props) {
+    super(props);
+
+    this.trades = [];
+  }
+
   async connectedCallback() {
     super.connectedCallback();
 
-    this.trades = [];
     this.tradesTrader = await ppp.getOrCreateTrader(this.document.tradesTrader);
     this.searchControl.trader = this.tradesTrader;
 
@@ -210,6 +215,8 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async instrumentChanged(oldValue, newValue) {
+    this.trades = [];
+
     super.instrumentChanged(oldValue, newValue);
 
     if (this.tradesTrader) {
