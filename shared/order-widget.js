@@ -635,6 +635,18 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   setPrice(price) {
     if (price > 0) {
+      if (this.orderTypeTabs.activeid !== 'limit') {
+        this.orderTypeTabs.activeid = 'limit';
+
+        setTimeout(() => {
+          this.price.focus();
+
+          const length = this.price.control.value.length;
+
+          this.price.control.setSelectionRange(length, length);
+        }, 100);
+      }
+
       this.price.value = price.toString().replace('.', decSeparator);
 
       this.calculateTotalAmount();
