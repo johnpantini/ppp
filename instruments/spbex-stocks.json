@@ -4320,24 +4320,6 @@
     "tinkoffFigi": "BBG000BQPC32"
   },
   {
-    "symbol": "ET",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Energy Transfer LP",
-    "isin": "US29273V1008",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG000BM2FL9"
-  },
-  {
     "symbol": "DIS",
     "exchange": [
       "nyse-nsdq",
@@ -4858,24 +4840,6 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BCGHH7"
-  },
-  {
-    "symbol": "FBHS",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Fortune Brands Home & Security",
-    "isin": "US34964C1062",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG001B4BV87"
   },
   {
     "symbol": "TOL",
@@ -28859,7 +28823,7 @@
       "nyse-nsdq",
       "spbex"
     ],
-    "fullName": "XPO Logistics Inc",
+    "fullName": "XPO, Inc.",
     "isin": "US9837931008",
     "minPriceIncrement": 0.01,
     "type": "stock",
@@ -31767,6 +31731,24 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0160DYCH4"
+  },
+  {
+    "symbol": "FBIN",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Fortune Brands Innovations",
+    "isin": "US34964C1062",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG001B4BV87"
   },
   {
     "symbol": "338",
