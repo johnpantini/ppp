@@ -192,13 +192,18 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
 
   maxSeenVolume;
 
-  async connectedCallback() {
-    super.connectedCallback();
+  constructor() {
+    super();
 
     this.spreadString = '—';
     this.maxSeenVolume = 0;
     this.orders = new Map();
     this.quoteLines = [];
+  }
+
+  async connectedCallback() {
+    super.connectedCallback();
+
     this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
     this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
 
@@ -318,12 +323,23 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
   }
 
   orderbookChanged(oldValue, newValue) {
+    if (newValue === '—') {
+      newValue = {
+        bids: [],
+        asks: []
+      };
+    }
+
     if (oldValue !== null && newValue)
       this.#lastOrderBookValue = ppp.structuredClone(newValue);
 
     const orderbook = ppp.structuredClone(newValue);
 
     if (orderbook && this.instrument) {
+      if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
+
+      if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
+
       const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
         this.#getMyOrdersPricesAndSizes();
 
@@ -441,10 +457,15 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
     return 0;
   }
 
-  instrumentChanged(oldValue, newValue) {
+  async instrumentChanged(oldValue, newValue) {
+    this.orderbookChanged(this.#lastOrderBookValue, {
+      bids: [],
+      asks: []
+    });
+
     super.instrumentChanged(oldValue, newValue);
 
-    this.bookTrader?.instrumentChanged?.(this, oldValue, newValue);
+    await this.bookTrader?.instrumentChanged?.(this, oldValue, newValue);
     Observable.notify(this, 'orders');
   }
 
