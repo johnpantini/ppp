@@ -141,10 +141,11 @@ try {
       const vals = [];
 
       for (const k of keys) {
-        if (typeof record[k] === 'boolean' || typeof record[k] === 'number')
+        if (typeof record[k] === 'boolean' || typeof record[k] === 'number') {
           vals.push(record[k]);
-        else
-          vals.push(`'${(record[k] || '').toString().replace(/'/g, "''")}'`);
+        } else {
+          vals.push('$ppp$' + (record[k] || '').toString().replace(/'/ig, "’") + '$ppp$');
+        }
       }
 
       plv8.execute(`insert into public.parsed_records_[%#ctx.document._id%](${keys.join(',')}) values(${vals.join(',')}) on conflict do nothing`);
