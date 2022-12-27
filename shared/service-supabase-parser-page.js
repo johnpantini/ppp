@@ -211,8 +211,8 @@ export class ServiceSupabaseParserPage extends Page {
     });
     await validate(this.depth);
     await validate(this.depth, {
-      hook: async (value) => +value >= 30 && +value <= 10000,
-      errorMessage: 'Введите значение в диапазоне от 30 до 10000'
+      hook: async (value) => +value >= 30 && +value <= 100000,
+      errorMessage: 'Введите значение в диапазоне от 30 до 100000'
     });
 
     await validate(this.tableSchema);

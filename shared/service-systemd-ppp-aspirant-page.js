@@ -13,39 +13,36 @@ export class ServiceSystemdPppAspirantPage extends Page {
     this.onDocumentReady = this.onDocumentReady.bind(this);
   }
 
+  async updateInspectorUrl() {
+    if (this.document.state === SERVICE_STATE.ACTIVE) {
+      // hostname --all-ip-addresses | grep -oP '(100.[0-9.]+)'
+      await this.executeSSHCommandsSilently({
+        server: this.document.server,
+        commands: [
+          'ip=`hostname --all-ip-addresses | grep -oP 100.[0-9.]+`',
+          `inspector_url=\`curl -s http://\${ip}:${this.document.port}/inspector_url\``,
+          'echo "${ip}|${inspector_url}" &&'
+        ].join(';')
+      });
+
+      const [ip, rawInspectorUrl] = this.terminalOutput
+        .split(/\r?\n/)[0]
+        .split('|');
+
+      if (ip && rawInspectorUrl) {
+        const inspectorUrl = new URL(rawInspectorUrl);
+
+        this.scratchSet(
+          'inspectorUrl',
+          `devtools://devtools/bundled/js_app.html?experiments=true&v8only=true&ws=${ip}:${inspectorUrl.port}${inspectorUrl.pathname}`
+        );
+      }
+    }
+  }
+
   async onDocumentReady() {
     try {
-      if (this.document.state === SERVICE_STATE.ACTIVE) {
-        await this.executeSSHCommandsSilently({
-          server: this.document.server,
-          commands:
-            'sudo salt-call --local network.ip_addrs cidr="100.0.0.0/8" --out json &&'
-        });
-
-        const [ip] = JSON.parse(this.terminalOutput.split('}')[0] + '}').local;
-
-        if (ip) {
-          const inspectorUrlEndpoint = `http://${ip}:${this.document.port}/inspector_url`;
-
-          await this.executeSSHCommandsSilently({
-            server: this.document.server,
-            commands: `curl ${inspectorUrlEndpoint} &&`
-          });
-
-          const rawInspectorUrl = this.terminalOutput.match(
-            /(ws:\/\/[:0-9.a-z\/-]+)/i
-          )[1];
-
-          if (rawInspectorUrl) {
-            const inspectorUrl = new URL(rawInspectorUrl);
-
-            this.scratchSet(
-              'inspectorUrl',
-              `devtools://devtools/bundled/js_app.html?experiments=true&v8only=true&ws=${ip}:${inspectorUrl.port}${inspectorUrl.pathname}`
-            );
-          }
-        }
-      }
+      await this.updateInspectorUrl();
     } catch (e) {
       console.error(e);
     }
@@ -214,6 +211,8 @@ export class ServiceSystemdPppAspirantPage extends Page {
       }))
     ) {
       throw new Error('Не удалось остановить сервис.');
+    } else {
+      await this.updateInspectorUrl();
     }
   }
 
@@ -225,6 +224,8 @@ export class ServiceSystemdPppAspirantPage extends Page {
       }))
     ) {
       throw new Error('Не удалось остановить сервис.');
+    } else {
+      this.scratchSet('inspectorUrl', null);
     }
   }
 
@@ -245,6 +246,8 @@ export class ServiceSystemdPppAspirantPage extends Page {
       throw new Error(
         'Не удалось удалить сервис. Удалите его вручную в панели управления MongoDB Realm.'
       );
+    } else {
+      this.scratchSet('inspectorUrl', null);
     }
   }
 }

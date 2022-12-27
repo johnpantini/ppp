@@ -176,11 +176,10 @@ export class ServicePppAspirantWorkerPage extends Page {
     } else if (aspirantService.type === SERVICES.SYSTEMD_PPP_ASPIRANT) {
       await this.executeSSHCommandsSilently({
         server: this.document.server,
-        commands:
-          'sudo salt-call --local network.ip_addrs cidr="100.0.0.0/8" --out json &&'
+        commands: 'hostname --all-ip-addresses | grep -oP 100.[0-9.]+ &&'
       });
 
-      const [ip] = JSON.parse(this.terminalOutput.split('}')[0] + '}').local;
+      const [ip] = this.terminalOutput.split(/\r?\n/);
 
       url = `http://${ip}:${aspirantService.port}`;
     }
