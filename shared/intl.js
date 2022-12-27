@@ -1,4 +1,7 @@
 export function getInstrumentPrecision(instrument) {
+  if (!instrument)
+    return 0;
+
   const [dec, frac] = (instrument.minPriceIncrement ?? 0.01)
     .toString()
     .split('.');
