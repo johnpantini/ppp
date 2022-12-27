@@ -10,7 +10,11 @@ const exampleEnvironmentCode = `{
   SERVICE_MACHINE_URL: '[%#ppp.keyVault.getKey("service-machine-url")%]'
 }`;
 
-const exampleSourceCode = `console.log(process.env.SERVICE_MACHINE_URL);`;
+const exampleSourceCode = `import { parentPort } from 'node:worker_threads';
+
+function log(text) { return parentPort.postMessage(text); }
+
+log(process.env.SERVICE_MACHINE_URL);`;
 
 export const servicePppAspirantWorkerPageTemplate = (
   context,
