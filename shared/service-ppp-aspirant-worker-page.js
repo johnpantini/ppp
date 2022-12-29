@@ -220,12 +220,19 @@ export class ServicePppAspirantWorkerPage extends Page {
     } else if (aspirantService.type === SERVICES.SYSTEMD_PPP_ASPIRANT) {
       requestUrl = new URL(url, aspirantUrl).toString();
 
+      const parsedBody = JSON.parse(body);
+
+      const commands =
+        method === 'DELETE'
+          ? `curl -X DELETE -d '{"_id": "${parsedBody._id}"}' -H "Accept: application/json" ${requestUrl} && `
+          : `sudo salt-call --local http.query ${requestUrl} method=${method} data='${JSON.stringify(
+              body
+            ).replaceAll(/'/gi, `'\\''`)}' && `;
+
       if (
         !(await this.executeSSHCommandsSilently({
           server: this.document.server,
-          commands: `sudo salt-call --local http.query ${requestUrl} method=${method} data='${JSON.stringify(
-            body
-          ).replaceAll(/'/gi, `'\\''`)}' &&`
+          commands
         }))
       ) {
         throw new Error('Не удалось выполнить действие.');
@@ -258,9 +265,8 @@ export class ServicePppAspirantWorkerPage extends Page {
             this.document.environmentCode
           )}`
         )(),
-        source: await new Tmpl().render(
-          this.page.view,
-          this.document.sourceCode
+        source: encodeURIComponent(
+          await new Tmpl().render(this.page.view, this.document.sourceCode)
         )
       })
     });
