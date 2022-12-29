@@ -171,7 +171,7 @@ uWS
             } else if (tokensResponse.tokens?.accessToken) {
               const serverList =
                 process.env.UTEX_US_DATA_SERVER_LIST ??
-                'us-ds-vela.auroraplatform.com:34001';
+                'us-ds-lyra.auroraplatform.com:34002';
 
               const servers = serverList.split(',').map((s) => {
                 const [host, port] = s.split(':');
