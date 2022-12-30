@@ -221,7 +221,6 @@ export class ServicePppAspirantWorkerPage extends Page {
       requestUrl = new URL(url, aspirantUrl).toString();
 
       const parsedBody = JSON.parse(body);
-
       const commands =
         method === 'DELETE'
           ? `curl -X DELETE -d '{"_id": "${parsedBody._id}"}' -H "Accept: application/json" ${requestUrl} && `
