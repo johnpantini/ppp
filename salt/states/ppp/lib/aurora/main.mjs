@@ -1,5 +1,19 @@
-import uWS from '../uWebSockets.js/uws.js';
-import { UTEXUSDataServer } from './utex.mjs';
+import { isMainThread, parentPort } from 'node:worker_threads';
+import path from 'path';
+
+if (isMainThread && typeof process.env.PPP_ASPIRANT_DIRNAME === 'undefined')
+  process.env.PPP_ASPIRANT_DIRNAME = path.dirname(
+    new URL(import.meta.url).pathname.substring(1)
+  );
+
+const { default: uWS } = await import(
+  'file://' +
+    path.join(process.env.PPP_ASPIRANT_DIRNAME, '../uWebSockets.js/uws.js')
+);
+
+const { UTEXUSDataServer } = await import(
+  'file://' + path.join(process.env.PPP_ASPIRANT_DIRNAME, '../aurora/utex.mjs')
+);
 
 const PORT = process.env.PORT ?? 24567;
 
@@ -84,6 +98,8 @@ const UTEXExchangeToAlpacaExchange = (exchangeId) => {
   // Dark Pool
   return 'D';
 };
+
+let appListenSocket;
 
 uWS
   .App({})
@@ -316,7 +332,7 @@ uWS
       }
     }
   })
-  .get('/ping', async (res, req) => {
+  .get('/ping', async (res) => {
     res
       .writeStatus('200 OK')
       .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
@@ -324,6 +340,15 @@ uWS
   })
   .listen(PORT, (listenSocket) => {
     if (listenSocket) {
+      appListenSocket = listenSocket;
+
       console.log(`Listening to port ${PORT}`);
     }
   });
+
+if (!isMainThread) {
+  parentPort.once('message', (message) => {
+    if (message === 'cleanup')
+      if (appListenSocket) uWS.us_listen_socket_close(appListenSocket);
+  });
+}
