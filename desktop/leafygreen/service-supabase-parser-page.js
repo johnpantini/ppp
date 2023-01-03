@@ -213,7 +213,8 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
             ></ppp-collection-select>
             <${'ppp-button'}
               class="margin-top"
-              @click="${() => window.open('?page=api-pusher', '_blank').focus()}"
+              @click="${() =>
+                window.open('?page=api-pusher', '_blank').focus()}"
               appearance="primary"
             >
               Добавить API Pusher
@@ -257,7 +258,8 @@ export const serviceSupabaseParserPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
-              ?disabled="${(x) => x.document.tableSchema}"
+              ?disabled="${(x) =>
+                x.document.tableSchema && !x.document.removed}"
               :code="${(x) => x.document.tableSchema ?? exampleTableSchema}"
               ${ref('tableSchema')}
             ></ppp-codeflask>
