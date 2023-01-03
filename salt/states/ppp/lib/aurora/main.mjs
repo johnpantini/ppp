@@ -338,7 +338,7 @@ uWS
       .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
       .end('pong');
   })
-  .listen(PORT, (listenSocket) => {
+  .listen(+PORT, (listenSocket) => {
     if (listenSocket) {
       appListenSocket = listenSocket;
 
