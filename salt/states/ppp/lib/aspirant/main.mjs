@@ -5,6 +5,12 @@ import { Worker } from 'node:worker_threads';
 import uWS from '../uWebSockets.js/uws.js';
 import * as inspector from 'node:inspector';
 
+async function later(delay) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, delay);
+  });
+}
+
 const PORT = process.env.PORT ?? 32456;
 
 function readJSON(res, cb) {
@@ -273,6 +279,8 @@ export default class Aspirant {
 
               this.#workers.delete(_id);
               currentWorkerData.worker.off('exit', this.#onWorkerExit);
+              currentWorkerData.worker.postMessage('cleanup');
+              await later(100);
               await currentWorkerData.worker.terminate();
               currentWorkerData.worker.unref();
             }
