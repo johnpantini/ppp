@@ -3,7 +3,7 @@ import path from 'path';
 
 if (isMainThread && typeof process.env.PPP_ASPIRANT_DIRNAME === 'undefined')
   process.env.PPP_ASPIRANT_DIRNAME = path.dirname(
-    new URL(import.meta.url).pathname.substring(1)
+    new URL(import.meta.url).pathname
   );
 
 const { default: uWS } = await import(
