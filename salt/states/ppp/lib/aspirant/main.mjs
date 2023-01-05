@@ -181,7 +181,11 @@ export default class Aspirant {
         source,
         env,
         worker: new Worker(new URL(`data:text/javascript,${source}`), {
-          env: Object.assign({ PPP_ASPIRANT_DIRNAME }, process.env, env),
+          env: Object.assign(
+            { PPP_ASPIRANT_FILENAME, PPP_ASPIRANT_DIRNAME, PPP_WORKER_ID: _id },
+            process.env,
+            env
+          ),
           workerData: {
             aspirant: this
           }
@@ -280,7 +284,7 @@ export default class Aspirant {
               this.#workers.delete(_id);
               currentWorkerData.worker.off('exit', this.#onWorkerExit);
               currentWorkerData.worker.postMessage('cleanup');
-              await later(100);
+              await later(1000);
               await currentWorkerData.worker.terminate();
               currentWorkerData.worker.unref();
             }
