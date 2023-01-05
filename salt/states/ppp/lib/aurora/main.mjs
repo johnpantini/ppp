@@ -15,18 +15,33 @@ const { UTEXUSDataServer } = await import(
   'file://' + path.join(process.env.PPP_ASPIRANT_DIRNAME, '../aurora/utex.mjs')
 );
 
+function isJWTTokenExpired(jwtToken) {
+  if (jwtToken) {
+    try {
+      const [, payload] = jwtToken.split('.');
+      const { exp: expires } = JSON.parse(atob(payload));
+
+      if (typeof expires === 'number') {
+        return Date.now() + 1000 >= expires * 1000;
+      }
+    } catch {
+      return true;
+    }
+  }
+
+  return true;
+}
+
 const PORT = process.env.PORT ?? 24567;
 
 const tickerToUTEXTicker = (ticker) => {
-  if (ticker === 'SPB@US') return 'SPB~US';
+  if (/@/i.test(ticker)) ticker = ticker.split('@')[0];
 
   return ticker.replace(' ', '/').replace('.', '/') + '~US';
 };
 
 const UTEXTickerToTicker = (ticker) => {
-  if (ticker === 'SPB~US') return 'SPB@US';
-
-  return ticker.replace('/', '.').split('~')[0];
+  return ticker.replace('/', ' ').split('~')[0];
 };
 
 const isDST = () => {
@@ -100,12 +115,14 @@ const UTEXExchangeToAlpacaExchange = (exchangeId) => {
 };
 
 let appListenSocket;
+const wsMap = new Map();
 
 uWS
   .App({})
   .ws('/*', {
     maxBackpressure: 10 * 1024 * 1024,
     open: (ws) => {
+      wsMap.set(ws, Date.now());
       ws.send(JSON.stringify([{ T: 'success', msg: 'connected' }]));
     },
     close: (ws) => {
@@ -118,6 +135,8 @@ uWS
 
         ws.connection = null;
       }
+
+      wsMap.delete(ws);
     },
     drain: (ws) => {
       if (!ws.closed)
@@ -139,30 +158,113 @@ uWS
               ])
             );
           } else {
-            const tokensRequest = await fetch(
-              process.env.UTEX_AUTH_URL ??
-                'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
-              {
-                method: 'POST',
-                headers: {
-                  Origin: 'https://utex.io',
-                  Referer: 'https://utex.io/',
-                  'User-Agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  realm: 'aurora',
-                  clientId: 'utexweb',
-                  loginOrEmail: payload.key,
-                  password: payload.secret,
-                  product: 'UTEX',
-                  locale: 'ru'
-                })
-              }
-            );
+            let savedAccessToken;
+            let tokensResponse;
 
-            const tokensResponse = await tokensRequest.json();
+            if (process.env.ASPIRANT_ID && process.env.PPP_WORKER_ID) {
+              savedAccessToken = await (
+                await fetch(
+                  new URL('redis', process.env.SERVICE_MACHINE_URL).toString(),
+                  {
+                    method: 'POST',
+                    cache: 'no-cache',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      options: {
+                        host: process.env.REDIS_HOST,
+                        port: +process.env.REDIS_PORT,
+                        tls: !!process.env.REDIS_TLS
+                          ? {
+                              servername: process.env.REDIS_HOST
+                            }
+                          : void 0,
+                        username: process.env.REDIS_USERNAME,
+                        db: +process.env.REDIS_DATABASE,
+                        password: process.env.REDIS_PASSWORD
+                      },
+                      command: 'get',
+                      args: [
+                        `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`
+                      ]
+                    })
+                  }
+                )
+              ).text();
+            }
+
+            if (isJWTTokenExpired(savedAccessToken)) {
+              const tokensRequest = await fetch(
+                process.env.UTEX_AUTH_URL ??
+                  'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
+                {
+                  method: 'POST',
+                  headers: {
+                    Origin: 'https://utex.io',
+                    Referer: 'https://utex.io/',
+                    'User-Agent':
+                      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    realm: 'aurora',
+                    clientId: 'utexweb',
+                    loginOrEmail: payload.key,
+                    password: payload.secret,
+                    product: 'UTEX',
+                    locale: 'ru'
+                  })
+                }
+              );
+
+              tokensResponse = await tokensRequest.json();
+
+              if (tokensResponse.tokens?.accessToken) {
+                if (process.env.ASPIRANT_ID && process.env.PPP_WORKER_ID) {
+                  savedAccessToken = tokensResponse.tokens.accessToken;
+
+                  await fetch(
+                    new URL(
+                      'redis',
+                      process.env.SERVICE_MACHINE_URL
+                    ).toString(),
+                    {
+                      method: 'POST',
+                      cache: 'no-cache',
+                      headers: {
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        options: {
+                          host: process.env.REDIS_HOST,
+                          port: +process.env.REDIS_PORT,
+                          tls: !!process.env.REDIS_TLS
+                            ? {
+                                servername: process.env.REDIS_HOST
+                              }
+                            : void 0,
+                          username: process.env.REDIS_USERNAME,
+                          db: +process.env.REDIS_DATABASE,
+                          password: process.env.REDIS_PASSWORD
+                        },
+                        command: 'set',
+                        args: [
+                          `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
+                          savedAccessToken
+                        ]
+                      })
+                    }
+                  );
+                }
+              }
+            } else {
+              tokensResponse = {
+                tokens: {
+                  accessToken: savedAccessToken
+                }
+              };
+            }
 
             // Must be checked after await
             if (ws.closed) return;
@@ -267,6 +369,7 @@ uWS
                         x: UTEXExchangeToAlpacaExchange(print.Exchange),
                         p: print.Price,
                         s: print.Size,
+                        h: print.Hit,
                         t: new Date(date).toISOString(),
                         c: print.Condition?.trim()
                           ?.replace('\u0000', '')
@@ -348,7 +451,16 @@ uWS
 
 if (!isMainThread) {
   parentPort.once('message', (message) => {
-    if (message === 'cleanup')
-      if (appListenSocket) uWS.us_listen_socket_close(appListenSocket);
+    if (message === 'cleanup') {
+      if (appListenSocket) {
+        uWS.us_listen_socket_close(appListenSocket);
+
+        appListenSocket = null;
+
+        for (const [ws] of wsMap) {
+          if (!ws.closed) ws.close();
+        }
+      }
+    }
   });
 }
