@@ -2,6 +2,123 @@ import { getInstrumentPrecision } from '../intl.js';
 import { TRADER_DATUM } from '../const.js';
 
 export class Trader {
+  document = {};
+
+  #cacheRequest;
+
+  #cacheRequestPendingSuccess;
+
+  constructor(document) {
+    this.document = document;
+    this.#cacheRequest = indexedDB.open('ppp', 1);
+    this.#cacheRequestPendingSuccess = new Promise((resolve, reject) => {
+      this.#cacheRequest.onupgradeneeded = () => {
+        const db = this.#cacheRequest.result;
+
+        if (!db.objectStoreNames.contains('instruments')) {
+          db.createObjectStore('instruments', { keyPath: 'symbol' });
+        }
+
+        db.onerror = (event) => {
+          console.error(event.target.error);
+          reject(event.target.error);
+        };
+      };
+
+      this.#cacheRequest.onsuccess = () => resolve(this.#cacheRequest.result);
+    });
+  }
+
+  async waitForInstrumentCache() {
+    return this.#cacheRequestPendingSuccess;
+  }
+
+  async findInstrumentInCache(symbol) {
+    return this.findInstrumentInCacheAndAssignToField(symbol);
+  }
+
+  async findInstrumentInCacheAndAssignToField(
+    symbol,
+    source = {},
+    field = 'payload',
+    payload = {}
+  ) {
+    return new Promise((resolve, reject) => {
+      if (/@/.test(symbol)) [symbol] = symbol.split('@');
+
+      const tx = this.#cacheRequest.result.transaction(
+        'instruments',
+        'readonly'
+      );
+      const store = tx.objectStore('instruments');
+      const storeRequest = store.get(symbol);
+
+      storeRequest.onsuccess = (event) => {
+        if (event.target.result) {
+          const instrument = event.target.result;
+
+          if (
+            instrument.exchange?.indexOf(
+              this.getExchange(this.document.exchange)
+            ) > -1
+          ) {
+            payload.instrument = instrument;
+            source[field] = payload;
+          } else {
+            // Try with exchange suffix
+            const symbolWithSuffix = `${symbol}~${this.document.exchange}`;
+            const storeRequestWithSuffix = store.get(symbolWithSuffix);
+
+            storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
+              if (eventWithSuffix.target.result) {
+                payload.instrument = eventWithSuffix.target.result;
+                source[field] = payload;
+              } else {
+                payload.instrument = {
+                  symbol: symbolWithSuffix
+                };
+                source[field] = payload;
+              }
+            };
+
+            storeRequestWithSuffix.onerror = (eventWithSuffix) => {
+              console.error(eventWithSuffix.target.error);
+
+              payload.instrument = {
+                symbol: symbolWithSuffix
+              };
+              source[field] = payload;
+
+              this.onError?.(eventWithSuffix.target.error);
+
+              reject(event.target.error);
+            };
+          }
+        } else {
+          payload.instrument = {
+            symbol
+          };
+          source[field] = payload;
+        }
+
+        resolve(payload.instrument);
+      };
+
+      storeRequest.onerror = (event) => {
+        console.error(event.target.error);
+
+        payload.instrument = {
+          symbol
+        };
+        source[field] = payload;
+
+        this.onError?.(event.target.error);
+
+        reject(event.target.error);
+      };
+    });
+  }
+
   caps() {
     return this.document.caps ?? [];
   }
@@ -63,6 +180,7 @@ export class Trader {
       const globalRefName = this.getDatumGlobalReferenceName(datum);
 
       if (globalRefName) {
+        // This reference is instrument-agnostic.
         await this.addRef(
           {
             _id: globalRefName

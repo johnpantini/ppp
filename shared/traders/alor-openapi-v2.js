@@ -2,7 +2,7 @@
 
 import { isJWTTokenExpired, uuidv4 } from '../ppp-crypto.js';
 import { TradingError } from '../trading-error.js';
-import { BROKERS, TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../const.js';
+import { TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../const.js';
 import { later } from '../later.js';
 import { TraderWithSimpleSearch } from './trader-with-simple-search.js';
 import { Trader } from './common-trader.js';
@@ -25,18 +25,13 @@ class AlorOpenAPIV2Trader extends Trader {
 
   #pendingJWTRequest;
 
-  #cacheRequest;
-
-  #cacheRequestPendingSuccess;
-
-  document = {};
-
   positions = new Map();
 
   orders = new Map();
 
   timeline = new Map();
 
+  // Key: widget instance; Value: [{ field, datum }] array
   subs = {
     quotes: new Map(),
     orders: new Map(),
@@ -46,6 +41,7 @@ class AlorOpenAPIV2Trader extends Trader {
     allTrades: new Map()
   };
 
+  // Key: instrumentId; Value: { instrument, refCount }
   refs = {
     quotes: new Map(),
     orders: new Map(),
@@ -59,29 +55,6 @@ class AlorOpenAPIV2Trader extends Trader {
   #guids = new Map();
 
   connection;
-
-  constructor(document) {
-    super();
-
-    this.document = document;
-    this.#cacheRequest = indexedDB.open('ppp', 1);
-    this.#cacheRequestPendingSuccess = new Promise((resolve, reject) => {
-      this.#cacheRequest.onupgradeneeded = () => {
-        const db = this.#cacheRequest.result;
-
-        if (!db.objectStoreNames.contains('instruments')) {
-          db.createObjectStore('instruments', { keyPath: 'symbol' });
-        }
-
-        db.onerror = (event) => {
-          console.error(event.target.error);
-          reject(event.target.error);
-        };
-      };
-
-      this.#cacheRequest.onsuccess = () => resolve(this.#cacheRequest.result);
-    });
-  }
 
   async syncAccessToken() {
     try {
@@ -329,8 +302,7 @@ class AlorOpenAPIV2Trader extends Trader {
         if (o.status === 'working' && o.side === side) {
           if (instrument && o.symbol !== this.getSymbol(instrument)) continue;
 
-          const orderInstrument =
-            await this.#findInstrumentInCacheAndPutToPayload(o.symbol);
+          const orderInstrument = await this.findInstrumentInCache(o.symbol);
 
           if (
             orderInstrument?.symbol ??
@@ -681,9 +653,10 @@ class AlorOpenAPIV2Trader extends Trader {
       datum === TRADER_DATUM.CURRENT_ORDER ||
       datum === TRADER_DATUM.TIMELINE_ITEM
     ) {
-      await this.#cacheRequestPendingSuccess;
+      await this.waitForInstrumentCache();
     }
 
+    // Broadcast data from instrument-agnostic global datums.
     switch (datum) {
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
@@ -726,7 +699,7 @@ class AlorOpenAPIV2Trader extends Trader {
     return super.unsubscribeField({ source, field, datum });
   }
 
-  async addFirstRef(instrument, refs, ref) {
+  async addFirstRef(instrument, refs) {
     const guid = this.#reqId();
 
     this.#guids.set(guid, {
@@ -857,7 +830,10 @@ class AlorOpenAPIV2Trader extends Trader {
     await super.instrumentChanged(source, oldValue, newValue);
 
     if (newValue?._id) {
-      // Handle no real subscription case
+      // Handle no real subscription case for quotes and orderbook.
+      // Use saved snapshot data for new widgets.
+      // Time and sales uses allTrades REST API call,
+      // so no special handling needed.
       this.onQuotesMessage({
         data: this.refs.quotes.get(newValue._id)?.lastData
       });
@@ -976,92 +952,6 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async #findInstrumentInCacheAndPutToPayload(
-    symbol,
-    source = {},
-    field = 'payload',
-    payload = {}
-  ) {
-    return new Promise((resolve, reject) => {
-      if (/@/.test(symbol)) [symbol] = symbol.split('@');
-
-      const tx = this.#cacheRequest.result.transaction(
-        'instruments',
-        'readonly'
-      );
-      const store = tx.objectStore('instruments');
-      const storeRequest = store.get(symbol);
-
-      storeRequest.onsuccess = (event) => {
-        if (event.target.result) {
-          const instrument = event.target.result;
-
-          if (
-            instrument.exchange?.indexOf(
-              this.getExchange(this.document.exchange)
-            ) > -1
-          ) {
-            payload.instrument = instrument;
-            source[field] = payload;
-          } else {
-            // Try with suffix
-            const symbolWithSuffix = `${symbol}~${this.document.exchange}`;
-            const storeRequestWithSuffix = store.get(symbolWithSuffix);
-
-            storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
-              if (eventWithSuffix.target.result) {
-                payload.instrument = eventWithSuffix.target.result;
-                source[field] = payload;
-              } else {
-                payload.instrument = {
-                  symbol: symbolWithSuffix
-                };
-                source[field] = payload;
-              }
-            };
-
-            storeRequestWithSuffix.onerror = (eventWithSuffix) => {
-              console.error(eventWithSuffix.target.error);
-
-              payload.instrument = {
-                symbol: symbolWithSuffix
-              };
-              source[field] = payload;
-
-              this.onError?.(eventWithSuffix.target.error);
-
-              reject(event.target.error);
-            };
-          }
-        } else {
-          payload.instrument = {
-            symbol
-          };
-          source[field] = payload;
-        }
-
-        resolve(payload.instrument);
-      };
-
-      storeRequest.onerror = (event) => {
-        console.error(event.target.error);
-
-        payload.instrument = {
-          symbol
-        };
-        source[field] = payload;
-
-        this.onError?.(event.target.error);
-
-        reject(event.target.error);
-      };
-    });
-  }
-
-  async findInstrumentInCache(symbol) {
-    return this.#findInstrumentInCacheAndPutToPayload(symbol);
-  }
-
   onPositionsMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.positions.set(data.symbol, data);
@@ -1088,7 +978,7 @@ class AlorOpenAPIV2Trader extends Trader {
             if (isBalance) {
               source[field] = payload;
             } else {
-              this.#findInstrumentInCacheAndPutToPayload(
+              void this.findInstrumentInCacheAndAssignToField(
                 data.symbol,
                 source,
                 field,
@@ -1133,7 +1023,7 @@ class AlorOpenAPIV2Trader extends Trader {
               price: data.price
             };
 
-            this.#findInstrumentInCacheAndPutToPayload(
+            void this.findInstrumentInCacheAndAssignToField(
               data.symbol,
               source,
               field,
@@ -1166,7 +1056,7 @@ class AlorOpenAPIV2Trader extends Trader {
               createdAt: data.date
             };
 
-            this.#findInstrumentInCacheAndPutToPayload(
+            void this.findInstrumentInCacheAndAssignToField(
               data.symbol,
               source,
               field,
@@ -1190,7 +1080,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   getBroker() {
-    return BROKERS.ALOR_OPENAPI_V2;
+    return this.document.broker.type;
   }
 
   async formatError(instrument, error) {
