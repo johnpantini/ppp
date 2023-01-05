@@ -113,7 +113,11 @@ export class TraderAlpacaV2PlusPage extends Page {
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
-        caps: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_TIME_AND_SALES],
+        caps: [
+          TRADER_CAPS.CAPS_ORDERBOOK,
+          TRADER_CAPS.CAPS_TIME_AND_SALES,
+          TRADER_CAPS.CAPS_MIC
+        ],
         version: 1,
         updatedAt: new Date()
       },

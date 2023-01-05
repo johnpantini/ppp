@@ -62,7 +62,8 @@ export const TRADER_CAPS = {
   CAPS_POSITIONS: 'caps-positions',
   CAPS_TIMELINE: 'caps-timeline',
   CAPS_LEVEL1: 'caps-level1',
-  CAPS_CHARTS: 'caps-charts'
+  CAPS_CHARTS: 'caps-charts',
+  CAPS_MIC: 'caps-mic'
 };
 
 export const TRADER_DATUM = {

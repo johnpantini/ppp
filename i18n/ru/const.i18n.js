@@ -46,7 +46,8 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_POSITIONS]: 'Портфель',
         [TRADER_CAPS.CAPS_TIMELINE]: 'Лента операций',
         [TRADER_CAPS.CAPS_LEVEL1]: 'Данные L1',
-        [TRADER_CAPS.CAPS_CHARTS]: 'Графики котировок'
+        [TRADER_CAPS.CAPS_CHARTS]: 'Графики котировок',
+        [TRADER_CAPS.CAPS_MIC]: 'Пулы ликвидности'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',

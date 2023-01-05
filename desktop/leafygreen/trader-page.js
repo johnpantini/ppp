@@ -95,6 +95,9 @@ export const traderPageTemplate = (context, definition) => html`
               <li>${(x) =>
                 x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIME_AND_SALES}`)}
               </li>
+              <li>${(x) =>
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MIC}`)}
+              </li>
             </ul>
           </div>
           <${'ppp-button'}
