@@ -633,7 +633,6 @@ export const widgetPageStyles = (context, definition) => css`
 
   .drawer-body {
     position: relative;
-    overflow-y: hidden;
     transition: height 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) 0s;
   }
 
