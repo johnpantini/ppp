@@ -4,7 +4,7 @@ import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
 import { html } from './template.js';
 import { validate } from './validate.js';
-import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
+import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from './const.js';
 import { Observable, observable } from './element/observation/observable.js';
 import { when } from './element/templating/when.js';
 import { repeat } from './element/templating/repeat.js';
@@ -56,6 +56,11 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
                 <th>Цена</th>
                 <th>Количество</th>
                 <th>Время</th>
+                <th style="display: ${(x) =>
+                  x.tradesTrader && x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                    ? 'table-cell'
+                    : 'none'}">MM
+                </th>
               </tr>
               </thead>
               <tbody @click="${(x, c) => x.handleTableClick(c)}">
@@ -139,11 +144,11 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
     this.tradesTrader = await ppp.getOrCreateTrader(this.document.tradesTrader);
     this.searchControl.trader = this.tradesTrader;
 
-    if (
-      this.tradesTrader &&
-      typeof this.tradesTrader.allTrades === 'function'
-    ) {
-      if (this.instrument) {
+    if (this.tradesTrader) {
+      if (
+        this.instrument &&
+        typeof this.tradesTrader.allTrades === 'function'
+      ) {
         try {
           this.trades = (
             await this.tradesTrader.allTrades({
@@ -223,7 +228,10 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
     super.instrumentChanged(oldValue, newValue);
 
     if (this.tradesTrader) {
-      if (this.instrument) {
+      if (
+        this.instrument &&
+        typeof this.tradesTrader.allTrades === 'function'
+      ) {
         this.trades = (
           await this.tradesTrader.allTrades({
             instrument: this.instrument,
