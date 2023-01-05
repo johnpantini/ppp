@@ -1,6 +1,6 @@
 import { Page } from './page.js';
 import { validate } from './validate.js';
-import { TRADERS } from './const.js';
+import { TRADER_CAPS, TRADERS } from './const.js';
 import { uuidv4 } from './ppp-crypto.js';
 import { maybeFetchError } from './fetch-error.js';
 import ppp from '../ppp.js';
@@ -103,10 +103,24 @@ export class TraderAlorOpenAPIV2Page extends Page {
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
         flatCommissionRate: this.flatCommissionRate.value
-          ? Math.abs(parseFloat(this.flatCommissionRate.value.replace(',', '.')))
+          ? Math.abs(
+              parseFloat(this.flatCommissionRate.value.replace(',', '.'))
+            )
           : void 0,
         useWebsocket: this.useWebsocket.checked,
         version: 1,
+        caps: [
+          TRADER_CAPS.CAPS_LIMIT_ORDERS,
+          TRADER_CAPS.CAPS_MARKET_ORDERS,
+          TRADER_CAPS.CAPS_STOP_ORDERS,
+          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+          TRADER_CAPS.CAPS_ORDERBOOK,
+          TRADER_CAPS.CAPS_TIME_AND_SALES,
+          TRADER_CAPS.CAPS_POSITIONS,
+          TRADER_CAPS.CAPS_TIMELINE,
+          TRADER_CAPS.CAPS_LEVEL1,
+          TRADER_CAPS.CAPS_CHARTS
+        ],
         updatedAt: new Date()
       },
       $setOnInsert: {
