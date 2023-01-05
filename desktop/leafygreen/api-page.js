@@ -95,24 +95,6 @@ export const apiPageTemplate = (context, definition) => html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
-          <img slot="logo" draggable="false" alt="Alpaca" style="height: 41px"
-               src="static/alpaca.svg"/>
-          <span slot="title">Alpaca Real-time Stock API</span>
-          <span slot="description">API Alpaca в реальном времени для акций. <a
-            target="_blank"
-            href="https://alpaca.markets/docs/api-references/market-data-api/stock-pricing-data/realtime/">Официальный ресурс</a>.</span>
-          <${'ppp-button'}
-            slot="action"
-            disabled
-            @click="${() =>
-              ppp.app.navigate({
-                page: `api-${APIS.ALPACA_REALTIME}`
-              })}"
-          >
-            Продолжить
-          </ppp-button>
-        </ppp-generic-card>
-        <ppp-generic-card>
           <img slot="logo" draggable="false" alt="Seatable" style="height: 45px"
                src="static/seatable.svg"/>
           <span slot="title">Seatable</span>
