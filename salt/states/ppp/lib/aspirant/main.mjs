@@ -280,7 +280,7 @@ export default class Aspirant {
               this.#workers.delete(_id);
               currentWorkerData.worker.off('exit', this.#onWorkerExit);
               currentWorkerData.worker.postMessage('cleanup');
-              await later(1000);
+              await later(100);
               await currentWorkerData.worker.terminate();
               currentWorkerData.worker.unref();
             }
