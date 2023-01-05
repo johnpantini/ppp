@@ -529,9 +529,16 @@ export async function widgetDefinition(definition = {}) {
                 .db('ppp')
                 .collection('traders')
                 .find({
-                  $or: [
-                    { removed: { $ne: true } },
-                    { _id: `[%#this.document.bookTraderId ?? ''%]` }
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.bookTraderId ?? ''%]` }
+                      ]
+                    }
                   ]
                 })
                 .sort({ updatedAt: -1 });
@@ -550,8 +557,8 @@ export async function widgetDefinition(definition = {}) {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер активных заявок</h5>
-          <p>Трейдер, который будет отображать собственные заявки (количество)
-            на ценовых уровнях.</p>
+          <p>Трейдер, который будет отображать собственные лимитные заявки
+            (количество) на ценовых уровнях.</p>
         </div>
         <ppp-collection-select
           ${ref('ordersTraderId')}
@@ -565,9 +572,16 @@ export async function widgetDefinition(definition = {}) {
                 .db('ppp')
                 .collection('traders')
                 .find({
-                  $or: [
-                    { removed: { $ne: true } },
-                    { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                      ]
+                    }
                   ]
                 })
                 .sort({ updatedAt: -1 });

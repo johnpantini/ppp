@@ -256,8 +256,8 @@ export async function widgetDefinition(definition = {}) {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер заявок</h5>
-          <p>Трейдер, который будет переставлять заявки.</p>
+          <h5>Трейдер лимитных заявок</h5>
+          <p>Трейдер, который будет переставлять лимитные заявки.</p>
         </div>
         <ppp-collection-select
           ${ref('ordersTraderId')}
@@ -271,9 +271,16 @@ export async function widgetDefinition(definition = {}) {
                 .db('ppp')
                 .collection('traders')
                 .find({
-                  $or: [
-                    { removed: { $ne: true } },
-                    { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                      ]
+                    }
                   ]
                 })
                 .sort({ updatedAt: -1 });

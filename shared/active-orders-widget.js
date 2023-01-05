@@ -364,9 +364,16 @@ export async function widgetDefinition(definition = {}) {
                 .db('ppp')
                 .collection('traders')
                 .find({
-                  $or: [
-                    { removed: { $ne: true } },
-                    { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                      ]
+                    }
                   ]
                 })
                 .sort({ updatedAt: -1 });

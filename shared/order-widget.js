@@ -838,10 +838,10 @@ export async function widgetDefinition(definition = {}) {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер заявок</h5>
+          <h5>Трейдер лимитных и рыночных заявок</h5>
           <p>
-            Трейдер, который будет выставлять заявки, а также фильтровать
-            инструменты в поиске.
+            Трейдер, который будет выставлять лимитные и рыночные заявки, а
+            также фильтровать инструменты в поиске.
           </p>
         </div>
         <ppp-collection-select
@@ -856,9 +856,21 @@ export async function widgetDefinition(definition = {}) {
                 .db('ppp')
                 .collection('traders')
                 .find({
-                  $or: [
-                    { removed: { $ne: true } },
-                    { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                  $and: [
+                    {
+                      caps: {
+                        $all: [
+                          `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
+                          `[%#(await import('./const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
+                        ]
+                      }
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                      ]
+                    }
                   ]
                 })
                 .sort({ updatedAt: -1 });
@@ -891,9 +903,16 @@ export async function widgetDefinition(definition = {}) {
                 .db('ppp')
                 .collection('traders')
                 .find({
-                  $or: [
-                    { removed: { $ne: true } },
-                    { _id: `[%#this.document.level1TraderId ?? ''%]` }
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.level1TraderId ?? ''%]` }
+                      ]
+                    }
                   ]
                 })
                 .sort({ updatedAt: -1 });
