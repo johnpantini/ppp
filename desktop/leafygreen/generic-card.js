@@ -7,7 +7,7 @@ export const genericCardStyles = (context, definition) => css`
   ${display('flex')}
   :host {
     flex-direction: column;
-    height: 220px;
+    min-height: 220px;
     padding: 22px 32px 22px;
     position: relative;
     width: 370px;
