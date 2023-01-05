@@ -139,7 +139,10 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
     this.tradesTrader = await ppp.getOrCreateTrader(this.document.tradesTrader);
     this.searchControl.trader = this.tradesTrader;
 
-    if (this.tradesTrader) {
+    if (
+      this.tradesTrader &&
+      typeof this.tradesTrader.allTrades === 'function'
+    ) {
       if (this.instrument) {
         try {
           this.trades = (
