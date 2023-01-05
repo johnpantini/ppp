@@ -2,6 +2,18 @@ import { getInstrumentPrecision } from '../intl.js';
 import { TRADER_DATUM } from '../const.js';
 
 export class Trader {
+  caps() {
+    return this.document.caps ?? [];
+  }
+
+  hasCap(cap) {
+    const caps = this.caps();
+
+    if (typeof cap === 'string') return caps.indexOf(cap) > -1;
+    else if (Array.isArray(cap)) return cap.every((c) => caps.indexOf(c) > -1);
+    else return false;
+  }
+
   valueForEmptyDatum(datum) {
     switch (datum) {
       case TRADER_DATUM.POSITION_SIZE:
