@@ -33,7 +33,7 @@ window.customElements.define(
         document.getElementById('ppp-loader').content.cloneNode(true)
       );
 
-      this.setText('Подожите, пока приложение загружается...');
+      this.setText('Приложение загружается, подождите...');
       globalThis.loader = this;
 
       this.input = this.shadowRoot.querySelector('input');
