@@ -8,6 +8,9 @@ export class WidgetWithInstrument extends Widget {
   @observable
   instrument;
 
+  /**
+   * @description Isolated widget ignores instrumentChanged() callback.
+   */
   isolated;
 
   connectedCallback() {
