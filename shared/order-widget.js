@@ -638,6 +638,12 @@ export class PppOrderWidget extends WidgetWithInstrument {
       if (this.orderTypeTabs.activeid !== 'limit') {
         this.orderTypeTabs.activeid = 'limit';
 
+        void this.applyChanges({
+          $set: {
+            'widgets.$.activeTab': 'limit'
+          }
+        });
+
         setTimeout(() => {
           this.price.focus();
 
