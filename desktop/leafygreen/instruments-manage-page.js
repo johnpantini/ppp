@@ -173,6 +173,20 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
               >
                 ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
               </ppp-checkbox>
+              <ppp-checkbox
+                name="${() => BROKERS.UTEX_AURORA}"
+                ?checked="${(x) =>
+                  x.document.broker?.indexOf(BROKERS.UTEX_AURORA) > -1}"
+              >
+                ${(x) => x.t(`$const.broker.${BROKERS.UTEX_AURORA}`)}
+              </ppp-checkbox>
+              <ppp-checkbox
+                name="${() => BROKERS.PSINA}"
+                ?checked="${(x) =>
+                  x.document.broker?.indexOf(BROKERS.PSINA) > -1}"
+              >
+                ${(x) => x.t(`$const.broker.${BROKERS.PSINA}`)}
+              </ppp-checkbox>
             </div>
           </div>
         </section>

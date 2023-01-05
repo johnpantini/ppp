@@ -40,14 +40,29 @@ export const SERVICE_STATE = {
 export const BROKERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
   TINKOFF_INVEST_API: 'tinkoff-invest-api',
-  UTEX_AURORA: 'utex-aurora'
+  UTEX_AURORA: 'utex-aurora',
+  PSINA: 'psina'
 };
 
 export const TRADERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
   TINKOFF_REST: 'tinkoff-rest',
   TINKOFF_GRPC_WEB: 'tinkoff-grpc-web',
+  ALPACA_V2_PLUS: 'alpaca-v2-plus',
   CUSTOM: 'custom'
+};
+
+export const TRADER_CAPS = {
+  CAPS_LIMIT_ORDERS: 'caps-limit-orders',
+  CAPS_MARKET_ORDERS: 'caps-marker-orders',
+  CAPS_STOP_ORDERS: 'caps-stop-orders',
+  CAPS_ACTIVE_ORDERS: 'caps-active-orders',
+  CAPS_ORDERBOOK: 'caps-orderbook',
+  CAPS_TIME_AND_SALES: 'caps-time-and-sales',
+  CAPS_POSITIONS: 'caps-positions',
+  CAPS_TIMELINE: 'caps-timeline',
+  CAPS_LEVEL1: 'caps-level1',
+  CAPS_CHARTS: 'caps-charts'
 };
 
 export const TRADER_DATUM = {

@@ -6,7 +6,8 @@ import {
   WIDGET_TYPES,
   SERVICE_STATE,
   TRADERS,
-  SERVER_STATE
+  SERVER_STATE,
+  TRADER_CAPS
 } from '../../shared/const.js';
 
 export default function (i18n) {
@@ -25,12 +26,27 @@ export default function (i18n) {
       broker: {
         [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
         [BROKERS.TINKOFF_INVEST_API]: 'Tinkoff Invest API',
-        [BROKERS.UTEX_AURORA]: 'UTEX Aurora'
+        [BROKERS.UTEX_AURORA]: 'UTEX Aurora',
+        [BROKERS.PSINA]: 'Psina'
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
+        [TRADERS.TINKOFF_REST]: 'Tinkoff REST',
+        [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.CUSTOM]: 'Произвольная реализация'
+      },
+      traderCaps: {
+        [TRADER_CAPS.CAPS_LIMIT_ORDERS]: 'Лимитные заявки',
+        [TRADER_CAPS.CAPS_MARKET_ORDERS]: 'Рыночные заявки',
+        [TRADER_CAPS.CAPS_STOP_ORDERS]: 'Отложенные заявки',
+        [TRADER_CAPS.CAPS_ACTIVE_ORDERS]: 'Активные заявки',
+        [TRADER_CAPS.CAPS_ORDERBOOK]: 'Книга заявок',
+        [TRADER_CAPS.CAPS_TIME_AND_SALES]: 'Лента всех сделок',
+        [TRADER_CAPS.CAPS_POSITIONS]: 'Портфель',
+        [TRADER_CAPS.CAPS_TIMELINE]: 'Лента операций',
+        [TRADER_CAPS.CAPS_LEVEL1]: 'Данные L1',
+        [TRADER_CAPS.CAPS_CHARTS]: 'Графики котировок'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',
