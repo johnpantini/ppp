@@ -349,6 +349,8 @@ export default new (class {
         {
           [TRADERS.ALOR_OPENAPI_V2]: `${this.rootUrl}/shared/traders/alor-openapi-v2.js`,
           [TRADERS.TINKOFF_GRPC_WEB]: `${this.rootUrl}/shared/traders/tinkoff-grpc-web.js`,
+          [TRADERS.TINKOFF_REST]: `${this.rootUrl}/shared/traders/tinkoff-rest.js`,
+          [TRADERS.ALPACA_V2_PLUS]: `${this.rootUrl}/shared/traders/alpaca-v2-plus.js`,
           [TRADERS.CUSTOM]: document.url
         }[document.type]
       );
