@@ -701,126 +701,130 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
-    const guid = this.#reqId();
+    if (this.connection.readyState === WebSocket.OPEN) {
+      const guid = this.#reqId();
 
-    this.#guids.set(guid, {
-      instrument,
-      refs
-    });
+      this.#guids.set(guid, {
+        instrument,
+        refs
+      });
 
-    refs.set(instrument._id, {
-      refCount: 1,
-      guid,
-      instrument
-    });
+      refs.set(instrument._id, {
+        refCount: 1,
+        guid,
+        instrument
+      });
 
-    if (refs === this.refs.quotes) {
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'QuotesSubscribe',
-          code: this.getSymbol(instrument),
-          exchange: this.document.exchange,
-          format: 'Simple',
-          token: this.#jwt,
-          guid
-        })
-      );
-    } else if (refs === this.refs.orderbook) {
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'OrderBookGetAndSubscribe',
-          code: this.getSymbol(instrument),
-          exchange: this.document.exchange,
-          depth: 20,
-          format: 'Simple',
-          token: this.#jwt,
-          guid
-        })
-      );
-    } else if (refs === this.refs.allTrades) {
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'AllTradesGetAndSubscribe',
-          code: this.getSymbol(instrument),
-          exchange: this.document.exchange,
-          depth: 0,
-          format: 'Simple',
-          token: this.#jwt,
-          guid
-        })
-      );
-    } else if (refs === this.refs.positions) {
-      this.positions.clear();
+      if (refs === this.refs.quotes) {
+        this.connection.send(
+          JSON.stringify({
+            opcode:   'QuotesSubscribe',
+            code:     this.getSymbol(instrument),
+            exchange: this.document.exchange,
+            format:   'Simple',
+            token:    this.#jwt,
+            guid
+          })
+        );
+      } else if (refs === this.refs.orderbook) {
+        this.connection.send(
+          JSON.stringify({
+            opcode:   'OrderBookGetAndSubscribe',
+            code:     this.getSymbol(instrument),
+            exchange: this.document.exchange,
+            depth:    20,
+            format:   'Simple',
+            token:    this.#jwt,
+            guid
+          })
+        );
+      } else if (refs === this.refs.allTrades) {
+        this.connection.send(
+          JSON.stringify({
+            opcode:   'AllTradesGetAndSubscribe',
+            code:     this.getSymbol(instrument),
+            exchange: this.document.exchange,
+            depth:    0,
+            format:   'Simple',
+            token:    this.#jwt,
+            guid
+          })
+        );
+      } else if (refs === this.refs.positions) {
+        this.positions.clear();
 
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'PositionsGetAndSubscribeV2',
-          portfolio: this.document.portfolio,
-          exchange: this.document.exchange,
-          format: 'Simple',
-          token: this.#jwt,
-          guid
-        })
-      );
-    } else if (refs === this.refs.orders) {
-      this.orders.clear();
+        this.connection.send(
+          JSON.stringify({
+            opcode:    'PositionsGetAndSubscribeV2',
+            portfolio: this.document.portfolio,
+            exchange:  this.document.exchange,
+            format:    'Simple',
+            token:     this.#jwt,
+            guid
+          })
+        );
+      } else if (refs === this.refs.orders) {
+        this.orders.clear();
 
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'OrdersGetAndSubscribeV2',
-          portfolio: this.document.portfolio,
-          exchange: this.document.exchange,
-          format: 'Simple',
-          token: this.#jwt,
-          guid
-        })
-      );
-    } else if (refs === this.refs.timeline) {
-      this.timeline.clear();
+        this.connection.send(
+          JSON.stringify({
+            opcode:    'OrdersGetAndSubscribeV2',
+            portfolio: this.document.portfolio,
+            exchange:  this.document.exchange,
+            format:    'Simple',
+            token:     this.#jwt,
+            guid
+          })
+        );
+      } else if (refs === this.refs.timeline) {
+        this.timeline.clear();
 
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'TradesGetAndSubscribeV2',
-          portfolio: this.document.portfolio,
-          exchange: this.document.exchange,
-          format: 'Simple',
-          token: this.#jwt,
-          guid
-        })
-      );
+        this.connection.send(
+          JSON.stringify({
+            opcode:    'TradesGetAndSubscribeV2',
+            portfolio: this.document.portfolio,
+            exchange:  this.document.exchange,
+            format:    'Simple',
+            token:     this.#jwt,
+            guid
+          })
+        );
+      }
     }
   }
 
   async removeLastRef(instrument, refs, ref) {
-    this.#guids.delete(ref.guid);
+    if (this.connection.readyState === WebSocket.OPEN) {
+      this.#guids.delete(ref.guid);
 
-    if (
-      refs === this.refs.quotes ||
-      refs === this.refs.orderbook ||
-      refs === this.refs.allTrades ||
-      refs === this.refs.positions ||
-      refs === this.refs.orders ||
-      refs === this.refs.timeline
-    ) {
-      this.connection.send(
-        JSON.stringify({
-          opcode: 'unsubscribe',
-          token: this.#jwt,
-          guid: ref.guid
-        })
-      );
-    }
+      if (
+        refs === this.refs.quotes ||
+        refs === this.refs.orderbook ||
+        refs === this.refs.allTrades ||
+        refs === this.refs.positions ||
+        refs === this.refs.orders ||
+        refs === this.refs.timeline
+      ) {
+        this.connection.send(
+          JSON.stringify({
+            opcode: 'unsubscribe',
+            token:  this.#jwt,
+            guid:   ref.guid
+          })
+        );
+      }
 
-    if (refs === this.refs.positions) {
-      this.positions.clear();
-    }
+      if (refs === this.refs.positions) {
+        this.positions.clear();
+      }
 
-    if (refs === this.refs.orders) {
-      this.orders.clear();
-    }
+      if (refs === this.refs.orders) {
+        this.orders.clear();
+      }
 
-    if (refs === this.refs.timeline) {
-      this.timeline.clear();
+      if (refs === this.refs.timeline) {
+        this.timeline.clear();
+      }
     }
   }
 
