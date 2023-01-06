@@ -242,7 +242,7 @@ export class Trader {
       const ref = refs.get(instrument._id);
 
       if (typeof ref === 'undefined') {
-        await this.addFirstRef?.(instrument, refs, ref);
+        await this.addFirstRef?.(instrument, refs);
       } else {
         ref.refCount++;
       }
