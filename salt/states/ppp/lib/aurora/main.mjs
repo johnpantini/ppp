@@ -117,10 +117,45 @@ const UTEXExchangeToAlpacaExchange = (exchangeId) => {
 let appListenSocket;
 const wsMap = new Map();
 
+const redisCommand = async (command, args = []) => {
+  if (process.env.ASPIRANT_ID && process.env.PPP_WORKER_ID) {
+    return await (
+      await fetch(
+        new URL('redis', process.env.SERVICE_MACHINE_URL).toString(),
+        {
+          method: 'POST',
+          cache: 'no-cache',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            options: {
+              host: process.env.REDIS_HOST,
+              port: +process.env.REDIS_PORT,
+              tls: !!process.env.REDIS_TLS
+                ? {
+                    servername: process.env.REDIS_HOST
+                  }
+                : void 0,
+              username: process.env.REDIS_USERNAME,
+              db: +process.env.REDIS_DATABASE,
+              password: process.env.REDIS_PASSWORD
+            },
+            command,
+            args
+          })
+        }
+      )
+    ).text();
+  }
+
+  return null;
+};
+
 uWS
   .App({})
   .ws('/*', {
-    maxBackpressure: 10 * 1024 * 1024,
+    maxBackpressure: 20 * 1024 * 1024,
     open: (ws) => {
       wsMap.set(ws, Date.now());
       ws.send(JSON.stringify([{ T: 'success', msg: 'connected' }]));
@@ -158,110 +193,89 @@ uWS
               ])
             );
           } else {
-            let savedAccessToken;
+            let savedAccessToken = await redisCommand('get', [
+              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`
+            ]);
+            let savedRefreshToken = await redisCommand('get', [
+              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`
+            ]);
             let tokensResponse;
 
-            if (process.env.ASPIRANT_ID && process.env.PPP_WORKER_ID) {
-              savedAccessToken = await (
-                await fetch(
-                  new URL('redis', process.env.SERVICE_MACHINE_URL).toString(),
+            if (isJWTTokenExpired(savedAccessToken)) {
+              if (isJWTTokenExpired(savedRefreshToken)) {
+                const tokensRequest = await fetch(
+                  process.env.UTEX_AUTH_URL ??
+                    'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
                   {
                     method: 'POST',
-                    cache: 'no-cache',
                     headers: {
+                      Origin: 'https://utex.io',
+                      Referer: 'https://utex.io/',
+                      'User-Agent':
+                        process.env.UTEX_USER_AGENT ??
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
                       'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                      options: {
-                        host: process.env.REDIS_HOST,
-                        port: +process.env.REDIS_PORT,
-                        tls: !!process.env.REDIS_TLS
-                          ? {
-                              servername: process.env.REDIS_HOST
-                            }
-                          : void 0,
-                        username: process.env.REDIS_USERNAME,
-                        db: +process.env.REDIS_DATABASE,
-                        password: process.env.REDIS_PASSWORD
-                      },
-                      command: 'get',
-                      args: [
-                        `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`
-                      ]
+                      realm: 'aurora',
+                      clientId: 'utexweb',
+                      loginOrEmail: payload.key,
+                      password: payload.secret,
+                      product: 'UTEX',
+                      locale: 'ru'
                     })
                   }
-                )
-              ).text();
-            }
+                );
 
-            if (isJWTTokenExpired(savedAccessToken)) {
-              const tokensRequest = await fetch(
-                process.env.UTEX_AUTH_URL ??
-                  'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
-                {
-                  method: 'POST',
-                  headers: {
-                    Origin: 'https://utex.io',
-                    Referer: 'https://utex.io/',
-                    'User-Agent':
-                      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    realm: 'aurora',
-                    clientId: 'utexweb',
-                    loginOrEmail: payload.key,
-                    password: payload.secret,
-                    product: 'UTEX',
-                    locale: 'ru'
-                  })
-                }
-              );
+                tokensResponse = await tokensRequest.json();
+              } else {
+                // Refresh token is OK - try to refresh access token.
+                const refreshAuthRequest = await fetch(
+                  process.env.UTEX_REFRESH_AUTH_URL ??
+                    'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.refreshAuthorization',
+                  {
+                    method: 'POST',
+                    headers: {
+                      Origin: 'https://utex.io',
+                      Referer: 'https://utex.io/',
+                      'User-Agent':
+                        process.env.UTEX_USER_AGENT ??
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36',
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      realm: 'aurora',
+                      clientId: 'utexweb',
+                      refreshToken: savedRefreshToken
+                    })
+                  }
+                );
 
-              tokensResponse = await tokensRequest.json();
+                tokensResponse = await refreshAuthRequest.json();
 
-              if (tokensResponse.tokens?.accessToken) {
-                if (process.env.ASPIRANT_ID && process.env.PPP_WORKER_ID) {
-                  savedAccessToken = tokensResponse.tokens.accessToken;
-
-                  await fetch(
-                    new URL(
-                      'redis',
-                      process.env.SERVICE_MACHINE_URL
-                    ).toString(),
-                    {
-                      method: 'POST',
-                      cache: 'no-cache',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({
-                        options: {
-                          host: process.env.REDIS_HOST,
-                          port: +process.env.REDIS_PORT,
-                          tls: !!process.env.REDIS_TLS
-                            ? {
-                                servername: process.env.REDIS_HOST
-                              }
-                            : void 0,
-                          username: process.env.REDIS_USERNAME,
-                          db: +process.env.REDIS_DATABASE,
-                          password: process.env.REDIS_PASSWORD
-                        },
-                        command: 'set',
-                        args: [
-                          `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
-                          savedAccessToken
-                        ]
-                      })
-                    }
-                  );
+                if (tokensResponse.accessToken && tokensResponse.refreshToken) {
+                  tokensResponse.tokens = {
+                    accessToken: tokensResponse.accessToken,
+                    refreshToken: tokensResponse.refreshToken
+                  };
                 }
               }
+
+              savedAccessToken = tokensResponse.tokens.accessToken;
+              savedRefreshToken = tokensResponse.tokens.refreshToken;
+
+              await redisCommand('mset', [
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
+                savedAccessToken,
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`,
+                savedRefreshToken
+              ]);
             } else {
+              // Access token is OK.
               tokensResponse = {
                 tokens: {
-                  accessToken: savedAccessToken
+                  accessToken: savedAccessToken,
+                  refreshToken: savedRefreshToken
                 }
               };
             }
