@@ -41,7 +41,7 @@ class AlorOpenAPIV2Trader extends Trader {
     allTrades: new Map()
   };
 
-  // Key: instrumentId; Value: { instrument, refCount }
+  // Key: instrumentId; Value: { instrument, refCount, guid }
   refs = {
     quotes: new Map(),
     orders: new Map(),
@@ -646,7 +646,6 @@ class AlorOpenAPIV2Trader extends Trader {
   async subscribeField({ source, field, datum }) {
     await this.syncAccessToken();
     await this.#connectWebSocket();
-    await super.subscribeField({ source, field, datum });
 
     if (
       datum === TRADER_DATUM.POSITION ||
@@ -656,7 +655,9 @@ class AlorOpenAPIV2Trader extends Trader {
       await this.waitForInstrumentCache();
     }
 
-    // Broadcast data from instrument-agnostic global datums.
+    await super.subscribeField({ source, field, datum });
+
+    // Broadcast data for instrument-agnostic global datum subscriptions.
     switch (datum) {
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
@@ -791,37 +792,35 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async removeLastRef(instrument, refs, ref) {
-    if (this.connection.readyState === WebSocket.OPEN) {
-      this.#guids.delete(ref.guid);
+    this.#guids.delete(ref.guid);
 
-      if (
-        refs === this.refs.quotes ||
-        refs === this.refs.orderbook ||
-        refs === this.refs.allTrades ||
-        refs === this.refs.positions ||
-        refs === this.refs.orders ||
-        refs === this.refs.timeline
-      ) {
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'unsubscribe',
-            token: this.#jwt,
-            guid: ref.guid
-          })
-        );
-      }
+    if (
+      refs === this.refs.quotes ||
+      refs === this.refs.orderbook ||
+      refs === this.refs.allTrades ||
+      refs === this.refs.positions ||
+      refs === this.refs.orders ||
+      refs === this.refs.timeline
+    ) {
+      this.connection.send(
+        JSON.stringify({
+          opcode: 'unsubscribe',
+          token: this.#jwt,
+          guid: ref.guid
+        })
+      );
+    }
 
-      if (refs === this.refs.positions) {
-        this.positions.clear();
-      }
+    if (refs === this.refs.positions) {
+      this.positions.clear();
+    }
 
-      if (refs === this.refs.orders) {
-        this.orders.clear();
-      }
+    if (refs === this.refs.orders) {
+      this.orders.clear();
+    }
 
-      if (refs === this.refs.timeline) {
-        this.timeline.clear();
-      }
+    if (refs === this.refs.timeline) {
+      this.timeline.clear();
     }
   }
 
