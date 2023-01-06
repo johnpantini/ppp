@@ -52,46 +52,61 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
           html`
             <table class="trades-table">
               <thead>
-              <tr>
-                <th>Цена</th>
-                <th>Количество</th>
-                <th>Время</th>
-                <th style="display: ${(x) =>
-                  x.tradesTrader && x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
-                    ? 'table-cell'
-                    : 'none'}">MM
-                </th>
-              </tr>
+                <tr>
+                  <th>Цена</th>
+                  <th>Количество</th>
+                  <th>Время</th>
+                  <th
+                    style="display: ${(x) =>
+                      x.tradesTrader &&
+                      x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                        ? 'table-cell'
+                        : 'none'}"
+                  >
+                    MM
+                  </th>
+                </tr>
               </thead>
               <tbody @click="${(x, c) => x.handleTableClick(c)}">
-              ${repeat(
-                (x) => x.trades ?? [],
-                html`
-                  <tr
-                    class="price-line"
-                    side="${(x) => x.side}"
-                    price="${(x) => x.price}"
-                  >
-                    <td>
-                      <div class="cell">
-                        ${(x, c) =>
-                          formatPriceWithoutCurrency(
-                            x.price,
-                            c.parent.instrument
-                          )}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        ${(x) => formatQuantity(x.volume ?? 0)}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">${(x) => formatDate(x.timestamp)}</div>
-                    </td>
-                  </tr>
-                `
-              )}
+                ${repeat(
+                  (x) => x.trades ?? [],
+                  html`
+                    <tr
+                      class="price-line"
+                      side="${(x) => x.side}"
+                      price="${(x) => x.price}"
+                    >
+                      <td>
+                        <div class="cell">
+                          ${(x, c) =>
+                            formatPriceWithoutCurrency(
+                              x.price,
+                              c.parent.instrument
+                            )}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          ${(x) => formatQuantity(x.volume ?? 0)}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          ${(x) => formatDate(x.timestamp)}
+                        </div>
+                      </td>
+                      <td
+                        style="display: ${(x, c) =>
+                          c.parent.tradesTrader &&
+                          c.parent.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                            ? 'table-cell'
+                            : 'none'}"
+                      >
+                        <div class="cell">${(x) => x.pool}</div>
+                      </td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
             ${when(
@@ -103,9 +118,6 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
                 </div>
               `
             )}
-            <${'ppp-widget-notifications-area'}
-              ${ref('notificationsArea')}
-            ></ppp-widget-notifications-area>
           `
         )}
         ${when(
@@ -117,6 +129,9 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
             </div>
           `
         )}
+        <${'ppp-widget-notifications-area'}
+          ${ref('notificationsArea')}
+        ></ppp-widget-notifications-area>
       </div>
     </div>
   </template>
@@ -170,12 +185,19 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
         }
       }
 
-      await this.tradesTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
-        }
-      });
+      try {
+        await this.tradesTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            print: TRADER_DATUM.MARKET_PRINT
+          }
+        });
+      } catch (e) {
+        return this.notificationsArea.error({
+          title: 'Лента всех сделок',
+          text: 'Не удалось подключиться к источнику данных.'
+        });
+      }
     }
   }
 
