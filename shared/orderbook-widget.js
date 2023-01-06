@@ -52,92 +52,92 @@ export const orderbookWidgetTemplate = (context, definition) => html`
           html`
             <table class="orderbook-table">
               <thead>
-                <tr>
-                  <th colspan="2">
-                    <div class="bid-title">
-                      ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
-                    </div>
-                    <div class="spread">${(x) => x.spreadString}</div>
-                    <div class="ask-title">
-                      ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
-                    </div>
-                  </th>
-                </tr>
+              <tr>
+                <th colspan="2">
+                  <div class="bid-title">
+                    ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
+                  </div>
+                  <div class="spread">${(x) => x.spreadString}</div>
+                  <div class="ask-title">
+                    ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
+                  </div>
+                </th>
+              </tr>
               </thead>
               <tbody @click="${(x, c) => x.handleTableClick(c)}">
-                ${repeat(
-                  (x) => x.quoteLines,
-                  html`
-                    <tr>
-                      <td
-                        style="${(x, c) =>
-                          `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
-                            x.bid?.volume
-                          )}%, transparent ${c.parent.calcGradientPercentage(
-                            x.bid?.volume
-                          )}%, transparent 100% )`}"
+              ${repeat(
+                (x) => x.quoteLines,
+                html`
+                  <tr>
+                    <td
+                      style="${(x, c) =>
+                        `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
+                          x.bid?.volume
+                        )}%, transparent ${c.parent.calcGradientPercentage(
+                          x.bid?.volume
+                        )}%, transparent 100% )`}"
+                    >
+                      <div
+                        class="quote-line bid-line"
+                        price="${(x) => x.bid?.price}"
                       >
-                        <div
-                          class="quote-line bid-line"
-                          price="${(x) => x.bid?.price}"
-                        >
-                          <div class="volume">${(x) => x.bid?.volume}</div>
-                          ${when(
-                            (x) => x.bid?.my > 0,
-                            html`
-                              <div class="my-order">
-                                <span>
-                                  <span>${(x) => x.bid.my}</span>
-                                </span>
-                              </div>
-                            `
-                          )}
-                          <div class="spacer"></div>
-                          <div class="price">
-                            ${(x, c) =>
-                              formatPriceWithoutCurrency(
-                                x.bid?.price,
-                                c.parent.instrument
-                              )}
-                          </div>
+                        <div class="volume">${(x) => x.bid?.volume}</div>
+                        ${when(
+                          (x) => x.bid?.my > 0,
+                          html`
+                            <div class="my-order">
+                              <span>
+                                <span>${(x) => x.bid.my}</span>
+                              </span>
+                            </div>
+                          `
+                        )}
+                        <div class="spacer"></div>
+                        <div class="price">
+                          ${(x, c) =>
+                            formatPriceWithoutCurrency(
+                              x.bid?.price,
+                              c.parent.instrument
+                            )}
                         </div>
-                      </td>
-                      <td
-                        style="${(x, c) =>
-                          `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
-                            x.ask?.volume
-                          )}%, transparent ${c.parent.calcGradientPercentage(
-                            x.ask?.volume
-                          )}%, transparent 100% )`}"
+                      </div>
+                    </td>
+                    <td
+                      style="${(x, c) =>
+                        `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
+                          x.ask?.volume
+                        )}%, transparent ${c.parent.calcGradientPercentage(
+                          x.ask?.volume
+                        )}%, transparent 100% )`}"
+                    >
+                      <div
+                        class="quote-line ask-line"
+                        price="${(x) => x.ask?.price}"
                       >
-                        <div
-                          class="quote-line ask-line"
-                          price="${(x) => x.ask?.price}"
-                        >
-                          <div class="volume">${(x) => x.ask?.volume}</div>
-                          ${when(
-                            (x) => x.ask?.my > 0,
-                            html`
-                              <div class="my-order">
-                                <span>
-                                  <span>${(x) => x.ask.my}</span>
-                                </span>
-                              </div>
-                            `
-                          )}
-                          <div class="spacer"></div>
-                          <div class="price">
-                            ${(x, c) =>
-                              formatPriceWithoutCurrency(
-                                x.ask?.price,
-                                c.parent.instrument
-                              )}
-                          </div>
+                        <div class="volume">${(x) => x.ask?.volume}</div>
+                        ${when(
+                          (x) => x.ask?.my > 0,
+                          html`
+                            <div class="my-order">
+                              <span>
+                                <span>${(x) => x.ask.my}</span>
+                              </span>
+                            </div>
+                          `
+                        )}
+                        <div class="spacer"></div>
+                        <div class="price">
+                          ${(x, c) =>
+                            formatPriceWithoutCurrency(
+                              x.ask?.price,
+                              c.parent.instrument
+                            )}
                         </div>
-                      </td>
-                    </tr>
-                  `
-                )}
+                      </div>
+                    </td>
+                  </tr>
+                `
+              )}
               </tbody>
             </table>
             ${when(
@@ -160,6 +160,9 @@ export const orderbookWidgetTemplate = (context, definition) => html`
             </div>
           `
         )}
+        <${'ppp-widget-notifications-area'}
+          ${ref('notificationsArea')}
+        ></ppp-widget-notifications-area>
       </div>
     </div>
   </template>
@@ -210,12 +213,19 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
     this.searchControl.trader = this.bookTrader;
 
     if (this.bookTrader) {
-      await this.bookTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          orderbook: TRADER_DATUM.ORDERBOOK
-        }
-      });
+      try {
+        await this.bookTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            orderbook: TRADER_DATUM.ORDERBOOK
+          }
+        });
+      } catch (e) {
+        return this.notificationsArea.error({
+          title: 'Книга заявок',
+          text: 'Не удалось подключиться к источнику данных.'
+        });
+      }
     }
 
     if (this.ordersTrader) {
