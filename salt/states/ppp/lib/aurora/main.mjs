@@ -261,15 +261,17 @@ uWS
                 }
               }
 
-              savedAccessToken = tokensResponse.tokens.accessToken;
-              savedRefreshToken = tokensResponse.tokens.refreshToken;
+              if (tokensResponse.tokens) {
+                savedAccessToken = tokensResponse.tokens.accessToken;
+                savedRefreshToken = tokensResponse.tokens.refreshToken;
 
-              await redisCommand('mset', [
-                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
-                savedAccessToken,
-                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`,
-                savedRefreshToken
-              ]);
+                await redisCommand('mset', [
+                  `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
+                  savedAccessToken,
+                  `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`,
+                  savedRefreshToken
+                ]);
+              }
             } else {
               // Access token is OK.
               tokensResponse = {
