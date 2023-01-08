@@ -17,5 +17,7 @@ RUN mkdir -p /var/run/tailscale
 RUN mkdir -p /var/cache/tailscale
 RUN mkdir -p /var/lib/tailscale
 
+RUN chmod +x /app/start.sh
+
 USER root
 CMD ["/app/start.sh"]
