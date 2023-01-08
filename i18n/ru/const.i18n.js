@@ -32,7 +32,6 @@ export default function (i18n) {
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
-        [TRADERS.TINKOFF_REST]: 'Tinkoff REST',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.CUSTOM]: 'Произвольная реализация'
       },

@@ -29,7 +29,7 @@ export const brokerPageTemplate = (context, definition) => html`
           <img slot="logo" draggable="false" alt="Alor" style="height: 40px"
                src="static/alor.svg"/>
           <span slot="title">Alor Open API V2</span>
-          <span slot="description">Торговля через Alor Open API. <a
+          <span slot="description">Торговля и рыночные данные через Alor Open API. <a
             target="_blank"
             rel="noopener"
             href="https://alor.dev/docs">Перейти к документации</a>.</span>
@@ -44,11 +44,30 @@ export const brokerPageTemplate = (context, definition) => html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Tinkoff Invest API"
+               style="height: 40px"
+               src="static/tinkoff.svg"/>
+          <span slot="title">Tinkoff Invest API</span>
+          <span slot="description">Торговля и рыночные данные через Tinkoff Invest API. <a
+            target="_blank"
+            rel="noopener"
+            href="https://tinkoff.github.io/investAPI">Перейти к документации</a>.</span>
+          <${'ppp-button'}
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.TINKOFF_INVEST_API}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
           <img slot="logo" draggable="false" alt="UTEX Aurora"
                style="height: 32px"
                src="static/utex.svg"/>
           <span slot="title">UTEX Aurora</span>
-          <span slot="description">Рыночные данные терминала UTEX Aurora. <a
+          <span slot="description">Рыночные данные от UTEX Aurora. <a
             target="_blank"
             rel="noopener"
             href="https://utex.io/aurora">Официальный ресурс</a>.</span>
@@ -57,6 +76,26 @@ export const brokerPageTemplate = (context, definition) => html`
             @click="${() =>
               ppp.app.navigate({
                 page: `broker-${BROKERS.UTEX_AURORA}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Psina"
+               style="height: 90%; opacity: .95"
+               src="static/psina.png"/>
+          <span slot="title">Psina</span>
+          <span slot="description">Рыночные данные проекта Psina. <a
+            target="_blank"
+            rel="noopener"
+            href="https://t.me/pantini_group">Официальная группа</a>.</span>
+          <${'ppp-button'}
+            disabled
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.PSINA}`
               })}"
           >
             Продолжить
