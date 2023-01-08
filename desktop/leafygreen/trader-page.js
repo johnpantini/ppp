@@ -95,8 +95,7 @@ export const traderPageTemplate = (context, definition) => html`
               <li>${(x) =>
                 x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIME_AND_SALES}`)}
               </li>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MIC}`)}
+              <li>${(x) => x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MIC}`)}
               </li>
             </ul>
           </div>
@@ -105,50 +104,6 @@ export const traderPageTemplate = (context, definition) => html`
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.ALPACA_V2_PLUS}`
-              })}"
-          >
-            Продолжить
-          </ppp-button>
-        </ppp-generic-card>
-        <ppp-generic-card>
-          <img slot="logo" draggable="false" alt="Tinkoff" style="height: 40px"
-               src="static/tinkoff.svg"/>
-          <div slot="title">
-            Tinkoff Invest API
-            <${'ppp-badge'} appearance="blue">
-              REST
-            </ppp-badge>
-          </div>
-          <span
-            slot="description">Торговля через брокерский профиль Tinkoff Invest API.</span>
-          <div slot="description" class="caps-list">
-            <ul>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
-              </li>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
-              </li>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
-              </li>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
-              </li>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
-              </li>
-              <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
-              </li>
-            </ul>
-          </div>
-          <${'ppp-button'}
-            disabled
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `trader-${TRADERS.TINKOFF_REST}`
               })}"
           >
             Продолжить
@@ -174,16 +129,26 @@ export const traderPageTemplate = (context, definition) => html`
                 x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
               </li>
               <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
               </li>
               <li>${(x) =>
-                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
+              </li>
+              <li>${(x) => x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+              </li>
+              <li>${(x) =>
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ORDERBOOK}`)}
+              </li>
+              <li>${(x) =>
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIME_AND_SALES}`)}
               </li>
               <li>${(x) =>
                 x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
               </li>
               <li>${(x) =>
                 x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
+              </li>
+              <li>${(x) => x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
               </li>
             </ul>
           </div>
