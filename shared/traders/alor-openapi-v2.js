@@ -42,6 +42,7 @@ class AlorOpenAPIV2Trader extends Trader {
   };
 
   // Key: instrumentId; Value: { instrument, refCount, guid }
+  // Value contains lastData fort quote & orderbook
   refs = {
     quotes: new Map(),
     orders: new Map(),
