@@ -28,6 +28,9 @@ class AlpacaV2PlusTrader extends Trader {
 
   connection;
 
+  // Key: instrumentId; Value: { bids: [], asks: [] }
+  orderbookMontage = new Map();
+
   getSymbol(instrument = {}) {
     let symbol = instrument.symbol;
 
@@ -93,37 +96,52 @@ class AlpacaV2PlusTrader extends Trader {
           this.connection.onerror = () => this.connection.close();
 
           this.connection.onmessage = ({ data }) => {
-            const [payload] = JSON.parse(data);
-
-            if (payload.msg === 'connected') {
-              this.connection.send(
-                JSON.stringify({
-                  action: 'auth',
-                  key: this.document.broker.login,
-                  secret: this.document.broker.password
-                })
-              );
-            } else if (payload.msg === 'authenticated') {
-              // 1. All trades
-              for (const [instrumentId, { instrument, refCount }] of this.refs
-                .allTrades) {
-                if (refCount > 0) {
-                  this.connection.send(
-                    JSON.stringify({
-                      action: 'subscribe',
-                      trades: [this.getSymbol(instrument)]
-                    })
-                  );
+            for (const payload of JSON.parse(data) ?? []) {
+              if (payload.msg === 'connected') {
+                this.connection.send(
+                  JSON.stringify({
+                    action: 'auth',
+                    key: this.document.broker.login,
+                    secret: this.document.broker.password
+                  })
+                );
+              } else if (payload.msg === 'authenticated') {
+                // 1. All trades
+                for (const [instrumentId, { instrument, refCount }] of this.refs
+                  .allTrades) {
+                  if (refCount > 0) {
+                    this.connection.send(
+                      JSON.stringify({
+                        action: 'subscribe',
+                        trades: [this.getSymbol(instrument)]
+                      })
+                    );
+                  }
                 }
+
+                // 2. Orderbook
+                for (const [instrumentId, { instrument, refCount }] of this.refs
+                  .orderbook) {
+                  if (refCount > 0) {
+                    this.connection.send(
+                      JSON.stringify({
+                        action: 'subscribe',
+                        quotes: [this.getSymbol(instrument)]
+                      })
+                    );
+                  }
+                }
+
+                resolve(this.connection);
+              } else if (payload.T === 't') {
+                return this.onTradeMessage({ data: payload });
+              } else if (payload.T === 'q') {
+                return this.onOrderbookMessage({ data: payload });
+              } else if (payload.T === 'error') {
+                console.error(payload);
+
+                reject(payload);
               }
-
-              resolve(this.connection);
-            } else if (payload.T === 't') {
-              return this.onTradeMessage({ data: payload });
-            } else if (payload.T === 'error') {
-              console.error(payload);
-
-              reject(payload);
             }
           };
         }
@@ -169,6 +187,33 @@ class AlpacaV2PlusTrader extends Trader {
     }
   }
 
+  async onOrderbookMessage({ data }) {
+    if (data) {
+      const instrument = await this.findInstrumentInCache(data.S);
+
+      if (instrument) {
+        for (const [source, fields] of this.subs.orderbook) {
+          if (
+            source.instrument?.symbol &&
+            this.getSymbol(instrument) === this.getSymbol(source.instrument)
+          ) {
+            // TODO - save last montage
+            const ref = this.refs.orderbook.get(source.instrument?._id);
+
+            for (const { field, datum } of fields) {
+              switch (datum) {
+                case TRADER_DATUM.ORDERBOOK:
+                  // TODO - make a montage
+
+                  break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   subsAndRefs(datum) {
     return {
       [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
@@ -183,31 +228,47 @@ class AlpacaV2PlusTrader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
-    refs.set(instrument._id, {
-      refCount: 1,
-      instrument
-    });
+    if (this.connection.readyState === WebSocket.OPEN) {
+      refs.set(instrument._id, {
+        refCount: 1,
+        instrument
+      });
 
-    if (refs === this.refs.allTrades) {
-      this.connection.send(
-        JSON.stringify({
-          action: 'subscribe',
-          trades: [this.getSymbol(instrument)]
-        })
-      );
-    } else if (refs === this.refs.orderbook) {
+      if (refs === this.refs.allTrades) {
+        this.connection.send(
+          JSON.stringify({
+            action: 'subscribe',
+            trades: [this.getSymbol(instrument)]
+          })
+        );
+      } else if (refs === this.refs.orderbook) {
+        this.connection.send(
+          JSON.stringify({
+            action: 'subscribe',
+            quotes: [this.getSymbol(instrument)]
+          })
+        );
+      }
     }
   }
 
   async removeLastRef(instrument, refs) {
-    if (refs === this.refs.allTrades) {
-      this.connection.send(
-        JSON.stringify({
-          action: 'unsubscribe',
-          trades: [this.getSymbol(instrument)]
-        })
-      );
-    } else if (refs === this.refs.orderbook) {
+    if (this.connection.readyState === WebSocket.OPEN) {
+      if (refs === this.refs.allTrades) {
+        this.connection.send(
+          JSON.stringify({
+            action: 'unsubscribe',
+            trades: [this.getSymbol(instrument)]
+          })
+        );
+      } else if (refs === this.refs.orderbook) {
+        this.connection.send(
+          JSON.stringify({
+            action: 'unsubscribe',
+            trades: [this.getSymbol(instrument)]
+          })
+        );
+      }
     }
   }
 
@@ -216,6 +277,9 @@ class AlpacaV2PlusTrader extends Trader {
 
     if (newValue?._id) {
       // Handle no real subscription case for orderbook.
+      await this.onOrderbookMessage({
+        data: this.refs.orderbook.get(newValue._id)?.lastData
+      });
     }
   }
 
