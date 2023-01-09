@@ -282,10 +282,24 @@ uWS
               };
             }
 
+            if (
+              !tokensResponse.tokens ||
+              /NoActiveSessionException/i.test(tokensResponse?.type)
+            ) {
+              await redisCommand('del', [
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`
+              ]);
+            }
+
             // Must be checked after await
             if (ws.closed) return;
 
-            if (/InvalidCredentialsException/i.test(tokensResponse?.type)) {
+            if (
+              /InvalidCredentialsException|NoActiveSessionException/i.test(
+                tokensResponse?.type
+              )
+            ) {
               return ws.send(
                 JSON.stringify([{ T: 'error', code: 402, msg: 'auth failed' }])
               );
