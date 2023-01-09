@@ -42,7 +42,7 @@ class AlorOpenAPIV2Trader extends Trader {
   };
 
   // Key: instrumentId; Value: { instrument, refCount, guid }
-  // Value contains lastData fort quote & orderbook
+  // Value contains lastQuotesData for quotes & lastOrderbookData for orderbook
   refs = {
     quotes: new Map(),
     orders: new Map(),
@@ -719,35 +719,35 @@ class AlorOpenAPIV2Trader extends Trader {
       if (refs === this.refs.quotes) {
         this.connection.send(
           JSON.stringify({
-            opcode:   'QuotesSubscribe',
-            code:     this.getSymbol(instrument),
+            opcode: 'QuotesSubscribe',
+            code: this.getSymbol(instrument),
             exchange: this.document.exchange,
-            format:   'Simple',
-            token:    this.#jwt,
+            format: 'Simple',
+            token: this.#jwt,
             guid
           })
         );
       } else if (refs === this.refs.orderbook) {
         this.connection.send(
           JSON.stringify({
-            opcode:   'OrderBookGetAndSubscribe',
-            code:     this.getSymbol(instrument),
+            opcode: 'OrderBookGetAndSubscribe',
+            code: this.getSymbol(instrument),
             exchange: this.document.exchange,
-            depth:    20,
-            format:   'Simple',
-            token:    this.#jwt,
+            depth: 20,
+            format: 'Simple',
+            token: this.#jwt,
             guid
           })
         );
       } else if (refs === this.refs.allTrades) {
         this.connection.send(
           JSON.stringify({
-            opcode:   'AllTradesGetAndSubscribe',
-            code:     this.getSymbol(instrument),
+            opcode: 'AllTradesGetAndSubscribe',
+            code: this.getSymbol(instrument),
             exchange: this.document.exchange,
-            depth:    0,
-            format:   'Simple',
-            token:    this.#jwt,
+            depth: 0,
+            format: 'Simple',
+            token: this.#jwt,
             guid
           })
         );
@@ -756,11 +756,11 @@ class AlorOpenAPIV2Trader extends Trader {
 
         this.connection.send(
           JSON.stringify({
-            opcode:    'PositionsGetAndSubscribeV2',
+            opcode: 'PositionsGetAndSubscribeV2',
             portfolio: this.document.portfolio,
-            exchange:  this.document.exchange,
-            format:    'Simple',
-            token:     this.#jwt,
+            exchange: this.document.exchange,
+            format: 'Simple',
+            token: this.#jwt,
             guid
           })
         );
@@ -769,11 +769,11 @@ class AlorOpenAPIV2Trader extends Trader {
 
         this.connection.send(
           JSON.stringify({
-            opcode:    'OrdersGetAndSubscribeV2',
+            opcode: 'OrdersGetAndSubscribeV2',
             portfolio: this.document.portfolio,
-            exchange:  this.document.exchange,
-            format:    'Simple',
-            token:     this.#jwt,
+            exchange: this.document.exchange,
+            format: 'Simple',
+            token: this.#jwt,
             guid
           })
         );
@@ -782,11 +782,11 @@ class AlorOpenAPIV2Trader extends Trader {
 
         this.connection.send(
           JSON.stringify({
-            opcode:    'TradesGetAndSubscribeV2',
+            opcode: 'TradesGetAndSubscribeV2',
             portfolio: this.document.portfolio,
-            exchange:  this.document.exchange,
-            format:    'Simple',
-            token:     this.#jwt,
+            exchange: this.document.exchange,
+            format: 'Simple',
+            token: this.#jwt,
             guid
           })
         );
@@ -809,8 +809,8 @@ class AlorOpenAPIV2Trader extends Trader {
         this.connection.send(
           JSON.stringify({
             opcode: 'unsubscribe',
-            token:  this.#jwt,
-            guid:   ref.guid
+            token: this.#jwt,
+            guid: ref.guid
           })
         );
       }
@@ -839,11 +839,11 @@ class AlorOpenAPIV2Trader extends Trader {
       // Time and sales uses allTrades REST API call,
       // so no special handling needed.
       this.onQuotesMessage({
-        data: this.refs.quotes.get(newValue._id)?.lastData
+        data: this.refs.quotes.get(newValue._id)?.lastQuotesData
       });
 
       this.onOrderbookMessage({
-        data: this.refs.orderbook.get(newValue._id)?.lastData
+        data: this.refs.orderbook.get(newValue._id)?.lastOrderbookData
       });
     }
 
@@ -867,7 +867,7 @@ class AlorOpenAPIV2Trader extends Trader {
           if (instrument._id === source.instrument?._id) {
             const ref = this.refs.orderbook.get(source.instrument?._id);
 
-            if (ref) ref.lastData = data;
+            if (ref) ref.lastOrderbookData = data;
 
             for (const { field, datum } of fields) {
               switch (datum) {
@@ -895,7 +895,7 @@ class AlorOpenAPIV2Trader extends Trader {
           if (instrument._id === source.instrument?._id) {
             const ref = this.refs.quotes.get(source.instrument?._id);
 
-            if (ref) ref.lastData = data;
+            if (ref) ref.lastQuotesData = data;
 
             for (const { field, datum } of fields) {
               switch (datum) {
