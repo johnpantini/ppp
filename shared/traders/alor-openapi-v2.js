@@ -867,17 +867,19 @@ class AlorOpenAPIV2Trader extends Trader {
           if (instrument._id === source.instrument?._id) {
             const ref = this.refs.orderbook.get(source.instrument?._id);
 
-            if (ref) ref.lastOrderbookData = data;
+            if (ref)  {
+              ref.lastOrderbookData = data;
 
-            for (const { field, datum } of fields) {
-              switch (datum) {
-                case TRADER_DATUM.ORDERBOOK:
-                  source[field] = {
-                    bids: data.bids,
-                    asks: data.asks
-                  };
+              for (const { field, datum } of fields) {
+                switch (datum) {
+                  case TRADER_DATUM.ORDERBOOK:
+                    source[field] = {
+                      bids: data.bids,
+                      asks: data.asks
+                    };
 
-                  break;
+                    break;
+                }
               }
             }
           }
