@@ -21,15 +21,13 @@ class AlpacaV2PlusTrader extends Trader {
   };
 
   // Key: instrumentId; Value: { instrument, refCount }
+  // Value contains lastOrderbookMontage for orderbook
   refs = {
     orderbook: new Map(),
     allTrades: new Map()
   };
 
   connection;
-
-  // Key: instrumentId; Value: { bids: [], asks: [] }
-  orderbookMontage = new Map();
 
   getSymbol(instrument = {}) {
     let symbol = instrument.symbol;
@@ -197,15 +195,62 @@ class AlpacaV2PlusTrader extends Trader {
             source.instrument?.symbol &&
             this.getSymbol(instrument) === this.getSymbol(source.instrument)
           ) {
-            // TODO - save last montage
             const ref = this.refs.orderbook.get(source.instrument?._id);
 
-            for (const { field, datum } of fields) {
-              switch (datum) {
-                case TRADER_DATUM.ORDERBOOK:
-                  // TODO - make a montage
+            if (ref) {
+              if (typeof ref.lastOrderBookMontage === 'undefined') {
+                ref.lastOrderBookMap = {
+                  bids: new Map(),
+                  asks: new Map()
+                };
+              }
 
-                  break;
+              const lastOrderBookMap = ref.lastOrderBookMap;
+
+              lastOrderBookMap.bids.set(data.bx, {
+                price: data.bp,
+                volume: data.bs * 100,
+                time: data.t,
+                condition: data.c?.join?.(' '),
+                timestamp: new Date(data.t).valueOf(),
+                pool: this.alpacaExchangeToUTEXExchange(data.bx)
+              });
+
+              lastOrderBookMap.asks.set(data.ax, {
+                price: data.ap,
+                volume: data.as * 100,
+                time: data.t,
+                condition: data.c?.join?.(' '),
+                timestamp: new Date(data.t).valueOf(),
+                pool: this.alpacaExchangeToUTEXExchange(data.ax)
+              });
+
+              ref.lastOrderBookMontage = {
+                bids: [],
+                asks: []
+              };
+
+              const lastOrderBookMontage = ref.lastOrderBookMontage;
+
+              lastOrderBookMontage.bids = [...lastOrderBookMap.bids.values()]
+                .filter((b) => b.price > 0 && b.volume > 0)
+                .sort((a, b) => {
+                  return b.price - a.price || b.volume - a.volume;
+                });
+
+              lastOrderBookMontage.asks = [...lastOrderBookMap.asks.values()]
+                .filter((a) => a.price > 0 && a.volume > 0)
+                .sort((a, b) => {
+                  return a.price - b.price || b.volume - a.volume;
+                });
+
+              for (const { field, datum } of fields) {
+                switch (datum) {
+                  case TRADER_DATUM.ORDERBOOK:
+                    source[field] = lastOrderBookMontage;
+
+                    break;
+                }
               }
             }
           }
@@ -277,9 +322,23 @@ class AlpacaV2PlusTrader extends Trader {
 
     if (newValue?._id) {
       // Handle no real subscription case for orderbook.
-      await this.onOrderbookMessage({
-        data: this.refs.orderbook.get(newValue._id)?.lastData
-      });
+      for (const [source, fields] of this.subs.orderbook) {
+        if (
+          source.instrument?.symbol &&
+          this.getSymbol(newValue) === this.getSymbol(source.instrument)
+        ) {
+          for (const { field, datum } of fields) {
+            switch (datum) {
+              case TRADER_DATUM.ORDERBOOK:
+                source[field] = this.refs.orderbook.get(
+                  newValue._id
+                )?.lastOrderBookMontage;
+
+                break;
+            }
+          }
+        }
+      }
     }
   }
 
