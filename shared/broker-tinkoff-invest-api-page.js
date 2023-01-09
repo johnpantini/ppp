@@ -22,7 +22,7 @@ export class BrokerTinkoffInvestApiPage extends Page {
         '*': {
           metadata: new Metadata({
             Authorization: `Bearer ${this.apiToken.value.trim()}`,
-            'x-app-name': 'ppp'
+            'x-app-name': `${ppp.keyVault.getKey('github-login')}.ppp`
           })
         }
       });
