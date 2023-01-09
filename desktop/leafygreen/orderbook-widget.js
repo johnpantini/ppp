@@ -111,6 +111,8 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
 
     .volume {
       color: rgb(90, 118, 143);
+      display: flex;
+      gap: 0 4px;
     }
 
     .my-order {
@@ -118,11 +120,11 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
     }
 
     .ask-line .my-order {
-      margin-left: 4px;
+      margin-left: 1px;
     }
 
     .bid-line .my-order {
-      margin-right: 4px;
+      margin-right: 1px;
     }
 
     .my-order > span {
@@ -152,9 +154,26 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       user-select: none;
     }
 
-    .price {
+    .price,
+    .pool {
       margin-right: 8px;
       color: rgb(90, 118, 143);
+      width: 33.33%;
+    }
+
+    .volume {
+      width: 33.33%;
+      max-width: 33.33%;
+    }
+
+    .ask-line .price,
+    .ask-line .pool,
+    .bid-line .volume {
+      text-align: right;
+    }
+
+    .bid-line .volume {
+      justify-content: flex-end;
     }
 
     ${widgetStyles}

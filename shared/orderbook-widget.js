@@ -4,7 +4,7 @@ import { WidgetWithInstrument } from './widget-with-instrument.js';
 import { ref } from './element/templating/ref.js';
 import { html, requireComponent } from './template.js';
 import { validate } from './validate.js';
-import { TRADER_DATUM, WIDGET_TYPES } from './const.js';
+import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from './const.js';
 import { Observable, observable } from './element/observation/observable.js';
 import { when } from './element/templating/when.js';
 import { repeat } from './element/templating/repeat.js';
@@ -52,92 +52,108 @@ export const orderbookWidgetTemplate = (context, definition) => html`
           html`
             <table class="orderbook-table">
               <thead>
-              <tr>
-                <th colspan="2">
-                  <div class="bid-title">
-                    ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
-                  </div>
-                  <div class="spread">${(x) => x.spreadString}</div>
-                  <div class="ask-title">
-                    ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
-                  </div>
-                </th>
-              </tr>
+                <tr>
+                  <th colspan="2">
+                    <div class="bid-title">
+                      ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
+                    </div>
+                    <div class="spread">${(x) => x.spreadString}</div>
+                    <div class="ask-title">
+                      ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
+                    </div>
+                  </th>
+                </tr>
               </thead>
               <tbody @click="${(x, c) => x.handleTableClick(c)}">
-              ${repeat(
-                (x) => x.quoteLines,
-                html`
-                  <tr>
-                    <td
-                      style="${(x, c) =>
-                        `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
-                          x.bid?.volume
-                        )}%, transparent ${c.parent.calcGradientPercentage(
-                          x.bid?.volume
-                        )}%, transparent 100% )`}"
-                    >
-                      <div
-                        class="quote-line bid-line"
-                        price="${(x) => x.bid?.price}"
+                ${repeat(
+                  (x) => x.quoteLines,
+                  html`
+                    <tr>
+                      <td
+                        style="${(x, c) =>
+                          `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
+                            x.bid?.volume
+                          )}%, transparent ${c.parent.calcGradientPercentage(
+                            x.bid?.volume
+                          )}%, transparent 100% )`}"
                       >
-                        <div class="volume">${(x) => x.bid?.volume}</div>
-                        ${when(
-                          (x) => x.bid?.my > 0,
-                          html`
-                            <div class="my-order">
-                              <span>
-                                <span>${(x) => x.bid.my}</span>
-                              </span>
-                            </div>
-                          `
-                        )}
-                        <div class="spacer"></div>
-                        <div class="price">
-                          ${(x, c) =>
-                            formatPriceWithoutCurrency(
-                              x.bid?.price,
-                              c.parent.instrument
+                        <div
+                          class="quote-line bid-line"
+                          price="${(x) => x.bid?.price}"
+                        >
+                          <div class="volume">
+                            ${when(
+                              (x) => x.bid?.my > 0,
+                              html`
+                                <div class="my-order">
+                                  <span>
+                                    <span>${(x) => x.bid.my}</span>
+                                  </span>
+                                </div>
+                              `
                             )}
+                            ${(x) => x.bid?.volume}
+                          </div>
+                          <div class="spacer"></div>
+                          <div class="price">
+                            ${(x, c) =>
+                              formatPriceWithoutCurrency(
+                                x.bid?.price,
+                                c.parent.instrument
+                              )}
+                          </div>
+                          ${when(
+                            (x) => x.bid?.pool,
+                            html`
+                              <div class="pool">${(x) => x.bid?.pool}</div>
+                            `
+                          )}
                         </div>
-                      </div>
-                    </td>
-                    <td
-                      style="${(x, c) =>
-                        `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
-                          x.ask?.volume
-                        )}%, transparent ${c.parent.calcGradientPercentage(
-                          x.ask?.volume
-                        )}%, transparent 100% )`}"
-                    >
-                      <div
-                        class="quote-line ask-line"
-                        price="${(x) => x.ask?.price}"
+                      </td>
+                      <td
+                        style="${(x, c) =>
+                          `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
+                            x.ask?.volume
+                          )}%, transparent ${c.parent.calcGradientPercentage(
+                            x.ask?.volume
+                          )}%, transparent 100% )`}"
                       >
-                        <div class="volume">${(x) => x.ask?.volume}</div>
-                        ${when(
-                          (x) => x.ask?.my > 0,
-                          html`
-                            <div class="my-order">
-                              <span>
-                                <span>${(x) => x.ask.my}</span>
-                              </span>
-                            </div>
-                          `
-                        )}
-                        <div class="spacer"></div>
-                        <div class="price">
-                          ${(x, c) =>
-                            formatPriceWithoutCurrency(
-                              x.ask?.price,
-                              c.parent.instrument
+                        <div
+                          class="quote-line ask-line"
+                          price="${(x) => x.ask?.price}"
+                        >
+                          <div class="volume">
+                            ${(x) => x.ask?.volume}
+                            ${when(
+                              (x) => x.ask?.my > 0,
+                              html`
+                                <div class="my-order">
+                                  <span>
+                                    <span>${(x) => x.ask.my}</span>
+                                  </span>
+                                </div>
+                              `
                             )}
+                          </div>
+                          <div class="spacer"></div>
+                          <div class="price">
+                            ${(x, c) =>
+                              formatPriceWithoutCurrency(
+                                x.ask?.price,
+                                c.parent.instrument
+                              )}
+                          </div>
+                          ${when(
+                            (x) => x.ask?.pool,
+                            html`
+                              <div class="pool">${(x) => x.ask?.pool}</div>
+                            `
+                          )}
                         </div>
-                      </div>
-                    </td>
-                  </tr>
-                `
-              )}
+                      </td>
+                    </tr>
+                  `
+                )}
               </tbody>
             </table>
             ${when(
@@ -208,9 +224,23 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
     super.connectedCallback();
 
     this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
-    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
+
+    if (this.document.ordersTrader) {
+      this.ordersTrader = await ppp.getOrCreateTrader(
+        this.document.ordersTrader
+      );
+    }
 
     this.searchControl.trader = this.bookTrader;
+
+    if (this.ordersTrader) {
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
+    }
 
     if (this.bookTrader) {
       try {
@@ -226,15 +256,6 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
           text: 'Не удалось подключиться к источнику данных.'
         });
       }
-    }
-
-    if (this.ordersTrader) {
-      await this.ordersTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
-        }
-      });
     }
   }
 
@@ -370,7 +391,14 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
 
             break;
           } else if (price > bookPriceAtThisLevel) {
-            orderbook.bids.splice(i, 0, { price, volume, my: volume });
+            orderbook.bids.splice(i, 0, {
+              price,
+              volume,
+              my: volume,
+              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+                ? this.bookTrader?.document?.exchange ?? 'SPBX'
+                : void 0
+            });
 
             insertAtTheEnd = false;
 
@@ -379,7 +407,14 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         }
 
         if (insertAtTheEnd) {
-          orderbook.bids.push({ price, volume, my: volume });
+          orderbook.bids.push({
+            price,
+            volume,
+            my: volume,
+            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+              ? this.bookTrader?.document?.exchange ?? 'SPBX'
+              : void 0
+          });
         }
       }
 
@@ -400,7 +435,14 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
 
             break;
           } else if (price < bookPriceAtThisLevel) {
-            orderbook.asks.splice(i, 0, { price, volume, my: volume });
+            orderbook.asks.splice(i, 0, {
+              price,
+              volume,
+              my: volume,
+              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+                ? this.bookTrader?.document?.exchange ?? 'SPBX'
+                : void 0
+            });
 
             insertAtTheEnd = false;
 
@@ -409,7 +451,14 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         }
 
         if (insertAtTheEnd) {
-          orderbook.asks.push({ price, volume, my: volume });
+          orderbook.asks.push({
+            price,
+            volume,
+            my: volume,
+            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+              ? this.bookTrader?.document?.exchange ?? 'SPBX'
+              : void 0
+          });
         }
       }
 
@@ -481,7 +530,6 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
 
   async validate() {
     await validate(this.container.bookTraderId);
-    await validate(this.container.ordersTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 50,
@@ -572,6 +620,7 @@ export async function widgetDefinition(definition = {}) {
         </div>
         <ppp-collection-select
           ${ref('ordersTraderId')}
+          placeholder="Опционально, нажмите для выбора"
           value="${(x) => x.document.ordersTraderId}"
           :context="${(x) => x}"
           :preloaded="${(x) => x.document.ordersTrader ?? ''}"
