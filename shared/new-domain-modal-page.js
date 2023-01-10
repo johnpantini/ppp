@@ -34,7 +34,9 @@ export class NewDomainModalPage extends Page {
         'sudo salt-call --local state.sls epel ;',
         'sudo firewall-cmd --permanent --add-service=http ;',
         'sudo firewall-cmd --reload ;',
-        'sudo dnf -y install python-cryptography python-cffi python-pycparser certbot ;',
+        'sudo pip install --force-reinstall --target /usr/lib/python3.9/site-packages cryptography==37.0.2 pyopenssl==22.0.0 ;',
+        'sudo pip install --force-reinstall --target /usr/lib64/python3.9/site-packages cryptography==37.0.2 pyopenssl==22.0.0 ;',
+        'sudo dnf -y install python3-cryptography python3-pyOpenSSL python-cffi python-pycparser certbot ;',
         domains
           .map(
             (d) =>
