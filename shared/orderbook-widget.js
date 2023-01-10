@@ -487,10 +487,14 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         const ask = orderbook.asks[i] ?? null;
 
         if (bid) {
+          bid.pool = this.normalizePool(bid.pool);
+
           this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
         }
 
         if (ask) {
+          ask.pool = this.normalizePool(ask.pool);
+
           this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
         }
 
@@ -502,6 +506,69 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
 
       Observable.notify(this, 'quoteLines');
     } else this.spreadString = '—';
+  }
+
+  normalizePool(pool) {
+    if (!pool || !this.document.useMicsForPools) return pool;
+
+    const mic = {
+      PA: 'ARCA',
+      DA: 'EDGA',
+      DX: 'EDGX',
+      SPBX: 'SPBX',
+      // Y
+      BT: 'BYX',
+      // M
+      MW: 'CHX',
+      // NYSE American (AMEX)
+      A: 'AMEX',
+      // NASDAQ OMX BX
+      B: 'BX',
+      // National Stock Exchange
+      C: 'NSX',
+      // FINRA ADF
+      D: 'XADF',
+      // Market Independent
+      E: 'MIND',
+      // MIAX Pearl, LLC (MIAX)
+      H: 'HPE',
+      // International Securities Exchange
+      I: 'XISX',
+      // Cboe EDGA
+      J: 'EDGA',
+      // Cboe EDGX
+      K: 'EDGX',
+      // Long-Term Stock Exchange (LTSE)
+      L: 'LTE',
+      // NYSE Chicago, Inc.
+      M: 'CHX',
+      // New York Stock Exchange
+      N: 'NYSE',
+      // NYSE Arca
+      P: 'ARCA',
+      // NASDAQ OMX
+      Q: 'XNAS',
+      // NASDAQ Small Cap
+      S: 'XNCM',
+      // NASDAQ Int
+      T: 'XNIM',
+      // Members Exchange, MEMX LLC (MEMX)
+      U: 'MMX',
+      // Investor's Exchange LLC (IEX)
+      V: 'IEX',
+      // CBOE
+      W: 'CBOE',
+      // Nasdaq PHLX LLC
+      X: 'PHO',
+      // Cboe BYX Exchange
+      Y: 'BYX',
+      // Cboe BZX Exchange
+      Z: 'BZX'
+    }[pool];
+
+    if (!mic) return pool;
+
+    return mic;
   }
 
   calcGradientPercentage(volume) {
@@ -543,7 +610,8 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         bookTraderId: this.container.bookTraderId.value,
         ordersTraderId: this.container.ordersTraderId.value,
         depth: Math.abs(this.container.depth.value),
-        displayMode: this.container.displayMode.value
+        displayMode: this.container.displayMode.value,
+        useMicsForPools: this.container.useMicsForPools.checked
       }
     };
   }
@@ -692,6 +760,17 @@ export async function widgetDefinition(definition = {}) {
             ${ref('depth')}
           ></ppp-text-field>
         </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Параметры отображения</h5>
+        </div>
+        <${'ppp-checkbox'}
+          ?checked="${(x) => x.document.useMicsForPools}"
+          ${ref('useMicsForPools')}
+        >
+          Отображать пулы ликвидности кодами MIC
+        </${'ppp-checkbox'}>
       </div>
     `
   };

@@ -113,6 +113,7 @@ export class TraderAlpacaV2PlusPage extends Page {
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
+        useLots: this.useLots.checked,
         caps: [
           TRADER_CAPS.CAPS_ORDERBOOK,
           TRADER_CAPS.CAPS_TIME_AND_SALES,

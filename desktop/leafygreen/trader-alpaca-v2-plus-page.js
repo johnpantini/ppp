@@ -116,6 +116,19 @@ export const traderAlpacaV2PlusPageTemplate = (context, definition) => html`
             ></ppp-text-field>
           </div>
         </section>
+        <section>
+          <div class="label-group">
+            <h5>Параметры рыночных данных</h5>
+          </div>
+          <div class="input-group">
+            <${'ppp-checkbox'}
+              ?checked="${(x) => x.document.useLots}"
+              ${ref('useLots')}
+            >
+              Передавать объёмы акций в книге заявок в лотах
+            </ppp-checkbox>
+          </div>
+        </section>
       </ppp-page>
     </form>
     </div>
