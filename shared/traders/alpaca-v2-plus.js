@@ -206,10 +206,11 @@ class AlpacaV2PlusTrader extends Trader {
               }
 
               const lastOrderBookMap = ref.lastOrderBookMap;
+              const coeff = this.document.useLots ? 1 : 100;
 
               lastOrderBookMap.bids.set(data.bx, {
                 price: data.bp,
-                volume: data.bs * 100,
+                volume: data.bs * coeff,
                 time: data.t,
                 condition: data.c?.join?.(' '),
                 timestamp: new Date(data.t).valueOf(),
@@ -218,7 +219,7 @@ class AlpacaV2PlusTrader extends Trader {
 
               lastOrderBookMap.asks.set(data.ax, {
                 price: data.ap,
-                volume: data.as * 100,
+                volume: data.as * coeff,
                 time: data.t,
                 condition: data.c?.join?.(' '),
                 timestamp: new Date(data.t).valueOf(),
