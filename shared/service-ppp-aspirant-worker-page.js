@@ -174,6 +174,18 @@ export class ServicePppAspirantWorkerPage extends Page {
           raiseException: true
         });
     } else if (aspirantService.type === SERVICES.SYSTEMD_PPP_ASPIRANT) {
+      // Fresh entity
+      if (!this.document.server) {
+        this.document.server = await ppp.user.functions.findOne(
+          {
+            collection: 'servers'
+          },
+          {
+            _id: aspirantService.serverId
+          }
+        );
+      }
+
       await this.executeSSHCommandsSilently({
         server: this.document.server,
         commands: 'hostname --all-ip-addresses | grep -oP 100.[0-9.]+ &&'
