@@ -13,6 +13,7 @@ Group=ppp
 {% if pillar['domain'] is defined and pillar['workingDirectory'] is defined %}
 ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['domain'] }}/fullchain.pem {{ pillar['workingDirectory'] }}/fullchain.pem
 ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['domain'] }}/privkey.pem {{ pillar['workingDirectory'] }}/privkey.pem
+ExecStartPre=+/bin/chmod 644 {{ pillar['workingDirectory'] }}/privkey.pem
 {% endif %}
 {% if pillar['execStart'] is defined %}
 ExecStart={{ pillar['execStart'] }}
