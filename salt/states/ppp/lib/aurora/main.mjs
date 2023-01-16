@@ -1,3 +1,4 @@
+// @version 2
 import { isMainThread, parentPort } from 'node:worker_threads';
 import path from 'path';
 
@@ -469,7 +470,7 @@ uWS
     res
       .writeStatus('200 OK')
       .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-      .end('pong');
+      .end('pong', true);
   })
   .listen(+PORT, (listenSocket) => {
     if (listenSocket) {
