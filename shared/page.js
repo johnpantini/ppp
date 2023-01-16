@@ -845,6 +845,9 @@ export const actionPageMountPoint = html`
  * @mixin
  */
 export class PageWithService {
+  @observable
+  actualVersion;
+
   async restartService() {
     this.beginOperation('Перезапуск сервиса');
 
