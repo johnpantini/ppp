@@ -1,4 +1,7 @@
+// ==PPPScript==
 // @version 2
+// ==/PPPScript==
+
 import { isMainThread, parentPort } from 'node:worker_threads';
 import path from 'path';
 
