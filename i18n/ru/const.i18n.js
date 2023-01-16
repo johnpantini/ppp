@@ -7,7 +7,8 @@ import {
   SERVICE_STATE,
   TRADERS,
   SERVER_STATE,
-  TRADER_CAPS
+  TRADER_CAPS,
+  VERSIONING_STATUS
 } from '../../shared/const.js';
 
 export default function (i18n) {
@@ -71,6 +72,11 @@ export default function (i18n) {
         [SERVICES.SYSTEMD_PPP_ASPIRANT]: 'PPP Aspirant (systemd)',
         [SERVICES.DEPLOYED_PPP_ASPIRANT]: 'PPP Aspirant (по адресу)',
         [SERVICES.PPP_ASPIRANT_WORKER]: 'PPP Aspirant Worker'
+      },
+      versioningStatus: {
+        [VERSIONING_STATUS.OLD]: 'Требуется обновление',
+        [VERSIONING_STATUS.OFF]: 'Версия не отслеживается',
+        [VERSIONING_STATUS.OK]: 'Последняя версия'
       },
       widget: {
         [WIDGET_TYPES.ORDER]: 'Заявка',

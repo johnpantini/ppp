@@ -1,3 +1,9 @@
+export const VERSIONING_STATUS = {
+  OK: 'ok',
+  OLD: 'old',
+  OFF: 'off'
+};
+
 export const SERVER_TYPES = {
   PASSWORD: 'password',
   KEY: 'key'
