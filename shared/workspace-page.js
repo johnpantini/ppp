@@ -220,6 +220,8 @@ export class WorkspacePage extends Page {
                     environmentCodeSecret: 0,
                     sourceCode: 0,
                     parsingCode: 0,
+                    versioningUrl: 0,
+                    useVersioning: 0,
                     tableSchema: 0,
                     insertTriggerCode: 0,
                     deleteTriggerCode: 0,
