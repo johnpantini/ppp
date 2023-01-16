@@ -217,6 +217,7 @@ export class WorkspacePage extends Page {
                     instrumentsCode: 0,
                     symbolsCode: 0,
                     environmentCode: 0,
+                    environmentCodeSecret: 0,
                     sourceCode: 0,
                     parsingCode: 0,
                     tableSchema: 0,

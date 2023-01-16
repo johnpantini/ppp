@@ -13,6 +13,7 @@ export class ServicePppAspirantWorkerPage extends Page {
     await validate(this.name);
     await validate(this.aspirantServiceId);
     await validate(this.environmentCode);
+    await validate(this.environmentCodeSecret);
 
     try {
       new Function(
@@ -24,6 +25,21 @@ export class ServicePppAspirantWorkerPage extends Page {
       )();
     } catch (e) {
       invalidate(this.environmentCode, {
+        errorMessage: 'Код содержит ошибки',
+        raiseException: true
+      });
+    }
+
+    try {
+      new Function(
+        `return ${await new Tmpl().render(
+          this.page.view,
+          this.environmentCodeSecret.value,
+          {}
+        )}`
+      )();
+    } catch (e) {
+      invalidate(this.environmentCodeSecret, {
         errorMessage: 'Код содержит ошибки',
         raiseException: true
       });
@@ -94,6 +110,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           name: this.name.value.trim(),
           aspirantServiceId: this.aspirantServiceId.value,
           environmentCode: this.environmentCode.value,
+          environmentCodeSecret: this.environmentCodeSecret.value,
           sourceCode: this.sourceCode.value,
           version: 1,
           state: SERVICE_STATE.FAILED,
@@ -271,10 +288,13 @@ export class ServicePppAspirantWorkerPage extends Page {
       body: JSON.stringify({
         _id: this.document._id,
         env: new Function(
-          `return ${await new Tmpl().render(
+          `return Object.assign({}, ${await new Tmpl().render(
             this.page.view,
             this.document.environmentCode
-          )}`
+          )}, ${await new Tmpl().render(
+            this.page.view,
+            this.document.environmentCodeSecret
+          )});`
         )(),
         source: encodeURIComponent(
           await new Tmpl().render(this.page.view, this.document.sourceCode)

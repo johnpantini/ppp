@@ -59,11 +59,10 @@ export const servicePppAspirantWorkerPageTemplate = (
               :preloaded="${(x) => x.document.aspirantService ?? ''}"
               :query="${() => {
                 return (context) => {
-                  return context.services
-                    .get('mongodb-atlas')
-                    .db('ppp')
-                    .collection('services')
-                    .find({
+                  return context.services.get('mongodb-atlas').
+                    db('ppp').
+                    collection('services').
+                    find({
                       $and: [
                         {
                           $or: [
@@ -87,8 +86,8 @@ export const servicePppAspirantWorkerPageTemplate = (
                           ]
                         }
                       ]
-                    })
-                    .sort({ updatedAt: -1 });
+                    }).
+                    sort({ updatedAt: -1 });
                 };
               }}"
               :transform="${() => ppp.decryptDocumentsTransformation()}"
@@ -112,6 +111,7 @@ export const servicePppAspirantWorkerPageTemplate = (
           </div>
           <div class="input-group">
             <${'ppp-codeflask'}
+              style="height: 150px"
               :code="${(x) =>
                 x.document.environmentCode ?? exampleEnvironmentCode}"
               ${ref('environmentCode')}
@@ -127,10 +127,35 @@ export const servicePppAspirantWorkerPageTemplate = (
           </div>
         </section>
         <section>
+          <div class="label-group">
+            <h5>Шифруемые переменные окружения</h5>
+            <p>Объект JavaScript с переменными окружения, которые будет переданы
+              в Worker в исходном виде, но сохранены в базе данных в
+              зашифрованном.</p>
+          </div>
+          <div class="input-group">
+            <${'ppp-codeflask'}
+              style="height: 150px"
+              :code="${(x) =>
+                x.document.environmentCodeSecret ?? '{}'}"
+              ${ref('environmentCodeSecret')}
+            ></ppp-codeflask>
+            <ppp-button
+              class="margin-top"
+              @click="${(x) =>
+                x.environmentCodeSecret.updateCode('{}')}"
+              appearance="primary"
+            >
+              Восстановить значение по умолчанию
+            </ppp-button>
+          </div>
+        </section>
+        <section>
           <div class="label-group full">
             <h5>Реализация сервиса</h5>
             <p>Код для платформы Node.js с реализацией сервиса</p>
             <${'ppp-codeflask'}
+              style="height: 512px"
               :code="${(x) => x.document.sourceCode ?? exampleSourceCode}"
               ${ref('sourceCode')}
             ></ppp-codeflask>
