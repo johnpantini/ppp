@@ -35,6 +35,14 @@ export const redBadgeStyles = (context, definition) => css`
   }
 `;
 
+export const yellowBadgeStyles = (context, definition) => css`
+  :host([appearance='yellow']) {
+    border: 1px solid rgb(255, 236, 158);
+    background-color: rgb(254, 247, 219);
+    color: rgb(148, 79, 1);
+  }
+`;
+
 export const blueBadgeStyles = (context, definition) => css`
   :host([appearance='blue']) {
     border: 1px solid rgb(195, 231, 254);
@@ -64,6 +72,7 @@ export const badgeStyles = (context, definition) =>
     appearanceBehavior('lightgray', lightgrayBadgeStyles(context, definition)),
     appearanceBehavior('green', greenBadgeStyles(context, definition)),
     appearanceBehavior('red', redBadgeStyles(context, definition)),
+    appearanceBehavior('yellow', yellowBadgeStyles(context, definition)),
     appearanceBehavior('blue', blueBadgeStyles(context, definition))
   );
 
