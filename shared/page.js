@@ -706,6 +706,10 @@ export class PageWithDocuments {
         this.documents = [];
       }
 
+      if (typeof this.page.view.transform === 'function') {
+        this.documents = await this.page.view.transform();
+      }
+
       this.$emit('ready');
       this.ready = true;
       Observable.notify(this.page, 'view');
