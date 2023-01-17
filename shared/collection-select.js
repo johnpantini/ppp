@@ -156,7 +156,7 @@ export class CollectionSelect extends FoundationElement {
             await new Tmpl().render(this.context, this.#code, {})
           );
         } else {
-          queryResult = await this.#code;
+          queryResult = await this.#code(this);
         }
 
         if (typeof this.transform === 'function')
@@ -187,6 +187,8 @@ export class CollectionSelect extends FoundationElement {
       if (typeof next === 'object') {
         const formatted = this.#formatter().call(this, next);
 
+        if (typeof formatted.value === 'undefined') return;
+
         if (!this.options.find((o) => o.value === formatted.value)) {
           this.options.push(formatted);
 
@@ -210,7 +212,7 @@ export class CollectionSelect extends FoundationElement {
 
     this.control.addEventListener('change', this.#onControlChange.bind(this));
 
-    if (this.query.constructor.name === 'Promise') {
+    if (this.query.constructor.name === 'AsyncFunction') {
       this.#code = this.query;
     } else if (typeof this.query === 'function') {
       this.#code = this.query.toString().split(/\r?\n/);
