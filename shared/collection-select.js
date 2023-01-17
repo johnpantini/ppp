@@ -149,8 +149,15 @@ export class CollectionSelect extends FoundationElement {
       this.loading = true;
 
       try {
-        const code = await new Tmpl().render(this.context, this.#code, {});
-        let queryResult = await ppp.user.functions.eval(code);
+        let queryResult;
+
+        if (typeof this.#code === 'string') {
+          queryResult = await ppp.user.functions.eval(
+            await new Tmpl().render(this.context, this.#code, {})
+          );
+        } else {
+          queryResult = await this.#code;
+        }
 
         if (typeof this.transform === 'function')
           queryResult = await this.transform.call(this.context, queryResult);
@@ -203,7 +210,9 @@ export class CollectionSelect extends FoundationElement {
 
     this.control.addEventListener('change', this.#onControlChange.bind(this));
 
-    if (typeof this.query === 'function') {
+    if (this.query.constructor.name === 'Promise') {
+      this.#code = this.query;
+    } else if (typeof this.query === 'function') {
       this.#code = this.query.toString().split(/\r?\n/);
 
       this.#code.pop();
