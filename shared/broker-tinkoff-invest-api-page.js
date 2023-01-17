@@ -4,7 +4,10 @@ import { BROKERS } from './const.js';
 import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
-import { UsersServiceDefinition } from '../vendor/tinkoff/definitions/users.js';
+import {
+  UsersServiceDefinition,
+  AccountStatus
+} from '../vendor/tinkoff/definitions/users.js';
 import ppp from '../ppp.js';
 
 export class BrokerTinkoffInvestApiPage extends Page {
@@ -38,9 +41,13 @@ export class BrokerTinkoffInvestApiPage extends Page {
     try {
       const response = await client.getAccounts();
 
-      if (!response?.accounts?.length) {
+      if (
+        !response?.accounts?.filter?.(
+          (a) => a.status === AccountStatus.ACCOUNT_STATUS_OPEN
+        )?.length
+      ) {
         invalidate(this.apiToken, {
-          errorMessage: 'Не найдены брокерские счета',
+          errorMessage: 'Не найдены открытые брокерские счета',
           raiseException: true
         });
       }
