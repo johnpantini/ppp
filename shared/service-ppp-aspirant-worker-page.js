@@ -1,10 +1,12 @@
 import { Page, PageWithService, PageWithSSHTerminal } from './page.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { validate, invalidate } from './validate.js';
-import { SERVICE_STATE, SERVICES } from './const.js';
+import { SERVICE_STATE, SERVICES, VERSIONING_STATUS } from './const.js';
 import { maybeFetchError } from './fetch-error.js';
-import ppp from '../ppp.js';
 import { Tmpl } from './tmpl.js';
+import { parsePPPScript } from './ppp-script.js';
+import { predefinedWorkerData } from './predefined-worker-data.js';
+import ppp from '../ppp.js';
 
 export class ServicePppAspirantWorkerPage extends Page {
   collection = 'services';
@@ -14,6 +16,15 @@ export class ServicePppAspirantWorkerPage extends Page {
     await validate(this.aspirantServiceId);
     await validate(this.environmentCode);
     await validate(this.environmentCodeSecret);
+
+    if (this.useVersioning.checked) {
+      await validate(this.versioningUrl);
+
+      // URL validation
+      this.getWorkerTemplateFullUrl(this.versioningUrl.value);
+    }
+
+    await validate(this.sourceCode);
 
     try {
       new Function(
@@ -44,8 +55,6 @@ export class ServicePppAspirantWorkerPage extends Page {
         raiseException: true
       });
     }
-
-    await validate(this.sourceCode);
   }
 
   async read() {
@@ -90,6 +99,12 @@ export class ServicePppAspirantWorkerPage extends Page {
     };
   }
 
+  async readyChanged(oldValue, newValue) {
+    if (newValue) {
+      await this.checkVersion();
+    }
+  }
+
   async find() {
     return {
       type: SERVICES.PPP_ASPIRANT_WORKER,
@@ -104,15 +119,38 @@ export class ServicePppAspirantWorkerPage extends Page {
         ? SERVICE_STATE.ACTIVE
         : SERVICE_STATE.STOPPED;
 
+    let version = 1;
+    const parsed = parsePPPScript(this.sourceCode.value);
+
+    if (parsed) {
+      [version] = parsed?.meta?.version;
+      version = Math.abs(+version) || 1;
+    }
+
+    if (this.useVersioning.checked) {
+      if (typeof version !== 'number') {
+        invalidate(this.sourceCode, {
+          errorMessage: 'Не удалось прочитать версию',
+          raiseException: true
+        });
+      }
+    }
+
+    if (typeof version !== 'number') {
+      version = 1;
+    }
+
     return [
       {
         $set: {
           name: this.name.value.trim(),
           aspirantServiceId: this.aspirantServiceId.value,
+          sourceCode: this.sourceCode.value,
           environmentCode: this.environmentCode.value,
           environmentCodeSecret: this.environmentCodeSecret.value,
-          sourceCode: this.sourceCode.value,
-          version: 1,
+          version,
+          useVersioning: this.useVersioning.checked,
+          versioningUrl: this.versioningUrl.value.trim(),
           state: SERVICE_STATE.FAILED,
           updatedAt: new Date()
         },
@@ -129,6 +167,47 @@ export class ServicePppAspirantWorkerPage extends Page {
         }
       })
     ];
+  }
+
+  async afterUpdate() {
+    await this.checkVersion();
+  }
+
+  getVersioningStatus() {
+    return this.document.useVersioning
+      ? this.document.version < this.actualVersion
+        ? VERSIONING_STATUS.OLD
+        : VERSIONING_STATUS.OK
+      : VERSIONING_STATUS.OFF;
+  }
+
+  async updateService() {
+    if (this.document.useVersioning && this.document.versioningUrl) {
+      this.beginOperation();
+
+      try {
+        const fcRequest = await fetch(
+          this.getWorkerTemplateFullUrl(this.document.versioningUrl).toString(),
+          {
+            cache: 'no-cache'
+          }
+        );
+
+        await maybeFetchError(
+          fcRequest,
+          'Не удалось загрузить файл с обновлением.'
+        );
+
+        this.sourceCode.updateCode(await fcRequest.text());
+        await this.saveDocument();
+
+        this.succeedOperation('Сервис успешно обновлён.');
+      } catch (e) {
+        this.failOperation(e);
+      } finally {
+        this.endOperation();
+      }
+    }
   }
 
   async getAspirantUrl() {
@@ -314,6 +393,98 @@ export class ServicePppAspirantWorkerPage extends Page {
         _id: this.document._id
       })
     });
+  }
+
+  getWorkerTemplateFullUrl(relativeOrAbsoluteUrl) {
+    try {
+      let url;
+
+      if (relativeOrAbsoluteUrl.startsWith('/')) {
+        const rootUrl = window.location.origin;
+
+        if (rootUrl.endsWith('.github.io'))
+          url = new URL('/ppp' + relativeOrAbsoluteUrl, rootUrl);
+        else url = new URL(relativeOrAbsoluteUrl, rootUrl);
+      } else {
+        url = new URL(relativeOrAbsoluteUrl);
+      }
+
+      return url;
+    } catch (e) {
+      invalidate(this.versioningUrl, {
+        errorMessage: 'Неверный URL',
+        raiseException: true
+      });
+    }
+  }
+
+  async checkVersion() {
+    if (this.document.useVersioning) {
+      const versioningUrl = this.document.versioningUrl.trim();
+
+      if (versioningUrl) {
+        const fcRequest = await fetch(
+          this.getWorkerTemplateFullUrl(versioningUrl).toString(),
+          {
+            cache: 'no-cache'
+          }
+        );
+
+        await maybeFetchError(
+          fcRequest,
+          'Не удалось отследить версию сервиса.'
+        );
+
+        const parsed = parsePPPScript(await fcRequest.text());
+
+        if (!parsed || !Array.isArray(parsed.meta?.version)) {
+          invalidate(this.versioningUrl, {
+            errorMessage: 'Не удалось прочитать версию',
+            raiseException: true
+          });
+        }
+
+        const [version] = parsed.meta?.version;
+
+        this.actualVersion = Math.abs(parseInt(version) || 1);
+
+        if (typeof this.actualVersion !== 'number') this.actualVersion = 1;
+      } else {
+        this.actualVersion = 1;
+      }
+    } else {
+      this.actualVersion = 1;
+    }
+  }
+
+  async fillOutFormWithTemplate() {
+    this.beginOperation();
+
+    try {
+      const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+      const fcRequest = await fetch(
+        this.getWorkerTemplateFullUrl(data.url).toString(),
+        {
+          cache: 'no-cache'
+        }
+      );
+
+      await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+
+      this.sourceCode.updateCode(await fcRequest.text());
+      this.environmentCode.updateCode(data.env);
+      this.environmentCodeSecret.updateCode(data.envSecret);
+
+      this.versioningUrl.value = data.url;
+
+      this.succeedOperation(
+        `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен.`
+      );
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
   }
 }
 

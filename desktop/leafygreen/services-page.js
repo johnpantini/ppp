@@ -3,8 +3,9 @@ import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { formatDate } from '../../shared/intl.js';
+import { when } from '../../shared/element/templating/when.js';
 import { actionPageMountPoint } from '../../shared/page.js';
-import { SERVICE_STATE } from '../../shared/const.js';
+import { SERVICE_STATE, VERSIONING_STATUS } from '../../shared/const.js';
 import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
@@ -62,6 +63,10 @@ export const servicesPageTemplate = (context, definition) => html`
             sortBy: (d) => d.version
           },
           {
+            label: 'Последняя версия',
+            sortBy: (d) => d.actualVersion
+          },
+          {
             label: 'Состояние',
             sortBy: (d) => d.state
           },
@@ -97,8 +102,29 @@ export const servicesPageTemplate = (context, definition) => html`
                 formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
                   <${'ppp-badge'}
-                    appearance="green">
+                    appearance="${() => {
+                      const vs = datum.versioningStatus;
+
+                      if (vs === VERSIONING_STATUS.OK) return 'green';
+                      else if (vs === VERSIONING_STATUS.OLD) {
+                        return 'yellow';
+                      } else if (vs === VERSIONING_STATUS.OFF) {
+                        return 'blue';
+                      }
+                    }}">
                     ${() => datum.version}
+                  </ppp-badge>
+                `,
+                html`
+                  <${'ppp-badge'}
+                    appearance="${() => {
+                      const vs = datum.versioningStatus;
+
+                      if (vs === VERSIONING_STATUS.OFF) {
+                        return 'blue';
+                      } else return 'green';
+                    }}">
+                    ${() => datum.actualVersion}
                   </ppp-badge>
                 `,
                 html`
@@ -107,6 +133,19 @@ export const servicesPageTemplate = (context, definition) => html`
                     ${x.t(`$const.serviceState.${datum.state ?? 'N/A'}`)}
                   </ppp-badge>`,
                 html`
+                  ${when(
+                    () => datum.versioningStatus === VERSIONING_STATUS.OLD,
+                    html`
+                      <${'ppp-button'}
+                        disabled
+                        shiftlock
+                        class="xsmall"
+                        @click="${() => x.updateService(datum)}"
+                      >
+                        Обновить
+                      </ppp-button>
+                    `
+                  )}
                   <${'ppp-button'}
                     disabled
                     shiftlock

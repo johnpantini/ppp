@@ -1,6 +1,11 @@
 import { ServicePage } from '../../shared/service-page.js';
-import { SERVICE_STATE, SERVICES } from '../../shared/const.js';
+import {
+  SERVICE_STATE,
+  SERVICES,
+  VERSIONING_STATUS
+} from '../../shared/const.js';
 import { html } from '../../shared/template.js';
+import { when } from '../../shared/element/templating/when.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import { search } from './icons/search.js';
@@ -8,6 +13,8 @@ import { filterCards } from '../../shared/generic-card.js';
 import { stateAppearance } from './services-page.js';
 import { formatDate } from '../../shared/intl.js';
 import ppp from '../../ppp.js';
+
+await ppp.i18n(import.meta.url);
 
 export const servicePageTemplate = (context, definition) => html`
   <template>
@@ -178,12 +185,27 @@ export const serviceControlsTemplate = (context, definition) => html`
           class="service-details-control"
           style="justify-content: left"
         >
+          ${when(
+            (x) =>
+              typeof x.updateService === 'function' &&
+              (x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK) ===
+                VERSIONING_STATUS.OLD,
+            html`
+              <${'ppp-button'}
+                ?disabled="${(x) => x.page.loading}"
+                appearance="primary"
+                @click="${(x) => x.updateService?.()}">
+                Обновить
+              </ppp-button>
+            `
+          )}
           <${'ppp-button'}
             ?disabled="${(x) =>
               x.page.loading ||
               x.document.removed ||
               x.document.state === SERVICE_STATE.FAILED}"
-            @click="${(x) => x.restartService()}">Перезапустить
+            @click="${(x) => x.restartService()}">
+            Перезапустить
           </ppp-button>
           <ppp-button
             ?disabled="${(x) =>
@@ -191,12 +213,14 @@ export const serviceControlsTemplate = (context, definition) => html`
               x.document.removed ||
               x.document.state === SERVICE_STATE.FAILED ||
               x.document.state === SERVICE_STATE.STOPPED}"
-            @click="${(x) => x.stopService()}">Приостановить
+            @click="${(x) => x.stopService()}">
+            Приостановить
           </ppp-button>
           <ppp-button
             ?disabled="${(x) => x.page.loading || x.document.removed}"
             appearance="danger"
-            @click="${(x) => x.cleanupService()}">Удалить
+            @click="${(x) => x.cleanupService()}">
+            Удалить
           </ppp-button>
         </div>
         <div class="service-details-control">
@@ -205,8 +229,22 @@ export const serviceControlsTemplate = (context, definition) => html`
             ${(x) => x.t(`$const.serviceState.${x.document.state}`)}
           </ppp-badge>
           <ppp-badge
-            appearance="blue">
-            Последняя версия
+            appearance="${(x) => {
+              const vs = x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK;
+
+              if (vs === VERSIONING_STATUS.OK) return 'green';
+              else if (vs === VERSIONING_STATUS.OLD) {
+                return 'yellow';
+              } else if (vs === VERSIONING_STATUS.OFF) {
+                return 'blue';
+              }
+            }}">
+            ${(x) =>
+              x.t(
+                `$const.versioningStatus.${
+                  x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK
+                }`
+              )}
           </ppp-badge>
         </div>
       </div>
@@ -216,7 +254,16 @@ export const serviceControlsTemplate = (context, definition) => html`
           Версия
           </span>
           <div style="grid-column-start: 1;grid-row-start: 2;">
-            <ppp-badge appearance="green">
+            <ppp-badge appearance="${(x) => {
+              const vs = x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK;
+
+              if (vs === VERSIONING_STATUS.OK) return 'green';
+              else if (vs === VERSIONING_STATUS.OLD) {
+                return 'yellow';
+              } else if (vs === VERSIONING_STATUS.OFF) {
+                return 'blue';
+              }
+            }}">
               ${(x) => x.document.version}
             </ppp-badge>
           </div>
