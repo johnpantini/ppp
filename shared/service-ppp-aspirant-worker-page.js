@@ -128,7 +128,7 @@ export class ServicePppAspirantWorkerPage extends Page {
     }
 
     if (this.useVersioning.checked) {
-      if (typeof version !== 'number') {
+      if (!parsed || typeof version !== 'number') {
         invalidate(this.sourceCode, {
           errorMessage: 'Не удалось прочитать версию',
           raiseException: true
