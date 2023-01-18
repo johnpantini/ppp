@@ -2,6 +2,14 @@ import { TraderTinkoffGrpcWebPage } from '../../shared/trader-tinkoff-grpc-web-p
 import { html } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
+import {
+  UsersServiceDefinition,
+  AccountStatus
+} from '../../vendor/tinkoff/definitions/users.js';
+import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
+import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
+import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
+import ppp from '../../ppp.js';
 
 export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
   <template>
@@ -26,7 +34,7 @@ export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
           </div>
           <div class="input-group">
             <${'ppp-text-field'}
-              placeholder="Alpaca"
+              placeholder="Tinkoff"
               value="${(x) => x.document.name}"
               ${ref('name')}
             ></ppp-text-field>
@@ -39,6 +47,7 @@ export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
           <div class="input-group">
             <${'ppp-collection-select'}
               ${ref('brokerId')}
+              @change="${(x) => x.scratchSet('brokerId', x.brokerId.value)}"
               value="${(x) => x.document.brokerId}"
               :context="${(x) => x}"
               :preloaded="${(x) => x.document.broker ?? ''}"
@@ -83,7 +92,70 @@ export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
             <h5>Торговый счёт</h5>
           </div>
           <div class="input-group">
+            <${'ppp-collection-select'}
+              ${ref('accountSelector')}
+              value="${(x) => x.document.account}"
+              ?disabled="${(x) => !x.scratch.brokerId}"
+              :context="${(x) => x}"
+              :placeholder="${() => 'Нажмите, чтобы выбрать счёт'}"
+              :preloaded="${(x) => {
+                return {
+                  _id: x.document.account,
+                  name: x.document.accountName,
+                  value: x.document.account
+                };
+              }}"
+              :query="${(x) => {
+                return async () => {
+                  const client = createClient(
+                    UsersServiceDefinition,
+                    createChannel('https://invest-public-api.tinkoff.ru:443'),
+                    {
+                      '*': {
+                        metadata: new Metadata({
+                          Authorization: `Bearer ${
+                            x.brokerId.datum().apiToken
+                          }`,
+                          'x-app-name': `${ppp.keyVault.getKey(
+                            'github-login'
+                          )}.ppp`
+                        })
+                      }
+                    }
+                  );
+                  const response = await client.getAccounts();
 
+                  return response.accounts
+                    ?.filter?.(
+                      (a) => a.status === AccountStatus.ACCOUNT_STATUS_OPEN
+                    )
+                    .map((a) => {
+                      return {
+                        _id: a.id,
+                        name: a.name,
+                        value: a.id
+                      };
+                    });
+                };
+              }}"
+            ></ppp-collection-select>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Тайм-аут восстановления соединения</h5>
+            <p>Время, по истечении которого будет предпринята очередная попытка
+              восстановить прерванное подключение к серверам брокера. Задаётся
+              в миллисекундах, по умолчанию 1000 мс.</p>
+          </div>
+          <div class="input-group">
+            <ppp-text-field
+              optional
+              type="number"
+              placeholder="1000"
+              value="${(x) => x.document.reconnectTimeout}"
+              ${ref('reconnectTimeout')}
+            ></ppp-text-field>
           </div>
         </section>
       </ppp-page>

@@ -9,6 +9,14 @@ export class TraderTinkoffGrpcWebPage extends Page {
   async validate() {
     await validate(this.name);
     await validate(this.brokerId);
+    await validate(this.accountSelector);
+
+    if (this.reconnectTimeout.value.trim()) {
+      await validate(this.reconnectTimeout, {
+        hook: async (value) => +value >= 100 && +value <= 10000,
+        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+      });
+    }
   }
 
   async read() {
@@ -52,10 +60,24 @@ export class TraderTinkoffGrpcWebPage extends Page {
       $set: {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
-        caps: [
-
-        ],
+        account: this.accountSelector.value,
+        accountName: this.accountSelector.datum().name,
+        reconnectTimeout: this.reconnectTimeout.value
+          ? Math.abs(this.reconnectTimeout.value)
+          : void 0,
         version: 1,
+        caps: [
+          TRADER_CAPS.CAPS_LIMIT_ORDERS,
+          TRADER_CAPS.CAPS_MARKET_ORDERS,
+          TRADER_CAPS.CAPS_STOP_ORDERS,
+          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+          TRADER_CAPS.CAPS_ORDERBOOK,
+          TRADER_CAPS.CAPS_TIME_AND_SALES,
+          TRADER_CAPS.CAPS_POSITIONS,
+          TRADER_CAPS.CAPS_TIMELINE,
+          TRADER_CAPS.CAPS_LEVEL1,
+          TRADER_CAPS.CAPS_CHARTS
+        ],
         updatedAt: new Date()
       },
       $setOnInsert: {
