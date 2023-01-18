@@ -251,6 +251,8 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
           }
         });
       } catch (e) {
+        console.error(e);
+
         return this.notificationsArea.error({
           title: 'Книга заявок',
           text: 'Не удалось подключиться к источнику данных.'

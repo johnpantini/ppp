@@ -193,6 +193,8 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
           }
         });
       } catch (e) {
+        console.error(e);
+
         return this.notificationsArea.error({
           title: 'Лента всех сделок',
           text: 'Не удалось подключиться к источнику данных.'
