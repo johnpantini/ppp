@@ -4,7 +4,8 @@ import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import {
   UsersServiceDefinition,
-  AccountStatus
+  AccountStatus,
+  AccountType
 } from '../../vendor/tinkoff/definitions/users.js';
 import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
@@ -127,7 +128,9 @@ export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
 
                   return response.accounts
                     ?.filter?.(
-                      (a) => a.status === AccountStatus.ACCOUNT_STATUS_OPEN
+                      (a) =>
+                        a.status === AccountStatus.ACCOUNT_STATUS_OPEN &&
+                        a.type !== AccountType.ACCOUNT_TYPE_INVEST_BOX
                     )
                     .map((a) => {
                       return {
