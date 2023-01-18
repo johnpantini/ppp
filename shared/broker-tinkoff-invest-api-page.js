@@ -17,18 +17,21 @@ export class BrokerTinkoffInvestApiPage extends Page {
     await validate(this.name);
     await validate(this.apiToken);
 
-    const channel = createChannel('https://invest-public-api.tinkoff.ru:443');
     let client;
 
     try {
-      client = createClient(UsersServiceDefinition, channel, {
-        '*': {
-          metadata: new Metadata({
-            Authorization: `Bearer ${this.apiToken.value.trim()}`,
-            'x-app-name': `${ppp.keyVault.getKey('github-login')}.ppp`
-          })
+      client = createClient(
+        UsersServiceDefinition,
+        createChannel('https://invest-public-api.tinkoff.ru:443'),
+        {
+          '*': {
+            metadata: new Metadata({
+              Authorization: `Bearer ${this.apiToken.value.trim()}`,
+              'x-app-name': `${ppp.keyVault.getKey('github-login')}.ppp`
+            })
+          }
         }
-      });
+      );
     } catch (e) {
       console.error(e);
 
