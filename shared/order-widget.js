@@ -799,6 +799,13 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
     try {
       if (this.orderTypeTabs.activeid === 'limit') {
+        if (typeof this.ordersTrader.placeLimitOrder !== 'function') {
+          return this.notificationsArea.error({
+            title: 'Ошибка заявки',
+            text: 'Трейдер не поддерживает выставление лимитных заявок.'
+          });
+        }
+
         await this.ordersTrader.placeLimitOrder({
           instrument: this.instrument,
           price: this.price.value,
@@ -806,6 +813,13 @@ export class PppOrderWidget extends WidgetWithInstrument {
           direction
         });
       } else if (this.orderTypeTabs.activeid === 'market') {
+        if (typeof this.ordersTrader.placeMarketOrder !== 'function') {
+          return this.notificationsArea.error({
+            title: 'Ошибка заявки',
+            text: 'Трейдер не поддерживает выставление рыночных заявок.'
+          });
+        }
+
         await this.ordersTrader.placeMarketOrder({
           instrument: this.instrument,
           quantity: this.quantity.value,
