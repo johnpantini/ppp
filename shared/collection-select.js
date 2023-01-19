@@ -2,7 +2,7 @@
 
 import { FoundationElement } from './foundation-element.js';
 import { html, requireComponent } from './template.js';
-import { observable } from './element/observation/observable.js';
+import { observable } from './element/observation/observable.js'
 import { attr } from './element/components/attributes.js';
 import { ref } from './element/templating/ref.js';
 import { when } from './element/templating/when.js';
@@ -12,6 +12,7 @@ import { Tmpl } from './tmpl.js';
 import { DOM } from './element/dom.js';
 import ppp from '../ppp.js';
 
+await requireComponent('ppp-option');
 await requireComponent(
   'ppp-loading-option',
   `${ppp.rootUrl}/${ppp.appType}/${ppp.theme}/option.js`
