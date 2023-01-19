@@ -631,12 +631,12 @@ export async function widgetDefinition(definition = {}) {
     description: html`<span class="positive">Книга заявок</span> отображает
       таблицу лимитных заявок финансового инструмента на покупку и продажу.`,
     customElement: PppOrderbookWidget.compose(definition),
-    maxHeight: 512,
-    maxWidth: 365,
+    maxHeight: 1440,
+    maxWidth: 2560,
     defaultHeight: 375,
     defaultWidth: 280,
     minHeight: 120,
-    minWidth: 200,
+    minWidth: 140,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
