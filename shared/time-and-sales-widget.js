@@ -309,12 +309,12 @@ export async function widgetDefinition(definition = {}) {
       обезличенные сделки с финансовым инструментом по всем доступным рыночным
       центрам.`,
     customElement: PppTimeAndSalesWidget.compose(definition),
-    maxHeight: 2050,
-    maxWidth: 365,
+    maxHeight: 2560,
+    maxWidth: 2560,
     defaultHeight: 375,
     defaultWidth: 280,
     minHeight: 120,
-    minWidth: 275,
+    minWidth: 140,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

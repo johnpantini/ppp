@@ -851,10 +851,12 @@ export async function widgetDefinition(definition = {}) {
     description: html`Виджет <span class="positive">Заявка</span> используется,
       чтобы выставлять рыночные, лимитные и отложенные биржевые заявки.`,
     customElement: PppOrderWidget.compose(definition),
-    maxHeight: 512,
-    maxWidth: 550,
-    minHeight: 375,
-    minWidth: 275,
+    maxHeight: 2560,
+    maxWidth: 2560,
+    defaultHeight: 375,
+    defaultWidth: 280,
+    minHeight: 370,
+    minWidth: 250,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

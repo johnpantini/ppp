@@ -485,11 +485,12 @@ export async function widgetDefinition(definition = {}) {
       <span class="positive">Лента операций</span> отображает историю сделок и
       других биржевых событий одного или нескольких торговых инструментов.`,
     customElement: PppTimelineWidget.compose(definition),
-    maxHeight: 1200,
-    maxWidth: 512,
-    defaultHeight: 365,
+    maxHeight: 2560,
+    maxWidth: 2560,
+    defaultHeight: 375,
+    defaultWidth: 280,
     minHeight: 120,
-    minWidth: 250,
+    minWidth: 140,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
