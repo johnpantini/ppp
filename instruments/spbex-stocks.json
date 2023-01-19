@@ -35279,6 +35279,26 @@
     "tinkoffFigi": "BBG001B4BV87"
   },
   {
+    "symbol": "GEHC",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "GE HealthCare Technologies",
+    "isin": "US36266G1076",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api",
+      "utex-aurora",
+      "psina"
+    ],
+    "tinkoffFigi": "BBG01BFR8YV1"
+  },
+  {
     "symbol": "338",
     "exchange": [
       "spbex"
@@ -35291,9 +35311,7 @@
     "lot": 1000,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BCHHM0"
   },
@@ -35310,9 +35328,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00J76TKS1"
   },
@@ -35329,9 +35345,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BZ3PX4"
   },
@@ -35348,9 +35362,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BKWM80"
   },
@@ -35367,9 +35379,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000MQF8G6"
   },
@@ -35386,9 +35396,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00GTY47H0"
   },
@@ -35405,9 +35413,7 @@
     "lot": 1,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BJ35N5"
   },
@@ -35424,9 +35430,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000LG6G08"
   },
@@ -35443,9 +35447,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00Y9WVZ76"
   },
@@ -35462,9 +35464,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PXTGY5"
   },
@@ -35481,9 +35481,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00ZHT7FY2"
   },
@@ -35500,9 +35498,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000HPNDX5"
   },
@@ -35519,9 +35515,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0016XR1Q8"
   },
@@ -35538,9 +35532,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0078Q6BC4"
   },
@@ -35557,9 +35549,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000QWR4M8"
   },
@@ -35576,9 +35566,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000TRZNP2"
   },
@@ -35595,9 +35583,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000CJXNB5"
   },
@@ -35614,9 +35600,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BDWT45"
   },
@@ -35633,9 +35617,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BF0155"
   },
@@ -35652,9 +35634,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BFNTD0"
   },
@@ -35671,9 +35651,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00LLV9WW6"
   },
@@ -35690,9 +35668,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00Y6QRNM7"
   },
@@ -35709,9 +35685,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BF0V40"
   },
@@ -35728,9 +35702,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00L3B3R02"
   },
@@ -35747,9 +35719,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BDWF36"
   },
@@ -35766,9 +35736,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000CHNH78"
   },
@@ -35785,9 +35753,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000F6F1G3"
   },
@@ -35804,9 +35770,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000NQGF05"
   },
@@ -35823,9 +35787,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00P4RBR99"
   },
@@ -35842,9 +35804,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00QV37ZP9"
   },
@@ -35861,9 +35821,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000FQH8C6"
   },
@@ -35880,9 +35838,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00ZMFX1S5"
   },
@@ -35899,9 +35855,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00ZNW65W3"
   },
@@ -35918,9 +35872,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG001XVDJ15"
   },
@@ -35937,9 +35889,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BG5LL6"
   },
@@ -35956,9 +35906,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BG4QM5"
   },
@@ -35975,9 +35923,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BGD8W4"
   },
@@ -35994,9 +35940,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00WR0QPZ7"
   },
@@ -36013,9 +35957,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG010RJL3B5"
   },
@@ -36032,9 +35974,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000GD4N44"
   },
@@ -36051,9 +35991,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000JSJ2F6"
   },
@@ -36070,9 +36008,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00VC6RYV6"
   },
@@ -36089,9 +36025,7 @@
     "lot": 1,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BGW354"
   },
@@ -36108,9 +36042,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00KVTBY91"
   },
@@ -36127,9 +36059,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000C16952"
   },
@@ -36146,9 +36076,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BDTCX4"
   },
@@ -36165,9 +36093,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG007WDD4B5"
   },
@@ -36184,9 +36110,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000CN0Y73"
   },
@@ -36203,9 +36127,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000QCN464"
   },
@@ -36222,9 +36144,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00699M8Q7"
   },
@@ -36241,9 +36161,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG015PB0HH9"
   },
@@ -36260,9 +36178,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0087DLDQ6"
   },
@@ -36279,9 +36195,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PSNMN1"
   },
@@ -36298,9 +36212,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000MKLJD1"
   },
@@ -36317,9 +36229,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00VSF90M3"
   },
@@ -36336,9 +36246,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00YYT9BD6"
   },
@@ -36355,9 +36263,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000NW2S18"
   },
@@ -36374,9 +36280,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000Q16VR4"
   },
@@ -36393,9 +36297,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00299NPM1"
   },
@@ -36412,9 +36314,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PTX047"
   },
@@ -36431,9 +36331,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000DVPPK1"
   },
@@ -36450,9 +36348,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG001DMCGS5"
   },
@@ -36469,9 +36365,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000C3N3B5"
   },
@@ -36488,9 +36382,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0120WC125"
   },
@@ -36507,9 +36399,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000C1DC75"
   },
@@ -36526,9 +36416,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000C6XDL4"
   },
@@ -36545,9 +36433,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BX4MS1"
   },
@@ -36564,9 +36450,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BDZJK6"
   },
@@ -36583,9 +36467,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG011LRHTM7"
   },
@@ -36602,9 +36484,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00P78Y7N1"
   },
@@ -36621,9 +36501,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PJKKM9"
   },
@@ -36640,9 +36518,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000FD8023"
   },
@@ -36659,9 +36535,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000H3CDH4"
   },
@@ -36678,9 +36552,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BFGXV9"
   },
@@ -36697,9 +36569,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00V6PS1F0"
   },
@@ -36716,9 +36586,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000N6X3L4"
   },
@@ -36735,9 +36603,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000TF4XZ9"
   },
@@ -36754,9 +36620,7 @@
     "lot": 10,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00M8832B5"
   },
@@ -36773,9 +36637,7 @@
     "lot": 100,
     "broker": [
       "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
+      "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000QQCY41"
   },

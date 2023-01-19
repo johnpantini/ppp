@@ -2012,10 +2012,10 @@
     ],
     "fullName": "Русолово",
     "isin": "RU000A0JU1B0",
-    "minPriceIncrement": 0.005,
+    "minPriceIncrement": 0.0001,
     "type": "stock",
     "currency": "RUB",
-    "lot": 100,
+    "lot": 1000,
     "broker": [
       "alor-openapi-v2",
       "tinkoff-invest-api"
@@ -2078,7 +2078,7 @@
     "exchange": [
       "moex"
     ],
-    "fullName": "Полюс Золото",
+    "fullName": "Полюс",
     "isin": "RU000A0JNAA8",
     "minPriceIncrement": 0.5,
     "type": "stock",
