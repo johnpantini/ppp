@@ -393,8 +393,7 @@ export const MarketDataRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseMarketDataRequest();
 
@@ -557,8 +556,7 @@ export const MarketDataServerSideStreamRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseMarketDataServerSideStreamRequest();
 
@@ -740,8 +738,7 @@ export const MarketDataResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseMarketDataResponse();
 
@@ -911,8 +908,7 @@ export const SubscribeCandlesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeCandlesRequest();
 
@@ -948,9 +944,7 @@ export const SubscribeCandlesRequest = {
       subscriptionAction: isSet(object.subscriptionAction)
         ? subscriptionActionFromJSON(object.subscriptionAction)
         : 0,
-      instruments: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.instruments
-      )
+      instruments: Array.isArray(object?.instruments)
         ? object.instruments.map((e) => CandleInstrument.fromJSON(e))
         : [],
       waitingClose: isSet(object.waitingClose)
@@ -982,24 +976,23 @@ export const SubscribeCandlesRequest = {
 };
 
 function createBaseCandleInstrument() {
-  return { figi: '', interval: 0 };
+  return { interval: 0, instrumentId: '' };
 }
 
 export const CandleInstrument = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
-    }
-
     if (message.interval !== 0) {
       writer.uint32(16).int32(message.interval);
+    }
+
+    if (message.instrumentId !== '') {
+      writer.uint32(26).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCandleInstrument();
 
@@ -1007,12 +1000,12 @@ export const CandleInstrument = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
-
-          break;
         case 2:
           message.interval = reader.int32();
+
+          break;
+        case 3:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -1026,18 +1019,21 @@ export const CandleInstrument = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : '',
       interval: isSet(object.interval)
         ? subscriptionIntervalFromJSON(object.interval)
-        : 0
+        : 0,
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
     message.interval !== undefined &&
       (obj.interval = subscriptionIntervalToJSON(message.interval));
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -1060,8 +1056,7 @@ export const SubscribeCandlesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeCandlesResponse();
 
@@ -1091,11 +1086,7 @@ export const SubscribeCandlesResponse = {
   fromJSON(object) {
     return {
       trackingId: isSet(object.trackingId) ? String(object.trackingId) : '',
-      candlesSubscriptions: Array.isArray(
-        object === null || object === void 0
-          ? void 0
-          : object.candlesSubscriptions
-      )
+      candlesSubscriptions: Array.isArray(object?.candlesSubscriptions)
         ? object.candlesSubscriptions.map((e) => CandleSubscription.fromJSON(e))
         : []
     };
@@ -1118,7 +1109,7 @@ export const SubscribeCandlesResponse = {
 };
 
 function createBaseCandleSubscription() {
-  return { figi: '', interval: 0, subscriptionStatus: 0 };
+  return { figi: '', interval: 0, subscriptionStatus: 0, instrumentUid: '' };
 }
 
 export const CandleSubscription = {
@@ -1135,11 +1126,14 @@ export const CandleSubscription = {
       writer.uint32(24).int32(message.subscriptionStatus);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(34).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCandleSubscription();
 
@@ -1159,6 +1153,10 @@ export const CandleSubscription = {
           message.subscriptionStatus = reader.int32();
 
           break;
+        case 4:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -1176,7 +1174,10 @@ export const CandleSubscription = {
         : 0,
       subscriptionStatus: isSet(object.subscriptionStatus)
         ? subscriptionStatusFromJSON(object.subscriptionStatus)
-        : 0
+        : 0,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -1189,6 +1190,8 @@ export const CandleSubscription = {
       (obj.subscriptionStatus = subscriptionStatusToJSON(
         message.subscriptionStatus
       ));
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -1211,8 +1214,7 @@ export const SubscribeOrderBookRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeOrderBookRequest();
 
@@ -1244,9 +1246,7 @@ export const SubscribeOrderBookRequest = {
       subscriptionAction: isSet(object.subscriptionAction)
         ? subscriptionActionFromJSON(object.subscriptionAction)
         : 0,
-      instruments: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.instruments
-      )
+      instruments: Array.isArray(object?.instruments)
         ? object.instruments.map((e) => OrderBookInstrument.fromJSON(e))
         : []
     };
@@ -1272,24 +1272,23 @@ export const SubscribeOrderBookRequest = {
 };
 
 function createBaseOrderBookInstrument() {
-  return { figi: '', depth: 0 };
+  return { depth: 0, instrumentId: '' };
 }
 
 export const OrderBookInstrument = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
-    }
-
     if (message.depth !== 0) {
       writer.uint32(16).int32(message.depth);
+    }
+
+    if (message.instrumentId !== '') {
+      writer.uint32(26).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrderBookInstrument();
 
@@ -1297,12 +1296,12 @@ export const OrderBookInstrument = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
-
-          break;
         case 2:
           message.depth = reader.int32();
+
+          break;
+        case 3:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -1316,15 +1315,18 @@ export const OrderBookInstrument = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : '',
-      depth: isSet(object.depth) ? Number(object.depth) : 0
+      depth: isSet(object.depth) ? Number(object.depth) : 0,
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
     message.depth !== undefined && (obj.depth = Math.round(message.depth));
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -1347,8 +1349,7 @@ export const SubscribeOrderBookResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeOrderBookResponse();
 
@@ -1378,11 +1379,7 @@ export const SubscribeOrderBookResponse = {
   fromJSON(object) {
     return {
       trackingId: isSet(object.trackingId) ? String(object.trackingId) : '',
-      orderBookSubscriptions: Array.isArray(
-        object === null || object === void 0
-          ? void 0
-          : object.orderBookSubscriptions
-      )
+      orderBookSubscriptions: Array.isArray(object?.orderBookSubscriptions)
         ? object.orderBookSubscriptions.map((e) =>
             OrderBookSubscription.fromJSON(e)
           )
@@ -1407,7 +1404,7 @@ export const SubscribeOrderBookResponse = {
 };
 
 function createBaseOrderBookSubscription() {
-  return { figi: '', depth: 0, subscriptionStatus: 0 };
+  return { figi: '', depth: 0, subscriptionStatus: 0, instrumentUid: '' };
 }
 
 export const OrderBookSubscription = {
@@ -1424,11 +1421,14 @@ export const OrderBookSubscription = {
       writer.uint32(24).int32(message.subscriptionStatus);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(34).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrderBookSubscription();
 
@@ -1448,6 +1448,10 @@ export const OrderBookSubscription = {
           message.subscriptionStatus = reader.int32();
 
           break;
+        case 4:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -1463,7 +1467,10 @@ export const OrderBookSubscription = {
       depth: isSet(object.depth) ? Number(object.depth) : 0,
       subscriptionStatus: isSet(object.subscriptionStatus)
         ? subscriptionStatusFromJSON(object.subscriptionStatus)
-        : 0
+        : 0,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -1475,6 +1482,8 @@ export const OrderBookSubscription = {
       (obj.subscriptionStatus = subscriptionStatusToJSON(
         message.subscriptionStatus
       ));
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -1497,8 +1506,7 @@ export const SubscribeTradesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeTradesRequest();
 
@@ -1530,9 +1538,7 @@ export const SubscribeTradesRequest = {
       subscriptionAction: isSet(object.subscriptionAction)
         ? subscriptionActionFromJSON(object.subscriptionAction)
         : 0,
-      instruments: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.instruments
-      )
+      instruments: Array.isArray(object?.instruments)
         ? object.instruments.map((e) => TradeInstrument.fromJSON(e))
         : []
     };
@@ -1558,20 +1564,20 @@ export const SubscribeTradesRequest = {
 };
 
 function createBaseTradeInstrument() {
-  return { figi: '' };
+  return { instrumentId: '' };
 }
 
 export const TradeInstrument = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
+
+    if (message.instrumentId !== '') {
+      writer.uint32(18).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTradeInstrument();
 
@@ -1579,8 +1585,8 @@ export const TradeInstrument = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
+        case 2:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -1594,13 +1600,16 @@ export const TradeInstrument = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : ''
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -1623,8 +1632,7 @@ export const SubscribeTradesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeTradesResponse();
 
@@ -1654,11 +1662,7 @@ export const SubscribeTradesResponse = {
   fromJSON(object) {
     return {
       trackingId: isSet(object.trackingId) ? String(object.trackingId) : '',
-      tradeSubscriptions: Array.isArray(
-        object === null || object === void 0
-          ? void 0
-          : object.tradeSubscriptions
-      )
+      tradeSubscriptions: Array.isArray(object?.tradeSubscriptions)
         ? object.tradeSubscriptions.map((e) => TradeSubscription.fromJSON(e))
         : []
     };
@@ -1681,7 +1685,7 @@ export const SubscribeTradesResponse = {
 };
 
 function createBaseTradeSubscription() {
-  return { figi: '', subscriptionStatus: 0 };
+  return { figi: '', subscriptionStatus: 0, instrumentUid: '' };
 }
 
 export const TradeSubscription = {
@@ -1694,11 +1698,14 @@ export const TradeSubscription = {
       writer.uint32(16).int32(message.subscriptionStatus);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(26).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTradeSubscription();
 
@@ -1712,6 +1719,10 @@ export const TradeSubscription = {
           break;
         case 2:
           message.subscriptionStatus = reader.int32();
+
+          break;
+        case 3:
+          message.instrumentUid = reader.string();
 
           break;
         default:
@@ -1728,7 +1739,10 @@ export const TradeSubscription = {
       figi: isSet(object.figi) ? String(object.figi) : '',
       subscriptionStatus: isSet(object.subscriptionStatus)
         ? subscriptionStatusFromJSON(object.subscriptionStatus)
-        : 0
+        : 0,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -1739,6 +1753,8 @@ export const TradeSubscription = {
       (obj.subscriptionStatus = subscriptionStatusToJSON(
         message.subscriptionStatus
       ));
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -1761,8 +1777,7 @@ export const SubscribeInfoRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeInfoRequest();
 
@@ -1794,9 +1809,7 @@ export const SubscribeInfoRequest = {
       subscriptionAction: isSet(object.subscriptionAction)
         ? subscriptionActionFromJSON(object.subscriptionAction)
         : 0,
-      instruments: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.instruments
-      )
+      instruments: Array.isArray(object?.instruments)
         ? object.instruments.map((e) => InfoInstrument.fromJSON(e))
         : []
     };
@@ -1822,20 +1835,19 @@ export const SubscribeInfoRequest = {
 };
 
 function createBaseInfoInstrument() {
-  return { figi: '' };
+  return { instrumentId: '' };
 }
 
 export const InfoInstrument = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
+    if (message.instrumentId !== '') {
+      writer.uint32(18).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseInfoInstrument();
 
@@ -1843,8 +1855,8 @@ export const InfoInstrument = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
+        case 2:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -1858,13 +1870,16 @@ export const InfoInstrument = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : ''
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -1887,8 +1902,7 @@ export const SubscribeInfoResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeInfoResponse();
 
@@ -1918,9 +1932,7 @@ export const SubscribeInfoResponse = {
   fromJSON(object) {
     return {
       trackingId: isSet(object.trackingId) ? String(object.trackingId) : '',
-      infoSubscriptions: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.infoSubscriptions
-      )
+      infoSubscriptions: Array.isArray(object?.infoSubscriptions)
         ? object.infoSubscriptions.map((e) => InfoSubscription.fromJSON(e))
         : []
     };
@@ -1943,7 +1955,7 @@ export const SubscribeInfoResponse = {
 };
 
 function createBaseInfoSubscription() {
-  return { figi: '', subscriptionStatus: 0 };
+  return { figi: '', subscriptionStatus: 0, instrumentUid: '' };
 }
 
 export const InfoSubscription = {
@@ -1956,11 +1968,14 @@ export const InfoSubscription = {
       writer.uint32(16).int32(message.subscriptionStatus);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(26).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseInfoSubscription();
 
@@ -1974,6 +1989,10 @@ export const InfoSubscription = {
           break;
         case 2:
           message.subscriptionStatus = reader.int32();
+
+          break;
+        case 3:
+          message.instrumentUid = reader.string();
 
           break;
         default:
@@ -1990,7 +2009,10 @@ export const InfoSubscription = {
       figi: isSet(object.figi) ? String(object.figi) : '',
       subscriptionStatus: isSet(object.subscriptionStatus)
         ? subscriptionStatusFromJSON(object.subscriptionStatus)
-        : 0
+        : 0,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -2001,6 +2023,8 @@ export const InfoSubscription = {
       (obj.subscriptionStatus = subscriptionStatusToJSON(
         message.subscriptionStatus
       ));
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -2023,8 +2047,7 @@ export const SubscribeLastPriceRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeLastPriceRequest();
 
@@ -2056,9 +2079,7 @@ export const SubscribeLastPriceRequest = {
       subscriptionAction: isSet(object.subscriptionAction)
         ? subscriptionActionFromJSON(object.subscriptionAction)
         : 0,
-      instruments: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.instruments
-      )
+      instruments: Array.isArray(object?.instruments)
         ? object.instruments.map((e) => LastPriceInstrument.fromJSON(e))
         : []
     };
@@ -2084,20 +2105,19 @@ export const SubscribeLastPriceRequest = {
 };
 
 function createBaseLastPriceInstrument() {
-  return { figi: '' };
+  return { instrumentId: '' };
 }
 
 export const LastPriceInstrument = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
+    if (message.instrumentId !== '') {
+      writer.uint32(18).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseLastPriceInstrument();
 
@@ -2105,8 +2125,8 @@ export const LastPriceInstrument = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
+        case 2:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -2120,13 +2140,16 @@ export const LastPriceInstrument = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : ''
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -2149,8 +2172,7 @@ export const SubscribeLastPriceResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeLastPriceResponse();
 
@@ -2180,11 +2202,7 @@ export const SubscribeLastPriceResponse = {
   fromJSON(object) {
     return {
       trackingId: isSet(object.trackingId) ? String(object.trackingId) : '',
-      lastPriceSubscriptions: Array.isArray(
-        object === null || object === void 0
-          ? void 0
-          : object.lastPriceSubscriptions
-      )
+      lastPriceSubscriptions: Array.isArray(object?.lastPriceSubscriptions)
         ? object.lastPriceSubscriptions.map((e) =>
             LastPriceSubscription.fromJSON(e)
           )
@@ -2209,7 +2227,7 @@ export const SubscribeLastPriceResponse = {
 };
 
 function createBaseLastPriceSubscription() {
-  return { figi: '', subscriptionStatus: 0 };
+  return { figi: '', subscriptionStatus: 0, instrumentUid: '' };
 }
 
 export const LastPriceSubscription = {
@@ -2222,11 +2240,14 @@ export const LastPriceSubscription = {
       writer.uint32(16).int32(message.subscriptionStatus);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(26).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseLastPriceSubscription();
 
@@ -2240,6 +2261,10 @@ export const LastPriceSubscription = {
           break;
         case 2:
           message.subscriptionStatus = reader.int32();
+
+          break;
+        case 3:
+          message.instrumentUid = reader.string();
 
           break;
         default:
@@ -2256,7 +2281,10 @@ export const LastPriceSubscription = {
       figi: isSet(object.figi) ? String(object.figi) : '',
       subscriptionStatus: isSet(object.subscriptionStatus)
         ? subscriptionStatusFromJSON(object.subscriptionStatus)
-        : 0
+        : 0,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -2267,6 +2295,8 @@ export const LastPriceSubscription = {
       (obj.subscriptionStatus = subscriptionStatusToJSON(
         message.subscriptionStatus
       ));
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -2282,7 +2312,8 @@ function createBaseCandle() {
     close: undefined,
     volume: 0,
     time: undefined,
-    lastTradeTs: undefined
+    lastTradeTs: undefined,
+    instrumentUid: ''
   };
 }
 
@@ -2330,11 +2361,14 @@ export const Candle = {
       ).ldelim();
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(82).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCandle();
 
@@ -2382,6 +2416,10 @@ export const Candle = {
           );
 
           break;
+        case 10:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -2405,7 +2443,10 @@ export const Candle = {
       time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined,
       lastTradeTs: isSet(object.lastTradeTs)
         ? fromJsonTimestamp(object.lastTradeTs)
-        : undefined
+        : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -2426,6 +2467,8 @@ export const Candle = {
     message.time !== undefined && (obj.time = message.time.toISOString());
     message.lastTradeTs !== undefined &&
       (obj.lastTradeTs = message.lastTradeTs.toISOString());
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -2440,7 +2483,8 @@ function createBaseOrderBook() {
     asks: [],
     time: undefined,
     limitUp: undefined,
-    limitDown: undefined
+    limitDown: undefined,
+    instrumentUid: ''
   };
 }
 
@@ -2481,11 +2525,14 @@ export const OrderBook = {
       Quotation.encode(message.limitDown, writer.uint32(66).fork()).ldelim();
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(74).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrderBook();
 
@@ -2527,6 +2574,10 @@ export const OrderBook = {
           message.limitDown = Quotation.decode(reader, reader.uint32());
 
           break;
+        case 9:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -2543,14 +2594,10 @@ export const OrderBook = {
       isConsistent: isSet(object.isConsistent)
         ? Boolean(object.isConsistent)
         : false,
-      bids: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.bids
-      )
+      bids: Array.isArray(object?.bids)
         ? object.bids.map((e) => Order.fromJSON(e))
         : [],
-      asks: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.asks
-      )
+      asks: Array.isArray(object?.asks)
         ? object.asks.map((e) => Order.fromJSON(e))
         : [],
       time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined,
@@ -2559,7 +2606,10 @@ export const OrderBook = {
         : undefined,
       limitDown: isSet(object.limitDown)
         ? Quotation.fromJSON(object.limitDown)
-        : undefined
+        : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -2591,6 +2641,8 @@ export const OrderBook = {
       (obj.limitDown = message.limitDown
         ? Quotation.toJSON(message.limitDown)
         : undefined);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -2613,8 +2665,7 @@ export const Order = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrder();
 
@@ -2663,7 +2714,8 @@ function createBaseTrade() {
     direction: 0,
     price: undefined,
     quantity: 0,
-    time: undefined
+    time: undefined,
+    instrumentUid: ''
   };
 }
 
@@ -2692,11 +2744,14 @@ export const Trade = {
       ).ldelim();
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(50).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTrade();
 
@@ -2726,6 +2781,10 @@ export const Trade = {
           );
 
           break;
+        case 6:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -2743,7 +2802,10 @@ export const Trade = {
         : 0,
       price: isSet(object.price) ? Quotation.fromJSON(object.price) : undefined,
       quantity: isSet(object.quantity) ? Number(object.quantity) : 0,
-      time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined
+      time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -2757,6 +2819,8 @@ export const Trade = {
     message.quantity !== undefined &&
       (obj.quantity = Math.round(message.quantity));
     message.time !== undefined && (obj.time = message.time.toISOString());
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
@@ -2768,7 +2832,8 @@ function createBaseTradingStatus() {
     tradingStatus: 0,
     time: undefined,
     limitOrderAvailableFlag: false,
-    marketOrderAvailableFlag: false
+    marketOrderAvailableFlag: false,
+    instrumentUid: ''
   };
 }
 
@@ -2797,11 +2862,14 @@ export const TradingStatus = {
       writer.uint32(40).bool(message.marketOrderAvailableFlag);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(50).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTradingStatus();
 
@@ -2831,6 +2899,10 @@ export const TradingStatus = {
           message.marketOrderAvailableFlag = reader.bool();
 
           break;
+        case 6:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -2852,7 +2924,10 @@ export const TradingStatus = {
         : false,
       marketOrderAvailableFlag: isSet(object.marketOrderAvailableFlag)
         ? Boolean(object.marketOrderAvailableFlag)
-        : false
+        : false,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -2866,21 +2941,24 @@ export const TradingStatus = {
       (obj.limitOrderAvailableFlag = message.limitOrderAvailableFlag);
     message.marketOrderAvailableFlag !== undefined &&
       (obj.marketOrderAvailableFlag = message.marketOrderAvailableFlag);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
 };
 
 function createBaseGetCandlesRequest() {
-  return { figi: '', from: undefined, to: undefined, interval: 0 };
+  return {
+    from: undefined,
+    to: undefined,
+    interval: 0,
+    instrumentId: ''
+  };
 }
 
 export const GetCandlesRequest = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
-    }
-
     if (message.from !== undefined) {
       Timestamp.encode(
         toTimestamp(message.from),
@@ -2899,11 +2977,14 @@ export const GetCandlesRequest = {
       writer.uint32(32).int32(message.interval);
     }
 
+    if (message.instrumentId !== '') {
+      writer.uint32(42).string(message.instrumentId);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetCandlesRequest();
 
@@ -2911,10 +2992,6 @@ export const GetCandlesRequest = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
-
-          break;
         case 2:
           message.from = fromTimestamp(
             Timestamp.decode(reader, reader.uint32())
@@ -2929,6 +3006,10 @@ export const GetCandlesRequest = {
           message.interval = reader.int32();
 
           break;
+        case 5:
+          message.instrumentId = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -2940,22 +3021,25 @@ export const GetCandlesRequest = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : '',
       from: isSet(object.from) ? fromJsonTimestamp(object.from) : undefined,
       to: isSet(object.to) ? fromJsonTimestamp(object.to) : undefined,
       interval: isSet(object.interval)
         ? candleIntervalFromJSON(object.interval)
-        : 0
+        : 0,
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
     message.from !== undefined && (obj.from = message.from.toISOString());
     message.to !== undefined && (obj.to = message.to.toISOString());
     message.interval !== undefined &&
       (obj.interval = candleIntervalToJSON(message.interval));
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -2974,8 +3058,7 @@ export const GetCandlesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetCandlesResponse();
 
@@ -2998,9 +3081,7 @@ export const GetCandlesResponse = {
   },
   fromJSON(object) {
     return {
-      candles: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.candles
-      )
+      candles: Array.isArray(object?.candles)
         ? object.candles.map((e) => HistoricCandle.fromJSON(e))
         : []
     };
@@ -3068,8 +3149,7 @@ export const HistoricCandle = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseHistoricCandle();
 
@@ -3147,20 +3227,19 @@ export const HistoricCandle = {
 };
 
 function createBaseGetLastPricesRequest() {
-  return { figi: [] };
+  return { instrumentId: [] };
 }
 
 export const GetLastPricesRequest = {
   encode(message, writer = protobuf.Writer.create()) {
-    for (const v of message.figi) {
-      writer.uint32(10).string(v);
+    for (const v of message.instrumentId) {
+      writer.uint32(18).string(v);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastPricesRequest();
 
@@ -3168,8 +3247,8 @@ export const GetLastPricesRequest = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi.push(reader.string());
+        case 2:
+          message.instrumentId.push(reader.string());
 
           break;
         default:
@@ -3183,20 +3262,18 @@ export const GetLastPricesRequest = {
   },
   fromJSON(object) {
     return {
-      figi: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.figi
-      )
-        ? object.figi.map((e) => String(e))
+      instrumentId: Array.isArray(object?.instrumentId)
+        ? object.instrumentId.map((e) => String(e))
         : []
     };
   },
   toJSON(message) {
     const obj = {};
 
-    if (message.figi) {
-      obj.figi = message.figi.map((e) => e);
+    if (message.instrumentId) {
+      obj.instrumentId = message.instrumentId.map((e) => e);
     } else {
-      obj.figi = [];
+      obj.instrumentId = [];
     }
 
     return obj;
@@ -3216,8 +3293,7 @@ export const GetLastPricesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastPricesResponse();
 
@@ -3240,9 +3316,7 @@ export const GetLastPricesResponse = {
   },
   fromJSON(object) {
     return {
-      lastPrices: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.lastPrices
-      )
+      lastPrices: Array.isArray(object?.lastPrices)
         ? object.lastPrices.map((e) => LastPrice.fromJSON(e))
         : []
     };
@@ -3263,7 +3337,7 @@ export const GetLastPricesResponse = {
 };
 
 function createBaseLastPrice() {
-  return { figi: '', price: undefined, time: undefined };
+  return { figi: '', price: undefined, time: undefined, instrumentUid: '' };
 }
 
 export const LastPrice = {
@@ -3283,11 +3357,14 @@ export const LastPrice = {
       ).ldelim();
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(90).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseLastPrice();
 
@@ -3309,6 +3386,10 @@ export const LastPrice = {
           );
 
           break;
+        case 11:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -3322,7 +3403,10 @@ export const LastPrice = {
     return {
       figi: isSet(object.figi) ? String(object.figi) : '',
       price: isSet(object.price) ? Quotation.fromJSON(object.price) : undefined,
-      time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined
+      time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -3332,30 +3416,31 @@ export const LastPrice = {
     message.price !== undefined &&
       (obj.price = message.price ? Quotation.toJSON(message.price) : undefined);
     message.time !== undefined && (obj.time = message.time.toISOString());
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
 };
 
 function createBaseGetOrderBookRequest() {
-  return { figi: '', depth: 0 };
+  return {depth: 0, instrumentId: '' };
 }
 
 export const GetOrderBookRequest = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
-    }
-
     if (message.depth !== 0) {
       writer.uint32(16).int32(message.depth);
+    }
+
+    if (message.instrumentId !== '') {
+      writer.uint32(26).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetOrderBookRequest();
 
@@ -3363,12 +3448,12 @@ export const GetOrderBookRequest = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
-
-          break;
         case 2:
           message.depth = reader.int32();
+
+          break;
+        case 3:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -3382,15 +3467,18 @@ export const GetOrderBookRequest = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : '',
-      depth: isSet(object.depth) ? Number(object.depth) : 0
+      depth: isSet(object.depth) ? Number(object.depth) : 0,
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
     message.depth !== undefined && (obj.depth = Math.round(message.depth));
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -3405,7 +3493,11 @@ function createBaseGetOrderBookResponse() {
     lastPrice: undefined,
     closePrice: undefined,
     limitUp: undefined,
-    limitDown: undefined
+    limitDown: undefined,
+    lastPriceTs: undefined,
+    closePriceTs: undefined,
+    orderbookTs: undefined,
+    instrumentUid: ''
   };
 }
 
@@ -3443,11 +3535,35 @@ export const GetOrderBookResponse = {
       Quotation.encode(message.limitDown, writer.uint32(66).fork()).ldelim();
     }
 
+    if (message.lastPriceTs !== undefined) {
+      Timestamp.encode(
+        toTimestamp(message.lastPriceTs),
+        writer.uint32(170).fork()
+      ).ldelim();
+    }
+
+    if (message.closePriceTs !== undefined) {
+      Timestamp.encode(
+        toTimestamp(message.closePriceTs),
+        writer.uint32(178).fork()
+      ).ldelim();
+    }
+
+    if (message.orderbookTs !== undefined) {
+      Timestamp.encode(
+        toTimestamp(message.orderbookTs),
+        writer.uint32(186).fork()
+      ).ldelim();
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(74).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetOrderBookResponse();
 
@@ -3487,6 +3603,28 @@ export const GetOrderBookResponse = {
           message.limitDown = Quotation.decode(reader, reader.uint32());
 
           break;
+        case 21:
+          message.lastPriceTs = fromTimestamp(
+            Timestamp.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 22:
+          message.closePriceTs = fromTimestamp(
+            Timestamp.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 23:
+          message.orderbookTs = fromTimestamp(
+            Timestamp.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 9:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -3500,14 +3638,10 @@ export const GetOrderBookResponse = {
     return {
       figi: isSet(object.figi) ? String(object.figi) : '',
       depth: isSet(object.depth) ? Number(object.depth) : 0,
-      bids: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.bids
-      )
+      bids: Array.isArray(object?.bids)
         ? object.bids.map((e) => Order.fromJSON(e))
         : [],
-      asks: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.asks
-      )
+      asks: Array.isArray(object?.asks)
         ? object.asks.map((e) => Order.fromJSON(e))
         : [],
       lastPrice: isSet(object.lastPrice)
@@ -3521,7 +3655,19 @@ export const GetOrderBookResponse = {
         : undefined,
       limitDown: isSet(object.limitDown)
         ? Quotation.fromJSON(object.limitDown)
-        : undefined
+        : undefined,
+      lastPriceTs: isSet(object.lastPriceTs)
+        ? fromJsonTimestamp(object.lastPriceTs)
+        : undefined,
+      closePriceTs: isSet(object.closePriceTs)
+        ? fromJsonTimestamp(object.closePriceTs)
+        : undefined,
+      orderbookTs: isSet(object.orderbookTs)
+        ? fromJsonTimestamp(object.orderbookTs)
+        : undefined,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -3558,26 +3704,33 @@ export const GetOrderBookResponse = {
       (obj.limitDown = message.limitDown
         ? Quotation.toJSON(message.limitDown)
         : undefined);
+    message.lastPriceTs !== undefined &&
+      (obj.lastPriceTs = message.lastPriceTs.toISOString());
+    message.closePriceTs !== undefined &&
+      (obj.closePriceTs = message.closePriceTs.toISOString());
+    message.orderbookTs !== undefined &&
+      (obj.orderbookTs = message.orderbookTs.toISOString());
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
 };
 
 function createBaseGetTradingStatusRequest() {
-  return { figi: '' };
+  return { instrumentId: '' };
 }
 
 export const GetTradingStatusRequest = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
+    if (message.instrumentId !== '') {
+      writer.uint32(18).string(message.instrumentId);
     }
 
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetTradingStatusRequest();
 
@@ -3585,8 +3738,8 @@ export const GetTradingStatusRequest = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
+        case 2:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -3600,13 +3753,16 @@ export const GetTradingStatusRequest = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : ''
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -3618,7 +3774,8 @@ function createBaseGetTradingStatusResponse() {
     tradingStatus: 0,
     limitOrderAvailableFlag: false,
     marketOrderAvailableFlag: false,
-    apiTradeAvailableFlag: false
+    apiTradeAvailableFlag: false,
+    instrumentUid: ''
   };
 }
 
@@ -3644,11 +3801,14 @@ export const GetTradingStatusResponse = {
       writer.uint32(40).bool(message.apiTradeAvailableFlag);
     }
 
+    if (message.instrumentUid !== '') {
+      writer.uint32(50).string(message.instrumentUid);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetTradingStatusResponse();
 
@@ -3676,6 +3836,10 @@ export const GetTradingStatusResponse = {
           message.apiTradeAvailableFlag = reader.bool();
 
           break;
+        case 6:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -3699,7 +3863,10 @@ export const GetTradingStatusResponse = {
         : false,
       apiTradeAvailableFlag: isSet(object.apiTradeAvailableFlag)
         ? Boolean(object.apiTradeAvailableFlag)
-        : false
+        : false,
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
@@ -3714,21 +3881,19 @@ export const GetTradingStatusResponse = {
       (obj.marketOrderAvailableFlag = message.marketOrderAvailableFlag);
     message.apiTradeAvailableFlag !== undefined &&
       (obj.apiTradeAvailableFlag = message.apiTradeAvailableFlag);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
 
     return obj;
   }
 };
 
 function createBaseGetLastTradesRequest() {
-  return { figi: '', from: undefined, to: undefined };
+  return { from: undefined, to: undefined, instrumentId: '' };
 }
 
 export const GetLastTradesRequest = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
-    }
-
     if (message.from !== undefined) {
       Timestamp.encode(
         toTimestamp(message.from),
@@ -3743,11 +3908,14 @@ export const GetLastTradesRequest = {
       ).ldelim();
     }
 
+    if (message.instrumentId !== '') {
+      writer.uint32(34).string(message.instrumentId);
+    }
+
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastTradesRequest();
 
@@ -3755,10 +3923,6 @@ export const GetLastTradesRequest = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
-
-          break;
         case 2:
           message.from = fromTimestamp(
             Timestamp.decode(reader, reader.uint32())
@@ -3767,6 +3931,10 @@ export const GetLastTradesRequest = {
           break;
         case 3:
           message.to = fromTimestamp(Timestamp.decode(reader, reader.uint32()));
+
+          break;
+        case 4:
+          message.instrumentId = reader.string();
 
           break;
         default:
@@ -3780,17 +3948,20 @@ export const GetLastTradesRequest = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : '',
       from: isSet(object.from) ? fromJsonTimestamp(object.from) : undefined,
-      to: isSet(object.to) ? fromJsonTimestamp(object.to) : undefined
+      to: isSet(object.to) ? fromJsonTimestamp(object.to) : undefined,
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
     message.from !== undefined && (obj.from = message.from.toISOString());
     message.to !== undefined && (obj.to = message.to.toISOString());
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
 
     return obj;
   }
@@ -3809,8 +3980,7 @@ export const GetLastTradesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastTradesResponse();
 
@@ -3833,9 +4003,7 @@ export const GetLastTradesResponse = {
   },
   fromJSON(object) {
     return {
-      trades: Array.isArray(
-        object === null || object === void 0 ? void 0 : object.trades
-      )
+      trades: Array.isArray(object?.trades)
         ? object.trades.map((e) => Trade.fromJSON(e))
         : []
     };
@@ -3862,8 +4030,7 @@ export const GetMySubscriptions = {
     return writer;
   },
   decode(input, length) {
-    const reader =
-      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetMySubscriptions();
 
@@ -3889,6 +4056,262 @@ export const GetMySubscriptions = {
     return obj;
   }
 };
+
+function createBaseGetClosePricesRequest() {
+  return { instruments: [] };
+}
+
+export const GetClosePricesRequest = {
+  encode(message, writer = protobuf.Writer.create()) {
+    for (const v of message.instruments) {
+      InstrumentClosePriceRequest.encode(v, writer.uint32(10).fork()).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetClosePricesRequest();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.instruments.push(
+            InstrumentClosePriceRequest.decode(reader, reader.uint32())
+          );
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      instruments: Array.isArray(object?.instruments)
+        ? object.instruments.map((e) => InstrumentClosePriceRequest.fromJSON(e))
+        : []
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.instruments) {
+      obj.instruments = message.instruments.map((e) =>
+        e ? InstrumentClosePriceRequest.toJSON(e) : undefined
+      );
+    } else {
+      obj.instruments = [];
+    }
+
+    return obj;
+  }
+};
+
+function createBaseInstrumentClosePriceRequest() {
+  return { instrumentId: '' };
+}
+
+export const InstrumentClosePriceRequest = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.instrumentId !== '') {
+      writer.uint32(10).string(message.instrumentId);
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseInstrumentClosePriceRequest();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.instrumentId = reader.string();
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      instrumentId: isSet(object.instrumentId)
+        ? String(object.instrumentId)
+        : ''
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.instrumentId !== undefined &&
+      (obj.instrumentId = message.instrumentId);
+
+    return obj;
+  }
+};
+
+function createBaseGetClosePricesResponse() {
+  return { closePrices: [] };
+}
+
+export const GetClosePricesResponse = {
+  encode(message, writer = protobuf.Writer.create()) {
+    for (const v of message.closePrices) {
+      InstrumentClosePriceResponse.encode(v, writer.uint32(10).fork()).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetClosePricesResponse();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.closePrices.push(
+            InstrumentClosePriceResponse.decode(reader, reader.uint32())
+          );
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      closePrices: Array.isArray(object?.closePrices)
+        ? object.closePrices.map((e) =>
+            InstrumentClosePriceResponse.fromJSON(e)
+          )
+        : []
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.closePrices) {
+      obj.closePrices = message.closePrices.map((e) =>
+        e ? InstrumentClosePriceResponse.toJSON(e) : undefined
+      );
+    } else {
+      obj.closePrices = [];
+    }
+
+    return obj;
+  }
+};
+
+function createBaseInstrumentClosePriceResponse() {
+  return { figi: '', instrumentUid: '', price: undefined, time: undefined };
+}
+
+export const InstrumentClosePriceResponse = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.figi !== '') {
+      writer.uint32(10).string(message.figi);
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(18).string(message.instrumentUid);
+    }
+
+    if (message.price !== undefined) {
+      Quotation.encode(message.price, writer.uint32(90).fork()).ldelim();
+    }
+
+    if (message.time !== undefined) {
+      Timestamp.encode(
+        toTimestamp(message.time),
+        writer.uint32(170).fork()
+      ).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseInstrumentClosePriceResponse();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.figi = reader.string();
+
+          break;
+        case 2:
+          message.instrumentUid = reader.string();
+
+          break;
+        case 11:
+          message.price = Quotation.decode(reader, reader.uint32());
+
+          break;
+        case 21:
+          message.time = fromTimestamp(
+            Timestamp.decode(reader, reader.uint32())
+          );
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      figi: isSet(object.figi) ? String(object.figi) : '',
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : '',
+      price: isSet(object.price) ? Quotation.fromJSON(object.price) : undefined,
+      time: isSet(object.time) ? fromJsonTimestamp(object.time) : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.figi !== undefined && (obj.figi = message.figi);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
+    message.price !== undefined &&
+      (obj.price = message.price ? Quotation.toJSON(message.price) : undefined);
+    message.time !== undefined && (obj.time = message.time.toISOString());
+
+    return obj;
+  }
+};
 export const MarketDataServiceDefinition = {
   name: 'MarketDataService',
   fullName: 'tinkoff.public.invest.api.contract.v1.MarketDataService',
@@ -3902,7 +4325,7 @@ export const MarketDataServiceDefinition = {
       responseStream: false,
       options: {}
     },
-    /** Метод запроса последних цен по инструментам. */
+    /** Метод запроса цен последних сделок по инструментам. */
     getLastPrices: {
       name: 'GetLastPrices',
       requestType: GetLastPricesRequest,
@@ -3937,6 +4360,15 @@ export const MarketDataServiceDefinition = {
       responseType: GetLastTradesResponse,
       responseStream: false,
       options: {}
+    },
+    /** Метод запроса цен закрытия торговой сессии по инструментам. */
+    getClosePrices: {
+      name: 'GetClosePrices',
+      requestType: GetClosePricesRequest,
+      requestStream: false,
+      responseType: GetClosePricesResponse,
+      responseStream: false,
+      options: {}
     }
   }
 };
@@ -3966,16 +4398,16 @@ export const MarketDataStreamServiceDefinition = {
 };
 
 function toTimestamp(date) {
-  const seconds = date.getTime() / 1000;
-  const nanos = (date.getTime() % 1000) * 1000000;
+  const seconds = date.getTime() / 1_000;
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
 
   return { seconds, nanos };
 }
 
 function fromTimestamp(t) {
-  let millis = t.seconds * 1000;
+  let millis = t.seconds * 1_000;
 
-  millis += t.nanos / 1000000;
+  millis += t.nanos / 1_000_000;
 
   return new Date(millis);
 }
