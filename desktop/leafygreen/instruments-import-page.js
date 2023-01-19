@@ -91,10 +91,16 @@ export const instrumentsImportPageTemplate = (context, definition) => html`
                 </div>
                 <ppp-select value="spbex-stocks" ${ref('dictionary')}>
                   <ppp-option value="spbex-stocks">Акции СПБ Биржи</ppp-option>
-                  <ppp-option value="moex-stocks"
-                    >Акции Московской биржи
+                  <ppp-option value="moex-stocks">
+                    Акции Московской биржи
                   </ppp-option>
                 </ppp-select>
+                <${'ppp-checkbox'}
+                  style="margin-top: 8px"
+                  ${ref('deleteBeforeImport')}
+                >
+                  Удалить инструменты словаря из базы данных перед импортом
+                </ppp-checkbox>
               `
             )}
             ${when(

@@ -63,6 +63,30 @@ export class InstrumentsImportPage extends Page {
       }
     }
 
+    if (this.deleteBeforeImport.checked) {
+      try {
+        await ppp.user.functions.bulkWrite(
+          {
+            collection: 'instruments'
+          },
+          array.map((i) => {
+            return {
+              deleteOne: {
+                filter: {
+                  symbol: i.symbol
+                }
+              }
+            };
+          }),
+          {
+            ordered: false
+          }
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     await ppp.user.functions.bulkWrite(
       {
         collection: 'instruments'
@@ -111,7 +135,17 @@ export class InstrumentsImportPage extends Page {
         const tx = db.transaction('instruments', 'readwrite');
         const instruments = tx.objectStore('instruments');
 
-        array.forEach((instrument) => instruments.put(instrument));
+        array.forEach((instrument) => {
+          if (this.deleteBeforeImport.checked) {
+            try {
+              instruments.delete(instrument.symbol);
+            } catch (e) {
+              console.error(e);
+            }
+          }
+
+          instruments.put(instrument);
+        });
 
         tx.oncomplete = () => {
           resolve();
