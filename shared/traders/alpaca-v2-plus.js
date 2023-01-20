@@ -238,7 +238,7 @@ class AlpacaV2PlusTrader extends Trader {
                 .filter((b) => {
                   if (this.document.broker.type === BROKERS.UTEX_AURORA) {
                     // Fix for invalid NYSE pool data
-                    if ((nowHours > 21 || nowHours < 11) && b.pool === 'N')
+                    if ((nowHours >= 21 || nowHours < 11) && b.pool === 'N')
                       return false;
                   }
 

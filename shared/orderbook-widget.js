@@ -518,8 +518,7 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
       DA: 'EDGA',
       DX: 'EDGX',
       SPBX: 'SPBX',
-      // Y
-      BT: 'BYX',
+      BT: 'BZX',
       // M
       MW: 'CHX',
       // NYSE American (AMEX)
