@@ -574,7 +574,6 @@ export const OrderTrade = {
 
 function createBasePostOrderRequest() {
   return {
-    figi: '',
     quantity: 0,
     price: undefined,
     direction: 0,
@@ -587,10 +586,6 @@ function createBasePostOrderRequest() {
 
 export const PostOrderRequest = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.figi !== '') {
-      writer.uint32(10).string(message.figi);
-    }
-
     if (message.quantity !== 0) {
       writer.uint32(16).int64(message.quantity);
     }
@@ -631,10 +626,6 @@ export const PostOrderRequest = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.figi = reader.string();
-
-          break;
         case 2:
           message.quantity = longToNumber(reader.int64());
 
@@ -674,7 +665,6 @@ export const PostOrderRequest = {
   },
   fromJSON(object) {
     return {
-      figi: isSet(object.figi) ? String(object.figi) : '',
       quantity: isSet(object.quantity) ? Number(object.quantity) : 0,
       price: isSet(object.price) ? Quotation.fromJSON(object.price) : undefined,
       direction: isSet(object.direction)
@@ -693,7 +683,6 @@ export const PostOrderRequest = {
   toJSON(message) {
     const obj = {};
 
-    message.figi !== undefined && (obj.figi = message.figi);
     message.quantity !== undefined &&
       (obj.quantity = Math.round(message.quantity));
     message.price !== undefined &&
