@@ -14,7 +14,14 @@ import {
   SubscriptionAction,
   TradeDirection
 } from '../../vendor/tinkoff/definitions/market-data.js';
+import {
+  OrderDirection,
+  OrdersServiceDefinition,
+  OrderType
+} from '../../vendor/tinkoff/definitions/orders.js';
 import { isAbortError } from '../../vendor/abort-controller-x.js';
+import { TradingError } from '../trading-error.js';
+import { uuidv4 } from '../ppp-crypto.js';
 import ppp from '../../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
@@ -87,6 +94,65 @@ class TinkoffGrpcWebTrader extends Trader {
     }
 
     return this.#clients.get(service);
+  }
+
+  #orderId() {
+    return uuidv4();
+  }
+
+  async placeLimitOrder({ instrument, price, quantity, direction }) {
+    try {
+      const response = await this.getOrCreateClient(
+        OrdersServiceDefinition
+      ).postOrder({
+        instrumentId: instrument.tinkoffFigi,
+        quantity,
+        price: toQuotation(+this.fixPrice(instrument, price)),
+        direction:
+          direction.toLowerCase() === 'buy'
+            ? OrderDirection.ORDER_DIRECTION_BUY
+            : OrderDirection.ORDER_DIRECTION_SELL,
+        accountId: this.document.account,
+        orderType: OrderType.ORDER_TYPE_LIMIT,
+        orderId: this.#orderId()
+      });
+
+      return {
+        orderId: response.orderId
+      };
+    } catch (e) {
+      throw new TradingError({
+        message: e.message,
+        details: e.details
+      });
+    }
+  }
+
+  async placeMarketOrder({ instrument, quantity, direction }) {
+    try {
+      const response = await this.getOrCreateClient(
+        OrdersServiceDefinition
+      ).postOrder({
+        instrumentId: instrument.tinkoffFigi,
+        quantity,
+        direction:
+          direction.toLowerCase() === 'buy'
+            ? OrderDirection.ORDER_DIRECTION_BUY
+            : OrderDirection.ORDER_DIRECTION_SELL,
+        accountId: this.document.account,
+        orderType: OrderType.ORDER_TYPE_MARKET,
+        orderId: this.#orderId()
+      });
+
+      return {
+        orderId: response.orderId
+      };
+    } catch (e) {
+      throw new TradingError({
+        message: e.message,
+        details: e.details
+      });
+    }
   }
 
   @debounce(100)
@@ -472,6 +538,49 @@ class TinkoffGrpcWebTrader extends Trader {
           .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
       );
     }
+  }
+
+  async formatError(instrument, error) {
+    const details = +error.details;
+
+    switch (details) {
+      case 30049:
+        return 'Ошибка метода выставления торгового поручения.';
+      case 30052:
+        return 'Для данного инструмента недоступна торговля через API.';
+      case 30055:
+        return 'order_id не может быть длиннее 36 символов';
+      case 30057:
+        return 'Заявка является дублем, но отчет по заявке не найден.';
+      case 30059:
+        return 'Ошибка метода отмены заявки.';
+      case 30068:
+        return 'В настоящий момент возможно выставление только лимитного торгового поручения.';
+      case 30079:
+        return 'Инструмент недоступен для торгов.';
+      case 30081:
+        return 'Аккаунт закрыт.';
+      case 30082:
+        return 'Аккаунт заблокирован.';
+      case 30083:
+        return 'Некорректный тип заявки.';
+      case 30092:
+        return 'Торги недоступны по нерабочим дням.';
+      case 40002:
+        return 'Недостаточно прав для совершения операции. Токен доступа имеет уровень прав read-only.';
+      case 40003:
+        return 'Токен доступа не найден или не активен.';
+      case 40004:
+        return 'Выставление заявок недоступно с текущего аккаунта.';
+      case 80002:
+        return 'Превышен лимит запросов в минуту.';
+      case 90001:
+        return 'Требуется подтверждение операции.';
+      case 90002:
+        return 'Торговля этим инструментом доступна только квалифицированным инвесторам.';
+    }
+
+    return 'Неизвестная ошибка, смотрите консоль браузера.';
   }
 }
 
