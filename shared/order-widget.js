@@ -549,6 +549,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
   instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
     this.level1Trader?.instrumentChanged?.(this, oldValue, newValue);
+    this.extraLevel1Trader?.instrumentChanged?.(this, oldValue, newValue);
     this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
 
     this.calculateEstimate();
