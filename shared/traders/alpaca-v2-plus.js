@@ -1,6 +1,6 @@
 /** @decorator */
 
-import { TRADER_DATUM } from '../const.js';
+import { BROKERS, TRADER_DATUM } from '../const.js';
 import { later } from '../later.js';
 import { TraderWithSimpleSearch } from './trader-with-simple-search.js';
 import { Trader } from './common-trader.js';
@@ -232,15 +232,32 @@ class AlpacaV2PlusTrader extends Trader {
               };
 
               const lastOrderBookMontage = ref.lastOrderBookMontage;
+              const nowHours = new Date().getUTCHours();
 
               lastOrderBookMontage.bids = [...lastOrderBookMap.bids.values()]
-                .filter((b) => b.price > 0 && b.volume > 0)
+                .filter((b) => {
+                  if (this.document.broker.type === BROKERS.UTEX_AURORA) {
+                    // Fix for invalid NYSE pool data
+                    if ((nowHours > 21 || nowHours < 11) && b.pool === 'N')
+                      return false;
+                  }
+
+                  return b.price > 0 && b.volume > 0;
+                })
                 .sort((a, b) => {
                   return b.price - a.price || b.volume - a.volume;
                 });
 
               lastOrderBookMontage.asks = [...lastOrderBookMap.asks.values()]
-                .filter((a) => a.price > 0 && a.volume > 0)
+                .filter((a) => {
+                  if (this.document.broker.type === BROKERS.UTEX_AURORA) {
+                    // Fix for invalid NYSE pool data
+                    if ((nowHours >= 21 || nowHours < 11) && a.pool === 'N')
+                      return false;
+                  }
+
+                  return a.price > 0 && a.volume > 0;
+                })
                 .sort((a, b) => {
                   return a.price - b.price || b.volume - a.volume;
                 });
