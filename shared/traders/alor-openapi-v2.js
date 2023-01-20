@@ -977,8 +977,8 @@ class AlorOpenAPIV2Trader extends Trader {
               isBalance,
               size: data.qty,
               accountId: data.portfolio,
-              dailyUnrealizedProfit: data.dailyUnrealisedPl,
-              unrealizedProfit: data.unrealisedPl
+              dailyUnrealizedProfit: '—',
+              unrealizedProfit: '—'
             };
 
             if (isBalance) {
