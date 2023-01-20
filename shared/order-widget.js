@@ -23,6 +23,7 @@ import ppp from '../ppp.js';
 
 const decSeparator = decimalSeparator();
 
+await requireComponent('ppp-collection-select');
 await Promise.all([
   requireComponent('ppp-widget-tabs'),
   requireComponent(
@@ -358,6 +359,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
   level1Trader;
 
   @observable
+  extraLevel1Trader;
+
+  @observable
   positionTrader;
 
   @observable
@@ -404,6 +408,13 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
     this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
     this.level1Trader = await ppp.getOrCreateTrader(this.document.level1Trader);
+
+    if (this.document.extraLevel1Trader) {
+      this.extraLevel1Trader = await ppp.getOrCreateTrader(
+        this.document.extraLevel1Trader
+      );
+    }
+
     this.positionTrader = await ppp.getOrCreateTrader(
       this.document.positionTrader
     );
@@ -411,6 +422,19 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
     if (this.level1Trader) {
       await this.level1Trader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          lastPrice: TRADER_DATUM.LAST_PRICE,
+          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          bestBid: TRADER_DATUM.BEST_BID,
+          bestAsk: TRADER_DATUM.BEST_ASK
+        }
+      });
+    }
+
+    if (this.extraLevel1Trader) {
+      await this.extraLevel1Trader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
           lastPrice: TRADER_DATUM.LAST_PRICE,
@@ -465,6 +489,19 @@ export class PppOrderWidget extends WidgetWithInstrument {
       });
     }
 
+    if (this.extraLevel1Trader) {
+      await this.extraLevel1Trader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          lastPrice: TRADER_DATUM.LAST_PRICE,
+          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          bestBid: TRADER_DATUM.BEST_BID,
+          bestAsk: TRADER_DATUM.BEST_ASK
+        }
+      });
+    }
+
     if (this.positionTrader) {
       await this.positionTrader.unsubscribeFields?.({
         source: this,
@@ -492,13 +529,13 @@ export class PppOrderWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
-  async selectSymbol(symbol) {
+  async selectSymbol(symbol, exchange) {
     if (this.ordersTrader) {
       await this.findAndSelectSymbol(
         {
           type: this.document.instrumentType ?? 'stock',
           symbol,
-          exchange: this.ordersTrader.getExchange()
+          exchange: exchange ?? this.ordersTrader.getExchange?.()
         },
         true
       );
@@ -506,7 +543,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
   }
 
   pusherTelegramHandler(data) {
-    void this.selectSymbol(data.t);
+    void this.selectSymbol(data.t, data.ex);
   }
 
   instrumentChanged(oldValue, newValue) {
@@ -528,6 +565,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
         level1TraderId: this.container.level1TraderId.value,
+        extraLevel1TraderId: this.container.extraLevel1TraderId.value,
         positionTraderId: this.container.positionTraderId.value,
         pusherApiId: this.container.pusherApiId.value,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
@@ -1004,6 +1042,50 @@ export async function widgetDefinition(definition = {}) {
                       $or: [
                         { removed: { $ne: true } },
                         { _id: `[%#this.document.level1TraderId ?? ''%]` }
+                      ]
+                    }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Дополнительный трейдер L1</h5>
+          <p>Трейдер, выступающий дополнительным источником L1-данных
+            виджета.</p>
+        </div>
+        <ppp-collection-select
+          ${ref('extraLevel1TraderId')}
+          placeholder="Опционально, нажмите для выбора"
+          value="${(x) => x.document.extraLevel1TraderId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('traders')
+                .find({
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.extraLevel1TraderId ?? ''%]` }
                       ]
                     }
                   ]
