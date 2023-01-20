@@ -57,7 +57,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
   connection;
 
-  async syncAccessToken() {
+  async ensureAccessTokenIsOk() {
     try {
       if (isJWTTokenExpired(this.#jwt)) this.#jwt = void 0;
 
@@ -84,7 +84,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
             return new Promise((resolve) => {
               setTimeout(async () => {
-                await this.syncAccessToken();
+                await this.ensureAccessTokenIsOk();
 
                 resolve();
               }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
@@ -100,7 +100,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
       return new Promise((resolve) => {
         setTimeout(async () => {
-          await this.syncAccessToken();
+          await this.ensureAccessTokenIsOk();
 
           resolve();
         }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
@@ -125,7 +125,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async placeMarketOrder({ instrument, quantity, direction }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     const orderRequest = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/market',
@@ -171,7 +171,7 @@ class AlorOpenAPIV2Trader extends Trader {
    * @param direction
    */
   async placeLimitOrder({ instrument, price, quantity, direction }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     const orderRequest = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit',
@@ -211,7 +211,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async allTrades({ instrument, depth }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     const qs = `format=Simple&take=${parseInt(depth)}&descending=true`;
     const request = await fetch(
@@ -246,7 +246,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async estimate(instrument, price, quantity) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     const request = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/estimate',
@@ -285,7 +285,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async modifyLimitOrders({ instrument, side, value }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     const ordersRequest = await fetch(
       `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
@@ -354,7 +354,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
   async cancelLimitOrder(order) {
     if (order.orderType === 'limit') {
-      await this.syncAccessToken();
+      await this.ensureAccessTokenIsOk();
 
       const qs = `portfolio=${this.document.portfolio}&exchange=${this.document.exchange}&stop=false&format=Simple`;
       const request = await fetch(
@@ -381,7 +381,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async cancelAllLimitOrders({ instrument }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     const request = await fetch(
       `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
@@ -582,7 +582,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
           this.connection.onclose = async () => {
             await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-            await this.syncAccessToken();
+            await this.ensureAccessTokenIsOk();
 
             this.#pendingConnection = null;
 
@@ -645,7 +645,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async subscribeField({ source, field, datum }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
 
     if (
@@ -696,7 +696,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async unsubscribeField({ source, field, datum }) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
 
     return super.unsubscribeField({ source, field, datum });
   }
@@ -830,7 +830,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async instrumentChanged(source, oldValue, newValue) {
-    await this.syncAccessToken();
+    await this.ensureAccessTokenIsOk();
     await super.instrumentChanged(source, oldValue, newValue);
 
     if (newValue?._id) {
@@ -867,7 +867,7 @@ class AlorOpenAPIV2Trader extends Trader {
           if (instrument._id === source.instrument?._id) {
             const ref = this.refs.orderbook.get(source.instrument?._id);
 
-            if (ref)  {
+            if (ref) {
               ref.lastOrderbookData = data;
 
               for (const { field, datum } of fields) {
