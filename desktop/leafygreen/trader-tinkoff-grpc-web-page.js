@@ -1,5 +1,5 @@
 import { TraderTinkoffGrpcWebPage } from '../../shared/trader-tinkoff-grpc-web-page.js';
-import { html } from '../../shared/template.js';
+import { html, requireComponent } from '../../shared/template.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { pageStyles } from './page.js';
 import {
@@ -11,6 +11,8 @@ import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
 import ppp from '../../ppp.js';
+
+await requireComponent('ppp-collection-select');
 
 export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
   <template>
@@ -46,7 +48,7 @@ export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
             <h5>Профиль брокера</h5>
           </div>
           <div class="input-group">
-            <${'ppp-collection-select'}
+            <ppp-collection-select
               ${ref('brokerId')}
               @change="${(x) => x.scratchSet('brokerId', x.brokerId.value)}"
               value="${(x) => x.document.brokerId}"
@@ -93,7 +95,7 @@ export const traderTinkoffGrpcWebPageTemplate = (context, definition) => html`
             <h5>Торговый счёт</h5>
           </div>
           <div class="input-group">
-            <${'ppp-collection-select'}
+            <ppp-collection-select
               ${ref('accountSelector')}
               value="${(x) => x.document.account}"
               ?disabled="${(x) => !x.scratch.brokerId}"

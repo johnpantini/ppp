@@ -47,6 +47,12 @@ export class TraderTinkoffGrpcWebPage extends Page {
     };
   }
 
+  readyChanged(oldValue, newValue) {
+    if (newValue) {
+      this.scratchSet('brokerId', this.document.brokerId);
+    }
+  }
+
   async find() {
     return {
       type: TRADERS.TINKOFF_GRPC_WEB,
