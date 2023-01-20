@@ -212,4 +212,12 @@ export class Widget extends FoundationElement {
       this.remove();
     }
   }
+
+  goToSettings() {
+    if (!this.preview) {
+      window
+        .open(`?page=widget&document=${this.document._id}`, '_blank')
+        .focus();
+    }
+  }
 }

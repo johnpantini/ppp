@@ -150,7 +150,6 @@ export const widgetStyles = (context, definition) =>
     }
 
     .widget-close-button {
-      color: #4f4f4f;
       font-size: 16px;
       margin-right: 2px;
       width: 16px;

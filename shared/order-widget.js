@@ -82,13 +82,16 @@ export const orderWidgetTemplate = (context, definition) => html`
             )}
           </div>
           <div class="widget-header-controls">
-            <img
-              draggable="false"
-              alt="Закрыть"
+            <div
+              style="background-image:url('static/widgets/settings.svg')"
               class="widget-close-button"
-              src="static/widgets/close.svg"
-              @click="${(x) => x.close()}"
-            />
+              @click="${(x) => x.goToSettings()}">
+            </div>
+            <div
+              style="background-image:url('static/widgets/close.svg')"
+              class="widget-close-button"
+              @click="${(x) => x.close()}">
+            </div>
           </div>
         </div>
       </div>
@@ -355,6 +358,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
   level1Trader;
 
   @observable
+  positionTrader;
+
+  @observable
   lastPrice;
 
   @observable
@@ -398,6 +404,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
     this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
     this.level1Trader = await ppp.getOrCreateTrader(this.document.level1Trader);
+    this.positionTrader = await ppp.getOrCreateTrader(
+      this.document.positionTrader
+    );
     this.searchControl.trader = this.ordersTrader;
 
     if (this.level1Trader) {
@@ -408,7 +417,15 @@ export class PppOrderWidget extends WidgetWithInstrument {
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK,
+          bestAsk: TRADER_DATUM.BEST_ASK
+        }
+      });
+    }
+
+    if (this.positionTrader) {
+      await this.positionTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
           positionSize: TRADER_DATUM.POSITION_SIZE,
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
@@ -443,7 +460,15 @@ export class PppOrderWidget extends WidgetWithInstrument {
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK,
+          bestAsk: TRADER_DATUM.BEST_ASK
+        }
+      });
+    }
+
+    if (this.positionTrader) {
+      await this.positionTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
           positionSize: TRADER_DATUM.POSITION_SIZE,
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
@@ -487,6 +512,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
   instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
     this.level1Trader?.instrumentChanged?.(this, oldValue, newValue);
+    this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
 
     this.calculateEstimate();
   }
@@ -494,6 +520,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
   async validate() {
     await validate(this.container.ordersTraderId);
     await validate(this.container.level1TraderId);
+    await validate(this.container.positionTraderId);
   }
 
   async update() {
@@ -501,6 +528,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
         level1TraderId: this.container.level1TraderId.value,
+        positionTraderId: this.container.positionTraderId.value,
         pusherApiId: this.container.pusherApiId.value,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
         changePriceQuantityViaMouseWheel:
@@ -891,6 +919,49 @@ export async function widgetDefinition(definition = {}) {
                       $or: [
                         { removed: { $ne: true } },
                         { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                      ]
+                    }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-collection-select>
+        <${'ppp-button'}
+          class="margin-top"
+          @click="${() => window.open('?page=trader', '_blank').focus()}"
+          appearance="primary"
+        >
+          Создать нового трейдера
+        </ppp-button>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер позиций</h5>
+          <p>Трейдер, ответственный за отображение средней цены и размера
+            позиции в виджете.</p>
+        </div>
+        <ppp-collection-select
+          ${ref('positionTraderId')}
+          value="${(x) => x.document.positionTraderId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.positionTrader ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('traders')
+                .find({
+                  $and: [
+                    {
+                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
+                    },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.positionTraderId ?? ''%]` }
                       ]
                     }
                   ]

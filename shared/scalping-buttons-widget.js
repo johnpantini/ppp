@@ -41,13 +41,16 @@ export const scalpingButtonsWidgetTemplate = (context, definition) => html`
             <span>${(x) => x.document?.name ?? ''}</span>
           </div>
           <div class="widget-header-controls">
-            <img
-              draggable="false"
-              alt="Закрыть"
+            <div
+              style="background-image:url('static/widgets/settings.svg')"
               class="widget-close-button"
-              src="static/widgets/close.svg"
-              @click="${(x) => x.close()}"
-            />
+              @click="${(x) => x.goToSettings()}">
+            </div>
+            <div
+              style="background-image:url('static/widgets/close.svg')"
+              class="widget-close-button"
+              @click="${(x) => x.close()}">
+            </div>
           </div>
         </div>
       </div>
