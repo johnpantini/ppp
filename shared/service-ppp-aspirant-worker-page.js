@@ -354,6 +354,12 @@ export class ServicePppAspirantWorkerPage extends Page {
     );
   }
 
+  #getIntervalEnv() {
+    return {
+      PPP_ROOT_URL: ppp.rootUrl
+    };
+  }
+
   async #recreate() {
     await this.#aspirantRequest('workers', {
       method: 'DELETE',
@@ -366,15 +372,19 @@ export class ServicePppAspirantWorkerPage extends Page {
       method: 'POST',
       body: JSON.stringify({
         _id: this.document._id,
-        env: new Function(
-          `return Object.assign({}, ${await new Tmpl().render(
-            this.page.view,
-            this.document.environmentCode
-          )}, ${await new Tmpl().render(
-            this.page.view,
-            this.document.environmentCodeSecret
-          )});`
-        )(),
+        env: Object.assign(
+          {},
+          new Function(
+            `return Object.assign({}, ${await new Tmpl().render(
+              this.page.view,
+              this.document.environmentCode
+            )}, ${await new Tmpl().render(
+              this.page.view,
+              this.document.environmentCodeSecret
+            )});`
+          )(),
+          this.#getIntervalEnv()
+        ),
         source: encodeURIComponent(
           await new Tmpl().render(this.page.view, this.document.sourceCode)
         )
