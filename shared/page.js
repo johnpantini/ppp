@@ -572,7 +572,7 @@ export class Page extends FoundationElement {
   #keypressHandler(e) {
     switch (e.key) {
       case keyEnter:
-        if (e.path.find((el) => el?.tagName?.toLowerCase() === 'textarea'))
+        if (e.composedPath().find((el) => el?.tagName?.toLowerCase() === 'textarea'))
           return;
 
         // Prevent multiple submissions
