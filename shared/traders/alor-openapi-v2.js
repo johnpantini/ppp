@@ -702,6 +702,8 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
+    if (instrument?.exchange?.indexOf?.(this.getExchange()) === -1) return;
+
     if (this.connection.readyState === WebSocket.OPEN) {
       const guid = this.#reqId();
 
@@ -795,6 +797,8 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async removeLastRef(instrument, refs, ref) {
+    if (instrument?.exchange?.indexOf?.(this.getExchange()) === -1) return;
+
     if (this.connection.readyState === WebSocket.OPEN) {
       this.#guids.delete(ref.guid);
 
