@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 2
+// @version 3
 // ==/PPPScript==
 
 import { isMainThread, parentPort } from 'node:worker_threads';
@@ -17,6 +17,21 @@ const { default: uWS } = await import(
 
 const { UTEXUSDataServer } = await import(
   'file://' + path.join(process.env.PPP_ASPIRANT_DIRNAME, '../aurora/utex.mjs')
+);
+
+const { redisCommand } = await import(
+  typeof process.env.PPP_ROOT_URL === 'undefined'
+    ? 'file://' +
+        path.join(process.env.PPP_ASPIRANT_DIRNAME, '../../util/redis.mjs')
+    : new URL(
+        `data:text/javascript,${encodeURIComponent(
+          await (
+            await fetch(
+              `${process.env.PPP_ROOT_URL}/salt/states/ppp/util/redis.mjs`
+            )
+          ).text()
+        )}`
+      )
 );
 
 function isJWTTokenExpired(jwtToken) {
@@ -120,41 +135,6 @@ const UTEXExchangeToAlpacaExchange = (exchangeId) => {
 
 let appListenSocket;
 const wsMap = new Map();
-
-const redisCommand = async (command, args = []) => {
-  if (process.env.ASPIRANT_ID && process.env.PPP_WORKER_ID) {
-    return await (
-      await fetch(
-        new URL('redis', process.env.SERVICE_MACHINE_URL).toString(),
-        {
-          method: 'POST',
-          cache: 'no-cache',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            options: {
-              host: process.env.REDIS_HOST,
-              port: +process.env.REDIS_PORT,
-              tls: !!process.env.REDIS_TLS
-                ? {
-                    servername: process.env.REDIS_HOST
-                  }
-                : void 0,
-              username: process.env.REDIS_USERNAME,
-              db: +process.env.REDIS_DATABASE,
-              password: process.env.REDIS_PASSWORD
-            },
-            command,
-            args
-          })
-        }
-      )
-    ).text();
-  }
-
-  return null;
-};
 
 uWS
   .App({})
