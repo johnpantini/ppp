@@ -137,6 +137,7 @@ export const servicesPageTemplate = (context, definition) => html`
                     () => datum.versioningStatus === VERSIONING_STATUS.OLD,
                     html`
                       <${'ppp-button'}
+                        style="margin-right: 4px"
                         disabled
                         shiftlock
                         class="xsmall"
