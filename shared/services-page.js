@@ -8,6 +8,7 @@ import { Observable } from './element/observation/observable.js';
 import { applyMixins } from './utilities/apply-mixins.js';
 import { parsePPPScript } from './ppp-script.js';
 import { SERVICES, VERSIONING_STATUS } from './const.js';
+import { later } from './later.js';
 
 export class ServicesPage extends Page {
   collection = 'services';
@@ -84,6 +85,8 @@ export class ServicesPage extends Page {
       methodName: 'updateService'
     });
 
+    await later(1000);
+
     const index = this.documents.findIndex((d) => d._id === datum._id);
 
     if (index > -1) {
@@ -100,6 +103,8 @@ export class ServicesPage extends Page {
       documentId: datum._id,
       methodName: 'cleanupService'
     });
+
+    await later(1000);
 
     const index = this.documents.findIndex((d) => d._id === datum._id);
 
