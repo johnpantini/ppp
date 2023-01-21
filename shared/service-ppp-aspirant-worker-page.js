@@ -356,7 +356,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
   #getIntervalEnv() {
     return {
-      PPP_ROOT_URL: ppp.rootUrl
+      PPP_ROOT_URL: ppp.rootUrl.replace('github.io.dev', 'github.io/ppp')
     };
   }
 
