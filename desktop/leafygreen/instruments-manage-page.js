@@ -49,6 +49,15 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
                 </ppp-banner>
               `
             )}
+            ${when(
+              (x) => x.document.removed,
+              html`
+                <${'ppp-banner'} class="inline margin-top" appearance="warning">
+                  Инструмент удалён из приложения и не показывается в поиске
+                  виджетов.
+                </ppp-banner>
+              `
+            )}
           </div>
           <div class="input-group">
             <ppp-text-field
@@ -186,6 +195,24 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
                   x.document.broker?.indexOf(BROKERS.PSINA) > -1}"
               >
                 ${(x) => x.t(`$const.broker.${BROKERS.PSINA}`)}
+              </ppp-checkbox>
+            </div>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
+            <h5>Флаги</h5>
+            <p>Параметры инструмента, принимающие значение Да или Нет.</p>
+          </div>
+          <div class="input-group">
+            <div
+              style="display: flex; flex-direction: column;"
+            >
+              <${'ppp-checkbox'}
+                ?checked="${(x) => x.document.removed}"
+                ${ref('removed')}
+              >
+                Инструмент удалён
               </ppp-checkbox>
             </div>
           </div>

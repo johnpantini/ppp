@@ -149,6 +149,7 @@ export class InstrumentsManagePage extends Page {
         ),
         spbexSymbol: this.spbexSymbol.value.trim(),
         tinkoffFigi: this.tinkoffFigi.value.trim(),
+        removed: !!this.removed.checked,
         updatedAt: new Date()
       },
       $setOnInsert: {
