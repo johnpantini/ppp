@@ -23,6 +23,7 @@ export const instrumentsPageTemplate = (context, definition) => html`
         }}"
       >
         <ppp-tab id="manage">Добавление/редактирование</ppp-tab>
+        <ppp-tab id="remove">Удаление</ppp-tab>
         <ppp-tab id="import">Импорт</ppp-tab>
         <ppp-tab-panel id="manage-panel"></ppp-tab-panel>
         <ppp-tab-panel id="import-panel"></ppp-tab-panel>
@@ -30,6 +31,10 @@ export const instrumentsPageTemplate = (context, definition) => html`
       ${when(
         (x) => x.tabs.activeid === 'manage',
         html` <ppp-instruments-manage-page></ppp-instruments-manage-page>`
+      )}
+      ${when(
+        (x) => x.tabs.activeid === 'remove',
+        html` <ppp-instruments-remove-page></ppp-instruments-remove-page>`
       )}
       ${when(
         (x) => x.tabs.activeid === 'import',

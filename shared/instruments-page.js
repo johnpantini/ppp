@@ -6,7 +6,7 @@ export class InstrumentsPage extends Page {
   getActiveTab() {
     const params = ppp.app.params();
 
-    if (/manage|import|export/i.test(params.tab)) return params.tab;
+    if (/manage|remove|import/i.test(params.tab)) return params.tab;
     else return 'manage';
   }
 
