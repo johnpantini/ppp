@@ -18,6 +18,7 @@ export class TraderWithSimpleSearch {
         const exactSymbolMatch = collection
           .find({
             $and: [
+              { removed: { $ne: true } },
               {
                 exchange: '$exchange'
               },
@@ -41,6 +42,7 @@ export class TraderWithSimpleSearch {
         const regexSymbolMatch = collection
           .find({
             $and: [
+              { removed: { $ne: true } },
               {
                 exchange: '$exchange'
               },
@@ -57,6 +59,7 @@ export class TraderWithSimpleSearch {
         const regexFullNameMatch = collection
           .find({
             $and: [
+              { removed: { $ne: true } },
               {
                 exchange: '$exchange'
               },

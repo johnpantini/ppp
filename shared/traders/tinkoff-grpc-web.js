@@ -464,6 +464,7 @@ class TinkoffGrpcWebTrader extends Trader {
         const exactSymbolMatch = collection
           .find({
             $and: [
+              { removed: { $ne: true } },
               {
                 exchange: {
                   $in: ['spbex', 'moex']
@@ -489,6 +490,7 @@ class TinkoffGrpcWebTrader extends Trader {
         const regexSymbolMatch = collection
           .find({
             $and: [
+              { removed: { $ne: true } },
               {
                 exchange: {
                   $in: ['spbex', 'moex']
@@ -507,6 +509,7 @@ class TinkoffGrpcWebTrader extends Trader {
         const regexFullNameMatch = collection
           .find({
             $and: [
+              { removed: { $ne: true } },
               {
                 exchange: {
                   $in: ['spbex', 'moex']
