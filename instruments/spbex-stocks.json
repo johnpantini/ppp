@@ -2300,26 +2300,6 @@
     "tinkoffFigi": "BBG001J1QN87"
   },
   {
-    "symbol": "EAR",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Eargo",
-    "isin": "US2700871096",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api",
-      "utex-aurora",
-      "psina"
-    ],
-    "tinkoffFigi": "BBG009HSTZ10"
-  },
-  {
     "symbol": "COUR",
     "exchange": [
       "nyse-nsdq",
@@ -36700,24 +36680,6 @@
     ]
   },
   {
-    "symbol": "BLZE",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "Backblaze",
-    "isin": "US05637B1052",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "utex-aurora",
-      "psina"
-    ]
-  },
-  {
     "symbol": "TECH",
     "exchange": [
       "nyse-nsdq",
@@ -36790,23 +36752,5 @@
       "psina"
     ],
     "tinkoffFigi": "BBG000BH2JM1"
-  },
-  {
-    "symbol": "AG",
-    "exchange": [
-      "nyse-nsdq",
-      "spbex"
-    ],
-    "fullName": "First Majestic Silver Corporation",
-    "isin": "CA32076V1031",
-    "minPriceIncrement": 0.01,
-    "type": "stock",
-    "currency": "USD",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "utex-aurora",
-      "psina"
-    ]
   }
 ]
