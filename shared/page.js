@@ -326,7 +326,8 @@ export class Page extends FoundationElement {
           );
         }
 
-        encryptedUpdateClause.$unset = { removed: '' };
+        if (typeof encryptedUpdateClause?.$set?.removed === 'undefined')
+          encryptedUpdateClause.$unset = { removed: '' };
 
         await ppp.user.functions.updateOne(
           {
@@ -572,7 +573,11 @@ export class Page extends FoundationElement {
   #keypressHandler(e) {
     switch (e.key) {
       case keyEnter:
-        if (e.composedPath().find((el) => el?.tagName?.toLowerCase() === 'textarea'))
+        if (
+          e
+            .composedPath()
+            .find((el) => el?.tagName?.toLowerCase() === 'textarea')
+        )
           return;
 
         // Prevent multiple submissions
