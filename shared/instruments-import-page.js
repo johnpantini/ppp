@@ -92,14 +92,22 @@ export class InstrumentsImportPage extends Page {
         collection: 'instruments'
       },
       array.map((i) => {
+        const updateClause = {
+          $set: i
+        };
+
+        if (typeof i.removed === 'undefined') {
+          updateClause.$unset = {
+            removed: ''
+          };
+        }
+
         return {
           updateOne: {
             filter: {
               symbol: i.symbol
             },
-            update: {
-              $set: i
-            },
+            update: updateClause,
             upsert: true
           }
         };
