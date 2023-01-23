@@ -304,6 +304,13 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   async cancelAllOrders() {
+    if (typeof this.ordersTrader?.cancelAllLimitOrders !== 'function') {
+      return this.notificationsArea.error({
+        title: 'Активные заявки',
+        text: 'Трейдер не поддерживает отмену всех заявок.'
+      });
+    }
+
     this.topLoader.start();
 
     try {
