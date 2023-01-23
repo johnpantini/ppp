@@ -354,7 +354,7 @@ export class ServicePppAspirantWorkerPage extends Page {
     );
   }
 
-  #getIntervalEnv() {
+  #getInternalEnv() {
     return {
       PPP_ROOT_URL: ppp.rootUrl.replace('github.io.dev', 'github.io/ppp')
     };
@@ -383,7 +383,7 @@ export class ServicePppAspirantWorkerPage extends Page {
               this.document.environmentCodeSecret
             )});`
           )(),
-          this.#getIntervalEnv()
+          this.#getInternalEnv()
         ),
         source: encodeURIComponent(
           await new Tmpl().render(this.page.view, this.document.sourceCode)
