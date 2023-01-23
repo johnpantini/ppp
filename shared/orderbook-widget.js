@@ -387,10 +387,19 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
           const bookPriceAtThisLevel = orderbook.bids[i].price;
 
           if (price === bookPriceAtThisLevel) {
-            orderbook.bids[i].my = volume;
+            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+              orderbook.bids.splice(i, 0, {
+                price,
+                volume,
+                my: volume,
+                pool: this.bookTrader?.document?.exchange ?? 'SPBX'
+              });
+            } else {
+              orderbook.bids[i].my = volume;
 
-            if (orderbook.bids[i].volume < volume)
-              orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+              if (orderbook.bids[i].volume < volume)
+                orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+            }
 
             insertAtTheEnd = false;
 
@@ -431,10 +440,20 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
           const bookPriceAtThisLevel = orderbook.asks[i].price;
 
           if (price === bookPriceAtThisLevel) {
-            orderbook.asks[i].my = volume;
+            // Always display fake pool
+            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+              orderbook.asks.splice(i, 0, {
+                price,
+                volume,
+                my: volume,
+                pool: this.bookTrader?.document?.exchange ?? 'SPBX'
+              });
+            } else {
+              orderbook.asks[i].my = volume;
 
-            if (orderbook.asks[i].volume < volume)
-              orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+              if (orderbook.asks[i].volume < volume)
+                orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+            }
 
             insertAtTheEnd = false;
 
