@@ -9,13 +9,14 @@ import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
 import {
-  MarketDataStreamServiceDefinition,
   MarketDataServiceDefinition,
+  MarketDataStreamServiceDefinition,
   SubscriptionAction,
   TradeDirection
 } from '../../vendor/tinkoff/definitions/market-data.js';
 import {
   OrderDirection,
+  OrderExecutionReportStatus,
   OrdersServiceDefinition,
   OrderType
 } from '../../vendor/tinkoff/definitions/orders.js';
@@ -46,6 +47,8 @@ export function toNumber(value) {
 }
 
 class TinkoffGrpcWebTrader extends Trader {
+  #instruments = new Map();
+
   #clients = new Map();
 
   #metadata;
@@ -55,17 +58,21 @@ class TinkoffGrpcWebTrader extends Trader {
   // Key: figi ; Value: instrument object
   #figis = new Map();
 
+  orders = new Map();
+
   // Key: widget instance; Value: [{ field, datum }] array
   subs = {
     orderbook: new Map(),
-    allTrades: new Map()
+    allTrades: new Map(),
+    orders: new Map()
   };
 
   // Key: instrumentId; Value: { instrument, refCount }
   // Value contains lastOrderbookData for orderbook
   refs = {
     orderbook: new Map(),
-    allTrades: new Map()
+    allTrades: new Map(),
+    orders: new Map()
   };
 
   constructor(document) {
@@ -75,6 +82,39 @@ class TinkoffGrpcWebTrader extends Trader {
       Authorization: `Bearer ${this.document.broker.apiToken}`,
       'x-app-name': `${ppp.keyVault.getKey('github-login')}.ppp`
     });
+  }
+
+  async #buildInstrumentCache() {
+    if (!this.#instruments.size) {
+      await this.waitForInstrumentCache();
+
+      return new Promise((resolve, reject) => {
+        const tx = this.cacheRequest.result.transaction(
+          'instruments',
+          'readonly'
+        );
+        const store = tx.objectStore('instruments');
+        const cursorRequest = store.openCursor();
+
+        cursorRequest.onsuccess = (event) => {
+          const result = event.target.result;
+
+          if (result?.value) {
+            if (result.value.tinkoffFigi) {
+              this.#instruments.set(result.value.tinkoffFigi, result.value);
+            }
+
+            result['continue']();
+          }
+        };
+
+        tx.oncomplete = () => {
+          resolve(this.#instruments);
+        };
+
+        tx.onerror = () => reject();
+      });
+    }
   }
 
   getOrCreateClient(service) {
@@ -155,12 +195,78 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  @debounce(100)
-  resubscribeToMarketData(reconnect = false) {
-    return this.#resubscribeToMarketData(reconnect);
+  async cancelLimitOrder(order) {
+    try {
+      if (order.orderType === 'limit') {
+        const client = createClient(
+          OrdersServiceDefinition,
+          createChannel('https://invest-public-api.tinkoff.ru:443'),
+          {
+            '*': {
+              metadata: this.#metadata
+            }
+          }
+        );
+
+        await client.cancelOrder({
+          accountId: this.document.account,
+          orderId: order.orderId
+        });
+
+        return {
+          orderId: order.orderId
+        };
+      }
+    } catch (e) {
+      throw new TradingError({
+        message: e.message,
+        details: e.details
+      });
+    }
   }
 
-  async #resubscribeToMarketData(reconnect = false) {
+  async cancelAllLimitOrders({ instrument }) {
+    try {
+      const client = createClient(
+        OrdersServiceDefinition,
+        createChannel('https://invest-public-api.tinkoff.ru:443'),
+        {
+          '*': {
+            metadata: this.#metadata
+          }
+        }
+      );
+
+      const { orders } = await client.getOrders({
+        accountId: this.document.account
+      });
+
+      for (const o of orders) {
+        const status = this.#getOrderStatus(o);
+
+        if (status === 'working') {
+          if (instrument && o.figi !== instrument.tinkoffFigi) continue;
+
+          await client.cancelOrder({
+            accountId: this.document.account,
+            orderId: o.orderId
+          });
+        }
+      }
+    } catch (e) {
+      throw new TradingError({
+        message: e.message,
+        details: e.details
+      });
+    }
+  }
+
+  @debounce(100)
+  resubscribeToMarketDataStream(reconnect = false) {
+    return this.#resubscribeToMarketDataStream(reconnect);
+  }
+
+  async #resubscribeToMarketDataStream(reconnect = false) {
     if (!this.refs.orderbook.size && !this.refs.allTrades.size) {
       return;
     }
@@ -254,13 +360,13 @@ class TinkoffGrpcWebTrader extends Trader {
         }
       }
 
-      this.resubscribeToMarketData(true);
+      this.resubscribeToMarketDataStream(true);
     } catch (e) {
       if (!isAbortError(e)) {
         console.error(e);
 
         setTimeout(() => {
-          this.resubscribeToMarketData(true);
+          this.resubscribeToMarketDataStream(true);
         }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
       }
     }
@@ -277,8 +383,29 @@ class TinkoffGrpcWebTrader extends Trader {
   subsAndRefs(datum) {
     return {
       [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
-      [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades]
+      [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades],
+      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders]
     }[datum];
+  }
+
+  async subscribeField({ source, field, datum }) {
+    if (datum === TRADER_DATUM.CURRENT_ORDER) {
+      await this.#buildInstrumentCache();
+    }
+
+    await super.subscribeField({ source, field, datum });
+
+    switch (datum) {
+      case TRADER_DATUM.CURRENT_ORDER: {
+        for (const [_, order] of this.orders) {
+          this.onOrdersMessage({
+            order
+          });
+        }
+
+        break;
+      }
+    }
   }
 
   async addFirstRef(instrument, refs) {
@@ -302,7 +429,11 @@ class TinkoffGrpcWebTrader extends Trader {
     }
 
     if (refs === this.refs.orderbook || refs === this.refs.allTrades) {
-      this.resubscribeToMarketData();
+      this.resubscribeToMarketDataStream();
+    }
+
+    if (refs === this.refs.orders) {
+      void this.#fetchOrdersLoop();
     }
   }
 
@@ -313,6 +444,10 @@ class TinkoffGrpcWebTrader extends Trader {
 
     if (refs === this.refs.allTrades) {
       this.refs.allTrades.delete(instrument._id);
+    }
+
+    if (refs === this.refs.orders) {
+      this.orders.clear();
     }
 
     if (!this.refs.orderbook.size && !this.refs.allTrades.size) {
@@ -435,6 +570,114 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
+  async #fetchOrdersLoop() {
+    if (this.refs.orders.size) {
+      try {
+        const client = createClient(
+          OrdersServiceDefinition,
+          createChannel('https://invest-public-api.tinkoff.ru:443'),
+          {
+            '*': {
+              metadata: this.#metadata
+            }
+          }
+        );
+
+        const { orders } = await client.getOrders({
+          accountId: this.document.account
+        });
+
+        const newOrders = new Set();
+
+        for (const o of orders) {
+          newOrders.add(o.orderId);
+
+          if (!this.orders.has(o.orderId)) {
+            this.orders.set(o.orderId, o);
+            this.onOrdersMessage({ order: o });
+          }
+        }
+
+        for (const [orderId, order] of this.orders) {
+          if (!newOrders.has(orderId)) {
+            order.executionReportStatus =
+              OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_UNSPECIFIED;
+
+            this.onOrdersMessage({ order });
+            this.orders.delete(orderId);
+          }
+        }
+
+        setTimeout(() => {
+          this.#fetchOrdersLoop();
+        }, 750);
+      } catch (e) {
+        console.error(e);
+
+        setTimeout(() => {
+          this.#fetchOrdersLoop();
+        }, 750);
+      }
+    }
+  }
+
+  #getOrderStatus(o = {}) {
+    switch (o.executionReportStatus) {
+      case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_CANCELLED:
+        return 'canceled';
+      case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_REJECTED:
+        return 'rejected';
+      case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_FILL:
+        return 'filled';
+      case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_PARTIALLYFILL:
+      case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_NEW:
+        return 'working';
+      case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_UNSPECIFIED:
+        return 'unspecified';
+    }
+  }
+
+  onOrdersMessage({ order }) {
+    if (order) {
+      for (const [source, fields] of this.subs.orders) {
+        for (const { field, datum } of fields) {
+          if (datum === TRADER_DATUM.CURRENT_ORDER) {
+            const instrument = this.#instruments.get(order.figi);
+
+            source[field] = {
+              instrument: instrument ?? {
+                symbol: order.figi,
+                currency: order.currency.toUpperCase(),
+                lot: Math.round(
+                  toNumber(order.initialOrderPrice) /
+                    toNumber(order.initialSecurityPrice) /
+                    order.lotsRequested
+                )
+              },
+              orderId: order.orderId,
+              symbol: order.figi,
+              exchange: 0,
+              orderType:
+                order.orderType === OrderType.ORDER_TYPE_LIMIT
+                  ? 'limit'
+                  : 'market',
+              side:
+                order.direction === OrderDirection.ORDER_DIRECTION_BUY
+                  ? 'buy'
+                  : 'sell',
+              status: this.#getOrderStatus(order),
+              placedAt: order.orderDate.toISOString(),
+              endsAt: null,
+              quantity: order.lotsRequested,
+              filled: order.lotsExecuted,
+              price: toNumber(order.initialSecurityPrice)
+            };
+          }
+        }
+      }
+    }
+  }
+
   async instrumentChanged(source, oldValue, newValue) {
     await super.instrumentChanged(source, oldValue, newValue);
 
@@ -547,6 +790,8 @@ class TinkoffGrpcWebTrader extends Trader {
     const details = +error.details;
 
     switch (details) {
+      case 30042:
+        return 'Недостаточно активов для маржинальной сделки.';
       case 30049:
         return 'Ошибка метода выставления торгового поручения.';
       case 30052:

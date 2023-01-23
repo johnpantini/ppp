@@ -6,6 +6,10 @@ export class Trader {
 
   #cacheRequest;
 
+  get cacheRequest() {
+    return this.#cacheRequest;
+  }
+
   #cacheRequestPendingSuccess;
 
   constructor(document) {
