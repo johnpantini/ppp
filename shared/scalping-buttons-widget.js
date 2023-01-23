@@ -211,6 +211,11 @@ export class PppScalpingButtonsWidget extends WidgetWithInstrument {
           }
         }
       }
+    } else {
+      return this.notificationsArea.error({
+        title: 'Скальперские кнопки',
+        text: 'Трейдер не поддерживает переставление заявок.'
+      });
     }
   }
 
