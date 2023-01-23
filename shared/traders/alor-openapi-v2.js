@@ -1022,7 +1022,7 @@ class AlorOpenAPIV2Trader extends Trader {
             const payload = {
               orderId: data.id,
               symbol: data.symbol,
-              exchange: data.exchange,
+              exchange: [data.exchange],
               orderType: data.type,
               side: data.side,
               status: data.status,
