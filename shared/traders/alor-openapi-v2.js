@@ -663,7 +663,7 @@ class AlorOpenAPIV2Trader extends Trader {
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE: {
-        for (const [symbol, data] of this.positions) {
+        for (const [_, data] of this.positions) {
           this.onPositionsMessage({
             data,
             fromCache: true
@@ -673,7 +673,7 @@ class AlorOpenAPIV2Trader extends Trader {
         break;
       }
       case TRADER_DATUM.CURRENT_ORDER: {
-        for (const [symbol, data] of this.orders) {
+        for (const [_, data] of this.orders) {
           this.onOrdersMessage({
             data,
             fromCache: true
@@ -1014,7 +1014,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
   onOrdersMessage({ data, fromCache }) {
     if (data) {
-      if (!fromCache) this.orders.set(data.symbol, data);
+      if (!fromCache) this.orders.set(data.id, data);
 
       for (const [source, fields] of this.subs.orders) {
         for (const { field, datum } of fields) {
