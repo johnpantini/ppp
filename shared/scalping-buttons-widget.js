@@ -159,6 +159,10 @@ export class PppScalpingButtonsWidget extends WidgetWithInstrument {
 
     this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
     this.searchControl.trader = this.ordersTrader;
+
+    if (this.ordersTrader) {
+      await this.ordersTrader.sayHello(WIDGET_TYPES.SCALPING_BUTTONS);
+    }
   }
 
   handleOrderTypeChange() {

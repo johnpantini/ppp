@@ -6,6 +6,10 @@ export class Trader {
 
   #cacheRequest;
 
+  async sayHello() {
+    return 'Hi';
+  }
+
   get cacheRequest() {
     return this.#cacheRequest;
   }
