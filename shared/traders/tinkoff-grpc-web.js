@@ -1,6 +1,6 @@
 /** @decorator */
 
-import { TRADER_DATUM } from '../const.js';
+import { TRADER_DATUM, WIDGET_TYPES } from '../const.js';
 import { Trader } from './common-trader.js';
 import { applyMixins } from '../utilities/apply-mixins.js';
 import { cyrillicToLatin } from '../intl.js';
@@ -18,7 +18,8 @@ import {
   OrderDirection,
   OrderExecutionReportStatus,
   OrdersServiceDefinition,
-  OrderType
+  OrderType,
+  PriceType
 } from '../../vendor/tinkoff/definitions/orders.js';
 import { isAbortError } from '../../vendor/abort-controller-x.js';
 import { TradingError } from '../trading-error.js';
@@ -55,6 +56,8 @@ class TinkoffGrpcWebTrader extends Trader {
 
   #marketDataAbortController;
 
+  #pendingInstrumentCachePromise;
+
   // Key: figi ; Value: instrument object
   #figis = new Map();
 
@@ -84,15 +87,25 @@ class TinkoffGrpcWebTrader extends Trader {
     });
   }
 
-  async #buildInstrumentCache() {
-    if (!this.#instruments.size) {
-      await this.waitForInstrumentCache();
+  async sayHello(widget) {
+    if (widget === WIDGET_TYPES.SCALPING_BUTTONS) {
+      await this.#buildInstrumentCache();
+    }
 
-      return new Promise((resolve, reject) => {
+    return super.sayHello();
+  }
+
+  async #buildInstrumentCache() {
+    await this.waitForInstrumentCache();
+
+    return (
+      this.#pendingInstrumentCachePromise ??
+      (this.#pendingInstrumentCachePromise = new Promise((resolve, reject) => {
         const tx = this.cacheRequest.result.transaction(
           'instruments',
           'readonly'
         );
+
         const store = tx.objectStore('instruments');
         const cursorRequest = store.openCursor();
 
@@ -113,8 +126,8 @@ class TinkoffGrpcWebTrader extends Trader {
         };
 
         tx.onerror = () => reject();
-      });
-    }
+      }))
+    );
   }
 
   getOrCreateClient(service) {
@@ -251,6 +264,56 @@ class TinkoffGrpcWebTrader extends Trader {
             accountId: this.document.account,
             orderId: o.orderId
           });
+        }
+      }
+    } catch (e) {
+      throw new TradingError({
+        message: e.message,
+        details: e.details
+      });
+    }
+  }
+
+  async modifyLimitOrders({ instrument, side, value }) {
+    try {
+      const client = createClient(
+        OrdersServiceDefinition,
+        createChannel('https://invest-public-api.tinkoff.ru:443'),
+        {
+          '*': {
+            metadata: this.#metadata
+          }
+        }
+      );
+
+      const { orders } = await client.getOrders({
+        accountId: this.document.account
+      });
+
+      for (const o of orders) {
+        const status = this.#getOrderStatus(o);
+        const orderSide =
+          o.direction === OrderDirection.ORDER_DIRECTION_BUY ? 'buy' : 'sell';
+
+        if (status === 'working' && orderSide === side) {
+          const orderInstrument = this.#instruments.get(o.figi);
+
+          if (orderInstrument && orderInstrument.minPriceIncrement > 0) {
+            await client.replaceOrder({
+              accountId: this.document.account,
+              orderId: o.orderId,
+              idempotencyKey: this.#orderId(),
+              quantity: o.lotsRequested - o.lotsExecuted,
+              price: toQuotation(
+                +this.fixPrice(
+                  orderInstrument,
+                  toNumber(o.initialSecurityPrice) +
+                    orderInstrument.minPriceIncrement * value
+                )
+              ),
+              priceType: PriceType.PRICE_TYPE_CURRENCY
+            });
+          }
         }
       }
     } catch (e) {
