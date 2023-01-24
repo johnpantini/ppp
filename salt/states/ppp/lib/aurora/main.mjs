@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 3
+// @version 4
 // ==/PPPScript==
 
 import { isMainThread, parentPort } from 'node:worker_threads';
@@ -177,11 +177,23 @@ uWS
               ])
             );
           } else {
+            if (!payload.key) {
+              return ws.send(
+                JSON.stringify([{ T: 'error', code: 422, msg: 'auth failed' }])
+              );
+            }
+
+            // Remove deprecated keys from v3
+            await redisCommand('del', [
+              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
+              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`
+            ]);
+
             let savedAccessToken = await redisCommand('get', [
-              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`
+              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-token`
             ]);
             let savedRefreshToken = await redisCommand('get', [
-              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`
+              `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-refresh-token`
             ]);
             let tokensResponse;
 
@@ -250,9 +262,9 @@ uWS
                 savedRefreshToken = tokensResponse.tokens.refreshToken;
 
                 await redisCommand('mset', [
-                  `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
+                  `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-token`,
                   savedAccessToken,
-                  `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`,
+                  `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-refresh-token`,
                   savedRefreshToken
                 ]);
               }
@@ -271,8 +283,8 @@ uWS
               /NoActiveSessionException/i.test(tokensResponse?.type)
             ) {
               await redisCommand('del', [
-                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-token`,
-                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:saved-refresh-token`
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-token`,
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-refresh-token`
               ]);
             }
 
@@ -284,6 +296,11 @@ uWS
                 tokensResponse?.type
               )
             ) {
+              await redisCommand('del', [
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-token`,
+                `ppp-aspirant-worker:${process.env.PPP_WORKER_ID}:${payload.key}:saved-refresh-token`
+              ]);
+
               return ws.send(
                 JSON.stringify([{ T: 'error', code: 402, msg: 'auth failed' }])
               );
