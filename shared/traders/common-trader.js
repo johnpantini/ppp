@@ -42,7 +42,21 @@ export class Trader {
   }
 
   async findInstrumentInCache(symbol) {
+    await this.waitForInstrumentCache();
+
     return this.findInstrumentInCacheAndAssignToField(symbol);
+  }
+
+  hasCommonExchange(e1 = [], e2 = []) {
+    for (let i = 0; i < e1.length; i++) {
+      for (let j = 0; j < e2.length; j++) {
+        if (e1[i] === e2[j]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   async findInstrumentInCacheAndAssignToField(
@@ -66,15 +80,16 @@ export class Trader {
           const instrument = event.target.result;
 
           if (
-            instrument.exchange?.indexOf(
-              this.getExchange(this.document.exchange)
-            ) > -1
+            instrument.broker?.indexOf?.(this.document.broker.type) > -1 &&
+            this.hasCommonExchange(instrument.exchange, this.getExchange())
           ) {
             payload.instrument = instrument;
             source[field] = payload;
           } else {
             // Try with exchange suffix
-            const symbolWithSuffix = `${symbol}~${this.document.exchange}`;
+            const symbolWithSuffix = `${symbol}~${
+              this.document.exchange ?? instrument.exchange
+            }`;
             const storeRequestWithSuffix = store.get(symbolWithSuffix);
 
             storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
@@ -250,6 +265,15 @@ export class Trader {
       const ref = refs.get(instrument._id);
 
       if (typeof ref === 'undefined') {
+        if (
+          instrument.broker?.indexOf?.(this.document.broker.type) === -1 ||
+          // Exchange is undefined for global (instrument-agnostic) datums
+          (typeof instrument.exchange !== 'undefined' &&
+            !this.hasCommonExchange(instrument.exchange, this.getExchange()))
+        ) {
+          return;
+        }
+
         await this.addFirstRef?.(instrument, refs);
       } else {
         ref.refCount++;
@@ -294,5 +318,9 @@ export class Trader {
         }
       }
     }
+  }
+
+  getExchange() {
+    return [];
   }
 }
