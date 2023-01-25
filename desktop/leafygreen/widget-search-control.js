@@ -18,6 +18,7 @@ export const widgetSearchControlTemplate = (context, definition) => html`
       maxlength="20"
       autocomplete="off"
       value="${(x) => x.widget?.instrument?.symbol ?? ''}"
+      title="${(x) => x.widget?.instrument?.symbol ?? ''}"
     />
     <div class="popup">
       <div class="suggest-area">
