@@ -14,7 +14,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000BN56Q9"
+    "tinkoffFigi": "BBG000BN56Q9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ENPG",
@@ -31,7 +32,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RMWQD4"
+    "tinkoffFigi": "BBG000RMWQD4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "POLY",
@@ -48,7 +50,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004PYF2N3"
+    "tinkoffFigi": "BBG004PYF2N3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NKNCP",
@@ -65,7 +68,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000GQSVC2"
+    "tinkoffFigi": "BBG000GQSVC2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RSTIP",
@@ -82,7 +86,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000KTF667"
+    "tinkoffFigi": "BBG000KTF667",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "IRKT",
@@ -99,7 +104,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000FWGSZ5"
+    "tinkoffFigi": "BBG000FWGSZ5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKV",
@@ -116,7 +122,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000PKWCQ7"
+    "tinkoffFigi": "BBG000PKWCQ7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "VSMO",
@@ -133,7 +140,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68CV8"
+    "tinkoffFigi": "BBG004S68CV8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "UNAC",
@@ -150,7 +158,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000Q7ZZY2"
+    "tinkoffFigi": "BBG000Q7ZZY2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LSRG",
@@ -167,7 +176,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68C39"
+    "tinkoffFigi": "BBG004S68C39",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TTLK",
@@ -184,7 +194,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RJL816"
+    "tinkoffFigi": "BBG000RJL816",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "CNTL",
@@ -201,7 +212,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000BBV4M5"
+    "tinkoffFigi": "BBG000BBV4M5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MGNT",
@@ -218,7 +230,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004RVFCY3"
+    "tinkoffFigi": "BBG004RVFCY3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SVAV",
@@ -235,7 +248,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68JR8"
+    "tinkoffFigi": "BBG004S68JR8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ORUP",
@@ -252,7 +266,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG001BBGNS2"
+    "tinkoffFigi": "BBG001BBGNS2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ETLN",
@@ -269,7 +284,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG001M2SC01"
+    "tinkoffFigi": "BBG001M2SC01",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RTKMP",
@@ -286,7 +302,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S685M3"
+    "tinkoffFigi": "BBG004S685M3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GRNT",
@@ -303,7 +320,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00B8NN386"
+    "tinkoffFigi": "BBG00B8NN386",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GEMC",
@@ -320,7 +338,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG011MCM288"
+    "tinkoffFigi": "BBG011MCM288",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KZOSP",
@@ -337,7 +356,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0029SG1C1"
+    "tinkoffFigi": "BBG0029SG1C1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "WUSH",
@@ -354,7 +374,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "TCS00A105EX7"
+    "tinkoffFigi": "TCS00A105EX7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KMAZ",
@@ -371,7 +392,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000LNHHJ9"
+    "tinkoffFigi": "BBG000LNHHJ9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KZOS",
@@ -388,7 +410,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0029SFXB3"
+    "tinkoffFigi": "BBG0029SFXB3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "FIXP",
@@ -405,7 +428,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00ZHCX1X2"
+    "tinkoffFigi": "BBG00ZHCX1X2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "VKCO",
@@ -422,7 +446,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00178PGX3"
+    "tinkoffFigi": "BBG00178PGX3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "PHOR",
@@ -439,7 +464,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S689R0"
+    "tinkoffFigi": "BBG004S689R0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LNZL",
@@ -456,7 +482,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000SK7JS5"
+    "tinkoffFigi": "BBG000SK7JS5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MGTSP",
@@ -473,7 +500,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000PZ0833"
+    "tinkoffFigi": "BBG000PZ0833",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SELG",
@@ -490,7 +518,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002458LF8"
+    "tinkoffFigi": "BBG002458LF8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "AGRO",
@@ -507,7 +536,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG007N0Z367"
+    "tinkoffFigi": "BBG007N0Z367",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TATNP",
@@ -524,7 +554,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68829"
+    "tinkoffFigi": "BBG004S68829",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "VEON-RX",
@@ -541,7 +572,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00R4Z2NT4"
+    "tinkoffFigi": "BBG00R4Z2NT4",
+    "forQualInvestorFlag": true
   },
   {
     "symbol": "BLNG",
@@ -558,7 +590,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000VQWH86"
+    "tinkoffFigi": "BBG000VQWH86",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MAGN",
@@ -575,7 +608,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68507"
+    "tinkoffFigi": "BBG004S68507",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "VTBR",
@@ -592,7 +626,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004730ZJ9"
+    "tinkoffFigi": "BBG004730ZJ9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SMLT",
@@ -609,7 +644,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00F6NKQX3"
+    "tinkoffFigi": "BBG00F6NKQX3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "BANE",
@@ -626,7 +662,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68758"
+    "tinkoffFigi": "BBG004S68758",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "AFLT",
@@ -643,7 +680,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S683W7"
+    "tinkoffFigi": "BBG004S683W7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "CIAN",
@@ -660,7 +698,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG012YQ6P43"
+    "tinkoffFigi": "BBG012YQ6P43",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RUAL",
@@ -677,7 +716,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG008F2T3T2"
+    "tinkoffFigi": "BBG008F2T3T2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NKHP",
@@ -694,7 +734,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00BGKYH17"
+    "tinkoffFigi": "BBG00BGKYH17",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SBER",
@@ -711,7 +752,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004730N88"
+    "tinkoffFigi": "BBG004730N88",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MDMG",
@@ -728,7 +770,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00Y3XYV94"
+    "tinkoffFigi": "BBG00Y3XYV94",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RUSP",
@@ -745,7 +788,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000R466J1"
+    "tinkoffFigi": "BBG000R466J1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GTRK",
@@ -762,7 +806,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00HY6V6H5"
+    "tinkoffFigi": "BBG00HY6V6H5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MVID",
@@ -779,7 +824,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68CP5"
+    "tinkoffFigi": "BBG004S68CP5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "BANEP",
@@ -796,7 +842,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S686N0"
+    "tinkoffFigi": "BBG004S686N0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "OKEY",
@@ -813,7 +860,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00172J7S9"
+    "tinkoffFigi": "BBG00172J7S9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ALRS",
@@ -830,7 +878,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68B31"
+    "tinkoffFigi": "BBG004S68B31",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKP",
@@ -847,7 +896,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000VG1034"
+    "tinkoffFigi": "BBG000VG1034",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "FLOT",
@@ -864,7 +914,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000R04X57"
+    "tinkoffFigi": "BBG000R04X57",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "PMSBP",
@@ -881,7 +932,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000MZL2S9"
+    "tinkoffFigi": "BBG000MZL2S9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TATN",
@@ -898,7 +950,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004RVFFC0"
+    "tinkoffFigi": "BBG004RVFFC0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "FIVE~MOEX",
@@ -915,7 +968,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00JXPFBN0"
+    "tinkoffFigi": "BBG00JXPFBN0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MSTT",
@@ -932,7 +986,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68DD6"
+    "tinkoffFigi": "BBG004S68DD6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MTLR",
@@ -949,7 +1004,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68598"
+    "tinkoffFigi": "BBG004S68598",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "UWGN",
@@ -966,7 +1022,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG008HD3V85"
+    "tinkoffFigi": "BBG008HD3V85",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "AKRN",
@@ -983,7 +1040,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S688G4"
+    "tinkoffFigi": "BBG004S688G4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GAZP",
@@ -1000,7 +1058,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004730RP0"
+    "tinkoffFigi": "BBG004730RP0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "DVEC",
@@ -1017,7 +1076,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000V07CB8"
+    "tinkoffFigi": "BBG000V07CB8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SBERP",
@@ -1034,7 +1094,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0047315Y7"
+    "tinkoffFigi": "BBG0047315Y7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RTKM",
@@ -1051,7 +1112,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S682Z6"
+    "tinkoffFigi": "BBG004S682Z6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LENT",
@@ -1068,7 +1130,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0063FKTD9"
+    "tinkoffFigi": "BBG0063FKTD9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LIFE",
@@ -1085,7 +1148,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0019K04R5"
+    "tinkoffFigi": "BBG0019K04R5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "BSPB",
@@ -1102,7 +1166,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000QJW156"
+    "tinkoffFigi": "BBG000QJW156",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MTSS",
@@ -1119,7 +1184,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S681W1"
+    "tinkoffFigi": "BBG004S681W1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TGKN",
@@ -1136,7 +1202,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RG4ZQ4"
+    "tinkoffFigi": "BBG000RG4ZQ4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TRNFP",
@@ -1153,7 +1220,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00475KHX6"
+    "tinkoffFigi": "BBG00475KHX6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RKKE",
@@ -1170,7 +1238,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000LWNRP3"
+    "tinkoffFigi": "BBG000LWNRP3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LSNG",
@@ -1187,7 +1256,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000NLC9Z6"
+    "tinkoffFigi": "BBG000NLC9Z6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RENI",
@@ -1204,7 +1274,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00QKJSX05"
+    "tinkoffFigi": "BBG00QKJSX05",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKC",
@@ -1221,7 +1292,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000VH7TZ8"
+    "tinkoffFigi": "BBG000VH7TZ8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "POSI",
@@ -1238,7 +1310,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "TCS00A103X66"
+    "tinkoffFigi": "TCS00A103X66",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "POGR",
@@ -1255,7 +1328,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00VPKLPX4"
+    "tinkoffFigi": "BBG00VPKLPX4",
+    "forQualInvestorFlag": true
   },
   {
     "symbol": "FEES",
@@ -1272,7 +1346,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00475JZZ6"
+    "tinkoffFigi": "BBG00475JZZ6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "DASB",
@@ -1289,7 +1364,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000LWVHN8"
+    "tinkoffFigi": "BBG000LWVHN8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KROT",
@@ -1306,7 +1382,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000NLB2G3"
+    "tinkoffFigi": "BBG000NLB2G3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KAZT",
@@ -1323,7 +1400,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002B9MYC1"
+    "tinkoffFigi": "BBG002B9MYC1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RUGR",
@@ -1340,7 +1418,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0014PFYM2"
+    "tinkoffFigi": "BBG0014PFYM2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "PMSB",
@@ -1357,7 +1436,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000MZL0Y6"
+    "tinkoffFigi": "BBG000MZL0Y6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "PRFN",
@@ -1374,7 +1454,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG003BNWBP3"
+    "tinkoffFigi": "BBG003BNWBP3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SIBN",
@@ -1391,7 +1472,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S684M6"
+    "tinkoffFigi": "BBG004S684M6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "YAKG",
@@ -1408,7 +1490,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002B298N6"
+    "tinkoffFigi": "BBG002B298N6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TGKB",
@@ -1425,7 +1508,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000Q7GG57"
+    "tinkoffFigi": "BBG000Q7GG57",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KLSB",
@@ -1442,7 +1526,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000DBD6F6"
+    "tinkoffFigi": "BBG000DBD6F6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "CHMK",
@@ -1459,7 +1544,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RP8V70"
+    "tinkoffFigi": "BBG000RP8V70",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RNFT",
@@ -1476,7 +1562,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00F9XX7H4"
+    "tinkoffFigi": "BBG00F9XX7H4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MSRS",
@@ -1493,7 +1580,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S687G6"
+    "tinkoffFigi": "BBG004S687G6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RSTI",
@@ -1510,7 +1598,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S682J4"
+    "tinkoffFigi": "BBG004S682J4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKZ",
@@ -1527,7 +1616,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000TJ6F42"
+    "tinkoffFigi": "BBG000TJ6F42",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "APTK",
@@ -1544,7 +1634,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000K3STR7"
+    "tinkoffFigi": "BBG000K3STR7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MSST",
@@ -1561,7 +1652,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG001BBSZV8"
+    "tinkoffFigi": "BBG001BBSZV8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "QIWI",
@@ -1578,7 +1670,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG005D1WCQ1"
+    "tinkoffFigi": "BBG005D1WCQ1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "IRAO",
@@ -1595,7 +1688,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68473"
+    "tinkoffFigi": "BBG004S68473",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "HYDR",
@@ -1612,7 +1706,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00475K2X9"
+    "tinkoffFigi": "BBG00475K2X9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TGKD",
@@ -1629,7 +1724,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000F6H7K3"
+    "tinkoffFigi": "BBG000F6H7K3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NSVZ",
@@ -1646,7 +1742,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002BCQK67"
+    "tinkoffFigi": "BBG002BCQK67",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NLMK",
@@ -1663,7 +1760,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S681B4"
+    "tinkoffFigi": "BBG004S681B4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "BELU",
@@ -1680,7 +1778,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000TY1CD1"
+    "tinkoffFigi": "BBG000TY1CD1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GCHE",
@@ -1697,7 +1796,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RTHVK7"
+    "tinkoffFigi": "BBG000RTHVK7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LNZLP",
@@ -1714,7 +1814,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000SR0YS4"
+    "tinkoffFigi": "BBG000SR0YS4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TCSG",
@@ -1731,7 +1832,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00QPYJ5H0"
+    "tinkoffFigi": "BBG00QPYJ5H0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SNGSP",
@@ -1748,7 +1850,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S681M2"
+    "tinkoffFigi": "BBG004S681M2",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "YNDX",
@@ -1765,7 +1868,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG006L8G4H1"
+    "tinkoffFigi": "BBG006L8G4H1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SFIN",
@@ -1782,7 +1886,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG003LYCMB1"
+    "tinkoffFigi": "BBG003LYCMB1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "FESH",
@@ -1799,7 +1904,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000QF1Q17"
+    "tinkoffFigi": "BBG000QF1Q17",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RASP",
@@ -1816,7 +1922,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68696"
+    "tinkoffFigi": "BBG004S68696",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NVTK",
@@ -1833,7 +1940,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00475KKY8"
+    "tinkoffFigi": "BBG00475KKY8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "UNKL",
@@ -1850,7 +1958,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002YFXL29"
+    "tinkoffFigi": "BBG002YFXL29",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NKNC",
@@ -1867,7 +1976,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000GQSRR5"
+    "tinkoffFigi": "BBG000GQSRR5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "AQUA",
@@ -1884,7 +1994,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000W325F7"
+    "tinkoffFigi": "BBG000W325F7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "VRSB",
@@ -1901,7 +2012,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000BX7DH0"
+    "tinkoffFigi": "BBG000BX7DH0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SGZH",
@@ -1918,7 +2030,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0100R9963"
+    "tinkoffFigi": "BBG0100R9963",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LSNGP",
@@ -1935,7 +2048,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000NLCCM3"
+    "tinkoffFigi": "BBG000NLCCM3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GMKN",
@@ -1952,7 +2066,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004731489"
+    "tinkoffFigi": "BBG004731489",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MOEX",
@@ -1969,7 +2084,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004730JJ5"
+    "tinkoffFigi": "BBG004730JJ5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "UPRO",
@@ -1986,7 +2102,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S686W0"
+    "tinkoffFigi": "BBG004S686W0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKS",
@@ -2003,7 +2120,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000VJMH65"
+    "tinkoffFigi": "BBG000VJMH65",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ROLO",
@@ -2020,7 +2138,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004Z2RGW8"
+    "tinkoffFigi": "BBG004Z2RGW8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MSNG",
@@ -2037,7 +2156,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S687W8"
+    "tinkoffFigi": "BBG004S687W8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "AFKS",
@@ -2054,7 +2174,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68614"
+    "tinkoffFigi": "BBG004S68614",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SFTL",
@@ -2071,7 +2192,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0136BTL03"
+    "tinkoffFigi": "BBG0136BTL03",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "PLZL",
@@ -2088,7 +2210,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000R607Y3"
+    "tinkoffFigi": "BBG000R607Y3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "OZON",
@@ -2105,7 +2228,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00Y91R9T3"
+    "tinkoffFigi": "BBG00Y91R9T3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "LKOH",
@@ -2122,7 +2246,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004731032"
+    "tinkoffFigi": "BBG004731032",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ENRU",
@@ -2139,7 +2264,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000F6YP24"
+    "tinkoffFigi": "BBG000F6YP24",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "OGKB",
@@ -2156,7 +2282,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RK52V1"
+    "tinkoffFigi": "BBG000RK52V1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "IRGZ",
@@ -2173,7 +2300,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000NL6ZD9"
+    "tinkoffFigi": "BBG000NL6ZD9",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "GLTR",
@@ -2190,7 +2318,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000VFX6Y4"
+    "tinkoffFigi": "BBG000VFX6Y4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KAZTP",
@@ -2207,7 +2336,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002B9T6Y1"
+    "tinkoffFigi": "BBG002B9T6Y1",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "NMTP",
@@ -2224,7 +2354,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68BR5"
+    "tinkoffFigi": "BBG004S68BR5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TGKA",
@@ -2241,7 +2372,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000QFH687"
+    "tinkoffFigi": "BBG000QFH687",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "SNGS",
@@ -2258,7 +2390,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0047315D0"
+    "tinkoffFigi": "BBG0047315D0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "CBOM",
@@ -2275,7 +2408,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG009GSYN76"
+    "tinkoffFigi": "BBG009GSYN76",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "AMEZ",
@@ -2292,7 +2426,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000RJWGC4"
+    "tinkoffFigi": "BBG000RJWGC4",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TGKBP",
@@ -2309,7 +2444,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000Q7GJ60"
+    "tinkoffFigi": "BBG000Q7GJ60",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ABRD",
@@ -2326,7 +2462,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002W2FT69"
+    "tinkoffFigi": "BBG002W2FT69",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "CNTLP",
@@ -2343,7 +2480,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG0027F0Y27"
+    "tinkoffFigi": "BBG0027F0Y27",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "PIKK",
@@ -2360,7 +2498,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68BH6"
+    "tinkoffFigi": "BBG004S68BH6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ROSN",
@@ -2377,7 +2516,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004731354"
+    "tinkoffFigi": "BBG004731354",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MTLRP",
@@ -2394,7 +2534,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004S68FR6"
+    "tinkoffFigi": "BBG004S68FR6",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "TRMK",
@@ -2411,7 +2552,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG004TC84Z8"
+    "tinkoffFigi": "BBG004TC84Z8",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKU",
@@ -2428,7 +2570,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000VKG4R5"
+    "tinkoffFigi": "BBG000VKG4R5",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "MRKY",
@@ -2445,7 +2588,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000C7P5M7"
+    "tinkoffFigi": "BBG000C7P5M7",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "KRKNP",
@@ -2462,7 +2606,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG002B2J5X0"
+    "tinkoffFigi": "BBG002B2J5X0",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "CHMF",
@@ -2479,7 +2624,8 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG00475K6C3"
+    "tinkoffFigi": "BBG00475K6C3",
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "ISKJ",
@@ -2496,6 +2642,7 @@
       "alor-openapi-v2",
       "tinkoff-invest-api"
     ],
-    "tinkoffFigi": "BBG000N16BP3"
+    "tinkoffFigi": "BBG000N16BP3",
+    "forQualInvestorFlag": false
   }
 ]

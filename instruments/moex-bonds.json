@@ -4764,7 +4764,7 @@
     "exchange": [
       "moex"
     ],
-    "fullName": "Онлайн Микрофинанс выпуск 2",
+    "fullName": "Онлайн Микрофинанс выпуск 3",
     "isin": "RU000A102CZ3",
     "minPriceIncrement": 0.01,
     "type": "bond",
@@ -5204,7 +5204,7 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": false
   },
   {
     "symbol": "RU000A1057D4",
