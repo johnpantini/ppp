@@ -94,6 +94,9 @@ export const instrumentsImportPageTemplate = (context, definition) => html`
                   <ppp-option value="moex-stocks">
                     Акции Московской биржи
                   </ppp-option>
+                  <ppp-option value="moex-bonds">
+                    Облигации Московской биржи
+                  </ppp-option>
                 </ppp-select>
                 <${'ppp-checkbox'}
                   style="margin-top: 8px"
