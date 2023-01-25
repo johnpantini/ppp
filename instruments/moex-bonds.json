@@ -25,7 +25,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU52004RMFS7",
@@ -53,7 +54,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29023RMFS7",
@@ -81,7 +83,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101RZ3",
@@ -109,7 +112,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102R73",
@@ -137,7 +141,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102D46",
@@ -165,7 +170,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1014B9",
@@ -193,7 +199,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1022E6",
@@ -221,7 +228,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ8A2",
@@ -249,7 +257,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100DC4",
@@ -277,7 +286,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYT40",
@@ -305,7 +315,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1046N6",
@@ -333,7 +344,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29017RMFS9",
@@ -361,7 +373,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103N84",
@@ -389,7 +402,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103661",
@@ -417,7 +431,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101GD3",
@@ -445,7 +460,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26241RMFS8",
@@ -473,7 +489,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1008D7",
@@ -501,7 +518,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101TA2",
@@ -529,7 +547,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYR91",
@@ -557,7 +576,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105L27",
@@ -585,7 +605,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103DT2",
@@ -613,7 +634,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYKH5",
@@ -641,7 +663,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1028H6",
@@ -669,7 +692,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104UV0",
@@ -697,7 +721,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104DZ7",
@@ -725,7 +750,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXQ44",
@@ -753,7 +779,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102LF6",
@@ -781,7 +808,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102X18",
@@ -809,7 +837,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102LD1",
@@ -837,7 +866,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103N19",
@@ -865,7 +895,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105146",
@@ -893,7 +924,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JTS22",
@@ -921,7 +953,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102BK7",
@@ -949,7 +982,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103935",
@@ -977,7 +1011,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105MN1",
@@ -1005,7 +1040,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYDU3",
@@ -1033,7 +1069,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26230RMFS1",
@@ -1061,7 +1098,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2243636219",
@@ -1088,7 +1126,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043L7",
@@ -1116,7 +1155,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043Z7",
@@ -1144,7 +1184,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1433454243",
@@ -1172,7 +1213,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102FT9",
@@ -1200,7 +1242,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1589106910",
@@ -1228,7 +1271,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1004K1",
@@ -1256,7 +1300,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105JN7",
@@ -1284,7 +1329,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2116222451",
@@ -1312,7 +1358,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104BC0",
@@ -1340,7 +1387,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105GS2",
@@ -1368,7 +1416,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104VS4",
@@ -1396,7 +1445,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105NA6",
@@ -1424,7 +1474,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105518",
@@ -1452,7 +1503,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100VS2",
@@ -1480,7 +1532,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29009RMFS6",
@@ -1508,7 +1561,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1020S0",
@@ -1536,7 +1590,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWDN6",
@@ -1564,7 +1619,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104BY4",
@@ -1592,7 +1648,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1034J0",
@@ -1620,7 +1677,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104UX6",
@@ -1648,7 +1706,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1048A9",
@@ -1676,7 +1735,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102ZH2",
@@ -1704,7 +1764,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYR18",
@@ -1732,7 +1793,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101M04",
@@ -1760,7 +1822,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105GV6",
@@ -1788,7 +1851,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102US0",
@@ -1816,7 +1880,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100XU4",
@@ -1844,7 +1909,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103F27",
@@ -1872,7 +1938,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2063279959",
@@ -1900,7 +1967,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1017J5",
@@ -1928,7 +1996,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100HU7",
@@ -1956,7 +2025,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1008V9",
@@ -1984,7 +2054,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101GJ0",
@@ -2012,7 +2083,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JVUK8",
@@ -2040,7 +2112,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYNY4",
@@ -2068,7 +2141,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1051T3",
@@ -2096,7 +2170,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103RJ3",
@@ -2124,7 +2199,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102DK3",
@@ -2152,7 +2228,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYU05",
@@ -2180,7 +2257,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CK5",
@@ -2208,7 +2286,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101RT6",
@@ -2236,7 +2315,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29014RMFS6",
@@ -2264,7 +2344,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CU4",
@@ -2292,7 +2373,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1053A9",
@@ -2320,7 +2402,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100VX2",
@@ -2348,7 +2431,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104WS2",
@@ -2376,7 +2460,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWST1",
@@ -2404,7 +2489,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030T7",
@@ -2432,7 +2518,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2010044621",
@@ -2460,7 +2547,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26227RMFS7",
@@ -2488,7 +2576,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYJ91",
@@ -2516,7 +2605,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101HJ8",
@@ -2544,7 +2634,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYG60",
@@ -2572,7 +2663,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102RF3",
@@ -2600,7 +2692,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101ZH4",
@@ -2628,7 +2721,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101EF3",
@@ -2656,7 +2750,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26237RMFS6",
@@ -2684,7 +2779,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2099763075",
@@ -2712,7 +2808,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102QX8",
@@ -2740,7 +2837,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXN05",
@@ -2768,7 +2866,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101ST4",
@@ -2796,7 +2895,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100WA8",
@@ -2824,7 +2924,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101GZ6",
@@ -2852,7 +2953,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101NJ6",
@@ -2880,7 +2982,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1032X5",
@@ -2908,7 +3011,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXPG2",
@@ -2936,7 +3040,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100303",
@@ -2964,7 +3069,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1514045886",
@@ -2992,7 +3098,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101PV6",
@@ -3020,7 +3127,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1033B9",
@@ -3048,7 +3156,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105Q89",
@@ -3076,7 +3185,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043K9",
@@ -3104,7 +3214,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103117",
@@ -3132,7 +3243,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0191754729",
@@ -3160,7 +3272,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1002C2",
@@ -3188,7 +3301,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105HC4",
@@ -3216,7 +3330,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101YV8",
@@ -3244,7 +3359,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101PU8",
@@ -3272,7 +3388,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102YG7",
@@ -3300,7 +3417,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105M67",
@@ -3328,7 +3446,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1634369224",
@@ -3356,7 +3475,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103PC2",
@@ -3384,7 +3504,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2159874002",
@@ -3412,7 +3533,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26234RMFS3",
@@ -3440,7 +3562,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2019822357",
@@ -3468,7 +3591,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103133",
@@ -3496,7 +3620,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105K85",
@@ -3524,7 +3649,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103G75",
@@ -3552,7 +3678,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0971721450",
@@ -3580,7 +3707,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1049P5",
@@ -3608,7 +3736,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101FH6",
@@ -3636,7 +3765,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105CM4",
@@ -3664,7 +3794,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU52003RMFS9",
@@ -3692,7 +3823,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104ZU1",
@@ -3720,7 +3852,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103CW8",
@@ -3748,7 +3881,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29022RMFS9",
@@ -3776,7 +3910,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101S08",
@@ -3804,7 +3939,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29020RMFS3",
@@ -3832,7 +3968,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1752568144",
@@ -3860,7 +3997,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1040E8",
@@ -3888,7 +4026,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102A15",
@@ -3916,7 +4055,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1017H9",
@@ -3944,7 +4084,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1013C9",
@@ -3972,7 +4113,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JSGV0",
@@ -4000,7 +4142,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103WV8",
@@ -4028,7 +4171,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104AX8",
@@ -4056,7 +4200,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101PJ1",
@@ -4084,7 +4229,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101S81",
@@ -4112,7 +4258,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101P92",
@@ -4140,7 +4287,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1013Y3",
@@ -4168,7 +4316,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105PP9",
@@ -4196,7 +4345,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103WB0",
@@ -4224,7 +4374,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZYP6",
@@ -4252,7 +4403,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26223RMFS6",
@@ -4280,7 +4432,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103F43",
@@ -4308,7 +4461,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101QM3",
@@ -4336,7 +4490,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYCZ4",
@@ -4364,7 +4519,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29007RMFS0",
@@ -4392,7 +4548,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1005L6",
@@ -4420,7 +4577,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100XP4",
@@ -4448,7 +4606,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102LW1",
@@ -4476,7 +4635,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102AB8",
@@ -4504,7 +4664,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29018RMFS7",
@@ -4532,7 +4693,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWHN7",
@@ -4560,7 +4722,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105KR6",
@@ -4588,7 +4751,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1018C8",
@@ -4616,7 +4780,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102HB3",
@@ -4644,7 +4809,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103125",
@@ -4672,7 +4838,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JUMH3",
@@ -4700,7 +4867,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYWY5",
@@ -4728,7 +4896,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101RW0",
@@ -4756,7 +4925,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CZ3",
@@ -4784,7 +4954,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1042W6",
@@ -4812,7 +4983,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JVWJ6",
@@ -4840,7 +5012,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105849",
@@ -4868,7 +5041,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1015E0",
@@ -4896,7 +5070,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101MC3",
@@ -4924,7 +5099,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JTM28",
@@ -4952,7 +5128,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26212RMFS9",
@@ -4980,7 +5157,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102A07",
@@ -5008,7 +5186,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1533915721",
@@ -5036,7 +5215,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0921331509",
@@ -5064,7 +5244,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29008RMFS8",
@@ -5092,7 +5273,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101012",
@@ -5120,7 +5302,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101HU5",
@@ -5148,7 +5331,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102JZ8",
@@ -5176,7 +5360,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105QL6",
@@ -5204,7 +5389,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1057D4",
@@ -5232,7 +5418,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29016RMFS1",
@@ -5260,7 +5447,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100VG7",
@@ -5288,7 +5476,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103R98",
@@ -5316,7 +5505,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100PB0",
@@ -5344,7 +5534,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103FP5",
@@ -5372,7 +5563,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105CF8",
@@ -5400,7 +5592,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101SM9",
@@ -5428,7 +5621,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYXV9",
@@ -5456,7 +5650,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXFS8",
@@ -5484,7 +5679,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXN21",
@@ -5512,7 +5708,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1037S4",
@@ -5540,7 +5737,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZBV2",
@@ -5568,7 +5766,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JX5W4",
@@ -5596,7 +5795,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102T55",
@@ -5624,7 +5824,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JTM44",
@@ -5652,7 +5853,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102713",
@@ -5680,7 +5882,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103KJ8",
@@ -5708,7 +5911,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103S14",
@@ -5736,7 +5940,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1964558339",
@@ -5764,7 +5969,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ1H2",
@@ -5792,7 +5998,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030K6",
@@ -5820,7 +6027,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104L36",
@@ -5848,7 +6056,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1032D7",
@@ -5876,7 +6085,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100CG7",
@@ -5904,7 +6114,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104SY8",
@@ -5932,7 +6143,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0893212398",
@@ -5960,7 +6172,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1002E8",
@@ -5988,7 +6201,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ9W4",
@@ -6016,7 +6230,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104FX7",
@@ -6044,7 +6259,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103WQ8",
@@ -6072,7 +6288,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1032P1",
@@ -6100,7 +6317,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105AD7",
@@ -6128,7 +6346,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JVA10",
@@ -6156,7 +6375,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1035D0",
@@ -6184,7 +6404,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWXF0",
@@ -6212,7 +6433,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0810596832",
@@ -6240,7 +6462,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ8X4",
@@ -6268,7 +6491,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1052T1",
@@ -6296,7 +6520,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1961080501",
@@ -6324,7 +6549,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103G00",
@@ -6352,7 +6578,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102TR4",
@@ -6380,7 +6607,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZV86",
@@ -6408,7 +6636,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105BW5",
@@ -6436,7 +6665,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1009Z8",
@@ -6464,7 +6694,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1003A4",
@@ -6492,7 +6723,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103760",
@@ -6520,7 +6752,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104WJ1",
@@ -6548,7 +6781,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103QH9",
@@ -6576,7 +6810,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102Y66",
@@ -6604,7 +6839,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYU39",
@@ -6632,7 +6868,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101UD4",
@@ -6660,7 +6897,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105AJ4",
@@ -6688,7 +6926,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102SK1",
@@ -6716,7 +6955,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101R33",
@@ -6744,7 +6984,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104Z71",
@@ -6772,7 +7013,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102VK5",
@@ -6800,7 +7042,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1029F8",
@@ -6828,7 +7071,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JVM81",
@@ -6856,7 +7100,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1843443273",
@@ -6884,7 +7129,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104UA4",
@@ -6912,7 +7158,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1037C8",
@@ -6940,7 +7187,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1016F5",
@@ -6968,7 +7216,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104V26",
@@ -6996,7 +7245,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101SD8",
@@ -7024,7 +7274,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101Q26",
@@ -7052,7 +7303,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101DU4",
@@ -7080,7 +7332,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103RT2",
@@ -7108,7 +7361,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2131995958",
@@ -7136,7 +7390,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXLR8",
@@ -7164,7 +7419,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102QY6",
@@ -7192,7 +7448,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYEE5",
@@ -7220,7 +7477,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102DR8",
@@ -7248,7 +7506,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105KQ8",
@@ -7276,7 +7535,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104C03",
@@ -7304,7 +7564,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102M86",
@@ -7332,7 +7593,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26207RMFS9",
@@ -7360,7 +7622,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103M36",
@@ -7388,7 +7651,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101SC0",
@@ -7416,7 +7680,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1040V2",
@@ -7444,7 +7709,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1022G1",
@@ -7472,7 +7738,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26221RMFS0",
@@ -7500,7 +7767,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103HT3",
@@ -7528,7 +7796,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102RU2",
@@ -7556,7 +7825,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104CJ3",
@@ -7584,7 +7854,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29006RMFS2",
@@ -7612,7 +7883,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102RS6",
@@ -7640,7 +7912,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26233RMFS5",
@@ -7668,7 +7941,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26240RMFS0",
@@ -7696,7 +7970,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100HH4",
@@ -7724,7 +7999,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030N0",
@@ -7752,7 +8028,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105A95",
@@ -7780,7 +8057,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1058M3",
@@ -7808,7 +8086,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104WF9",
@@ -7836,7 +8115,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26238RMFS4",
@@ -7864,7 +8144,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYFB8",
@@ -7892,7 +8173,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103D37",
@@ -7920,7 +8202,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2124187571",
@@ -7948,7 +8231,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104JV3",
@@ -7976,7 +8260,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101FY1",
@@ -8004,7 +8289,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26228RMFS5",
@@ -8032,7 +8318,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1034P7",
@@ -8059,7 +8346,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1589324075",
@@ -8087,7 +8375,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1011Q3",
@@ -8115,7 +8404,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103QJ5",
@@ -8143,7 +8433,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030S9",
@@ -8171,7 +8462,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZVE6",
@@ -8199,7 +8491,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100L63",
@@ -8227,7 +8520,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101S99",
@@ -8255,7 +8549,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYKJ1",
@@ -8283,7 +8578,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1053P7",
@@ -8311,7 +8607,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101MT7",
@@ -8339,7 +8636,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100D89",
@@ -8367,7 +8665,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1001L5",
@@ -8395,35 +8694,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
-  },
-  {
-    "symbol": "RU000A1026H0",
-    "classCode": "TQCB",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "Гидромашсервис БО выпуск 3",
-    "isin": "RU000A1026H0",
-    "minPriceIncrement": 0.01,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00XRFV045",
-    "couponQuantityPerYear": 2,
-    "maturityDate": "2030-09-20T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "consumer",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101XN7",
@@ -8451,7 +8723,37 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
+    "symbol": "RU000A1026H0",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Гидромашсервис БО выпуск 3",
+    "isin": "RU000A1026H0",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00XRFV045",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2030-09-20T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "consumer",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYRY5",
@@ -8479,7 +8781,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101QF7",
@@ -8507,7 +8810,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1034X1",
@@ -8535,7 +8839,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105M59",
@@ -8563,7 +8868,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYHX8",
@@ -8591,7 +8897,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105104",
@@ -8619,7 +8926,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105M75",
@@ -8647,7 +8955,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWV63",
@@ -8675,7 +8984,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105HN1",
@@ -8703,7 +9013,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103SZ7",
@@ -8731,7 +9042,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1024W4",
@@ -8759,7 +9071,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101TS4",
@@ -8787,7 +9100,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXSF8",
@@ -8815,7 +9129,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104AQ2",
@@ -8843,7 +9158,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104WA0",
@@ -8871,7 +9187,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102H83",
@@ -8899,7 +9216,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102GY7",
@@ -8927,7 +9245,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043B8",
@@ -8955,7 +9274,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYVU5",
@@ -8983,7 +9303,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103DP0",
@@ -9011,7 +9332,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102VL3",
@@ -9039,7 +9361,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103RL9",
@@ -9067,7 +9390,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030D1",
@@ -9095,7 +9419,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1843434959",
@@ -9123,7 +9448,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JUAG0",
@@ -9151,7 +9477,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105LS2",
@@ -9179,7 +9506,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1006C3",
@@ -9207,7 +9535,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1034M4",
@@ -9235,7 +9564,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101H43",
@@ -9263,7 +9593,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103DU0",
@@ -9291,7 +9622,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100NS9",
@@ -9319,7 +9651,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1034T9",
@@ -9347,7 +9680,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU52002RMFS1",
@@ -9375,7 +9709,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102SC8",
@@ -9403,7 +9738,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100DG5",
@@ -9431,7 +9767,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103H25",
@@ -9459,7 +9796,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100G03",
@@ -9487,7 +9825,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101TR6",
@@ -9515,7 +9854,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100YD8",
@@ -9543,7 +9883,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103RS4",
@@ -9571,7 +9912,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1038D4",
@@ -9599,7 +9941,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101C89",
@@ -9627,7 +9970,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105054",
@@ -9655,7 +9999,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105PH6",
@@ -9683,7 +10028,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105NL3",
@@ -9711,7 +10057,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26226RMFS9",
@@ -9739,7 +10086,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103C95",
@@ -9767,7 +10115,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXSD3",
@@ -9795,35 +10144,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
-  },
-  {
-    "symbol": "RU000A104ZC9",
-    "classCode": "TQCB",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "КАМАЗ",
-    "isin": "RU000A104ZC9",
-    "minPriceIncrement": 0.01,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "TCS00A104ZC9",
-    "couponQuantityPerYear": 4,
-    "maturityDate": "2025-07-18T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "industrials",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030U5",
@@ -9851,7 +10173,37 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
+    "symbol": "RU000A104ZC9",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "КАМАЗ",
+    "isin": "RU000A104ZC9",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "TCS00A104ZC9",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2025-07-18T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "industrials",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104FG2",
@@ -9879,7 +10231,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXYS9",
@@ -9907,7 +10260,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1054W1",
@@ -9935,7 +10289,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU46022RMFS8",
@@ -9963,7 +10318,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103HG0",
@@ -9991,7 +10347,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2393688598",
@@ -10018,7 +10375,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104Z48",
@@ -10046,7 +10404,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105M91",
@@ -10074,7 +10433,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZGT5",
@@ -10102,7 +10462,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100HY9",
@@ -10130,7 +10491,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1056U0",
@@ -10158,7 +10520,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2010044381",
@@ -10186,7 +10549,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYRX7",
@@ -10214,7 +10578,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102JB9",
@@ -10242,7 +10607,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYJT2",
@@ -10270,7 +10636,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100ZK0",
@@ -10298,7 +10665,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103XP8",
@@ -10326,7 +10694,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101S16",
@@ -10354,7 +10723,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100RG5",
@@ -10382,7 +10752,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101QN1",
@@ -10410,7 +10781,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1577961516",
@@ -10438,7 +10810,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101350",
@@ -10466,7 +10839,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102HG2",
@@ -10494,7 +10868,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZES2",
@@ -10522,7 +10897,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1008J4",
@@ -10550,7 +10926,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ117",
@@ -10578,7 +10955,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1713473608",
@@ -10606,7 +10984,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100FE5",
@@ -10634,7 +11013,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103NZ8",
@@ -10662,7 +11042,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0767473852",
@@ -10690,7 +11071,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ1F6",
@@ -10718,7 +11100,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1018A2",
@@ -10746,7 +11129,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101RJ7",
@@ -10774,7 +11158,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0316524130",
@@ -10802,7 +11187,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104A39",
@@ -10830,7 +11216,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102Y58",
@@ -10858,7 +11245,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1008W7",
@@ -10886,7 +11274,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXME4",
@@ -10914,7 +11303,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYU21",
@@ -10942,7 +11332,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102WL1",
@@ -10970,7 +11361,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102952",
@@ -10998,7 +11390,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYEB1",
@@ -11026,7 +11419,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100JH0",
@@ -11054,7 +11448,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103N43",
@@ -11082,7 +11477,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105CS1",
@@ -11110,7 +11506,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103DA2",
@@ -11138,7 +11535,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102895",
@@ -11166,7 +11564,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103NU9",
@@ -11194,7 +11593,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1058U6",
@@ -11222,7 +11622,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103SV6",
@@ -11250,7 +11651,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103Q08",
@@ -11278,7 +11680,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104V75",
@@ -11306,7 +11709,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1878009866",
@@ -11334,7 +11738,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102SM7",
@@ -11362,7 +11767,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100W60",
@@ -11390,7 +11796,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104V00",
@@ -11418,7 +11825,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26215RMFS2",
@@ -11446,7 +11854,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103KG4",
@@ -11474,7 +11883,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102RN7",
@@ -11502,7 +11912,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103M10",
@@ -11530,7 +11941,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102234",
@@ -11558,7 +11970,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103QL1",
@@ -11586,7 +11999,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1014S3",
@@ -11614,7 +12028,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1014V7",
@@ -11642,7 +12057,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102986",
@@ -11670,7 +12086,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101YD6",
@@ -11698,7 +12115,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1721463500",
@@ -11726,7 +12144,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100238",
@@ -11754,7 +12173,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103372",
@@ -11782,7 +12202,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104XR2",
@@ -11810,7 +12231,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26229RMFS3",
@@ -11838,7 +12260,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26239RMFS2",
@@ -11866,7 +12289,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZYL5",
@@ -11894,7 +12318,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102S80",
@@ -11922,7 +12347,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103JR3",
@@ -11950,7 +12376,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYDH0",
@@ -11978,7 +12405,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103GL2",
@@ -12006,7 +12434,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1020W2",
@@ -12034,7 +12463,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101XS6",
@@ -12062,7 +12492,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030X9",
@@ -12090,7 +12521,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1030Y7",
@@ -12118,7 +12550,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0971721963",
@@ -12146,7 +12579,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105JG1",
@@ -12174,7 +12608,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYCM2",
@@ -12202,7 +12637,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100LV7",
@@ -12230,7 +12666,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105FM7",
@@ -12258,7 +12695,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYCD1",
@@ -12286,7 +12724,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1053R3",
@@ -12314,7 +12753,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101FG8",
@@ -12342,7 +12782,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100N12",
@@ -12370,7 +12811,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104JQ3",
@@ -12398,7 +12840,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105NH1",
@@ -12426,7 +12869,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26232RMFS7",
@@ -12454,7 +12898,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104693",
@@ -12482,7 +12927,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102556",
@@ -12510,7 +12956,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYWU3",
@@ -12538,7 +12985,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102KG6",
@@ -12566,7 +13014,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102TA0",
@@ -12594,7 +13043,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102QP4",
@@ -12622,7 +13072,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102T63",
@@ -12650,7 +13101,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100YE6",
@@ -12678,7 +13130,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2384475930",
@@ -12706,7 +13159,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103NY1",
@@ -12734,7 +13188,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103YM3",
@@ -12762,7 +13217,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100PE4",
@@ -12790,7 +13246,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JUV08",
@@ -12818,7 +13275,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105FS4",
@@ -12846,7 +13304,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103828",
@@ -12874,7 +13333,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1028C7",
@@ -12902,7 +13362,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103G42",
@@ -12930,7 +13391,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101FC7",
@@ -12958,7 +13420,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101D13",
@@ -12986,7 +13449,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1041B2",
@@ -13014,7 +13478,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWHA4",
@@ -13042,7 +13507,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100Z91",
@@ -13070,7 +13536,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1013N6",
@@ -13098,7 +13565,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29010RMFS4",
@@ -13126,7 +13594,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1007Z2",
@@ -13154,7 +13623,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1010M4",
@@ -13182,7 +13652,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102W68",
@@ -13210,7 +13681,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102GJ8",
@@ -13238,7 +13710,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29013RMFS8",
@@ -13266,7 +13739,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1057A0",
@@ -13294,7 +13768,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1029T9",
@@ -13322,7 +13797,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104B53",
@@ -13350,7 +13826,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2134628069",
@@ -13378,7 +13855,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYX28",
@@ -13406,7 +13884,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1036E6",
@@ -13434,7 +13913,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JY023",
@@ -13462,7 +13942,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102SV8",
@@ -13490,7 +13971,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104C78",
@@ -13518,7 +14000,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102G50",
@@ -13546,7 +14029,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JQ7Z2",
@@ -13574,7 +14058,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105PK0",
@@ -13602,7 +14087,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1036X6",
@@ -13630,7 +14116,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXU14",
@@ -13658,7 +14145,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103QK3",
@@ -13686,7 +14174,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101RV2",
@@ -13714,7 +14203,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105C44",
@@ -13742,7 +14232,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102K39",
@@ -13770,7 +14261,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXRD5",
@@ -13798,7 +14290,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JW1K9",
@@ -13826,7 +14319,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100GW5",
@@ -13853,7 +14347,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JX0B9",
@@ -13881,7 +14376,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU46020RMFS2",
@@ -13909,7 +14405,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWZY6",
@@ -13937,7 +14434,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1051U1",
@@ -13965,7 +14463,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103RD6",
@@ -13993,7 +14492,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102RX6",
@@ -14021,7 +14521,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1034K8",
@@ -14049,7 +14550,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYCR1",
@@ -14077,7 +14579,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1051E5",
@@ -14105,7 +14608,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2249778247",
@@ -14133,7 +14637,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102T97",
@@ -14161,7 +14666,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100TH9",
@@ -14189,7 +14695,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXQK2",
@@ -14217,7 +14724,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101UR4",
@@ -14245,7 +14753,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYMJ7",
@@ -14273,7 +14782,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103WD6",
@@ -14301,7 +14811,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103YP6",
@@ -14329,7 +14840,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104YT6",
@@ -14357,7 +14869,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100YU2",
@@ -14385,7 +14898,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102B48",
@@ -14413,7 +14927,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1946763361",
@@ -14441,7 +14956,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105MP6",
@@ -14469,7 +14985,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1006S9",
@@ -14497,7 +15014,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102B97",
@@ -14525,7 +15043,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26218RMFS6",
@@ -14553,7 +15072,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103RY2",
@@ -14581,7 +15101,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101Z66",
@@ -14609,7 +15130,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYLK7",
@@ -14637,7 +15159,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100881",
@@ -14665,7 +15188,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1024R4",
@@ -14693,7 +15217,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102GD1",
@@ -14721,7 +15246,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105Q97",
@@ -14749,7 +15275,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103WZ9",
@@ -14777,7 +15304,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1037L9",
@@ -14805,7 +15333,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYLC4",
@@ -14833,7 +15362,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JTMK9",
@@ -14861,7 +15391,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102ZT7",
@@ -14889,7 +15420,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JW5E3",
@@ -14917,7 +15449,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103943",
@@ -14945,7 +15478,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103KA7",
@@ -14973,7 +15507,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1143363940",
@@ -15001,7 +15536,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102LB5",
@@ -15029,7 +15565,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104ZK2",
@@ -15057,7 +15594,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100Q35",
@@ -15085,7 +15623,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101RP4",
@@ -15113,7 +15652,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102V51",
@@ -15141,7 +15681,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105A61",
@@ -15169,7 +15710,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102M45",
@@ -15197,7 +15739,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100VQ6",
@@ -15225,7 +15768,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU24021RMFS6",
@@ -15253,7 +15797,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1016Z3",
@@ -15281,7 +15826,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXPN8",
@@ -15309,7 +15855,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102UZ5",
@@ -15337,7 +15884,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101GR3",
@@ -15365,7 +15913,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100A66",
@@ -15393,7 +15942,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101UQ6",
@@ -15421,7 +15971,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104362",
@@ -15449,7 +16000,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101Z74",
@@ -15477,7 +16029,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYQY7",
@@ -15505,7 +16058,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103C53",
@@ -15533,7 +16087,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1020K7",
@@ -15561,7 +16116,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102GU5",
@@ -15589,7 +16145,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102FS1",
@@ -15617,7 +16174,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101KK0",
@@ -15645,7 +16203,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXS59",
@@ -15673,7 +16232,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102TT0",
@@ -15701,7 +16261,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104Z89",
@@ -15729,7 +16290,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100HE1",
@@ -15757,7 +16319,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0088543193",
@@ -15785,7 +16348,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101QL5",
@@ -15813,7 +16377,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102VR0",
@@ -15841,7 +16406,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2113968148",
@@ -15869,7 +16435,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102960",
@@ -15897,7 +16464,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1032S5",
@@ -15925,7 +16493,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101665",
@@ -15953,7 +16522,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100733",
@@ -15981,7 +16551,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105PR5",
@@ -16009,7 +16580,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101CQ4",
@@ -16037,7 +16609,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU52001RMFS3",
@@ -16065,7 +16638,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0114288789",
@@ -16093,7 +16667,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1050H0",
@@ -16121,7 +16696,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101QW2",
@@ -16149,7 +16725,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105112",
@@ -16177,7 +16754,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103PX8",
@@ -16205,7 +16783,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104SX0",
@@ -16233,7 +16812,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103TS0",
@@ -16261,7 +16841,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103G83",
@@ -16289,7 +16870,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102200",
@@ -16317,7 +16899,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1033Z8",
@@ -16345,7 +16928,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ4T1",
@@ -16373,7 +16957,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWYQ5",
@@ -16401,7 +16986,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26225RMFS1",
@@ -16429,7 +17015,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26224RMFS4",
@@ -16457,7 +17044,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CD0",
@@ -16485,7 +17073,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105EW9",
@@ -16513,7 +17102,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104W33",
@@ -16541,7 +17131,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102H91",
@@ -16569,7 +17160,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1006B5",
@@ -16597,7 +17189,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103UL3",
@@ -16625,7 +17218,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103G91",
@@ -16653,7 +17247,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100BB0",
@@ -16681,7 +17276,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS0559915961",
@@ -16709,7 +17305,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1057S2",
@@ -16737,7 +17334,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043N3",
@@ -16765,7 +17363,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105RU5",
@@ -16793,7 +17392,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102S23",
@@ -16821,7 +17421,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZZ17",
@@ -16849,7 +17450,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYYN4",
@@ -16877,7 +17479,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103N76",
@@ -16905,7 +17508,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZEM5",
@@ -16933,7 +17537,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1031K4",
@@ -16961,7 +17566,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2243631095",
@@ -16988,7 +17594,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103L03",
@@ -17016,7 +17623,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CX8",
@@ -17044,7 +17652,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS2069992258",
@@ -17072,7 +17681,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102VY6",
@@ -17100,7 +17710,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ5J9",
@@ -17128,7 +17739,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYBM4",
@@ -17156,7 +17768,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1005T9",
@@ -17184,7 +17797,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZ1J8",
@@ -17212,7 +17826,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105DL4",
@@ -17240,7 +17855,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZAL5",
@@ -17268,7 +17884,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100XC2",
@@ -17296,7 +17913,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CR0",
@@ -17324,7 +17942,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXTS9",
@@ -17352,7 +17971,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102FC5",
@@ -17380,7 +18000,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105RF6",
@@ -17408,7 +18029,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104BU2",
@@ -17436,7 +18058,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104XU6",
@@ -17464,7 +18087,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103C46",
@@ -17492,7 +18116,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102CL3",
@@ -17520,7 +18145,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104XW2",
@@ -17548,7 +18174,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXE06",
@@ -17576,7 +18203,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZZWJ3",
@@ -17604,7 +18232,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043E2",
@@ -17632,7 +18261,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102TJ1",
@@ -17660,7 +18290,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105JU2",
@@ -17688,7 +18319,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "XS1760786340",
@@ -17716,7 +18348,8 @@
     "perpetualFlag": true,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104XJ9",
@@ -17744,7 +18377,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1049M2",
@@ -17772,7 +18406,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103DY2",
@@ -17800,7 +18435,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103CD8",
@@ -17828,7 +18464,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JX0Z8",
@@ -17856,7 +18493,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100GY1",
@@ -17884,7 +18522,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1055Y4",
@@ -17912,7 +18551,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102VW0",
@@ -17940,7 +18580,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104Y15",
@@ -17968,7 +18609,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100ZL8",
@@ -17996,7 +18638,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29019RMFS5",
@@ -18024,7 +18667,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104SU6",
@@ -18052,7 +18696,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101XD8",
@@ -18080,7 +18725,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JQRD9",
@@ -18108,7 +18754,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105H23",
@@ -18136,7 +18783,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWVL2",
@@ -18164,7 +18812,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "USG76237AC37",
@@ -18192,7 +18841,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1026C1",
@@ -18220,7 +18870,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101JF2",
@@ -18248,7 +18899,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JW1P8",
@@ -18276,7 +18928,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105P64",
@@ -18304,7 +18957,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100QA0",
@@ -18332,7 +18986,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1049K6",
@@ -18360,7 +19015,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103PE8",
@@ -18388,7 +19044,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102SX4",
@@ -18416,7 +19073,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105C28",
@@ -18444,7 +19102,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26235RMFS0",
@@ -18472,7 +19131,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1047S3",
@@ -18500,7 +19160,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103WR6",
@@ -18528,7 +19189,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26236RMFS8",
@@ -18556,7 +19218,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101LJ0",
@@ -18584,7 +19247,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1043G7",
@@ -18612,7 +19276,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103S30",
@@ -18640,7 +19305,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JWM56",
@@ -18668,7 +19334,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29021RMFS1",
@@ -18696,7 +19363,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": true,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYX69",
@@ -18724,7 +19392,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A100Y50",
@@ -18752,7 +19421,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26219RMFS4",
@@ -18780,7 +19450,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU26222RMFS8",
@@ -18808,7 +19479,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102BF7",
@@ -18836,7 +19508,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103M85",
@@ -18864,7 +19537,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102KR3",
@@ -18892,7 +19566,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102SG9",
@@ -18920,7 +19595,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102TL7",
@@ -18948,7 +19624,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1023K1",
@@ -18976,7 +19653,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A1053H4",
@@ -19004,7 +19682,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101GW3",
@@ -19032,7 +19711,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102KQ5",
@@ -19060,7 +19740,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A103VD8",
@@ -19088,7 +19769,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A102RT4",
@@ -19116,7 +19798,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU25084RMFS3",
@@ -19144,7 +19827,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105HJ9",
@@ -19172,7 +19856,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0JXPD9",
@@ -19200,7 +19885,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A101L96",
@@ -19228,7 +19914,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A105DS9",
@@ -19256,7 +19943,8 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A104735",
@@ -19284,7 +19972,8 @@
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   },
   {
     "symbol": "RU000A0ZYG52",
@@ -19312,6 +20001,7 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
   }
 ]

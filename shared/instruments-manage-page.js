@@ -120,6 +120,12 @@ export class InstrumentsManagePage extends Page {
     await validate(this.minPriceIncrement);
 
     if (this.tinkoffCheckbox.checked) await validate(this.tinkoffFigi);
+
+    if (this.document.type === 'bond') {
+      await validate(this.initialNominal);
+      await validate(this.nominal);
+      await validate(this.maturityDate);
+    }
   }
 
   async update() {
@@ -130,28 +136,52 @@ export class InstrumentsManagePage extends Page {
 
     this.notFound = false;
 
+    const $set = {
+      symbol: this.symbol.value.trim(),
+      fullName: this.fullName.value.trim(),
+      type: this.type.value,
+      currency: this.currency.value,
+      exchange: this.exchangeCheckboxes
+        .filter((c) => c.checked)
+        .map((c) => c.name),
+      broker: this.brokerCheckboxes.filter((c) => c.checked).map((c) => c.name),
+      isin: this.isin.value.trim(),
+      lot: Math.abs(this.lot.value) || 1,
+      minPriceIncrement: Math.abs(
+        this.minPriceIncrement.value?.replace(',', '.')
+      ),
+      spbexSymbol: this.spbexSymbol.value.trim(),
+      tinkoffFigi: this.tinkoffFigi.value.trim(),
+      forQualInvestorFlag: !!this.forQualInvestorFlag.checked,
+      removed: !!this.removed.checked,
+      updatedAt: new Date()
+    };
+
+    if (
+      this.document.type === 'stock' ||
+      this.document.type === 'bond' ||
+      this.document.type === 'future'
+    ) {
+      $set.classCode = this.classCode.value.trim();
+      $set.sector = this.sector.value;
+    }
+
+    if (this.document.type === 'bond') {
+      $set.amortizationFlag = !!this.amortizationFlag.checked;
+      $set.floatingCouponFlag = !!this.floatingCouponFlag.checked;
+      $set.perpetualFlag = !!this.perpetualFlag.checked;
+      $set.subordinatedFlag = !!this.subordinatedFlag.checked;
+      $set.issueKind = this.issueKind.value;
+      $set.initialNominal = this.initialNominal.value;
+      $set.nominal = this.nominal.value;
+      $set.maturityDate = this.maturityDate.value;
+      $set.couponQuantityPerYear = Math.abs(
+        this.couponQuantityPerYear.value ?? 0
+      );
+    }
+
     return {
-      $set: {
-        symbol: this.symbol.value.trim(),
-        fullName: this.fullName.value.trim(),
-        type: this.type.value,
-        currency: this.currency.value,
-        exchange: this.exchangeCheckboxes
-          .filter((c) => c.checked)
-          .map((c) => c.name),
-        broker: this.brokerCheckboxes
-          .filter((c) => c.checked)
-          .map((c) => c.name),
-        isin: this.isin.value.trim(),
-        lot: Math.abs(this.lot.value) || 1,
-        minPriceIncrement: Math.abs(
-          this.minPriceIncrement.value?.replace(',', '.')
-        ),
-        spbexSymbol: this.spbexSymbol.value.trim(),
-        tinkoffFigi: this.tinkoffFigi.value.trim(),
-        removed: !!this.removed.checked,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }

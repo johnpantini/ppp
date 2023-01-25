@@ -28,7 +28,7 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
               style="display: flex; flex-direction: column;"
               ${children({
                 property: 'typeCheckboxes',
-                filter:   elements('ppp-checkbox')
+                filter: elements('ppp-checkbox')
               })}
             >
               <${'ppp-checkbox'}
@@ -36,6 +36,12 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
                 name="stock"
               >
                 Акция
+              </ppp-checkbox>
+              <ppp-checkbox
+                checked
+                name="bond"
+              >
+                Облигация
               </ppp-checkbox>
             </div>
           </div>
@@ -49,7 +55,7 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
               style="display: flex; flex-direction: column;"
               ${children({
                 property: 'exchangeCheckboxes',
-                filter:   elements('ppp-checkbox')
+                filter: elements('ppp-checkbox')
               })}
             >
               <${'ppp-checkbox'}
@@ -82,7 +88,7 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
               style="display: flex; flex-direction: column;"
               ${children({
                 property: 'brokerCheckboxes',
-                filter:   elements('ppp-checkbox')
+                filter: elements('ppp-checkbox')
               })}
             >
               <${'ppp-checkbox'}

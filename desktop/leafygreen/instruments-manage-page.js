@@ -5,6 +5,7 @@ import { ref } from '../../shared/element/templating/ref.js';
 import { children } from '../../shared/element/templating/children.js';
 import { elements } from '../../shared/element/templating/node-observation.js';
 import { when } from '../../shared/element/templating/when.js';
+import { Observable } from '../../shared/element/observation/observable.js';
 import { BROKERS } from '../../shared/const.js';
 import { pageStyles } from './page.js';
 import { search } from './icons/search.js';
@@ -89,9 +90,15 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
             <${'ppp-radio-group'}
               orientation="vertical"
               value="${(x) => x.document.type ?? 'stock'}"
+              @change="${(x) => {
+                x.document.type = x.type.value;
+
+                Observable.notify(x, 'document');
+              }}"
               ${ref('type')}
             >
               <${'ppp-radio'} value="stock">Акция</ppp-radio>
+              <ppp-radio value="bond">Облигация</ppp-radio>
             </ppp-radio-group>
           </div>
         </section>
@@ -214,6 +221,41 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
               >
                 Инструмент удалён
               </ppp-checkbox>
+              <ppp-checkbox
+                ?checked="${(x) => x.document.forQualInvestorFlag}"
+                ${ref('forQualInvestorFlag')}
+              >
+                Только для квалифицированных инвесторов
+              </ppp-checkbox>
+              ${when(
+                (x) => x.document.type === 'bond',
+                html`
+                  <ppp-checkbox
+                    ?checked="${(x) => x.document.amortizationFlag}"
+                    ${ref('amortizationFlag')}
+                  >
+                    Облигация с амортизацией
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    ?checked="${(x) => x.document.floatingCouponFlag}"
+                    ${ref('floatingCouponFlag')}
+                  >
+                    Плавающий купон
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    ?checked="${(x) => x.document.perpetualFlag}"
+                    ${ref('perpetualFlag')}
+                  >
+                    Бессрочная облигация
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    ?checked="${(x) => x.document.subordinatedFlag}"
+                    ${ref('subordinatedFlag')}
+                  >
+                    Субординированная облигация
+                  </ppp-checkbox>
+                `
+              )}
             </div>
           </div>
         </section>
@@ -293,6 +335,151 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
             ></ppp-text-field>
           </div>
         </section>
+        ${when(
+          (x) =>
+            !x.document.type ||
+            x.document.type === 'stock' ||
+            x.document.type === 'bond' ||
+            x.document.type === 'future',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Класс-код (секция торгов)</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  optional
+                  placeholder="Класс-код"
+                  value="${(x) => x.document.classCode ?? ''}"
+                  ${ref('classCode')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Сектор экономики</h5>
+              </div>
+              <div class="input-group">
+                <ppp-select
+                  value="${(x) => x.document.sector ?? ''}"
+                  ${ref('sector')}
+                >
+                  <ppp-option value="">Не указан</ppp-option>
+                  <ppp-option value="health_care">Здравоохранение</ppp-option>
+                  <ppp-option value="it">
+                    Информационные технологии
+                  </ppp-option>
+                  <ppp-option value="consumer">
+                    Потребительские товары и услуги
+                  </ppp-option>
+                  <ppp-option value="materials">
+                    Сырьевая промышленность
+                  </ppp-option>
+                  <ppp-option value="industrials">
+                    Машиностроение и транспорт
+                  </ppp-option>
+                  <ppp-option value="financial">Финансовый сектор</ppp-option>
+                  <ppp-option value="energy">Энергетика</ppp-option>
+                  <ppp-option value="real_estate">Недвижимость</ppp-option>
+                  <ppp-option value="utilities">Электроэнергетика</ppp-option>
+                  <ppp-option value="telecom">Телекоммуникации</ppp-option>
+                  <ppp-option value="ecomaterials">
+                    Материалы для эко-технологий
+                  </ppp-option>
+                  <ppp-option value="electrocars">
+                    Электротранспорт и комплектующие
+                  </ppp-option>
+                  <ppp-option value="green_buildings">
+                    Энергоэффективные здания
+                  </ppp-option>
+                  <ppp-option value="other"> Другое</ppp-option>
+                  <ppp-option value="green_energy">
+                    Зеленая энергетика
+                  </ppp-option>
+                  <ppp-option value="government"
+                    >Государственные облигации
+                  </ppp-option>
+                  <ppp-option value="municipal"
+                    >Муниципальные облигации
+                  </ppp-option>
+                </ppp-select>
+              </div>
+            </section>
+          `
+        )}
+        ${when(
+          (x) => x.document.type === 'bond',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Форма выпуска</h5>
+              </div>
+              <div class="input-group">
+                <ppp-select
+                  value="${(x) => x.document.issueKind ?? 'non_documentary'}"
+                  ${ref('issueKind')}
+                >
+                  <ppp-option value="documentary">Документарная</ppp-option>
+                  <ppp-option value="non_documentary">
+                    Бездокументарная
+                  </ppp-option>
+                </ppp-select>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Начальный номинал</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  type="number"
+                  placeholder="1000"
+                  value="${(x) => x.document.initialNominal}"
+                  ${ref('initialNominal')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Текущий номинал</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  type="number"
+                  placeholder="1000"
+                  value="${(x) => x.document.nominal}"
+                  ${ref('nominal')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Дата погашения облигации</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Дата погашения"
+                  value="${(x) => x.document.maturityDate}"
+                  ${ref('maturityDate')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Количество выплат по купонам в год</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  type="number"
+                  optional
+                  placeholder="Купонов в в год"
+                  value="${(x) => x.document.couponQuantityPerYear}"
+                  ${ref('couponQuantityPerYear')}
+                ></ppp-text-field>
+              </div>
+            </section>
+          `
+        )}
         <span slot="submit-control-text">Сохранить инструмент</span>
       </ppp-page>
     </form>
