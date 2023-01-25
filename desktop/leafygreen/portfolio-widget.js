@@ -62,7 +62,7 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       text-align: right;
       position: sticky;
       top: 0;
-      z-index: 1;
+      z-index: 100;
       width: 50%;
       height: 28px;
       padding: 4px 8px;
