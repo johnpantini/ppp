@@ -143,6 +143,38 @@ export const widgetSearchControlTemplate = (context, definition) => html`
               )}
             `
           )}
+          ${when(
+            (x) => x.bonds.length,
+            html`
+              <div class="menu-title">Облигации</div>
+              ${repeat(
+                (x) => x.bonds,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.selectInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
+                        <div
+                          class="menu-item-icon-logo"
+                          style="${(x) =>
+                            `background-image:url(${
+                              'static/instruments/' + x.isin + '.svg'
+                            })`}"
+                        ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
         </div>
       </div>
     </div>
