@@ -2,7 +2,6 @@
 
 import { TRADER_DATUM, WIDGET_TYPES } from '../const.js';
 import { Trader } from './common-trader.js';
-import { applyMixins } from '../utilities/apply-mixins.js';
 import { cyrillicToLatin } from '../intl.js';
 import { debounce } from '../ppp-throttle.js';
 import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
@@ -753,13 +752,17 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  getBroker() {
+  getBrokerType() {
     return this.document.broker.type;
+  }
+
+  getExchange() {
+    return ['moex', 'spbex'];
   }
 
   async search(searchText) {
     if (searchText?.trim()) {
-      searchText = searchText.trim();
+      searchText = searchText.trim().replaceAll("'", "\\'");
 
       const lines = ((context) => {
         const collection = context.services
@@ -771,6 +774,17 @@ class TinkoffGrpcWebTrader extends Trader {
           .find({
             $and: [
               { removed: { $ne: true } },
+              {
+                tinkoffFigi: {
+                  $exists: true,
+                  $ne: null
+                }
+              },
+              {
+                type: {
+                  $in: ['currency', 'bond', 'stock', 'future', 'option']
+                }
+              },
               {
                 exchange: {
                   $in: ['spbex', 'moex']
@@ -798,6 +812,17 @@ class TinkoffGrpcWebTrader extends Trader {
             $and: [
               { removed: { $ne: true } },
               {
+                tinkoffFigi: {
+                  $exists: true,
+                  $ne: null
+                }
+              },
+              {
+                type: {
+                  $in: ['currency', 'bond', 'stock', 'future', 'option']
+                }
+              },
+              {
                 exchange: {
                   $in: ['spbex', 'moex']
                 }
@@ -816,6 +841,17 @@ class TinkoffGrpcWebTrader extends Trader {
           .find({
             $and: [
               { removed: { $ne: true } },
+              {
+                tinkoffFigi: {
+                  $exists: true,
+                  $ne: null
+                }
+              },
+              {
+                type: {
+                  $in: ['currency', 'bond', 'stock', 'future', 'option']
+                }
+              },
               {
                 exchange: {
                   $in: ['spbex', 'moex']
@@ -842,7 +878,7 @@ class TinkoffGrpcWebTrader extends Trader {
       return ppp.user.functions.eval(
         lines
           .join('\n')
-          .replaceAll('$broker', this.getBroker?.() ?? '')
+          .replaceAll('$broker', this.getBrokerType?.() ?? '')
           .replaceAll('$text', searchText.toUpperCase())
           .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
       );
@@ -895,4 +931,4 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 }
 
-export default applyMixins(TinkoffGrpcWebTrader);
+export default TinkoffGrpcWebTrader;

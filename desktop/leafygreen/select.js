@@ -12,7 +12,7 @@ import { bodyFont, designUnit, heightNumber } from './design-tokens.js';
 import { disabledCursor } from '../../shared/utilities/style/disabled.js';
 import { requireComponent } from '../../shared/template.js';
 import { warning } from './icons/warning.js';
-import { caretDown } from './icons/caret-down.js'
+import { caretDown } from './icons/caret-down.js';
 
 await requireComponent(
   'ppp-option',
@@ -140,6 +140,7 @@ export const selectStyles = (context, definition) => css`
 
   .listbox[hidden] {
     visibility: hidden;
+    display: none;
   }
 
   .listbox::-webkit-scrollbar {
@@ -258,6 +259,7 @@ export const selectStyles = (context, definition) => css`
   }
 
   /* prettier-ignore */
+
   :host([state='error']:not([disabled])) .root:hover .control {
     border-color: rgb(219, 48, 48);
     box-shadow: rgb(255 205 199) 0 0 0 3px;
