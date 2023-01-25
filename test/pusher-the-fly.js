@@ -102,8 +102,7 @@ async function formatter(event, message) {
   return {
     id: message.ppp_counter,
     '@click':
-      instrument &&
-      ((x, c) => c.parent.trySelectSymbol(instrument.symbol, 'stock')),
+      instrument && ((x, c) => c.parent.trySelectSymbol(instrument.symbol)),
     iconLayout: `<div slot="icon" style="${
       instrument?.isin
         ? `background-image:url(${
@@ -124,7 +123,7 @@ async function formatter(event, message) {
         else {
           return `<span class="clickable" onclick="event.composedPath().find(n =>
             n?.tagName?.toLowerCase?.() === 'ppp-psina-pusher-subscription-widget')
-            ?.trySelectSymbol(this.textContent, 'stock')">${s}</span>`;
+            ?.trySelectSymbol(this.textContent)">${s}</span>`;
         }
       })
       .join('<span class="dot-divider">•</span>')}</div>`,
