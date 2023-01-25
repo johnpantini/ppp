@@ -130,7 +130,7 @@ export const portfolioWidgetTemplate = (context, definition) => html`
             `
           )}
           </tbody>
-          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c, 'stock')}">
+          <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
           ${repeat(
             (_, c) => [42],
             html`
@@ -149,6 +149,115 @@ export const portfolioWidgetTemplate = (context, definition) => html`
                       <tr
                         class="portfolio-row"
                         symbol="${(cell) => cell.instrument.symbol}"
+                        type="${(cell) => cell.instrument.type}"
+                      >
+                        <td class="cell capitalize">
+                          <div class="portfolio-row-logo-with-name">
+                            <div
+                              class="portfolio-row-logo"
+                              style="${(cell) =>
+                                cell.instrument.isin
+                                  ? `background-image:url(${
+                                      'static/instruments/' +
+                                      cell.instrument.isin +
+                                      '.svg'
+                                    })`
+                                  : ''}"
+                            ></div>
+                            <div class="portfolio-row-name">
+                              ${(cell) =>
+                                cell.instrument.fullName ??
+                                cell.instrument.symbol}
+                            </div>
+                          </div>
+                        </td>
+                        <td class="cell">
+                          ${(cell) => formatQuantity(cell.size * cell.lot)}
+                        </td>
+                        <td class="cell">
+                          ${(cell) =>
+                            formatPrice(cell.averagePrice, cell.instrument)}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.unrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatAmount(
+                              cell.unrealizedProfit,
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.unrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatRelativeChange(
+                              cell.unrealizedProfit /
+                                (cell.averagePrice *
+                                  cell.size *
+                                  cell.instrument.lot),
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.dailyUnrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatAmount(
+                              cell.dailyUnrealizedProfit,
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.dailyUnrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatRelativeChange(
+                              cell.dailyUnrealizedProfit /
+                                (cell.averagePrice *
+                                  cell.size *
+                                  cell.instrument.lot),
+                              cell.instrument.currency
+                            )}
+                        </td>
+                      </tr>
+                    `
+                  )}
+                `
+              )}
+            `
+          )}
+          ${repeat(
+            (_, c) => [42],
+            html`
+              ${when(
+                (x, c) => c.parent.bonds?.size,
+                html`
+                  <tr class="table-group">
+                    <td colspan="1">Облигации</td>
+                  </tr>
+                  ${repeat(
+                    (__, r) =>
+                      Array.from(r.parent.bonds?.values()).sort((a, b) =>
+                        a.instrument.symbol.localeCompare(b.instrument.symbol)
+                      ),
+                    html`
+                      <tr
+                        class="portfolio-row"
+                        symbol="${(cell) => cell.instrument.symbol}"
+                        type="${(cell) => cell.instrument.type}"
                       >
                         <td class="cell capitalize">
                           <div class="portfolio-row-logo-with-name">
@@ -241,7 +350,11 @@ export const portfolioWidgetTemplate = (context, definition) => html`
           </tbody>
         </table>
         ${when(
-          (x) => !x.balances?.size && !x.stocks?.size && !x.zombies?.size,
+          (x) =>
+            !x.balances?.size &&
+            !x.stocks?.size &&
+            !x.bonds?.size &&
+            !x.zombies?.size,
           html`
             <div class="widget-empty-state-holder">
               <img draggable="false" src="static/empty-widget-state.svg" />
@@ -271,6 +384,9 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
   stocks;
 
   @observable
+  bonds;
+
+  @observable
   zombies;
 
   onTraderError() {
@@ -285,6 +401,7 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
 
     this.balances = new Map();
     this.stocks = new Map();
+    this.bonds = new Map();
     this.zombies = new Map();
 
     this.portfolioTrader = await ppp.getOrCreateTrader(
@@ -325,21 +442,26 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
     button && (button.style.display = 'none');
   }
 
-  async handlePortfolioTableClick({ event }, instrumentType) {
+  async handlePortfolioTableClick({ event }) {
     if (this.groupControl.selection && !this.preview && this.portfolioTrader) {
-      const symbol = event
-        .composedPath()
+      const cp = event.composedPath();
+      const symbol = cp
         .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
         ?.getAttribute('symbol');
+      const type = cp
+        .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
+        ?.getAttribute('type');
 
-      if (symbol) {
+      if (symbol && type) {
         this.topLoader.start();
 
         try {
           const instrument = await this.findAndSelectSymbol({
-            type: instrumentType,
+            type,
             symbol,
-            exchange: this.portfolioTrader.getExchange()
+            exchange: {
+              $in: this.portfolioTrader.getExchange()
+            }
           });
 
           if (!instrument) {
@@ -358,6 +480,11 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
         } finally {
           this.topLoader.stop();
         }
+      } else {
+        this.notificationsArea.error({
+          title: 'Портфель',
+          text: 'Инструмент не найден в базе данных.'
+        });
       }
     }
   }
@@ -381,6 +508,13 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
             else this.stocks.delete(newValue.symbol);
 
             Observable.notify(this, 'stocks');
+
+            break;
+          case 'bond':
+            if (newValue.size !== 0) this.bonds.set(newValue.symbol, newValue);
+            else this.bonds.delete(newValue.symbol);
+
+            Observable.notify(this, 'bonds');
 
             break;
         }
