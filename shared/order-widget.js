@@ -571,7 +571,8 @@ export class PppOrderWidget extends WidgetWithInstrument {
         pusherApiId: this.container.pusherApiId.value,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
         changePriceQuantityViaMouseWheel:
-          this.container.changePriceQuantityViaMouseWheel.checked
+          this.container.changePriceQuantityViaMouseWheel.checked,
+        orderViaHotkeys: this.container.orderViaHotkeys.checked
       }
     };
   }
@@ -685,12 +686,26 @@ export class PppOrderWidget extends WidgetWithInstrument {
     this.saveLastPriceValue();
   }
 
+  async keydownBuyOrSell(event) {
+    if (event.code === 'KeyB') {
+      await this.buyOrSell('buy')
+    }
+
+    if (event.code === 'KeyS') {
+      await this.buyOrSell('sell')
+    }
+  }
+
   handlePriceKeydown({ event }) {
     if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       event.preventDefault();
 
       if (event.key === 'ArrowUp') this.stepUp(false);
       else this.stepDown(false);
+    }
+
+    if (this.document.orderViaHotkeys) {
+      this.keydownBuyOrSell(event)
     }
 
     return true;
@@ -1167,6 +1182,12 @@ export async function widgetDefinition(definition = {}) {
         >
           Изменять цену и количество колесом мыши
         </${'ppp-checkbox'}>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.orderViaHotkeys}"
+          ${ref('orderViaHotkeys')}
+        >
+          Покупка/продажа клавишами "B"/"S", если поле цена в фокусе.
+        </ppp-checkbox>
       </div>
     `
   };
