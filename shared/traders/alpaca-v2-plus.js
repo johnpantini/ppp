@@ -2,9 +2,9 @@
 
 import { BROKERS, TRADER_DATUM } from '../const.js';
 import { later } from '../later.js';
-import { TraderWithSimpleSearch } from './trader-with-simple-search.js';
 import { Trader } from './common-trader.js';
-import { applyMixins } from '../utilities/apply-mixins.js';
+import { cyrillicToLatin } from '../intl.js';
+import ppp from '../../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -363,15 +363,117 @@ class AlpacaV2PlusTrader extends Trader {
   getExchange() {
     switch (this.document.exchange) {
       case 'SPBX':
-        return 'spbex';
+        return ['spbex'];
       default:
-        return '';
+        return [];
     }
   }
 
-  getBroker() {
+  getBrokerType() {
     return this.document.broker.type;
+  }
+
+  async search(searchText) {
+    if (searchText?.trim()) {
+      searchText = searchText.trim().replaceAll("'", "\\'");
+
+      const lines = ((context) => {
+        const collection = context.services
+          .get('mongodb-atlas')
+          .db('ppp')
+          .collection('instruments');
+
+        const exactSymbolMatch = collection
+          .find({
+            $and: [
+              { removed: { $ne: true } },
+              {
+                type: 'stock'
+              },
+              {
+                exchange: {
+                  $in: '$exchange'
+                }
+              },
+              {
+                broker: '$broker'
+              },
+              {
+                $or: [
+                  {
+                    symbol: '$text'
+                  },
+                  {
+                    symbol: '$latin'
+                  }
+                ]
+              }
+            ]
+          })
+          .limit(1);
+
+        const regexSymbolMatch = collection
+          .find({
+            $and: [
+              { removed: { $ne: true } },
+              {
+                type: 'stock'
+              },
+              {
+                exchange: {
+                  $in: '$exchange'
+                }
+              },
+              {
+                broker: '$broker'
+              },
+              {
+                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
+              }
+            ]
+          })
+          .limit(20);
+
+        const regexFullNameMatch = collection
+          .find({
+            $and: [
+              { removed: { $ne: true } },
+              {
+                type: 'stock'
+              },
+              {
+                exchange: {
+                  $in: '$exchange'
+                }
+              },
+              {
+                broker: '$broker'
+              },
+              {
+                fullName: { $regex: '($text|$latin)', $options: 'i' }
+              }
+            ]
+          })
+          .limit(20);
+
+        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
+      })
+        .toString()
+        .split(/\r?\n/);
+
+      lines.pop();
+      lines.shift();
+
+      return ppp.user.functions.eval(
+        lines
+          .join('\n')
+          .replaceAll("'$exchange'", JSON.stringify(this.getExchange()))
+          .replaceAll('$broker', this.getBrokerType?.() ?? '')
+          .replaceAll('$text', searchText.toUpperCase())
+          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
+      );
+    }
   }
 }
 
-export default applyMixins(AlpacaV2PlusTrader, TraderWithSimpleSearch);
+export default AlpacaV2PlusTrader;

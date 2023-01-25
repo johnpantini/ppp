@@ -4,10 +4,9 @@ import { isJWTTokenExpired, uuidv4 } from '../ppp-crypto.js';
 import { TradingError } from '../trading-error.js';
 import { TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../const.js';
 import { later } from '../later.js';
-import { TraderWithSimpleSearch } from './trader-with-simple-search.js';
 import { Trader } from './common-trader.js';
-import { applyMixins } from '../utilities/apply-mixins.js';
-import { formatPrice } from '../intl.js';
+import { cyrillicToLatin, formatPrice } from '../intl.js';
+import ppp from '../../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -184,7 +183,7 @@ class AlorOpenAPIV2Trader extends Trader {
           },
           side: direction.toLowerCase(),
           type: 'limit',
-          price: this.fixPrice(instrument, price),
+          price: +this.fixPrice(instrument, price),
           quantity,
           user: {
             portfolio: this.document.portfolio
@@ -320,7 +319,7 @@ class AlorOpenAPIV2Trader extends Trader {
                   },
                   side,
                   type: 'limit',
-                  price: this.fixPrice(
+                  price: +this.fixPrice(
                     orderInstrument,
                     o.price + orderInstrument.minPriceIncrement * value
                   ),
@@ -702,8 +701,6 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
-    if (instrument?.exchange?.indexOf?.(this.getExchange()) === -1) return;
-
     if (this.connection.readyState === WebSocket.OPEN) {
       const guid = this.#reqId();
 
@@ -797,8 +794,6 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async removeLastRef(instrument, refs, ref) {
-    if (instrument?.exchange?.indexOf?.(this.getExchange()) === -1) return;
-
     if (this.connection.readyState === WebSocket.OPEN) {
       this.#guids.delete(ref.guid);
 
@@ -877,6 +872,28 @@ class AlorOpenAPIV2Trader extends Trader {
               for (const { field, datum } of fields) {
                 switch (datum) {
                   case TRADER_DATUM.ORDERBOOK:
+                    if (instrument.type === 'bond') {
+                      data.bids = data.bids.map((b) => {
+                        return {
+                          price: +this.fixPrice(
+                            instrument,
+                            (b.price * instrument.nominal) / 100
+                          ),
+                          volume: b.volume
+                        };
+                      });
+
+                      data.asks = data.asks.map((a) => {
+                        return {
+                          price: +this.fixPrice(
+                            instrument,
+                            (a.price * instrument.nominal) / 100
+                          ),
+                          volume: a.volume
+                        };
+                      });
+                    }
+
                     source[field] = {
                       bids: data.bids,
                       asks: data.asks
@@ -1054,6 +1071,8 @@ class AlorOpenAPIV2Trader extends Trader {
           if (datum === TRADER_DATUM.TIMELINE_ITEM) {
             const payload = {
               operationId: data.id,
+              accruedInterest: data.accruedInt,
+              commission: data.commission,
               parentId: data.orderno,
               symbol: data.symbol,
               type:
@@ -1081,15 +1100,15 @@ class AlorOpenAPIV2Trader extends Trader {
   getExchange() {
     switch (this.document.exchange) {
       case 'SPBX':
-        return 'spbex';
+        return ['spbex'];
       case 'MOEX':
-        return 'moex';
+        return ['moex'];
       default:
-        return '';
+        return [];
     }
   }
 
-  getBroker() {
+  getBrokerType() {
     return this.document.broker.type;
   }
 
@@ -1151,6 +1170,125 @@ class AlorOpenAPIV2Trader extends Trader {
 
     return 'Неизвестная ошибка, смотрите консоль браузера.';
   }
+
+  async search(searchText) {
+    const instrumentType = [];
+
+    if (/^D/.test(this.document.portfolio)) {
+      instrumentType.push('stock', 'bond');
+    } else if (/^G/.test(this.document.portfolio)) {
+      instrumentType.push('currency');
+    } else if (/HL$/.test(this.document.portfolio)) {
+      instrumentType.push('future');
+    }
+
+    if (searchText?.trim()) {
+      searchText = searchText.trim().replaceAll("'", "\\'");
+
+      const lines = ((context) => {
+        const collection = context.services
+          .get('mongodb-atlas')
+          .db('ppp')
+          .collection('instruments');
+
+        const exactSymbolMatch = collection
+          .find({
+            $and: [
+              { removed: { $ne: true } },
+              {
+                type: {
+                  $in: '$instrumentType'
+                }
+              },
+              {
+                exchange: {
+                  $in: '$exchange'
+                }
+              },
+              {
+                broker: '$broker'
+              },
+              {
+                $or: [
+                  {
+                    symbol: '$text'
+                  },
+                  {
+                    symbol: '$latin'
+                  }
+                ]
+              }
+            ]
+          })
+          .limit(1);
+
+        const regexSymbolMatch = collection
+          .find({
+            $and: [
+              { removed: { $ne: true } },
+              {
+                type: {
+                  $in: '$instrumentType'
+                }
+              },
+              {
+                exchange: {
+                  $in: '$exchange'
+                }
+              },
+              {
+                broker: '$broker'
+              },
+              {
+                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
+              }
+            ]
+          })
+          .limit(20);
+
+        const regexFullNameMatch = collection
+          .find({
+            $and: [
+              { removed: { $ne: true } },
+              {
+                type: {
+                  $in: '$instrumentType'
+                }
+              },
+              {
+                exchange: {
+                  $in: '$exchange'
+                }
+              },
+              {
+                broker: '$broker'
+              },
+              {
+                fullName: { $regex: '($text|$latin)', $options: 'i' }
+              }
+            ]
+          })
+          .limit(20);
+
+        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
+      })
+        .toString()
+        .split(/\r?\n/);
+
+      lines.pop();
+      lines.shift();
+
+      return ppp.user.functions.eval(
+        lines
+          .join('\n')
+          .replaceAll("'$exchange'", JSON.stringify(this.getExchange()))
+          .replaceAll("'$instrumentType'", JSON.stringify(instrumentType))
+          .replaceAll('$broker', this.getBrokerType?.() ?? '')
+          .replaceAll('$text', searchText.toUpperCase())
+          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
+      );
+    }
+  }
 }
 
-export default applyMixins(AlorOpenAPIV2Trader, TraderWithSimpleSearch);
+export default AlorOpenAPIV2Trader;

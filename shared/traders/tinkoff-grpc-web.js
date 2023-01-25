@@ -533,15 +533,31 @@ class TinkoffGrpcWebTrader extends Trader {
                   source[field] = {
                     bids:
                       orderbook?.bids?.map?.((b) => {
+                        const p = toNumber(b.price);
+
                         return {
-                          price: toNumber(b.price),
+                          price:
+                            instrument.type === 'bond'
+                              ? +this.fixPrice(
+                                  instrument,
+                                  (p * instrument.nominal) / 100
+                                )
+                              : p,
                           volume: b.quantity
                         };
                       }) ?? [],
                     asks:
                       orderbook?.asks?.map?.((a) => {
+                        const p = toNumber(a.price);
+
                         return {
-                          price: toNumber(a.price),
+                          price:
+                            instrument.type === 'bond'
+                              ? +this.fixPrice(
+                                  instrument,
+                                  (p * instrument.nominal) / 100
+                                )
+                              : p,
                           volume: a.quantity
                         };
                       }) ?? []
