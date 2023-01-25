@@ -531,14 +531,23 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   async selectSymbol(symbol, exchange) {
     if (this.ordersTrader) {
-      await this.findAndSelectSymbol(
-        {
-          type: this.document.instrumentType ?? 'stock',
-          symbol,
-          exchange: exchange ?? this.ordersTrader.getExchange?.()
-        },
-        true
-      );
+      const instrument = await this.ordersTrader.findInstrumentInCache(symbol);
+
+      if (instrument) {
+        await this.findAndSelectSymbol(
+          {
+            type: instrument.type,
+            symbol,
+            exchange: {
+              $in:
+                typeof exchange !== 'undefined'
+                  ? [exchange]
+                  : this.ordersTrader.getExchange() ?? instrument.exchange ?? []
+            }
+          },
+          true
+        );
+      }
     }
   }
 
