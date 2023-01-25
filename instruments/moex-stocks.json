@@ -15,7 +15,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BN56Q9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "ENPG",
@@ -33,7 +34,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RMWQD4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "POLY",
@@ -51,7 +53,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004PYF2N3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "NKNCP",
@@ -69,7 +72,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000GQSVC2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "RSTIP",
@@ -87,7 +91,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000KTF667",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "IRKT",
@@ -105,7 +110,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000FWGSZ5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "MRKV",
@@ -123,7 +129,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PKWCQ7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "VSMO",
@@ -141,7 +148,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68CV8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "UNAC",
@@ -159,7 +167,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000Q7ZZY2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "LSRG",
@@ -177,7 +186,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68C39",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "real_estate"
   },
   {
     "symbol": "TTLK",
@@ -195,7 +205,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RJL816",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "CNTL",
@@ -213,7 +224,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BBV4M5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "MGNT",
@@ -231,7 +243,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004RVFCY3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "SVAV",
@@ -249,7 +262,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68JR8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "ORUP",
@@ -267,7 +281,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG001BBGNS2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "ETLN",
@@ -285,7 +300,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG001M2SC01",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "real_estate"
   },
   {
     "symbol": "RTKMP",
@@ -303,7 +319,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S685M3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "GRNT",
@@ -321,7 +338,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00B8NN386",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "GEMC",
@@ -339,7 +357,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG011MCM288",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "health_care"
   },
   {
     "symbol": "KZOSP",
@@ -357,7 +376,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0029SG1C1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "WUSH",
@@ -375,7 +395,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "TCS00A105EX7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "other"
   },
   {
     "symbol": "KMAZ",
@@ -393,7 +414,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000LNHHJ9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "KZOS",
@@ -411,7 +433,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0029SFXB3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "FIXP",
@@ -429,7 +452,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00ZHCX1X2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "VKCO",
@@ -447,7 +471,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00178PGX3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "it"
   },
   {
     "symbol": "PHOR",
@@ -465,7 +490,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S689R0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "LNZL",
@@ -483,7 +509,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000SK7JS5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "MGTSP",
@@ -501,7 +528,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000PZ0833",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "SELG",
@@ -519,7 +547,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002458LF8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "AGRO",
@@ -537,7 +566,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG007N0Z367",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "TATNP",
@@ -555,7 +585,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68829",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "VEON-RX",
@@ -573,7 +604,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00R4Z2NT4",
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "sector": "telecom"
   },
   {
     "symbol": "BLNG",
@@ -591,7 +623,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VQWH86",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "MAGN",
@@ -609,7 +642,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68507",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "VTBR",
@@ -627,7 +661,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004730ZJ9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "SMLT",
@@ -645,7 +680,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00F6NKQX3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "real_estate"
   },
   {
     "symbol": "BANE",
@@ -663,7 +699,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68758",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "AFLT",
@@ -681,7 +718,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S683W7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "CIAN",
@@ -699,7 +737,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG012YQ6P43",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "it"
   },
   {
     "symbol": "RUAL",
@@ -717,7 +756,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG008F2T3T2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "NKHP",
@@ -735,7 +775,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00BGKYH17",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "SBER",
@@ -753,7 +794,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004730N88",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "MDMG",
@@ -771,7 +813,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00Y3XYV94",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "health_care"
   },
   {
     "symbol": "RUSP",
@@ -789,7 +832,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000R466J1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "GTRK",
@@ -807,7 +851,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00HY6V6H5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "MVID",
@@ -825,7 +870,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68CP5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "BANEP",
@@ -843,7 +889,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S686N0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "OKEY",
@@ -861,7 +908,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00172J7S9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "ALRS",
@@ -879,7 +927,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68B31",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "MRKP",
@@ -897,7 +946,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VG1034",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "FLOT",
@@ -915,7 +965,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000R04X57",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "PMSBP",
@@ -933,7 +984,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000MZL2S9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "TATN",
@@ -951,7 +1003,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004RVFFC0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "FIVE~MOEX",
@@ -969,7 +1022,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00JXPFBN0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "MSTT",
@@ -987,7 +1041,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68DD6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "MTLR",
@@ -1005,7 +1060,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68598",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "UWGN",
@@ -1023,7 +1079,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG008HD3V85",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "AKRN",
@@ -1041,7 +1098,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S688G4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "GAZP",
@@ -1059,7 +1117,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004730RP0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "DVEC",
@@ -1077,7 +1136,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000V07CB8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "SBERP",
@@ -1095,7 +1155,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0047315Y7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "RTKM",
@@ -1113,7 +1174,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S682Z6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "LENT",
@@ -1131,7 +1193,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0063FKTD9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "LIFE",
@@ -1149,7 +1212,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0019K04R5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "health_care"
   },
   {
     "symbol": "BSPB",
@@ -1167,7 +1231,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000QJW156",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "MTSS",
@@ -1185,7 +1250,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S681W1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "TGKN",
@@ -1203,7 +1269,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RG4ZQ4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "TRNFP",
@@ -1221,7 +1288,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00475KHX6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "RKKE",
@@ -1239,7 +1307,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000LWNRP3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "LSNG",
@@ -1257,7 +1326,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000NLC9Z6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "RENI",
@@ -1275,7 +1345,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00QKJSX05",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "MRKC",
@@ -1293,7 +1364,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VH7TZ8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "POSI",
@@ -1311,7 +1383,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "TCS00A103X66",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "it"
   },
   {
     "symbol": "POGR",
@@ -1329,7 +1402,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00VPKLPX4",
-    "forQualInvestorFlag": true
+    "forQualInvestorFlag": true,
+    "sector": "materials"
   },
   {
     "symbol": "FEES",
@@ -1347,7 +1421,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00475JZZ6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "DASB",
@@ -1365,7 +1440,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000LWVHN8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "KROT",
@@ -1383,7 +1459,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000NLB2G3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "KAZT",
@@ -1401,7 +1478,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002B9MYC1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "RUGR",
@@ -1419,7 +1497,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0014PFYM2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "PMSB",
@@ -1437,7 +1516,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000MZL0Y6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "PRFN",
@@ -1455,7 +1535,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG003BNWBP3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "SIBN",
@@ -1473,7 +1554,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S684M6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "YAKG",
@@ -1491,7 +1573,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002B298N6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "TGKB",
@@ -1509,7 +1592,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000Q7GG57",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "KLSB",
@@ -1527,7 +1611,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000DBD6F6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "CHMK",
@@ -1545,7 +1630,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RP8V70",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "RNFT",
@@ -1563,7 +1649,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00F9XX7H4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "MSRS",
@@ -1581,7 +1668,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S687G6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "RSTI",
@@ -1599,7 +1687,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S682J4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "MRKZ",
@@ -1617,7 +1706,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000TJ6F42",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "APTK",
@@ -1635,7 +1725,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000K3STR7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "MSST",
@@ -1653,7 +1744,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG001BBSZV8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "other"
   },
   {
     "symbol": "QIWI",
@@ -1671,7 +1763,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG005D1WCQ1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "it"
   },
   {
     "symbol": "IRAO",
@@ -1689,7 +1782,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68473",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "HYDR",
@@ -1707,7 +1801,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00475K2X9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "TGKD",
@@ -1725,7 +1820,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000F6H7K3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "NSVZ",
@@ -1743,7 +1839,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002BCQK67",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "NLMK",
@@ -1761,7 +1858,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S681B4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "BELU",
@@ -1779,7 +1877,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000TY1CD1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "GCHE",
@@ -1797,7 +1896,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RTHVK7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "LNZLP",
@@ -1815,7 +1915,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000SR0YS4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "TCSG",
@@ -1833,7 +1934,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00QPYJ5H0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "SNGSP",
@@ -1851,7 +1953,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S681M2",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "YNDX",
@@ -1869,7 +1972,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG006L8G4H1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "SFIN",
@@ -1887,7 +1991,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG003LYCMB1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "FESH",
@@ -1905,7 +2010,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000QF1Q17",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "RASP",
@@ -1923,7 +2029,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68696",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "NVTK",
@@ -1941,7 +2048,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00475KKY8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "UNKL",
@@ -1959,7 +2067,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002YFXL29",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "NKNC",
@@ -1977,7 +2086,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000GQSRR5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "AQUA",
@@ -1995,7 +2105,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000W325F7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "VRSB",
@@ -2013,7 +2124,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000BX7DH0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "SGZH",
@@ -2031,7 +2143,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0100R9963",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "LSNGP",
@@ -2049,7 +2162,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000NLCCM3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "GMKN",
@@ -2067,7 +2181,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004731489",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "MOEX",
@@ -2085,7 +2200,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004730JJ5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "UPRO",
@@ -2103,7 +2219,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S686W0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "MRKS",
@@ -2121,7 +2238,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VJMH65",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "ROLO",
@@ -2139,7 +2257,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004Z2RGW8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "MSNG",
@@ -2157,7 +2276,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S687W8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "AFKS",
@@ -2175,7 +2295,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68614",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "SFTL",
@@ -2193,7 +2314,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0136BTL03",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "it"
   },
   {
     "symbol": "PLZL",
@@ -2211,7 +2333,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000R607Y3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "OZON",
@@ -2229,7 +2352,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00Y91R9T3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "LKOH",
@@ -2247,7 +2371,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004731032",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "ENRU",
@@ -2265,7 +2390,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000F6YP24",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "OGKB",
@@ -2283,7 +2409,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RK52V1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "IRGZ",
@@ -2301,7 +2428,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000NL6ZD9",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "GLTR",
@@ -2319,7 +2447,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VFX6Y4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "KAZTP",
@@ -2337,7 +2466,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002B9T6Y1",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "NMTP",
@@ -2355,7 +2485,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68BR5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "TGKA",
@@ -2373,7 +2504,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000QFH687",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "SNGS",
@@ -2391,7 +2523,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0047315D0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "CBOM",
@@ -2409,7 +2542,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG009GSYN76",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "financial"
   },
   {
     "symbol": "AMEZ",
@@ -2427,7 +2561,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000RJWGC4",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "TGKBP",
@@ -2445,7 +2580,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000Q7GJ60",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "ABRD",
@@ -2463,7 +2599,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002W2FT69",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "consumer"
   },
   {
     "symbol": "CNTLP",
@@ -2481,7 +2618,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG0027F0Y27",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "telecom"
   },
   {
     "symbol": "PIKK",
@@ -2499,7 +2637,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68BH6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "real_estate"
   },
   {
     "symbol": "ROSN",
@@ -2517,7 +2656,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004731354",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "MTLRP",
@@ -2535,7 +2675,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004S68FR6",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "TRMK",
@@ -2553,7 +2694,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG004TC84Z8",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "industrials"
   },
   {
     "symbol": "MRKU",
@@ -2571,7 +2713,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000VKG4R5",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "MRKY",
@@ -2589,7 +2732,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000C7P5M7",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "utilities"
   },
   {
     "symbol": "KRKNP",
@@ -2607,7 +2751,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG002B2J5X0",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "energy"
   },
   {
     "symbol": "CHMF",
@@ -2625,7 +2770,8 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG00475K6C3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "materials"
   },
   {
     "symbol": "ISKJ",
@@ -2643,6 +2789,7 @@
       "tinkoff-invest-api"
     ],
     "tinkoffFigi": "BBG000N16BP3",
-    "forQualInvestorFlag": false
+    "forQualInvestorFlag": false,
+    "sector": "health_care"
   }
 ]

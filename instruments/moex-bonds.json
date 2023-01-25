@@ -7251,6 +7251,34 @@
     "forQualInvestorFlag": false
   },
   {
+    "symbol": "RU000A105KQ8",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Магнит БО-004Р-01",
+    "isin": "RU000A105KQ8",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "TCS00A105KQ8",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2025-12-02T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "consumer",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false
+  },
+  {
     "symbol": "RU000A104C03",
     "classCode": "TQCB",
     "exchange": [
@@ -8370,34 +8398,6 @@
     "forQualInvestorFlag": false
   },
   {
-    "symbol": "RU000A101XN7",
-    "classCode": "TQCB",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "АФК Система выпуск 14",
-    "isin": "RU000A101XN7",
-    "minPriceIncrement": 0.01,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00WCMMJ92",
-    "couponQuantityPerYear": 4,
-    "maturityDate": "2030-07-10T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "financial",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
-  },
-  {
     "symbol": "RU000A1026H0",
     "classCode": "TQCB",
     "exchange": [
@@ -8419,6 +8419,34 @@
     "nominal": 1000,
     "initialNominal": 1000,
     "sector": "consumer",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false
+  },
+  {
+    "symbol": "RU000A101XN7",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "АФК Система выпуск 14",
+    "isin": "RU000A101XN7",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00WCMMJ92",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2030-07-10T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
     "issueKind": "non_documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
@@ -8898,6 +8926,34 @@
     "issueKind": "non_documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false
+  },
+  {
+    "symbol": "RU000A1043B8",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "ТАЛАН-ФИНАНС 001P-03",
+    "isin": "RU000A1043B8",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG013PS4RH1",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2025-05-19T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": true,
     "floatingCouponFlag": false,
     "forQualInvestorFlag": false
   },
@@ -9742,34 +9798,6 @@
     "forQualInvestorFlag": false
   },
   {
-    "symbol": "RU000A1030U5",
-    "classCode": "TQIR",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "ЭкономЛизинг выпуск 3",
-    "isin": "RU000A1030U5",
-    "minPriceIncrement": 0.01,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0109ZMRP0",
-    "couponQuantityPerYear": 4,
-    "maturityDate": "2024-04-18T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "financial",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false
-  },
-  {
     "symbol": "RU000A104ZC9",
     "classCode": "TQCB",
     "exchange": [
@@ -9791,6 +9819,34 @@
     "nominal": 1000,
     "initialNominal": 1000,
     "sector": "industrials",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false
+  },
+  {
+    "symbol": "RU000A1030U5",
+    "classCode": "TQIR",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "ЭкономЛизинг выпуск 3",
+    "isin": "RU000A1030U5",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0109ZMRP0",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2024-04-18T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
     "issueKind": "non_documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
@@ -14752,6 +14808,34 @@
     "forQualInvestorFlag": false
   },
   {
+    "symbol": "RU000A0ZYLC4",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Газпром нефть 001P-04R",
+    "isin": "RU000A0ZYLC4",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00JLWSJK0",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2024-12-12T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "energy",
+    "issueKind": "documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false
+  },
+  {
     "symbol": "RU000A0JTMK9",
     "classCode": "TQCB",
     "exchange": [
@@ -16680,6 +16764,34 @@
     "issueKind": "non_documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false
+  },
+  {
+    "symbol": "RU000A105RU5",
+    "classCode": "TQIR",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Мосрегионлифт БО-01",
+    "isin": "RU000A105RU5",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "TCS00A105RU5",
+    "couponQuantityPerYear": 12,
+    "maturityDate": "2026-01-08T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "other",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": true,
     "floatingCouponFlag": false,
     "forQualInvestorFlag": false
   },
