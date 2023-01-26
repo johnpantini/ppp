@@ -966,9 +966,23 @@ class AlorOpenAPIV2Trader extends Trader {
                 case TRADER_DATUM.BEST_BID:
                   source[field] = data.bid;
 
+                  if (instrument.type === 'bond') {
+                    source[field] = this.relativeBondPriceToPrice(
+                      data.bid,
+                      instrument
+                    );
+                  }
+
                   break;
                 case TRADER_DATUM.BEST_ASK:
                   source[field] = data.ask;
+
+                  if (instrument.type === 'bond') {
+                    source[field] = this.relativeBondPriceToPrice(
+                      data.ask,
+                      instrument
+                    );
+                  }
 
                   break;
               }
