@@ -295,6 +295,8 @@ class TinkoffGrpcWebTrader extends Trader {
           o.direction === OrderDirection.ORDER_DIRECTION_BUY ? 'buy' : 'sell';
 
         if (status === 'working' && orderSide === side) {
+          if (instrument && o.figi !== instrument.tinkoffFigi) continue;
+
           const orderInstrument = this.#instruments.get(o.figi);
 
           if (orderInstrument && orderInstrument.minPriceIncrement > 0) {
@@ -306,7 +308,12 @@ class TinkoffGrpcWebTrader extends Trader {
               price: toQuotation(
                 +this.fixPrice(
                   orderInstrument,
-                  toNumber(o.initialSecurityPrice) +
+                  (orderInstrument.type === 'bond'
+                    ? this.relativeBondPriceToPrice(
+                        toNumber(o.initialSecurityPrice),
+                        orderInstrument
+                      )
+                    : toNumber(o.initialSecurityPrice)) +
                     orderInstrument.minPriceIncrement * value
                 )
               ),
@@ -537,13 +544,11 @@ class TinkoffGrpcWebTrader extends Trader {
 
                         return {
                           price:
-                            instrument.type === 'bond'
-                              ? +this.fixPrice(
-                                  instrument,
-                                  (p * instrument.nominal) / 100
-                                )
+                            instrument.type === 'bond' && !b.processed
+                              ? this.relativeBondPriceToPrice(p, instrument)
                               : p,
-                          volume: b.quantity
+                          volume: b.quantity,
+                          processed: true
                         };
                       }) ?? [],
                     asks:
@@ -552,13 +557,11 @@ class TinkoffGrpcWebTrader extends Trader {
 
                         return {
                           price:
-                            instrument.type === 'bond'
-                              ? +this.fixPrice(
-                                  instrument,
-                                  (p * instrument.nominal) / 100
-                                )
+                            instrument.type === 'bond' && !a.processed
+                              ? this.relativeBondPriceToPrice(p, instrument)
                               : p,
-                          volume: a.quantity
+                          volume: a.quantity,
+                          processed: true
                         };
                       }) ?? []
                   };
@@ -593,7 +596,10 @@ class TinkoffGrpcWebTrader extends Trader {
         .reverse()
         .map((trade) => {
           const timestamp = trade.time.valueOf();
-          const price = toNumber(trade.price);
+          const price =
+            instrument.type === 'bond'
+              ? this.relativeBondPriceToPrice(toNumber(trade.price), instrument)
+              : toNumber(trade.price);
 
           return {
             orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
@@ -623,7 +629,13 @@ class TinkoffGrpcWebTrader extends Trader {
             switch (datum) {
               case TRADER_DATUM.MARKET_PRINT:
                 const timestamp = trade.time.valueOf();
-                const price = toNumber(trade.price);
+                const price =
+                  instrument.type === 'bond'
+                    ? this.relativeBondPriceToPrice(
+                        toNumber(trade.price),
+                        instrument
+                      )
+                    : toNumber(trade.price);
 
                 source[field] = {
                   orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
@@ -720,18 +732,18 @@ class TinkoffGrpcWebTrader extends Trader {
       for (const [source, fields] of this.subs.orders) {
         for (const { field, datum } of fields) {
           if (datum === TRADER_DATUM.CURRENT_ORDER) {
-            const instrument = this.#instruments.get(order.figi);
+            const instrument = this.#instruments.get(order.figi) ?? {
+              symbol: order.figi,
+              currency: order.currency.toUpperCase(),
+              lot: Math.round(
+                toNumber(order.initialOrderPrice) /
+                  toNumber(order.initialSecurityPrice) /
+                  order.lotsRequested
+              )
+            };
 
             source[field] = {
-              instrument: instrument ?? {
-                symbol: order.figi,
-                currency: order.currency.toUpperCase(),
-                lot: Math.round(
-                  toNumber(order.initialOrderPrice) /
-                    toNumber(order.initialSecurityPrice) /
-                    order.lotsRequested
-                )
-              },
+              instrument,
               orderId: order.orderId,
               symbol: order.figi,
               exchange: 0,
@@ -748,7 +760,13 @@ class TinkoffGrpcWebTrader extends Trader {
               endsAt: null,
               quantity: order.lotsRequested,
               filled: order.lotsExecuted,
-              price: toNumber(order.initialSecurityPrice)
+              price:
+                instrument.type === 'bond'
+                  ? this.relativeBondPriceToPrice(
+                      toNumber(order.initialSecurityPrice),
+                      instrument
+                    )
+                  : toNumber(order.initialSecurityPrice)
             };
           }
         }
