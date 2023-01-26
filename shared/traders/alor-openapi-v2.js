@@ -183,7 +183,13 @@ class AlorOpenAPIV2Trader extends Trader {
           },
           side: direction.toLowerCase(),
           type: 'limit',
-          price: +this.fixPrice(instrument, price),
+          price:
+            instrument.type === 'bond'
+              ? this.bondPriceToRelativeBondPrice(
+                  +this.fixPrice(instrument, price),
+                  instrument
+                )
+              : +this.fixPrice(instrument, price),
           quantity,
           user: {
             portfolio: this.document.portfolio
@@ -233,7 +239,10 @@ class AlorOpenAPIV2Trader extends Trader {
           time: t.time,
           timestamp: t.timestamp,
           symbol: t.symbol,
-          price: t.price,
+          price:
+            instrument.type === 'bond'
+              ? this.relativeBondPriceToPrice(t.price, instrument)
+              : t.price,
           volume: t.qty
         };
       });
@@ -308,6 +317,15 @@ class AlorOpenAPIV2Trader extends Trader {
             orderInstrument?.symbol ??
             orderInstrument.minPriceIncrement > 0
           ) {
+            let price = +this.fixPrice(
+              orderInstrument,
+              o.price + orderInstrument.minPriceIncrement * value
+            );
+
+            if (orderInstrument.type === 'bond') {
+              price = +(o.price + 0.01 * value).toFixed(2);
+            }
+
             const modifyOrderRequest = await fetch(
               `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit/${o.id}`,
               {
@@ -319,10 +337,7 @@ class AlorOpenAPIV2Trader extends Trader {
                   },
                   side,
                   type: 'limit',
-                  price: +this.fixPrice(
-                    orderInstrument,
-                    o.price + orderInstrument.minPriceIncrement * value
-                  ),
+                  price,
                   quantity: o.qty - o.filled,
                   user: {
                     portfolio: this.document.portfolio
@@ -663,7 +678,7 @@ class AlorOpenAPIV2Trader extends Trader {
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE: {
         for (const [_, data] of this.positions) {
-          this.onPositionsMessage({
+          await this.onPositionsMessage({
             data,
             fromCache: true
           });
@@ -673,7 +688,7 @@ class AlorOpenAPIV2Trader extends Trader {
       }
       case TRADER_DATUM.CURRENT_ORDER: {
         for (const [_, data] of this.orders) {
-          this.onOrdersMessage({
+          await this.onOrdersMessage({
             data,
             fromCache: true
           });
@@ -683,7 +698,7 @@ class AlorOpenAPIV2Trader extends Trader {
       }
       case TRADER_DATUM.TIMELINE_ITEM: {
         for (const [_, data] of this.timeline) {
-          this.onTimelineMessage({
+          await this.onTimelineMessage({
             data,
             fromCache: true
           });
@@ -849,7 +864,7 @@ class AlorOpenAPIV2Trader extends Trader {
     // Broadcast positions for order widgets (at least).
     if (this.subs.positions.has(source)) {
       for (const [symbol, data] of this.positions) {
-        this.onPositionsMessage({
+        await this.onPositionsMessage({
           data,
           fromCache: true
         });
@@ -862,6 +877,28 @@ class AlorOpenAPIV2Trader extends Trader {
       const instrument = this.#guids.get(data.guid)?.instrument;
 
       if (instrument) {
+        if (instrument.type === 'bond') {
+          data.bids = data.bids.map((b) => {
+            if (b.processed) return b;
+
+            return {
+              price: this.relativeBondPriceToPrice(b.price, instrument),
+              volume: b.volume,
+              processed: true
+            };
+          });
+
+          data.asks = data.asks.map((a) => {
+            if (a.processed) return a;
+
+            return {
+              price: this.relativeBondPriceToPrice(a.price, instrument),
+              volume: a.volume,
+              processed: true
+            };
+          });
+        }
+
         for (const [source, fields] of this.subs.orderbook) {
           if (instrument._id === source.instrument?._id) {
             const ref = this.refs.orderbook.get(source.instrument?._id);
@@ -872,28 +909,6 @@ class AlorOpenAPIV2Trader extends Trader {
               for (const { field, datum } of fields) {
                 switch (datum) {
                   case TRADER_DATUM.ORDERBOOK:
-                    if (instrument.type === 'bond') {
-                      data.bids = data.bids.map((b) => {
-                        return {
-                          price: +this.fixPrice(
-                            instrument,
-                            (b.price * instrument.nominal) / 100
-                          ),
-                          volume: b.volume
-                        };
-                      });
-
-                      data.asks = data.asks.map((a) => {
-                        return {
-                          price: +this.fixPrice(
-                            instrument,
-                            (a.price * instrument.nominal) / 100
-                          ),
-                          volume: a.volume
-                        };
-                      });
-                    }
-
                     source[field] = {
                       bids: data.bids,
                       asks: data.asks
@@ -925,9 +940,23 @@ class AlorOpenAPIV2Trader extends Trader {
                 case TRADER_DATUM.LAST_PRICE:
                   source[field] = data.last_price;
 
+                  if (instrument.type === 'bond') {
+                    source[field] = this.relativeBondPriceToPrice(
+                      data.last_price,
+                      instrument
+                    );
+                  }
+
                   break;
                 case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
                   source[field] = data.change;
+
+                  if (instrument.type === 'bond') {
+                    source[field] = this.relativeBondPriceToPrice(
+                      data.change,
+                      instrument
+                    );
+                  }
 
                   break;
                 case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE:
@@ -966,7 +995,10 @@ class AlorOpenAPIV2Trader extends Trader {
                     time: data.time,
                     timestamp: data.timestamp,
                     symbol: data.symbol,
-                    price: data.price,
+                    price:
+                      instrument.type === 'bond'
+                        ? this.relativeBondPriceToPrice(data.price, instrument)
+                        : data.price,
                     volume: data.qty
                   };
 
@@ -979,7 +1011,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  onPositionsMessage({ data, fromCache }) {
+  async onPositionsMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.positions.set(data.symbol, data);
 
@@ -1005,12 +1037,18 @@ class AlorOpenAPIV2Trader extends Trader {
             if (isBalance) {
               source[field] = payload;
             } else {
-              void this.findInstrumentInCacheAndAssignToField(
-                data.symbol,
-                source,
-                field,
-                payload
+              payload.instrument = await this.findInstrumentInCache(
+                data.symbol
               );
+
+              if (payload.instrument.type === 'bond') {
+                payload.averagePrice = this.relativeBondPriceToPrice(
+                  payload.averagePrice,
+                  payload.instrument
+                );
+              }
+
+              source[field] = payload;
             }
           } else if (data.symbol === this.getSymbol(source.instrument)) {
             switch (datum) {
@@ -1021,6 +1059,13 @@ class AlorOpenAPIV2Trader extends Trader {
               case TRADER_DATUM.POSITION_AVERAGE:
                 source[field] = data.avgPrice;
 
+                if (source.instrument.type === 'bond') {
+                  source[field] = this.relativeBondPriceToPrice(
+                    data.avgPrice,
+                    source.instrument
+                  );
+                }
+
                 break;
             }
           }
@@ -1029,7 +1074,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  onOrdersMessage({ data, fromCache }) {
+  async onOrdersMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.orders.set(data.id, data);
 
@@ -1050,19 +1095,23 @@ class AlorOpenAPIV2Trader extends Trader {
               price: data.price
             };
 
-            void this.findInstrumentInCacheAndAssignToField(
-              data.symbol,
-              source,
-              field,
-              payload
-            );
+            payload.instrument = await this.findInstrumentInCache(data.symbol);
+
+            if (payload.instrument.type === 'bond') {
+              payload.price = this.relativeBondPriceToPrice(
+                payload.price,
+                payload.instrument
+              );
+            }
+
+            source[field] = payload;
           }
         }
       }
     }
   }
 
-  onTimelineMessage({ data, fromCache }) {
+  async onTimelineMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.timeline.set(data.id, data);
 
@@ -1085,12 +1134,16 @@ class AlorOpenAPIV2Trader extends Trader {
               createdAt: data.date
             };
 
-            void this.findInstrumentInCacheAndAssignToField(
-              data.symbol,
-              source,
-              field,
-              payload
-            );
+            payload.instrument = await this.findInstrumentInCache(data.symbol);
+
+            if (payload.instrument.type === 'bond') {
+              payload.price = this.relativeBondPriceToPrice(
+                payload.price,
+                payload.instrument
+              );
+            }
+
+            source[field] = payload;
           }
         }
       }
