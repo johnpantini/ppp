@@ -44,27 +44,6 @@ export class Trader {
   async findInstrumentInCache(symbol) {
     await this.waitForInstrumentCache();
 
-    return this.findInstrumentInCacheAndAssignToField(symbol);
-  }
-
-  hasCommonExchange(e1 = [], e2 = []) {
-    for (let i = 0; i < e1.length; i++) {
-      for (let j = 0; j < e2.length; j++) {
-        if (e1[i] === e2[j]) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  async findInstrumentInCacheAndAssignToField(
-    symbol,
-    source = {},
-    field = 'payload',
-    payload = {}
-  ) {
     return new Promise((resolve, reject) => {
       if (/@/.test(symbol)) [symbol] = symbol.split('@');
 
@@ -83,8 +62,7 @@ export class Trader {
             instrument.broker?.indexOf?.(this.document.broker.type) > -1 &&
             this.hasCommonExchange(instrument.exchange, this.getExchange())
           ) {
-            payload.instrument = instrument;
-            source[field] = payload;
+            resolve(instrument);
           } else {
             // Try with exchange suffix
             const symbolWithSuffix = `${symbol}~${
@@ -94,52 +72,54 @@ export class Trader {
 
             storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
               if (eventWithSuffix.target.result) {
-                payload.instrument = eventWithSuffix.target.result;
-                source[field] = payload;
+                resolve(eventWithSuffix.target.result);
               } else {
-                payload.instrument = {
+                resolve({
                   symbol: symbolWithSuffix
-                };
-                source[field] = payload;
+                });
               }
             };
 
             storeRequestWithSuffix.onerror = (eventWithSuffix) => {
               console.error(eventWithSuffix.target.error);
 
-              payload.instrument = {
-                symbol: symbolWithSuffix
-              };
-              source[field] = payload;
-
               this.onError?.(eventWithSuffix.target.error);
-
               reject(event.target.error);
             };
           }
-        } else {
-          payload.instrument = {
-            symbol
-          };
-          source[field] = payload;
         }
-
-        resolve(payload.instrument);
       };
 
       storeRequest.onerror = (event) => {
         console.error(event.target.error);
 
-        payload.instrument = {
-          symbol
-        };
-        source[field] = payload;
-
         this.onError?.(event.target.error);
-
         reject(event.target.error);
       };
     });
+  }
+
+  hasCommonExchange(e1 = [], e2 = []) {
+    for (let i = 0; i < e1.length; i++) {
+      for (let j = 0; j < e2.length; j++) {
+        if (e1[i] === e2[j]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  relativeBondPriceToPrice(relativePrice, instrument) {
+    return +this.fixPrice(
+      instrument,
+      (relativePrice * instrument.nominal) / 100
+    );
+  }
+
+  bondPriceToRelativeBondPrice(price, instrument) {
+    return +((price * 100) / instrument.nominal).toFixed(2);
   }
 
   caps() {
