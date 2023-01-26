@@ -568,6 +568,15 @@ export class PppOrderWidget extends WidgetWithInstrument {
     await validate(this.container.ordersTraderId);
     await validate(this.container.level1TraderId);
     await validate(this.container.positionTraderId);
+
+    if (this.container.buyShortcut.value && this.container.sellShortcut.value) {
+      await validate(this.container.sellShortcut, {
+        hook: async () =>
+          this.container.buyShortcut.value !==
+          this.container.sellShortcut.value,
+        errorMessage: 'Горячие клавиши должны различаться'
+      });
+    }
   }
 
   async update() {
@@ -580,7 +589,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
         pusherApiId: this.container.pusherApiId.value,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
         changePriceQuantityViaMouseWheel:
-          this.container.changePriceQuantityViaMouseWheel.checked
+          this.container.changePriceQuantityViaMouseWheel.checked,
+        buyShortcut: this.container.buyShortcut.value.trim(),
+        sellShortcut: this.container.sellShortcut.value.trim()
       }
     };
   }
@@ -656,6 +667,22 @@ export class PppOrderWidget extends WidgetWithInstrument {
     this.calculateEstimate();
   }
 
+  async handlePriceOrQuantityKeydown({ event, type }) {
+    if (this.document.buyShortcut !== this.document.sellShortcut) {
+      if (
+        this.document.buyShortcut &&
+        event.code === this.document.buyShortcut
+      ) {
+        await this.buyOrSell('buy');
+      } else if (
+        this.document.sellShortcut &&
+        event.code === this.document.sellShortcut
+      ) {
+        await this.buyOrSell('sell');
+      }
+    }
+  }
+
   handlePricePaste({ event }) {
     const data = event.clipboardData.getData('text/plain').replace(',', '.');
 
@@ -700,6 +727,8 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
       if (event.key === 'ArrowUp') this.stepUp(false);
       else this.stepDown(false);
+    } else {
+      void this.handlePriceOrQuantityKeydown({ event, type: 'price' });
     }
 
     return true;
@@ -785,6 +814,8 @@ export class PppOrderWidget extends WidgetWithInstrument {
   }
 
   handleQuantityKeydown({ event }) {
+    void this.handlePriceOrQuantityKeydown({ event, type: 'quantity' });
+
     if (event.key === '0' && !this.quantity.value) return false;
 
     switch (event.key) {
@@ -1158,6 +1189,70 @@ export async function widgetDefinition(definition = {}) {
           >
             Добавить API Pusher
           </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Горячая клавиша для покупки</h5>
+          <p>Покупка сработает, если фокус ввода будет находиться в поле цены
+            или количества. Нажмите Esc, чтобы отменить эту функцию.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <${'ppp-text-field'}
+            optional
+            placeholder="Не задана"
+            value="${(x) => x.document.buyShortcut}"
+            @keydown="${(x, { event }) => {
+              if (
+                +event.key === parseInt(event.key) ||
+                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                  event.code
+                )
+              )
+                return false;
+
+              if (event.key === 'Escape') {
+                x.buyShortcut.value = '';
+              } else {
+                x.buyShortcut.value = event.code;
+              }
+
+              return false;
+            }}"
+            ${ref('buyShortcut')}
+          ></ppp-text-field>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Горячая клавиша для продажи</h5>
+          <p>Продажа сработает, если фокус ввода будет находиться в поле цены
+            или количества. Нажмите Esc, чтобы отменить эту функцию.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <${'ppp-text-field'}
+            optional
+            placeholder="Не задана"
+            value="${(x) => x.document.sellShortcut}"
+            @keydown="${(x, { event }) => {
+              if (
+                +event.key === parseInt(event.key) ||
+                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                  event.code
+                )
+              )
+                return false;
+
+              if (event.key === 'Escape') {
+                x.sellShortcut.value = '';
+              } else {
+                x.sellShortcut.value = event.code;
+              }
+
+              return false;
+            }}"
+            ${ref('sellShortcut')}
+          ></ppp-text-field>
         </div>
       </div>
       <div class="widget-settings-section">
