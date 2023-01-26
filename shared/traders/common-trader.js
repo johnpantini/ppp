@@ -87,7 +87,8 @@ export class Trader {
               reject(event.target.error);
             };
           }
-        }
+        } else
+          resolve(null);
       };
 
       storeRequest.onerror = (event) => {
