@@ -347,6 +347,114 @@ export const portfolioWidgetTemplate = (context, definition) => html`
               )}
             `
           )}
+          ${repeat(
+            (_, c) => [42],
+            html`
+              ${when(
+                (x, c) => c.parent.futures?.size,
+                html`
+                  <tr class="table-group">
+                    <td colspan="1">Фьючерсы</td>
+                  </tr>
+                  ${repeat(
+                    (__, r) =>
+                      Array.from(r.parent.futures?.values()).sort((a, b) =>
+                        a.instrument.symbol.localeCompare(b.instrument.symbol)
+                      ),
+                    html`
+                      <tr
+                        class="portfolio-row"
+                        symbol="${(cell) => cell.instrument.symbol}"
+                        type="${(cell) => cell.instrument.type}"
+                      >
+                        <td class="cell capitalize">
+                          <div class="portfolio-row-logo-with-name">
+                            <div
+                              class="portfolio-row-logo"
+                              style="${(cell) =>
+                                cell.instrument.isin
+                                  ? `background-image:url(${
+                                      'static/instruments/' +
+                                      cell.instrument.isin +
+                                      '.svg'
+                                    })`
+                                  : ''}"
+                            ></div>
+                            <div class="portfolio-row-name">
+                              ${(cell) =>
+                                cell.instrument.fullName ??
+                                cell.instrument.symbol}
+                            </div>
+                          </div>
+                        </td>
+                        <td class="cell">
+                          ${(cell) => formatQuantity(cell.size * cell.lot)}
+                        </td>
+                        <td class="cell">
+                          ${(cell) =>
+                            formatPrice(cell.averagePrice, cell.instrument)}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.unrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatAmount(
+                              cell.unrealizedProfit,
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.unrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatRelativeChange(
+                              cell.unrealizedProfit /
+                                (cell.averagePrice *
+                                  cell.size *
+                                  cell.instrument.lot),
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.dailyUnrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatAmount(
+                              cell.dailyUnrealizedProfit,
+                              cell.instrument.currency
+                            )}
+                        </td>
+                        <td
+                          class="cell ${(cell) =>
+                            cell.dailyUnrealizedProfit < 0
+                              ? 'negative'
+                              : 'positive'}"
+                        >
+                          ${(cell) =>
+                            formatRelativeChange(
+                              cell.dailyUnrealizedProfit /
+                                (cell.averagePrice *
+                                  cell.size *
+                                  cell.instrument.lot),
+                              cell.instrument.currency
+                            )}
+                        </td>
+                      </tr>
+                    `
+                  )}
+                `
+              )}
+            `
+          )}
           </tbody>
         </table>
         ${when(
@@ -354,6 +462,7 @@ export const portfolioWidgetTemplate = (context, definition) => html`
             !x.balances?.size &&
             !x.stocks?.size &&
             !x.bonds?.size &&
+            !x.futures?.size &&
             !x.zombies?.size,
           html`
             <div class="widget-empty-state-holder">
@@ -387,6 +496,9 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
   bonds;
 
   @observable
+  futures;
+
+  @observable
   zombies;
 
   onTraderError() {
@@ -402,6 +514,7 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
     this.balances = new Map();
     this.stocks = new Map();
     this.bonds = new Map();
+    this.futures = new Map();
     this.zombies = new Map();
 
     this.portfolioTrader = await ppp.getOrCreateTrader(
@@ -510,6 +623,14 @@ export class PppPortfolioWidget extends WidgetWithInstrument {
             else this.bonds.delete(newValue.symbol);
 
             Observable.notify(this, 'bonds');
+
+            break;
+          case 'future':
+            if (newValue.size !== 0)
+              this.futures.set(newValue.symbol, newValue);
+            else this.futures.delete(newValue.symbol);
+
+            Observable.notify(this, 'futures');
 
             break;
         }

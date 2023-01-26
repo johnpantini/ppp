@@ -180,6 +180,11 @@ export class InstrumentsManagePage extends Page {
       );
     }
 
+    if (this.document.type === 'future') {
+      $set.expirationDate = this.expirationDate.value;
+      $set.basicAsset = this.basicAsset.value;
+    }
+
     return {
       $set,
       $setOnInsert: {

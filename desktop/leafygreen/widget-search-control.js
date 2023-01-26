@@ -50,7 +50,8 @@ export const widgetSearchControlTemplate = (context, definition) => html`
                     style="${(x) =>
                       `background-image:url(${
                         'static/instruments/' +
-                        x.widget?.instrument.isin +
+                        (x.widget?.instrument.isin ??
+                          x.widget?.instrument.symbol) +
                         '.svg'
                       })`}"
                   ></div>
@@ -77,7 +78,11 @@ export const widgetSearchControlTemplate = (context, definition) => html`
       <div class="menu-holder" ${ref('menuHolder')}>
         <div class="menu">
           ${when(
-            (x) => !x.ticker && !x.stocks.length && !x.bonds.length,
+            (x) =>
+              !x.ticker &&
+              !x.stocks.length &&
+              !x.bonds.length &&
+              !x.futures.length,
             html`
               <div class="empty-state-holder">
                 <img draggable="false" src="static/empty-widget-state.svg" />
@@ -99,7 +104,9 @@ export const widgetSearchControlTemplate = (context, definition) => html`
                       class="menu-item-icon-logo"
                       style="${(x) =>
                         `background-image:url(${
-                          'static/instruments/' + x.ticker?.isin + '.svg'
+                          'static/instruments/' +
+                          (x.ticker?.isin ?? x.ticker?.symbol) +
+                          '.svg'
                         })`}"
                     ></div>
                     ${(x) => x.ticker?.fullName[0]}
@@ -162,6 +169,38 @@ export const widgetSearchControlTemplate = (context, definition) => html`
                           style="${(x) =>
                             `background-image:url(${
                               'static/instruments/' + x.isin + '.svg'
+                            })`}"
+                        ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
+            (x) => x.futures.length,
+            html`
+              <div class="menu-title">Фьючерсы</div>
+              ${repeat(
+                (x) => x.futures,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.selectInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
+                        <div
+                          class="menu-item-icon-logo"
+                          style="${(x) =>
+                            `background-image:url(${
+                              'static/instruments/' + x.symbol + '.svg'
                             })`}"
                         ></div>
                         ${(x) => x.fullName[0]}

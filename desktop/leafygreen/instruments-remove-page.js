@@ -43,6 +43,12 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
               >
                 Облигация
               </ppp-checkbox>
+              <ppp-checkbox
+                checked
+                name="future"
+              >
+                Фьючерс
+              </ppp-checkbox>
             </div>
           </div>
         </section>

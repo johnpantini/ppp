@@ -99,6 +99,7 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
             >
               <${'ppp-radio'} value="stock">Акция</ppp-radio>
               <ppp-radio value="bond">Облигация</ppp-radio>
+              <ppp-radio value="future">Фьючерс</ppp-radio>
             </ppp-radio-group>
           </div>
         </section>
@@ -403,6 +404,35 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
                     >Муниципальные облигации
                   </ppp-option>
                 </ppp-select>
+              </div>
+            </section>
+          `
+        )}
+        ${when(
+          (x) => x.document.type === 'future',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Основной актив</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Основной актив"
+                  value="${(x) => x.document.basicAsset}"
+                  ${ref('basicAsset')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Дата экспирации</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Дата экспирации"
+                  value="${(x) => x.document.expirationDate}"
+                  ${ref('expirationDate')}
+                ></ppp-text-field>
               </div>
             </section>
           `

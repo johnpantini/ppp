@@ -28,11 +28,15 @@ export class WidgetSearchControl extends OffClickElement {
   @observable
   bonds;
 
+  @observable
+  futures;
+
   constructor(props) {
     super(props);
 
     this.stocks = [];
     this.bonds = [];
+    this.futures = [];
   }
 
   documentOffClickHandler() {
@@ -138,12 +142,14 @@ export class WidgetSearchControl extends OffClickElement {
           const seen = {};
           const stocks = [];
           const bonds = [];
+          const futures = [];
 
           for (const i of results?.regexSymbolMatch ?? []) {
             if (seen[i._id]) continue;
 
             if (i.type === 'stock') stocks.push(i);
             else if (i.type === 'bond') bonds.push(i);
+            else if (i.type === 'future') futures.push(i);
 
             seen[i._id] = true;
           }
@@ -153,6 +159,7 @@ export class WidgetSearchControl extends OffClickElement {
 
             if (i.type === 'stock') stocks.push(i);
             else if (i.type === 'bond') bonds.push(i);
+            else if (i.type === 'future') futures.push(i);
 
             seen[i._id] = true;
           }
@@ -161,6 +168,9 @@ export class WidgetSearchControl extends OffClickElement {
             a.fullName.localeCompare(b.fullName)
           );
           this.bonds = bonds.sort((a, b) =>
+            a.fullName.localeCompare(b.fullName)
+          );
+          this.futures = futures.sort((a, b) =>
             a.fullName.localeCompare(b.fullName)
           );
 
@@ -175,6 +185,7 @@ export class WidgetSearchControl extends OffClickElement {
 
           this.stocks = [];
           this.bonds = [];
+          this.futures = [];
           this.ticker = null;
           this.searching = false;
         });
@@ -182,6 +193,7 @@ export class WidgetSearchControl extends OffClickElement {
       this.activeItem = null;
       this.stocks = [];
       this.bonds = [];
+      this.futures = [];
       this.ticker = null;
       this.searching = false;
     }

@@ -24,6 +24,10 @@ class AlorOpenAPIV2Trader extends Trader {
 
   #pendingJWTRequest;
 
+  #futures = new Map();
+
+  #pendingFuturesCachePromise;
+
   positions = new Map();
 
   orders = new Map();
@@ -55,6 +59,44 @@ class AlorOpenAPIV2Trader extends Trader {
   #guids = new Map();
 
   connection;
+
+  async #buildFuturesCache() {
+    await this.waitForInstrumentCache();
+
+    return (
+      this.#pendingFuturesCachePromise ??
+      (this.#pendingFuturesCachePromise = new Promise((resolve, reject) => {
+        const tx = this.cacheRequest.result.transaction(
+          'instruments',
+          'readonly'
+        );
+
+        const store = tx.objectStore('instruments');
+        const cursorRequest = store.openCursor();
+
+        cursorRequest.onsuccess = (event) => {
+          const result = event.target.result;
+
+          if (result?.value) {
+            if (result.value.fullName) {
+              this.#futures.set(
+                result.value.fullName.split(/\s+/)[0],
+                result.value
+              );
+            }
+
+            result['continue']();
+          }
+        };
+
+        tx.oncomplete = () => {
+          resolve(this.#futures);
+        };
+
+        tx.onerror = () => reject();
+      }))
+    );
+  }
 
   async ensureAccessTokenIsOk() {
     try {
@@ -112,6 +154,9 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   getSymbol(instrument = {}) {
+    if (instrument.type === 'future')
+      return instrument.fullName.split(/\s+/)[0];
+
     let symbol;
 
     if (this.document.exchange === 'SPBX' && instrument.spbexSymbol)
@@ -256,6 +301,8 @@ class AlorOpenAPIV2Trader extends Trader {
   async estimate(instrument, price, quantity) {
     await this.ensureAccessTokenIsOk();
 
+    if (instrument.type === 'future') return {};
+
     const request = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/estimate',
       {
@@ -311,7 +358,13 @@ class AlorOpenAPIV2Trader extends Trader {
         if (o.status === 'working' && o.side === side) {
           if (instrument && o.symbol !== this.getSymbol(instrument)) continue;
 
-          const orderInstrument = await this.findInstrumentInCache(o.symbol);
+          let orderInstrument;
+
+          if (/HL$/.test(this.document.portfolio)) {
+            orderInstrument = this.#futures.get(o.symbol);
+          } else {
+            orderInstrument = await this.findInstrumentInCache(o.symbol);
+          }
 
           if (
             orderInstrument?.symbol ??
@@ -661,6 +714,10 @@ class AlorOpenAPIV2Trader extends Trader {
   async subscribeField({ source, field, datum }) {
     await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
+
+    if (/HL$/.test(this.document.portfolio)) {
+      await this.#buildFuturesCache();
+    }
 
     if (
       datum === TRADER_DATUM.POSITION ||
@@ -1051,11 +1108,15 @@ class AlorOpenAPIV2Trader extends Trader {
             if (isBalance) {
               source[field] = payload;
             } else {
-              payload.instrument = await this.findInstrumentInCache(
-                data.symbol
-              );
+              if (/HL$/.test(this.document.portfolio)) {
+                payload.instrument = this.#futures.get(data.symbol);
+              } else {
+                payload.instrument = await this.findInstrumentInCache(
+                  data.symbol
+                );
+              }
 
-              if (payload.instrument.type === 'bond') {
+              if (payload.instrument?.type === 'bond') {
                 payload.averagePrice = this.relativeBondPriceToPrice(
                   payload.averagePrice,
                   payload.instrument
@@ -1109,9 +1170,15 @@ class AlorOpenAPIV2Trader extends Trader {
               price: data.price
             };
 
-            payload.instrument = await this.findInstrumentInCache(data.symbol);
+            if (/HL$/.test(this.document.portfolio)) {
+              payload.instrument = this.#futures.get(data.symbol);
+            } else {
+              payload.instrument = await this.findInstrumentInCache(
+                data.symbol
+              );
+            }
 
-            if (payload.instrument.type === 'bond') {
+            if (payload.instrument?.type === 'bond') {
               payload.price = this.relativeBondPriceToPrice(
                 payload.price,
                 payload.instrument
@@ -1148,9 +1215,15 @@ class AlorOpenAPIV2Trader extends Trader {
               createdAt: data.date
             };
 
-            payload.instrument = await this.findInstrumentInCache(data.symbol);
+            if (/HL$/.test(this.document.portfolio)) {
+              payload.instrument = this.#futures.get(data.symbol);
+            } else {
+              payload.instrument = await this.findInstrumentInCache(
+                data.symbol
+              );
+            }
 
-            if (payload.instrument.type === 'bond') {
+            if (payload.instrument?.type === 'bond') {
               payload.price = this.relativeBondPriceToPrice(
                 payload.price,
                 payload.instrument
@@ -1234,6 +1307,9 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (/Заявка/i.test(message))
       return message.endsWith('.') ? message : message + '.';
+
+    if (/Неизвестный инструмент в заявке/i.test(message))
+      return 'Неизвестный инструмент в заявке.';
 
     return 'Неизвестная ошибка, смотрите консоль браузера.';
   }

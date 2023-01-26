@@ -148,7 +148,9 @@ export const orderWidgetTemplate = (context, definition) => html`
                         class="widget-nbbo-line-icon-logo"
                         style="${(x) =>
                           `background-image:url(${
-                            'static/instruments/' + x.instrument?.isin + '.svg'
+                            'static/instruments/' +
+                            (x.instrument?.isin ?? x.instrument?.symbol) +
+                            '.svg'
                           })`}"
                       ></div>
                       ${(x) => x.instrument?.fullName[0]}
@@ -658,6 +660,9 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   calculateTotalAmount() {
     if (!this.instrument) return;
+
+    if (this.instrument.type === 'future')
+      return;
 
     this.totalAmount =
       parseFloat(this.price.value.replace(',', '.')) *

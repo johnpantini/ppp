@@ -139,6 +139,9 @@ export function cyrillicToLatin(text) {
 }
 
 export function priceCurrencySymbol(instrument) {
+  if (instrument?.type === 'future')
+    return 'пт.';
+
   if (instrument?.currency) {
     return (0)
       .toLocaleString('ru-RU', {

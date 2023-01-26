@@ -309,7 +309,7 @@ export class PppOrderbookWidget extends WidgetWithInstrument {
         if (
           needToChangeOrderbook &&
           this.instrument &&
-          newValue.instrument.symbol === this.instrument.symbol
+          newValue.instrument?.symbol === this.instrument.symbol
         ) {
           this.orderbookChanged(null, this.#lastOrderBookValue);
         }

@@ -248,7 +248,7 @@ export class PppActiveOrdersWidget extends WidgetWithInstrument {
       if (order.status !== 'working') continue;
 
       if (this.instrument) {
-        if (order.instrument.symbol === this.instrument.symbol) {
+        if (order.instrument?.symbol === this.instrument.symbol) {
           orders.push(order);
         }
       } else orders.push(order);
