@@ -47,7 +47,7 @@
     "tinkoffFigi": "BBG012F0B291",
     "couponQuantityPerYear": 2,
     "maturityDate": "2032-03-17T00:00:00Z",
-    "nominal": 1156.79,
+    "nominal": 1156.86,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -55,7 +55,8 @@
     "amortizationFlag": false,
     "floatingCouponFlag": false,
     "forQualInvestorFlag": false,
-    "subordinatedFlag": false
+    "subordinatedFlag": false,
+    "removed": true
   },
   {
     "symbol": "SU29023RMFS7",
@@ -3816,7 +3817,7 @@
     "tinkoffFigi": "BBG00XD2M5S2",
     "couponQuantityPerYear": 2,
     "maturityDate": "2030-07-17T00:00:00Z",
-    "nominal": 1230.46,
+    "nominal": 1230.53,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -4396,7 +4397,7 @@
     "tinkoffFigi": "TCS00A0ZZYP6",
     "couponQuantityPerYear": 12,
     "maturityDate": "2023-02-25T00:00:00Z",
-    "nominal": 100,
+    "nominal": 40,
     "initialNominal": 1000,
     "sector": "consumer",
     "issueKind": "documentary",
@@ -8698,35 +8699,6 @@
     "subordinatedFlag": false
   },
   {
-    "symbol": "RU000A101XN7",
-    "classCode": "TQCB",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "АФК Система выпуск 14",
-    "isin": "RU000A101XN7",
-    "minPriceIncrement": 0.1,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00WCMMJ92",
-    "couponQuantityPerYear": 4,
-    "maturityDate": "2030-07-10T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "financial",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false,
-    "subordinatedFlag": false
-  },
-  {
     "symbol": "RU000A1026H0",
     "classCode": "TQCB",
     "exchange": [
@@ -8748,6 +8720,35 @@
     "nominal": 1000,
     "initialNominal": 1000,
     "sector": "consumer",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
+    "symbol": "RU000A101XN7",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "АФК Система выпуск 14",
+    "isin": "RU000A101XN7",
+    "minPriceIncrement": 0.1,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00WCMMJ92",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2030-07-10T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
     "issueKind": "non_documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
@@ -9702,7 +9703,7 @@
     "tinkoffFigi": "BBG00KFLDC92",
     "couponQuantityPerYear": 2,
     "maturityDate": "2028-02-02T00:00:00Z",
-    "nominal": 1353.37,
+    "nominal": 1353.44,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -10148,35 +10149,6 @@
     "subordinatedFlag": false
   },
   {
-    "symbol": "RU000A1030U5",
-    "classCode": "TQIR",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "ЭкономЛизинг выпуск 3",
-    "isin": "RU000A1030U5",
-    "minPriceIncrement": 0.1,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG0109ZMRP0",
-    "couponQuantityPerYear": 4,
-    "maturityDate": "2024-04-18T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "financial",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false,
-    "subordinatedFlag": false
-  },
-  {
     "symbol": "RU000A104ZC9",
     "classCode": "TQCB",
     "exchange": [
@@ -10198,6 +10170,35 @@
     "nominal": 1000,
     "initialNominal": 1000,
     "sector": "industrials",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
+    "symbol": "RU000A1030U5",
+    "classCode": "TQIR",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "ЭкономЛизинг выпуск 3",
+    "isin": "RU000A1030U5",
+    "minPriceIncrement": 0.1,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG0109ZMRP0",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2024-04-18T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
     "issueKind": "non_documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
@@ -13424,35 +13425,6 @@
     "subordinatedFlag": false
   },
   {
-    "symbol": "RU000A101D13",
-    "classCode": "TQCB",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "Сегежа выпуск 1",
-    "isin": "RU000A101D13",
-    "minPriceIncrement": 0.1,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00RMFTSM5",
-    "couponQuantityPerYear": 2,
-    "maturityDate": "2023-01-26T00:00:00Z",
-    "nominal": 1000,
-    "initialNominal": 1000,
-    "sector": "materials",
-    "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": false,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false,
-    "subordinatedFlag": false
-  },
-  {
     "symbol": "RU000A1041B2",
     "classCode": "TQCB",
     "exchange": [
@@ -16631,7 +16603,7 @@
     "tinkoffFigi": "BBG009J6Q4B7",
     "couponQuantityPerYear": 2,
     "maturityDate": "2023-08-16T00:00:00Z",
-    "nominal": 1530.62,
+    "nominal": 1530.7,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
