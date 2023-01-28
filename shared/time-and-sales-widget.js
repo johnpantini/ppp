@@ -285,7 +285,8 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
 
     if (this.container.threshold.value) {
       await validate(this.container.threshold, {
-        hook: async (value) => +value >= 0 && +value <= 10000000,
+        hook: async (value) =>
+          +value.replace(',', '.') >= 0 && +value.replace(',', '.') <= 10000000,
         errorMessage: 'Введите значение в диапазоне от 0 до 10000000'
       });
     }
@@ -296,7 +297,7 @@ export class PppTimeAndSalesWidget extends WidgetWithInstrument {
       $set: {
         depth: Math.abs(this.container.depth.value),
         tradesTraderId: this.container.tradesTraderId.value,
-        threshold: this.container.threshold.value
+        threshold: +this.container.threshold.value.replace(',', '.') || ''
       }
     };
   }
@@ -386,9 +387,11 @@ export async function widgetDefinition(definition = {}) {
         </div>
         <div class="widget-settings-input-group">
           <${'ppp-text-field'}
-            type="number"
             placeholder="Фильтр объёма"
-            value="${(x) => x.document.threshold ?? ''}"
+            value="${(x) => x.document.threshold ?? 0}"
+            @beforeinput="${(x, { event }) => {
+              return event.data === null || /[0-9.,]/.test(event.data);
+            }}"
             ${ref('threshold')}
           ></ppp-text-field>
         </div>
