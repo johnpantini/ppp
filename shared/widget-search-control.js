@@ -31,12 +31,16 @@ export class WidgetSearchControl extends OffClickElement {
   @observable
   futures;
 
+  @observable
+  cryptocurrencies;
+
   constructor(props) {
     super(props);
 
     this.stocks = [];
     this.bonds = [];
     this.futures = [];
+    this.cryptocurrencies = [];
   }
 
   documentOffClickHandler() {
@@ -143,6 +147,7 @@ export class WidgetSearchControl extends OffClickElement {
           const stocks = [];
           const bonds = [];
           const futures = [];
+          const cryptocurrencies = [];
 
           for (const i of results?.regexSymbolMatch ?? []) {
             if (seen[i._id]) continue;
@@ -150,6 +155,7 @@ export class WidgetSearchControl extends OffClickElement {
             if (i.type === 'stock') stocks.push(i);
             else if (i.type === 'bond') bonds.push(i);
             else if (i.type === 'future') futures.push(i);
+            else if (i.type === 'cryptocurrency') cryptocurrencies.push(i);
 
             seen[i._id] = true;
           }
@@ -160,6 +166,7 @@ export class WidgetSearchControl extends OffClickElement {
             if (i.type === 'stock') stocks.push(i);
             else if (i.type === 'bond') bonds.push(i);
             else if (i.type === 'future') futures.push(i);
+            else if (i.type === 'cryptocurrency') cryptocurrencies.push(i);
 
             seen[i._id] = true;
           }
@@ -171,6 +178,9 @@ export class WidgetSearchControl extends OffClickElement {
             a.fullName.localeCompare(b.fullName)
           );
           this.futures = futures.sort((a, b) =>
+            a.fullName.localeCompare(b.fullName)
+          );
+          this.cryptocurrencies = cryptocurrencies.sort((a, b) =>
             a.fullName.localeCompare(b.fullName)
           );
 
@@ -186,6 +196,7 @@ export class WidgetSearchControl extends OffClickElement {
           this.stocks = [];
           this.bonds = [];
           this.futures = [];
+          this.cryptocurrencies = [];
           this.ticker = null;
           this.searching = false;
         });
@@ -194,6 +205,7 @@ export class WidgetSearchControl extends OffClickElement {
       this.stocks = [];
       this.bonds = [];
       this.futures = [];
+      this.cryptocurrencies = [];
       this.ticker = null;
       this.searching = false;
     }
