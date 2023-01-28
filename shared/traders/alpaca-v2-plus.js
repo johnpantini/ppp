@@ -29,14 +29,6 @@ class AlpacaV2PlusTrader extends Trader {
 
   connection;
 
-  getSymbol(instrument = {}) {
-    let symbol = instrument.symbol;
-
-    if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
-
-    return symbol;
-  }
-
   alpacaExchangeToUTEXExchange(exchange) {
     switch (exchange) {
       case 'P':

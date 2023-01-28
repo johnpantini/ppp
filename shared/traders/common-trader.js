@@ -37,6 +37,14 @@ export class Trader {
     });
   }
 
+  getSymbol(instrument = {}) {
+    let symbol = instrument.symbol;
+
+    if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
+
+    return symbol;
+  }
+
   async waitForInstrumentCache() {
     return this.#cacheRequestPendingSuccess;
   }
