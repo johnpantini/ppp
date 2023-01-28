@@ -1,6 +1,5 @@
 export function getInstrumentPrecision(instrument) {
-  if (!instrument)
-    return 0;
+  if (!instrument) return 0;
 
   const [dec, frac] = (instrument.minPriceIncrement ?? 0.01)
     .toString()
@@ -139,8 +138,9 @@ export function cyrillicToLatin(text) {
 }
 
 export function priceCurrencySymbol(instrument) {
-  if (instrument?.type === 'future')
-    return 'пт.';
+  if (instrument?.type === 'future') return 'пт.';
+
+  if (instrument?.type === 'cryptocurrency') return instrument.quoteCryptoAsset;
 
   if (instrument?.currency) {
     return (0)
