@@ -109,12 +109,21 @@ export function formatPercentage(change) {
   }).format(change);
 }
 
-export function formatQuantity(quantity) {
+export function formatQuantity(quantity, instrument) {
   if (typeof quantity !== 'number' || isNaN(quantity)) return '—';
+
+  let precision = 0;
+
+  if (typeof instrument?.minQuantityIncrement === 'number') {
+    const [_, frac] = instrument.minQuantityIncrement.toString().split('.');
+
+    precision = frac.length;
+  }
 
   return new Intl.NumberFormat('ru-RU', {
     style: 'decimal',
-    maximumFractionDigits: 0
+    minimumFractionDigits: precision,
+    maximumFractionDigits: precision
   }).format(quantity);
 }
 

@@ -11,7 +11,8 @@ import { repeat } from './element/templating/repeat.js';
 import {
   formatDate,
   formatPriceWithoutCurrency,
-  formatQuantity
+  formatQuantity,
+  priceCurrencySymbol
 } from './intl.js';
 import ppp from '../ppp.js';
 
@@ -56,7 +57,12 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
             <table class="trades-table">
               <thead>
                 <tr>
-                  <th>Цена</th>
+                  <th>
+                    ${(x) =>
+                      x.instrument
+                        ? 'Цена, ' + priceCurrencySymbol(x.instrument)
+                        : 'Цена'}
+                  </th>
                   <th>Количество</th>
                   <th>Время</th>
                   <th
@@ -90,7 +96,8 @@ export const timeAndSalesWidgetTemplate = (context, definition) => html`
                       </td>
                       <td>
                         <div class="cell">
-                          ${(x) => formatQuantity(x.volume ?? 0)}
+                          ${(x, c) =>
+                            formatQuantity(x.volume ?? 0, c.parent.instrument)}
                         </div>
                       </td>
                       <td>
