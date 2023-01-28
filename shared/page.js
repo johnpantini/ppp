@@ -249,6 +249,8 @@ export class Page extends FoundationElement {
     this.page.loading = false;
 
     Observable.notify(this, 'page');
+
+    return false;
   }
 
   async encrypt(document) {
@@ -421,6 +423,8 @@ export class Page extends FoundationElement {
   }
 
   async saveDocument() {
+    let updateResult;
+
     if (typeof this.page.view.save === 'function') return this.page.view.save();
 
     this.beginOperation();
@@ -435,7 +439,7 @@ export class Page extends FoundationElement {
 
       if (document._id ?? ownId) {
         // Update existing document
-        await this.#updateDocument(
+        updateResult = await this.#updateDocument(
           document._id
             ? {
                 _id: document._id
@@ -465,10 +469,13 @@ export class Page extends FoundationElement {
           }
         }
 
-        await this.#updateDocument();
+        updateResult = await this.#updateDocument();
       }
 
-      if (typeof this.page.view.afterUpdate === 'function') {
+      if (
+        updateResult !== false &&
+        typeof this.page.view.afterUpdate === 'function'
+      ) {
         await this.page.view.afterUpdate();
       }
 
