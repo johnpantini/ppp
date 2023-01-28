@@ -47,13 +47,15 @@ export const BROKERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
   TINKOFF_INVEST_API: 'tinkoff-invest-api',
   UTEX_AURORA: 'utex-aurora',
-  PSINA: 'psina'
+  PSINA: 'psina',
+  BINANCE: 'binance'
 };
 
 export const TRADERS = {
   ALOR_OPENAPI_V2: 'alor-openapi-v2',
   TINKOFF_GRPC_WEB: 'tinkoff-grpc-web',
   ALPACA_V2_PLUS: 'alpaca-v2-plus',
+  BINANCE_V3: 'binance-v3',
   CUSTOM: 'custom'
 };
 

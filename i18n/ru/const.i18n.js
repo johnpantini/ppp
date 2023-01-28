@@ -28,12 +28,14 @@ export default function (i18n) {
         [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
         [BROKERS.TINKOFF_INVEST_API]: 'Tinkoff Invest API',
         [BROKERS.UTEX_AURORA]: 'UTEX Aurora',
-        [BROKERS.PSINA]: 'Psina'
+        [BROKERS.PSINA]: 'Psina',
+        [BROKERS.BINANCE]: 'Binance'
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
+        [TRADERS.BINANCE_V3]: 'Binance API V3',
         [TRADERS.CUSTOM]: 'Произвольная реализация'
       },
       traderCaps: {

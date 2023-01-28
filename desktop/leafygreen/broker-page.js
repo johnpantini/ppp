@@ -82,6 +82,25 @@ export const brokerPageTemplate = (context, definition) => html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Binance"
+               style="height: 40px;"
+               src="static/binance.svg"/>
+          <span slot="title">Binance</span>
+          <span slot="description">Торговля и рыночные данные криптобиржи Binance. <a
+            target="_blank"
+            rel="noopener"
+            href="https://www.binance.com/">Официальный ресурс</a>.</span>
+          <${'ppp-button'}
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.BINANCE}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
           <img slot="logo" draggable="false" alt="Psina"
                style="height: 90%; opacity: .95"
                src="static/psina.png"/>
