@@ -1063,7 +1063,6 @@ class AlorOpenAPIV2Trader extends Trader {
                   source[field] = {
                     orderId: data.id,
                     side: data.side,
-                    time: data.time,
                     timestamp: data.timestamp,
                     symbol: data.symbol,
                     price:

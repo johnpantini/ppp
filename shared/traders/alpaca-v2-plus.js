@@ -159,7 +159,6 @@ class AlpacaV2PlusTrader extends Trader {
                   source[field] = {
                     orderId: `${data.S}|${side}|${data.p}|${data.s}|${pool}|${timestamp}`,
                     side,
-                    time: data.t,
                     condition: data.c?.join?.(' '),
                     timestamp,
                     symbol: data.S,

@@ -601,7 +601,6 @@ class TinkoffGrpcWebTrader extends Trader {
                 : trade.direction === TradeDirection.TRADE_DIRECTION_SELL
                 ? 'sell'
                 : '',
-            time: trade.time.toISOString(),
             timestamp,
             symbol: instrument.symbol,
             price,
