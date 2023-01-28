@@ -163,6 +163,33 @@ export const traderPageTemplate = (context, definition) => html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
+          <img slot="logo" draggable="false" alt="Binance" style="height: 40px"
+               src="static/binance.svg"/>
+          <div slot="title">
+            Binance API V3
+          </div>
+          <span slot="description">Рыночные данные через брокерский профиль Binance.</span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>${(x) =>
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ORDERBOOK}`)}
+              </li>
+              <li>${(x) =>
+                x.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIME_AND_SALES}`)}
+              </li>
+            </ul>
+          </div>
+          <${'ppp-button'}
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.BINANCE_V3}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
           <img slot="logo" draggable="false" alt="Custom" style="height: 40px"
                src="static/functions.svg"/>
           <div slot="title">
