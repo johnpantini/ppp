@@ -40614,6 +40614,29 @@
     "sector": "financial"
   },
   {
+    "symbol": "VTS",
+    "classCode": "SPBXM",
+    "exchange": [
+      "nyse-nsdq",
+      "spbex"
+    ],
+    "fullName": "Vitesse Energy",
+    "isin": "US92852X1037",
+    "minPriceIncrement": 0.01,
+    "type": "stock",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api",
+      "utex-aurora",
+      "psina"
+    ],
+    "tinkoffFigi": "BBG01B9G0GS3",
+    "forQualInvestorFlag": true,
+    "sector": "energy"
+  },
+  {
     "symbol": "338",
     "classCode": "SPBHKEX",
     "exchange": [

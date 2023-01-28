@@ -47,7 +47,7 @@
     "tinkoffFigi": "BBG012F0B291",
     "couponQuantityPerYear": 2,
     "maturityDate": "2032-03-17T00:00:00Z",
-    "nominal": 1156.86,
+    "nominal": 1156.92,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -55,8 +55,7 @@
     "amortizationFlag": false,
     "floatingCouponFlag": false,
     "forQualInvestorFlag": false,
-    "subordinatedFlag": false,
-    "removed": true
+    "subordinatedFlag": false
   },
   {
     "symbol": "SU29023RMFS7",
@@ -1421,6 +1420,35 @@
     "subordinatedFlag": false
   },
   {
+    "symbol": "RU000A0JX2M2",
+    "classCode": "TQOD",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Росэксимбанк выпуск 1",
+    "isin": "RU000A0JX2M2",
+    "minPriceIncrement": 0.0001,
+    "type": "bond",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00FM98YG2",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2026-12-10T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
+    "issueKind": "documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
     "symbol": "RU000A104VS4",
     "classCode": "TQCB",
     "exchange": [
@@ -1762,35 +1790,6 @@
     "initialNominal": 1000,
     "sector": "energy",
     "issueKind": "non_documentary",
-    "perpetualFlag": false,
-    "amortizationFlag": true,
-    "floatingCouponFlag": false,
-    "forQualInvestorFlag": false,
-    "subordinatedFlag": false
-  },
-  {
-    "symbol": "RU000A0ZYR18",
-    "classCode": "TQCB",
-    "exchange": [
-      "moex"
-    ],
-    "fullName": "Башкирская содовая компания выпуск 1",
-    "isin": "RU000A0ZYR18",
-    "minPriceIncrement": 0.025,
-    "type": "bond",
-    "currency": "RUB",
-    "lot": 1,
-    "broker": [
-      "alor-openapi-v2",
-      "tinkoff-invest-api"
-    ],
-    "tinkoffFigi": "BBG00JYHHXN7",
-    "couponQuantityPerYear": 4,
-    "maturityDate": "2023-01-27T00:00:00Z",
-    "nominal": 250,
-    "initialNominal": 1000,
-    "sector": "industrials",
-    "issueKind": "documentary",
     "perpetualFlag": false,
     "amortizationFlag": true,
     "floatingCouponFlag": false,
@@ -3817,7 +3816,7 @@
     "tinkoffFigi": "BBG00XD2M5S2",
     "couponQuantityPerYear": 2,
     "maturityDate": "2030-07-17T00:00:00Z",
-    "nominal": 1230.53,
+    "nominal": 1230.6,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -8062,6 +8061,35 @@
     "subordinatedFlag": false
   },
   {
+    "symbol": "RU000A102HC1",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Сбербанк 002СУБ-02R",
+    "isin": "RU000A102HC1",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00Z0WNXM9",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2031-03-11T00:00:00Z",
+    "nominal": 10000000,
+    "initialNominal": 10000000,
+    "sector": "financial",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
+  },
+  {
     "symbol": "RU000A1058M3",
     "classCode": "TQCB",
     "exchange": [
@@ -8902,6 +8930,35 @@
     "subordinatedFlag": false
   },
   {
+    "symbol": "RU000A104K37",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Сибэнергомаш-БКЗ выпуск 1",
+    "isin": "RU000A104K37",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG015K977N7",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2025-02-13T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "industrials",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
+  },
+  {
     "symbol": "RU000A105104",
     "classCode": "TQOY",
     "exchange": [
@@ -9703,7 +9760,7 @@
     "tinkoffFigi": "BBG00KFLDC92",
     "couponQuantityPerYear": 2,
     "maturityDate": "2028-02-02T00:00:00Z",
-    "nominal": 1353.44,
+    "nominal": 1353.52,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -9971,6 +10028,35 @@
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
+    "symbol": "RU000A105RW1",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "ППК РЭО выпуск 1",
+    "isin": "RU000A105RW1",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "TCS00A105RW1",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2032-12-17T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "other",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": true,
+    "floatingCouponFlag": true,
     "forQualInvestorFlag": false,
     "subordinatedFlag": false
   },
@@ -13106,6 +13192,35 @@
     "subordinatedFlag": false
   },
   {
+    "symbol": "RU000A105QZ6",
+    "classCode": "TQCB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "Агротек выпуск 1",
+    "isin": "RU000A105QZ6",
+    "minPriceIncrement": 0.01,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "TCS00A105QZ6",
+    "couponQuantityPerYear": 4,
+    "maturityDate": "2026-04-09T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "industrials",
+    "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": true,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
     "symbol": "RU000A100YE6",
     "classCode": "TQCB",
     "exchange": [
@@ -15095,7 +15210,7 @@
     "tinkoffFigi": "BBG00WFBVRN9",
     "couponQuantityPerYear": 4,
     "maturityDate": "2024-07-26T00:00:00Z",
-    "nominal": 875,
+    "nominal": 750,
     "initialNominal": 1000,
     "sector": "financial",
     "issueKind": "non_documentary",
@@ -16603,7 +16718,7 @@
     "tinkoffFigi": "BBG009J6Q4B7",
     "couponQuantityPerYear": 2,
     "maturityDate": "2023-08-16T00:00:00Z",
-    "nominal": 1530.7,
+    "nominal": 1530.79,
     "initialNominal": 1000,
     "sector": "government",
     "issueKind": "documentary",
@@ -18411,6 +18526,35 @@
     "subordinatedFlag": false
   },
   {
+    "symbol": "RU000A0ZZY59",
+    "classCode": "TQOD",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "RSHB",
+    "isin": "RU000A0ZZY59",
+    "minPriceIncrement": 0.0001,
+    "type": "bond",
+    "currency": "USD",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG00MTL7443",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2028-12-04T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "financial",
+    "issueKind": "documentary",
+    "perpetualFlag": true,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": true,
+    "subordinatedFlag": false
+  },
+  {
     "symbol": "RU000A103CD8",
     "classCode": "TQCB",
     "exchange": [
@@ -18694,6 +18838,35 @@
     "initialNominal": 1000,
     "sector": "telecom",
     "issueKind": "non_documentary",
+    "perpetualFlag": false,
+    "amortizationFlag": false,
+    "floatingCouponFlag": false,
+    "forQualInvestorFlag": false,
+    "subordinatedFlag": false
+  },
+  {
+    "symbol": "SU26242RMFS6",
+    "classCode": "TQOB",
+    "exchange": [
+      "moex"
+    ],
+    "fullName": "ОФЗ 26242",
+    "isin": "RU000A105RV3",
+    "minPriceIncrement": 0.001,
+    "type": "bond",
+    "currency": "RUB",
+    "lot": 1,
+    "broker": [
+      "alor-openapi-v2",
+      "tinkoff-invest-api"
+    ],
+    "tinkoffFigi": "BBG01DC7XWW9",
+    "couponQuantityPerYear": 2,
+    "maturityDate": "2029-08-29T00:00:00Z",
+    "nominal": 1000,
+    "initialNominal": 1000,
+    "sector": "government",
+    "issueKind": "documentary",
     "perpetualFlag": false,
     "amortizationFlag": false,
     "floatingCouponFlag": false,
