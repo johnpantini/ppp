@@ -44,6 +44,13 @@ export class InstrumentsImportPage extends Page {
       });
     }
 
+    if (!array.length) {
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Массив для импорта не содержит ни одного инструмента.',
+        raiseException: true
+      });
+    }
+
     for (const i of array) {
       if (
         !i.symbol ||
