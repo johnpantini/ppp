@@ -190,17 +190,17 @@ class AlpacaV2PlusTrader extends Trader {
             const ref = this.refs.orderbook.get(source.instrument?._id);
 
             if (ref) {
-              if (typeof ref.lastOrderBookMontage === 'undefined') {
-                ref.lastOrderBookMap = {
+              if (typeof ref.lastOrderbookMontage === 'undefined') {
+                ref.lastOrderbookMap = {
                   bids: new Map(),
                   asks: new Map()
                 };
               }
 
-              const lastOrderBookMap = ref.lastOrderBookMap;
+              const lastOrderbookMap = ref.lastOrderbookMap;
               const coeff = this.document.useLots ? 1 : 100;
 
-              lastOrderBookMap.bids.set(data.bx, {
+              lastOrderbookMap.bids.set(data.bx, {
                 price: data.bp,
                 volume: data.bs * coeff,
                 time: data.t,
@@ -209,7 +209,7 @@ class AlpacaV2PlusTrader extends Trader {
                 pool: this.alpacaExchangeToUTEXExchange(data.bx)
               });
 
-              lastOrderBookMap.asks.set(data.ax, {
+              lastOrderbookMap.asks.set(data.ax, {
                 price: data.ap,
                 volume: data.as * coeff,
                 time: data.t,
@@ -218,15 +218,15 @@ class AlpacaV2PlusTrader extends Trader {
                 pool: this.alpacaExchangeToUTEXExchange(data.ax)
               });
 
-              ref.lastOrderBookMontage = {
+              ref.lastOrderbookMontage = {
                 bids: [],
                 asks: []
               };
 
-              const lastOrderBookMontage = ref.lastOrderBookMontage;
+              const lastOrderbookMontage = ref.lastOrderbookMontage;
               const nowHours = new Date().getUTCHours();
 
-              lastOrderBookMontage.bids = [...lastOrderBookMap.bids.values()]
+              lastOrderbookMontage.bids = [...lastOrderbookMap.bids.values()]
                 .filter((b) => {
                   if (this.document.broker.type === BROKERS.UTEX_AURORA) {
                     // Fix for invalid NYSE pool data
@@ -240,7 +240,7 @@ class AlpacaV2PlusTrader extends Trader {
                   return b.price - a.price || b.volume - a.volume;
                 });
 
-              lastOrderBookMontage.asks = [...lastOrderBookMap.asks.values()]
+              lastOrderbookMontage.asks = [...lastOrderbookMap.asks.values()]
                 .filter((a) => {
                   if (this.document.broker.type === BROKERS.UTEX_AURORA) {
                     // Fix for invalid NYSE pool data
@@ -257,7 +257,7 @@ class AlpacaV2PlusTrader extends Trader {
               for (const { field, datum } of fields) {
                 switch (datum) {
                   case TRADER_DATUM.ORDERBOOK:
-                    source[field] = lastOrderBookMontage;
+                    source[field] = lastOrderbookMontage;
 
                     break;
                 }
@@ -342,7 +342,7 @@ class AlpacaV2PlusTrader extends Trader {
               case TRADER_DATUM.ORDERBOOK:
                 source[field] = this.refs.orderbook.get(
                   newValue._id
-                )?.lastOrderBookMontage;
+                )?.lastOrderbookMontage;
 
                 break;
             }
