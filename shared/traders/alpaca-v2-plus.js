@@ -1,5 +1,3 @@
-/** @decorator */
-
 import { BROKERS, TRADER_DATUM } from '../const.js';
 import { later } from '../later.js';
 import { Trader } from './common-trader.js';

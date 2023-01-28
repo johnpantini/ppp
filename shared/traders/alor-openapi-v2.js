@@ -1,5 +1,3 @@
-/** @decorator */
-
 import { isJWTTokenExpired, uuidv4 } from '../ppp-crypto.js';
 import { TradingError } from '../trading-error.js';
 import { TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../const.js';
