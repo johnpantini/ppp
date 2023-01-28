@@ -55,9 +55,14 @@ export class InstrumentsImportPage extends Page {
       if (
         !i.symbol ||
         !i.type ||
-        !i.currency ||
-        !i.minPriceIncrement ||
-        !i.lot ||
+        (i.type !== 'cryptocurrency' && !i.currency) ||
+        typeof i.minPriceIncrement !== 'number' ||
+        (i.type === 'cryptocurrency' &&
+          typeof i.minQuantityIncrement !== 'number') ||
+        (i.type === 'cryptocurrency' && !i.baseCryptoAsset) ||
+        (i.type === 'cryptocurrency' && !i.quoteCryptoAsset) ||
+        (i.type === 'cryptocurrency' && typeof i.minNotional !== 'number') ||
+        (i.type !== 'cryptocurrency' && typeof i.lot !== 'number') ||
         (i.broker?.indexOf(BROKERS.TINKOFF_INVEST_API) > -1 && !i.tinkoffFigi)
       ) {
         console.log(i);

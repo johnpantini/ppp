@@ -116,7 +116,15 @@ export class InstrumentsManagePage extends Page {
   async validate() {
     await validate(this.symbol);
     await validate(this.fullName);
-    await validate(this.lot);
+
+    if (
+      this.document.type === 'stock' ||
+      this.document.type === 'bond' ||
+      this.document.type === 'future'
+    ) {
+      await validate(this.lot);
+    }
+
     await validate(this.minPriceIncrement);
 
     if (this.tinkoffCheckbox.checked) await validate(this.tinkoffFigi);
@@ -125,6 +133,18 @@ export class InstrumentsManagePage extends Page {
       await validate(this.initialNominal);
       await validate(this.nominal);
       await validate(this.maturityDate);
+    }
+
+    if (this.document.type === 'future') {
+      await validate(this.basicAsset);
+      await validate(this.expirationDate);
+    }
+
+    if (this.document.type === 'cryptocurrency') {
+      await validate(this.minQuantityIncrement);
+      await validate(this.minNotional);
+      await validate(this.baseCryptoAsset);
+      await validate(this.quoteCryptoAsset);
     }
   }
 
@@ -140,18 +160,13 @@ export class InstrumentsManagePage extends Page {
       symbol: this.symbol.value.trim(),
       fullName: this.fullName.value.trim(),
       type: this.type.value,
-      currency: this.currency.value,
       exchange: this.exchangeCheckboxes
         .filter((c) => c.checked)
         .map((c) => c.name),
       broker: this.brokerCheckboxes.filter((c) => c.checked).map((c) => c.name),
-      isin: this.isin.value.trim(),
-      lot: Math.abs(this.lot.value) || 1,
       minPriceIncrement: Math.abs(
         this.minPriceIncrement.value?.replace(',', '.')
       ),
-      spbexSymbol: this.spbexSymbol.value.trim(),
-      tinkoffFigi: this.tinkoffFigi.value.trim(),
       forQualInvestorFlag: !!this.forQualInvestorFlag.checked,
       removed: !!this.removed.checked,
       updatedAt: new Date()
@@ -162,6 +177,11 @@ export class InstrumentsManagePage extends Page {
       this.document.type === 'bond' ||
       this.document.type === 'future'
     ) {
+      $set.lot = Math.abs(this.lot.value) || 1;
+      $set.currency = this.currency.value;
+      $set.spbexSymbol = this.spbexSymbol.value.trim();
+      $set.isin = this.isin.value.trim();
+      $set.tinkoffFigi = this.tinkoffFigi.value.trim();
       $set.classCode = this.classCode.value.trim();
       $set.sector = this.sector.value;
     }
@@ -181,8 +201,17 @@ export class InstrumentsManagePage extends Page {
     }
 
     if (this.document.type === 'future') {
+      $set.isin = void 0;
       $set.expirationDate = this.expirationDate.value;
       $set.basicAsset = this.basicAsset.value;
+    }
+
+    if (this.document.type === 'cryptocurrency') {
+      $set.minQuantityIncrement = Math.abs(
+        this.minQuantityIncrement.value?.replace(',', '.')
+      );
+      $set.baseCryptoAsset = this.baseCryptoAsset.value;
+      $set.quoteCryptoAsset = this.quoteCryptoAsset.value;
     }
 
     return {

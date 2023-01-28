@@ -1,5 +1,5 @@
 import { InstrumentsManagePage } from '../../shared/instruments-manage-page.js';
-import { html } from '../../shared/template.js';
+import { html, requireComponent } from '../../shared/template.js';
 import { css } from '../../shared/element/styles/css.js';
 import { ref } from '../../shared/element/templating/ref.js';
 import { children } from '../../shared/element/templating/children.js';
@@ -9,9 +9,11 @@ import { Observable } from '../../shared/element/observation/observable.js';
 import { BROKERS } from '../../shared/const.js';
 import { pageStyles } from './page.js';
 import { search } from './icons/search.js';
+import { decimalSeparator } from '../../shared/intl.js';
 import ppp from '../../ppp.js';
 
 await ppp.i18n(import.meta.url);
+await requireComponent('ppp-checkbox');
 
 export const instrumentsManagePageTemplate = (context, definition) => html`
   <template>
@@ -100,25 +102,31 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
               <${'ppp-radio'} value="stock">Акция</ppp-radio>
               <ppp-radio value="bond">Облигация</ppp-radio>
               <ppp-radio value="future">Фьючерс</ppp-radio>
+              <ppp-radio value="cryptocurrency">Криптовалютная пара</ppp-radio>
             </ppp-radio-group>
           </div>
         </section>
-        <section>
-          <div class="label-group">
-            <h5>Валюта</h5>
-            <p>Валюта, в которой торгуется инструмент.</p>
-          </div>
-          <div class="input-group">
-            <${'ppp-select'}
-              value="${(x) => x.document.currency ?? 'USD'}"
-              ${ref('currency')}
-            >
-              <ppp-option value="USD">USD</ppp-option>
-              <ppp-option value="RUB">RUB</ppp-option>
-              <ppp-option value="HKD">HKD</ppp-option>
-            </ppp-select>
-          </div>
-        </section>
+        ${when(
+          (x) => x.document.type !== 'cryptocurrency',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Валюта</h5>
+                <p>Валюта, в которой торгуется инструмент.</p>
+              </div>
+              <div class="input-group">
+                <${'ppp-select'}
+                  value="${(x) => x.document.currency ?? 'USD'}"
+                  ${ref('currency')}
+                >
+                  <ppp-option value="USD">USD</ppp-option>
+                  <ppp-option value="RUB">RUB</ppp-option>
+                  <ppp-option value="HKD">HKD</ppp-option>
+                </ppp-select>
+              </div>
+            </section>
+          `
+        )}
         <section>
           <div class="label-group">
             <h5>Торговые площадки</h5>
@@ -132,28 +140,47 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
                 filter: elements('ppp-checkbox')
               })}
             >
-              <${'ppp-checkbox'}
-                name="nyse-nsdq"
-                ?checked="${(x) =>
-                  x.document.exchange?.indexOf('nyse-nsdq') > -1}"
-              >
-                NYSE/NASDAQ
-              </ppp-checkbox>
-              <ppp-checkbox
-                name="spbex"
-                @change="${(x) =>
-                  x.scratchSet('spbexChecked', x.spbexCheckbox.checked)}"
-                ?checked="${(x) => x.document.exchange?.indexOf('spbex') > -1}"
-                ${ref('spbexCheckbox')}
-              >
-                СПБ Биржа
-              </ppp-checkbox>
-              <ppp-checkbox
-                name="moex"
-                ?checked="${(x) => x.document.exchange?.indexOf('moex') > -1}"
-              >
-                Московская биржа
-              </ppp-checkbox>
+              ${when(
+                (x) => x.document.type !== 'cryptocurrency',
+                html`
+                  <ppp-checkbox
+                    name="nyse-nsdq"
+                    ?checked="${(x) =>
+                      x.document.exchange?.indexOf('nyse-nsdq') > -1}"
+                  >
+                    NYSE/NASDAQ
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    name="spbex"
+                    @change="${(x) =>
+                      x.scratchSet('spbexChecked', x.spbexCheckbox.checked)}"
+                    ?checked="${(x) =>
+                      x.document.exchange?.indexOf('spbex') > -1}"
+                    ${ref('spbexCheckbox')}
+                  >
+                    СПБ Биржа
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    name="moex"
+                    ?checked="${(x) =>
+                      x.document.exchange?.indexOf('moex') > -1}"
+                  >
+                    Московская биржа
+                  </ppp-checkbox>
+                `
+              )}
+              ${when(
+                (x) => x.document.type === 'cryptocurrency',
+                html`
+                  <ppp-checkbox
+                    name="binance"
+                    ?checked="${(x) =>
+                      x.document.exchange?.indexOf('binance') > -1}"
+                  >
+                    Binance
+                  </ppp-checkbox>
+                `
+              )}
             </div>
           </div>
         </section>
@@ -170,40 +197,63 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
                 filter: elements('ppp-checkbox')
               })}
             >
-              <${'ppp-checkbox'}
-                name="${() => BROKERS.ALOR_OPENAPI_V2}"
-                ?checked="${(x) =>
-                  x.document.broker?.indexOf(BROKERS.ALOR_OPENAPI_V2) > -1}"
-              >
-                ${(x) => x.t(`$const.broker.${BROKERS.ALOR_OPENAPI_V2}`)}
-              </ppp-checkbox>
-              <ppp-checkbox
-                name="${() => BROKERS.TINKOFF_INVEST_API}"
-                ?checked="${(x) =>
-                  x.document.broker?.indexOf(BROKERS.TINKOFF_INVEST_API) > -1}"
-                @change="${(x) => {
-                  x.scratchSet('tinkoffChecked', x.tinkoffCheckbox.checked);
+              ${when(
+                (x) => x.document.type !== 'cryptocurrency',
+                html`
+                  <ppp-checkbox
+                    name="${() => BROKERS.ALOR_OPENAPI_V2}"
+                    ?checked="${(x) =>
+                      x.document.broker?.indexOf(BROKERS.ALOR_OPENAPI_V2) > -1}"
+                  >
+                    ${(x) => x.t(`$const.broker.${BROKERS.ALOR_OPENAPI_V2}`)}
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    name="${() => BROKERS.TINKOFF_INVEST_API}"
+                    ?checked="${(x) =>
+                      x.document.broker?.indexOf(BROKERS.TINKOFF_INVEST_API) >
+                      -1}"
+                    @change="${(x) => {
+                      x.scratchSet('tinkoffChecked', x.tinkoffCheckbox.checked);
 
-                  x.tinkoffFigi.state = 'default';
-                }}"
-                ${ref('tinkoffCheckbox')}
-              >
-                ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
-              </ppp-checkbox>
-              <ppp-checkbox
-                name="${() => BROKERS.UTEX_AURORA}"
-                ?checked="${(x) =>
-                  x.document.broker?.indexOf(BROKERS.UTEX_AURORA) > -1}"
-              >
-                ${(x) => x.t(`$const.broker.${BROKERS.UTEX_AURORA}`)}
-              </ppp-checkbox>
-              <ppp-checkbox
-                name="${() => BROKERS.PSINA}"
-                ?checked="${(x) =>
-                  x.document.broker?.indexOf(BROKERS.PSINA) > -1}"
-              >
-                ${(x) => x.t(`$const.broker.${BROKERS.PSINA}`)}
-              </ppp-checkbox>
+                      x.tinkoffFigi.state = 'default';
+                    }}"
+                    ${ref('tinkoffCheckbox')}
+                  >
+                    ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
+                  </ppp-checkbox>
+                `
+              )}
+              ${when(
+                (x) => x.document.type === 'stock',
+                html`
+                  <ppp-checkbox
+                    name="${() => BROKERS.UTEX_AURORA}"
+                    ?checked="${(x) =>
+                      x.document.broker?.indexOf(BROKERS.UTEX_AURORA) > -1}"
+                  >
+                    ${(x) => x.t(`$const.broker.${BROKERS.UTEX_AURORA}`)}
+                  </ppp-checkbox>
+                  <ppp-checkbox
+                    name="${() => BROKERS.PSINA}"
+                    ?checked="${(x) =>
+                      x.document.broker?.indexOf(BROKERS.PSINA) > -1}"
+                  >
+                    ${(x) => x.t(`$const.broker.${BROKERS.PSINA}`)}
+                  </ppp-checkbox>
+                `
+              )}
+              ${when(
+                (x) => x.document.type === 'cryptocurrency',
+                html`
+                  <ppp-checkbox
+                    name="${() => BROKERS.BINANCE}"
+                    ?checked="${(x) =>
+                      x.document.broker?.indexOf(BROKERS.BINANCE) > -1}"
+                  >
+                    ${(x) => x.t(`$const.broker.${BROKERS.BINANCE}`)}
+                  </ppp-checkbox>
+                `
+              )}
             </div>
           </div>
         </section>
@@ -260,82 +310,131 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
             </div>
           </div>
         </section>
-        <section>
-          <div class="label-group">
-            <h5>Лотность</h5>
-            <p>Минимальное количество, доступное для покупки.</p>
-          </div>
-          <div class="input-group">
-            <ppp-text-field
-              type="number"
-              placeholder="1"
-              value="${(x) => x.document.lot}"
-              ${ref('lot')}
-            ></ppp-text-field>
-          </div>
-        </section>
+        ${when(
+          (x) => x.document.type !== 'cryptocurrency',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Лотность</h5>
+                <p>Минимальное количество, доступное для покупки.</p>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  type="number"
+                  placeholder="1"
+                  value="${(x) => x.document.lot}"
+                  ${ref('lot')}
+                ></ppp-text-field>
+              </div>
+            </section>
+          `
+        )}
         <section>
           <div class="label-group">
             <h5>Шаг цены</h5>
           </div>
           <div class="input-group">
             <ppp-text-field
-              type="number"
-              placeholder="${() =>
-                new Intl.NumberFormat().format(0.01).toString()}"
+              placeholder="${() => `0${decimalSeparator()}01`}"
               value="${(x) => x.document.minPriceIncrement}"
+              @beforeinput="${(x, { event }) => {
+                return event.data === null || /[0-9.,]/.test(event.data);
+              }}"
               ${ref('minPriceIncrement')}
             ></ppp-text-field>
           </div>
         </section>
-        <section>
-          <div class="label-group">
-            <h5>ISIN</h5>
-            <p>Международный идентификационный код ценной бумаги.</p>
-          </div>
-          <div class="input-group">
-            <ppp-text-field
-              placeholder="ISIN"
-              optional
-              value="${(x) => x.document.isin}"
-              ${ref('isin')}
-            ></ppp-text-field>
-          </div>
-        </section>
-        <section>
-          <div class="label-group">
-            <h5>Идентификатор FIGI</h5>
-            <${'ppp-badge'} appearance="green">
-              ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
-            </ppp-badge>
-          </div>
-          <div class="input-group">
-            <ppp-text-field
-              ?disabled="${(x) => !x.scratch.tinkoffChecked}"
-              placeholder="FIGI"
-              value="${(x) => x.document.tinkoffFigi}"
-              style="text-transform: uppercase"
-              ${ref('tinkoffFigi')}
-            ></ppp-text-field>
-          </div>
-        </section>
-        <section>
-          <div class="label-group">
-            <h5>Тикер на СПБ Бирже</h5>
-            <${'ppp-badge'} appearance="green">
-              СПБ Биржа
-            </ppp-badge>
-          </div>
-          <div class="input-group">
-            <ppp-text-field
-              ?disabled="${(x) => !x.scratch.spbexChecked}"
-              optional
-              placeholder="Тикер"
-              value="${(x) => x.document.spbexSymbol}"
-              ${ref('spbexSymbol')}
-            ></ppp-text-field>
-          </div>
-        </section>
+        ${when(
+          (x) => x.document.type === 'cryptocurrency',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Шаг количества</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="${() => `0${decimalSeparator()}00001`}"
+                  value="${(x) => x.document.minQuantityIncrement}"
+                  @beforeinput="${(x, { event }) => {
+                    return event.data === null || /[0-9.,]/.test(event.data);
+                  }}"
+                  ${ref('minQuantityIncrement')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Минимальная сумма заявки</h5>
+                <p>Измеряется в единицах актива котировки.</p>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Минимальная сумма заявки"
+                  value="${(x) => x.document.minNotional}"
+                  @beforeinput="${(x, { event }) => {
+                    return event.data === null || /[0-9.,]/.test(event.data);
+                  }}"
+                  ${ref('minNotional')}
+                ></ppp-text-field>
+              </div>
+            </section>
+          `
+        )}
+        ${when(
+          (x) => x.document.type !== 'cryptocurrency',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>ISIN</h5>
+                <p>Международный идентификационный код ценной бумаги.</p>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  ?disabled="${(x) =>
+                    x.document.type !== 'stock' && x.document.type !== 'bond'}"
+                  placeholder="ISIN"
+                  optional
+                  value="${(x) => x.document.isin}"
+                  ${ref('isin')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Идентификатор FIGI</h5>
+                <${'ppp-badge'} appearance="green">
+                  ${(x) => x.t(`$const.broker.${BROKERS.TINKOFF_INVEST_API}`)}
+                </ppp-badge>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  ?disabled="${(x) => !x.scratch.tinkoffChecked}"
+                  placeholder="FIGI"
+                  value="${(x) => x.document.tinkoffFigi}"
+                  style="text-transform: uppercase"
+                  ${ref('tinkoffFigi')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Тикер на СПБ Бирже</h5>
+                <${'ppp-badge'} appearance="green">
+                  СПБ Биржа
+                </ppp-badge>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  ?disabled="${(x) => !x.scratch.spbexChecked}"
+                  optional
+                  placeholder="Тикер"
+                  value="${(x) => x.document.spbexSymbol}"
+                  ${ref('spbexSymbol')}
+                ></ppp-text-field>
+              </div>
+            </section>
+          `
+        )}
         ${when(
           (x) =>
             !x.document.type ||
@@ -409,35 +508,6 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
           `
         )}
         ${when(
-          (x) => x.document.type === 'future',
-          html`
-            <section>
-              <div class="label-group">
-                <h5>Основной актив</h5>
-              </div>
-              <div class="input-group">
-                <ppp-text-field
-                  placeholder="Основной актив"
-                  value="${(x) => x.document.basicAsset}"
-                  ${ref('basicAsset')}
-                ></ppp-text-field>
-              </div>
-            </section>
-            <section>
-              <div class="label-group">
-                <h5>Дата экспирации</h5>
-              </div>
-              <div class="input-group">
-                <ppp-text-field
-                  placeholder="Дата экспирации"
-                  value="${(x) => x.document.expirationDate}"
-                  ${ref('expirationDate')}
-                ></ppp-text-field>
-              </div>
-            </section>
-          `
-        )}
-        ${when(
           (x) => x.document.type === 'bond',
           html`
             <section>
@@ -505,6 +575,64 @@ export const instrumentsManagePageTemplate = (context, definition) => html`
                   placeholder="Купонов в в год"
                   value="${(x) => x.document.couponQuantityPerYear}"
                   ${ref('couponQuantityPerYear')}
+                ></ppp-text-field>
+              </div>
+            </section>
+          `
+        )}
+        ${when(
+          (x) => x.document.type === 'future',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Основной актив</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Основной актив"
+                  value="${(x) => x.document.basicAsset}"
+                  ${ref('basicAsset')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Дата экспирации</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Дата экспирации"
+                  value="${(x) => x.document.expirationDate}"
+                  ${ref('expirationDate')}
+                ></ppp-text-field>
+              </div>
+            </section>
+          `
+        )}
+        ${when(
+          (x) => x.document.type === 'cryptocurrency',
+          html`
+            <section>
+              <div class="label-group">
+                <h5>Основной актив</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Основной актив"
+                  value="${(x) => x.document.baseCryptoAsset}"
+                  ${ref('baseCryptoAsset')}
+                ></ppp-text-field>
+              </div>
+            </section>
+            <section>
+              <div class="label-group">
+                <h5>Актив котировки</h5>
+              </div>
+              <div class="input-group">
+                <ppp-text-field
+                  placeholder="Актив котировки"
+                  value="${(x) => x.document.quoteCryptoAsset}"
+                  ${ref('quoteCryptoAsset')}
                 ></ppp-text-field>
               </div>
             </section>

@@ -49,6 +49,12 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
               >
                 Фьючерс
               </ppp-checkbox>
+              <ppp-checkbox
+                checked
+                name="cryptocurrency"
+              >
+                Криптовалютная пара
+              </ppp-checkbox>
             </div>
           </div>
         </section>
@@ -81,6 +87,12 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
                 name="moex"
               >
                 Московская биржа
+              </ppp-checkbox>
+              <ppp-checkbox
+                checked
+                name="binance"
+              >
+                Binance
               </ppp-checkbox>
             </div>
           </div>
@@ -121,6 +133,12 @@ export const instrumentsRemovePageTemplate = (context, definition) => html`
                 name="${() => BROKERS.PSINA}"
               >
                 ${(x) => x.t(`$const.broker.${BROKERS.PSINA}`)}
+              </ppp-checkbox>
+              <ppp-checkbox
+                checked
+                name="${() => BROKERS.BINANCE}"
+              >
+                ${(x) => x.t(`$const.broker.${BROKERS.BINANCE}`)}
               </ppp-checkbox>
             </div>
           </div>
