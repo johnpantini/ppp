@@ -1,4 +1,6 @@
-create table if not exists public.spbex_halts_instruments_[%#ctx.document._id%](
+drop table if exists public.spbex_halts_instruments_[%#ctx.document._id%];
+
+create table public.spbex_halts_instruments_[%#ctx.document._id%](
   isin text primary key,
   ticker text not null,
   name text not null,
@@ -30,8 +32,9 @@ try {
     return `('${i.isin}', '${i.ticker}', '${i.name}', '${i.currency}')`;
   });
 
-  if (values.length)
+  if (values.length) {
     plv8.execute(`insert into public.spbex_halts_instruments_[%#ctx.document._id%](isin, ticker, name, currency) values ${values.join(',')} on conflict do nothing`);
+  }
 } catch (e) {
   plv8.elog(NOTICE, e.toString());
 }
