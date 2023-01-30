@@ -19,8 +19,6 @@ export default new (class {
 
   traders = new Map();
 
-  pusherConnections = new Map();
-
   scratch = new Map();
 
   constructor(appType) {
