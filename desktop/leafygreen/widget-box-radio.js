@@ -29,6 +29,10 @@ export const widgetBoxRadioStyles = (context, definition) => css`
     padding: 0 10px;
   }
 
+  :host(.xsmall) .control {
+    padding: 0 5px;
+  }
+
   :host([disabled]) .control {
     color: rgb(137, 151, 155);
     cursor: ${disabledCursor};
