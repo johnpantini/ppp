@@ -8,6 +8,16 @@ export function getInstrumentPrecision(instrument) {
   return frac ? frac.length : 0;
 }
 
+export function getInstrumentQuantityPrecision(instrument) {
+  if (!instrument) return 0;
+
+  const [dec, frac] = (instrument.minQuantityIncrement ?? 0)
+    .toString()
+    .split('.');
+
+  return frac ? frac.length : 0;
+}
+
 export function formatDateWithOptions(date, options = {}) {
   if (!date) return '—';
 
