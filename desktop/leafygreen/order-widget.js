@@ -171,6 +171,15 @@ export async function widgetDefinition({ ppp, baseWidgetUrl }) {
       border-radius: 0 0 4px 0;
     }
 
+    .coin-icon {
+      background-image: url('static/coin.svg');
+      background-repeat: no-repeat;
+      width: 12px;
+      height: 12px;
+      margin-right: 2px;
+      pointer-events: none;
+    }
+
     ${widgetStyles}
   `;
 

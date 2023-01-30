@@ -286,6 +286,10 @@ export const orderWidgetTemplate = (context, definition) => html`
                             volume="${(x) => x.volume}"
                             ?money="${(x) => x.isInMoney}"
                           >
+                            ${when(
+                              (x) => x.isInMoney,
+                              html` <div class="coin-icon"></div> `
+                            )}
                             ${(x) => x.text}
                           </ppp-widget-box-radio>
                         `,
@@ -700,7 +704,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
       if (volume > 0) {
         result.push({
-          text: (isInMoney ? '🪙' : '') + v.replaceAll('.', decSeparator),
+          text: v.replaceAll('.', decSeparator),
           isInMoney,
           volume
         });
