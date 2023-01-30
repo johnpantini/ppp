@@ -6,6 +6,7 @@ import { observable } from './element/observation/observable.js';
 import { html, requireComponent } from './template.js';
 import { when } from './element/templating/when.js';
 import { validate } from './validate.js';
+import { repeat } from './element/templating/repeat.js';
 import { WIDGET_TYPES, TRADER_DATUM } from './const.js';
 import { DOM } from './element/dom.js';
 import {
@@ -16,7 +17,8 @@ import {
   formatCommission,
   priceCurrencySymbol,
   getInstrumentPrecision,
-  decimalSeparator
+  decimalSeparator,
+  getInstrumentQuantityPrecision
 } from './intl.js';
 import { debounce } from './ppp-throttle.js';
 import ppp from '../ppp.js';
@@ -262,6 +264,38 @@ export const orderWidgetTemplate = (context, definition) => html`
                 </div>
               </div>
               <div class="widget-margin-spacer"></div>
+              ${when(
+                (x) => x.document.fastVolumes,
+                html`
+                  <div class="widget-section">
+                    <ppp-widget-radio-box-group
+                      wrap
+                      readonly
+                      class="fast-volume-selector"
+                      value="${(x) => x.document.selectedFastVolume}"
+                      @click="${(x, c) => x.handleFastVolumeClick(c)}"
+                      @dblclick="${(x, c) => x.handleFastVolumeDblClick(c)}"
+                      ${ref('fastVolumeButtons')}
+                    >
+                      ${repeat(
+                        (x) => x.getFastVolumeButtonsData(),
+                        html`
+                          <ppp-widget-box-radio
+                            class="xsmall"
+                            value="${(x, c) => c.index}"
+                            volume="${(x) => x.volume}"
+                            ?money="${(x) => x.isInMoney}"
+                          >
+                            ${(x) => x.text}
+                          </ppp-widget-box-radio>
+                        `,
+                        { positioning: true, recycle: false }
+                      )}
+                    </ppp-widget-radio-box-group>
+                  </div>
+                  <div class="widget-margin-spacer"></div>
+                `
+              )}
               <div class="widget-section">
                 <div class="widget-summary">
                   <div class="widget-summary-line">
@@ -593,7 +627,8 @@ export class PppOrderWidget extends WidgetWithInstrument {
         changePriceQuantityViaMouseWheel:
           this.container.changePriceQuantityViaMouseWheel.checked,
         buyShortcut: this.container.buyShortcut.value.trim(),
-        sellShortcut: this.container.sellShortcut.value.trim()
+        sellShortcut: this.container.sellShortcut.value.trim(),
+        fastVolumes: this.container.fastVolumes.value.trim()
       }
     };
   }
@@ -602,6 +637,77 @@ export class PppOrderWidget extends WidgetWithInstrument {
     if (/market|limit/i.test(this.document.activeTab))
       return this.document.activeTab;
     else return 'limit';
+  }
+
+  handleFastVolumeClick({ event }) {
+    if (!this.instrument) return;
+
+    const radio = event
+      .composedPath()
+      .find((n) => n.tagName?.toLowerCase?.() === 'ppp-widget-box-radio');
+
+    this.#setQuantityForFastButtonRadio(radio);
+  }
+
+  handleFastVolumeDblClick({ event }) {
+    const radio = event
+      .composedPath()
+      .find((n) => n.tagName?.toLowerCase?.() === 'ppp-widget-box-radio');
+
+    if (radio) {
+      if (this.fastVolumeButtons.value === radio.value) {
+        this.fastVolumeButtons.value = null;
+        this.fastVolumeButtons.slottedRadioButtons.forEach((b) => {
+          b.checked = false;
+        });
+      } else {
+        this.fastVolumeButtons.value = radio.value;
+      }
+
+      void this.applyChanges({
+        $set: {
+          'widgets.$.selectedFastVolume': this.fastVolumeButtons.value
+        }
+      });
+    }
+  }
+
+  getFastVolumeButtonsData() {
+    if (typeof this.document.fastVolumes !== 'string') {
+      return [];
+    }
+
+    const result = [];
+
+    this.document.fastVolumes.split(';').forEach((v) => {
+      let isInMoney = false;
+
+      if (v[0] === '~') {
+        v = v.substring(1);
+        isInMoney = true;
+      }
+
+      v = v.replaceAll(',', '.').trim();
+
+      const multiplier = v[v.length - 1];
+      let volume = parseFloat(v);
+
+      if (multiplier) {
+        if (multiplier.toLowerCase() === 'k') volume *= 1000;
+        else if (multiplier.toLowerCase() === 'm') volume /= 1000;
+        else if (multiplier.toLowerCase() === 'M') volume *= 10000000;
+      }
+
+      if (volume > 0) {
+        result.push({
+          text: (isInMoney ? '🪙' : '') + v.replaceAll('.', decSeparator),
+          isInMoney,
+          volume
+        });
+      }
+    });
+
+    return result;
   }
 
   handleWidgetTabChange({ event }) {
@@ -661,8 +767,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
   calculateTotalAmount() {
     if (!this.instrument) return;
 
-    if (this.instrument.type === 'future')
-      return;
+    if (this.instrument.type === 'future') return;
 
     this.totalAmount =
       parseFloat(this.price.value.replace(',', '.')) *
@@ -722,6 +827,14 @@ export class PppOrderWidget extends WidgetWithInstrument {
         index === str.indexOf(decSeparator) ? val : ''
       );
 
+    if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
+      const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
+        (b) => b.value === this.fastVolumeButtons.value
+      );
+
+      this.#setQuantityForFastButtonRadio(radio);
+    }
+
     this.calculateTotalAmount();
     this.saveLastPriceValue();
   }
@@ -741,6 +854,32 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
   formatPrice(price) {
     return formatPrice(price, this.instrument);
+  }
+
+  #setQuantityForFastButtonRadio(radio) {
+    if (radio) {
+      const volume = parseFloat(radio.getAttribute('volume'));
+      const isInMoney = radio.hasAttribute('money');
+
+      if (volume > 0) {
+        if (isInMoney && this.ordersTrader) {
+          this.setQuantity(
+            +volume /
+              +this.ordersTrader.fixPrice(this.instrument, this.price.value),
+            {
+              focusOnQuantity: false
+            }
+          );
+        } else {
+          this.setQuantity(
+            +volume.toFixed(getInstrumentQuantityPrecision(this.instrument)),
+            {
+              focusOnQuantity: false
+            }
+          );
+        }
+      }
+    }
   }
 
   setPrice(price) {
@@ -767,6 +906,15 @@ export class PppOrderWidget extends WidgetWithInstrument {
 
       this.calculateTotalAmount();
       this.price.focus();
+
+      if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
+        const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
+          (b) => b.value === this.fastVolumeButtons.value
+        );
+
+        this.#setQuantityForFastButtonRadio(radio);
+      }
+
       this.saveLastPriceValue();
     }
   }
@@ -780,12 +928,22 @@ export class PppOrderWidget extends WidgetWithInstrument {
     });
   }
 
-  setQuantity(quantity) {
-    if (quantity > 0) {
-      this.quantity.value = parseInt(quantity);
+  setQuantity(quantity, options = {}) {
+    if (this.instrument && quantity > 0) {
+      const precision = getInstrumentQuantityPrecision(this.instrument);
+
+      this.quantity.value =
+        Math.trunc(+quantity * Math.pow(10, precision)) /
+        Math.pow(10, precision);
+
+      if (+this.quantity.value === 0) {
+        this.quantity.value = '';
+      }
 
       this.calculateTotalAmount();
-      this.quantity.focus();
+
+      if (options.focusOnQuantity !== false) this.quantity.focus();
+
       this.saveLastQuantity();
     }
   }
@@ -863,6 +1021,14 @@ export class PppOrderWidget extends WidgetWithInstrument {
           '.',
           decSeparator
         );
+
+        if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
+          const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
+            (b) => b.value === this.fastVolumeButtons.value
+          );
+
+          this.#setQuantityForFastButtonRadio(radio);
+        }
 
         this.price.control.focus();
         this.calculateTotalAmount();
@@ -1257,6 +1423,25 @@ export async function widgetDefinition(definition = {}) {
               return false;
             }}"
             ${ref('sellShortcut')}
+          ></ppp-text-field>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Кнопки быстрого объёма</h5>
+          <p>Перечислите значения через точку с запятой. Нажатие на кнопку
+            подставляет номинал в поле количества. Поставьте ~ перед значением,
+            чтобы указать объём в единицах валюты.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <${'ppp-text-field'}
+            optional
+            placeholder="1;10;100;1k;~100;~500;~1k"
+            value="${(x) => x.document.fastVolumes}"
+            @beforeinput="${(x, { event }) => {
+              return event.data === null || /[0-9.,;~kmM]/.test(event.data);
+            }}"
+            ${ref('fastVolumes')}
           ></ppp-text-field>
         </div>
       </div>
