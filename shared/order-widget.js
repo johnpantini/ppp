@@ -865,6 +865,7 @@ export class PppOrderWidget extends WidgetWithInstrument {
         if (isInMoney && this.ordersTrader) {
           this.setQuantity(
             +volume /
+              this.instrument.lot /
               +this.ordersTrader.fixPrice(this.instrument, this.price.value),
             {
               focusOnQuantity: false
