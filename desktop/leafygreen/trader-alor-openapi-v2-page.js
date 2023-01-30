@@ -91,6 +91,24 @@ export const traderAlorOpenAPIV2PageTemplate = (context, definition) => html`
         </section>
         <section>
           <div class="label-group">
+            <h5>Тип клиентского портфеля</h5>
+          </div>
+          <div class="input-group">
+            <${'ppp-radio-group'}
+              orientation="vertical"
+              value="${(x) => x.document.portfolioType ?? 'stock'}"
+              ${ref('portfolioType')}
+            >
+              <${'ppp-radio'} value="stock">Фондовый рынок</ppp-radio>
+              <ppp-radio value="futures">Срочный рынок</ppp-radio>
+              <ppp-radio value="currency">Валютный рынок и рынок драг.
+                металлов
+              </ppp-radio>
+            </ppp-radio-group>
+          </div>
+        </section>
+        <section>
+          <div class="label-group">
             <h5>Торговая площадка</h5>
           </div>
           <div class="input-group">

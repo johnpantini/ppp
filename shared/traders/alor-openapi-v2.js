@@ -58,6 +58,14 @@ class AlorOpenAPIV2Trader extends Trader {
 
   connection;
 
+  constructor(document) {
+    super(document);
+
+    if (!this.document.portfolioType) {
+      this.document.portfolioType = 'stock';
+    }
+  }
+
   async #buildFuturesCache() {
     await this.waitForInstrumentCache();
 
@@ -358,7 +366,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
           let orderInstrument;
 
-          if (/HL$/.test(this.document.portfolio)) {
+          if (this.document.portfolioType === 'futures') {
             orderInstrument = this.#futures.get(o.symbol);
           } else {
             orderInstrument = await this.findInstrumentInCache(o.symbol);
@@ -713,7 +721,7 @@ class AlorOpenAPIV2Trader extends Trader {
     await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
 
-    if (/HL$/.test(this.document.portfolio)) {
+    if (this.document.portfolioType === 'futures') {
       await this.#buildFuturesCache();
     }
 
@@ -1087,7 +1095,7 @@ class AlorOpenAPIV2Trader extends Trader {
         for (const { field, datum } of fields) {
           if (datum === TRADER_DATUM.POSITION) {
             const isBalance =
-              data.isCurrency && !this.document.portfolio.startsWith('G');
+              data.isCurrency && this.document.portfolioType !== 'currency';
 
             const payload = {
               symbol: data.symbol,
@@ -1105,7 +1113,7 @@ class AlorOpenAPIV2Trader extends Trader {
             if (isBalance) {
               source[field] = payload;
             } else {
-              if (/HL$/.test(this.document.portfolio)) {
+              if (this.document.portfolioType === 'futures') {
                 payload.instrument = this.#futures.get(data.symbol);
               } else {
                 payload.instrument = await this.findInstrumentInCache(
@@ -1167,7 +1175,7 @@ class AlorOpenAPIV2Trader extends Trader {
               price: data.price
             };
 
-            if (/HL$/.test(this.document.portfolio)) {
+            if (this.document.portfolioType === 'futures') {
               payload.instrument = this.#futures.get(data.symbol);
             } else {
               payload.instrument = await this.findInstrumentInCache(
@@ -1212,7 +1220,7 @@ class AlorOpenAPIV2Trader extends Trader {
               createdAt: data.date
             };
 
-            if (/HL$/.test(this.document.portfolio)) {
+            if (this.document.portfolioType === 'futures') {
               payload.instrument = this.#futures.get(data.symbol);
             } else {
               payload.instrument = await this.findInstrumentInCache(
@@ -1317,11 +1325,11 @@ class AlorOpenAPIV2Trader extends Trader {
   async search(searchText) {
     const instrumentType = [];
 
-    if (/^D/.test(this.document.portfolio)) {
+    if (this.document.portfolioType === 'stock') {
       instrumentType.push('stock', 'bond');
-    } else if (/^G/.test(this.document.portfolio)) {
+    } else if (this.document.portfolioType === 'currency') {
       instrumentType.push('currency');
-    } else if (/HL$/.test(this.document.portfolio)) {
+    } else if (this.document.portfolioType === 'futures') {
       instrumentType.push('future');
     }
 

@@ -98,6 +98,7 @@ export class TraderAlorOpenAPIV2Page extends Page {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
         portfolio: this.portfolio.value.trim(),
+        portfolioType: this.portfolioType.value,
         exchange: this.exchange.value,
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
