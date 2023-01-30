@@ -4,9 +4,7 @@ import { display } from '../../shared/utilities/style/display.js';
 import { bodyFont } from './design-tokens.js';
 import { requireComponent } from '../../shared/template.js';
 
-await requireComponent(
-  'ppp-widget-box-radio'
-);
+await requireComponent('ppp-widget-box-radio');
 
 export const widgetRadioBoxGroupStyles = (context, definition) => css`
   ${display('flex')} :host {
@@ -19,6 +17,10 @@ export const widgetRadioBoxGroupStyles = (context, definition) => css`
     display: flex;
     flex-direction: row;
     gap: 5px;
+  }
+
+  :host([wrap]) .positioning-region {
+    flex-wrap: wrap;
   }
 `;
 
