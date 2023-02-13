@@ -1,7 +1,7 @@
 import { PPPAppearanceElement } from '../lib/ppp-element.js';
 import { css, when, html } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
-import { normalize } from '../design/styles.js';
+import { normalize, typography } from '../design/styles.js';
 import {
   infoWithCircle,
   importantWithCircle,
@@ -9,6 +9,7 @@ import {
   warning
 } from '../static/svg/sprite.js';
 import {
+  bodyFont, fontWeightBody1,
   paletteBlueBase,
   paletteBlueDark2,
   paletteBlueDark3,
@@ -32,8 +33,8 @@ import {
   paletteYellowDark3,
   paletteYellowLight2,
   paletteYellowLight3,
-  themeConditional
-} from '../design/design-tokens.js';
+  themeConditional,
+} from '../design/design-tokens.js'
 
 export const bannerTemplate = html`
   <template role="alert">
@@ -50,7 +51,7 @@ export const bannerTemplate = html`
       html`${html.partial(importantWithCircle)}`
     )}
     ${when((x) => x.appearance === 'danger', html`${html.partial(warning)}`)}
-    <div class="content">
+    <div class="content body1">
       <slot></slot>
     </div>
   </template>
@@ -59,16 +60,15 @@ export const bannerTemplate = html`
 export const bannerStyles = css`
   ${normalize()}
   ${display('flex')}
+  ${typography()}
   :host {
     position: relative;
+    font-family: ${bodyFont};
     min-height: 40px;
     padding: 10px 12px 10px 20px;
     border-width: 1px 1px 1px 0;
     border-style: solid;
     border-radius: 12px;
-    font-size: 14px;
-    line-height: 20px;
-    box-sizing: border-box;
   }
 
   :host(.inline) {
@@ -95,8 +95,33 @@ export const bannerStyles = css`
   .content {
     align-self: center;
     flex-grow: 1;
-    margin-left: 15px;
+    margin-left: 13px;
     margin-right: 10px;
+  }
+
+  :host a {
+    font-size: inherit;
+    line-height: inherit;
+    font-weight: ${fontWeightBody1};
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 2px;
+    border-radius: 4px;
+    display: inline;
+  }
+
+  :host a:hover,
+  :host a:focus,
+  :host a:focus-visible {
+    outline: none;
+  }
+
+  :host a:hover {
+    text-decoration: none;
+  }
+
+  :host a:focus-visible {
+    position: relative;
   }
 
   :host(.info) {
@@ -193,7 +218,7 @@ export const bannerStyles = css`
     color: ${themeConditional(paletteRedDark2, paletteRedLight2)};
     border-color: ${themeConditional(paletteRedLight2, paletteRedDark2)};
     border-left-color: ${themeConditional(paletteRedBase)};
-    background-color: ${themeConditional(paletteRedDark3)};
+    background-color: ${themeConditional(paletteRedLight3, paletteRedDark3)};
   }
 
   :host(.danger) a {
