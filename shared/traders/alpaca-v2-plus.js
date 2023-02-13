@@ -317,7 +317,7 @@ class AlpacaV2PlusTrader extends Trader {
         this.connection.send(
           JSON.stringify({
             action: 'unsubscribe',
-            trades: [this.getSymbol(instrument)]
+            quotes: [this.getSymbol(instrument)]
           })
         );
       }
