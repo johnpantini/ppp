@@ -169,7 +169,7 @@ export const cloudServicesPageTemplate = html`
           ${html`${html.partial(numberedCircle(7))}`}
         </div>
         <div class="label-group">
-          <h6>Сервер MongoDB Realm - #12</h6>
+          <h6>Сервер MongoDB Realm - #13</h6>
           <p class="description">
             Требуется, если используется альтернативная база данных MongoDB.
           </p>
