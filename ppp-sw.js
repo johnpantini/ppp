@@ -96,7 +96,7 @@ function removeDecorators(source) {
 }
 
 class VersionControl {
-  #interval = 30000;
+  #interval = 10000;
 
   #channel = new BroadcastChannel('ppp');
 
@@ -173,6 +173,10 @@ self.onmessage = (event) => {
     const { data } = event;
 
     if (data.type === 'version') {
+      if (typeof self.vc === 'undefined') {
+        self.vc = new VersionControl();
+      }
+
       self.vc.currentVersion = data.version;
     }
   }
@@ -195,8 +199,6 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', () => {
-  self.vc = new VersionControl();
-
   // Tell the active service worker to take control of the page immediately.
   return self.clients.claim();
 });
