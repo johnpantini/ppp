@@ -145,6 +145,8 @@ class VersionControl {
       .then((pkg) => {
         this.lastVersion = pkg.version;
 
+        console.log(self.vc.currentVersion, this.lastVersion);
+
         const updateNeeded = this.updateNeeded();
 
         if (updateNeeded) {
@@ -176,8 +178,6 @@ self.onmessage = (event) => {
       if (typeof self.vc === 'undefined') {
         self.vc = new VersionControl();
       }
-
-      console.log(self.vc.currentVersion, data.version);
 
       self.vc.currentVersion = data.version;
     }
