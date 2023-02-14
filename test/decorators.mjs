@@ -133,11 +133,36 @@ class BaseProgress extends FoundationElement {
   paused;
 }`;
 
+// noinspection DuplicatedCode
+function placeDecorators(decorators = []) {
+  let result = '';
+
+  decorators.forEach(({ d, c, t, l }) => {
+    if (t === 'class') {
+      result += `${c} = __decorate([${d}], ${c});\n`;
+    } else if (t === 'method') {
+      result += `__decorate([${d}], ${c}.prototype, '${l
+        .split(/\(/i)[0]
+        .trim()}', null);\n`;
+    } else if (t === 'prop') {
+      result += `__decorate([${d}], ${c}.prototype, '${l
+        .split(/=/i)[0]
+        .replace(/;/, '')
+        .trim()}', void 0);\n`;
+    }
+  });
+
+  return result;
+}
+
 function removeDecorators(source) {
   const decorators = [];
+  // Should be moved to the bottom after __decorate
+  const exports = [];
   const lines = source.split(/\n/gi);
   let result = '';
   let currentClass = '';
+  let hasDefaultExport = false;
 
   lines.forEach((l, i) => {
     const line = l.trim();
@@ -171,6 +196,11 @@ function removeDecorators(source) {
 
         t === 'prop' && (lines[i + 1] = '');
       }
+    } else if (/^export default/.test(line)) {
+      hasDefaultExport = true;
+
+      result += placeDecorators(decorators);
+      result += l + '\n';
     } else result += l + '\n';
   });
 
@@ -183,20 +213,9 @@ function removeDecorators(source) {
       '};\n' +
       result;
 
-    decorators.forEach(({ d, c, t, l }) => {
-      if (t === 'class') {
-        result += `${c} = __decorate([${d}], ${c});\n`;
-      } else if (t === 'method') {
-        result += `__decorate([${d}], ${c}.prototype, '${l
-          .split(/\(/i)[0]
-          .trim()}', null);\n`;
-      } else if (t === 'prop') {
-        result += `__decorate([${d}], ${c}.prototype, '${l
-          .split(/=/i)[0]
-          .replace(/;/, '')
-          .trim()}', void 0);\n`;
-      }
-    });
+    if (!hasDefaultExport) {
+      result += placeDecorators(decorators);
+    }
   }
 
   return result;
