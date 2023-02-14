@@ -467,6 +467,11 @@ export class App extends PPPElement {
           this.toast.appearance = 'note';
           this.toast.removeAttribute('hidden');
         }
+      } else if (data.type === 'version-request') {
+        navigator.serviceWorker?.controller?.postMessage?.({
+          type: 'version',
+          version: localStorage.getItem('ppp-version') ?? ''
+        });
       }
     };
 

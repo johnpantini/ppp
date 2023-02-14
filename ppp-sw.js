@@ -138,14 +138,18 @@ class VersionControl {
   }
 
   checkLoop() {
+    if (typeof this.currentVersion === 'undefined') {
+      this.#channel.postMessage({
+        type: 'version-request'
+      });
+    }
+
     fetch(new URL('package.json', this.rootUrl).toString(), {
       cache: 'no-store'
     })
       .then((response) => response.json())
       .then((pkg) => {
         this.lastVersion = pkg.version;
-
-        console.log(self.vc.currentVersion, this.lastVersion);
 
         const updateNeeded = this.updateNeeded();
 
@@ -167,6 +171,8 @@ class VersionControl {
   }
 }
 
+self.vc = new VersionControl();
+
 self.onmessage = (event) => {
   // For hard resets
   if (event.data === 'reclaim') {
@@ -175,10 +181,6 @@ self.onmessage = (event) => {
     const { data } = event;
 
     if (data.type === 'version') {
-      if (typeof self.vc === 'undefined') {
-        self.vc = new VersionControl();
-      }
-
       self.vc.currentVersion = data.version;
     }
   }
