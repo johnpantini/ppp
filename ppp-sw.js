@@ -175,9 +175,9 @@ self.onmessage = (event) => {
     if (data.type === 'version') {
       if (typeof self.vc === 'undefined') {
         self.vc = new VersionControl();
-
-        console.log('new VersionControl()', data.version);
       }
+
+      console.log(self.vc.currentVersion, data.version);
 
       self.vc.currentVersion = data.version;
     }
