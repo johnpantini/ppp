@@ -34,6 +34,8 @@ window.addEventListener('load', async () => {
     appendMainScript();
   }
 
+  await navigator.serviceWorker.ready;
+
   registration.active.postMessage({
     type: 'version',
     version: localStorage.getItem('ppp-version') ?? ''
