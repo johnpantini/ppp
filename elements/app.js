@@ -434,17 +434,18 @@ export class App extends PPPElement {
   #onPopState() {
     this.extension = this.params()?.extension;
 
-    this.navigate(this.url(this.params()));
+    void this.navigate(this.url(this.params()));
   }
 
-  updateApp(lastVersion) {
+  async updateApp(lastVersion) {
     localStorage.setItem('ppp-version', lastVersion);
     navigator.serviceWorker.controller.postMessage({
       type: 'version',
       version: lastVersion
     });
-    window.location.reload();
+    await caches.delete('offline');
     this.toast.setAttribute('hidden', '');
+    window.location.reload();
   }
 
   constructor() {

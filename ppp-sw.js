@@ -96,7 +96,7 @@ function removeDecorators(source) {
 }
 
 class VersionControl {
-  #interval = 10000;
+  #interval = 30000;
 
   #channel = new BroadcastChannel('ppp');
 
