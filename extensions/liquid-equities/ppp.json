@@ -1,9 +1,0 @@
-{
-  "page": "liquid-equities",
-  "type": "page",
-  "version": 2,
-  "author": "johnpantini",
-  "repository": "https://github.com/johnpantini/ppp",
-  "title": "Маржинальные инструменты",
-  "description": "Liquid equities for Alor & Tinkoff"
-}
