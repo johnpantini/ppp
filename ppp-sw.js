@@ -3,15 +3,40 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 5;
+const OFFLINE_VERSION = 6;
 const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
+// noinspection DuplicatedCode
+function placeDecorators(decorators = []) {
+  let result = '';
+
+  decorators.forEach(({ d, c, t, l }) => {
+    if (t === 'class') {
+      result += `${c} = __decorate([${d}], ${c});\n`;
+    } else if (t === 'method') {
+      result += `__decorate([${d}], ${c}.prototype, '${l
+        .split(/\(/i)[0]
+        .trim()}', null);\n`;
+    } else if (t === 'prop') {
+      result += `__decorate([${d}], ${c}.prototype, '${l
+        .split(/=/i)[0]
+        .replace(/;/, '')
+        .trim()}', void 0);\n`;
+    }
+  });
+
+  return result;
+}
+
 function removeDecorators(source) {
   const decorators = [];
+  // Should be moved to the bottom after __decorate
+  const exports = [];
   const lines = source.split(/\n/gi);
   let result = '';
   let currentClass = '';
+  let hasDefaultExport = false;
 
   lines.forEach((l, i) => {
     const line = l.trim();
@@ -45,6 +70,11 @@ function removeDecorators(source) {
 
         t === 'prop' && (lines[i + 1] = '');
       }
+    } else if (/^export default/.test(line)) {
+      hasDefaultExport = true;
+
+      result += placeDecorators(decorators);
+      result += l + '\n';
     } else result += l + '\n';
   });
 
@@ -57,28 +87,94 @@ function removeDecorators(source) {
       '};\n' +
       result;
 
-    decorators.forEach(({ d, c, t, l }) => {
-      if (t === 'class') {
-        result += `${c} = __decorate([${d}], ${c});\n`;
-      } else if (t === 'method') {
-        result += `__decorate([${d}], ${c}.prototype, '${l
-          .split(/\(/i)[0]
-          .trim()}', null);\n`;
-      } else if (t === 'prop') {
-        result += `__decorate([${d}], ${c}.prototype, '${l
-          .split(/=/i)[0]
-          .replace(/;/, '')
-          .trim()}', void 0);\n`;
-      }
-    });
+    if (!hasDefaultExport) {
+      result += placeDecorators(decorators);
+    }
   }
 
   return result;
 }
 
+class VersionControl {
+  #interval = 10000;
+
+  #channel = new BroadcastChannel('ppp');
+
+  currentVersion;
+
+  lastVersion;
+
+  rootUrl = location.origin;
+
+  updateNeeded() {
+    if (
+      typeof this.lastVersion !== 'string' ||
+      typeof this.currentVersion !== 'string'
+    ) {
+      return false;
+    }
+
+    if (this.currentVersion === '') this.currentVersion = '1.0.0';
+
+    const lastVersion = this.lastVersion.split(/\./g);
+    const currentVersion = this.currentVersion.split(/\./g);
+
+    while (lastVersion.length || currentVersion.length) {
+      const l = parseInt(lastVersion.shift());
+      const c = parseInt(currentVersion.shift());
+
+      if (l === c) continue;
+
+      return l > c || isNaN(c);
+    }
+
+    return false;
+  }
+
+  constructor() {
+    if (this.rootUrl.endsWith('.github.io')) this.rootUrl += '/ppp';
+
+    this.checkLoop();
+  }
+
+  checkLoop() {
+    fetch(new URL('package.json', this.rootUrl).toString(), {
+      cache: 'no-store'
+    })
+      .then((response) => response.json())
+      .then((pkg) => {
+        this.lastVersion = pkg.version;
+
+        const updateNeeded = this.updateNeeded();
+
+        if (updateNeeded) {
+          this.#channel.postMessage({
+            type: 'update-available',
+            currentVersion: this.currentVersion,
+            lastVersion: this.lastVersion
+          });
+        }
+
+        setTimeout(() => this.checkLoop(), this.#interval);
+      })
+      .catch((e) => {
+        console.error(e);
+
+        setTimeout(() => this.checkLoop(), this.#interval * 2);
+      });
+  }
+}
+
 self.onmessage = (event) => {
+  // For hard resets
   if (event.data === 'reclaim') {
-    self.clients.claim();
+    return self.clients.claim();
+  } else {
+    const { data } = event;
+
+    if (data.type === 'version') {
+      self.vc.currentVersion = data.version;
+    }
   }
 };
 
@@ -87,35 +183,27 @@ self.addEventListener('install', (event) => {
     (async () => {
       const cache = await caches.open(PPP_CACHE_NAME);
 
-      // Setting {cache: 'reload'} in the new request will ensure that the
+      // Setting { cache: 'reload' } in the new request will ensure that the
       // response isn't fulfilled from the HTTP cache; i.e., it will be from
       // the network.
       await cache.add(new Request(OFFLINE_URL, { cache: 'reload' }));
     })()
   );
+
   // Force the waiting service worker to become the active service worker.
-  self.skipWaiting();
+  return self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    (async () => {
-      // Enable navigation preload if it's supported.
-      // See https://developers.google.com/web/updates/2017/02/navigation-preload
-      if ('navigationPreload' in self.registration) {
-        await self.registration.navigationPreload.enable();
-      }
-    })()
-  );
+self.addEventListener('activate', () => {
+  self.vc = new VersionControl();
 
   // Tell the active service worker to take control of the page immediately.
-  self.clients.claim();
+  return self.clients.claim();
 });
 
 self.addEventListener('fetch', async (event) => {
   // If no fetch handlers call event.respondWith(), the request will be handled
   // by the browser as if there were no service worker involvement.
-
   if (
     (event.request.destination === 'image' &&
       event.request.url?.endsWith('.png')) ||
@@ -133,65 +221,66 @@ self.addEventListener('fetch', async (event) => {
   ) {
     return event.respondWith(
       (async () => {
-        if (location.origin.endsWith('.io.dev')) {
-          return await fetch(event.request, {
-            cache: 'no-cache'
-          }).then(async (r) => {
-            const ct = r.headers.get('content-type');
-            const text = await r.text();
+        try {
+          if (location.origin.endsWith('.io.dev')) {
+            return await fetch(event.request, {
+              cache: 'no-store'
+            }).then(async (r) => {
+              const ct = r.headers.get('content-type');
+              const text = await r.text();
+              const init = {
+                status: r.status,
+                statusText: r.statusText,
+                headers: r.headers
+              };
+
+              if (
+                /javascript/gi.test(ct) &&
+                text.startsWith('/** @decorator */')
+              ) {
+                return new Response(removeDecorators(text), init);
+              } else {
+                return new Response(text, init);
+              }
+            });
+          }
+
+          const cache = await caches.open(PPP_CACHE_NAME);
+          const cachedResponse = await cache.match(event.request);
+          const fetchedResponse = fetch(event.request, {
+            cache: 'no-store'
+          }).then(async (networkResponse) => {
+            const clone = networkResponse.clone();
+            const ct = clone.headers.get('content-type');
+            const text = await clone.text();
             const init = {
-              status: r.status,
-              statusText: r.statusText,
-              headers: r.headers
+              status: clone.status,
+              statusText: clone.statusText,
+              headers: clone.headers
             };
 
             if (
               /javascript/gi.test(ct) &&
               text.startsWith('/** @decorator */')
             ) {
-              return new Response(removeDecorators(text), init);
+              const r = new Response(removeDecorators(text), init);
+
+              void cache.put(event.request, r.clone());
+
+              return r;
             } else {
-              return new Response(text, init);
+              void cache.put(event.request, new Response(text, init));
+
+              return networkResponse;
             }
           });
+
+          return cachedResponse ?? fetchedResponse;
+        } catch (e) {
+          const cache = await caches.open(PPP_CACHE_NAME);
+
+          return await cache.match(OFFLINE_URL);
         }
-
-        if (event.request.mode === 'navigate') {
-          const preloadResponse = await event.preloadResponse;
-
-          if (preloadResponse) {
-            return preloadResponse;
-          }
-        }
-
-        const cache = await caches.open(PPP_CACHE_NAME);
-        const cachedResponse = await cache.match(event.request);
-        const fetchedResponse = fetch(event.request, {
-          cache: 'no-cache'
-        }).then(async (networkResponse) => {
-          const clone = networkResponse.clone();
-          const ct = clone.headers.get('content-type');
-          const text = await clone.text();
-          const init = {
-            status: clone.status,
-            statusText: clone.statusText,
-            headers: clone.headers
-          };
-
-          if (/javascript/gi.test(ct) && text.startsWith('/** @decorator */')) {
-            const r = new Response(removeDecorators(text), init);
-
-            void cache.put(event.request, r.clone());
-
-            return r;
-          } else {
-            void cache.put(event.request, new Response(text, init));
-
-            return networkResponse;
-          }
-        });
-
-        return cachedResponse ?? fetchedResponse;
       })()
     );
   }

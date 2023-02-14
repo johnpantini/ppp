@@ -1,42 +1,72 @@
-import { KeyVault } from './shared/key-vault.js';
-import { bufferToString, generateIV, PPPCrypto } from './shared/ppp-crypto.js';
-import { maybeFetchError } from './shared/fetch-error.js';
-import { APIS, TRADERS } from './shared/const.js';
+/** @decorator */
 
-export default new (class {
-  /**
-   * Default theme is leafygreen {@link https://www.mongodb.design/}
-   */
-  theme = 'leafygreen';
+import { observable, html } from './vendor/fast-element.min.js';
+import { DesignToken } from './design/design-token.js';
+import { KeyVault } from './lib/key-vault.js';
+import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
+import { PPPElement } from './lib/ppp-element.js';
+import { APIS, TRADERS } from './lib/const.js';
 
-  /**
-   * Supported languages.
-   * @type {[string]}
-   */
+(class DesignSystemCanvas extends PPPElement {
+  connectedCallback() {
+    super.connectedCallback();
+
+    DesignToken.registerDefaultStyleTarget(this);
+  }
+}
+  .compose({
+    template: html` <slot></slot> `
+  })
+  .define());
+
+class PPP {
+  @observable
+  workspaces;
+
+  @observable
+  extensions;
+
+  @observable
+  settings;
+
+  @observable
+  darkMode;
+
   locales = ['ru'];
+
+  locale =
+    localStorage.getItem('ppp-locale') ??
+    this.locales.find((l) => {
+      return new RegExp(`^${l}\\b`, 'i').test(navigator.language);
+    }) ??
+    this.locales[0];
 
   crypto = new PPPCrypto();
 
   traders = new Map();
 
-  scratch = new Map();
-
   constructor(appType) {
     globalThis.ppp = this;
+
+    this.workspaces = [];
+    this.extensions = [];
+    this.settings = {};
+
+    this.designSystemCanvas = document.querySelector(
+      'ppp-design-system-canvas'
+    );
+
+    this.darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    const savedDarkMode = localStorage.getItem('ppp-dark-mode');
+
+    if (typeof savedDarkMode === 'string')
+      this.darkMode = savedDarkMode === '1';
 
     this.appType = appType;
     this.rootUrl = window.location.origin;
 
     if (this.rootUrl.endsWith('.github.io')) this.rootUrl += '/ppp';
-
-    const storedLang = localStorage.getItem('ppp-lang');
-
-    this.locale = this.locales.indexOf(storedLang) > -1 ? storedLang : 'ru';
-    this.dict = new Polyglot({
-      locale: this.locale
-    });
-
-    document.documentElement.setAttribute('lang', this.locale);
 
     void this.start();
   }
@@ -49,9 +79,30 @@ export default new (class {
     }
   }
 
+  #showLoadingError({ errorText, shouldShowServiceMachineInput }) {
+    document.querySelector('.splashscreen-loader').classList.add('error');
+    document.querySelector('.loading-text').classList.add('error');
+
+    document.querySelector('.loading-text').textContent = errorText;
+
+    if (shouldShowServiceMachineInput) {
+      document.querySelector('.service-machine-url').removeAttribute('hidden');
+    }
+  }
+
+  async #rebuildDictionary() {
+    this.dict = new Polyglot({
+      locale: this.locale
+    });
+
+    (await import(`./i18n/${this.locale}/loading-errors.i18n.js`)).default(
+      this.dict
+    );
+  }
+
   async #createApplication({ emergency }) {
     if (!emergency) {
-      const { getApp, Credentials } = await import('./shared/realm.js');
+      const { getApp, Credentials } = await import('./lib/realm.js');
 
       try {
         this.realm = getApp(this.keyVault.getKey('mongo-app-client-id'));
@@ -67,20 +118,15 @@ export default new (class {
 
           return this.#createApplication({ emergency: true });
         } else {
-          document.getElementById('global-loader').classList.add('error');
-
           if (/Failed to fetch/i.test(e?.message)) {
-            document
-              .getElementById('global-loader')
-              .setText('Нет связи с сервисной машиной');
-
-            document
-              .getElementById('global-loader')
-              .showInput(this.keyVault.getKey('service-machine-url'));
+            this.#showLoadingError({
+              errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
+              shouldShowServiceMachineInput: true
+            });
           } else {
-            document
-              .getElementById('global-loader')
-              .setText('Ошибка загрузки. Подробности в консоли браузера');
+            this.#showLoadingError({
+              errorText: this.t('$loadingErrors.E_UNKNOWN')
+            });
           }
 
           return;
@@ -99,21 +145,6 @@ export default new (class {
         );
       }
     }
-
-    const [{ DesignSystem }, { app, appStyles, appTemplate }] =
-      await Promise.all([
-        import('./shared/design-system/design-system.js'),
-        import(`./${this.appType}/${this.theme}/app.js`)
-      ]);
-
-    this.DesignSystem = DesignSystem;
-
-    DesignSystem.getOrCreate().register(app(appStyles, appTemplate)());
-    document.body.setAttribute('appearance', this.theme);
-
-    let workspaces = [];
-    let extensions = [];
-    let settings = {};
 
     if (!emergency) {
       try {
@@ -140,46 +171,48 @@ export default new (class {
 
         const evalRequest = await this.user.functions.eval(lines.join('\n'));
 
-        workspaces = evalRequest.workspaces;
-        extensions = evalRequest.extensions;
-        settings = evalRequest.settings;
+        this.workspaces = evalRequest.workspaces ?? [];
+        this.extensions = evalRequest.extensions ?? [];
+        this.settings = evalRequest.settings ?? {};
+        this.darkMode = this.settings.darkMode ?? this.darkMode;
+
+        if (this.locales.indexOf(this.settings.locale) > -1) {
+          this.locale = this.settings.locale;
+        }
+
+        await this.#rebuildDictionary();
+
+        localStorage.setItem('ppp-locale', this.locale);
+        localStorage.setItem('ppp-dark-mode', this.darkMode ? '1' : '0');
       } catch (e) {
         console.error(e);
-        document.getElementById('global-loader').classList.add('error');
 
         if (/Failed to fetch/i.test(e?.message)) {
-          document
-            .getElementById('global-loader')
-            .setText('Нет связи с сервисной машиной');
-
-          document
-            .getElementById('global-loader')
-            .showInput(this.keyVault.getKey('service-machine-url'));
+          this.#showLoadingError({
+            errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
+            shouldShowServiceMachineInput: true
+          });
         } else if (/failed to find refresh token/i.test(e?.message)) {
           sessionStorage.removeItem('realmLogin');
           window.location.reload();
         } else if (/Cannot access member 'db' of undefined/i.test(e?.message)) {
-          document
-            .getElementById('global-loader')
-            .setText(
-              'Хранилище MongoDB Atlas не имеет связи с приложением MongoDB Realm'
-            );
+          this.#showLoadingError({
+            errorText: this.t('$loadingErrors.E_BROKEN_ATLAS_REALM_LINK')
+          });
         } else if (
           /error resolving cluster hostname/i.test(e?.message) ||
           /error connecting to MongoDB cluster/i.test(e?.message) ||
           /server selection error/i.test(e?.message)
         ) {
-          document
-            .getElementById('global-loader')
-            .setText(
-              'Хранилище MongoDB Atlas не в сети или отключено за неактивность'
-            );
+          this.#showLoadingError({
+            errorText: this.t('$loadingErrors.E_OFFLINE_REALM')
+          });
         } else if (/function not found: 'eval'/i.test(e?.message)) {
-          document
-            .getElementById('global-loader')
-            .setText(
-              'Сбой настройки облачных сервисов, пожалуйста, подождите...'
-            );
+          this.#showLoadingError({
+            errorText: this.t(
+              '$loadingErrors.E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT'
+            )
+          });
 
           setTimeout(() => {
             localStorage.removeItem('ppp-mongo-app-id');
@@ -188,31 +221,32 @@ export default new (class {
             window.location.reload();
           }, 5000);
         } else {
-          document
-            .getElementById('global-loader')
-            .setText('Ошибка загрузки. Подробности в консоли браузера');
+          this.#showLoadingError({
+            errorText: this.t('$loadingErrors.E_UNKNOWN')
+          });
         }
 
         return;
       }
     }
 
-    const appElement = document.createElement('ppp-app');
+    try {
+      await import(`./elements/app.js`);
 
-    if (!emergency) {
-      appElement.workspaces = workspaces;
-      appElement.extensions = extensions;
-      appElement.settings = settings ?? {};
+      const appElement = document.createElement('ppp-app');
+
+      this.app = this.designSystemCanvas.appendChild(appElement);
+
+      document
+        .querySelector('.splashscreen-loader')
+        .setAttribute('hidden', true);
+    } catch (e) {
+      console.error(e);
+
+      this.#showLoadingError({
+        errorText: this.t('$loadingErrors.E_UNKNOWN')
+      });
     }
-
-    appElement.ppp = this;
-
-    this.app = document.body.insertBefore(appElement, document.body.firstChild);
-
-    this.app.setAttribute('hidden', true);
-    this.app.setAttribute('appearance', this.theme);
-    document.getElementById('global-loader').setAttribute('hidden', true);
-    this.app.removeAttribute('hidden');
   }
 
   async i18n(url) {
@@ -223,10 +257,14 @@ export default new (class {
     (await import(`./i18n/${this.locale}/${fileName}`)).default(this.dict);
   }
 
-  async start() {
-    this.keyVault = new KeyVault();
+  t(key, options) {
+    return this.dict.t(key, options);
+  }
 
-    (await import(`./i18n/${this.locale}/shared.i18n.js`)).default(this.dict);
+  async start() {
+    await this.#rebuildDictionary();
+
+    this.keyVault = new KeyVault();
 
     if (!this.keyVault.ok()) {
       return this.#createApplication({ emergency: true });
@@ -235,62 +273,21 @@ export default new (class {
     }
   }
 
-  /**
-   *
-   * @param username
-   * @param apiKey
-   * @param serviceMachineUrl
-   * @throws {FetchError}
-   */
-  async getMongoDBRealmAccessToken({
-    username = this.keyVault.getKey('mongo-public-key'),
-    apiKey = this.keyVault.getKey('mongo-private-key'),
-    serviceMachineUrl = this.keyVault.getKey('service-machine-url')
-  } = {}) {
-    const rMongoDBRealmAccessToken = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
-      {
-        cache: 'no-cache',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          url: 'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
-          body: {
-            username,
-            apiKey
-          }
-        })
-      }
-    );
-
-    await maybeFetchError(
-      rMongoDBRealmAccessToken,
-      'Не удалось авторизоваться в MongoDB Realm. Проверьте ключи.'
-    );
-
-    const { access_token: mongoDBRealmAccessToken } =
-      await rMongoDBRealmAccessToken.json();
-
-    return mongoDBRealmAccessToken;
-  }
-
-  async encrypt(document = {}, excludedKeys = []) {
-    const clone = Object.assign({}, document);
+  async encrypt(document = {}) {
+    const clone = this.structuredClone(document);
 
     let iv;
 
     for (const key in clone) {
       if (
         /(token|key|secret|password)$/i.test(key) &&
-        excludedKeys.indexOf(key) < 0
+        !(key === 'key' && clone?.type === APIS.PUSHER)
       ) {
         if (!iv) {
           iv = generateIV();
         }
 
-        clone[key] = await ppp.crypto.encrypt(iv, clone[key]);
+        clone[key] = await this.crypto.encrypt(iv, clone[key]);
         clone.iv = bufferToString(iv);
       }
     }
@@ -298,16 +295,16 @@ export default new (class {
     return clone;
   }
 
-  async decrypt(document = {}, excludedKeys = []) {
-    const clone = Object.assign({}, document);
+  async decrypt(document = {}) {
+    const clone = this.structuredClone(document);
 
     for (const key in clone) {
       if (
         /(token|key|secret|password)$/i.test(key) &&
-        excludedKeys.indexOf(key) < 0
+        !(key === 'key' && clone?.type === APIS.PUSHER)
       ) {
         try {
-          clone[key] = await ppp.crypto.decrypt(document.iv, clone[key]);
+          clone[key] = await this.crypto.decrypt(document.iv, clone[key]);
         } catch (e) {
           if (!(key === 'key' && clone?.type === APIS.PUSHER)) {
             throw e;
@@ -325,13 +322,13 @@ export default new (class {
     return clone;
   }
 
-  decryptDocumentsTransformation(excludedKeys = []) {
+  decryptDocumentsTransformation() {
     return async (d) => {
       if (Array.isArray(d)) {
         const mapped = [];
 
         for (const document of d) {
-          mapped.push(await ppp.decrypt(document, excludedKeys));
+          mapped.push(await this.decrypt(document));
         }
 
         return mapped;
@@ -345,10 +342,10 @@ export default new (class {
     if (document) {
       const module = await import(
         {
-          [TRADERS.ALOR_OPENAPI_V2]: `${this.rootUrl}/shared/traders/alor-openapi-v2.js`,
-          [TRADERS.TINKOFF_GRPC_WEB]: `${this.rootUrl}/shared/traders/tinkoff-grpc-web.js`,
-          [TRADERS.ALPACA_V2_PLUS]: `${this.rootUrl}/shared/traders/alpaca-v2-plus.js`,
-          [TRADERS.BINANCE_V3]: `${this.rootUrl}/shared/traders/binance-v3.js`,
+          [TRADERS.ALOR_OPENAPI_V2]: `${this.rootUrl}/traders/alor-openapi-v2.js`,
+          [TRADERS.TINKOFF_GRPC_WEB]: `${this.rootUrl}/traders/tinkoff-grpc-web.js`,
+          [TRADERS.ALPACA_V2_PLUS]: `${this.rootUrl}/traders/alpaca-v2-plus.js`,
+          [TRADERS.BINANCE_V3]: `${this.rootUrl}/traders/binance-v3.js`,
           [TRADERS.CUSTOM]: document.url
         }[document.type]
       );
@@ -384,4 +381,6 @@ export default new (class {
       return this.traders.get(document._id);
     }
   }
-})(document.documentElement.getAttribute('ppp-type'));
+}
+
+export default new PPP(document.documentElement.getAttribute('ppp-app-type'));

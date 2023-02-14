@@ -2,14 +2,14 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <title>PPP Console</title>
+    <title>PPP</title>
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" href="static/icons/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="static/icons/apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="PPP Terminal" />
-    <meta name="apple-mobile-web-app-title" content="PPP Console" />
+    <meta name="apple-mobile-web-app-title" content="PPP" />
     <meta name="msapplication-TileColor" content="#131722" />
     <meta name="theme-color" content="#131722" />
     <meta name="msapplication-navbutton-color" content="#131722" />
@@ -20,25 +20,28 @@
     />
   </head>
   <script>
-    let type = 'mobile';
+    let appType = 'mobile';
 
     const params = Object.fromEntries(
       new URLSearchParams(window.location.search).entries()
     );
 
-    if (!/mobile/i.test(navigator.userAgent)) type = 'desktop';
+    if (!/mobile/i.test(navigator.userAgent)) appType = 'desktop';
+
+    const lastVisitedUrl =
+      localStorage.getItem('ppp-last-visited-url') ?? '?page=cloud-services';
 
     if (window.location.origin.endsWith('github.io'))
       window.location.replace(
-        window.location.origin + `/ppp/${type}?page=cloud-services`
+        window.location.origin + `/ppp/${appType}${lastVisitedUrl}`
       );
     else if (/(vercel)/gi.test(window.location.origin))
       window.location.replace(
-        window.location.origin + `/${type}.html?page=cloud-services`
+        window.location.origin + `/${appType}.html${lastVisitedUrl}`
       );
     else
       window.location.replace(
-        window.location.origin + `/${type}?page=cloud-services`
+        window.location.origin + `/${appType}${lastVisitedUrl}`
       );
   </script>
   <body></body>
