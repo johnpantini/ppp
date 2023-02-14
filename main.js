@@ -22,9 +22,9 @@ window.addEventListener('load', async () => {
 
   const registration = await navigator.serviceWorker.register('ppp-sw.js');
 
-  if (navigator.serviceWorker.controller === null) {
-    await navigator.serviceWorker.ready;
+  await navigator.serviceWorker.ready;
 
+  if (navigator.serviceWorker.controller === null) {
     registration.active.postMessage('reclaim');
 
     navigator.serviceWorker.addEventListener('controllerchange', async () => {
@@ -33,8 +33,6 @@ window.addEventListener('load', async () => {
   } else {
     appendMainScript();
   }
-
-  await navigator.serviceWorker.ready;
 
   registration.active.postMessage({
     type: 'version',
