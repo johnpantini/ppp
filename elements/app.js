@@ -406,6 +406,8 @@ export const appStyles = css`
 `;
 
 export class App extends PPPElement {
+  #updateInterval = 5000;
+
   #toast;
 
   get toast() {
@@ -414,6 +416,86 @@ export class App extends PPPElement {
     }
 
     return this.#toast;
+  }
+
+  currentVersion = localStorage.getItem('ppp-version') ?? '1.0.0';
+
+  lastVersion;
+
+  #checkForAvailableUpdatesLoop() {
+    if (!this.toast.hasAttribute('hidden')) {
+      return setTimeout(
+        () => this.#checkForAvailableUpdatesLoop(),
+        this.#updateInterval
+      );
+    }
+
+    fetch(new URL('package.json', ppp.rootUrl).toString(), {
+      cache: 'no-store'
+    })
+      .then((response) => response.json())
+      .then((pkg) => {
+        this.lastVersion = pkg.version;
+
+        const updateNeeded = this.updateNeeded();
+
+        if (updateNeeded) {
+          this.toast.title = 'Обновление готово';
+          this.toast.text = html`Новая версия приложения (${this.lastVersion})
+            готова к использованию.
+            <a
+              class="link"
+              href="javascript:void(0);"
+              @click="${() => this.updateApp(this.lastVersion)}"
+            >
+              Нажмите, чтобы обновиться.
+            </a>`;
+          this.toast.appearance = 'note';
+          this.toast.removeAttribute('hidden');
+        }
+
+        setTimeout(
+          () => this.#checkForAvailableUpdatesLoop(),
+          this.#updateInterval
+        );
+      })
+      .catch((e) => {
+        console.error(e);
+
+        setTimeout(
+          () => this.#checkForAvailableUpdatesLoop(),
+          this.#updateInterval * 4
+        );
+      });
+  }
+
+  updateNeeded() {
+    if (typeof this.lastVersion !== 'string') {
+      return false;
+    }
+
+    const lastVersion = this.lastVersion.split(/\./g);
+    const currentVersion = this.currentVersion.split(/\./g);
+
+    while (lastVersion.length || currentVersion.length) {
+      const l = parseInt(lastVersion.shift());
+      const c = parseInt(currentVersion.shift());
+
+      if (l === c) continue;
+
+      return l > c || isNaN(c);
+    }
+
+    return false;
+  }
+
+  async updateApp(lastVersion) {
+    this.currentVersion = lastVersion;
+
+    localStorage.setItem('ppp-version', lastVersion);
+    await caches.delete('offline');
+    this.toast.setAttribute('hidden', '');
+    window.location.reload();
   }
 
   @attr
@@ -437,43 +519,10 @@ export class App extends PPPElement {
     void this.navigate(this.url(this.params()));
   }
 
-  async updateApp(lastVersion) {
-    localStorage.setItem('ppp-version', lastVersion);
-    navigator.serviceWorker.controller.postMessage({
-      type: 'version',
-      version: lastVersion
-    });
-    await caches.delete('offline');
-    this.toast.setAttribute('hidden', '');
-    window.location.reload();
-  }
-
   constructor() {
     super();
 
-    new BroadcastChannel('ppp').onmessage = ({ data }) => {
-      if (data.type === 'update-available') {
-        if (this.toast.hasAttribute('hidden')) {
-          this.toast.title = 'Обновление готово';
-          this.toast.text = html`Новая версия приложения (${data.lastVersion})
-            готова к использованию.
-            <a
-              class="link"
-              href="javascript:void(0);"
-              @click="${() => this.updateApp(data.lastVersion)}"
-            >
-              Нажмите, чтобы обновиться.
-            </a>`;
-          this.toast.appearance = 'note';
-          this.toast.removeAttribute('hidden');
-        }
-      } else if (data.type === 'version-request') {
-        navigator.serviceWorker?.controller?.postMessage?.({
-          type: 'version',
-          version: localStorage.getItem('ppp-version') ?? ''
-        });
-      }
-    };
+    this.#checkForAvailableUpdatesLoop();
 
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Escape') {
