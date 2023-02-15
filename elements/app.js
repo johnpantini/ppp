@@ -406,7 +406,7 @@ export const appStyles = css`
 `;
 
 export class App extends PPPElement {
-  #updateInterval = 5000;
+  #updateInterval = 30000;
 
   #toast;
 

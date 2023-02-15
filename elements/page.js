@@ -39,8 +39,8 @@ import './toast.js';
     styles: css`
       ${display('flex')}
       ${normalize()}
-    ${typography()}
-    :host {
+      ${typography()}
+      :host {
         align-items: center;
         border-bottom: 3px solid
           ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
@@ -327,6 +327,10 @@ class Page extends PPPElement {
 
   beginOperation() {
     this.status = PAGE_STATUS.OPERATION_STARTED;
+  }
+
+  succeedOperation() {
+    this.status = PAGE_STATUS.OPERATION_SUCCEEDED;
   }
 
   endOperation() {

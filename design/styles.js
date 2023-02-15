@@ -105,6 +105,41 @@ export const ellipsis = () => css.partial`
   text-overflow: ellipsis;
 `;
 
+export const emptyState = () => css`
+  .empty-state {
+    display: flex;
+    word-wrap: break-word;
+    align-items: center;
+    flex-direction: column;
+    flex-flow: column;
+    justify-content: center;
+    min-height: 260px;
+    padding: 40px 0 0;
+  }
+
+  .empty-state .picture svg {
+    height: 100px;
+    margin: 50px 0;
+  }
+
+  .empty-state h3 {
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  .empty-state p {
+    width: 400px;
+    margin-bottom: 42px;
+    text-align: center;
+    font-size: calc(${fontSizeCode1} + 2px);
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
+  }
+
+  .empty-state ppp-button.large {
+    margin: 24px 0;
+  }
+`;
+
 export const spacing = () => css`
   .spacing1 {
     margin-top: ${spacing1};
@@ -140,6 +175,7 @@ export const typography = () => css`
     font-size: ${fontSizeHeading3};
     line-height: ${lineHeightHeading3};
     font-weight: ${fontWeightHeading3};
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
 
   h5 {
