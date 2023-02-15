@@ -3,7 +3,7 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 6;
+const OFFLINE_VERSION = 7;
 const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
@@ -95,94 +95,10 @@ function removeDecorators(source) {
   return result;
 }
 
-class VersionControl {
-  #interval = 10000;
-
-  #channel = new BroadcastChannel('ppp');
-
-  currentVersion;
-
-  lastVersion;
-
-  rootUrl = location.origin;
-
-  updateNeeded() {
-    if (
-      typeof this.lastVersion !== 'string' ||
-      typeof this.currentVersion !== 'string'
-    ) {
-      return false;
-    }
-
-    if (this.currentVersion === '') this.currentVersion = '1.0.0';
-
-    const lastVersion = this.lastVersion.split(/\./g);
-    const currentVersion = this.currentVersion.split(/\./g);
-
-    while (lastVersion.length || currentVersion.length) {
-      const l = parseInt(lastVersion.shift());
-      const c = parseInt(currentVersion.shift());
-
-      if (l === c) continue;
-
-      return l > c || isNaN(c);
-    }
-
-    return false;
-  }
-
-  constructor() {
-    if (this.rootUrl.endsWith('.github.io')) this.rootUrl += '/ppp';
-
-    this.checkLoop();
-  }
-
-  checkLoop() {
-    if (typeof this.currentVersion === 'undefined') {
-      this.#channel.postMessage({
-        type: 'version-request'
-      });
-    }
-
-    fetch(new URL('package.json', this.rootUrl).toString(), {
-      cache: 'no-store'
-    })
-      .then((response) => response.json())
-      .then((pkg) => {
-        this.lastVersion = pkg.version;
-
-        const updateNeeded = this.updateNeeded();
-
-        if (updateNeeded) {
-          this.#channel.postMessage({
-            type: 'update-available',
-            currentVersion: this.currentVersion,
-            lastVersion: this.lastVersion
-          });
-        }
-
-        setTimeout(() => this.checkLoop(), this.#interval);
-      })
-      .catch((e) => {
-        console.error(e);
-
-        setTimeout(() => this.checkLoop(), this.#interval * 2);
-      });
-  }
-}
-
-self.vc = new VersionControl();
-
 self.onmessage = (event) => {
   // For hard resets
   if (event.data === 'reclaim') {
     return self.clients.claim();
-  } else {
-    const { data } = event;
-
-    if (data.type === 'version') {
-      self.vc.currentVersion = data.version;
-    }
   }
 };
 
