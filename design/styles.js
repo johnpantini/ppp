@@ -1,4 +1,4 @@
-import { css } from '../../vendor/fast-element.min.js';
+import { css } from '../vendor/fast-element.min.js';
 import {
   themeConditional,
   scrollBarSize,
