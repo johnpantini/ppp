@@ -430,7 +430,7 @@ export class App extends PPPElement {
       );
     }
 
-    fetch(new URL('package.json', ppp.rootUrl).toString(), {
+    fetch(`${ppp.rootUrl}/package.json`, {
       cache: 'no-store'
     })
       .then((response) => response.json())
