@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <script>
       let darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
       const savedDarkMode = localStorage.getItem('ppp-dark-mode');
 
-      if (typeof savedDarkMode === 'string') darkMode = savedDarkMode === '1';
+      if (typeof savedDarkMode === 'string') {
+        if (savedDarkMode === '0') darkMode = false;
+        else if (savedDarkMode === '1') darkMode = true;
+      } else {
+        localStorage.setItem('ppp-dark-mode', '2');
+      }
 
       let criticalCss = `:root {
         --critical-default-color: #FFFFFF;

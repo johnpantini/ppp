@@ -60,8 +60,13 @@ class PPP {
 
     const savedDarkMode = localStorage.getItem('ppp-dark-mode');
 
-    if (typeof savedDarkMode === 'string')
-      this.darkMode = savedDarkMode === '1';
+    if (typeof savedDarkMode === 'string') {
+      if (savedDarkMode === '0') this.darkMode = false;
+      else if (savedDarkMode === '1') this.darkMode = true;
+      else localStorage.setItem('ppp-dark-mode', '2');
+    } else {
+      localStorage.setItem('ppp-dark-mode', '2');
+    }
 
     this.appType = appType;
     this.rootUrl = window.location.origin;
@@ -174,7 +179,24 @@ class PPP {
         this.workspaces = evalRequest.workspaces ?? [];
         this.extensions = evalRequest.extensions ?? [];
         this.settings = evalRequest.settings ?? {};
-        this.darkMode = this.settings.darkMode ?? this.darkMode;
+
+        const storedDarkMode = this.settings.darkMode;
+
+        if (storedDarkMode === '1') {
+          this.darkMode = true;
+
+          localStorage.setItem('ppp-dark-mode', '1');
+        } else if (storedDarkMode === '0') {
+          this.darkMode = false;
+
+          localStorage.setItem('ppp-dark-mode', '0');
+        } else if (storedDarkMode === '2') {
+          this.darkMode = window.matchMedia(
+            '(prefers-color-scheme: dark)'
+          ).matches;
+
+          localStorage.setItem('ppp-dark-mode', '2');
+        }
 
         if (this.locales.indexOf(this.settings.locale) > -1) {
           this.locale = this.settings.locale;
@@ -183,7 +205,6 @@ class PPP {
         await this.#rebuildDictionary();
 
         localStorage.setItem('ppp-locale', this.locale);
-        localStorage.setItem('ppp-dark-mode', this.darkMode ? '1' : '0');
       } catch (e) {
         console.error(e);
 
