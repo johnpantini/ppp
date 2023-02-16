@@ -166,31 +166,36 @@ export const appTemplate = html`
               <span slot="title">Установить сервис</span>
             </ppp-side-nav-item>
           </ppp-side-nav-group>
-          <ppp-side-nav-group>
-            <span slot="start"> ${html`${html.partial(extensions)}`} </span>
-            <span slot="title">Дополнения</span>
-            ${repeat(
-              () => ppp.extensions,
-              html`
-                <ppp-side-nav-item
-                  @click="${(x, c) => {
-                    c.parent.extension = x._id;
+          ${when(
+            () => ppp.extensions.length,
+            html`
+              <ppp-side-nav-group>
+                <span slot="start"> ${html`${html.partial(extensions)}`} </span>
+                <span slot="title">Дополнения</span>
+                ${repeat(
+                  () => ppp.extensions,
+                  html`
+                    <ppp-side-nav-item
+                      @click="${(x, c) => {
+                        c.parent.extension = x._id;
 
-                    c.parent.navigate({
-                      page: x.page,
-                      extension: x._id
-                    });
-                  }} }"
-                  ?active="${(x, c) => c.parent.extension === x._id}"
-                  slot="items"
-                >
-                  <span slot="title" title="${(x) => x.title}">
-                    ${(x) => x.title}
-                  </span>
-                </ppp-side-nav-item>
-              `
-            )}
-          </ppp-side-nav-group>
+                        c.parent.navigate({
+                          page: x.page,
+                          extension: x._id
+                        });
+                      }} }"
+                      ?active="${(x, c) => c.parent.extension === x._id}"
+                      slot="items"
+                    >
+                      <span slot="title" title="${(x) => x.title}">
+                        ${(x) => x.title}
+                      </span>
+                    </ppp-side-nav-item>
+                  `
+                )}
+              </ppp-side-nav-group>
+            `
+          )}
           <ppp-side-nav-group>
             <span slot="start"> ${html`${html.partial(connections)}`} </span>
             <span slot="title">Подключения</span>
