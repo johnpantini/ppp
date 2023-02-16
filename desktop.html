@@ -9,9 +9,32 @@
 
       if (typeof savedDarkMode === 'string') darkMode = savedDarkMode === '1';
 
+      let criticalCss = `:root {
+        --critical-default-color: #FFFFFF;
+        --critical-default-inverse-color: #21313C;
+        --critical-border-color: #889397;
+        --success-color: #00ED64;
+        --danger-color: #DB3030;
+      }`;
+
+      if (darkMode) {
+        criticalCss = `:root {
+          --critical-default-color: #21313C;
+          --critical-default-inverse-color: #FFFFFF;
+          --critical-border-color: #889397;
+          --success-color: #00ED64;
+          --danger-color: #DB3030;
+        }`;
+      }
+
       document.head.insertAdjacentHTML(
         'afterbegin',
         `<style>
+          ${
+            localStorage.getItem(
+              `ppp-${darkMode ? 'dark' : 'light'}-critical-css`
+            ) || criticalCss
+          }
         </style>`
       );
     </script>
@@ -42,6 +65,7 @@
         overflow: hidden auto;
         scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.3);
         scrollbar-width: thin;
+        background-color: var(--critical-default-color);
       }
 
       body {
@@ -61,11 +85,11 @@
         padding: 0 12px;
         font-size: 14px;
         font-weight: normal;
-        border: 1px solid #89979b;
         z-index: 1;
         outline: none;
-        color: #061621;
-        background-color: rgb(255, 255, 255);
+        color: var(--critical-default-inverse-color);
+        border: 1px solid var(--critical-border-color);
+        background-color: var(--critical-default-color);
         font-family: -apple-system, BlinkMacSystemFont, Roboto, Segoe UI,
           'Trebuchet MS', Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue,
           Icons16, sans-serif;
@@ -74,6 +98,7 @@
 
       .loading-text {
         display: flex;
+        color: var(--danger-color);
         font-size: 18px;
         font-family: -apple-system, BlinkMacSystemFont, Roboto, Segoe UI,
           'Trebuchet MS', Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue,
@@ -106,9 +131,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="application-name" content="PPP" />
     <meta name="apple-mobile-web-app-title" content="PPP Console" />
-    <meta name="msapplication-TileColor" content="#131722" />
-    <meta name="theme-color" content="#131722" />
-    <meta name="msapplication-navbutton-color" content="#131722" />
+    <meta name="msapplication-TileColor" content="#21313C" />
+    <meta name="theme-color" content="#21313C" />
+    <meta name="msapplication-navbutton-color" content="#21313C" />
     <meta name="msapplication-starturl" content="/" />
     <meta
       name="viewport"
@@ -136,8 +161,8 @@
         width: 10px;
         height: 10px;
         border-radius: 50%;
-        border: 1px solid #89979b;
-        background-color: #00ed64;
+        border: 1px solid var(--critical-border-color);
+        background-color: var(--success-color);
         animation-timing-function: cubic-bezier(0, 1, 1, 0);
       }
 
@@ -162,7 +187,7 @@
       }
 
       :host(.error) .loader-holder div {
-        background-color: #db3030;
+        background-color: var(--danger-color);
         animation: none;
       }
 
