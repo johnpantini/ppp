@@ -76,6 +76,29 @@ export const pageStyles = css`
   ${normalize()}
   ${spacing()}
   ${typography()}
+  :host(.page) {
+    position: relative;
+    height: 100%;
+  }
+
+  :host(.page) ppp-loader {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+
+  :host(.page.loader-visible) ppp-loader {
+    display: flex;
+  }
+
+  :host(.page.loader-visible) form {
+    opacity: 0.5;
+    pointer-events: none;
+    user-select: none;
+  }
+
   footer,
   section {
     display: flex;
@@ -180,14 +203,6 @@ class Page extends PPPElement {
   @attr
   status;
 
-  constructor() {
-    super();
-
-    this.status = PAGE_STATUS.NOT_READY;
-    this.scratch = new ScratchMap(this);
-    this.document = {};
-  }
-
   #keypressHandler(e) {
     switch (e.code) {
       case 'Enter':
@@ -209,7 +224,15 @@ class Page extends PPPElement {
     }
   }
 
-  connectedCallback() {
+  constructor() {
+    super();
+
+    this.status = PAGE_STATUS.NOT_READY;
+    this.scratch = new ScratchMap(this);
+    this.document = {};
+  }
+
+  async connectedCallback() {
     super.connectedCallback();
 
     this.form = this.shadowRoot.querySelector('form[novalidate]');
@@ -230,9 +253,8 @@ class Page extends PPPElement {
     }
 
     if (!this.hasAttribute('disable-auto-read')) {
-      void this.readDocument();
+      return this.readDocument();
     } else {
-      this.ready = true;
       this.status = PAGE_STATUS.READY;
     }
   }
@@ -241,6 +263,18 @@ class Page extends PPPElement {
     super.disconnectedCallback();
 
     this.removeEventListener('keypress', this.#keypressHandler);
+  }
+
+  generateClasses() {
+    const result = ['page'];
+
+    if (
+      this.status === PAGE_STATUS.NOT_READY ||
+      this.status === PAGE_STATUS.OPERATION_STARTED
+    )
+      result.push('loader-visible');
+
+    return result.join(' ');
   }
 
   async documentId() {
