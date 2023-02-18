@@ -25,7 +25,7 @@ export default {
   fontWeightHeading6: 700,
   // Base colors
   paletteWhite: '#FFFFFF',
-  paletteBlack: '#21313C',
+  paletteBlack: '#001E2B',
   // Gray
   paletteGrayBase: '#889397',
   paletteGrayLight1: '#C1C7C6',
