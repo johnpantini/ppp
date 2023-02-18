@@ -90,7 +90,7 @@ export const toastTemplate = html`
           class="close"
           tabindex="0"
         >
-          <div class="close-icon">${html`${html.partial(close)}`}</div>
+          <div class="close-icon">${html.partial(close)}</div>
         </button>
       `
     )}

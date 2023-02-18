@@ -107,7 +107,7 @@ export const textFieldTemplate = html`
       ${when((x) => x.appearance === 'default', html`${endSlotTemplate()}`)}
       ${when(
         (x) => x.appearance === 'error' && x.errorMessage,
-        html` <div class="end">${html`${html.partial(warning)}`}</div> `
+        html` <div class="end">${html.partial(warning)}</div> `
       )}
       ${when(
         (x) => x.optional,
@@ -122,9 +122,7 @@ export const textFieldTemplate = html`
       ${when(
         (x) => x.appearance === 'valid',
         html` <div class="end">
-          ${html`${html.partial(
-            ppp.darkMode ? checkmarkWithCircle : checkmark
-          )}`}
+          ${html.partial(ppp.darkMode ? checkmarkWithCircle : checkmark)}
         </div>`
       )}
     </div>

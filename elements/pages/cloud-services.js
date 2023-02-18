@@ -24,9 +24,7 @@ export const cloudServicesPageTemplate = html`
         `
       )}
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(1))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(1))}</div>
         <div class="label-group">
           <h6>Мастер-пароль</h6>
           <p class="description">
@@ -47,9 +45,7 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(2))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(2))}</div>
         <div class="label-group">
           <h6>Сервисная машина</h6>
           <p class="description">
@@ -73,9 +69,7 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(3))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(3))}</div>
         <div class="label-group">
           <h6>Персональный токен GitHub</h6>
           <p class="description">
@@ -100,9 +94,7 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(4))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(4))}</div>
         <div class="label-group">
           <h6>Публичный ключ MongoDB Realm</h6>
           <p class="description">
@@ -127,9 +119,7 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(5))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
         <div class="label-group">
           <h6>Приватный ключ MongoDB Realm</h6>
         </div>
@@ -143,20 +133,17 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(6))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(6))}</div>
         <div class="label-group">
           <h6>Подключение к базе данных MongoDB</h6>
           <p class="description">
-            Опциональное подключение к альтернативной базе данных MongoDB. Чтобы
-            использовать облачную базу приложения MongoDB Realm, не заполняйте
-            поле.
+            Опциональное подключение к альтернативной базе данных MongoDB.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             optional
+            disabled
             type="password"
             placeholder="mongodb://0.0.0.0:27017"
             value="${() => ppp.keyVault.getKey('mongo-connection-uri')}"
@@ -165,9 +152,7 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <section>
-        <div class="section-index-icon">
-          ${html`${html.partial(numberedCircle(7))}`}
-        </div>
+        <div class="section-index-icon">${html.partial(numberedCircle(7))}</div>
         <div class="label-group">
           <h6>Сервер MongoDB Realm</h6>
           <p class="description">
@@ -177,6 +162,7 @@ export const cloudServicesPageTemplate = html`
         <div class="input-group">
           <ppp-text-field
             optional
+            disabled
             type="url"
             placeholder="http://0.0.0.0:14444"
             value="${() => ppp.keyVault.getKey('mongo-realm-url')}"

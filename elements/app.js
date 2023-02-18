@@ -52,7 +52,7 @@ export const appTemplate = html`
             @click="${(x) => x.handleNewWorkspaceClick()}"
           >
             <span slot="start" class="action-icon">
-              ${html`${html.partial(plus)}`}
+              ${html.partial(plus)}
             </span>
             <span slot="title">Новый терминал</span>
           </ppp-side-nav-item>
@@ -60,7 +60,7 @@ export const appTemplate = html`
             () => ppp.workspaces.length,
             html`
               <ppp-side-nav-group>
-                <span slot="start"> ${html`${html.partial(workspaces)}`} </span>
+                <span slot="start"> ${html.partial(workspaces)} </span>
                 ${when(
                   (x) => x.page === 'workspace',
                   html` <code
@@ -103,7 +103,7 @@ export const appTemplate = html`
             `
           )}
           <ppp-side-nav-group>
-            <span slot="start"> ${html`${html.partial(trading)}`} </span>
+            <span slot="start"> ${html.partial(trading)} </span>
             <span slot="title">Торговля</span>
             <ppp-side-nav-item
               ?disabled="${() => !ppp.keyVault.ok()}"
@@ -140,7 +140,7 @@ export const appTemplate = html`
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
-            <span slot="start"> ${html`${html.partial(services)}`} </span>
+            <span slot="start"> ${html.partial(services)} </span>
             <span slot="title">Сервисы</span>
             <ppp-side-nav-item
               ?disabled="${() => !ppp.keyVault.ok()}"
@@ -170,7 +170,7 @@ export const appTemplate = html`
             () => ppp.extensions.length,
             html`
               <ppp-side-nav-group>
-                <span slot="start"> ${html`${html.partial(extensions)}`} </span>
+                <span slot="start"> ${html.partial(extensions)} </span>
                 <span slot="title">Дополнения</span>
                 ${repeat(
                   () => ppp.extensions,
@@ -197,7 +197,7 @@ export const appTemplate = html`
             `
           )}
           <ppp-side-nav-group>
-            <span slot="start"> ${html`${html.partial(connections)}`} </span>
+            <span slot="start"> ${html.partial(connections)} </span>
             <span slot="title">Подключения</span>
             <ppp-side-nav-item
               ?disabled="${() => !ppp.keyVault.ok()}"
@@ -267,7 +267,7 @@ export const appTemplate = html`
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
-            <span slot="start"> ${html`${html.partial(settings)}`} </span>
+            <span slot="start"> ${html.partial(settings)} </span>
             <span slot="title">Конфигурация</span>
             <ppp-side-nav-item
               ?active="${(x) => x.page === 'cloud-services'}"
@@ -303,7 +303,7 @@ export const appTemplate = html`
             </ppp-side-nav-item>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
-            <span slot="start"> ${html`${html.partial(cloud)}`} </span>
+            <span slot="start"> ${html.partial(cloud)} </span>
             <span slot="title">Обновление</span>
             <ppp-side-nav-item
               ?disabled="${(x) => !ppp.keyVault.ok()}"

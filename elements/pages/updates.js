@@ -16,15 +16,16 @@ import '../text-field.js';
 import '../button.js';
 
 export const updatesPageTemplate = html`
-  <template>
+  <template class="${(x) => x.generateClasses()}">
+    <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>Центр обновлений</ppp-page-header>
       ${when(
         (x) =>
           x.currentCommit?.sha && x.currentCommit?.sha === x.targetCommit?.sha,
         html` <div class="empty-state">
-          ${html` <div class="picture">${html.partial(framedCloud)}</div>`}
-          <h3>Приложение обновлено до последней версии</h3>
+          <div class="picture">${html.partial(framedCloud)}</div>
+          <h3>Репозиторий приложения синхронизирован с последней версией</h3>
           <p class="body1">
             Текущая версия приложения:
             ${() => localStorage.getItem('ppp-version') ?? '1.0.0'}
@@ -58,10 +59,10 @@ export class UpdatesPage extends Page {
   @observable
   currentCommit;
 
-  connectedCallback() {
-    super.connectedCallback();
+  async connectedCallback() {
+    await super.connectedCallback();
 
-    void this.checkForUpdates();
+    return this.checkForUpdates();
   }
 
   async checkForUpdates() {
@@ -209,7 +210,7 @@ export class UpdatesPage extends Page {
       this.updateComplete = true;
 
       this.succeedOperation(
-        'Обновление успешно выполнено, обновите страницу. Изменения будут применены в течение нескольких минут'
+        'Приложение синхронизировано с последней версией. Когда обновление будет готово, вы получите уведомление.'
       );
     } catch (e) {
       this.failOperation(e);
