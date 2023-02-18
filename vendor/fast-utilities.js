@@ -1,11 +1,14 @@
+import {
+  AttributeConfiguration,
+  InlineTemplateDirective
+} from './fast-element.min.js';
+
 /**
  * Retrieves the "composed parent" element of a node, ignoring DOM tree boundaries.
  * When the parent of a node is a shadow-root, it will return the host
  * element of the shadow root. Otherwise, it will return the parent node or null if
  * no parent node exists.
  * @param element - The element for which to retrieve the composed parent
- *
- * @public
  */
 export function composedParent(element) {
   const parentNode = element.parentElement;
@@ -32,8 +35,6 @@ export function composedParent(element) {
  * a shadow DOM that is a logical descendent of the reference. Otherwise returns false.
  * @param reference - The element to test for containment against.
  * @param test - The element being tested for containment.
- *
- * @public
  */
 export function composedContains(reference, test) {
   let current = test;
@@ -49,14 +50,8 @@ export function composedContains(reference, test) {
   return false;
 }
 
-import {
-  AttributeConfiguration,
-  InlineTemplateDirective
-} from './fast-element.min.js';
-
 /**
  * Apply mixins to a constructor.
- * @public
  */
 export function applyMixins(derivedCtor, ...baseCtors) {
   const derivedAttributes = AttributeConfiguration.locate(derivedCtor);
@@ -118,7 +113,6 @@ export const hidden = `:host([hidden]){display:none}`;
 
 /**
  * A CSS fragment to set `visibility:hidden;` to all undefined children.
- * @public
  */
 export const notDefined = '*:not(:defined){visibility:hidden;}';
 
@@ -126,7 +120,6 @@ export const notDefined = '*:not(:defined){visibility:hidden;}';
  * Applies a CSS display property.
  * Also adds CSS rules to not display the element when the [hidden] attribute is applied to the element.
  * @param displayValue - The CSS display property value
- * @public
  */
 export function display(displayValue) {
   return `${notDefined}${hidden}:host{display:${displayValue}}`;
@@ -134,7 +127,6 @@ export function display(displayValue) {
 
 /**
  * A function to compose template options.
- * @public
  */
 export function staticallyCompose(item) {
   if (!item) {
@@ -151,3 +143,85 @@ export function staticallyCompose(item) {
 
   return item;
 }
+
+/**
+ * Standard orientation values
+ */
+export const Orientation = {
+  horizontal: 'horizontal',
+  vertical: 'vertical'
+};
+
+export var Direction;
+(function (Direction) {
+  Direction['ltr'] = 'ltr';
+  Direction['rtl'] = 'rtl';
+})(Direction || (Direction = {}));
+
+/**
+ * Determines the current localization direction of an element.
+ *
+ * @param rootNode - the HTMLElement to begin the query from, usually "this" when used in a component controller
+ * @returns the localization direction of the element
+ */
+export const getDirection = (rootNode) => {
+  return rootNode.closest('[dir]')?.dir === 'rtl'
+    ? Direction.rtl
+    : Direction.ltr;
+};
+
+/**
+ * String values for use with KeyboardEvent.key
+ */
+export const keyAlt = 'Alt';
+export const keyAltGraph = 'AltGraph';
+export const keyCapsLock = 'CapsLock';
+export const keyControl = 'Control';
+export const keyArrowDown = 'ArrowDown';
+export const keyArrowLeft = 'ArrowLeft';
+export const keyArrowRight = 'ArrowRight';
+export const keyArrowUp = 'ArrowUp';
+export const keyBackspace = 'Backspace';
+export const keyDelete = 'Delete';
+export const keyEnd = 'End';
+export const keyEnter = 'Enter';
+export const keyEscape = 'Escape';
+export const keyHome = 'Home';
+export const keyFunction = 'Fn';
+export const keyFunctionLock = 'FnLock';
+export const keyFunction2 = 'F2';
+export const keyFunction3 = 'F3';
+export const keyFunction4 = 'F4';
+export const keyFunction5 = 'F5';
+export const keyFunction6 = 'F6';
+export const keyFunction7 = 'F7';
+export const keyFunction8 = 'F8';
+export const keyFunction9 = 'F9';
+export const keyFunction10 = 'F10';
+export const keyFunction11 = 'F11';
+export const keyFunction12 = 'F12';
+export const keyFunction13 = 'F13';
+export const keyFunction14 = 'F14';
+export const keyFunction15 = 'F15';
+export const keyNumLock = 'NumLock';
+export const keyPageDown = 'PageDown';
+export const keyPageUp = 'PageUp';
+export const keyScrollLock = 'ScrollLock';
+export const keyShift = 'Shift';
+export const keySpace = ' ';
+export const keyTab = 'Tab';
+export const ArrowKeys = {
+  ArrowDown: keyArrowDown,
+  ArrowLeft: keyArrowLeft,
+  ArrowRight: keyArrowRight,
+  ArrowUp: keyArrowUp
+};
+
+/**
+ * Filters out any whitespace-only nodes, to be used inside a template.
+ *
+ * @param value - The Node that is being inspected
+ * @returns true if the node is not a whitespace-only node, false otherwise
+ */
+export const whitespaceFilter = (value) =>
+  value.nodeType !== Node.TEXT_NODE || !!value.nodeValue?.trim().length;
