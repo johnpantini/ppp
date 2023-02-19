@@ -171,6 +171,20 @@ export const pageStyles = css`
     padding-bottom: ${spacing1};
     padding-right: 20px;
   }
+
+  :host([slot="body"]) section {
+    padding: 24px 0;
+    margin: 0 36px;
+  }
+
+  :host([slot="body"]) footer {
+    padding: 24px 36px 36px;
+  }
+
+  :host section:last-of-type {
+    border-bottom: none;
+    padding-bottom: unset;
+  }
 `;
 
 class ScratchMap extends Map {
