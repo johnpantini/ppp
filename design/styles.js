@@ -66,6 +66,18 @@ export const normalize = () => css`
   label {
     margin: unset;
   }
+
+  :-webkit-any-link {
+    color: currentColor;
+  }
+
+  :-moz-any-link {
+    color: currentColor;
+  }
+
+  :any-link {
+    color: currentColor;
+  }
 `;
 
 export const scrollbars = (selector = '') => css`
