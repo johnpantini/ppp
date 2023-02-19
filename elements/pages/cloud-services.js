@@ -4,7 +4,9 @@ import { Page, pageStyles } from '../page.js';
 import { numberedCircle } from '../../static/svg/sprite.js';
 import '../banner.js';
 import '../copyable.js';
+import '../modal.js';
 import '../text-field.js';
+import '../pages/import-cloud-keys-modal.js';
 
 export const cloudServicesPageTemplate = html`
   <template>
@@ -21,6 +23,37 @@ export const cloudServicesPageTemplate = html`
           <ppp-copyable>
             ${(x) => x.generateCloudCredentialsString()}
           </ppp-copyable>
+        `
+      )}
+      ${when(
+        () => !ppp.keyVault.ok(),
+        html`
+          <ppp-modal
+            ${ref('importCloudKeysModal')}
+            class="large"
+            hidden
+            dismissible
+          >
+            <span slot="title">Импорт ключей</span>
+            <div slot="description">
+              Чтобы импортировать ключи, приготовьте мастер-пароль и компактное
+              представление из ранее настроенного приложения.
+            </div>
+            <ppp-import-cloud-keys-modal-page
+              slot="body"
+              :parent="${(x) => x}"
+            ></ppp-import-cloud-keys-modal-page>
+          </ppp-modal>
+          <ppp-banner class="inline" appearance="warning">
+            Сохраните заново или
+            <a
+              @click="${(x) =>
+                x.importCloudKeysModal.removeAttribute('hidden')}"
+              href="javascript:void(0)"
+              >импортируйте</a
+            >
+            ключи облачных сервисов.
+          </ppp-banner>
         `
       )}
       <section>
@@ -170,6 +203,15 @@ export const cloudServicesPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      <footer>
+        <ppp-button
+          type="submit"
+          appearance="primary"
+          @click="${(x) => x.saveDocument()}"
+        >
+          Сохранить пароль и ключи
+        </ppp-button>
+      </footer>
     </form>
   </template>
 `;
