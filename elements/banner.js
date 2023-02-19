@@ -9,7 +9,8 @@ import {
   warning
 } from '../static/svg/sprite.js';
 import {
-  bodyFont, fontWeightBody1,
+  bodyFont,
+  fontWeightBody1,
   paletteBlueBase,
   paletteBlueDark2,
   paletteBlueDark3,
@@ -33,8 +34,8 @@ import {
   paletteYellowDark3,
   paletteYellowLight2,
   paletteYellowLight3,
-  themeConditional,
-} from '../design/design-tokens.js'
+  themeConditional
+} from '../design/design-tokens.js';
 
 export const bannerTemplate = html`
   <template role="alert">
