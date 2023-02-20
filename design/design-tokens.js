@@ -17,9 +17,10 @@ export const createThemed = (name) => {
     }`;
 
     const dt = create(name).withDefault(defaultTheme[propName]);
+    const themeSetting = ppp.settings.get(themePropName);
 
-    if (typeof ppp.settings[themePropName] !== 'undefined') {
-      dt.setValueFor(ppp.designSystemCanvas, ppp.settings[themePropName]);
+    if (typeof themeSetting !== 'undefined') {
+      dt.setValueFor(ppp.designSystemCanvas, themeSetting);
     }
 
     designTokens.set(name, dt);

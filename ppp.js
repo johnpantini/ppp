@@ -1,6 +1,6 @@
 /** @decorator */
 
-import { observable, html } from './vendor/fast-element.min.js';
+import { observable, html, Observable } from './vendor/fast-element.min.js';
 import { DesignToken } from './design/design-token.js';
 import { KeyVault } from './lib/key-vault.js';
 import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
@@ -18,6 +18,45 @@ import { APIS, TRADERS } from './lib/const.js';
     template: html` <slot></slot> `
   })
   .define());
+
+class SettingsMap extends Map {
+  #observable;
+
+  constructor(observable) {
+    super();
+
+    this.#observable = observable;
+  }
+
+  load(key, value) {
+    return super.set(key, value);
+  }
+
+  set(key, value) {
+    super.set(key, value);
+
+    Observable.notify(this.#observable, 'settings');
+
+    if (ppp.keyVault?.ok()) {
+      return ppp.user.functions.updateOne(
+        {
+          collection: 'app'
+        },
+        {
+          _id: '@settings'
+        },
+        {
+          $set: {
+            [key]: value
+          }
+        },
+        {
+          upsert: true
+        }
+      );
+    }
+  }
+}
 
 class PPP {
   @observable
@@ -50,7 +89,7 @@ class PPP {
 
     this.workspaces = [];
     this.extensions = [];
-    this.settings = {};
+    this.settings = new SettingsMap(this);
 
     this.designSystemCanvas = document.querySelector(
       'ppp-design-system-canvas'
@@ -178,9 +217,14 @@ class PPP {
 
         this.workspaces = evalRequest.workspaces ?? [];
         this.extensions = evalRequest.extensions ?? [];
-        this.settings = evalRequest.settings ?? {};
 
-        const storedDarkMode = this.settings.darkMode;
+        for (const key in evalRequest.settings ?? {}) {
+          if (key !== '_id') {
+            this.settings.load(key, evalRequest.settings?.[key]);
+          }
+        }
+
+        const storedDarkMode = this.settings.get('darkMode');
 
         if (storedDarkMode === '1') {
           this.darkMode = true;
@@ -198,8 +242,10 @@ class PPP {
           localStorage.setItem('ppp-dark-mode', '2');
         }
 
-        if (this.locales.indexOf(this.settings.locale) > -1) {
-          this.locale = this.settings.locale;
+        const locale = this.settings.get('locale');
+
+        if (this.locales.indexOf(locale) > -1) {
+          this.locale = locale;
         }
 
         await this.#rebuildDictionary();

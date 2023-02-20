@@ -53,7 +53,7 @@ export class SettingsPage extends Page {
   }
 
   async read() {
-    return ppp.settings;
+    return Object.fromEntries(ppp.settings);
   }
 }
 

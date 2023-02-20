@@ -65,7 +65,6 @@ export class TopLoader extends PPPElement {
 
     this.queue &&
       this.queue(function (next) {
-        // Update percentage
         self.classList.add('visible');
         self.bar.setAttribute(
           'style',

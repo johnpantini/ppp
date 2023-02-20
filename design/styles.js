@@ -34,8 +34,8 @@ import {
   fontSizeHeading5,
   lineHeightHeading5,
   fontWeightHeading5,
-  linkColor
-} from './design-tokens.js';
+  linkColor, paletteWhite, paletteGrayDark3
+} from './design-tokens.js'
 
 export const normalize = () => css`
   *:not(:defined) {
@@ -117,6 +117,26 @@ export const ellipsis = () => css.partial`
   text-overflow: ellipsis;
 `;
 
+export const hotkey = () => css`
+  .hotkey {
+    user-select: none;
+    cursor: pointer;
+    font-family: ${monospaceFont};
+    border: 1px solid ${themeConditional(paletteGrayDark3, paletteGrayBase)};
+    border-radius: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
+    background-color: ${themeConditional(paletteWhite, paletteGrayDark3)};
+    font-size: ${fontSizeCode1};
+    line-height: ${lineHeightCode1};
+  }
+
+  .hotkey:hover {
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+  }
+`;
+
 export const emptyState = () => css`
   .empty-state {
     display: flex;
@@ -143,7 +163,7 @@ export const emptyState = () => css`
     width: 400px;
     margin-bottom: 42px;
     text-align: center;
-    font-size: calc(${fontSizeCode1} + 2px);
+    font-size: calc(${fontSizeBody1} + 2px);
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
   }
 

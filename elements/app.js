@@ -13,13 +13,12 @@ import {
 } from '../vendor/fast-element.min.js';
 import {
   bodyFont,
-  monospaceFont,
   paletteBlack,
   paletteWhite,
   themeConditional
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
-import { normalize } from '../design/styles.js';
+import { hotkey, normalize } from '../design/styles.js';
 import {
   workspaces,
   trading,
@@ -41,9 +40,10 @@ export const appTemplate = html`
         <ppp-side-nav
           ${ref('sideNav')}
           expandable
-          ?expanded="${() => !ppp.settings.sideNavCollapsed}"
+          ?expanded="${() => !ppp.settings.get('sideNavCollapsed')}"
           style="${(x) =>
-            (ppp.settings.sideNavVisible ?? true) || x.page !== 'workspace'
+            (ppp.settings.get('sideNavVisible') ?? true) ||
+            x.page !== 'workspace'
               ? 'display: flex'
               : 'display: none'}"
         >
@@ -345,6 +345,7 @@ export const appTemplate = html`
 export const appStyles = css`
   ${display('flex')}
   ${normalize()}
+  ${hotkey()}
   :host {
     position: relative;
     font-family: ${bodyFont};
@@ -364,6 +365,7 @@ export const appStyles = css`
 
   .app-container,
   .page-content {
+    position: relative;
     display: flex;
     flex-grow: 1;
   }
@@ -374,8 +376,10 @@ export const appStyles = css`
   }
 
   .app-loader {
-    position: relative;
-    top: 6px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .page-content:not([workspace]) {
@@ -389,24 +393,6 @@ export const appStyles = css`
   .page-content[workspace] {
     flex-direction: column;
     min-width: 0;
-  }
-
-  .hotkey {
-    user-select: none;
-    font-family: ${monospaceFont};
-    border: 1px solid rgb(28, 45, 56);
-    border-radius: 3px;
-    padding-left: 5px;
-    padding-right: 5px;
-    color: rgb(0, 30, 43);
-    background-color: rgb(255, 255, 255);
-    font-size: 15px;
-    line-height: 22px;
-    cursor: pointer;
-  }
-
-  .hotkey:hover {
-    background-color: rgb(228, 244, 228);
   }
 `;
 

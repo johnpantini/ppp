@@ -360,6 +360,10 @@ class Page extends PPPElement {
           this.document = {};
         }
 
+        if (typeof this.transform === 'function') {
+          this.document = await this.transform(documentId);
+        }
+
         this.status = PAGE_STATUS.READY;
       } catch (e) {
         this.document = {};

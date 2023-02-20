@@ -2,24 +2,66 @@
 
 import ppp from '../../ppp.js';
 import { maybeFetchError } from '../../lib/ppp-errors.js';
-import {
-  html,
-  when,
-  css,
-  ref,
-  observable
-} from '../../vendor/fast-element.min.js';
+import { html, when, css, observable } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { emptyState, typography } from '../../design/styles.js';
 import { framedCloud } from '../../static/svg/sprite.js';
-import '../text-field.js';
+import { formatDate } from '../../lib/intl.js';
+import '../badge.js';
+import '../banner.js';
 import '../button.js';
+import '../text-field.js';
 
 export const updatesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>Центр обновлений</ppp-page-header>
+      ${when(
+        (x) =>
+          x.currentCommit?.sha &&
+          x.targetCommit?.sha &&
+          x.currentCommit?.sha !== x.targetCommit?.sha,
+        html`
+          <ppp-banner class="inline margin-top" appearance="info">
+            Для полного применения обновления может потребоваться несколько
+            минут.
+          </ppp-banner>
+          <section>
+            <div class="label-group">
+              <h6>Текущая версия</h6>
+              <ppp-badge appearance="yellow">
+                ${(x) => x.currentCommit?.sha}
+              </ppp-badge>
+              <p class="description">
+                ${(x) => formatDate(x.currentCommit?.author.date)} MSK
+              </p>
+            </div>
+          </section>
+          <section>
+            <div class="label-group">
+              <h6>Последняя версия</h6>
+              <ppp-badge appearance="green">
+                ${(x) => x.targetCommit?.sha}
+              </ppp-badge>
+              <p class="description">
+                ${(x) => formatDate(x.targetCommit?.author.date)} MSK
+              </p>
+            </div>
+          </section>
+          <section class="last">
+            <div class="footer-actions">
+              <ppp-button
+                type="submit"
+                appearance="primary"
+                @click="${(x) => x.updateApp()}"
+              >
+                Обновить приложение
+              </ppp-button>
+            </div>
+          </section>
+        `
+      )}
       ${when(
         (x) =>
           x.currentCommit?.sha && x.currentCommit?.sha === x.targetCommit?.sha,
@@ -47,6 +89,10 @@ export const updatesPageStyles = css`
   ${pageStyles}
   ${typography()}
   ${emptyState()}
+  ppp-badge,
+  ppp-banner {
+    margin-top: 10px;
+  }
 `;
 
 export class UpdatesPage extends Page {
