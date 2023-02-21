@@ -3,7 +3,8 @@ import defaultTheme from './themes/mongodb.js';
 import ppp from '../ppp.js';
 
 const { create } = DesignToken;
-const designTokens = new Map();
+
+export const designTokens = new Map();
 
 export const createThemed = (name) => {
   const existing = designTokens.get(name);
