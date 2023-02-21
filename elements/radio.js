@@ -71,7 +71,8 @@ export const radioStyles = css`
   }
 
   :host(:focus-visible) .control {
-    border: 1px solid red;
+    border: 2px solid ${themeConditional(paletteGrayDark3, paletteGrayLight2)};
+    border-radius: 100px;
   }
 
   .control {

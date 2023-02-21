@@ -169,11 +169,6 @@ export const textFieldStyles = css`
     padding-bottom: ${spacing1};
   }
 
-  .label:has(slot:empty),
-  .description:has(slot:empty) {
-    padding-bottom: 0;
-  }
-
   .root {
     position: relative;
     display: flex;
@@ -191,6 +186,10 @@ export const textFieldStyles = css`
     position: relative;
     z-index: 0;
     width: 100%;
+  }
+
+  :host([slotted]) input {
+    padding-right: 30px;
   }
 
   :host([optional]) input {

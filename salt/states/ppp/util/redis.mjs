@@ -13,7 +13,7 @@ async function redisCommand(command, args = []) {
             options: {
               host: process.env.REDIS_HOST,
               port: +process.env.REDIS_PORT,
-              tls: !!process.env.REDIS_TLS
+              tls: process.env.REDIS_TLS !== '0'
                 ? {
                     servername: process.env.REDIS_HOST
                   }
