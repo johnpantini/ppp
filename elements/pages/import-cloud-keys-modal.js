@@ -1,11 +1,14 @@
 import ppp from '../../ppp.js';
+import { TAG } from '../../lib/tag.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
+import {validate } from '../../lib/validate.js';
 import { Page, pageStyles } from '../page.js';
 import '../text-field.js';
 import '../button.js';
 
 export const importCloudKeysModalPageTemplate = html`
-  <template>
+  <template class="${(x) => x.generateClasses()}">
+    <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group">
@@ -37,7 +40,7 @@ export const importCloudKeysModalPageTemplate = html`
         <ppp-button
           type="submit"
           appearance="primary"
-          @click="${(x) => x.saveDocument()}"
+          @click="${(x) => x.importKeys()}"
         >
           Импортировать ключи
         </ppp-button>
@@ -50,7 +53,65 @@ export const importCloudKeysModalPageStyles = css`
   ${pageStyles}
 `;
 
-export class ImportCloudKeysModalPage extends Page {}
+export class ImportCloudKeysModalPage extends Page {
+  async importKeys() {
+    this.beginOperation();
+
+    try {
+      await validate(this.masterPasswordForImport);
+      await validate(this.cloudCredentialsData);
+
+      return;
+
+      const { s, u } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
+      const { iv, data } = await (
+        await fetch(new URL('fetch', s).toString(), {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'GET',
+            url: u
+          })
+        })
+      ).json();
+
+      ppp.crypto.resetKey();
+
+      const decryptedCredentials = JSON.parse(
+        await ppp.crypto.decrypt(
+          iv,
+          data,
+          this.masterPasswordForImport.value.trim()
+        )
+      );
+
+      ppp.keyVault.setKey(
+        'master-password',
+        this.masterPasswordForImport.value.trim()
+      );
+
+      Object.keys(decryptedCredentials).forEach((k) => {
+        ppp.keyVault.setKey(k, decryptedCredentials[k]);
+      });
+
+      ppp.keyVault.setKey('service-machine-url', s);
+
+      if (+TAG > +decryptedCredentials.tag) {
+        this.succeedOperation(
+          'Импортированные ключи устарели. Обновите страницу и сохраните их заново'
+        );
+      } else {
+        this.succeedOperation(
+          'Обновите страницу, чтобы пользоваться приложением'
+        );
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+}
 
 export default ImportCloudKeysModalPage.compose({
   template: importCloudKeysModalPageTemplate,

@@ -659,6 +659,15 @@ export class App extends PPPElement {
       return this.navigate({ page: 'cloud-services' });
     }
   }
+
+  getVisibleModal() {
+    return (
+      this.shadowRoot.querySelector('ppp-modal:not([hidden])') ??
+      this.shadowRoot
+        .querySelector(`ppp-${this.page}-page`)
+        .shadowRoot.querySelector('ppp-modal:not([hidden])')
+    );
+  }
 }
 
 export default App.compose({

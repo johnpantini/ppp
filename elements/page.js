@@ -25,8 +25,11 @@ import { PAGE_STATUS } from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
 import { DocumentNotFoundError } from '../lib/ppp-errors.js';
 import './toast.js';
+import { invalidate } from '../lib/validate.js';
 
-(class PageHeader extends PPPElement {}
+await ppp.i18n(import.meta.url);
+
+(class PageHeader extends PPPElement {})
   .compose({
     template: html`
       <h3 class="title">
@@ -39,8 +42,8 @@ import './toast.js';
     styles: css`
       ${display('flex')}
       ${normalize()}
-      ${typography()}
-      :host {
+    ${typography()}
+    :host {
         align-items: center;
         border-bottom: 3px solid
           ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
@@ -70,7 +73,7 @@ import './toast.js';
       }
     `
   })
-  .define());
+  .define();
 
 export const pageStyles = css`
   ${normalize()}
@@ -87,6 +90,7 @@ export const pageStyles = css`
     top: 50%;
     transform: translate(-50%, -50%);
     display: none;
+    z-index: 1;
   }
 
   :host(.page.loader-visible) ppp-loader {
@@ -172,12 +176,12 @@ export const pageStyles = css`
     padding-right: 20px;
   }
 
-  :host([slot="body"]) section {
+  :host([slot='body']) section {
     padding: 24px 0;
     margin: 0 36px;
   }
 
-  :host([slot="body"]) footer {
+  :host([slot='body']) footer {
     padding: 24px 36px 36px;
   }
 
@@ -377,11 +381,33 @@ class Page extends PPPElement {
     }
   }
 
-  beginOperation() {
+  beginOperation(toastTitle) {
+    if (!ppp.app) return;
+
+    if (!toastTitle) {
+      const visibleModal = ppp.app.getVisibleModal();
+
+      if (visibleModal) {
+        toastTitle = visibleModal
+          .querySelector('[slot="title"]')
+          ?.textContent?.trim();
+      } else {
+        toastTitle = ppp.app.shadowRoot
+          .querySelector('.page-content')
+          ?.lastElementChild?.shadowRoot?.querySelector('[slot="header"]')
+          ?.textContent?.trim();
+      }
+    }
+
+    ppp.app.toast.title = toastTitle;
+    ppp.app.toast.text = ppp.t('$operations.operationInProgress');
+
+    ppp.app.toast.setAttribute('hidden', '');
+
     this.status = PAGE_STATUS.OPERATION_STARTED;
   }
 
-  succeedOperation() {
+  succeedOperation(toastText) {
     this.status = PAGE_STATUS.OPERATION_SUCCEEDED;
   }
 
@@ -389,8 +415,76 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.OPERATION_SUCCEEDED;
   }
 
-  failOperation() {
+  failOperation(e) {
+    console.dir(e);
+
     this.status = PAGE_STATUS.OPERATION_FAILED;
+
+    const errorName = e?.errorCode ?? e?.error_code ?? e?.name;
+
+    if (
+      [
+        'EndpointDuplicateKey',
+        'FunctionDuplicateName',
+        'InvalidParameter',
+        'FunctionExecutionError',
+        'OperationError',
+        'MongoDBError',
+        'InvalidCharacterError',
+        'SyntaxError'
+      ].indexOf(errorName) > -1
+    ) {
+      return invalidate(ppp.app.toast, {
+        errorMessage: ppp.t(`$exceptions.${errorName}`, {
+          _: ppp.t('$pppErrors.E_UNKNOWN')
+        })
+      });
+    }
+
+    switch (e?.errorCode ?? e?.error_code ?? e?.name) {
+      case 'ValidationError':
+        return invalidate(ppp.app.toast, {
+          errorMessage:
+            e?.pppMessage ??
+            e?.message ??
+            'Форма заполнена некорректно или не полностью.'
+        });
+      case 'FetchError':
+        return invalidate(ppp.app.toast, {
+          errorMessage: e?.pppMessage ?? e?.message ?? 'Ошибка загрузки.'
+        });
+      case 'NotFoundError':
+        if (typeof this.page.notFound === 'function') this.page.notFound();
+        else this.notFound?.();
+
+        return invalidate(ppp.app.toast, {
+          errorMessage: e?.message ?? 'Документ с таким ID не существует.'
+        });
+      case 'ConflictError':
+        return invalidate(ppp.app.toast, {
+          errorMessage:
+            e?.message ??
+            html`Запись с таким названием уже существует, перейдите по
+              <a href="${e.href}">ссылке</a> для редактирования.`
+        });
+      case 'TypeError':
+        return invalidate(ppp.app.toast, {
+          errorMessage:
+            'Значение имеет не ожидаемый тип. Свяжитесь с разработчиками.'
+        });
+      case 'ReferenceError':
+        return invalidate(ppp.app.toast, {
+          errorMessage:
+            'Обращение к несуществующей переменной. Свяжитесь с разработчиками.'
+        });
+      default:
+        invalidate(ppp.app.toast, {
+          errorMessage:
+            e?.pppMessage ??
+            e?.message ??
+            'Операция не выполнена, подробности в консоли браузера.'
+        });
+    }
   }
 
   async saveDocument() {}

@@ -9,7 +9,7 @@ import '../text-field.js';
 import '../pages/import-cloud-keys-modal.js';
 
 export const cloudServicesPageTemplate = html`
-  <template>
+  <template class="${(x) => x.generateClasses()}">
     <form novalidate>
       <ppp-page-header>Облачные сервисы</ppp-page-header>
       ${when(

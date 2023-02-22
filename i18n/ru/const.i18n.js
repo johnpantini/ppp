@@ -9,7 +9,7 @@ import {
   SERVER_STATE,
   TRADER_CAPS,
   VERSIONING_STATUS
-} from '../../shared/const.js';
+} from '../../lib/const.js';
 
 export default function (i18n) {
   i18n.extend({
