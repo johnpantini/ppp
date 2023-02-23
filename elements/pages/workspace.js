@@ -224,7 +224,7 @@ export class WorkspacePage extends Page {
     };
   }
 
-  async transform() {
+  async transformDocument() {
     const widgets = [];
 
     this.denormalization.fillRefs(this.document);

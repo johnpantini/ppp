@@ -40,7 +40,7 @@ export const importCloudKeysModalPageTemplate = html`
         <ppp-button
           type="submit"
           appearance="primary"
-          @click="${(x) => x.importKeys()}"
+          @click="${(x) => x.submitDocument()}"
         >
           Импортировать ключи
         </ppp-button>

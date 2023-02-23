@@ -207,7 +207,7 @@ export const cloudServicesPageTemplate = html`
         <ppp-button
           type="submit"
           appearance="primary"
-          @click="${(x) => x.saveDocument()}"
+          @click="${(x) => x.submitDocument()}"
         >
           Сохранить пароль и ключи
         </ppp-button>

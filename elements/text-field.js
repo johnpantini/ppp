@@ -393,5 +393,8 @@ applyMixins(TextField, ARIAGlobalStatesAndProperties);
 
 export default TextField.compose({
   template: textFieldTemplate,
-  styles: textFieldStyles
+  styles: textFieldStyles,
+  shadowOptions: {
+    delegatesFocus: true
+  }
 }).define();

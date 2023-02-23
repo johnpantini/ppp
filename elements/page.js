@@ -264,7 +264,7 @@ class Page extends PPPElement {
       );
 
       this.form.onsubmit = () => {
-        void this.saveDocument();
+        void this.submitDocument();
 
         return false;
       };
@@ -364,8 +364,8 @@ class Page extends PPPElement {
           this.document = {};
         }
 
-        if (typeof this.transform === 'function') {
-          this.document = await this.transform(documentId);
+        if (typeof this.transformDocument === 'function') {
+          this.document = await this.transformDocument(documentId);
         }
 
         this.status = PAGE_STATUS.READY;
@@ -431,7 +431,9 @@ class Page extends PPPElement {
         'OperationError',
         'MongoDBError',
         'InvalidCharacterError',
-        'SyntaxError'
+        'SyntaxError',
+        'TypeError',
+        'ReferenceError'
       ].indexOf(errorName) > -1
     ) {
       return invalidate(ppp.app.toast, {
@@ -467,27 +469,17 @@ class Page extends PPPElement {
             html`Запись с таким названием уже существует, перейдите по
               <a href="${e.href}">ссылке</a> для редактирования.`
         });
-      case 'TypeError':
-        return invalidate(ppp.app.toast, {
-          errorMessage:
-            'Значение имеет не ожидаемый тип. Свяжитесь с разработчиками.'
-        });
-      case 'ReferenceError':
-        return invalidate(ppp.app.toast, {
-          errorMessage:
-            'Обращение к несуществующей переменной. Свяжитесь с разработчиками.'
-        });
       default:
         invalidate(ppp.app.toast, {
           errorMessage:
             e?.pppMessage ??
             e?.message ??
-            'Операция не выполнена, подробности в консоли браузера.'
+            ppp.t('$operations.operationFailedDetailsInConsole')
         });
     }
   }
 
-  async saveDocument() {}
+  async submitDocument() {}
 }
 
 export { Page };

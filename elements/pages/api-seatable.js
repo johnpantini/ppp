@@ -50,7 +50,7 @@ export const apiSeatablePageTemplate = html`
         <ppp-button
           type="submit"
           appearance="primary"
-          @click="${(x) => x.saveDocument()}"
+          @click="${(x) => x.submitDocument()}"
         >
           Сохранить изменения
         </ppp-button>
