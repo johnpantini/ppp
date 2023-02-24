@@ -9,6 +9,7 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { PPPElement } from '../../lib/ppp-element.js';
+import { validate } from '../../lib/ppp-errors.js';
 import {
   designTokens,
   paletteGrayBase,
@@ -28,9 +29,8 @@ class PaletteItem extends PPPElement {
 
   dtChanged(oldValue, newValue) {
     if (newValue) {
-      const page = this.closest('form').getRootNode().host;
-
       Updates.enqueue(() => {
+        const page = this.closest('form').getRootNode().host;
         const propName = newValue.replace(/-./g, (x) => x[1].toUpperCase());
         const themePropName = `theme${
           propName[0].toUpperCase() + propName.slice(1)
@@ -38,7 +38,7 @@ class PaletteItem extends PPPElement {
 
         this.control.placeholder = defaultTheme[propName];
         this.control.value =
-          page.document[propName] ?? designTokens.get(newValue).default;
+          page.document[themePropName] ?? designTokens.get(newValue).default;
         this.updateExampleColor();
       });
     }
@@ -87,8 +87,10 @@ export const settingsPageTemplate = html`
       <section>
         <div class="label-group">
           <h5>Палитра</h5>
-          <p class="description">Настройте цветовое оформления приложения
-            самостоятельно или воспользуйтесь готовым шаблоном:</p>
+          <p class="description">
+            Настройте цветовое оформления приложения самостоятельно или
+            воспользуйтесь готовым шаблоном:
+          </p>
         </div>
         <div class="input-group">
           <div class="palette-holder">
@@ -245,7 +247,7 @@ export const settingsPageStyles = css`
   }
 
   .palette-holder ppp-palette-item {
-    width: 120px;
+    width: 140px;
   }
 
   .palette-holder {
@@ -274,7 +276,15 @@ export class SettingsPage extends Page {
   }
 
   async validate() {
-
+    for (const pi of Array.from(
+      this.shadowRoot.querySelectorAll('ppp-palette-item')
+    )) {
+      await validate(pi.control);
+      await validate(pi.control, {
+        hook: async (value) => CSS.supports('color', value),
+        errorMessage: 'Недопустимый цвет'
+      });
+    }
   }
 
   async submit() {

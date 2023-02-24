@@ -23,13 +23,16 @@ import {
 } from '../design/design-tokens.js';
 import { PAGE_STATUS } from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
-import { DocumentNotFoundError } from '../lib/ppp-errors.js';
+import {
+  ConflictError,
+  DocumentNotFoundError,
+  invalidate
+} from '../lib/ppp-errors.js';
 import './toast.js';
-import { invalidate } from '../lib/validate.js';
 
 await ppp.i18n(import.meta.url);
 
-(class PageHeader extends PPPElement {})
+(class PageHeader extends PPPElement {}
   .compose({
     template: html`
       <h3 class="title">
@@ -73,7 +76,7 @@ await ppp.i18n(import.meta.url);
       }
     `
   })
-  .define();
+  .define());
 
 export const pageStyles = css`
   ${normalize()}
@@ -295,6 +298,11 @@ class Page extends PPPElement {
     return result.join(' ');
   }
 
+  async notFound() {
+    this.style.display = 'none';
+    ppp.app.pageNotFound = true;
+  }
+
   async documentId() {
     return (
       this.getAttribute('document-id') ??
@@ -407,12 +415,18 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.OPERATION_STARTED;
   }
 
-  succeedOperation(toastText) {
-    this.status = PAGE_STATUS.OPERATION_SUCCEEDED;
+  showSuccessNotification(toastText = ppp.t('$operations.operationSucceeded')) {
+    if (!toastText.endsWith('.')) toastText += '.';
+
+    ppp.app.toast.appearance = 'success';
+    ppp.app.toast.dismissible = true;
+    ppp.app.toast.text = toastText;
+
+    ppp.app.toast.removeAttribute('hidden');
   }
 
   endOperation() {
-    this.status = PAGE_STATUS.OPERATION_SUCCEEDED;
+    this.status = PAGE_STATUS.OPERATION_ENDED;
   }
 
   failOperation(e) {
@@ -443,30 +457,26 @@ class Page extends PPPElement {
       });
     }
 
-    switch (e?.errorCode ?? e?.error_code ?? e?.name) {
+    switch (errorName) {
       case 'ValidationError':
         return invalidate(ppp.app.toast, {
-          errorMessage:
-            e?.pppMessage ??
-            e?.message ??
-            'Форма заполнена некорректно или не полностью.'
+          errorMessage: e?.message ?? ppp.t('$pppErrors.E_BAD_FORM')
         });
       case 'FetchError':
         return invalidate(ppp.app.toast, {
-          errorMessage: e?.pppMessage ?? e?.message ?? 'Ошибка загрузки.'
+          errorMessage: e?.pppMessage ?? e.message
         });
       case 'NotFoundError':
-        if (typeof this.page.notFound === 'function') this.page.notFound();
-        else this.notFound?.();
+        if (typeof this.notFound === 'function') this.notFound();
 
         return invalidate(ppp.app.toast, {
-          errorMessage: e?.message ?? 'Документ с таким ID не существует.'
+          errorMessage: e.message
         });
       case 'ConflictError':
         return invalidate(ppp.app.toast, {
           errorMessage:
             e?.message ??
-            html`Запись с таким названием уже существует, перейдите по
+            html`Документ с таким названием уже существует, перейдите по
               <a href="${e.href}">ссылке</a> для редактирования.`
         });
       default:
@@ -479,14 +489,17 @@ class Page extends PPPElement {
     }
   }
 
+  async #submitDocument(idClause) {
+
+  }
+
   async submitDocument() {
     this.beginOperation();
 
     try {
       const document = this.document;
 
-      if (typeof this.validate === 'function')
-        await this.validate();
+      if (typeof this.validate === 'function') await this.validate();
 
       const ownId = await this.getDocumentId?.();
 
@@ -495,8 +508,8 @@ class Page extends PPPElement {
         await this.#submitDocument(
           document._id
             ? {
-              _id: document._id
-            }
+                _id: document._id
+              }
             : ownId
         );
       } else {
@@ -525,7 +538,7 @@ class Page extends PPPElement {
         await this.#submitDocument();
       }
 
-      this.succeedOperation();
+      this.showSuccessNotification();
     } catch (e) {
       this.failOperation(e);
     } finally {

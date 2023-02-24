@@ -1,7 +1,7 @@
 import ppp from '../../ppp.js';
 import { TAG } from '../../lib/tag.js';
-import { html, css, ref } from '../../vendor/fast-element.min.js';
-import {validate } from '../../lib/validate.js';
+import { html, css, ref, Observable } from '../../vendor/fast-element.min.js';
+import { validate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import '../button.js';
 import '../text-field.js';
@@ -54,16 +54,38 @@ export const importCloudKeysModalPageStyles = css`
 `;
 
 export class ImportCloudKeysModalPage extends Page {
-  async validate() {
-    await validate(this.masterPasswordForImport);
-    await validate(this.cloudCredentialsData);
+  modalNotifier = {
+    handleChange: (modal, attr) => {
+      if (modal.hasAttribute(attr)) {
+        ppp.app.toast.setAttribute('hidden', '');
+      }
+    }
+  };
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    Observable.getNotifier(this.closest('ppp-modal')).subscribe(
+      this.modalNotifier,
+      'hidden'
+    );
   }
 
-  async submit() {
+  disconnectedCallback() {
+    super.disconnectedCallback();
+
+    Observable.getNotifier(this.closest('ppp-modal')).unsubscribe(
+      this.modalNotifier,
+      'hidden'
+    );
+  }
+
+  async submitDocument() {
     this.beginOperation();
 
     try {
-      return;
+      await validate(this.masterPasswordForImport);
+      await validate(this.cloudCredentialsData);
 
       const { s, u } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
       const { iv, data } = await (
@@ -99,12 +121,12 @@ export class ImportCloudKeysModalPage extends Page {
       ppp.keyVault.setKey('service-machine-url', s);
 
       if (+TAG > +decryptedCredentials.tag) {
-        this.succeedOperation(
-          'Импортированные ключи устарели. Обновите страницу и сохраните их заново'
+        this.showSuccessNotification(
+          'Импортированные ключи устарели. Обновите страницу и сохраните их заново.'
         );
       } else {
-        this.succeedOperation(
-          'Обновите страницу, чтобы пользоваться приложением'
+        this.showSuccessNotification(
+          'Всё в порядке. Обновите страницу, чтобы пользоваться приложением.'
         );
       }
     } catch (e) {

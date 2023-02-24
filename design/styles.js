@@ -149,9 +149,14 @@ export const emptyState = () => css`
     padding: 40px 0 0;
   }
 
+  .empty-state img.picture,
+  .empty-state .picture svg {
+    margin: 50px 0;
+    user-select: none;
+  }
+
   .empty-state .picture svg {
     height: 100px;
-    margin: 50px 0;
   }
 
   .empty-state h3 {
@@ -160,7 +165,7 @@ export const emptyState = () => css`
   }
 
   .empty-state p {
-    width: 400px;
+    max-width: 800px;
     margin-bottom: 42px;
     text-align: center;
     font-size: calc(${fontSizeBody1} + 2px);

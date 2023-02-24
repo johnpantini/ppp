@@ -10,10 +10,10 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
-import '../button.js';
-import '../top-loader.js';
 import { PAGE_STATUS } from '../../lib/const.js';
 import { emptyState, hotkey, typography } from '../../design/styles.js';
+import '../button.js';
+import '../top-loader.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -32,7 +32,6 @@ export const workspacePageTemplate = html`
             height="200"
             src="static/svg/empty-state.svg"
             draggable="false"
-            alt="Этот терминал не настроен"
           />
           <h3>В этом терминале нет виджетов</h3>
           <p>

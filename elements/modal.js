@@ -171,6 +171,9 @@ export const modalStyles = css`
 
 export class Modal extends PPPElement {
   @attr({ mode: 'boolean' })
+  hidden;
+
+  @attr({ mode: 'boolean' })
   dismissible;
 }
 
