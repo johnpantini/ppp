@@ -106,7 +106,7 @@ export class ApiSeatablePage extends Page {
     };
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         name: this.name.value.trim(),

@@ -3,8 +3,8 @@ import { TAG } from '../../lib/tag.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import {validate } from '../../lib/validate.js';
 import { Page, pageStyles } from '../page.js';
-import '../text-field.js';
 import '../button.js';
+import '../text-field.js';
 
 export const importCloudKeysModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -54,13 +54,15 @@ export const importCloudKeysModalPageStyles = css`
 `;
 
 export class ImportCloudKeysModalPage extends Page {
-  async importKeys() {
+  async validate() {
+    await validate(this.masterPasswordForImport);
+    await validate(this.cloudCredentialsData);
+  }
+
+  async submit() {
     this.beginOperation();
 
     try {
-      await validate(this.masterPasswordForImport);
-      await validate(this.cloudCredentialsData);
-
       return;
 
       const { s, u } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));

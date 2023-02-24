@@ -479,7 +479,59 @@ class Page extends PPPElement {
     }
   }
 
-  async submitDocument() {}
+  async submitDocument() {
+    this.beginOperation();
+
+    try {
+      const document = this.document;
+
+      if (typeof this.validate === 'function')
+        await this.validate();
+
+      const ownId = await this.getDocumentId?.();
+
+      if (document._id ?? ownId) {
+        // Update existing document
+        await this.#submitDocument(
+          document._id
+            ? {
+              _id: document._id
+            }
+            : ownId
+        );
+      } else {
+        // Look for existing document, then insert
+        if (typeof this.find === 'function') {
+          const existingDocument = await ppp.user.functions.findOne(
+            {
+              collection: this.collection
+            },
+            await this.find(),
+            {
+              _id: 1
+            }
+          );
+
+          if (existingDocument) {
+            // noinspection ExceptionCaughtLocallyJS
+            throw new ConflictError({
+              href: `?page=${ppp.app.params().page}&document=${
+                existingDocument._id
+              }`
+            });
+          }
+        }
+
+        await this.#submitDocument();
+      }
+
+      this.succeedOperation();
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
 }
 
 export { Page };

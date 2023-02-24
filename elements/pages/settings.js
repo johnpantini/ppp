@@ -277,7 +277,7 @@ export class SettingsPage extends Page {
 
   }
 
-  async update() {
+  async submit() {
 
   }
 }
