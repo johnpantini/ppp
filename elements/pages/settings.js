@@ -91,6 +91,20 @@ export const settingsPageTemplate = html`
             Настройте цветовое оформления приложения самостоятельно или
             воспользуйтесь готовым шаблоном:
           </p>
+          <div>
+            <ppp-select hidden value="mongodb" ${ref('themeTemplateSelect')}>
+              <ppp-option value="mongodb"> MongoDB</ppp-option>
+              <ppp-option value="binance"> Binance</ppp-option>
+            </ppp-select>
+            <div class="spacing2"></div>
+            <ppp-button
+              @click="${(x) =>
+                x.applyThemeTemplate(x.themeTemplateSelect.value)}"
+              appearance="primary"
+            >
+              Применить шаблон
+            </ppp-button>
+          </div>
         </div>
         <div class="input-group">
           <div class="palette-holder">
@@ -287,9 +301,7 @@ export class SettingsPage extends Page {
     }
   }
 
-  async submit() {
-
-  }
+  async submit() {}
 }
 
 export default SettingsPage.compose({
