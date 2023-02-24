@@ -10,11 +10,50 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
+import '../button.js';
 import '../top-loader.js';
+import { PAGE_STATUS } from '../../lib/const.js';
+import { emptyState, hotkey, typography } from '../../design/styles.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-top-loader ${ref('topLoader')}></ppp-top-loader>
+    ${when(
+      (x) =>
+        !(
+          x.status === PAGE_STATUS.NOT_READY ||
+          x.status === PAGE_STATUS.OPERATION_STARTED
+        ) && !x.document.widgets?.length,
+      html`
+        <div class="empty-state">
+          <img
+            class="picture"
+            width="200"
+            height="200"
+            src="static/svg/empty-state.svg"
+            draggable="false"
+            alt="Этот терминал не настроен"
+          />
+          <h3>В этом терминале нет виджетов</h3>
+          <p>
+            Перед тем, как начать торговать, разместите виджеты на рабочей
+            области. Чтобы в дальнейшем добавлять виджеты, выберите терминал в
+            боковом меню и нажмите&nbsp;<code
+              @click="${() => ppp.app.showWidgetSelector()}"
+              class="hotkey"
+              >+W</code
+            >
+          </p>
+          <ppp-button
+            appearance="primary"
+            class="large"
+            @click="${() => ppp.app.showWidgetSelector()}"
+          >
+            Разместить виджет
+          </ppp-button>
+        </div>
+      `
+    )}
     ${when(
       (x) => x.document.widgets?.length,
       html` <div class="workspace" ${ref('workspace')}></div> `
@@ -24,6 +63,9 @@ export const workspacePageTemplate = html`
 
 export const workspacePageStyles = css`
   ${pageStyles}
+  ${hotkey()}
+  ${typography()}
+  ${emptyState()}
 `;
 
 export class WorkspacePage extends Page {
