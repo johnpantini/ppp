@@ -1,6 +1,9 @@
 export const numberedCircle = (number) =>
   `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11"></circle><text x="50%" y="50%" text-anchor="middle" dy=".3em" font-size="smaller" font-weight="bold">${number.toString()}</text></svg>`;
 
+export const caretDown =
+  '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M8.679 10.796a.554.554 0 01-.858 0L4.64 6.976C4.32 6.594 4.582 6 5.069 6h6.362c.487 0 .748.594.43.976l-3.182 3.82z"/></svg>';
+
 export const cloud =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M12.571 8.143c0 1.775-.899 3.34-2.267 4.264l-.014.01a5.12 5.12 0 01-2.861.869H2.857a2.857 2.857 0 01-.545-5.663 5.144 5.144 0 0110.26.52zM13.821 8.143a6.38 6.38 0 01-2.358 4.96 3.429 3.429 0 102.17-6.506c.123.494.188 1.013.188 1.546z"></path></svg>';
 

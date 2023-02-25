@@ -17,8 +17,8 @@ export const createThemed = (name) => {
       propName[0].toUpperCase() + propName.slice(1)
     }`;
 
-    const dt = create(name).withDefault(defaultTheme[propName]);
     const themeSetting = ppp.settings.get(themePropName);
+    const dt = create(name).withDefault(themeSetting ?? defaultTheme[propName]);
 
     if (typeof themeSetting !== 'undefined') {
       dt.setValueFor(ppp.designSystemCanvas, themeSetting);
@@ -244,8 +244,19 @@ export const linkColor = themeConditional(
   designTokens.get(defaultTheme.linkColor[0]),
   designTokens.get(defaultTheme.linkColor[1])
 );
-// Text
-export const defaultTextColor = themeConditional(
-  designTokens.get(defaultTheme.defaultTextColor[0]),
-  designTokens.get(defaultTheme.defaultTextColor[1])
+
+// For loader
+document.body.style.setProperty(
+  '--success-color',
+  designTokens.get('palette-green-base').$value
+);
+
+document.body.style.setProperty(
+  '--danger-color',
+  designTokens.get('palette-red-base').$value
+);
+
+document.body.style.setProperty(
+  '--critical-border-color',
+  designTokens.get('palette-gray-base').$value
 );

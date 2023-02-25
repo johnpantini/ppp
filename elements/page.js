@@ -10,11 +10,10 @@ import {
   attr
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
-import { normalize, spacing, typography } from '../design/styles.js';
+import { ellipsis, normalize, spacing, typography } from '../design/styles.js';
 import {
   paletteGrayDark2,
   paletteGrayLight2,
-  defaultTextColor,
   themeConditional,
   paletteWhite,
   paletteBlack,
@@ -29,6 +28,7 @@ import {
   invalidate
 } from '../lib/ppp-errors.js';
 import './toast.js';
+import { uuidv4 } from '../lib/ppp-crypto.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -58,11 +58,9 @@ await ppp.i18n(import.meta.url);
       }
 
       .title {
-        color: ${defaultTextColor};
+        color: ${themeConditional(paletteBlack, paletteGrayLight2)};
         margin-right: 10px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        ${ellipsis()};
       }
 
       .controls {
@@ -160,13 +158,18 @@ export const pageStyles = css`
   .input-group {
     flex-grow: 1;
     align-items: center;
-    max-width: 960px;
+    max-width: 800px;
   }
 
   .label-group > h6,
   .label-group > h5 {
     margin: unset;
     letter-spacing: 0;
+  }
+
+  .label-group ppp-select,
+  .label-group ppp-text-field {
+    max-width: 320px;
   }
 
   .label-group ppp-banner {
@@ -400,10 +403,15 @@ class Page extends PPPElement {
           .querySelector('[slot="title"]')
           ?.textContent?.trim();
       } else {
-        toastTitle = ppp.app.shadowRoot
-          .querySelector('.page-content')
-          ?.lastElementChild?.shadowRoot?.querySelector('[slot="header"]')
-          ?.textContent?.trim();
+        const headerText = ppp.app.shadowRoot
+          .querySelector('.page')
+          ?.shadowRoot?.querySelector('ppp-page-header')
+          ?.shadowRoot?.querySelector('.title')
+          ?.firstElementChild?.assignedNodes?.();
+
+        if (Array.isArray(headerText)) {
+          toastTitle = headerText[0].textContent;
+        }
       }
     }
 
@@ -466,7 +474,7 @@ class Page extends PPPElement {
         return invalidate(ppp.app.toast, {
           errorMessage: e?.pppMessage ?? e.message
         });
-      case 'NotFoundError':
+      case 'DocumentNotFoundError':
         if (typeof this.notFound === 'function') this.notFound();
 
         return invalidate(ppp.app.toast, {
@@ -489,11 +497,128 @@ class Page extends PPPElement {
     }
   }
 
-  async #submitDocument(idClause) {
+  async #applyDocumentUpdates(idClause, fragments = []) {
+    for (let documentUpdateFragment of fragments) {
+      const isAnonymousFunc =
+        typeof documentUpdateFragment === 'function' &&
+        !documentUpdateFragment.name;
 
+      if (typeof documentUpdateFragment === 'object' || isAnonymousFunc) {
+        if (isAnonymousFunc)
+          documentUpdateFragment = documentUpdateFragment.call(this);
+
+        const encryptedUpdateClause = Object.assign({}, documentUpdateFragment);
+
+        if (encryptedUpdateClause.$set) {
+          encryptedUpdateClause.$set = await ppp.encrypt(
+            encryptedUpdateClause.$set
+          );
+        }
+
+        if (encryptedUpdateClause.$setOnInsert) {
+          encryptedUpdateClause.$setOnInsert = await ppp.encrypt(
+            encryptedUpdateClause.$setOnInsert
+          );
+        }
+
+        if (typeof encryptedUpdateClause?.$set?.removed === 'undefined') {
+          if (typeof encryptedUpdateClause.$unset === 'undefined') {
+            encryptedUpdateClause.$unset = { removed: '' };
+          } else if (
+            typeof encryptedUpdateClause.$unset?.removed === 'undefined'
+          ) {
+            encryptedUpdateClause.$unset.removed = '';
+          }
+        }
+
+        await ppp.user.functions.updateOne(
+          {
+            collection: this.collection
+          },
+          idClause,
+          encryptedUpdateClause,
+          {
+            upsert: true
+          }
+        );
+
+        this.document = Object.assign(
+          {},
+          this.document,
+          { removed: void 0 },
+          documentUpdateFragment.$set ?? {}
+        );
+      } else if (
+        typeof documentUpdateFragment === 'function' &&
+        documentUpdateFragment.name
+      ) {
+        await documentUpdateFragment.call(this);
+      }
+    }
   }
 
-  async submitDocument() {
+  async #submitDocument(idClause) {
+    if (typeof this.submit === 'function') {
+      let documentUpdateFragments = await this.submit();
+
+      // For debugging, skip immediately
+      if (documentUpdateFragments === false) {
+        return this.endOperation();
+      }
+
+      if (!Array.isArray(documentUpdateFragments)) {
+        documentUpdateFragments = [documentUpdateFragments];
+      }
+
+      if (idClause) {
+        await this.#applyDocumentUpdates(idClause, documentUpdateFragments);
+      } else {
+        // No _id here, insert first via upsert
+        const fragments = [...documentUpdateFragments];
+        const firstFragment = fragments.shift();
+        const upsertClause = Object.assign({}, firstFragment);
+        const encryptedUpsertClause = Object.assign({}, upsertClause);
+
+        if (encryptedUpsertClause.$set) {
+          encryptedUpsertClause.$set = await ppp.encrypt(
+            encryptedUpsertClause.$set
+          );
+        }
+
+        if (encryptedUpsertClause.$setOnInsert) {
+          encryptedUpsertClause.$setOnInsert = await ppp.encrypt(
+            encryptedUpsertClause.$setOnInsert
+          );
+        }
+
+        const { upsertedId } = await ppp.user.functions.updateOne(
+          {
+            collection: this.collection
+          },
+          (await this.find?.()) ?? { uuid: uuidv4() },
+          encryptedUpsertClause,
+          {
+            upsert: true
+          }
+        );
+
+        this.document = Object.assign(
+          { _id: upsertedId },
+          this.document,
+          upsertClause.$setOnInsert ?? {},
+          upsertClause.$set ?? {}
+        );
+
+        ppp.app.setURLSearchParams({
+          document: upsertedId
+        });
+
+        return this.#applyDocumentUpdates({ _id: upsertedId }, fragments);
+      }
+    }
+  }
+
+  async submitDocument(options = {}) {
     this.beginOperation();
 
     try {
@@ -538,7 +663,7 @@ class Page extends PPPElement {
         await this.#submitDocument();
       }
 
-      this.showSuccessNotification();
+      if (!options.silent) this.showSuccessNotification();
     } catch (e) {
       this.failOperation(e);
     } finally {

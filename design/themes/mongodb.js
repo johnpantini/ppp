@@ -84,7 +84,5 @@ export default {
   // Scrollbars
   scrollBarSize: 4,
   // Links
-  linkColor: ['palette-blue-base', 'palette-blue-light-1'],
-  // Text
-  defaultTextColor: ['palette-black', 'palette-gray-light-2']
+  linkColor: ['palette-blue-base', 'palette-blue-light-1']
 };

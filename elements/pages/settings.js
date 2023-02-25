@@ -21,6 +21,7 @@ import defaultTheme from '../../design/themes/mongodb.js';
 import '../banner.js';
 import '../button.js';
 import '../radio-group.js';
+import '../select.js';
 import '../text-field.js';
 
 class PaletteItem extends PPPElement {
@@ -68,6 +69,7 @@ export const settingsPageTemplate = html`
           <p class="description">
             Светлое, тёмное или по выбору операционной системы.
           </p>
+          <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
             Оформление вступит в силу после сохранения изменений.
           </ppp-banner>
@@ -92,7 +94,7 @@ export const settingsPageTemplate = html`
             воспользуйтесь готовым шаблоном:
           </p>
           <div>
-            <ppp-select hidden value="mongodb" ${ref('themeTemplateSelect')}>
+            <ppp-select value="mongodb" ${ref('themeTemplateSelect')}>
               <ppp-option value="mongodb"> MongoDB</ppp-option>
               <ppp-option value="binance"> Binance</ppp-option>
             </ppp-select>
@@ -246,6 +248,7 @@ export const settingsPageTemplate = html`
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
+          ${ref('submitControl')}
         >
           Сохранить параметры
         </ppp-button>
@@ -256,10 +259,6 @@ export const settingsPageTemplate = html`
 
 export const settingsPageStyles = css`
   ${pageStyles}
-  ppp-banner {
-    margin-top: 10px;
-  }
-
   .palette-holder ppp-palette-item {
     width: 140px;
   }
@@ -281,8 +280,21 @@ export const settingsPageStyles = css`
 export class SettingsPage extends Page {
   collection = 'app';
 
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (sessionStorage.getItem('ppp-show-success-notification') === '1') {
+      sessionStorage.removeItem('ppp-show-success-notification');
+
+      this.submitControl.scrollIntoView({ behavior: 'smooth' });
+      this.showSuccessNotification();
+    }
+  }
+
   getDocumentId() {
-    return '@settings';
+    return {
+      _id: '@settings'
+    };
   }
 
   async read() {
@@ -301,7 +313,113 @@ export class SettingsPage extends Page {
     }
   }
 
-  async submit() {}
+  async submit() {
+    const updateClause = {
+      $set: {
+        darkMode: this.darkMode.value
+      },
+      $unset: {
+        removed: ''
+      }
+    };
+
+    for (const pi of Array.from(
+      this.shadowRoot.querySelectorAll('ppp-palette-item')
+    )) {
+      const propName = pi
+        .getAttribute('dt')
+        .replace(/-./g, (x) => x[1].toUpperCase());
+      const themePropName = `theme${
+        propName[0].toUpperCase() + propName.slice(1)
+      }`;
+
+      if (defaultTheme[propName] === pi.control.value) {
+        updateClause.$unset[themePropName] = '';
+      } else {
+        updateClause.$set[themePropName] = pi.control.value;
+      }
+    }
+
+    localStorage.setItem(
+      'ppp-light-critical-css',
+      `:root {
+        --critical-default-color: ${
+          this.shadowRoot.querySelector('[dt="palette-white"]').control.value
+        };
+        --critical-default-inverse-color: ${
+          this.shadowRoot.querySelector('[dt="palette-black"]').control.value
+        };
+        --critical-border-color: ${
+          this.shadowRoot.querySelector('[dt="palette-gray-base"]').control
+            .value
+        };
+        --success-color: ${
+          this.shadowRoot.querySelector('[dt="palette-green-base"]').control
+            .value
+        };
+        --danger-color: ${
+          this.shadowRoot.querySelector('[dt="palette-red-base"]').control.value
+        };
+      }`
+    );
+
+    localStorage.setItem(
+      'ppp-dark-critical-css',
+      `:root {
+        --critical-default-color: ${
+          this.shadowRoot.querySelector('[dt="palette-black"]').control.value
+        };
+        --critical-default-inverse-color: ${
+          this.shadowRoot.querySelector('[dt="palette-white"]').control.value
+        };
+        --critical-border-color: ${
+          this.shadowRoot.querySelector('[dt="palette-gray-base"]').control
+            .value
+        };
+        --success-color: ${
+          this.shadowRoot.querySelector('[dt="palette-green-base"]').control
+            .value
+        };
+        --danger-color: ${
+          this.shadowRoot.querySelector('[dt="palette-red-base"]').control.value
+        };
+      }`
+    );
+
+    return updateClause;
+  }
+
+  async submitDocument(options = {}) {
+    await super.submitDocument(Object.assign(options, { silent: true }));
+    sessionStorage.setItem('ppp-show-success-notification', '1');
+    location.reload();
+  }
+
+  async applyThemeTemplate(template) {
+    this.beginOperation('Загрузка шаблона темы');
+
+    try {
+      const { default: theme } = await import(
+        `${ppp.rootUrl}/design/themes/${template}.js`
+      );
+
+      for (const pi of Array.from(
+        this.shadowRoot.querySelectorAll('ppp-palette-item')
+      )) {
+        const propName = pi
+          .getAttribute('dt')
+          .replace(/-./g, (x) => x[1].toUpperCase());
+
+        pi.control.value = theme[propName];
+
+        pi.control.dispatchEvent(new CustomEvent('input'));
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
 }
 
 export default SettingsPage.compose({

@@ -15,6 +15,7 @@ export const cloudServicesPageTemplate = html`
       ${when(
         () => ppp.keyVault.ok(),
         html`
+          <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="success">
             Облачные сервисы в порядке. Скопируйте компактное представление ниже
             для переноса ключей в другие браузеры:
@@ -44,6 +45,7 @@ export const cloudServicesPageTemplate = html`
               :parent="${(x) => x}"
             ></ppp-import-cloud-keys-modal-page>
           </ppp-modal>
+          <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
             Сохраните заново или
             <a
@@ -64,6 +66,7 @@ export const cloudServicesPageTemplate = html`
             Требуется для шифрования/дешифрования конфиденциальных данных:
             токенов, ключей, других паролей.
           </p>
+          <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="info">
             Придумайте пароль при первой настройке приложения.
           </ppp-banner>
@@ -165,44 +168,6 @@ export const cloudServicesPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <section>
-        <div class="section-index-icon">${html.partial(numberedCircle(6))}</div>
-        <div class="label-group">
-          <h6>Подключение к базе данных MongoDB</h6>
-          <p class="description">
-            Опциональное подключение к альтернативной базе данных MongoDB.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            optional
-            disabled
-            type="password"
-            placeholder="mongodb://0.0.0.0:27017"
-            value="${() => ppp.keyVault.getKey('mongo-connection-uri')}"
-            ${ref('mongoConnectionUri')}
-          ></ppp-text-field>
-        </div>
-      </section>
-      <section>
-        <div class="section-index-icon">${html.partial(numberedCircle(7))}</div>
-        <div class="label-group">
-          <h6>Сервер MongoDB Realm</h6>
-          <p class="description">
-            Требуется, если используется альтернативная база данных MongoDB.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            optional
-            disabled
-            type="url"
-            placeholder="http://0.0.0.0:14444"
-            value="${() => ppp.keyVault.getKey('mongo-realm-url')}"
-            ${ref('mongoRealmUrl')}
-          ></ppp-text-field>
-        </div>
-      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -218,9 +183,6 @@ export const cloudServicesPageTemplate = html`
 
 export const cloudServicesPageStyles = css`
   ${pageStyles}
-  ppp-banner {
-    margin-top: 10px;
-  }
 `;
 
 export class CloudServicesPage extends Page {

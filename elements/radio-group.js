@@ -397,18 +397,6 @@ export class RadioGroup extends PPPElement {
     }
   }
 
-  get parentToolbar() {
-    return this.closest('[role="toolbar"]');
-  }
-
-  get isInsideToolbar() {
-    return this.parentToolbar ?? false;
-  }
-
-  get isInsideFoundationToolbar() {
-    return !!this.parentToolbar?.['$pppController'];
-  }
-
   connectedCallback() {
     super.connectedCallback();
     this.direction = getDirection(this);

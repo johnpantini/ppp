@@ -23,6 +23,7 @@ export const updatesPageTemplate = html`
           x.targetCommit?.sha &&
           x.currentCommit?.sha !== x.targetCommit?.sha,
         html`
+          <div class="spacing2"></div>
           <ppp-banner class="inline margin-top" appearance="info">
             Для полного применения обновления может потребоваться несколько
             минут.
@@ -30,6 +31,7 @@ export const updatesPageTemplate = html`
           <section>
             <div class="label-group">
               <h6>Текущая версия</h6>
+              <div class="spacing2"></div>
               <ppp-badge appearance="yellow">
                 ${(x) => x.currentCommit?.sha}
               </ppp-badge>
@@ -41,6 +43,7 @@ export const updatesPageTemplate = html`
           <section>
             <div class="label-group">
               <h6>Последняя версия</h6>
+              <div class="spacing2"></div>
               <ppp-badge appearance="green">
                 ${(x) => x.targetCommit?.sha}
               </ppp-badge>
@@ -87,12 +90,7 @@ export const updatesPageTemplate = html`
 
 export const updatesPageStyles = css`
   ${pageStyles}
-  ${typography()}
   ${emptyState()}
-  ppp-badge,
-  ppp-banner {
-    margin-top: 10px;
-  }
 `;
 
 export class UpdatesPage extends Page {
@@ -255,7 +253,7 @@ export class UpdatesPage extends Page {
 
       this.updateComplete = true;
 
-      this.succeedOperation(
+      this.showSuccessNotification(
         'Приложение синхронизировано с последней версией. Когда обновление будет готово, вы получите уведомление.'
       );
     } catch (e) {

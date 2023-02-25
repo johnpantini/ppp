@@ -3,6 +3,35 @@ import {
   InlineTemplateDirective
 } from './fast-element.min.js';
 
+let uniqueIdCounter = 0;
+
+/**
+ * Generates a unique ID based on incrementing a counter.
+ */
+export function uniqueId(prefix = '') {
+  return `${prefix}${uniqueIdCounter++}`;
+}
+
+/**
+ * Determines if a number value is within a specified range.
+ *
+ * @param value - the value to check
+ * @param min - the range start
+ * @param max - the range end
+ */
+export function inRange(value, min, max = 0) {
+  [min, max] = [min, max].sort((a, b) => a - b);
+
+  return min <= value && value < max;
+}
+
+/**
+ * A test that ensures that all arguments are HTML Elements
+ */
+export function isHTMLElement(...args) {
+  return args.every((arg) => arg instanceof HTMLElement);
+}
+
 /**
  * Retrieves the "composed parent" element of a node, ignoring DOM tree boundaries.
  * When the parent of a node is a shadow-root, it will return the host
@@ -225,3 +254,21 @@ export const ArrowKeys = {
  */
 export const whitespaceFilter = (value) =>
   value.nodeType !== Node.TEXT_NODE || !!value.nodeValue?.trim().length;
+
+/**
+ * Returns the index of the last element in the array where predicate is true, and -1 otherwise.
+ *
+ * @param array - the array to test
+ * @param predicate - find calls predicate once for each element of the array, in descending order, until it finds one where predicate returns true. If such an element is found, findLastIndex immediately returns that element index. Otherwise, findIndex returns -1.
+ */
+export function findLastIndex(array, predicate) {
+  let k = array.length;
+
+  while (k--) {
+    if (predicate(array[k], k, array)) {
+      return k;
+    }
+  }
+
+  return -1;
+}
