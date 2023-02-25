@@ -420,6 +420,8 @@ export class SettingsPage extends Page {
         pi.control.value = theme[propName];
 
         pi.control.dispatchEvent(new CustomEvent('input'));
+
+        pi.control.appearance = 'default';
       }
     } catch (e) {
       this.failOperation(e);
