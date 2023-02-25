@@ -390,9 +390,16 @@ export class SettingsPage extends Page {
   }
 
   async submitDocument(options = {}) {
-    await super.submitDocument(Object.assign(options, { silent: true }));
-    sessionStorage.setItem('ppp-show-success-notification', '1');
-    location.reload();
+    try {
+      await this.validate();
+      await super.submitDocument(Object.assign(options, { silent: true }));
+      sessionStorage.setItem('ppp-show-success-notification', '1');
+      location.reload();
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
   }
 
   async applyThemeTemplate(template) {
