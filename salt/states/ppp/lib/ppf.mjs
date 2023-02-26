@@ -1,6 +1,4 @@
-import mongodb from './vendor/mongodb.min.js';
-
-export default function (createServer) {
+export default function (mongodb, createServer) {
   const { MongoClient, BSON } = mongodb;
   const EJSON = BSON.EJSON;
 
