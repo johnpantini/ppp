@@ -114,25 +114,6 @@ export class WorkspacePage extends Page {
   // Place widgets when DOM (.workspace) is ready
   async workspaceChanged(prev, next) {
     if (this.$fastController.isConnected && next) {
-      // this.beginOperation('Загрузка рабочего пространства');
-      //
-      // try {
-      //   const widgets = this.document.widgets ?? [];
-      //
-      //   if (widgets.length) {
-      //     await import(`${ppp.rootUrl}/vendor/jquery.slim.min.js`);
-      //     await import(`${ppp.rootUrl}/vendor/jquery-ui.min.js`);
-      //   }
-      //
-      //   for (const w of widgets) {
-      //     // Skip first widget added from modal
-      //     if (!this.locked && w.type) await this.placeWidget(w);
-      //   }
-      // } catch (e) {
-      //   this.failOperation(e);
-      // } finally {
-      //   this.endOperation();
-      // }
     }
   }
 

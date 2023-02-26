@@ -392,42 +392,50 @@ class Page extends PPPElement {
     }
   }
 
-  beginOperation(toastTitle) {
-    if (!ppp.app) return;
+  getToastTitle() {
+    let toastTitle = 'PPP';
 
-    if (!toastTitle) {
-      const visibleModal = ppp.app.getVisibleModal();
+    const visibleModal = ppp.app.getVisibleModal();
 
-      if (visibleModal) {
-        toastTitle = visibleModal
-          .querySelector('[slot="title"]')
-          ?.textContent?.trim();
-      } else {
-        const headerText = ppp.app.shadowRoot
-          .querySelector('.page')
-          ?.shadowRoot?.querySelector('ppp-page-header')
-          ?.shadowRoot?.querySelector('.title')
-          ?.firstElementChild?.assignedNodes?.();
+    if (visibleModal) {
+      toastTitle = visibleModal
+        .querySelector('[slot="title"]')
+        ?.textContent?.trim();
+    } else {
+      const headerText = ppp.app.shadowRoot
+        .querySelector('.page')
+        ?.shadowRoot?.querySelector('ppp-page-header')
+        ?.shadowRoot?.querySelector('.title')
+        ?.firstElementChild?.assignedNodes?.();
 
-        if (Array.isArray(headerText)) {
-          toastTitle = headerText[0].textContent;
-        }
+      if (Array.isArray(headerText)) {
+        toastTitle = headerText[0].textContent;
       }
     }
 
-    ppp.app.toast.title = toastTitle;
-    ppp.app.toast.text = ppp.t('$operations.operationInProgress');
+    return toastTitle;
+  }
 
-    ppp.app.toast.setAttribute('hidden', '');
+  beginOperation() {
+    if (!ppp.app) return;
+
+    // Do not hide update notifications
+    if (ppp.app.toast.appearance !== 'note') {
+      ppp.app.toast.setAttribute('hidden', '');
+    }
 
     this.status = PAGE_STATUS.OPERATION_STARTED;
   }
 
-  showSuccessNotification(toastText = ppp.t('$operations.operationSucceeded')) {
+  showSuccessNotification(
+    toastText = ppp.t('$operations.operationSucceeded'),
+    toastTitle = this.getToastTitle()
+  ) {
     if (!toastText.endsWith('.')) toastText += '.';
 
     ppp.app.toast.appearance = 'success';
     ppp.app.toast.dismissible = true;
+    ppp.app.toast.title = toastTitle;
     ppp.app.toast.text = toastText;
 
     ppp.app.toast.removeAttribute('hidden');
@@ -437,12 +445,14 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.OPERATION_ENDED;
   }
 
-  failOperation(e) {
+  failOperation(e, toastTitle = this.getToastTitle()) {
     console.dir(e);
 
     this.status = PAGE_STATUS.OPERATION_FAILED;
 
     const errorName = e?.errorCode ?? e?.error_code ?? e?.name;
+
+    ppp.app.toast.title = toastTitle;
 
     if (
       [

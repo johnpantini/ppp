@@ -163,10 +163,16 @@ class PPP {
           return this.#createApplication({ emergency: true });
         } else {
           if (/Failed to fetch/i.test(e?.message)) {
-            this.#showLoadingError({
-              errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
-              shouldShowServiceMachineInput: true
-            });
+            if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
+              this.#showLoadingError({
+                errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
+              });
+            } else {
+              this.#showLoadingError({
+                errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
+                shouldShowServiceMachineInput: true
+              });
+            }
           } else {
             this.#showLoadingError({
               errorText: this.t('$loadingErrors.E_UNKNOWN')
@@ -255,10 +261,16 @@ class PPP {
         console.error(e);
 
         if (/Failed to fetch/i.test(e?.message)) {
-          this.#showLoadingError({
-            errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
-            shouldShowServiceMachineInput: true
-          });
+          if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
+            this.#showLoadingError({
+              errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
+            });
+          } else {
+            this.#showLoadingError({
+              errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
+              shouldShowServiceMachineInput: true
+            });
+          }
         } else if (/failed to find refresh token/i.test(e?.message)) {
           sessionStorage.removeItem('realmLogin');
           window.location.reload();

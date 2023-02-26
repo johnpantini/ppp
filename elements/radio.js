@@ -104,7 +104,7 @@ export const radioStyles = css`
     border-radius: 100%;
     border-style: solid;
     border-color: ${themeConditional(paletteGrayDark2, paletteGrayBase)};
-    background-color: ${themeConditional(paletteWhite, paletteBlack)}
+    background-color: ${themeConditional(paletteWhite, paletteBlack)};
     border-width: 3px;
   }
 

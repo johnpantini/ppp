@@ -231,7 +231,7 @@ export const buttonStyles = css`
 
   :host([disabled]) ::slotted(span[slot='start']),
   :host([disabled]) ::slotted(span[slot='end']) {
-    color: ${themeConditional(paletteGrayLight1)};
+    color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
   }
 `;
 

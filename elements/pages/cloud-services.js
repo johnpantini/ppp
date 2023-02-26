@@ -3,6 +3,7 @@ import { css, html, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { numberedCircle } from '../../static/svg/sprite.js';
 import '../banner.js';
+import '../checkbox.js';
 import '../copyable.js';
 import '../modal.js';
 import '../text-field.js';
@@ -165,6 +166,50 @@ export const cloudServicesPageTemplate = html`
             placeholder="Приватный ключ"
             value="${() => ppp.keyVault.getKey('mongo-private-key')}"
             ${ref('mongoPrivateKey')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="section-index-icon">${html.partial(numberedCircle(6))}</div>
+        <div class="label-group">
+          <h6>Подключение к базе данных MongoDB</h6>
+          <p class="description">
+            Подключение к альтернативной базе данных MongoDB.
+          </p>
+          <div class="spacing2"></div>
+          <ppp-checkbox
+            ?checked="${() =>
+              ppp.keyVault.getKey('use-alternative-mongo') === '1'}"
+            ${ref('useAlternativeMongo')}
+          >
+            Использовать это подключение вместо облачной базы MongoDB Atlas
+          </ppp-checkbox>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            ?disabled="${(x) => !x.useAlternativeMongo.checked}"
+            type="password"
+            placeholder="mongodb://0.0.0.0:27017"
+            value="${() => ppp.keyVault.getKey('mongo-connection-uri')}"
+            ${ref('mongoConnectionUri')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="section-index-icon">${html.partial(numberedCircle(7))}</div>
+        <div class="label-group">
+          <h6>Сервер доступа к MongoDB</h6>
+          <p class="description">
+            Требуется, если используется альтернативная база данных MongoDB.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            ?disabled="${(x) => !x.useAlternativeMongo.checked}"
+            type="url"
+            placeholder="http://0.0.0.0:14444"
+            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"
+            ${ref('mongoProxyUrl')}
           ></ppp-text-field>
         </div>
       </section>

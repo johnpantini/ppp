@@ -414,7 +414,7 @@ export class SettingsPage extends Page {
   async applyThemeTemplate(template) {
     if (!template) return;
 
-    this.beginOperation('Загрузка шаблона темы');
+    this.beginOperation();
 
     try {
       const { default: theme } = await import(
@@ -435,7 +435,7 @@ export class SettingsPage extends Page {
         pi.control.appearance = 'default';
       }
     } catch (e) {
-      this.failOperation(e);
+      this.failOperation(e, 'Загрузка шаблона темы');
     } finally {
       this.endOperation();
     }
