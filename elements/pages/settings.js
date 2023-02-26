@@ -94,17 +94,26 @@ export const settingsPageTemplate = html`
             воспользуйтесь готовым шаблоном:
           </p>
           <div>
-            <ppp-select value="mongodb" ${ref('themeTemplateSelect')}>
+            <ppp-select
+              placeholder="Выберите шаблон"
+              @change="${(x) =>
+                x.scratch.set(
+                  'themeTemplateSelectValue',
+                  x.themeTemplateSelect.value
+                )}"
+              ${ref('themeTemplateSelect')}
+            >
               <ppp-option value="mongodb"> MongoDB</ppp-option>
               <ppp-option value="binance"> Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
+              ?disabled="${(x) => !x.scratch.get('themeTemplateSelectValue')}"
+              appearance="primary"
               @click="${(x) =>
                 x.applyThemeTemplate(x.themeTemplateSelect.value)}"
-              appearance="primary"
             >
-              Применить шаблон
+              Заполнить цвета по шаблону
             </ppp-button>
           </div>
         </div>
@@ -403,6 +412,8 @@ export class SettingsPage extends Page {
   }
 
   async applyThemeTemplate(template) {
+    if (!template) return;
+
     this.beginOperation('Загрузка шаблона темы');
 
     try {

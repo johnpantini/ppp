@@ -26,6 +26,8 @@ import {
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark2,
+  paletteGrayDark3,
+  paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
   paletteGreenBase,
@@ -210,6 +212,26 @@ export const buttonStyles = css`
 
   :host .control:focus-visible {
     border-color: ${themeConditional(paletteBlueLight1)};
+  }
+
+  :host([disabled]) {
+    cursor: not-allowed;
+  }
+
+  :host([disabled]) .control {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  :host([disabled]) .control {
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark3)};
+    border-color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
+    color: ${themeConditional(paletteGrayBase, paletteGrayDark1)};
+  }
+
+  :host([disabled]) ::slotted(span[slot='start']),
+  :host([disabled]) ::slotted(span[slot='end']) {
+    color: ${themeConditional(paletteGrayLight1)};
   }
 `;
 
