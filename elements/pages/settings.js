@@ -103,8 +103,9 @@ export const settingsPageTemplate = html`
                 )}"
               ${ref('themeTemplateSelect')}
             >
-              <ppp-option value="mongodb"> MongoDB</ppp-option>
-              <ppp-option value="binance"> Binance</ppp-option>
+              <ppp-option value="mongodb">MongoDB</ppp-option>
+              <ppp-option value="binance">Binance</ppp-option>
+              <ppp-option value="tinkoff">Tinkoff</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
