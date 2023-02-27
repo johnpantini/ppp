@@ -74,17 +74,21 @@ createServer(async (request, response) => {
             );
             response.write(JSON.stringify(invocation));
             response.end();
-          } else if (typeof invocation === 'object') {
-            const result = {};
+          } else {
+            let result = {};
 
-            for (const key in invocation) {
-              const name = invocation[key].constructor.name;
+            if (invocation?.constructor?.name === 'AggregationCursor') {
+              result = await invocation.toArray();
+            } else if (typeof invocation === 'object') {
+              for (const key in invocation) {
+                const name = invocation[key]?.constructor?.name;
 
-              if (name === 'Promise') {
-                result[key] = await invocation[key];
-              } else if (name === 'FindCursor') {
-                result[key] = await invocation[key].toArray();
-              } else result[key] = invocation[key];
+                if (name === 'Promise') {
+                  result[key] = await invocation[key];
+                } else if (name === 'FindCursor') {
+                  result[key] = await invocation[key].toArray();
+                } else result[key] = invocation[key];
+              }
             }
 
             response.setHeader(
