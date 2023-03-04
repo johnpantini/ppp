@@ -6,8 +6,8 @@ export default Object.assign({}, defaultTheme, {
   paletteBlack: '#1E2C39', // *
   // Gray
   paletteGrayBase: '#3C5469', // *
-  paletteGrayLight1: '#5A768F', // *
-  paletteGrayLight2: '#B3C7DB', // *
+  paletteGrayLight1: '#8CA7BE', // *
+  paletteGrayLight2: '#DFE6ED', // *
   paletteGrayLight3: '#F3F5F8', // *
   paletteGrayDark1: '#334657', // *
   paletteGrayDark2: '#243442', // *
