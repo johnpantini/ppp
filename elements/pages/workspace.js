@@ -5,25 +5,33 @@ import {
   css,
   ref,
   when,
-  attr,
-  Observable
+  Observable,
+  observable,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
-import { PAGE_STATUS } from '../../lib/const.js';
-import { emptyState, hotkey, typography } from '../../design/styles.js';
+import {
+  emptyState,
+  hotkey,
+  scrollbars,
+  typography
+} from '../../design/styles.js';
 import '../button.js';
 import '../top-loader.js';
+import {
+  darken, lighten,
+  paletteGrayDark4, paletteGrayLight1, paletteGrayLight2,
+  paletteGrayLight3,
+  scrollBarSize,
+  themeConditional
+} from '../../design/design-tokens.js'
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-top-loader ${ref('topLoader')}></ppp-top-loader>
     ${when(
-      (x) =>
-        !(
-          x.status === PAGE_STATUS.NOT_READY ||
-          x.status === PAGE_STATUS.OPERATION_STARTED
-        ) && !x.document.widgets?.length,
+      (x) => x.isSteady() && !x.document.widgets?.length,
       html`
         <div class="empty-state">
           <img
@@ -54,7 +62,7 @@ export const workspacePageTemplate = html`
       `
     )}
     ${when(
-      (x) => x.document.widgets?.length,
+      (x) => x.isSteady() && x.document.widgets?.length,
       html` <div class="workspace" ${ref('workspace')}></div> `
     )}
   </template>
@@ -65,10 +73,38 @@ export const workspacePageStyles = css`
   ${hotkey()}
   ${typography()}
   ${emptyState()}
+  ${scrollbars('.workspace')}
+  :host {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .workspace {
+    position: relative;
+    z-index: 1;
+    overflow: auto;
+    background-color: ${themeConditional(
+      paletteGrayLight2,
+      paletteGrayDark4
+    )};
+    width: 100%;
+    height: 100%;
+  }
+
+  .workspace::-webkit-scrollbar {
+    width: calc(${scrollBarSize} * 2px);
+    height: calc(${scrollBarSize} * 2px);
+  }
+
+  .widget {
+    position: relative;
+    overflow: hidden;
+  }
 `;
 
 export class WorkspacePage extends Page {
-  @attr
+  @observable
   workspace;
 
   collection = 'workspaces';
@@ -79,7 +115,7 @@ export class WorkspacePage extends Page {
 
   sideNavExpandedChanged = {
     handleChange() {
-      // this.updateWidgetContainment();
+      this.updateWidgetContainment();
     }
   };
 
@@ -101,19 +137,38 @@ export class WorkspacePage extends Page {
     document.addEventListener('dblclick', this.onDblClick);
   }
 
+  updateWidgetContainment() {
+    console.log('updateWidgetContainment');
+  }
+
   onDblClick(event) {
     if (event.ctrlKey) {
       const value = !ppp.settings.get('sideNavVisible');
 
       ppp.settings.set('sideNavVisible', value);
 
-      // this.updateWidgetContainment();
+      this.updateWidgetContainment();
     }
   }
 
   // Place widgets when DOM (.workspace) is ready
   async workspaceChanged(prev, next) {
     if (this.$fastController.isConnected && next) {
+      this.beginOperation();
+
+      try {
+        const widgets = this.document.widgets ?? [];
+
+        for (const w of widgets) {
+          // Skip first widget added from modal
+          if (!this.locked && typeof w.type !== 'undefined')
+            await this.placeWidget(w);
+        }
+      } catch (e) {
+        this.failOperation(e, 'Загрузка терминала');
+      } finally {
+        this.endOperation();
+      }
     }
   }
 
@@ -246,7 +301,7 @@ export class WorkspacePage extends Page {
     };
   }
 
-  async transformDocument() {
+  async transform() {
     const widgets = [];
 
     this.denormalization.fillRefs(this.document);
@@ -271,6 +326,68 @@ export class WorkspacePage extends Page {
       _id: this.document._id,
       widgets
     };
+  }
+
+  getWidgetUrl(widget) {
+    const type = widget.type;
+
+    if (type === 'custom') {
+      return new URL(widget.url).toString();
+    } else {
+      return `${ppp.rootUrl}/elements/widgets/${widget.type}.js`;
+    }
+  }
+
+  async placeWidget(widgetDocument) {
+    const url = await this.getWidgetUrl(widgetDocument);
+    const module = await import(url);
+    const wUrl = new URL(url);
+    const baseWidgetUrl = wUrl.href.slice(0, wUrl.href.lastIndexOf('/'));
+
+    widgetDocument.widgetDefinition = await module.widgetDefinition?.({
+      ppp,
+      baseWidgetUrl
+    });
+
+    const tagName = widgetDocument.widgetDefinition.customElement.name;
+    const domElement = document.createElement(tagName);
+    const minWidth = widgetDocument.widgetDefinition.minWidth ?? '275';
+    const minHeight = widgetDocument.widgetDefinition.minHeight ?? '395';
+
+    domElement.style.left = `${parseInt(widgetDocument.x ?? '0')}px`;
+    domElement.style.top = `${parseInt(widgetDocument.y ?? '0')}px`;
+    domElement.style.width = `${parseInt(
+      widgetDocument.width ??
+        widgetDocument.widgetDefinition.defaultWidth ??
+        minWidth
+    )}px`;
+    domElement.style.height = `${parseInt(
+      widgetDocument.height ??
+        widgetDocument.widgetDefinition.defaultHeight ??
+        minHeight
+    )}px`;
+
+    if (typeof widgetDocument.zIndex === 'number') {
+      this.zIndex = Math.max(this.zIndex, widgetDocument.zIndex);
+
+      domElement.style.zIndex = widgetDocument.zIndex;
+    } else {
+      domElement.style.zIndex = (++this.zIndex).toString();
+    }
+
+    domElement.widgetDefinition = widgetDocument.widgetDefinition;
+    domElement.document = widgetDocument;
+
+    return new Promise((resolve) => {
+      Updates.enqueue(() => {
+        widgetDocument.widgetElement = this.workspace.appendChild(domElement);
+        widgetDocument.widgetElement.container = this;
+        widgetDocument.widgetElement.topLoader = this.topLoader;
+        widgetDocument.widgetElement.classList.add('widget');
+      });
+
+      resolve();
+    });
   }
 }
 

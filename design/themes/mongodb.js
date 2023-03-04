@@ -3,6 +3,10 @@ export default {
   bodyFont:
     '-apple-system, BlinkMacSystemFont, Roboto, Segoe UI, "Trebuchet MS", Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Icons16, sans-serif',
   monospaceFont: `'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace`,
+  // Widget
+  fontSizeWidget: '12px',
+  lineHeightWidget: 'normal',
+  fontWeightWidget: 400,
   // Body 1
   fontSizeBody1: '13px',
   lineHeightBody1: '20px',

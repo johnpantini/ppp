@@ -43,7 +43,6 @@ export const cloudServicesPageTemplate = html`
             </div>
             <ppp-import-cloud-keys-modal-page
               slot="body"
-              :parent="${(x) => x}"
             ></ppp-import-cloud-keys-modal-page>
           </ppp-modal>
           <div class="spacing2"></div>
@@ -178,6 +177,11 @@ export const cloudServicesPageTemplate = html`
           </p>
           <div class="spacing2"></div>
           <ppp-checkbox
+            @change="${(x) =>
+              ppp.keyVault.setKey(
+                'use-alternative-mongo',
+                x.useAlternativeMongo.checked ? '1' : '0'
+              )}"
             ?checked="${() =>
               ppp.keyVault.getKey('use-alternative-mongo') === '1'}"
             ${ref('useAlternativeMongo')}

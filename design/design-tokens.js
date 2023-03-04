@@ -158,6 +158,10 @@ export const darken = (token, amount) =>
 // Types
 export const bodyFont = createThemed('body-font');
 export const monospaceFont = createThemed('monospace-font');
+// Widget
+export const fontSizeWidget = createThemed('font-size-widget');
+export const lineHeightWidget = createThemed('line-height-widget');
+export const fontWeightWidget = createThemed('font-weight-widget');
 // Body 1
 export const fontSizeBody1 = createThemed('font-size-body-1');
 export const lineHeightBody1 = createThemed('line-height-body-1');

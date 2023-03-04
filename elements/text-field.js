@@ -222,15 +222,15 @@ export const textFieldStyles = css`
   }
 
   input {
-    border: 1px solid ${themeConditional(paletteGrayBase)};
     border-radius: 6px;
     width: 100%;
     height: 36px;
     padding: 0 12px;
     z-index: 1;
     outline: none;
-    color: ${themeConditional(paletteBlack, paletteGrayLight3)};
     background-color: ${themeConditional(paletteWhite, paletteBlack)};
+    border: 1px solid ${themeConditional(paletteGrayBase)};
+    color: ${themeConditional(paletteBlack, paletteGrayLight3)};
     text-transform: inherit;
     font-family: inherit;
     font-size: inherit;

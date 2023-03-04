@@ -289,6 +289,13 @@ class Page extends PPPElement {
     this.removeEventListener('keypress', this.#keypressHandler);
   }
 
+  isSteady() {
+    return !(
+      this.status === PAGE_STATUS.NOT_READY ||
+      this.status === PAGE_STATUS.OPERATION_STARTED
+    );
+  }
+
   generateClasses() {
     const result = ['page'];
 
@@ -375,8 +382,8 @@ class Page extends PPPElement {
           this.document = {};
         }
 
-        if (typeof this.transformDocument === 'function') {
-          this.document = await this.transformDocument(documentId);
+        if (typeof this.transform === 'function') {
+          this.document = await this.transform(documentId);
         }
 
         this.status = PAGE_STATUS.READY;

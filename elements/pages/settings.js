@@ -98,10 +98,10 @@ export const settingsPageTemplate = html`
               placeholder="Выберите шаблон"
               @change="${(x) =>
                 x.scratch.set(
-                  'themeTemplateSelectValue',
-                  x.themeTemplateSelect.value
+                  'themeColorsTemplateSelectValue',
+                  x.themeColorsTemplateSelect.value
                 )}"
-              ${ref('themeTemplateSelect')}
+              ${ref('themeColorsTemplateSelect')}
             >
               <ppp-option value="mongodb">MongoDB</ppp-option>
               <ppp-option value="binance">Binance</ppp-option>
@@ -109,17 +109,18 @@ export const settingsPageTemplate = html`
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
-              ?disabled="${(x) => !x.scratch.get('themeTemplateSelectValue')}"
+              ?disabled="${(x) =>
+                !x.scratch.get('themeColorsTemplateSelectValue')}"
               appearance="primary"
               @click="${(x) =>
-                x.applyThemeTemplate(x.themeTemplateSelect.value)}"
+                x.applyThemeColorsTemplate(x.themeColorsTemplateSelect.value)}"
             >
               Заполнить цвета по шаблону
             </ppp-button>
           </div>
         </div>
         <div class="input-group">
-          <div class="palette-holder">
+          <div class="settings-grid colors">
             <div class="row">
               <ppp-palette-item dt="palette-white"> Белый</ppp-palette-item>
               <ppp-palette-item dt="palette-black"> Чёрный</ppp-palette-item>
@@ -253,6 +254,122 @@ export const settingsPageTemplate = html`
           </div>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Шрифты</h5>
+          <p class="description">Настройте шрифты приложения.</p>
+          <div>
+            <ppp-select
+              placeholder="Выберите шаблон"
+              @change="${(x) =>
+                x.scratch.set(
+                  'themeFontsTemplateSelectValue',
+                  x.themeFontsTemplateSelect.value
+                )}"
+              ${ref('themeFontsTemplateSelect')}
+            >
+              <ppp-option value="mongodb">MongoDB</ppp-option>
+              <ppp-option value="binance">Binance</ppp-option>
+              <ppp-option value="tinkoff">Tinkoff</ppp-option>
+            </ppp-select>
+            <div class="spacing2"></div>
+            <ppp-button
+              ?disabled="${(x) =>
+                !x.scratch.get('themeFontsTemplateSelectValue')}"
+              appearance="primary"
+              @click="${(x) =>
+                x.applyThemeFontsTemplate(x.themeFontsTemplateSelect.value)}"
+            >
+              Заполнить шрифты по шаблону
+            </ppp-button>
+          </div>
+        </div>
+        <div class="input-group">
+          <div class="settings-grid fonts">
+            <h5>Семейство шрифта</h5>
+            <div class="row">
+              <ppp-text-field dt="body-font" placeholder="Roboto">
+                <span slot="label">Обычный шрифт</span>
+              </ppp-text-field>
+              <ppp-text-field dt="monospace-font" placeholder="monospace">
+                <span slot="label">Моноширинный шрифт</span>
+              </ppp-text-field>
+            </div>
+            <h5>Шрифт виджетов</h5>
+            <div class="row">
+              <ppp-text-field dt="font-size-widget" placeholder="12px">
+                <span slot="label">Размер</span>
+              </ppp-text-field>
+              <ppp-text-field dt="font-weight-widget" placeholder="400">
+                <span slot="label">Насыщенность</span>
+              </ppp-text-field>
+              <ppp-text-field dt="line-height-widget" placeholder="normal">
+                <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+            <h5>Шрифт обычного текста</h5>
+            <div class="row">
+              <ppp-text-field dt="font-size-body-1" placeholder="13px">
+                <span slot="label">Размер</span>
+              </ppp-text-field>
+              <ppp-text-field dt="font-weight-body-1" placeholder="400">
+                <span slot="label">Насыщенность</span>
+              </ppp-text-field>
+              <ppp-text-field dt="line-height-body-1" placeholder="20px">
+                <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+            <h5>Шрифт кода</h5>
+            <div class="row">
+              <ppp-text-field dt="font-size-code-1" placeholder="13px">
+                <span slot="label">Размер</span>
+              </ppp-text-field>
+              <ppp-text-field dt="font-weight-code-1" placeholder="400">
+                <span slot="label">Насыщенность</span>
+              </ppp-text-field>
+              <ppp-text-field dt="line-height-code-1" placeholder="20px">
+                <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+            <h5>Шрифт заголовка 3</h5>
+            <div class="row">
+              <ppp-text-field dt="font-size-heading-3" placeholder="24px">
+                <span slot="label">Размер</span>
+              </ppp-text-field>
+              <ppp-text-field dt="font-weight-heading-3" placeholder="500">
+                <span slot="label">Насыщенность</span>
+              </ppp-text-field>
+              <ppp-text-field dt="line-height-heading-3" placeholder="32px">
+                <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+            <h5>Шрифт заголовка 5</h5>
+            <div class="row">
+              <ppp-text-field dt="font-size-heading-5" placeholder="16px">
+                <span slot="label">Размер</span>
+              </ppp-text-field>
+              <ppp-text-field dt="font-weight-heading-5" placeholder="700">
+                <span slot="label">Насыщенность</span>
+              </ppp-text-field>
+              <ppp-text-field dt="line-height-heading-5" placeholder="20px">
+                <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+            <h5>Шрифт заголовка 6</h5>
+            <div class="row">
+              <ppp-text-field dt="font-size-heading-6" placeholder="18px">
+                <span slot="label">Размер</span>
+              </ppp-text-field>
+              <ppp-text-field dt="font-weight-heading-6" placeholder="700">
+                <span slot="label">Насыщенность</span>
+              </ppp-text-field>
+              <ppp-text-field dt="line-height-heading-6" placeholder="24px">
+                <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+          </div>
+        </div>
+      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -269,11 +386,11 @@ export const settingsPageTemplate = html`
 
 export const settingsPageStyles = css`
   ${pageStyles}
-  .palette-holder ppp-palette-item {
+  .settings-grid ppp-palette-item {
     width: 140px;
   }
 
-  .palette-holder {
+  .settings-grid {
     display: flex;
     flex-direction: column;
     gap: ${spacing4} 0;
@@ -308,6 +425,19 @@ export class SettingsPage extends Page {
   }
 
   async read() {
+    Array.from(
+      this.shadowRoot.querySelectorAll('.settings-grid.fonts ppp-text-field')
+    ).forEach((input) => {
+      const dt = input.getAttribute('dt');
+      const propName = dt.replace(/-./g, (x) => x[1].toUpperCase());
+      const themePropName = `theme${
+        propName[0].toUpperCase() + propName.slice(1)
+      }`;
+
+      input.value =
+        this.document[themePropName] ?? designTokens.get(dt).default;
+    });
+
     return Object.fromEntries(ppp.settings);
   }
 
@@ -320,6 +450,36 @@ export class SettingsPage extends Page {
         hook: async (value) => CSS.supports('color', value),
         errorMessage: 'Недопустимый цвет'
       });
+    }
+
+    for (const input of Array.from(
+      this.shadowRoot.querySelectorAll('.settings-grid.fonts ppp-text-field')
+    )) {
+      await validate(input);
+
+      const dt = input.getAttribute('dt');
+
+      if (dt === 'body-font' || dt === 'monospace-font') {
+        await validate(input, {
+          hook: async (value) => CSS.supports('font-family', value),
+          errorMessage: 'Недопустимый шрифт'
+        });
+      } else if (dt.startsWith('font-size')) {
+        await validate(input, {
+          hook: async (value) => CSS.supports('font-size', value),
+          errorMessage: 'Недопустимый размер'
+        });
+      } else if (dt.startsWith('font-weight')) {
+        await validate(input, {
+          hook: async (value) => CSS.supports('font-weight', value),
+          errorMessage: 'Недопустимое значение'
+        });
+      } else if (dt.startsWith('line-height')) {
+        await validate(input, {
+          hook: async (value) => CSS.supports('line-height', value),
+          errorMessage: 'Недопустимое значение'
+        });
+      }
     }
   }
 
@@ -349,6 +509,22 @@ export class SettingsPage extends Page {
         updateClause.$set[themePropName] = pi.control.value;
       }
     }
+
+    Array.from(
+      this.shadowRoot.querySelectorAll('.settings-grid.fonts ppp-text-field')
+    ).forEach((input) => {
+      const dt = input.getAttribute('dt');
+      const propName = dt.replace(/-./g, (x) => x[1].toUpperCase());
+      const themePropName = `theme${
+        propName[0].toUpperCase() + propName.slice(1)
+      }`;
+
+      if (defaultTheme[propName] === input.value) {
+        updateClause.$unset[themePropName] = '';
+      } else {
+        updateClause.$set[themePropName] = input.value;
+      }
+    });
 
     localStorage.setItem(
       'ppp-light-critical-css',
@@ -412,7 +588,7 @@ export class SettingsPage extends Page {
     }
   }
 
-  async applyThemeTemplate(template) {
+  async applyThemeColorsTemplate(template) {
     if (!template) return;
 
     this.beginOperation();
@@ -435,6 +611,35 @@ export class SettingsPage extends Page {
 
         pi.control.appearance = 'default';
       }
+    } catch (e) {
+      this.failOperation(e, 'Загрузка шаблона темы');
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async applyThemeFontsTemplate(template) {
+    if (!template) return;
+
+    this.beginOperation();
+
+    try {
+      const { default: theme } = await import(
+        `${ppp.rootUrl}/design/themes/${template}.js`
+      );
+
+      Array.from(
+        this.shadowRoot.querySelectorAll('.settings-grid.fonts ppp-text-field')
+      ).forEach((input) => {
+        const dt = input.getAttribute('dt');
+        const propName = dt.replace(/-./g, (x) => x[1].toUpperCase());
+
+        input.value = theme[propName];
+
+        input.dispatchEvent(new CustomEvent('input'));
+
+        input.appearance = 'default';
+      });
     } catch (e) {
       this.failOperation(e, 'Загрузка шаблона темы');
     } finally {

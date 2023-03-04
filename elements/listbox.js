@@ -214,8 +214,8 @@ export class Listbox extends PPPAppearanceElement {
 
     const key = e.key;
 
+    // noinspection FallThroughInSwitchStatementJS
     switch (key) {
-      // Select the first available option
       case keyHome: {
         if (!e.shiftKey) {
           e.preventDefault();
@@ -224,7 +224,6 @@ export class Listbox extends PPPAppearanceElement {
 
         break;
       }
-      // Select the next selectable option
       case keyArrowDown: {
         if (!e.shiftKey) {
           e.preventDefault();
@@ -233,7 +232,6 @@ export class Listbox extends PPPAppearanceElement {
 
         break;
       }
-      // Select the previous selectable option
       case keyArrowUp: {
         if (!e.shiftKey) {
           e.preventDefault();
@@ -242,7 +240,6 @@ export class Listbox extends PPPAppearanceElement {
 
         break;
       }
-      // Select the last available option
       case keyEnd: {
         e.preventDefault();
         this.selectLastOption();
@@ -263,7 +260,6 @@ export class Listbox extends PPPAppearanceElement {
           return true;
         }
       }
-      // Send key to Typeahead handler
       default: {
         if (key.length === 1) {
           this.handleTypeAhead(`${key}`);
