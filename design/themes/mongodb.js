@@ -84,7 +84,7 @@ export default {
   spacing7: '88px',
   // Side navigation
   sideNavCollapsedWidth: 40,
-  sideNavExpandedWidth: 175,
+  sideNavExpandedWidth: 180,
   // Scrollbars
   scrollBarSize: 4,
   // Links

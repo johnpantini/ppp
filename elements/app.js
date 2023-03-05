@@ -74,7 +74,6 @@ export const appTemplate = html`
                   () => ppp.workspaces,
                   html`
                     <ppp-side-nav-item
-                      class="ellipsis"
                       @click="${(x, c) => {
                         if (
                           c.event.target
@@ -186,9 +185,7 @@ export const appTemplate = html`
                       ?active="${(x, c) => c.parent.extension === x._id}"
                       slot="items"
                     >
-                      <span slot="title" title="${(x) => x.title}">
-                        ${(x) => x.title}
-                      </span>
+                      <span slot="title"> ${(x) => x.title} </span>
                     </ppp-side-nav-item>
                   `
                 )}
@@ -392,6 +389,11 @@ export const appStyles = css`
   .page-content[workspace] {
     flex-direction: column;
     min-width: 0;
+  }
+
+  span[slot='start'] svg {
+    width: 16px;
+    height: 16px;
   }
 `;
 

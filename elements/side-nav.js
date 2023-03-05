@@ -8,7 +8,9 @@ import {
   observable,
   slotted,
   html,
-  repeat
+  repeat,
+  ref,
+  Updates
 } from '../vendor/fast-element.min.js';
 import { startSlotTemplate, endSlotTemplate } from '../vendor/fast-patterns.js';
 import { notDefined, display } from '../vendor/fast-utilities.js';
@@ -239,7 +241,9 @@ export const sideNavGroupTemplate = html`
     <div class="title">
       <div class="title-container">
         ${startSlotTemplate()}
-        <slot name="title"></slot>
+        <span class="ellipsis" ${ref('ellipsisTitle')}>
+          <slot name="title"></slot>
+        </span>
         ${endSlotTemplate()}
       </div>
     </div>
@@ -281,10 +285,15 @@ export const sideNavGroupStyles = css`
     margin: unset;
   }
 
+  .ellipsis {
+    ${ellipsis()};
+  }
+
   .title-container {
     display: inline-flex;
     align-items: center;
     gap: ${spacing2};
+    ${ellipsis()};
   }
 
   .items-container {
@@ -295,12 +304,28 @@ export const sideNavGroupStyles = css`
   }
 `;
 
-export class SideNavGroup extends PPPElement {}
+export class SideNavGroup extends PPPElement {
+  connectedCallback() {
+    super.connectedCallback();
+
+    Updates.enqueue(() => {
+      if (this.ellipsisTitle.offsetWidth < this.ellipsisTitle.scrollWidth) {
+        this.ellipsisTitle.setAttribute(
+          'title',
+          this.ellipsisTitle.firstElementChild?.assignedNodes?.()?.[0]
+            ?.textContent
+        );
+      } else {
+        this.ellipsisTitle.removeAttribute('title');
+      }
+    });
+  }
+}
 
 export const sideNavItemTemplate = html`
   <template>
     ${startSlotTemplate()}
-    <li class="content" part="content">
+    <li class="content" part="content" ${ref('content')}>
       <slot name="title"></slot>
     </li>
     ${endSlotTemplate()}
@@ -400,6 +425,18 @@ export class SideNavItem extends PPPElement {
 
   @attr({ mode: 'boolean' })
   active;
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    Updates.enqueue(() => {
+      if (this.content.offsetWidth < this.content.scrollWidth) {
+        this.setAttribute('title', this.textContent.trim());
+      } else {
+        this.removeAttribute('title');
+      }
+    });
+  }
 }
 
 export default {
