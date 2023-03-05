@@ -20,12 +20,12 @@ import {
 import '../button.js';
 import '../top-loader.js';
 import {
-  darken, lighten,
-  paletteGrayDark4, paletteGrayLight1, paletteGrayLight2,
-  paletteGrayLight3,
+  paletteGrayDark4,
+  paletteGrayLight2,
   scrollBarSize,
   themeConditional
-} from '../../design/design-tokens.js'
+} from '../../design/design-tokens.js';
+import { dragAndDrop } from '../../static/svg/sprite.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -34,13 +34,7 @@ export const workspacePageTemplate = html`
       (x) => x.isSteady() && !x.document.widgets?.length,
       html`
         <div class="empty-state">
-          <img
-            class="picture"
-            width="200"
-            height="200"
-            src="static/svg/empty-state.svg"
-            draggable="false"
-          />
+          <div class="picture">${html.partial(dragAndDrop)}</div>
           <h3>В этом терминале нет виджетов</h3>
           <p>
             Перед тем, как начать торговать, разместите виджеты на рабочей
@@ -84,10 +78,7 @@ export const workspacePageStyles = css`
     position: relative;
     z-index: 1;
     overflow: auto;
-    background-color: ${themeConditional(
-      paletteGrayLight2,
-      paletteGrayDark4
-    )};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark4)};
     width: 100%;
     height: 100%;
   }
@@ -100,6 +91,10 @@ export const workspacePageStyles = css`
   .widget {
     position: relative;
     overflow: hidden;
+  }
+
+  .empty-state .picture svg {
+    width: 110px;
   }
 `;
 
