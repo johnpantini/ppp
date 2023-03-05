@@ -31,8 +31,6 @@ import {
 } from '../static/svg/sprite.js';
 import './pages/not-found.js';
 import './side-nav.js';
-import './side-nav-item.js';
-import './side-nav-group.js';
 
 export const appTemplate = html`
   <template>

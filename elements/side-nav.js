@@ -10,9 +10,12 @@ import {
   html,
   repeat
 } from '../vendor/fast-element.min.js';
-import { notDefined } from '../vendor/fast-utilities.js';
-import { normalize, scrollbars } from '../design/styles.js';
+import { startSlotTemplate, endSlotTemplate } from '../vendor/fast-patterns.js';
+import { notDefined, display } from '../vendor/fast-utilities.js';
+import { ellipsis, normalize, scrollbars } from '../design/styles.js';
 import {
+  bodyFont,
+  fontSizeBody1,
   paletteGrayDark2,
   paletteGrayDark4,
   paletteGrayLight2,
@@ -22,8 +25,21 @@ import {
   paletteWhite,
   sideNavExpandedWidth,
   sideNavCollapsedWidth,
-  themeConditional, spacing3,
-} from '../design/design-tokens.js'
+  themeConditional,
+  spacing2,
+  spacing3,
+  fontWeightBody1,
+  lineHeightBody1,
+  spacing1,
+  paletteBlack,
+  paletteGrayBase,
+  toColorComponents,
+  paletteGrayDark3,
+  paletteGreenLight3,
+  paletteGreenDark3,
+  paletteGreenDark1,
+  paletteGreenBase
+} from '../design/design-tokens.js';
 
 export const sideNavTemplate = html`
   <template>
@@ -218,7 +234,185 @@ export class SideNav extends PPPElement {
   topLevelItems;
 }
 
-export default SideNav.compose({
-  template: sideNavTemplate,
-  styles: sideNavStyles
-}).define();
+export const sideNavGroupTemplate = html`
+  <template>
+    <div class="title">
+      <div class="title-container">
+        ${startSlotTemplate()}
+        <slot name="title"></slot>
+        ${endSlotTemplate()}
+      </div>
+    </div>
+    <ul class="items-container">
+      <slot name="items"></slot>
+    </ul>
+  </template>
+`;
+
+export const sideNavGroupStyles = css`
+  ${display('flex')}
+  ${normalize()}
+  :host {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+  }
+
+  ::slotted(span[slot='start']),
+  ::slotted(span[slot='end']) {
+    display: inline-flex;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+  }
+
+  .title {
+    display: flex;
+    position: relative;
+    font-family: ${bodyFont};
+    font-size: calc(${fontSizeBody1} - 1px);
+    font-weight: bold;
+    padding: ${spacing3} ${spacing3} ${spacing2};
+    align-items: center;
+    letter-spacing: 0.4px;
+    justify-content: space-between;
+    text-transform: uppercase;
+    color: ${themeConditional(paletteGreenDark2, paletteGreenLight1)};
+    margin: unset;
+  }
+
+  .title-container {
+    display: inline-flex;
+    align-items: center;
+    gap: ${spacing2};
+  }
+
+  .items-container {
+    margin-block: 0;
+    padding-inline-start: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+`;
+
+export class SideNavGroup extends PPPElement {}
+
+export const sideNavItemTemplate = html`
+  <template>
+    ${startSlotTemplate()}
+    <li class="content" part="content">
+      <slot name="title"></slot>
+    </li>
+    ${endSlotTemplate()}
+  </template>
+`;
+
+export const sideNavItemStyles = css`
+  ${display('flex')}
+  ${normalize()}
+  :host {
+    position: relative;
+    gap: ${spacing2};
+    font-family: ${bodyFont};
+    font-size: ${fontSizeBody1};
+    font-weight: ${fontWeightBody1};
+    line-height: ${lineHeightBody1};
+    margin: 0;
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    min-height: 32px;
+    padding: ${spacing1} ${spacing3};
+    align-items: center;
+    text-align: left;
+    text-decoration: none;
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
+  }
+
+  :host(.ellipsis) .content {
+    ${ellipsis()};
+    max-width: 130px;
+  }
+
+  :host([disabled]) {
+    color: ${paletteGrayBase};
+    background-color: rgba(${toColorComponents(paletteGrayLight3)}, 0);
+    pointer-events: none;
+  }
+
+  :host(:hover) {
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark3)};
+    text-decoration: none;
+  }
+
+  :host([active]:not([disabled])) {
+    color: ${themeConditional(paletteGreenDark2, paletteWhite)};
+    background-color: ${themeConditional(
+      paletteGreenLight3,
+      paletteGreenDark3
+    )};
+    font-weight: bold;
+  }
+
+  :host(:not([disabled])) .content::before {
+    content: '';
+    position: absolute;
+    background-color: transparent;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    border-radius: 0 6px 6px 0;
+    transform: scaleY(0.3);
+  }
+
+  :host([active]:not([disabled])) .content::before {
+    transform: scaleY(1);
+    background-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
+  }
+
+  :host([disabled]) slot[name='start']::slotted(.action-icon) {
+    color: ${paletteGrayBase} !important;
+  }
+
+  .content {
+    ${ellipsis()};
+  }
+
+  ::slotted(span[slot='start']),
+  ::slotted(span[slot='end']) {
+    display: inline-flex;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+  }
+
+  ::slotted(.action-icon) {
+    color: ${themeConditional(paletteGreenDark2, paletteGreenLight1)};
+  }
+`;
+
+export class SideNavItem extends PPPElement {
+  @attr({ mode: 'boolean' })
+  disabled;
+
+  @attr({ mode: 'boolean' })
+  active;
+}
+
+export default {
+  SideNavGroupComposition: SideNavGroup.compose({
+    template: sideNavGroupTemplate,
+    styles: sideNavGroupStyles
+  }).define(),
+  SideNavComposition: SideNav.compose({
+    template: sideNavTemplate,
+    styles: sideNavStyles
+  }).define(),
+  SideNavItemComposition: SideNavItem.compose({
+    template: sideNavItemTemplate,
+    styles: sideNavItemStyles
+  }).define()
+};
