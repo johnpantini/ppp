@@ -148,19 +148,45 @@ export class WorkspacePage extends Page {
       if (widget) {
         widget.dragging = true;
         this.draggedWidget = widget;
-        this.draggedWidgetBCR = this.draggedWidget.getBoundingClientRect();
+
+        const tempBCR = this.draggedWidget.getBoundingClientRect();
+
+        this.draggedWidgetCR = {
+          width: tempBCR.width,
+          height: tempBCR.height
+        };
 
         this.rectangles = this.widgets
           .filter((w) => w !== widget)
           .map((w) => {
-            const rect = w.getBoundingClientRect();
+            const { width, height } = w.getBoundingClientRect();
+            let { left, top } = getComputedStyle(w);
 
-            rect.w = w;
+            left = parseInt(left) + this.x;
+            top = parseInt(top);
 
-            return rect;
+            return {
+              top,
+              right: left + width,
+              bottom: top + height,
+              left,
+              width,
+              height,
+              x: left,
+              y: top
+            };
           });
 
-        this.rectangles.push(this.getBoundingClientRect());
+        this.rectangles.push({
+          top: 0,
+          right: this.x + this.workspace.scrollWidth,
+          bottom: this.workspace.scrollHeight,
+          left: this.x,
+          width: this.workspace.scrollWidth,
+          height: this.workspace.scrollHeight,
+          x: this.x,
+          y: 0
+        });
 
         const styles = getComputedStyle(widget);
 
@@ -177,8 +203,8 @@ export class WorkspacePage extends Page {
 
       let newTop = this.draggedWidget.y + deltaY;
       let newLeft = this.draggedWidget.x + deltaX;
-      const newRight = newLeft + this.draggedWidgetBCR.width;
-      const newBottom = newTop + this.draggedWidgetBCR.height;
+      const newRight = newLeft + this.draggedWidgetCR.width;
+      const newBottom = newTop + this.draggedWidgetCR.height;
 
       this.rectangles.forEach((rect) => {
         const hasVerticalIntersection =
@@ -212,8 +238,7 @@ export class WorkspacePage extends Page {
           );
 
           if (deltaRightRight <= this.snapDistance) {
-            newLeft =
-              rect.x - this.x + rect.width - this.draggedWidgetBCR.width;
+            newLeft = rect.x - this.x + rect.width - this.draggedWidgetCR.width;
           }
 
           // 4. Vertical, this.right -> rect.left
@@ -221,7 +246,7 @@ export class WorkspacePage extends Page {
 
           if (deltaRightLeft <= this.snapDistance) {
             newLeft =
-              rect.x - this.x - this.draggedWidgetBCR.width - this.snapMargin;
+              rect.x - this.x - this.draggedWidgetCR.width - this.snapMargin;
           }
         }
 
@@ -250,20 +275,20 @@ export class WorkspacePage extends Page {
 
           // 3. Horizontal, this.bottom -> rect.bottom
           const deltaBottomBottom = Math.abs(
-            rect.bottom - (newTop + this.draggedWidgetBCR.height)
+            rect.bottom - (newTop + this.draggedWidgetCR.height)
           );
 
           if (deltaBottomBottom <= this.snapDistance) {
-            newTop = rect.bottom - this.draggedWidgetBCR.height;
+            newTop = rect.bottom - this.draggedWidgetCR.height;
           }
 
           // 4. Horizontal, this.bottom -> rect.top
           const deltaBottomTop = Math.abs(
-            rect.y - (newTop + this.draggedWidgetBCR.height)
+            rect.y - (newTop + this.draggedWidgetCR.height)
           );
 
           if (deltaBottomTop <= this.snapDistance) {
-            newTop = rect.y - this.draggedWidgetBCR.height - this.snapMargin;
+            newTop = rect.y - this.draggedWidgetCR.height - this.snapMargin;
           }
         }
       });
@@ -289,7 +314,7 @@ export class WorkspacePage extends Page {
 
       this.dragging = false;
       this.draggedWidget = null;
-      this.draggedWidgetBCR = {};
+      this.draggedWidgetCR = {};
       this.rectangles = [];
 
       this.widgets.forEach((w) => {
