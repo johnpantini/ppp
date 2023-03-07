@@ -152,7 +152,13 @@ export class WorkspacePage extends Page {
 
         this.rectangles = this.widgets
           .filter((w) => w !== widget)
-          .map((w) => w.getBoundingClientRect());
+          .map((w) => {
+            const rect = w.getBoundingClientRect();
+
+            rect.w = w;
+
+            return rect;
+          });
 
         this.rectangles.push(this.getBoundingClientRect());
 
@@ -176,9 +182,12 @@ export class WorkspacePage extends Page {
 
       this.rectangles.forEach((rect) => {
         const hasVerticalIntersection =
-          (newTop >= rect.top && newTop <= rect.bottom) ||
-          (newBottom >= rect.top && newBottom <= rect.bottom) ||
-          (newTop <= rect.top && newBottom >= rect.bottom);
+          (newTop >= rect.top - this.snapDistance &&
+            newTop <= rect.bottom + this.snapDistance) ||
+          (newBottom >= rect.top - this.snapDistance &&
+            newBottom <= rect.bottom + this.snapDistance) ||
+          (newTop <= rect.top - this.snapDistance &&
+            newBottom >= rect.bottom + this.snapDistance);
 
         if (hasVerticalIntersection) {
           // 1. Vertical, this.left -> rect.right
@@ -217,9 +226,12 @@ export class WorkspacePage extends Page {
         }
 
         const hasHorizontalIntersection =
-          (newLeft >= rect.left && newLeft <= rect.right) ||
-          (newRight >= rect.left && newRight <= rect.right) ||
-          (newLeft <= rect.left && newRight >= rect.right);
+          (newLeft >= rect.left - this.x - this.snapDistance &&
+            newLeft <= rect.right - this.x + this.snapDistance) ||
+          (newRight >= rect.left - this.x - this.snapDistance &&
+            newRight <= rect.right - this.x + this.snapDistance) ||
+          (newLeft <= rect.left - this.x - this.snapDistance &&
+            newRight >= rect.right - this.x + this.snapDistance);
 
         if (hasHorizontalIntersection) {
           // 1. Horizontal, this.top -> rect.bottom
