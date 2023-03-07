@@ -3,16 +3,16 @@ import defaultTheme from './mongodb.js';
 export default Object.assign({}, defaultTheme, {
   // Base colors
   paletteWhite: '#FFFFFF', // *
-  paletteBlack: '#161A1E', // *
+  paletteBlack: '#181A20', // *
   // Gray
   paletteGrayBase: '#848E9C',
   paletteGrayLight1: '#B7BDC6', // *
   paletteGrayLight2: '#EAECEF', // *
   paletteGrayLight3: '#F9FBFA',
   paletteGrayDark1: '#474D57', // *
-  paletteGrayDark2: '#474D57', // *
+  paletteGrayDark2: '#40464F', // *
   paletteGrayDark3: '#1C2D38',
-  paletteGrayDark4: '#181A20', // *
+  paletteGrayDark4: '#0B0E11', // *
   // Green
   paletteGreenBase: '#F0B90B', // *
   paletteGreenLight1: '#FCD535', // *

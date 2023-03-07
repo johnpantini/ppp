@@ -1,6 +1,11 @@
 /** @decorator */
 
-import { observable, html, Observable } from './vendor/fast-element.min.js';
+import {
+  observable,
+  html,
+  Observable,
+  css
+} from './vendor/fast-element.min.js';
 import { DesignToken } from './design/design-token.js';
 import { KeyVault } from './lib/key-vault.js';
 import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
@@ -15,7 +20,13 @@ import { APIS, TRADERS } from './lib/const.js';
   }
 }
   .compose({
-    template: html` <slot></slot> `
+    template: html` <slot></slot> `,
+    styles: css`
+      :host {
+        position: relative;
+        height: 100%;
+      }
+    `
   })
   .define());
 
@@ -119,7 +130,7 @@ class PPP {
     if (typeof structuredClone === 'function') {
       return structuredClone(value);
     } else {
-      return JSON.parse(JSON.stringify(value));
+      return Object.assign({}, value);
     }
   }
 

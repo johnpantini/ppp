@@ -1,7 +1,7 @@
-import { BROKERS, TRADER_DATUM } from '../const.js';
-import { later } from '../later.js';
+import { BROKERS, TRADER_DATUM } from '../lib/const.js';
+import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
-import { cyrillicToLatin } from '../intl.js';
+import { cyrillicToLatin } from '../lib/intl.js';
 import ppp from '../../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols

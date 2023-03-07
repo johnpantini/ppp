@@ -44,39 +44,18 @@ import { circleNotch, search } from '../static/svg/sprite.js';
 const searchDebounceTimeout =
   ppp.keyVault.getKey('use-alternative-mongo') === '1' ? 0 : 200;
 
-export const widget = () => css``;
-
-export const widgetEmptyStateTemplate = (text) => `
-  <div class="widget-empty-state-holder">
-
-  </div>`;
-
-export const widgetTemplate = html`
-  <template>
-    <header>
-      <div class="header-inner">
-        <slot name="header"></slot>
-      </div>
-    </header>
-    <div class="widget-body">
-      <slot name="body"></slot>
-    </div>
-  </template>
-`;
-
-export const widgetStyles = css`
-  ${normalize()}
+export const widget = () => css`
   ${display('inline-flex')}
-  :host {
+  .widget-root {
     position: relative;
-    background: ${themeConditional(paletteWhite)};
-    border: 1px solid ${themeConditional(paletteGrayLight2)};
+    background: ${themeConditional(paletteWhite, paletteBlack)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteBlack)};
     width: 100%;
     height: 100%;
     user-select: none;
   }
 
-  header {
+  .widget-header {
     display: flex;
     position: relative;
     width: 100%;
@@ -85,23 +64,24 @@ export const widgetStyles = css`
     flex-shrink: 0;
     padding: 0 5px;
     font-size: ${fontSizeWidget};
-    background: ${themeConditional(darken(paletteGrayLight3, 5))};
+    background: ${themeConditional(darken(paletteGrayLight3, 5), paletteBlack)};
     align-items: center;
     justify-content: space-between;
   }
 
-  header::after {
+  .widget-header::after {
     top: 0;
     left: 0;
     right: 0;
     bottom: -1px;
     content: '';
     position: absolute;
-    border-bottom: 1px solid ${themeConditional(paletteGrayLight2)};
+    border-bottom: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
     pointer-events: none;
   }
 
-  .header-inner {
+  .widget-header-inner {
     display: flex;
     width: 100%;
     height: 30px;
@@ -116,18 +96,40 @@ export const widgetStyles = css`
     overflow: auto;
   }
 
-  slot[name='header']::slotted(ppp-widget-group-control) {
+  .widget-header ppp-widget-group-control {
     flex: 0 0 16px;
   }
 
-  slot[name='header']::slotted(ppp-widget-search-control) {
+  .widget-header ppp-widget-search-control {
     height: 20px;
     flex: 0 0 66px;
     margin-left: ${spacing1};
   }
+
+  .widget-title {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    margin-left: 8px;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    flex-grow: 1;
+    padding: 0 ${spacing1};
+    margin-right: 6px;
+  }
 `;
 
+export const widgetEmptyStateTemplate = (text) => `
+  <div class="widget-empty-state-holder">
+
+  </div>`;
+
 export class Widget extends PPPElement {
+  @attr({ mode: 'boolean' })
+  dragging;
+
   @attr({ mode: 'boolean' })
   preview;
 
@@ -146,15 +148,12 @@ export class Widget extends PPPElement {
   connectedCallback() {
     super.connectedCallback();
 
-    return;
+    this.header = this.shadowRoot.querySelector('.widget-header');
 
     if (!this.preview) {
-      this.querySelector('.widget-header').addEventListener(
-        'pointerdown',
-        () => {
-          this.style.zIndex = ++this.container.zIndex;
-        }
-      );
+      this.header.addEventListener('pointerdown', () => {
+        this.style.zIndex = ++this.container.zIndex;
+      });
     } else {
       this.style.position = 'relative';
       this.style.display = 'block';
@@ -185,14 +184,6 @@ export class Widget extends PPPElement {
       if (this.container.savedInstrument)
         this.instrument = this.container.savedInstrument;
     }
-  }
-
-  onDragEnd() {
-    console.log('onDragEnd');
-  }
-
-  onResizeEnd() {
-    console.log('onResizeEnd');
   }
 
   async updateDocumentFragment(widgetUpdateFragment = {}) {
@@ -480,13 +471,14 @@ export const widgetGroupControlStyles = css`
     position: relative;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
   }
 
   .toggle {
     cursor: pointer;
     position: relative;
-    background: #d9dae0;
-    color: #ffffff;
+    background: ${paletteGrayLight1};
+    color: ${paletteBlack};
     width: 12px;
     height: 12px;
     font-size: 10px;
@@ -517,7 +509,6 @@ export const widgetGroupControlStyles = css`
     border-radius: 4px;
     transform: translate(10px, 12px);
     background: #ffffff;
-    box-shadow: 0 7px 20px 0 rgb(0 0 0 / 20%);
   }
 
   .popup::after,
@@ -987,6 +978,7 @@ export const widgetSearchControlStyles = css`
     height: 100%;
     position: relative;
     cursor: default;
+    pointer-events: none;
   }
 
   .popup-trigger {
@@ -1002,9 +994,13 @@ export const widgetSearchControlStyles = css`
     height: 100%;
     border-radius: 2px;
     background-color: ${themeConditional(paletteWhite, paletteBlack)};
-    border: 1px solid ${themeConditional(paletteGrayLight1)};
-    color: ${themeConditional(paletteBlack, paletteGrayLight3)};
+    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
     ${ellipsis()};
+  }
+
+  input.popup-trigger::placeholder {
+    color: ${paletteGrayLight1};
   }
 
   .popup-trigger:focus-visible {
@@ -1569,10 +1565,6 @@ export class WidgetNotificationsArea extends PPPElement {
 }
 
 export default {
-  WidgetComposition: Widget.compose({
-    template: widgetTemplate,
-    styles: widgetStyles
-  }).define(),
   WidgetGroupControlComposition: WidgetGroupControl.compose({
     template: widgetGroupControlTemplate,
     styles: widgetGroupControlStyles

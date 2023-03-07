@@ -1,5 +1,5 @@
-import { getInstrumentPrecision } from '../intl.js';
-import { TRADER_DATUM } from '../const.js';
+import { getInstrumentPrecision } from '../lib/intl.js';
+import { TRADER_DATUM } from '../lib/const.js';
 
 export class Trader {
   document = {};
@@ -95,8 +95,7 @@ export class Trader {
               reject(event.target.error);
             };
           }
-        } else
-          resolve(null);
+        } else resolve(null);
       };
 
       storeRequest.onerror = (event) => {

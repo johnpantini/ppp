@@ -82,6 +82,7 @@ export const pageStyles = css`
   ${typography()}
   :host(.page) {
     position: relative;
+    width: 100%;
     height: 100%;
   }
 

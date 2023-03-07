@@ -238,6 +238,10 @@ export const textFieldStyles = css`
     line-height: inherit;
   }
 
+  input::placeholder {
+    color: ${paletteGrayLight1};
+  }
+
   :host(.error:not([disabled])) input {
     border-color: ${themeConditional(paletteRedBase, paletteRedLight1)};
     padding-right: 30px;

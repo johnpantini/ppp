@@ -370,6 +370,42 @@ export const settingsPageTemplate = html`
           </div>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Прилипание виджетов</h5>
+          <p class="description">
+            Дистанция срабатывания определяет минимальное расстояние между
+            вертикальными или горизонтальными границами виджетов, при котором
+            активируется прилипание, и виджеты притягиваются друг к другу на
+            величину отступа. Параметры задаются в пикселях. Чтобы отключить
+            прилипание, установите оба значение в 0.
+          </p>
+        </div>
+        <div class="input-group">
+          <div class="settings-grid snap">
+            <div class="row">
+              <ppp-text-field
+                type="number"
+                min="0"
+                placeholder="5"
+                value="${(x) => x.document.workspaceSnapDistance ?? '5'}"
+                ${ref('workspaceSnapDistance')}
+              >
+                <span slot="label">Дистанция срабатывания</span>
+              </ppp-text-field>
+              <ppp-text-field
+                type="number"
+                min="0"
+                placeholder="0"
+                value="${(x) => x.document.workspaceSnapMargin ?? '0'}"
+                ${ref('workspaceSnapMargin')}
+              >
+                <span slot="label">Отступ между виджетами</span>
+              </ppp-text-field>
+            </div>
+          </div>
+        </div>
+      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -481,12 +517,32 @@ export class SettingsPage extends Page {
         });
       }
     }
+
+    await validate(this.workspaceSnapDistance);
+    await validate(this.workspaceSnapMargin);
+
+    for (const input of [
+      this.workspaceSnapDistance,
+      this.workspaceSnapMargin
+    ]) {
+      await validate(input, {
+        hook: async (value) => value >= 0,
+        errorMessage: 'Значение должно быть неотрицательным'
+      });
+    }
+
+    await validate(this.workspaceSnapMargin, {
+      hook: async (value) => value <= +this.workspaceSnapDistance.value,
+      errorMessage: `Значение должно быть не больше ${this.workspaceSnapDistance.value}`
+    });
   }
 
   async submit() {
     const updateClause = {
       $set: {
-        darkMode: this.darkMode.value
+        darkMode: this.darkMode.value,
+        workspaceSnapDistance: Math.trunc(this.workspaceSnapDistance.value),
+        workspaceSnapMargin: Math.trunc(this.workspaceSnapMargin.value)
       },
       $unset: {
         removed: ''

@@ -98,7 +98,7 @@ export const sideNavStyles = css`
   :host {
     position: relative;
     width: calc(${sideNavCollapsedWidth} * 1px);
-    height: 100vh;
+    height: 100%;
     user-select: none;
   }
 

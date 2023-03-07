@@ -34,8 +34,12 @@ import {
   fontSizeHeading5,
   lineHeightHeading5,
   fontWeightHeading5,
-  linkColor, paletteWhite, paletteGrayDark3
-} from './design-tokens.js'
+  linkColor,
+  paletteWhite,
+  paletteGrayDark3,
+  toColorComponents,
+  paletteGreenBase
+} from './design-tokens.js';
 
 export const normalize = () => css`
   *:not(:defined) {
@@ -89,29 +93,54 @@ export const scrollbars = (selector = '') => css`
   }
 
   ${selector}::-webkit-scrollbar-track {
-    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark4)};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark4)};
   }
 
   ${selector}::-webkit-scrollbar-thumb {
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+    background-color: rgba(
+      ${themeConditional(
+        toColorComponents(paletteGrayDark1),
+        toColorComponents(paletteGrayLight1)
+      )},
+      0.2
+    );
   }
 
   :host {
-    scrollbar-color: ${themeConditional(paletteGrayLight3, paletteGrayDark4)}
-      ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+    scrollbar-color: ${themeConditional(paletteGrayLight2, paletteGrayDark4)}
+      rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayDark1),
+          toColorComponents(paletteGrayLight1)
+        )},
+        0.2
+      );
     scrollbar-width: thin;
   }
 `;
 
 [
   scrollBarSize,
-  themeConditional(paletteGrayLight3, paletteGrayDark4),
-  themeConditional(paletteGrayLight2, paletteGrayDark2)
+  themeConditional(paletteGrayLight2, paletteGrayDark4),
+  themeConditional(
+    toColorComponents(paletteGrayDark1),
+    toColorComponents(paletteGrayLight1)
+  )
 ].forEach((dt) => {
-  document.body.style.setProperty(dt.cssCustomProperty, dt.$value);
+  document.body.style.setProperty(
+    dt.cssCustomProperty,
+    typeof dt.$value === 'object' ? dt.$value.createCSS() : dt.$value
+  );
 });
 
 scrollbars('body').addStylesTo(document.body);
+
+css`
+  body::-webkit-scrollbar {
+    width: calc(${scrollBarSize} * 1px + 1px);
+    height: calc(${scrollBarSize} * 1px + 1px);
+  }
+`.addStylesTo(document.body);
 
 export const ellipsis = () => css.partial`
   overflow: hidden;

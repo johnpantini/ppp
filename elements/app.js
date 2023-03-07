@@ -348,6 +348,7 @@ export const appStyles = css`
     flex-direction: column;
     flex-grow: 1;
     width: 100%;
+    height: 100%;
   }
 
   .holder {
@@ -379,16 +380,9 @@ export const appStyles = css`
   }
 
   .page-content:not([workspace]) {
-    flex-direction: column;
-    min-width: 0;
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 20px;
-  }
-
-  .page-content[workspace] {
-    flex-direction: column;
-    min-width: 0;
   }
 
   span[slot='start'] svg {
