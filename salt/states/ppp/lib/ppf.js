@@ -103,7 +103,7 @@ createServer(async (request, response) => {
             .db('ppp')
             .collection(body.arguments[0].collection)
             [body.name](
-              body.arguments[1],
+              EJSON.deserialize(body.arguments[1]),
               body.arguments[2],
               body.arguments[3],
               body.arguments[4]
