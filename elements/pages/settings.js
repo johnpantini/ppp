@@ -396,8 +396,8 @@ export const settingsPageTemplate = html`
               <ppp-text-field
                 type="number"
                 min="0"
-                placeholder="0"
-                value="${(x) => x.document.workspaceSnapMargin ?? '0'}"
+                placeholder="1"
+                value="${(x) => x.document.workspaceSnapMargin ?? '1'}"
                 ${ref('workspaceSnapMargin')}
               >
                 <span slot="label">Отступ между виджетами</span>

@@ -290,7 +290,7 @@ export class WorkspacePage extends Page {
     await super.connectedCallback();
 
     this.snapDistance = ppp.settings.get('workspaceSnapDistance') ?? 5;
-    this.snapMargin = ppp.settings.get('workspaceSnapMargin') ?? 0;
+    this.snapMargin = ppp.settings.get('workspaceSnapMargin') ?? 1;
 
     document.addEventListener('dblclick', this.onDblClick);
     document.addEventListener('pointerdown', this.onPointerDown);
