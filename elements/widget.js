@@ -21,7 +21,7 @@ import {
   fontSizeWidget,
   fontWeightWidget,
   lineHeightWidget,
-  paletteBlack,
+  paletteBlack, paletteBlueLight1,
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark2,
@@ -38,7 +38,7 @@ import {
   paletteYellowLight2,
   spacing1,
   themeConditional
-} from '../design/design-tokens.js';
+} from '../design/design-tokens.js'
 import { circleNotch, search } from '../static/svg/sprite.js';
 
 const searchDebounceTimeout =
@@ -53,6 +53,10 @@ export const widget = () => css`
     width: 100%;
     height: 100%;
     user-select: none;
+  }
+
+  :host([dragging]) .widget-root {
+    border: 1px solid ${paletteBlueLight1};
   }
 
   .widget-header {
