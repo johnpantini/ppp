@@ -104,7 +104,7 @@ createServer(async (request, response) => {
             .collection(body.arguments[0].collection)
             [body.name](
               EJSON.deserialize(body.arguments[1]),
-              body.arguments[2],
+              EJSON.deserialize(body.arguments[2]),
               body.arguments[3],
               body.arguments[4]
             );
