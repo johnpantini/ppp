@@ -10,12 +10,33 @@ import {
   css,
   when,
   ref,
+  repeat,
   observable,
   Observable
 } from '../../vendor/fast-element.min.js';
-import { WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
-import { priceCurrencySymbol } from '../../lib/intl.js';
-import { normalize } from '../../design/styles.js';
+import { WIDGET_TYPES, TRADER_DATUM, TRADER_CAPS } from '../../lib/const.js';
+import {
+  priceCurrencySymbol,
+  formatQuantity,
+  formatDate,
+  formatPriceWithoutCurrency
+} from '../../lib/intl.js';
+import { ellipsis, normalize } from '../../design/styles.js';
+import {
+  buy,
+  fontSizeWidget,
+  lighten,
+  paletteBlack,
+  paletteGrayBase,
+  paletteGrayDark1,
+  paletteGrayDark4,
+  paletteGrayLight1,
+  paletteGrayLight2,
+  paletteWhite,
+  sell,
+  themeConditional,
+  toColorComponents
+} from '../../design/design-tokens.js';
 
 export const timeAndSalesWidgetTemplate = html`
   <template>
@@ -32,6 +53,82 @@ export const timeAndSalesWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${when(
+          (x) => x.instrument,
+          html`
+            <table class="trades-table">
+              <thead>
+                <tr>
+                  <th>
+                    ${(x) =>
+                      x.instrument
+                        ? 'Цена, ' + priceCurrencySymbol(x.instrument)
+                        : 'Цена'}
+                  </th>
+                  <th>Количество</th>
+                  <th>Время</th>
+                  <th
+                    style="display: ${(x) =>
+                      x.tradesTrader &&
+                      x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                        ? 'table-cell'
+                        : 'none'}"
+                  >
+                    MM
+                  </th>
+                </tr>
+              </thead>
+              <tbody @click="${(x, c) => x.handleTableClick(c)}">
+                ${repeat(
+                  (x) => x.trades ?? [],
+                  html`
+                    <tr
+                      class="price-line"
+                      side="${(x) => x.side}"
+                      price="${(x) => x.price}"
+                    >
+                      <td>
+                        <div class="cell">
+                          ${(x, c) =>
+                            formatPriceWithoutCurrency(
+                              x.price,
+                              c.parent.instrument
+                            )}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          ${(x, c) =>
+                            formatQuantity(x.volume ?? 0, c.parent.instrument)}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          ${(x) => formatDate(x.timestamp)}
+                        </div>
+                      </td>
+                      <td
+                        style="display: ${(x, c) =>
+                          c.parent.tradesTrader &&
+                          c.parent.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                            ? 'table-cell'
+                            : 'none'}"
+                      >
+                        <div class="cell">${(x) => x.pool}</div>
+                      </td>
+                    </tr>
+                  `
+                )}
+              </tbody>
+            </table>
+            ${when(
+              (x) => !x.trades?.length,
+              html`${html.partial(
+                widgetEmptyStateTemplate('Лента сделок пуста.')
+              )}`
+            )}
+          `
+        )}
+        ${when(
           (x) => !x.instrument,
           html`${html.partial(
             widgetEmptyStateTemplate('Выберите инструмент.')
@@ -46,6 +143,86 @@ export const timeAndSalesWidgetTemplate = html`
 export const timeAndSalesWidgetStyles = css`
   ${normalize()}
   ${widget()}
+  .trades-table {
+    text-align: left;
+    min-width: 140px;
+    width: 100%;
+    padding: 0;
+    user-select: none;
+    border-collapse: collapse;
+  }
+
+  .trades-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    width: 50%;
+    height: 28px;
+    padding: 4px 8px;
+    font-weight: 500;
+    font-size: ${fontSizeWidget};
+    line-height: 20px;
+    white-space: nowrap;
+    color: ${themeConditional(paletteGrayDark1, lighten(paletteGrayLight1, 10))};
+    background: ${themeConditional(paletteWhite, paletteBlack)};
+  }
+
+  .trades-table th::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    display: block;
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  .trades-table .cell {
+    padding: 2px 4px;
+    font-variant-numeric: tabular-nums;
+    color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
+  }
+
+  .trades-table tr[side='buy'] {
+    background-color: rgba(
+      ${toColorComponents(buy)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+  }
+
+  .trades-table tr[side='sell'] {
+    background-color: rgba(
+      ${toColorComponents(sell)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+  }
+
+  .trades-table tr:hover {
+    background-color: rgba(
+      ${themeConditional(
+        toColorComponents(paletteGrayLight2),
+        toColorComponents(paletteGrayDark1)
+      )},
+      0.7
+    );
+  }
+
+  .trades-table td {
+    width: 50%;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid
+      ${themeConditional(lighten(paletteGrayLight2, 10), paletteGrayDark4)};
+    background: transparent;
+    cursor: pointer;
+    font-size: ${fontSizeWidget};
+    ${ellipsis()};
+  }
+
+  .trades-table .cell:last-child {
+    margin-right: 8px;
+  }
 `;
 
 export class TimeAndSalesWidget extends WidgetWithInstrument {

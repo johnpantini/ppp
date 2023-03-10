@@ -371,7 +371,6 @@ export const orderWidgetTemplate = html`
                 </div>
               </div>
             </div>
-            <ppp-widget-notifications-area></ppp-widget-notifications-area>
           `
         )}
         ${when(
@@ -380,6 +379,7 @@ export const orderWidgetTemplate = html`
             widgetEmptyStateTemplate('Выберите инструмент.')
           )}`
         )}
+        <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
     </div>
   </template>

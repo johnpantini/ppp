@@ -10,6 +10,7 @@ import {
   css,
   when,
   ref,
+  repeat,
   observable,
   Observable
 } from '../../vendor/fast-element.min.js';
@@ -19,7 +20,25 @@ import {
   formatPriceWithoutCurrency,
   priceCurrencySymbol
 } from '../../lib/intl.js';
-import { normalize } from '../../design/styles.js';
+import { ellipsis, normalize, spacing } from '../../design/styles.js';
+import {
+  buy,
+  fontSizeWidget,
+  lighten,
+  negative,
+  paletteBlack,
+  paletteBlueBase,
+  paletteGrayBase,
+  paletteGrayDark1,
+  paletteGrayDark4,
+  paletteGrayLight1,
+  paletteGrayLight2,
+  paletteWhite,
+  positive,
+  sell,
+  themeConditional,
+  toColorComponents
+} from '../../design/design-tokens.js';
 
 export const orderbookWidgetTemplate = html`
   <template>
@@ -36,6 +55,123 @@ export const orderbookWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${when(
+          (x) => x.instrument,
+          html`
+            <table class="orderbook-table">
+              <thead>
+                <tr>
+                  <th colspan="2">
+                    <div class="bid-title">
+                      ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
+                    </div>
+                    <div class="spread">${(x) => x.spreadString}</div>
+                    <div class="ask-title">
+                      ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody @click="${(x, c) => x.handleTableClick(c)}">
+                ${repeat(
+                  (x) => x.quoteLines,
+                  html`
+                    <tr>
+                      <td
+                        style="${(x, c) =>
+                          `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
+                            x.bid?.volume
+                          )}%, transparent ${c.parent.calcGradientPercentage(
+                            x.bid?.volume
+                          )}%, transparent 100% )`}"
+                      >
+                        <div
+                          class="quote-line bid-line"
+                          price="${(x) => x.bid?.price}"
+                        >
+                          <div class="volume">
+                            ${when(
+                              (x) => x.bid?.my > 0,
+                              html`
+                                <div class="my-order">
+                                  <span>
+                                    <span>${(x) => x.bid.my}</span>
+                                  </span>
+                                </div>
+                              `
+                            )}
+                            ${(x) => x.bid?.volume}
+                          </div>
+                          <div class="spacer"></div>
+                          <div class="price">
+                            ${(x, c) =>
+                              formatPriceWithoutCurrency(
+                                x.bid?.price,
+                                c.parent.instrument
+                              )}
+                          </div>
+                          ${when(
+                            (x) => x.bid?.pool,
+                            html`
+                              <div class="pool">${(x) => x.bid?.pool}</div>
+                            `
+                          )}
+                        </div>
+                      </td>
+                      <td
+                        style="${(x, c) =>
+                          `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
+                            x.ask?.volume
+                          )}%, transparent ${c.parent.calcGradientPercentage(
+                            x.ask?.volume
+                          )}%, transparent 100% )`}"
+                      >
+                        <div
+                          class="quote-line ask-line"
+                          price="${(x) => x.ask?.price}"
+                        >
+                          <div class="volume">
+                            ${(x) => x.ask?.volume}
+                            ${when(
+                              (x) => x.ask?.my > 0,
+                              html`
+                                <div class="my-order">
+                                  <span>
+                                    <span>${(x) => x.ask.my}</span>
+                                  </span>
+                                </div>
+                              `
+                            )}
+                          </div>
+                          <div class="spacer"></div>
+                          <div class="price">
+                            ${(x, c) =>
+                              formatPriceWithoutCurrency(
+                                x.ask?.price,
+                                c.parent.instrument
+                              )}
+                          </div>
+                          ${when(
+                            (x) => x.ask?.pool,
+                            html`
+                              <div class="pool">${(x) => x.ask?.pool}</div>
+                            `
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  `
+                )}
+              </tbody>
+            </table>
+            ${when(
+              (x) => !x.quoteLines.length,
+              html`${html.partial(
+                widgetEmptyStateTemplate('Книга заявок пуста.')
+              )}`
+            )}
+          `
+        )}
+        ${when(
           (x) => !x.instrument,
           html`${html.partial(
             widgetEmptyStateTemplate('Выберите инструмент.')
@@ -50,6 +186,177 @@ export const orderbookWidgetTemplate = html`
 export const orderbookWidgetStyles = css`
   ${normalize()}
   ${widget()}
+  ${spacing()}
+  .orderbook-table {
+    min-width: 140px;
+    width: 100%;
+    padding: 0;
+    user-select: none;
+    border-collapse: collapse;
+  }
+
+  .orderbook-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    width: 50%;
+    height: 28px;
+    padding: 4px 8px;
+    font-weight: 500;
+    font-size: ${fontSizeWidget};
+    line-height: 20px;
+    white-space: nowrap;
+    background: ${themeConditional(paletteWhite, paletteBlack)};
+  }
+
+  .orderbook-table th::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    display: block;
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  .bid-title {
+    left: 8px;
+    text-align: left;
+    position: absolute;
+    top: 4px;
+    color: ${positive};
+  }
+
+  .ask-title {
+    right: 8px;
+    text-align: right;
+    position: absolute;
+    top: 4px;
+    color: ${negative};
+  }
+
+  .bid-title,
+  .ask-title {
+    font-weight: 500;
+  }
+
+  .spread {
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: 400;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    position: absolute;
+    top: 4px;
+  }
+
+  .orderbook-table td {
+    --orderbook-ask-color: rgba(
+      ${toColorComponents(sell)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+    --orderbook-bid-color: rgba(
+      ${toColorComponents(buy)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+    width: 50%;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid
+      ${themeConditional(lighten(paletteGrayLight2, 10), paletteGrayDark4)};
+    background: transparent;
+    cursor: pointer;
+    font-size: ${fontSizeWidget};
+    ${ellipsis()};
+  }
+
+  .ask-line,
+  .bid-line {
+    width: 100%;
+    display: flex;
+    padding: 2px 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ask-line:hover,
+  .bid-line:hover {
+    background-color: rgba(
+      ${themeConditional(
+        toColorComponents(paletteGrayLight2),
+        toColorComponents(paletteGrayDark1)
+      )},
+      0.7
+    );
+  }
+
+  .bid-line {
+    flex-direction: row-reverse;
+  }
+
+  .my-order {
+    display: inline-block;
+  }
+
+  .ask-line .my-order {
+    margin-left: 1px;
+  }
+
+  .bid-line .my-order {
+    margin-right: 1px;
+  }
+
+  .my-order > span {
+    cursor: pointer;
+    background-color: ${paletteBlueBase};
+    color: ${paletteWhite};
+    border-radius: 24px;
+    font-size: calc(${fontSizeWidget} - 1px);
+    line-height: 16px;
+    min-height: 16px;
+    min-width: 16px;
+    padding: 1px 4px;
+  }
+
+  .my-order > span > span {
+    min-height: 16px;
+    margin: 0 4px;
+    word-wrap: normal;
+    ${ellipsis()};
+  }
+
+  .spacer {
+    width: 0;
+    margin: 0 auto;
+    user-select: none;
+  }
+
+  .volume {
+    color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
+    display: flex;
+    gap: 0 4px;
+  }
+
+  .price,
+  .pool {
+    margin-right: 8px;
+    color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
+    width: 33.33%;
+  }
+
+  .volume {
+    width: 33.33%;
+    max-width: 33.33%;
+  }
+
+  .ask-line .price,
+  .ask-line .pool,
+  .bid-line .volume {
+    text-align: right;
+  }
+
+  .bid-line .volume {
+    justify-content: flex-end;
+  }
 `;
 
 export class OrderbookWidget extends WidgetWithInstrument {

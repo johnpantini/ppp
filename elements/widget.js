@@ -149,8 +149,7 @@ export const widget = () => css`
 
   .widget-header ppp-widget-search-control {
     height: 20px;
-    flex: 0 0 66px;
-    margin-left: ${spacing1};
+    margin-left: 6px;
   }
 
   .widget-title {
@@ -918,7 +917,10 @@ export class WidgetGroupControl extends PPPOffClickElement {
 }
 
 export const widgetSearchControlTemplate = html`
-  <template @click="${(x, c) => x.handleClick(c)}">
+  <template
+    size="${(x) => x.widget?.instrument?.symbol?.length ?? '0'}"
+    @click="${(x, c) => x.handleClick(c)}"
+  >
     <input
       readonly
       class="popup-trigger"
@@ -1178,7 +1180,33 @@ export const widgetSearchControlStyles = css`
     height: 100%;
     position: relative;
     cursor: default;
+    max-width: 75px;
+    min-width: 45px;
     pointer-events: none;
+  }
+
+  :host([size='1']),
+  :host([size='2']) {
+    width: 45px;
+  }
+
+  :host([size='3']) {
+    width: 55px;
+  }
+
+  :host([size='4']) {
+    width: 60px;
+  }
+
+  :host([size='5']),
+  :host([size='6']),
+  :host([size='7']),
+  :host([size='8']),
+  :host([size='9']),
+  :host([size='10']),
+  :host([size='11']),
+  :host([size='12']) {
+    width: 75px;
   }
 
   .popup-trigger {
@@ -1462,6 +1490,9 @@ export const widgetSearchControlStyles = css`
 export class WidgetSearchControl extends PPPOffClickElement {
   @attr({ mode: 'boolean' })
   open;
+
+  @attr
+  size;
 
   @attr({ mode: 'boolean' })
   searching;
@@ -1909,6 +1940,7 @@ export const widgetTextFieldStyles = css`
   }
 
   input {
+    height: 32px;
     font-size: ${fontSizeWidget};
     border-radius: 4px 0 0 4px;
     padding: 0 0 1px 8px;

@@ -1,6 +1,6 @@
 import { isJWTTokenExpired, uuidv4 } from '../lib/ppp-crypto.js';
 import { TradingError } from '../lib/ppp-errors.js';
-import { TRADER_DATUM } from '../lib/const.js';
+import { TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
 import { cyrillicToLatin } from '../lib/intl.js';
