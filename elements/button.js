@@ -33,6 +33,11 @@ import {
   paletteGreenBase,
   paletteGreenDark2,
   paletteGreenLight2,
+  paletteRedBase,
+  paletteRedDark1,
+  paletteRedLight1,
+  paletteRedLight2,
+  paletteRedLight3,
   paletteWhite,
   spacing2,
   themeConditional
@@ -197,6 +202,30 @@ export const buttonStyles = css`
   :host(.primary) ::slotted(span[slot='start']),
   :host(.primary) ::slotted(span[slot='end']) {
     color: ${themeConditional(paletteGreenLight2)};
+  }
+
+  :host(.danger) .control {
+    background-color: ${themeConditional(paletteRedBase)};
+    border-color: ${themeConditional(paletteRedBase, paletteRedLight1)};
+    color: ${themeConditional(paletteWhite)};
+  }
+
+  :host(.danger) .control:hover,
+  :host(.danger) .control:active {
+    color: ${themeConditional(paletteWhite)};
+    background-color: ${themeConditional(
+      darken(paletteRedBase, 15),
+      paletteRedDark1
+    )};
+    border-color: ${themeConditional(
+      darken(paletteRedDark1, 15),
+      paletteRedLight1
+    )};
+  }
+
+  :host(.danger) ::slotted(span[slot='start']),
+  :host(.danger) ::slotted(span[slot='end']) {
+    color: ${themeConditional(paletteRedLight3, paletteRedLight2)};
   }
 
   ::slotted(span[slot='start']),

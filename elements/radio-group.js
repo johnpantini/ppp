@@ -194,7 +194,7 @@ export class RadioGroup extends PPPElement {
     };
 
     this.handleDisabledClick = (e) => {
-      if (this.disabled) {
+      if (this.disabled || this.readOnly) {
         e.preventDefault();
 
         return;
@@ -204,7 +204,7 @@ export class RadioGroup extends PPPElement {
     };
 
     this.clickHandler = (e) => {
-      if (this.disabled) {
+      if (this.disabled || this.readOnly) {
         return;
       }
 

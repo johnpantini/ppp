@@ -30,8 +30,6 @@ import {
 export const radioTemplate = html`
   <template
     role="radio"
-    class="${(x) => (x.checked ? 'checked' : '')} ${(x) =>
-      x.readOnly ? 'readonly' : ''}"
     aria-checked="${(x) => x.checked}"
     aria-required="${(x) => x.required}"
     aria-disabled="${(x) => x.disabled}"
@@ -225,7 +223,61 @@ export class Radio extends PPPElement {
   }
 }
 
-export default Radio.compose({
-  template: radioTemplate,
-  styles: radioStyles
-}).define();
+export const boxRadioTemplate = html`
+  <template
+    role="radio"
+    aria-checked="${(x) => x.checked}"
+    aria-required="${(x) => x.required}"
+    aria-disabled="${(x) => x.disabled}"
+    aria-readonly="${(x) => x.readOnly}"
+    @keypress="${(x, c) => x.keypressHandler(c.event)}"
+    @click="${(x, c) => x.clickHandler(c.event)}"
+  >
+    <div class="control">
+      <slot></slot>
+    </div>
+  </template>
+`;
+
+export const boxRadioStyles = css`
+  :host(:focus-visible) {
+    outline: none;
+  }
+
+  .control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    text-align: center;
+    overflow-wrap: break-word;
+    cursor: pointer;
+    pointer-events: auto;
+    padding: 16px 24px;
+    border-radius: 4px;
+    flex: 1 1 0;
+  }
+
+  :host([disabled]) .control {
+    cursor: not-allowed;
+  }
+
+  :host(:not([checked]):not([disabled])) .control:hover {
+  }
+
+  :host([checked]) .control {
+  }
+`;
+
+export class BoxRadio extends Radio {}
+
+export default {
+  RadioComposition: Radio.compose({
+    template: radioTemplate,
+    styles: radioStyles
+  }).define(),
+  BoxRadioComposition: BoxRadio.compose({
+    template: boxRadioTemplate,
+    styles: boxRadioStyles
+  }).define()
+};

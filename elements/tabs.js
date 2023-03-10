@@ -84,11 +84,6 @@ export const tabsStyles = css`
     align-self: end;
   }
 
-  .start,
-  .end {
-    align-self: center;
-  }
-
   .tabpanel {
     position: relative;
     grid-row: 2;
@@ -128,13 +123,10 @@ export const tabStyles = css`
     border-radius: 4px;
     align-items: center;
     justify-content: center;
-    grid-row: 1;
     cursor: pointer;
     background-color: transparent;
-    border: 0;
+    border: none;
     padding: 12px 16px;
-    text-decoration: none;
-    max-width: 300px;
     white-space: nowrap;
     position: relative;
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
@@ -151,20 +143,16 @@ export const tabStyles = css`
     background-color: transparent;
   }
 
-  :host(:hover) {
+  :host(:hover:not([disabled])) {
     color: ${themeConditional(paletteGrayDark3, paletteWhite)};
   }
 
-  :host([aria-selected='false']:hover):after {
+  :host([aria-selected='false']:hover:not([disabled])):after {
     background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
 
   :host([aria-selected='true']):after {
     background-color: ${paletteGreenDark1};
-  }
-
-  :host(:focus) {
-    text-decoration: inherit;
   }
 
   :host([aria-selected='true']) {
@@ -176,10 +164,6 @@ export const tabStyles = css`
   :host(:focus-visible) {
     outline: none;
     color: ${themeConditional(paletteBlueBase, paletteBlueLight1)};
-  }
-
-  :host(:focus) {
-    outline: none;
   }
 
   :host(:focus-visible):after {

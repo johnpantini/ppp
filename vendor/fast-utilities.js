@@ -26,6 +26,21 @@ export function inRange(value, min, max = 0) {
 }
 
 /**
+ * This method keeps a given value within the bounds of a min and max value. If the value
+ * is larger than the max, the minimum value will be returned. If the value is smaller than the minimum,
+ * the maximum will be returned. Otherwise, the value is returned un-changed.
+ */
+export function wrapInBounds(min, max, value) {
+  if (value < min) {
+    return max;
+  } else if (value > max) {
+    return min;
+  }
+
+  return value;
+}
+
+/**
  * A test that ensures that all arguments are HTML Elements
  */
 export function isHTMLElement(...args) {

@@ -1,4 +1,4 @@
-import defaultTheme from './mongodb.js';
+import defaultTheme from './tinkoff.js';
 
 export default Object.assign({}, defaultTheme, {
   // Base colors
@@ -46,8 +46,9 @@ export default Object.assign({}, defaultTheme, {
   paletteRedLight1: '#FF6960',
   paletteRedLight2: '#FFCDC7',
   paletteRedLight3: '#FFEAE5',
+  paletteRedDark1: '#970606',
   paletteRedDark2: '#970606',
   paletteRedDark3: '#5B0000',
   // Links
-  linkColor: ['palette-yellow-base', 'palette-yellow-light-2']
+  linkColor: ['palette-yellow-base', 'palette-yellow-light-2'],
 });

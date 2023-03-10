@@ -48,7 +48,7 @@ import {
 import { applyMixins, display } from '../vendor/fast-utilities.js';
 
 export const textFieldTemplate = html`
-  <template class="${(x) => (x.readOnly ? 'readonly' : '')}">
+  <template>
     <label part="label" for="control" class="label">
       <slot name="label"></slot>
     </label>
@@ -146,6 +146,13 @@ export const textFieldStyles = css`
     padding-right: 30px;
   }
 
+  input[type='search']::-webkit-search-decoration,
+  input[type='search']::-webkit-search-cancel-button,
+  input[type='search']::-webkit-search-results-button,
+  input[type='search']::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+
   input::-webkit-outer-spin-button,
   input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -222,7 +229,7 @@ export const textFieldStyles = css`
   }
 
   input {
-    border-radius: 6px;
+    border-radius: 4px;
     width: 100%;
     height: 36px;
     padding: 0 12px;
@@ -266,14 +273,14 @@ export const textFieldStyles = css`
     border-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }
 
-  input:focus,
-  input:focus-visible {
+  input.control:focus,
+  input.control:focus-visible {
     border-color: ${themeConditional(paletteBlueLight1)};
   }
 
   :host([disabled]) input {
     color: ${themeConditional(paletteGrayBase, paletteGrayDark1)};
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark3)};
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)};
     border-color: ${themeConditional(paletteGrayLight1, paletteGrayDark2)};
     cursor: not-allowed;
   }

@@ -1,5 +1,5 @@
 import { DesignToken } from './design-token.js';
-import defaultTheme from './themes/mongodb.js';
+import defaultTheme from './themes/tinkoff.js';
 import ppp from '../ppp.js';
 
 const { create } = DesignToken;
@@ -47,6 +47,16 @@ export const themeConditional = (light, dark) => {
 
     return dt;
   }
+};
+
+export const fromPair = (propName) => {
+  const themePropName = `theme${propName[0].toUpperCase() + propName.slice(1)}`;
+  const setting = ppp.settings.get(themePropName) ?? defaultTheme[propName];
+
+  return themeConditional(
+    designTokens.get(setting[0]),
+    designTokens.get(setting[1])
+  );
 };
 
 function hexToRgb(hex) {
@@ -98,18 +108,18 @@ export const toColorComponents = (token) => {
   }
 };
 
-export const shadeColor = (col, amt) => {
-  col = col.replace(/^#/, '');
+export const shadeColor = (color, amount) => {
+  color = color.replace(/^#/, '');
 
-  if (col.length === 3)
-    col = col[0] + col[0] + col[1] + col[1] + col[2] + col[2];
+  if (color.length === 3)
+    color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
 
-  let [r, g, b] = col.match(/.{2}/g);
+  let [r, g, b] = color.match(/.{2}/g);
 
   [r, g, b] = [
-    parseInt(r, 16) + amt,
-    parseInt(g, 16) + amt,
-    parseInt(b, 16) + amt
+    parseInt(r, 16) + amount,
+    parseInt(g, 16) + amount,
+    parseInt(b, 16) + amount
   ];
 
   r = Math.max(Math.min(255, r), 0).toString(16);
@@ -227,6 +237,7 @@ export const paletteRedBase = createThemed('palette-red-base');
 export const paletteRedLight1 = createThemed('palette-red-light-1');
 export const paletteRedLight2 = createThemed('palette-red-light-2');
 export const paletteRedLight3 = createThemed('palette-red-light-3');
+export const paletteRedDark1 = createThemed('palette-red-dark-1');
 export const paletteRedDark2 = createThemed('palette-red-dark-2');
 export const paletteRedDark3 = createThemed('palette-red-dark-3');
 // Spacing
@@ -237,18 +248,30 @@ export const spacing4 = createThemed('spacing-4');
 export const spacing5 = createThemed('spacing-5');
 export const spacing6 = createThemed('spacing-6');
 export const spacing7 = createThemed('spacing-7');
-
 // Side navigation
 export const sideNavCollapsedWidth = createThemed('side-nav-collapsed-width');
 export const sideNavExpandedWidth = createThemed('side-nav-expanded-width');
 // Scrollbars
 export const scrollBarSize = createThemed('scroll-bar-size');
 // Links
-export const linkColor = themeConditional(
-  designTokens.get(defaultTheme.linkColor[0]),
-  designTokens.get(defaultTheme.linkColor[1])
-);
-
+export const linkColor = fromPair('linkColor');
+// Widget groups
+export const widgetGroup1 = fromPair('widgetGroup1');
+export const widgetGroup2 = fromPair('widgetGroup2');
+export const widgetGroup3 = fromPair('widgetGroup3');
+export const widgetGroup4 = fromPair('widgetGroup4');
+export const widgetGroup5 = fromPair('widgetGroup5');
+export const widgetGroup6 = fromPair('widgetGroup6');
+export const widgetGroup7 = fromPair('widgetGroup7');
+export const widgetGroup8 = fromPair('widgetGroup8');
+export const widgetGroup9 = fromPair('widgetGroup9');
+// Buy and sell
+export const positive = fromPair('positive');
+export const negative = fromPair('negative');
+export const buy = fromPair('buy');
+export const sell = fromPair('sell');
+export const buyHover = fromPair('buyHover');
+export const sellHover = fromPair('sellHover');
 // For loader
 document.body.style.setProperty(
   '--success-color',

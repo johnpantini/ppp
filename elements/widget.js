@@ -14,38 +14,81 @@ import {
 } from '../vendor/fast-element.min.js';
 import { debounce } from '../lib/ppp-decorators.js';
 import { display } from '../vendor/fast-utilities.js';
-import { ellipsis, normalize } from '../design/styles.js';
+import { ellipsis, normalize, scrollbars } from '../design/styles.js';
 import {
   bodyFont,
+  buy,
+  buyHover,
   darken,
+  fontSizeBody1,
   fontSizeWidget,
   fontWeightWidget,
+  lighten,
   lineHeightWidget,
-  paletteBlack, paletteBlueLight1,
+  negative,
+  paletteBlack,
+  paletteBlueBase,
+  paletteBlueLight1,
+  paletteBlueLight2,
+  paletteBlueLight3,
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark2,
   paletteGrayDark3,
+  paletteGrayDark4,
   paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
   paletteGreenBase,
+  paletteGreenDark1,
+  paletteGreenDark2,
+  palettePurpleBase,
+  palettePurpleLight2,
   paletteRedBase,
+  paletteRedDark2,
+  paletteRedLight1,
   paletteRedLight2,
+  paletteRedLight3,
   paletteWhite,
   paletteYellowBase,
   paletteYellowDark2,
   paletteYellowLight2,
+  positive,
+  sell,
+  sellHover,
   spacing1,
-  themeConditional
-} from '../design/design-tokens.js'
-import { circleNotch, search } from '../static/svg/sprite.js';
+  spacing2,
+  themeConditional,
+  toColorComponents,
+  widgetGroup1,
+  widgetGroup2,
+  widgetGroup3,
+  widgetGroup4,
+  widgetGroup5,
+  widgetGroup6,
+  widgetGroup7,
+  widgetGroup8,
+  widgetGroup9
+} from '../design/design-tokens.js';
+import {
+  circleNotch,
+  close,
+  settings,
+  search,
+  emptyWidgetState
+} from '../static/svg/sprite.js';
+import { Tab, Tabs, tabsTemplate, tabTemplate } from './tabs.js';
+import { TextField, textFieldStyles, textFieldTemplate } from './text-field.js';
+import { Button, buttonStyles, buttonTemplate } from './button.js';
+import { RadioGroup, radioGroupTemplate } from './radio-group.js';
+import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
 
 const searchDebounceTimeout =
   ppp.keyVault.getKey('use-alternative-mongo') === '1' ? 0 : 200;
 
 export const widget = () => css`
   ${display('inline-flex')}
+  ${scrollbars('.widget-body')}
   .widget-root {
     position: relative;
     background: ${themeConditional(paletteWhite, paletteBlack)};
@@ -112,22 +155,162 @@ export const widget = () => css`
 
   .widget-title {
     display: flex;
-    align-items: center;
-    overflow: hidden;
+    gap: 0 6px;
+    font-size: ${fontSizeWidget};
+    font-weight: 500;
+    line-height: ${lineHeightWidget};
     margin-left: 8px;
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-    font-size: 12px;
-    font-weight: 500;
     white-space: nowrap;
+    overflow: hidden;
     flex-grow: 1;
     padding: 0 ${spacing1};
     margin-right: 6px;
+  }
+
+  .widget-title > .title {
+    ${ellipsis()};
+  }
+
+  .widget-empty-state-holder {
+    width: 100%;
+    height: 95%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .widget-empty-state-holder > svg {
+    color: ${themeConditional(paletteGrayLight2, paletteGrayLight1)};
+    width: 60%;
+    height: 60%;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 80px;
+    max-height: 80px;
+    margin-left: 16px;
+  }
+
+  .widget-empty-state-holder > span {
+    color: ${paletteGrayLight1};
+    font-family: ${bodyFont};
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    line-height: ${lineHeightWidget};
+    margin-top: ${spacing1};
+    padding: 0 10px;
+    text-align: center;
+  }
+
+  .positive {
+    color: ${positive};
+  }
+
+  .negative {
+    color: ${negative};
+  }
+
+  .widget-section {
+    width: 100%;
+    padding: 0 10px;
+    position: relative;
+  }
+
+  .widget-section-spacer {
+    width: 100%;
+    padding: 6px 0;
+  }
+
+  .widget-subsection {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .widget-subsection ppp-widget-button {
+    width: 100%;
+  }
+
+  .widget-subsection > :not(:first-child) {
+    margin-left: 10px;
+  }
+
+  .widget-subsection-item {
+    width: 100%;
+    position: relative;
+  }
+
+  .widget-text-label {
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    font-size: ${fontSizeWidget};
+    margin-bottom: 5px;
+  }
+
+  .widget-flex-line {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .widget-margin-spacer {
+    width: 100%;
+    position: relative;
+    margin-top: ${spacing2};
+  }
+
+  .widget-summary {
+    display: flex;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    font-size: ${fontSizeWidget};
+    width: 100%;
+    text-align: left;
+    line-height: 14px;
+    flex-direction: column;
+  }
+
+  .widget-summary-line {
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  }
+
+  .widget-summary-line::after {
+    inset: 0;
+    content: '';
+    position: absolute;
+    border-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+    border-style: solid;
+    border-width: 0;
+    pointer-events: none;
+  }
+
+  .widget-summary-line + .widget-summary-line::after {
+    border-top-width: 0.5px;
+  }
+
+  .widget-summary-line-price {
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 120px;
+  }
+
+  .widget-footer {
+    padding: 8px 0;
+    position: relative;
   }
 `;
 
 export const widgetEmptyStateTemplate = (text) => `
   <div class="widget-empty-state-holder">
-
+    ${emptyWidgetState}
+    <span>${text}</span>
   </div>`;
 
 export class Widget extends PPPElement {
@@ -153,6 +336,8 @@ export class Widget extends PPPElement {
     super.connectedCallback();
 
     this.header = this.shadowRoot.querySelector('.widget-header');
+
+    this.adjustTitleEllipsis();
 
     if (!this.preview) {
       this.header.addEventListener('pointerdown', () => {
@@ -185,8 +370,19 @@ export class Widget extends PPPElement {
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
 
-      if (this.container.savedInstrument)
+      if (this.container.savedInstrument) {
         this.instrument = this.container.savedInstrument;
+      }
+    }
+  }
+
+  adjustTitleEllipsis() {
+    const title = this.shadowRoot.querySelector('.widget-title > .title');
+
+    if (title) {
+      if (title.offsetWidth < title.scrollWidth) {
+        title.setAttribute('title', title.textContent);
+      } else title.removeAttribute('title');
     }
   }
 
@@ -234,12 +430,6 @@ export class Widget extends PPPElement {
       Observable.notify(this.container, 'document');
 
       this.remove();
-    }
-  }
-
-  goToSettings() {
-    if (!this.preview) {
-      console.log('goToSettings');
     }
   }
 }
@@ -290,6 +480,10 @@ export class WidgetWithInstrument extends Widget {
   }
 
   instrumentChanged() {
+    if (this.searchControl) {
+      Observable.notify(this.searchControl, 'widget');
+    }
+
     if (this.preview) return;
 
     if (!this.isolated) {
@@ -468,76 +662,77 @@ export const widgetGroupControlTemplate = html`
 export const widgetGroupControlStyles = css`
   ${display('inline-flex')}
   :host {
-    font-size: 16px;
+    position: relative;
     width: 16px;
     height: 16px;
-    display: inline-flex;
-    position: relative;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
   }
 
   .toggle {
+    font-size: calc(${fontSizeWidget} - 2px);
+    line-height: calc(${fontSizeWidget} - 2px);
     cursor: pointer;
     position: relative;
     background: ${paletteGrayLight1};
     color: ${paletteBlack};
     width: 12px;
     height: 12px;
-    font-size: 10px;
     text-align: center;
-    line-height: 11px;
   }
 
   :host(:not([selection])) .toggle::before {
+    position: absolute;
     top: 50%;
     left: 50%;
     width: 6px;
     height: 2px;
     content: '';
-    position: absolute;
     transform: translate(-50%, -50%);
     border-radius: 1px;
-    background-color: rgba(9, 19, 44, 0.5);
+    background-color: ${themeConditional(paletteGrayDark4, paletteBlack)};
     transform-origin: 50% 50%;
   }
 
   .popup {
+    position: absolute;
     top: 100%;
     left: 50%;
     width: 122px;
-    margin: 0 -23px;
+    margin: 2px -20px;
     z-index: 1000;
-    position: absolute;
-    border-radius: 4px;
-    transform: translate(10px, 12px);
-    background: #ffffff;
+    border-radius: 2px;
+    border: 1px solid ${themeConditional(paletteGrayLight3, paletteGrayDark3)};
+    transform: translate(12px, 12px);
+    background: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
   }
 
   .popup::after,
   .popup::before {
-    left: 13px;
+    position: absolute;
+    left: 7px;
     width: 0;
     border: solid transparent;
     bottom: 100%;
     height: 0;
     content: '';
-    position: absolute;
     transform: translate(-50%, 0);
   }
 
   .popup::before {
     border-width: 6px;
-    border-bottom-color: #ffffff;
+    border-bottom-color: ${themeConditional(
+      paletteGrayLight3,
+      paletteGrayDark2
+    )};
   }
 
   .popup::after {
     border-width: 5px;
-    border-bottom-color: #ffffff;
-  }
-
-  .toolbar {
+    border-bottom-color: ${themeConditional(
+      paletteGrayLight3,
+      paletteGrayDark2
+    )};
   }
 
   .groups {
@@ -555,11 +750,11 @@ export const widgetGroupControlStyles = css`
   }
 
   .group-icon-holder {
+    display: inline-flex;
+    position: relative;
     width: 16px;
     cursor: pointer;
     height: 16px;
-    display: inline-flex;
-    position: relative;
     align-items: center;
     justify-content: center;
   }
@@ -569,13 +764,13 @@ export const widgetGroupControlStyles = css`
     top: 0;
     left: 0;
     right: 0;
-    border: 0.5px solid #d9dae0;
+    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayLight1)};
     bottom: 0;
     position: absolute;
   }
 
   .group-icon {
-    color: #ffffff;
+    color: ${paletteBlack};
     width: 12px;
     height: 12px;
     font-size: 10px;
@@ -586,7 +781,7 @@ export const widgetGroupControlStyles = css`
 
   .no-group {
     position: relative;
-    background: #d9dae0;
+    background: ${themeConditional(paletteGrayLight1)};
   }
 
   .no-group::before {
@@ -598,53 +793,53 @@ export const widgetGroupControlStyles = css`
     position: absolute;
     transform: translate(-50%, -50%);
     border-radius: 1px;
-    background-color: rgba(9, 19, 44, 0.5);
+    background-color: ${themeConditional(paletteGrayDark4, paletteBlack)};
     transform-origin: 50% 50%;
   }
 
   :host([selection='1']) .toggle,
   .group-1 {
-    background-color: ${paletteYellowBase};
+    background-color: ${widgetGroup1};
   }
 
   :host([selection='2']) .toggle,
   .group-2 {
-    background-color: ${paletteRedBase};
+    background-color: ${widgetGroup2};
   }
 
   :host([selection='3']) .toggle,
   .group-3 {
-    background-color: #a381ff;
+    background-color: ${widgetGroup3};
   }
 
   :host([selection='4']) .toggle,
   .group-4 {
-    background-color: #4dc3f7;
+    background-color: ${widgetGroup4};
   }
 
   :host([selection='5']) .toggle,
   .group-5 {
-    background-color: #aed57f;
+    background-color: ${widgetGroup5};
   }
 
   :host([selection='6']) .toggle,
   .group-6 {
-    background-color: #4da197;
+    background-color: ${widgetGroup6};
   }
 
   :host([selection='7']) .toggle,
   .group-7 {
-    background-color: #ffb74c;
+    background-color: ${widgetGroup7};
   }
 
   :host([selection='8']) .toggle,
   .group-8 {
-    background-color: #f8a34d;
+    background-color: ${widgetGroup8};
   }
 
   :host([selection='9']) .toggle,
   .group-9 {
-    background-color: #ff8863;
+    background-color: ${widgetGroup9};
   }
 `;
 
@@ -660,6 +855,7 @@ export class WidgetGroupControl extends PPPOffClickElement {
 
     this.widget = this.getRootNode().host;
     this.widget.groupControl = this;
+    this.selection = this.widget.document?.group;
   }
 
   handleClick({ event }) {
@@ -987,8 +1183,7 @@ export const widgetSearchControlStyles = css`
 
   .popup-trigger {
     cursor: pointer;
-    padding: 0 10px;
-    padding-bottom: 2px;
+    padding: 0 10px 2px 10px;
     font-family: ${bodyFont};
     font-size: ${fontSizeWidget};
     font-weight: ${fontWeightWidget};
@@ -1292,8 +1487,8 @@ export class WidgetSearchControl extends PPPOffClickElement {
   @observable
   cryptocurrencies;
 
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
 
     this.stocks = [];
     this.bonds = [];
@@ -1568,6 +1763,268 @@ export class WidgetNotificationsArea extends PPPElement {
   }
 }
 
+export const widgetHeaderButtonsTemplate = html`
+  <template>
+    <slot>
+      <div class="button" @click="${(x) => x.showWidgetSettings()}">
+        ${html.partial(settings)}
+      </div>
+      <div class="button">${html.partial(close)}</div>
+    </slot>
+  </template>
+`;
+
+export const widgetHeaderButtonsStyles = css`
+  ${display('flex')}
+  .button {
+    margin-right: 2px;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+`;
+
+export class WidgetHeaderButtons extends PPPElement {
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.widget = this.getRootNode().host;
+  }
+
+  showWidgetSettings() {
+    if (!this.widget.preview) {
+      console.log(this.widget.document._id);
+    }
+  }
+}
+
+export const widgetTabsStyles = css`
+  ${normalize()}
+  ${display('grid')}
+  :host {
+    border-bottom: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  .tablist {
+    display: flex;
+    position: relative;
+    align-items: center;
+    border: none;
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 0;
+  }
+`;
+
+export class WidgetTabs extends Tabs {}
+
+export const widgetTabStyles = css`
+  ${normalize()}
+  ${display('inline-flex')}
+  :host {
+    display: inline-block;
+    position: relative;
+    font-family: ${bodyFont};
+    font-size: ${fontSizeWidget};
+    margin-bottom: -1px;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    padding: 5px 10px 7px;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
+    color: ${themeConditional(lighten(paletteGrayBase, 25), paletteGrayLight1)};
+  }
+
+  :host:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    border-radius: 4px 4px 0 0;
+    background-color: transparent;
+  }
+
+  :host(:hover:not([disabled])) {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  :host([aria-selected='true']):after {
+    background-color: ${paletteBlueLight2};
+  }
+
+  :host([aria-selected='true']) {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+    cursor: default;
+  }
+
+  :host(:focus-visible) {
+    outline: none;
+    color: ${themeConditional(paletteBlueBase, paletteBlueLight1)};
+  }
+
+  :host(:focus-visible):after {
+    background-color: ${themeConditional(paletteBlueBase, paletteBlueLight1)};
+  }
+
+  :host([disabled]) {
+    color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
+    cursor: not-allowed;
+  }
+`;
+
+export class WidgetTab extends Tab {}
+
+export const widgetTextFieldStyles = css`
+  ${textFieldStyles}
+  :host([lotsize="1"]) input {
+    padding-right: 32px;
+  }
+
+  :host([lotsize='2']) input {
+    padding-right: 39px;
+  }
+
+  :host([lotsize='3']) input {
+    padding-right: 46px;
+  }
+
+  :host([lotsize='4']) input {
+    padding-right: 53px;
+  }
+
+  :host([lotsize='5']) input {
+    padding-right: 60px;
+  }
+
+  ::slotted(span[slot='end']) {
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  input {
+    font-size: ${fontSizeWidget};
+    border-radius: 4px 0 0 4px;
+    padding: 0 0 1px 8px;
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  input:hover {
+    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayBase)};
+  }
+
+  :host([disabled]) input {
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  :host([disabled]) input::placeholder {
+    color: ${themeConditional(paletteGrayLight1, paletteGrayBase)};
+  }
+
+  .label,
+  .description {
+    padding: unset;
+  }
+`;
+
+export class WidgetTextField extends TextField {}
+
+export const widgetButtonStyles = css`
+  ${buttonStyles}
+  .control {
+    width: 100%;
+    height: 32px;
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    border-radius: 4px;
+    border: none;
+  }
+
+  .content-container {
+    padding: 0 4px;
+  }
+
+  :host(.primary) .control {
+    background-color: ${buy};
+    color: ${themeConditional(paletteWhite)};
+  }
+
+  :host(.primary) .control:hover,
+  :host(.primary) .control:active {
+    color: ${themeConditional(paletteWhite)};
+    background-color: ${buyHover};
+  }
+
+  :host(.danger) .control {
+    background-color: ${sell};
+    color: ${themeConditional(paletteWhite)};
+  }
+
+  :host(.danger) .control:hover,
+  :host(.danger) .control:active {
+    color: ${themeConditional(paletteWhite)};
+    background-color: ${sellHover};
+  }
+`;
+
+export class WidgetButton extends Button {}
+
+export const widgetBoxRadioGroupStyles = css`
+  ${display('flex')}
+  :host {
+    font-family: ${bodyFont};
+    margin: 0 auto;
+    flex-direction: column;
+  }
+
+  .positioning-region {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+  }
+
+  :host([wrap]) .positioning-region {
+    flex-wrap: wrap;
+  }
+`;
+
+export class WidgetBoxRadioGroup extends RadioGroup {}
+
+export const widgetBoxRadioStyles = css`
+  ${boxRadioStyles}
+  .control {
+    height: 22px;
+    font-size: ${fontSizeWidget};
+    background-color: ${themeConditional(paletteWhite, paletteBlack)};
+    color: ${themeConditional(lighten(paletteGrayBase, 25), paletteGrayLight1)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+    border-radius: 4px;
+    padding: 0 10px;
+  }
+
+  :host(.xsmall) .control {
+    padding: 0 5px;
+  }
+
+  :host(:not([disabled])) .control:hover {
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  :host([checked]) .control {
+    border: 1px solid ${paletteBlueLight2};
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+`;
+
+export class WidgetBoxRadio extends BoxRadio {}
+
 export default {
   WidgetGroupControlComposition: WidgetGroupControl.compose({
     template: widgetGroupControlTemplate,
@@ -1580,5 +2037,39 @@ export default {
   WidgetNotificationsAreaComposition: WidgetNotificationsArea.compose({
     template: widgetNotificationsAreaTemplate,
     styles: widgetNotificationsAreaStyles
+  }).define(),
+  WidgetHeaderButtonsComposition: WidgetHeaderButtons.compose({
+    template: widgetHeaderButtonsTemplate,
+    styles: widgetHeaderButtonsStyles
+  }).define(),
+  WidgetTabsComposition: WidgetTabs.compose({
+    template: tabsTemplate,
+    styles: widgetTabsStyles
+  }).define(),
+  WidgetTabComposition: WidgetTab.compose({
+    template: tabTemplate,
+    styles: widgetTabStyles
+  }).define(),
+  WidgetTextFieldComposition: WidgetTextField.compose({
+    template: textFieldTemplate,
+    styles: widgetTextFieldStyles,
+    shadowOptions: {
+      delegatesFocus: true
+    }
+  }).define(),
+  WidgetButtonComposition: WidgetButton.compose({
+    template: buttonTemplate,
+    styles: widgetButtonStyles,
+    shadowOptions: {
+      delegatesFocus: true
+    }
+  }).define(),
+  WidgetBoxRadioGroupComposition: WidgetBoxRadioGroup.compose({
+    template: radioGroupTemplate,
+    styles: widgetBoxRadioGroupStyles
+  }).define(),
+  WidgetBoxRadioComposition: WidgetBoxRadio.compose({
+    template: boxRadioTemplate,
+    styles: widgetBoxRadioStyles
   }).define()
 };

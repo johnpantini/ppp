@@ -11,7 +11,8 @@ import {
   when,
   ref,
   observable,
-  Observable
+  Observable,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import {
@@ -28,11 +29,12 @@ export const timelineWidgetTemplate = html`
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
-          <ppp-widget-group-control
-            selection="${(x) => x.document?.group}"
-          ></ppp-widget-group-control>
+          <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">${(x) => x.document?.name ?? ''}</span>
+          <span class="widget-title">
+            <span class="title">${(x) => x.document?.name ?? ''}</span>
+          </span>
+          <ppp-widget-header-buttons></ppp-widget-header-buttons>
         </div>
       </div>
       <div class="widget-body">
@@ -106,7 +108,7 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     this.needsRefresh = true;
 
-    DOM.queueUpdate(() => {
+    Updates.enqueue(() => {
       this.needsRefresh = false;
 
       Observable.notify(this, 'timeline');
@@ -332,7 +334,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.emptyIndicator.set(symbol, [topLevelKey]);
     }
 
-    DOM.queueUpdate(() => {
+    Updates.enqueue(() => {
       this.needsRefresh = false;
 
       Observable.notify(this, 'timeline');

@@ -45,6 +45,14 @@ const colorPairs = [
   {
     h: 'Продажа',
     pair: 'sell'
+  },
+  {
+    h: 'Покупка (активно)',
+    pair: 'buyHover'
+  },
+  {
+    h: 'Продажа (активно)',
+    pair: 'sellHover'
   }
 ];
 
@@ -186,8 +194,6 @@ export const settingsAppearancePageTemplate = html`
               ${ref('themeColorsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
-              <ppp-option value="mongodb">MongoDB</ppp-option>
-              <ppp-option value="binance">Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
@@ -356,8 +362,6 @@ export const settingsAppearancePageTemplate = html`
               ${ref('themeColorPairsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
-              <ppp-option value="mongodb">MongoDB</ppp-option>
-              <ppp-option value="binance">Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
@@ -413,8 +417,6 @@ export const settingsAppearancePageTemplate = html`
               ${ref('themeFontsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
-              <ppp-option value="mongodb">MongoDB</ppp-option>
-              <ppp-option value="binance">Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
@@ -556,8 +558,6 @@ export class SettingsAppearancePage extends Page {
 
     if (sessionStorage.getItem('ppp-show-success-notification') === '1') {
       sessionStorage.removeItem('ppp-show-success-notification');
-
-      this.submitControl.scrollIntoView({ behavior: 'smooth' });
       this.showSuccessNotification();
     }
   }

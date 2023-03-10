@@ -26,11 +26,12 @@ export const orderbookWidgetTemplate = html`
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
-          <ppp-widget-group-control
-            selection="${(x) => x.document?.group}"
-          ></ppp-widget-group-control>
+          <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">${(x) => x.document?.name ?? ''}</span>
+          <span class="widget-title">
+            <span class="title">${(x) => x.document?.name ?? ''}</span>
+          </span>
+          <ppp-widget-header-buttons></ppp-widget-header-buttons>
         </div>
       </div>
       <div class="widget-body">
@@ -526,9 +527,7 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер книги заявок</h5>
-          <p>
-            Трейдер, который будет источником книги заявок.
-          </p>
+          <p>Трейдер, который будет источником книги заявок.</p>
         </div>
         <ppp-collection-select
           ${ref('bookTraderId')}
@@ -570,8 +569,10 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер активных заявок</h5>
-          <p>Трейдер, который будет отображать собственные лимитные заявки
-            (количество) на ценовых уровнях.</p>
+          <p>
+            Трейдер, который будет отображать собственные лимитные заявки
+            (количество) на ценовых уровнях.
+          </p>
         </div>
         <ppp-collection-select
           ${ref('ordersTraderId')}
@@ -621,13 +622,12 @@ export async function widgetDefinition() {
             value="compact"
             ${ref('displayMode')}
           >
-            <ppp-radio value="compact">Компактный
+            <ppp-radio value="compact">Компактный</ppp-radio>
+            <ppp-radio disabled value="classic-1"
+              >Классический, 1 колонка
             </ppp-radio>
-            <ppp-radio disabled value="classic-1">Классический, 1
-              колонка
-            </ppp-radio>
-            <ppp-radio disabled value="classic-2">Классический, 2
-              колонки
+            <ppp-radio disabled value="classic-2"
+              >Классический, 2 колонки
             </ppp-radio>
           </ppp-radio-group>
         </div>
@@ -635,9 +635,10 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Глубина книги заявок</h5>
-          <p>Количество строк <span
-            class="positive">bid</span> и <span
-            class="negative">ask</span> для отображения.</p>
+          <p>
+            Количество строк <span class="positive">bid</span> и
+            <span class="negative">ask</span> для отображения.
+          </p>
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field

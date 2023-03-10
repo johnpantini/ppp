@@ -174,7 +174,7 @@ export const selectStyles = css`
     line-height: ${lineHeightBody1};
     width: 100%;
     height: 36px;
-    border-radius: 6px;
+    border-radius: 4px;
     padding: 0 4px 0 12px;
     border: 1px solid ${paletteGrayBase};
     z-index: 1;
@@ -213,8 +213,9 @@ export const selectStyles = css`
     display: flex;
     position: absolute;
     flex-direction: column;
-    border-radius: 12px;
+    border-radius: 2px;
     left: 0;
+    min-height: 36px;
     max-height: calc(var(--max-height) - (36 * 4px));
     overflow-y: auto;
     width: 100%;

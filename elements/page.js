@@ -18,7 +18,9 @@ import {
   paletteWhite,
   paletteBlack,
   spacing1,
-  spacing2
+  spacing2,
+  spacing4,
+  spacing3
 } from '../design/design-tokens.js';
 import { PAGE_STATUS } from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
@@ -195,6 +197,23 @@ export const pageStyles = css`
   :host section:last-of-type {
     border-bottom: none;
     padding-bottom: unset;
+  }
+
+  .settings-grid ppp-palette-item {
+    width: 140px;
+  }
+
+  .settings-grid {
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing4} 0;
+  }
+
+  .settings-grid .row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: ${spacing2} ${spacing3};
   }
 `;
 

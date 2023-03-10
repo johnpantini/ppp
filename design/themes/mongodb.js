@@ -1,32 +1,6 @@
-export default {
-  // Types
-  bodyFont:
-    '-apple-system, BlinkMacSystemFont, Roboto, Segoe UI, "Trebuchet MS", Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Icons16, sans-serif',
-  monospaceFont: `'SF Mono', SFMono-Regular, ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace`,
-  // Widget
-  fontSizeWidget: '12px',
-  lineHeightWidget: 'normal',
-  fontWeightWidget: 400,
-  // Body 1
-  fontSizeBody1: '13px',
-  lineHeightBody1: '20px',
-  fontWeightBody1: 400,
-  // Code 1
-  fontSizeCode1: '13px',
-  lineHeightCode1: '20px',
-  fontWeightCode1: 400,
-  // Heading 3
-  fontSizeHeading3: '24px',
-  lineHeightHeading3: '32px',
-  fontWeightHeading3: 500,
-  // Heading 5
-  fontSizeHeading5: '16px',
-  lineHeightHeading5: '20px',
-  fontWeightHeading5: 700,
-  // Heading 6 (Subtitle)
-  fontSizeHeading6: '18px',
-  lineHeightHeading6: '24px',
-  fontWeightHeading6: 700,
+import defaultTheme from './tinkoff.js';
+
+export default Object.assign({}, defaultTheme, {
   // Base colors
   paletteWhite: '#FFFFFF',
   paletteBlack: '#001E2B',
@@ -72,21 +46,9 @@ export default {
   paletteRedLight1: '#FF6960',
   paletteRedLight2: '#FFCDC7',
   paletteRedLight3: '#FFEAE5',
+  paletteRedDark1: '#970606',
   paletteRedDark2: '#970606',
   paletteRedDark3: '#5B0000',
-  // Spacing
-  spacing1: '4px',
-  spacing2: '8px',
-  spacing3: '16px',
-  spacing4: '24px',
-  spacing5: '32px',
-  spacing6: '64px',
-  spacing7: '88px',
-  // Side navigation
-  sideNavCollapsedWidth: 40,
-  sideNavExpandedWidth: 180,
-  // Scrollbars
-  scrollBarSize: 4,
   // Links
   linkColor: ['palette-blue-base', 'palette-blue-light-1']
-};
+});

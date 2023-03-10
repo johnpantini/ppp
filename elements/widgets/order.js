@@ -1,13 +1,19 @@
 /** @decorator */
 
-import { widget, WidgetWithInstrument } from '../widget.js';
+import {
+  widget,
+  widgetEmptyStateTemplate,
+  WidgetWithInstrument
+} from '../widget.js';
 import { debounce } from '../../lib/ppp-decorators.js';
 import {
   html,
   css,
   when,
   ref,
-  observable
+  observable,
+  repeat,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
 import {
@@ -21,8 +27,25 @@ import {
   decimalSeparator,
   getInstrumentQuantityPrecision
 } from '../../lib/intl.js';
-import { normalize } from '../../design/styles.js';
-import { orderbookWidgetStyles, orderbookWidgetTemplate } from './orderbook.js';
+import { ellipsis, normalize, spacing } from '../../design/styles.js';
+import { decrement, increment } from '../../static/svg/sprite.js';
+import {
+  fontSizeWidget,
+  paletteBlack,
+  paletteGrayBase,
+  paletteGrayDark1,
+  paletteGrayLight1,
+  paletteGrayLight2,
+  buy,
+  themeConditional,
+  toColorComponents,
+  sell,
+  paletteWhite,
+  paletteGrayLight3,
+  darken,
+  positive,
+  negative
+} from '../../design/design-tokens.js';
 
 const decSeparator = decimalSeparator();
 
@@ -31,14 +54,332 @@ export const orderWidgetTemplate = html`
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
-          <ppp-widget-group-control
-            selection="${(x) => x.document?.group}"
-          ></ppp-widget-group-control>
+          <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
+          <span class="widget-title">
+            ${when(
+              (x) => !x.instrument,
+              html`
+                <span class="title">${(x) => x.document?.name ?? ''}</span>
+              `
+            )}
+            ${when(
+              (x) => x.instrument,
+              html`
+                <span
+                  class="price ${(x) =>
+                    x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
+                >
+                  ${(x) => x.formatPrice(x.lastPrice)}
+                </span>
+                <span
+                  class="${(x) =>
+                    x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
+                >
+                  ${(x) =>
+                    formatAbsoluteChange(
+                      x.lastPriceAbsoluteChange,
+                      x.instrument
+                    )}
+                </span>
+                <span
+                  class="${(x) =>
+                    x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
+                >
+                  ${(x) =>
+                    formatRelativeChange(x.lastPriceRelativeChange / 100)}
+                </span>
+              `
+            )}
+          </span>
+          <ppp-widget-header-buttons></ppp-widget-header-buttons>
         </div>
       </div>
       <div class="widget-body">
-        <ppp-widget-notifications-area></ppp-widget-notifications-area>
+        ${when(
+          (x) => x.instrument,
+          html`
+            <ppp-widget-tabs
+              activeid="${(x) => x.getActiveWidgetTab()}"
+              @change="${(x, c) => x.handleWidgetTabChange(c)}"
+              ${ref('orderTypeTabs')}
+            >
+              <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
+              <ppp-widget-tab id="limit">Лимитная</ppp-widget-tab>
+              <ppp-widget-tab id="stop" disabled>Отложенная</ppp-widget-tab>
+              <ppp-tab-panel id="market-panel"></ppp-tab-panel>
+              <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
+              <ppp-tab-panel id="stop-panel"></ppp-tab-panel>
+            </ppp-widget-tabs>
+            <div style="height: 100%">
+              <div class="company-card">
+                <div class="company-card-item">
+                  <span
+                    title="${(x) => x.instrument?.fullName}"
+                    class="company-name"
+                    >${(x) => x.instrument?.fullName}</span
+                  >
+                  <span
+                    @click="${(x) => x.setPrice(x.lastPrice)}"
+                    class="company-last-price ${(x) =>
+                      x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
+                  >
+                    ${(x) => x.formatPrice(x.lastPrice)}
+                  </span>
+                </div>
+                <div class="company-card-item">
+                  <span
+                    style="cursor: pointer"
+                    @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
+                  >
+                    В портфеле: ${(x) => x.formatPositionSize()}
+                  </span>
+                  <span
+                    >Средняя:
+                    ${(x) => x.formatPrice(x.positionAverage ?? 0)}</span
+                  >
+                </div>
+              </div>
+              <div class="nbbo-line">
+                <div
+                  class="nbbo-line-bid"
+                  @click="${(x) => x.setPrice(x.bestBid)}"
+                >
+                  Bid ${(x) => x.formatPrice(x.bestBid)}
+                  <div class="nbbo-line-icon-holder">
+                    <div class="nbbo-line-icon-fallback">
+                      <div
+                        class="nbbo-line-icon-logo"
+                        style="${(x) =>
+                          `background-image:url(${
+                            'static/instruments/' +
+                            (x.instrument?.isin ?? x.instrument?.symbol) +
+                            '.svg'
+                          })`}"
+                      ></div>
+                      ${(x) => x.instrument?.fullName[0]}
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="nbbo-line-ask"
+                  @click="${(x) => x.setPrice(x.bestAsk)}"
+                >
+                  Ask ${(x) => x.formatPrice(x.bestAsk)}
+                </div>
+              </div>
+              <div class="widget-section">
+                <div class="widget-subsection">
+                  <div class="widget-subsection-item">
+                    <div class="widget-text-label">Цена исполнения</div>
+                    <div class="widget-flex-line">
+                      <ppp-widget-text-field
+                        type="text"
+                        autocomplete="off"
+                        min="0"
+                        max="1000000000"
+                        step="${(x) =>
+                          x.instrument?.minPriceIncrement ?? '0.01'}"
+                        precision="${(x) =>
+                          getInstrumentPrecision(x.instrument)}"
+                        ?disabled="${(x) =>
+                          x.orderTypeTabs.activeid === 'market'}"
+                        maxlength="12"
+                        @wheel="${(x, c) => x.handlePriceWheel(c)}"
+                        @input="${(x, c) => x.handlePriceInput(c)}"
+                        @keydown="${(x, c) => x.handlePriceKeydown(c)}"
+                        @paste="${(x, c) => x.handlePricePaste(c)}"
+                        @beforeinput="${(x, c) => x.handlePriceBeforeInput(c)}"
+                        value="${(x) =>
+                          (x.document?.lastPrice ?? '').replace(
+                            '.',
+                            decSeparator
+                          )}"
+                        ${ref('price')}
+                      >
+                        <span slot="end"
+                          >${(x) => priceCurrencySymbol(x.instrument)}</span
+                        >
+                      </ppp-widget-text-field>
+                      <div class="step-controls">
+                        <button @click="${(x) => x.stepUp(false)}">
+                          ${html.partial(increment)}
+                        </button>
+                        <button @click="${(x) => x.stepDown(false)}">
+                          ${html.partial(decrement)}
+                        </button>
+                      </div>
+                      ${when(
+                        (x) => x.orderTypeTabs.activeid === 'market',
+                        html`
+                          <ppp-widget-text-field
+                            class="price-placeholder"
+                            disabled
+                            placeholder="Рыночная"
+                          >
+                          </ppp-widget-text-field>
+                        `
+                      )}
+                    </div>
+                  </div>
+                  <div class="widget-subsection-item">
+                    <div class="widget-text-label">Количество</div>
+                    <div class="widget-flex-line">
+                      <ppp-widget-text-field
+                        type="number"
+                        autocomplete="off"
+                        min="1"
+                        max="1000000000"
+                        precision="0"
+                        maxlength="8"
+                        @wheel="${(x, c) => x.handleQuantityWheel(c)}"
+                        @input="${(x, c) => x.handleQuantityInput(c)}"
+                        @paste="${(x, c) => x.handleQuantityPaste(c)}"
+                        @keydown="${(x, c) => x.handleQuantityKeydown(c)}"
+                        lotsize="${(x) =>
+                          x.instrument?.lot?.toString()?.length ?? 1}"
+                        value="${(x) => x.document?.lastQuantity ?? ''}"
+                        ${ref('quantity')}
+                      >
+                        <span slot="end"
+                          >${(x) =>
+                            x.instrument?.lot
+                              ? '×' + x.instrument.lot
+                              : ''}</span
+                        >
+                      </ppp-widget-text-field>
+                      <div class="step-controls">
+                        <button @click="${(x) => x.stepUp(true)}">
+                          ${html.partial(increment)}
+                        </button>
+                        <button @click="${(x) => x.stepDown(true)}">
+                          ${html.partial(decrement)}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="widget-margin-spacer"></div>
+              ${when(
+                (x) => x.document.fastVolumes,
+                html`
+                  <div class="widget-section">
+                    <ppp-widget-box-radio-group
+                      wrap
+                      readonly
+                      class="fast-volume-selector"
+                      value="${(x) => x.document.selectedFastVolume}"
+                      @click="${(x, c) => x.handleFastVolumeClick(c)}"
+                      @dblclick="${(x, c) => x.handleFastVolumeDblClick(c)}"
+                      ${ref('fastVolumeButtons')}
+                    >
+                      ${repeat(
+                        (x) => x.getFastVolumeButtonsData(),
+                        html`
+                          <ppp-widget-box-radio
+                            class="xsmall"
+                            value="${(x, c) => c.index}"
+                            volume="${(x) => x.volume}"
+                            ?money="${(x) => x.isInMoney}"
+                          >
+                            ${when(
+                              (x) => x.isInMoney,
+                              html` <div class="coin-icon"></div> `
+                            )}
+                            ${(x) => x.text}
+                          </ppp-widget-box-radio>
+                        `,
+                        { positioning: true, recycle: false }
+                      )}
+                    </ppp-widget-box-radio-group>
+                  </div>
+                  <div class="widget-margin-spacer"></div>
+                `
+              )}
+              <div class="widget-section">
+                <div class="widget-summary">
+                  <div class="widget-summary-line">
+                    <span>Стоимость</span>
+                    <span class="widget-summary-line-price">
+                      ${(x) =>
+                        x.orderTypeTabs.activeid === 'market'
+                          ? 'по факту сделки'
+                          : formatAmount(x.totalAmount, x.instrument?.currency)}
+                    </span>
+                  </div>
+                  <div class="widget-summary-line">
+                    <span>Комиссия</span>
+                    <span
+                      >${(x) =>
+                        x.orderTypeTabs.activeid === 'market'
+                          ? 'по факту сделки'
+                          : formatCommission(x.commission, x.instrument)}</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="widget-footer">
+              <div class="widget-section">
+                <div class="widget-subsection">
+                  <div class="widget-summary">
+                    <div class="widget-summary-line">
+                      <span>Доступно</span>
+                      <span class="positive">
+                        ${(x) => x.buyingPowerQuantity ?? '—'}
+                      </span>
+                    </div>
+                    <div class="widget-summary-line">
+                      <span>С плечом</span>
+                      <span class="positive">
+                        ${(x) => x.marginBuyingPowerQuantity ?? '—'}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="widget-summary">
+                    <div class="widget-summary-line">
+                      <span>Доступно</span>
+                      <span class="negative">
+                        ${(x) => x.sellingPowerQuantity ?? '—'}
+                      </span>
+                    </div>
+                    <div class="widget-summary-line">
+                      <span>С плечом</span>
+                      <span class="negative">
+                        ${(x) => x.marginSellingPowerQuantity ?? '—'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="widget-section-spacer"></div>
+              <div class="widget-section">
+                <div class="widget-subsection">
+                  <ppp-widget-button
+                    appearance="primary"
+                    @click="${(x) => x.buyOrSell('buy')}"
+                  >
+                    Покупка
+                  </ppp-widget-button>
+                  <ppp-widget-button
+                    appearance="danger"
+                    @click="${(x) => x.buyOrSell('sell')}"
+                  >
+                    Продажа
+                  </ppp-widget-button>
+                </div>
+              </div>
+            </div>
+            <ppp-widget-notifications-area></ppp-widget-notifications-area>
+          `
+        )}
+        ${when(
+          (x) => !x.instrument,
+          html`${html.partial(
+            widgetEmptyStateTemplate('Выберите инструмент.')
+          )}`
+        )}
       </div>
     </div>
   </template>
@@ -47,6 +388,169 @@ export const orderWidgetTemplate = html`
 export const orderWidgetStyles = css`
   ${normalize()}
   ${widget()}
+  ${spacing()}
+  .company-card {
+    width: 100%;
+    padding: 10px 10px 0;
+    font-size: ${fontSizeWidget};
+    text-align: left;
+  }
+
+  .company-card-item {
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    display: flex;
+    align-items: center;
+    line-height: 20px;
+    justify-content: space-between;
+  }
+
+  .company-card-item:first-child {
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
+    font-size: calc(${fontSizeWidget} + 4px);
+  }
+
+  .company-name {
+    font-weight: bold;
+    max-width: 70%;
+    ${ellipsis()};
+  }
+
+  .company-last-price {
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .nbbo-line {
+    display: flex;
+    width: 100%;
+    font-size: calc(${fontSizeWidget} + 1px);
+    line-height: 22px;
+    padding: 10px;
+    font-weight: 500;
+  }
+
+  .nbbo-line-bid {
+    flex: 1 1 0;
+    color: ${positive};
+    cursor: pointer;
+    padding: 2px 10px;
+    position: relative;
+    background-color: rgba(${toColorComponents(buy)}, 0.2);
+    text-align: left;
+    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
+  }
+
+  .nbbo-line-ask {
+    flex: 1 1 0;
+    color: ${negative};
+    cursor: pointer;
+    padding: 2px 10px;
+    background-color: rgba(${toColorComponents(sell)}, 0.2);
+    text-align: right;
+    border-bottom-right-radius: 4px;
+    border-top-right-radius: 4px;
+  }
+
+  .nbbo-line-icon-holder {
+    cursor: default;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2px;
+    position: absolute;
+    transform: translate(50%, 0px);
+    background-color: ${themeConditional(paletteWhite, paletteBlack)};
+    border-radius: 50%;
+    font-weight: 500;
+  }
+
+  .nbbo-line-icon-fallback {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    background-color: ${themeConditional(
+      darken(paletteGrayLight3, 5),
+      paletteBlack
+    )};
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow-wrap: break-word;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  .nbbo-line-icon-logo {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 0;
+    top: 0;
+    border-radius: 50%;
+    background-size: 100%;
+  }
+
+  .step-controls {
+    display: inline-flex;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 2px;
+    border-radius: 0 4px 4px 0;
+    align-items: stretch;
+    flex-direction: column;
+    vertical-align: top;
+  }
+
+  .step-controls button {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    justify-content: center;
+    text-align: left;
+    vertical-align: middle;
+    min-width: 24px;
+    position: relative;
+    flex: 1 1 15px;
+    min-height: 0;
+    padding: 0;
+    width: 32px;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    background-color: ${themeConditional(paletteWhite, paletteBlack)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  .step-controls button:hover {
+    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayBase)};
+  }
+
+  .step-controls button:first-child {
+    border-radius: 0 4px 0 0;
+    margin-bottom: 2px;
+  }
+
+  .step-controls button:last-child {
+    border-radius: 0 0 4px;
+  }
+
+  .price-placeholder {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .coin-icon {
+    background-image: url('static/svg/coin.svg');
+    background-repeat: no-repeat;
+    width: 12px;
+    height: 12px;
+    margin-right: 2px;
+    pointer-events: none;
+  }
 `;
 
 export class OrderWidget extends WidgetWithInstrument {
@@ -672,7 +1176,7 @@ export class OrderWidget extends WidgetWithInstrument {
       this.price.value = this.price.value.replace(',', '.');
       this.price.control.type = 'number';
 
-      DOM.queueUpdate(() => {
+      Updates.enqueue(() => {
         up ? this.price.control.stepUp() : this.price.control.stepDown();
         this.price.control.type = 'text';
 

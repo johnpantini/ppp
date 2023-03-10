@@ -30,7 +30,10 @@ export const scalpingButtonsWidgetTemplate = html`
             selection="${(x) => x.document?.group}"
           ></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">${(x) => x.document?.name ?? ''}</span>
+          <span class="widget-title">
+            <span class="title">${(x) => x.document?.name ?? ''}</span>
+          </span>
+          <ppp-widget-header-buttons></ppp-widget-header-buttons>
         </div>
       </div>
       <div class="widget-body">
