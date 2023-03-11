@@ -182,7 +182,7 @@ export class Radio extends PPPElement {
     this.keypressHandler = (e) => {
       switch (e.key) {
         case keySpace:
-          if (!this.checked && !this.readOnly) {
+          if (!this.checked && !this.readOnly && !this.disabled) {
             this.checked = true;
           }
 

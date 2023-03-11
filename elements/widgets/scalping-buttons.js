@@ -1,20 +1,16 @@
 /** @decorator */
 
-import {
-  widget,
-  widgetEmptyStateTemplate,
-  WidgetWithInstrument
-} from '../widget.js';
+import { widget, WidgetWithInstrument } from '../widget.js';
 import {
   html,
   css,
-  when,
   ref,
   observable,
-  Observable
+  repeat
 } from '../../vendor/fast-element.min.js';
-import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
-import { normalize } from '../../design/styles.js';
+import { WIDGET_TYPES } from '../../lib/const.js';
+import { normalize, spacing } from '../../design/styles.js';
+import { scrollbars } from '../../design/styles.js';
 
 const defaultBuySideButtonsTemplate = `+1,+2,+5,+10
 -1,-2,-5,-10`;
@@ -26,9 +22,7 @@ export const scalpingButtonsWidgetTemplate = html`
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
-          <ppp-widget-group-control
-            selection="${(x) => x.document?.group}"
-          ></ppp-widget-group-control>
+          <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
           <span class="widget-title">
             <span class="title">${(x) => x.document?.name ?? ''}</span>
@@ -37,12 +31,88 @@ export const scalpingButtonsWidgetTemplate = html`
         </div>
       </div>
       <div class="widget-body">
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
-        )}
+        <div class="controls">
+          <div class="tabs">
+            <ppp-widget-box-radio-group
+              class="order-type-selector"
+              @change="${(x) => x.handleOrderTypeChange()}"
+              value="${(x) => x.document.activeTab ?? 'all'}"
+              ${ref('orderTypeSelector')}
+            >
+              <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
+              <ppp-widget-box-radio value="limit"
+                >Лимитные
+              </ppp-widget-box-radio>
+              <ppp-widget-box-radio value="stop" disabled>
+                Отложенные
+              </ppp-widget-box-radio>
+            </ppp-widget-box-radio-group>
+          </div>
+        </div>
+        <div class="holder">
+          <div
+            class="holder-buy"
+            @click="${(x, c) => x.handleBuySellButtonClick(c, 'buy')}"
+          >
+            ${repeat(
+              (x) =>
+                (
+                  x.document.buySideButtonsTemplate ??
+                  defaultBuySideButtonsTemplate
+                )?.split(/\r?\n/),
+              html`
+                <div class="${(x) => (x?.trim() ? '' : 'empty')}">
+                  ${repeat(
+                    (x) => x?.split(',').filter((i) => i),
+                    html`
+                      <ppp-widget-button appearance="primary">
+                        ${(x) => {
+                          const n = parseInt(x).toString();
+
+                          if (isNaN(n)) return '0';
+
+                          if (n > 0) return `+${n}`;
+                          else return n;
+                        }}
+                      </ppp-widget-button>
+                    `
+                  )}
+                </div>
+              `
+            )}
+          </div>
+          <div
+            class="holder-sell"
+            @click="${(x, c) => x.handleBuySellButtonClick(c, 'sell')}"
+          >
+            ${repeat(
+              (x) =>
+                (
+                  x.document.sellSideButtonsTemplate ??
+                  defaultSellSideButtonsTemplate
+                )?.split(/\r?\n/),
+              html`
+                <div class="${(x) => (x?.trim() ? '' : 'empty')}">
+                  ${repeat(
+                    (x) => x?.split(',').filter((i) => i),
+                    html`
+                      <ppp-widget-button appearance="danger">
+                        ${(x) => {
+                          const n = parseInt(x).toString();
+
+                          if (isNaN(n)) return '0';
+
+                          if (n > 0) return `+${n}`;
+                          else return n;
+                        }}
+                      </ppp-widget-button>
+                    `
+                  )}
+                </div>
+              `
+            )}
+          </div>
+        </div>
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
     </div>
@@ -52,6 +122,52 @@ export const scalpingButtonsWidgetTemplate = html`
 export const scalpingButtonsWidgetStyles = css`
   ${normalize()}
   ${widget()}
+  ${spacing()}
+  ${scrollbars('.holder')}
+  .controls {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    padding-right: 12px;
+  }
+
+  .tabs {
+    padding: 8px;
+  }
+
+  .holder {
+    display: flex;
+    position: relative;
+    padding: 0 8px;
+    margin-bottom: 8px;
+    height: 100%;
+    width: 100%;
+    gap: 0 8px;
+  }
+
+  .holder-buy,
+  .holder-sell {
+    width: 100%;
+  }
+
+  .holder-buy > div,
+  .holder-sell > div {
+    display: flex;
+    width: 100%;
+    margin-top: 8px;
+    gap: 2px 5px;
+  }
+
+  .holder-buy > div.empty,
+  .holder-sell > div.empty {
+    margin-top: 0;
+    height: 4px;
+  }
+
+  .holder-buy > div > ppp-widget-button,
+  .holder-sell > div > ppp-widget-button {
+    width: 100%;
+  }
 `;
 
 export class ScalpingButtonsWidget extends WidgetWithInstrument {
@@ -72,7 +188,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
   }
 
   handleOrderTypeChange() {
-    void this.applyChanges({
+    void this.updateDocumentFragment({
       $set: {
         'widgets.$.activeTab': this.orderTypeSelector.value
       }

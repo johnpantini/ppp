@@ -20,7 +20,6 @@ import {
   buy,
   buyHover,
   darken,
-  fontSizeBody1,
   fontSizeWidget,
   fontWeightWidget,
   lighten,
@@ -1182,7 +1181,6 @@ export const widgetSearchControlStyles = css`
     cursor: default;
     max-width: 75px;
     min-width: 45px;
-    pointer-events: none;
   }
 
   :host([size='1']),
@@ -2052,6 +2050,11 @@ export const widgetBoxRadioStyles = css`
   :host([checked]) .control {
     border: 1px solid ${paletteBlueLight2};
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  :host([disabled]) .control {
+    color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
+    border: 1px solid ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
   }
 `;
 

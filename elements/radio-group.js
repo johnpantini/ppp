@@ -129,6 +129,8 @@ export class RadioGroup extends PPPElement {
     this.moveToRadioByIndex = (group, index) => {
       const radio = group[index];
 
+      if (radio.disabled) return;
+
       if (!this.isInsideToolbar) {
         radio.setAttribute('tabindex', '0');
 
@@ -212,7 +214,7 @@ export class RadioGroup extends PPPElement {
 
       const radio = e.target;
 
-      if (radio) {
+      if (radio && !radio.disabled) {
         radio.checked = true;
         radio.setAttribute('tabindex', '0');
         this.selectedRadio = radio;
