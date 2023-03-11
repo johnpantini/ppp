@@ -1181,6 +1181,7 @@ export const widgetSearchControlStyles = css`
     cursor: default;
     max-width: 75px;
     min-width: 45px;
+    pointer-events: none;
   }
 
   :host([size='1']),
