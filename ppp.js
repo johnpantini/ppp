@@ -428,6 +428,10 @@ class PPP {
     };
   }
 
+  brandSvg(svg) {
+    return `static/brand/${ppp.darkMode ? 'dark' : 'light'}/${svg}.svg`;
+  }
+
   async getOrCreateTrader(document) {
     if (document) {
       const module = await import(

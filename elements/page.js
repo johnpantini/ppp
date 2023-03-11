@@ -49,6 +49,7 @@ await ppp.i18n(import.meta.url);
       ${normalize()}
     ${typography()}
     :host {
+        position: relative;
         align-items: center;
         border-bottom: 3px solid
           ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
@@ -57,6 +58,7 @@ await ppp.i18n(import.meta.url);
         margin: 0;
         padding-bottom: 15px;
         padding-top: 0;
+        width: 100%;
       }
 
       .title {
@@ -214,6 +216,19 @@ export const pageStyles = css`
     flex-direction: row;
     flex-wrap: wrap;
     gap: ${spacing2} ${spacing3};
+  }
+
+  .global-search-input {
+    display: flex;
+    margin: 5px 0 10px 0;
+    width: 300px;
+  }
+
+  .card-container {
+    margin: 15px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 370px);
+    grid-gap: 24px;
   }
 `;
 
@@ -436,7 +451,10 @@ class Page extends PPPElement {
         ?.firstElementChild?.assignedNodes?.();
 
       if (Array.isArray(headerText)) {
-        toastTitle = headerText[0].textContent;
+        toastTitle = headerText
+          .filter((h) => h.textContent.trim())
+          .map((text) => text.textContent)
+          .join(' ');
       }
     }
 

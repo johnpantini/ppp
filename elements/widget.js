@@ -85,9 +85,43 @@ import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
 const searchDebounceTimeout =
   ppp.keyVault.getKey('use-alternative-mongo') === '1' ? 0 : 200;
 
+export const widgetEmptyState = () => css`
+  .widget-empty-state-holder {
+    width: 100%;
+    height: 95%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .widget-empty-state-holder > svg {
+    color: ${themeConditional(paletteGrayLight2, paletteGrayLight1)};
+    width: 60%;
+    height: 60%;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 80px;
+    max-height: 80px;
+    margin-left: 16px;
+  }
+
+  .widget-empty-state-holder > span {
+    color: ${paletteGrayLight1};
+    font-family: ${bodyFont};
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    line-height: ${lineHeightWidget};
+    margin-top: ${spacing1};
+    padding: 0 10px;
+    text-align: center;
+  }
+`;
+
 export const widget = () => css`
   ${display('inline-flex')}
   ${scrollbars('.widget-body')}
+  ${widgetEmptyState()}
   .widget-root {
     position: relative;
     background: ${themeConditional(paletteWhite, paletteBlack)};
@@ -168,37 +202,6 @@ export const widget = () => css`
 
   .widget-title > .title {
     ${ellipsis()};
-  }
-
-  .widget-empty-state-holder {
-    width: 100%;
-    height: 95%;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .widget-empty-state-holder > svg {
-    color: ${themeConditional(paletteGrayLight2, paletteGrayLight1)};
-    width: 60%;
-    height: 60%;
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 80px;
-    max-height: 80px;
-    margin-left: 16px;
-  }
-
-  .widget-empty-state-holder > span {
-    color: ${paletteGrayLight1};
-    font-family: ${bodyFont};
-    font-size: ${fontSizeWidget};
-    font-weight: ${fontWeightWidget};
-    line-height: ${lineHeightWidget};
-    margin-top: ${spacing1};
-    padding: 0 10px;
-    text-align: center;
   }
 
   .positive {
@@ -771,7 +774,7 @@ export const widgetGroupControlStyles = css`
     color: ${paletteBlack};
     width: 12px;
     height: 12px;
-    font-size: 10px;
+    font-size: calc(${fontSizeWidget} - 2px);
     text-align: center;
     line-height: 11px;
     border-radius: 2px;
@@ -985,7 +988,9 @@ export const widgetSearchControlTemplate = html`
                 <div
                   @click="${(x) => x.selectInstrument()}"
                   class="menu-item-close"
-                ></div>
+                >
+                  <span>${html.partial(close)}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1174,6 +1179,8 @@ export const widgetSearchControlTemplate = html`
 
 export const widgetSearchControlStyles = css`
   ${normalize()}
+  ${widgetEmptyState()}
+  ${scrollbars('.menu')}
   :host {
     width: 100%;
     height: 100%;
@@ -1181,7 +1188,6 @@ export const widgetSearchControlStyles = css`
     cursor: default;
     max-width: 75px;
     min-width: 45px;
-    pointer-events: none;
   }
 
   :host([size='1']),
@@ -1221,12 +1227,15 @@ export const widgetSearchControlStyles = css`
     border-radius: 2px;
     background-color: ${themeConditional(paletteWhite, paletteBlack)};
     border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
-    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
+    color: ${themeConditional(paletteBlack, paletteGrayLight1)};
     ${ellipsis()};
   }
 
   input.popup-trigger::placeholder {
-    color: ${paletteGrayLight1};
+    color: ${themeConditional(
+      paletteGrayLight1,
+      darken(paletteGrayLight1, 60)
+    )};
   }
 
   .popup-trigger:focus-visible {
@@ -1234,7 +1243,8 @@ export const widgetSearchControlStyles = css`
   }
 
   .popup-trigger:hover {
-    border: 1px solid ${themeConditional(darken(paletteGrayLight1, 30))};
+    border: 1px solid
+      ${themeConditional(darken(paletteGrayLight1, 30), paletteGrayBase)};
   }
 
   .popup {
@@ -1243,8 +1253,8 @@ export const widgetSearchControlStyles = css`
     width: 330px;
     z-index: 1000;
     position: absolute;
-    border: 1px solid ${themeConditional(paletteGrayLight2)};
-    background: ${themeConditional(paletteWhite)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark3)};
+    background: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
     border-radius: 4px;
     transform: translate(0px, -6px);
     display: none;
@@ -1264,7 +1274,7 @@ export const widgetSearchControlStyles = css`
   .search-icon {
     width: 16px;
     height: 16px;
-    color: ${themeConditional(paletteGrayLight1)};
+    color: ${paletteGrayLight1};
   }
 
   .spinner {
@@ -1285,7 +1295,8 @@ export const widgetSearchControlStyles = css`
 
   .divider {
     display: block;
-    border-top: 1px solid ${themeConditional(paletteGrayLight2)};
+    border-top: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
     margin: 6px 12px;
   }
 
@@ -1294,6 +1305,7 @@ export const widgetSearchControlStyles = css`
     font-size: ${fontSizeWidget};
     font-weight: ${fontWeightWidget};
     line-height: ${lineHeightWidget};
+    color: ${themeConditional(paletteBlack, paletteGrayLight1)};
     border: none;
     outline: none;
     background: transparent;
@@ -1303,6 +1315,13 @@ export const widgetSearchControlStyles = css`
     appearance: none;
     word-wrap: break-word;
     letter-spacing: 0;
+  }
+
+  .suggest-input::placeholder {
+    color: ${themeConditional(
+      paletteGrayLight1,
+      darken(paletteGrayLight1, 60)
+    )};
   }
 
   .menu-holder {
@@ -1316,7 +1335,6 @@ export const widgetSearchControlStyles = css`
   .menu-item-holder {
     padding: 0;
     border-radius: 4px;
-    color: rgb(33, 49, 60);
     list-style: none;
     margin: 0;
     min-width: 100%;
@@ -1333,28 +1351,18 @@ export const widgetSearchControlStyles = css`
     overflow-y: auto;
   }
 
-  .menu::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-
-  .menu::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.2);
-  }
-
-  .menu::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.3);
-  }
-
   .menu-title {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: rgb(112, 139, 164);
+    color: ${themeConditional(
+      lighten(paletteGrayDark1, 50),
+      paletteGrayLight1
+    )};
     padding: 8px 12px;
     cursor: default;
     word-wrap: break-word;
-    font-size: 12px;
+    font-size: ${fontSizeWidget};
     line-height: 16px;
     font-weight: 400;
     letter-spacing: 0;
@@ -1365,7 +1373,7 @@ export const widgetSearchControlStyles = css`
     flex-direction: row;
     align-items: center;
     color: inherit;
-    padding: 8px 12px;
+    padding: 7px 12px;
     text-decoration: none;
     user-select: none;
     cursor: pointer;
@@ -1373,7 +1381,10 @@ export const widgetSearchControlStyles = css`
 
   .menu-item.active,
   .menu-item:hover {
-    background-color: rgb(243, 245, 248);
+    background-color: ${themeConditional(
+      paletteGrayLight2,
+      darken(paletteGrayDark1, 5)
+    )};
   }
 
   .menu-item-icon-holder {
@@ -1391,18 +1402,17 @@ export const widgetSearchControlStyles = css`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: rgb(140, 167, 190);
-    background-color: rgb(223, 230, 237);
+    color: ${themeConditional(paletteGrayLight1, paletteGrayLight1)};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
     width: 20px;
     height: 20px;
     border-radius: 50%;
     position: relative;
     word-wrap: break-word;
-    font-size: 12px;
+    font-size: ${fontSizeWidget};
     line-height: 16px;
     font-weight: 500;
     letter-spacing: 0;
-    box-sizing: border-box;
     text-transform: uppercase;
   }
 
@@ -1417,11 +1427,15 @@ export const widgetSearchControlStyles = css`
   }
 
   .menu-item-text {
+    color: ${themeConditional(
+      paletteGrayDark1,
+      lighten(paletteGrayLight1, 20)
+    )};
     word-break: break-word;
     flex-grow: 1;
     flex-shrink: 1;
     margin-right: 12px;
-    font-size: 12px;
+    font-size: ${fontSizeWidget};
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1434,16 +1448,17 @@ export const widgetSearchControlStyles = css`
   }
 
   .menu-item-tag {
-    box-sizing: border-box;
+    color: ${themeConditional(paletteGrayDark1, darken(paletteGrayLight2, 30))};
+    background-color: ${themeConditional(
+      darken(paletteGrayLight2, 15),
+      paletteGrayBase
+    )};
     display: inline-flex;
     flex-direction: row;
     align-items: center;
-    background-color: rgb(206, 216, 225);
     border: none;
     border-radius: 4px;
-    box-shadow: none;
-    color: rgb(90, 118, 143);
-    font-size: 12px;
+    font-size: ${fontSizeWidget};
     line-height: 16px;
     padding: 2px;
     position: relative;
@@ -1456,33 +1471,12 @@ export const widgetSearchControlStyles = css`
   }
 
   .menu-item-close {
-    background-image: url('static/widgets/menu-item-close.svg');
-    font-size: 16px;
+    color: ${paletteGrayLight1};
+    position: relative;
     margin-left: 8px;
     cursor: pointer;
     width: 16px;
     height: 16px;
-  }
-
-  .empty-state-holder {
-    width: 100%;
-    height: 90%;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .empty-state-holder img {
-    width: 80px;
-    height: 80px;
-    margin-left: 16px;
-  }
-
-  .empty-state-holder span {
-    color: rgba(9, 19, 44, 0.5);
-    font-size: 12px;
-    margin-top: 4px;
   }
 `;
 

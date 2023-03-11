@@ -19,7 +19,7 @@ import { normalize } from '../design/styles.js';
 import {
   bodyFont,
   darken,
-  fontSizeBody1,
+  fontSizeBody1, fontWeightBody1,
   lineHeightBody1,
   paletteBlack,
   paletteBlueLight1,
@@ -41,7 +41,7 @@ import {
   paletteWhite,
   spacing2,
   themeConditional
-} from '../design/design-tokens.js';
+} from '../design/design-tokens.js'
 
 export const buttonTemplate = html`
   <button
@@ -110,7 +110,7 @@ export const buttonStyles = css`
     font-family: ${bodyFont};
     font-size: ${fontSizeBody1};
     line-height: ${lineHeightBody1};
-    font-weight: 500;
+    font-weight: ${fontWeightBody1};
   }
 
   .content-container {

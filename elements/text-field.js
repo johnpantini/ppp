@@ -221,6 +221,9 @@ export const textFieldStyles = css`
     align-items: center;
     right: 12px;
     z-index: 1;
+    width: 16px;
+    height: 16px;
+    color: ${themeConditional(paletteBlack, paletteGrayLight3)};
   }
 
   .end svg {

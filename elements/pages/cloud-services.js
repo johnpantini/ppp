@@ -11,6 +11,7 @@ import '../pages/import-cloud-keys-modal.js';
 
 export const cloudServicesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
+    <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>Облачные сервисы</ppp-page-header>
       ${when(

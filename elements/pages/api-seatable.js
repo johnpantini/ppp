@@ -1,12 +1,14 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
+import { validate, invalidate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import { APIS } from '../../lib/const.js';
 import '../text-field.js';
 import '../button.js';
 
 export const apiSeatablePageTemplate = html`
-  <template>
+  <template class="${(x) => x.generateClasses()}">
+    <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
         ${(x) =>
@@ -83,7 +85,24 @@ export async function checkSeatableCredentials({
 export class ApiSeatablePage extends Page {
   collection = 'apis';
 
-  async validate() {}
+  async validate() {
+    await validate(this.name);
+    await validate(this.baseToken);
+
+    if (
+      !(
+        await checkSeatableCredentials({
+          baseToken: this.baseToken.value.trim(),
+          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+        })
+      ).ok
+    ) {
+      invalidate(this.baseToken, {
+        errorMessage: 'Неверный токен',
+        raiseException: true
+      });
+    }
+  }
 
   async read() {
     return (context) => {

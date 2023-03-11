@@ -197,9 +197,9 @@ export const orderWidgetTemplate = html`
                           )}"
                         ${ref('price')}
                       >
-                        <span slot="end"
-                          >${(x) => priceCurrencySymbol(x.instrument)}</span
-                        >
+                        <span slot="end">
+                          ${(x) => priceCurrencySymbol(x.instrument)}
+                        </span>
                       </ppp-widget-text-field>
                       <div class="step-controls">
                         <button @click="${(x) => x.stepUp(false)}">
@@ -241,12 +241,10 @@ export const orderWidgetTemplate = html`
                         value="${(x) => x.document?.lastQuantity ?? ''}"
                         ${ref('quantity')}
                       >
-                        <span slot="end"
-                          >${(x) =>
-                            x.instrument?.lot
-                              ? '×' + x.instrument.lot
-                              : ''}</span
-                        >
+                        <span slot="end">
+                          ${(x) =>
+                            x.instrument?.lot ? '×' + x.instrument.lot : ''}
+                        </span>
                       </ppp-widget-text-field>
                       <div class="step-controls">
                         <button @click="${(x) => x.stepUp(true)}">

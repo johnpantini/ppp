@@ -81,8 +81,23 @@ export const normalize = () => css`
     color: currentColor;
   }
 
-  :any-link {
+  a, :any-link {
     color: currentColor;
+    position: relative;
+  }
+
+  a:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -4px;
+    left: 0;
+    border-radius: 2px;
+  }
+
+  a:hover:after {
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 `;
 
