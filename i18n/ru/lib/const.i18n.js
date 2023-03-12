@@ -9,7 +9,7 @@ import {
   SERVER_STATE,
   TRADER_CAPS,
   VERSIONING_STATUS
-} from '../../lib/const.js';
+} from '../../../lib/const.js';
 
 export default function (i18n) {
   i18n.extend({
@@ -36,6 +36,7 @@ export default function (i18n) {
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',
+        [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
         [TRADERS.CUSTOM]: 'Произвольная реализация'
       },
       traderCaps: {

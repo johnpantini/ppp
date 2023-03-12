@@ -340,11 +340,13 @@ class PPP {
   }
 
   async i18n(url) {
-    const fileName = url
-      .substring(url.lastIndexOf('/') + 1)
-      .replace('.', '.i18n.');
-
-    (await import(`./i18n/${this.locale}/${fileName}`)).default(this.dict);
+    (
+      await import(
+        `./i18n/${this.locale}${url
+          .split(ppp.rootUrl)[1]
+          .replace('.js', '.i18n.js')}`
+      )
+    ).default(this.dict);
   }
 
   t(key, options) {

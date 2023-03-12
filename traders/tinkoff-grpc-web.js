@@ -1,29 +1,29 @@
 /** @decorator */
 
-import { TRADER_DATUM, WIDGET_TYPES } from '../const.js';
+import { TRADER_DATUM, WIDGET_TYPES } from '../lib/const.js';
 import { Trader } from './common-trader.js';
-import { cyrillicToLatin } from '../intl.js';
-import { debounce } from '../ppp-throttle.js';
-import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
-import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
-import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
+import { cyrillicToLatin } from '../lib/intl.js';
+import { debounce } from '../lib/ppp-decorators.js';
+import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
+import { createChannel } from '../vendor/nice-grpc-web/client/channel.js';
+import { Metadata } from '../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
 import {
   MarketDataServiceDefinition,
   MarketDataStreamServiceDefinition,
   SubscriptionAction,
   TradeDirection
-} from '../../vendor/tinkoff/definitions/market-data.js';
+} from '../vendor/tinkoff/definitions/market-data.js';
 import {
   OrderDirection,
   OrderExecutionReportStatus,
   OrdersServiceDefinition,
   OrderType,
   PriceType
-} from '../../vendor/tinkoff/definitions/orders.js';
-import { isAbortError } from '../../vendor/abort-controller-x.js';
-import { TradingError } from '../trading-error.js';
-import { uuidv4 } from '../ppp-crypto.js';
-import ppp from '../../ppp.js';
+} from '../vendor/tinkoff/definitions/orders.js';
+import { isAbortError } from '../vendor/abort-controller-x.js';
+import { TradingError } from '../lib/ppp-errors.js';
+import { uuidv4 } from '../lib/ppp-crypto.js';
+import ppp from '../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
