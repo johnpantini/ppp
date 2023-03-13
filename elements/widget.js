@@ -29,7 +29,6 @@ import {
   paletteBlueBase,
   paletteBlueLight1,
   paletteBlueLight2,
-  paletteBlueLight3,
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark2,
@@ -39,26 +38,13 @@ import {
   paletteGrayLight2,
   paletteGrayLight3,
   paletteGreenBase,
-  paletteGreenDark1,
-  paletteGreenDark2,
-  palettePurpleBase,
-  palettePurpleLight2,
-  paletteRedBase,
-  paletteRedDark2,
-  paletteRedLight1,
-  paletteRedLight2,
-  paletteRedLight3,
   paletteWhite,
-  paletteYellowBase,
-  paletteYellowDark2,
-  paletteYellowLight2,
   positive,
   sell,
   sellHover,
   spacing1,
   spacing2,
   themeConditional,
-  toColorComponents,
   widgetGroup1,
   widgetGroup2,
   widgetGroup3,
@@ -131,7 +117,8 @@ export const widget = () => css`
     user-select: none;
   }
 
-  :host([dragging]) .widget-root {
+  :host([dragging]) .widget-root,
+  :host([resizing]) .widget-root {
     border: 1px solid ${paletteBlueLight1};
   }
 
@@ -317,6 +304,9 @@ export const widgetEmptyStateTemplate = (text) => `
 export class Widget extends PPPElement {
   @attr({ mode: 'boolean' })
   dragging;
+
+  @attr({ mode: 'boolean' })
+  resizing;
 
   @attr({ mode: 'boolean' })
   preview;
@@ -1696,6 +1686,103 @@ export class WidgetSearchControl extends PPPOffClickElement {
   }
 }
 
+export const widgetResizeControlsTemplate = html`
+  <template>
+    <div class="top"></div>
+    <div class="right"></div>
+    <div class="bottom"></div>
+    <div class="left"></div>
+    <div class="ne"></div>
+    <div class="se"></div>
+    <div class="sw"></div>
+    <div class="nw"></div>
+  </template>
+`;
+
+export const widgetResizeControlsStyles = css`
+  :host > div {
+    position: absolute;
+    user-select: none;
+    z-index: 2;
+  }
+
+  .top {
+    top: -5px;
+    left: 0;
+    width: 100%;
+    cursor: row-resize;
+    height: 10px;
+  }
+
+  .right {
+    top: 0;
+    right: -5px;
+    width: 10px;
+    cursor: col-resize;
+    height: 100%;
+  }
+
+  .bottom {
+    left: 0;
+    width: 100%;
+    bottom: -5px;
+    cursor: row-resize;
+    height: 10px;
+  }
+
+  .left {
+    top: 0;
+    left: -5px;
+    width: 10px;
+    cursor: col-resize;
+    height: 100%;
+  }
+
+  .ne {
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    cursor: ne-resize;
+    height: 20px;
+  }
+
+  .se {
+    right: -10px;
+    width: 20px;
+    bottom: -10px;
+    cursor: se-resize;
+    height: 20px;
+  }
+
+  .sw {
+    left: -10px;
+    width: 20px;
+    bottom: -10px;
+    cursor: sw-resize;
+    height: 20px;
+  }
+
+  .nw {
+    top: -10px;
+    left: -10px;
+    width: 20px;
+    cursor: nw-resize;
+    height: 20px;
+  }
+`;
+
+export class WidgetResizeControls extends PPPElement {
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.widget = this.getRootNode().host;
+  }
+
+  onPointerDown({ event, node }) {
+    this.widget.resizing = true;
+  }
+}
+
 export const widgetNotificationsAreaTemplate = html`
   <template>
     <div class="widget-notification-ps">
@@ -2063,6 +2150,10 @@ export default {
   WidgetSearchControlComposition: WidgetSearchControl.compose({
     template: widgetSearchControlTemplate,
     styles: widgetSearchControlStyles
+  }).define(),
+  WidgetResizeControlsComposition: WidgetResizeControls.compose({
+    template: widgetResizeControlsTemplate,
+    styles: widgetResizeControlsStyles
   }).define(),
   WidgetNotificationsAreaComposition: WidgetNotificationsArea.compose({
     template: widgetNotificationsAreaTemplate,

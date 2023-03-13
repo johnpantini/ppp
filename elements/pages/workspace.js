@@ -103,6 +103,9 @@ export class WorkspacePage extends Page {
   @attr({ mode: 'boolean' })
   dragging;
 
+  @attr({ mode: 'boolean' })
+  resizing;
+
   @observable
   workspace;
 
@@ -192,6 +195,18 @@ export class WorkspacePage extends Page {
 
         widget.x = parseInt(styles.left);
         widget.y = parseInt(styles.top);
+      }
+    } else {
+      let resizeControls;
+
+      if (
+        (resizeControls = cp.find(
+          (n) => n?.tagName?.toLowerCase?.() === 'ppp-widget-resize-controls'
+        ))
+      ) {
+        this.resizing = true;
+
+        resizeControls.onPointerDown({ event, node: cp[0] });
       }
     }
   }
@@ -303,22 +318,30 @@ export class WorkspacePage extends Page {
   }
 
   onPointerUp() {
-    if (this.dragging) {
-      void this.draggedWidget.updateDocumentFragment({
-        $set: {
-          'widgets.$.x': parseInt(this.draggedWidget.style.left),
-          'widgets.$.y': parseInt(this.draggedWidget.style.top),
-          'widgets.$.zIndex': this.zIndex
-        }
-      });
+    if (this.dragging || this.resizing) {
+      if (this.dragging) {
+        void this.draggedWidget.updateDocumentFragment({
+          $set: {
+            'widgets.$.x': parseInt(this.draggedWidget.style.left),
+            'widgets.$.y': parseInt(this.draggedWidget.style.top),
+            'widgets.$.zIndex': this.zIndex
+          }
+        });
 
-      this.dragging = false;
-      this.draggedWidget = null;
-      this.draggedWidgetCR = {};
+        this.draggedWidget = null;
+        this.draggedWidgetCR = {};
+      }
+
+      if (this.resizing) {
+      }
+
       this.rectangles = [];
+      this.dragging = false;
+      this.resizing = false;
 
       this.widgets.forEach((w) => {
         w.dragging = false;
+        w.resizing = false;
       });
     }
   }

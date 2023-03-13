@@ -87,16 +87,16 @@ export const cloudFunctions = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="
     fill="var(--palette-green-base)"/>
   <path
     d="M36.3747 9.3125V16.2C36.3747 16.7938 36.0354 17.2688 35.357 17.2688H34V22.7313H35.357C35.9224 22.7313 36.3747 23.2063 36.3747 23.8V30.6875C36.3747 35.2 39.8802 39 44.2903 39V33.5375C42.8203 33.5375 41.5764 32.2313 41.5764 30.6875V23.8C41.5764 22.375 41.1241 21.0688 40.4456 20C41.2371 18.9312 41.6895 17.625 41.6895 16.2V9.3125C41.6895 7.76875 42.9333 6.4625 44.4034 6.4625V1C39.9933 1 36.3747 4.8 36.3747 9.3125Z"
-    stroke="var(--palette-black-with-palette-white)" stroke-miterlimit="10"/>
+    stroke="var(--palette-black-with-palette-gray-base)" stroke-miterlimit="10"/>
   <path
     d="M62.5122 9.3125V16.2C62.5122 16.7938 62.8514 17.2688 63.5299 17.2688H65V22.7313H63.643C63.0776 22.7313 62.6253 23.2063 62.6253 23.8V30.6875C62.6253 35.2 59.1198 39 54.7096 39V33.5375C56.1797 33.5375 57.4236 32.2313 57.4236 30.6875V23.8C57.4236 22.375 57.8759 21.0688 58.5544 20C57.7628 18.9312 57.3105 17.625 57.3105 16.2V9.3125C57.3105 7.76875 56.0666 6.4625 54.5966 6.4625V1C58.8936 1 62.5122 4.8 62.5122 9.3125Z"
-    stroke="var(--palette-black-with-palette-white)" stroke-miterlimit="10"/>
+    stroke="var(--palette-black-with-palette-gray-base))" stroke-miterlimit="10"/>
   <path
     d="M9.00966 5.7352C7.17888 5.7352 5.57695 7.27414 5.57695 9.2866V30.7134C5.57695 32.6075 7.06446 34.2648 9.00966 34.2648V39C4.66156 39 1 35.3302 1 30.7134V9.2866C1 4.78816 4.54713 1 9.00966 1V5.7352Z"
-    stroke="var(--palette-black-with-palette-white)" stroke-miterlimit="10"/>
+    stroke="var(--palette-black-with-palette-gray-light-2)" stroke-miterlimit="10"/>
   <path
     d="M18.9904 5.7352C20.8211 5.7352 22.4231 7.27414 22.4231 9.2866V30.7134C22.4231 32.6075 20.9356 34.2648 18.9904 34.2648V39C23.3385 39 27 35.3302 27 30.7134V9.2866C27 4.78816 23.4529 1 18.9904 1V5.7352Z"
-    stroke="var(--palette-black-with-palette-white)" stroke-miterlimit="10"/>
+    stroke="var(--palette-black-with-palette-gray-light-2)" stroke-miterlimit="10"/>
 </svg>
 `;
 
