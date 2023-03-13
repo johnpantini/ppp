@@ -131,6 +131,7 @@ export class WorkspacePage extends Page {
   }
 
   onPointerDown(event) {
+    let resizeControls;
     const cp = event.composedPath();
 
     if (
@@ -142,22 +143,27 @@ export class WorkspacePage extends Page {
       )
     ) {
       this.dragging = true;
+    } else if (
+      (resizeControls = cp.find(
+        (n) => n?.tagName?.toLowerCase?.() === 'ppp-widget-resize-controls'
+      ))
+    ) {
+      this.resizeControls = this.resizeControls ?? resizeControls;
+      this.resizing = true;
+    }
+
+    if (this.dragging || this.resizing) {
+      // Initial coordinates for deltas
       this.clientX = event.clientX;
       this.clientY = event.clientY;
+      // Side nav offset
       this.x = this.getBoundingClientRect().x;
 
       const widget = cp.find((n) => n?.classList?.contains('widget'));
 
       if (widget) {
-        widget.dragging = true;
-        this.draggedWidget = widget;
-
-        const tempBCR = this.draggedWidget.getBoundingClientRect();
-
-        this.draggedWidgetCR = {
-          width: tempBCR.width,
-          height: tempBCR.height
-        };
+        widget.dragging = this.dragging;
+        widget.resizing = this.resizing;
 
         this.rectangles = this.widgets
           .filter((w) => w !== widget)
@@ -191,22 +197,23 @@ export class WorkspacePage extends Page {
           y: 0
         });
 
-        const styles = getComputedStyle(widget);
+        if (this.dragging) {
+          this.draggedWidget = widget;
 
-        widget.x = parseInt(styles.left);
-        widget.y = parseInt(styles.top);
-      }
-    } else {
-      let resizeControls;
+          const tempBCR = this.draggedWidget.getBoundingClientRect();
 
-      if (
-        (resizeControls = cp.find(
-          (n) => n?.tagName?.toLowerCase?.() === 'ppp-widget-resize-controls'
-        ))
-      ) {
-        this.resizing = true;
+          this.draggedWidgetCR = {
+            width: tempBCR.width,
+            height: tempBCR.height
+          };
 
-        resizeControls.onPointerDown({ event, node: cp[0] });
+          const styles = getComputedStyle(widget);
+
+          widget.x = parseInt(styles.left);
+          widget.y = parseInt(styles.top);
+        } else if (this.resizing) {
+          resizeControls.onPointerDown({ event, node: cp[0] });
+        }
       }
     }
   }
@@ -314,17 +321,18 @@ export class WorkspacePage extends Page {
 
       this.draggedWidget.style.left = `${newLeft}px`;
       this.draggedWidget.style.top = `${newTop}px`;
+    } else if (this.resizing) {
+      this.resizeControls.onPointerMove({ event });
     }
   }
 
-  onPointerUp() {
+  onPointerUp(event) {
     if (this.dragging || this.resizing) {
       if (this.dragging) {
         void this.draggedWidget.updateDocumentFragment({
           $set: {
             'widgets.$.x': parseInt(this.draggedWidget.style.left),
-            'widgets.$.y': parseInt(this.draggedWidget.style.top),
-            'widgets.$.zIndex': this.zIndex
+            'widgets.$.y': parseInt(this.draggedWidget.style.top)
           }
         });
 
@@ -333,6 +341,7 @@ export class WorkspacePage extends Page {
       }
 
       if (this.resizing) {
+        this.resizeControls.onPointerUp({ event });
       }
 
       this.rectangles = [];

@@ -326,13 +326,20 @@ export class Widget extends PPPElement {
   connectedCallback() {
     super.connectedCallback();
 
-    this.header = this.shadowRoot.querySelector('.widget-header');
-
     this.adjustTitleEllipsis();
 
     if (!this.preview) {
-      this.header.addEventListener('pointerdown', () => {
-        this.style.zIndex = ++this.container.zIndex;
+      this.addEventListener('pointerdown', () => {
+        // Check if not topmost
+        if (this.style.zIndex < this.container.zIndex) {
+          this.style.zIndex = ++this.container.zIndex;
+
+          void this.updateDocumentFragment({
+            $set: {
+              'widgets.$.zIndex': this.container.zIndex
+            }
+          });
+        }
       });
     } else {
       this.style.position = 'relative';
@@ -1176,7 +1183,7 @@ export const widgetSearchControlStyles = css`
     height: 100%;
     position: relative;
     cursor: default;
-    max-width: 75px;
+    max-width: 80px;
     min-width: 45px;
   }
 
@@ -1201,7 +1208,7 @@ export const widgetSearchControlStyles = css`
   :host([size='10']),
   :host([size='11']),
   :host([size='12']) {
-    width: 75px;
+    width: 80px;
   }
 
   .popup-trigger {
@@ -1779,7 +1786,21 @@ export class WidgetResizeControls extends PPPElement {
   }
 
   onPointerDown({ event, node }) {
-    this.widget.resizing = true;
+
+  }
+
+  onPointerMove({ event }) {
+    const clientX = this.widget.container.clientX;
+    const clientY = this.widget.container.clientY;
+
+    const deltaX = event.clientX - clientX;
+    const deltaY = event.clientY - clientY;
+
+    console.log(deltaX, deltaY)
+  }
+
+  onPointerUp({ event }) {
+
   }
 }
 

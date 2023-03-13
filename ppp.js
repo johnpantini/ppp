@@ -18,7 +18,7 @@ import { APIS, TRADERS } from './lib/const.js';
 
     DesignToken.registerDefaultStyleTarget(this);
   }
-}
+})
   .compose({
     template: html` <slot></slot> `,
     styles: css`
@@ -28,7 +28,7 @@ import { APIS, TRADERS } from './lib/const.js';
       }
     `
   })
-  .define());
+  .define();
 
 class SettingsMap extends Map {
   #observable;
@@ -442,6 +442,7 @@ class PPP {
           [TRADERS.TINKOFF_GRPC_WEB]: `${this.rootUrl}/traders/tinkoff-grpc-web.js`,
           [TRADERS.ALPACA_V2_PLUS]: `${this.rootUrl}/traders/alpaca-v2-plus.js`,
           [TRADERS.BINANCE_V3]: `${this.rootUrl}/traders/binance-v3.js`,
+          [TRADERS.UTEX_MARGIN_STOCKS]: `${this.rootUrl}/traders/utex-margin-stocks.js`,
           [TRADERS.CUSTOM]: document.url
         }[document.type]
       );

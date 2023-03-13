@@ -134,10 +134,9 @@ export const orderWidgetTemplate = html`
                   >
                     В портфеле: ${(x) => x.formatPositionSize()}
                   </span>
-                  <span
-                    >Средняя:
-                    ${(x) => x.formatPrice(x.positionAverage ?? 0)}</span
-                  >
+                  <span>
+                    Средняя: ${(x) => x.formatPrice(x.positionAverage ?? 0)}
+                  </span>
                 </div>
               </div>
               <div class="nbbo-line">
@@ -146,7 +145,10 @@ export const orderWidgetTemplate = html`
                   @click="${(x) => x.setPrice(x.bestBid)}"
                 >
                   Bid ${(x) => x.formatPrice(x.bestBid)}
-                  <div class="nbbo-line-icon-holder">
+                  <div
+                    @click="${(x, { event }) => event.stopPropagation()}"
+                    class="nbbo-line-icon-holder"
+                  >
                     <div class="nbbo-line-icon-fallback">
                       <div
                         class="nbbo-line-icon-logo"
@@ -508,7 +510,7 @@ export const orderWidgetStyles = css`
     align-items: center;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: ${fontSizeWidget};
     justify-content: center;
     text-align: left;
     vertical-align: middle;
