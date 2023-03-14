@@ -764,6 +764,11 @@ export class OrderWidget extends WidgetWithInstrument {
     this.extraLevel1Trader?.instrumentChanged?.(this, oldValue, newValue);
     this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
 
+    if (newValue !== oldValue && this.price) {
+      this.price.value = '';
+      this.price.focus();
+    }
+
     this.calculateEstimate();
   }
 

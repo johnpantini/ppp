@@ -77,7 +77,10 @@ createServer(async (request, response) => {
           } else {
             let result = {};
 
-            if (invocation?.constructor?.name === 'AggregationCursor') {
+            if (
+              invocation?.constructor?.name === 'AggregationCursor' ||
+              invocation?.constructor?.name === 'FindCursor'
+            ) {
               result = await invocation.toArray();
             } else if (typeof invocation === 'object') {
               for (const key in invocation) {

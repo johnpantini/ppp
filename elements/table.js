@@ -98,7 +98,7 @@ export const tableTemplate = html`
 export const tableStyles = css`
   ${normalize()}
   ${hotkey()}
-  ${display('flex')}
+  ${display('block')}
   table {
     font-family: ${bodyFont};
     position: relative;
@@ -193,6 +193,7 @@ export const tableStyles = css`
   }
 
   .empty-message {
+    color: ${themeConditional(paletteGrayDark3, paletteGrayLight2)};
     font-style: italic;
     padding: 5px;
     text-align: center;
