@@ -390,6 +390,10 @@ export const orderWidgetStyles = css`
   ${normalize()}
   ${widget()}
   ${spacing()}
+  :host ppp-widget-notifications-area {
+    bottom: 55px;
+  }
+
   .company-card {
     width: 100%;
     padding: 10px 10px 0;
@@ -764,9 +768,13 @@ export class OrderWidget extends WidgetWithInstrument {
     this.extraLevel1Trader?.instrumentChanged?.(this, oldValue, newValue);
     this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
 
-    if (newValue !== oldValue && this.price) {
-      this.price.value = '';
-      this.price.focus();
+    if (this.price && (oldValue?._id !== newValue?._id || !oldValue)) {
+      setTimeout(() => {
+        this.price.value = '';
+        this.price.focus();
+
+        void this.saveLastPriceValue();
+      }, 25);
     }
 
     this.calculateEstimate();
@@ -1072,7 +1080,7 @@ export class OrderWidget extends WidgetWithInstrument {
           const length = this.price.control.value.length;
 
           this.price.control.setSelectionRange(length, length);
-        }, 100);
+        }, 25);
       }
 
       this.price.value = price.toString().replace('.', decSeparator);

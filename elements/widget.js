@@ -37,7 +37,8 @@ import {
   paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
-  paletteGreenBase,
+  paletteGreenBase, paletteGreenLight3,
+  paletteRedBase, paletteRedLight3,
   paletteWhite,
   positive,
   sell,
@@ -54,12 +55,14 @@ import {
   widgetGroup7,
   widgetGroup8,
   widgetGroup9
-} from '../design/design-tokens.js';
+} from '../design/design-tokens.js'
 import {
   circleNotch,
   close,
   settings,
   search,
+  notificationError,
+  notificationSuccess,
   emptyWidgetState
 } from '../static/svg/sprite.js';
 import { Tab, Tabs, tabsTemplate, tabTemplate } from './tabs.js';
@@ -1961,21 +1964,19 @@ export const widgetNotificationsAreaTemplate = html`
     <div class="widget-notification-ps">
       <div class="widget-notification-holder">
         ${when(
-          (x) => x.visible && x.title,
+          (x) => x.title,
           html`
             <div
               class="widget-notification"
               status="${(x) => x.status ?? 'success'}"
             >
               <div class="widget-notification-icon">
-                <img
-                  draggable="false"
-                  alt="Ошибка"
-                  src="${(x) =>
-                    `static/widgets/notifications-${
-                      x.status ?? 'success'
-                    }.svg`}"
-                />
+                ${(x) =>
+                  html`${html.partial(
+                    (x.status ?? 'success') === 'success'
+                      ? notificationSuccess
+                      : notificationError
+                  )}`}
               </div>
               <div class="widget-notification-text-container">
                 <div class="widget-notification-title">
@@ -1987,13 +1988,9 @@ export const widgetNotificationsAreaTemplate = html`
               </div>
               <div
                 class="widget-notification-close-button"
-                @click="${(x) => (x.visible = false)}"
+                @click="${(x) => x.setAttribute('hidden', '')}"
               >
-                <img
-                  draggable="false"
-                  alt="Закрыть"
-                  src="static/widgets/close.svg"
-                />
+                ${html.partial(close)}
               </div>
             </div>
           `
@@ -2003,12 +2000,105 @@ export const widgetNotificationsAreaTemplate = html`
   </template>
 `;
 
-export const widgetNotificationsAreaStyles = css``;
+export const widgetNotificationsAreaStyles = css`
+  ${normalize()}
+  :host {
+    position: absolute;
+    width: 100%;
+    bottom: 20px;
+    left: 0;
+    z-index: 20;
+    will-change: contents;
+  }
+
+  .widget-notification-ps {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    contain: layout;
+  }
+
+  .widget-notification-holder {
+    padding: 0 12px;
+    max-width: 480px;
+    margin: auto;
+  }
+
+  .widget-notification {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    overflow: hidden;
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  .widget-notification::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    width: 4px;
+    content: '';
+  }
+
+  .widget-notification[status='error']::before {
+    background: ${themeConditional(paletteRedBase, paletteRedLight3)};
+  }
+
+  .widget-notification[status='success']::before {
+    background: ${themeConditional(paletteGreenBase, paletteGreenLight3)};
+  }
+
+  .widget-notification-close-button {
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    margin-left: ${spacing1};
+    width: 16px;
+    height: 16px;
+  }
+
+  .widget-notification-icon {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .widget-notification[status='error'] .widget-notification-icon {
+    color: ${themeConditional(paletteRedBase, paletteRedLight3)};
+  }
+
+  .widget-notification[status='success'] .widget-notification-icon {
+    color: ${themeConditional(paletteGreenBase, paletteGreenLight3)};
+  }
+
+  .widget-notification-text-container {
+    flex-grow: 1;
+    font-size: 12px;
+  }
+
+  .widget-notification-title {
+    font-size: ${fontSizeWidget};
+    font-weight: 500;
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  .widget-notification-text {
+    font-size: ${fontSizeWidget};
+    margin-top: 4px;
+    line-height: 20px;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  .widget-notification-close-button {
+    margin-left: 4px;
+    cursor: pointer;
+  }
+`;
 
 export class WidgetNotificationsArea extends PPPElement {
-  @observable
-  visible;
-
   @observable
   title;
 
@@ -2020,16 +2110,26 @@ export class WidgetNotificationsArea extends PPPElement {
 
   #timeout;
 
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.setAttribute('hidden', '');
+
+    this.widget = this.getRootNode().host;
+    this.widget.notificationsArea = this;
+  }
+
   success({ title, text }) {
     this.status = 'success';
     this.title = title;
     this.text = text;
-    this.visible = true;
+
+    this.removeAttribute('hidden');
 
     clearTimeout(this.#timeout);
 
     this.#timeout = setTimeout(() => {
-      this.visible = false;
+      this.setAttribute('hidden', '');
     }, 3000);
   }
 
@@ -2037,12 +2137,13 @@ export class WidgetNotificationsArea extends PPPElement {
     this.status = 'error';
     this.title = title;
     this.text = text;
-    this.visible = true;
+
+    this.removeAttribute('hidden');
 
     clearTimeout(this.#timeout);
 
     this.#timeout = setTimeout(() => {
-      this.visible = false;
+      this.setAttribute('hidden', '');
     }, 3000);
   }
 }
