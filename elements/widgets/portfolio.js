@@ -39,6 +39,7 @@ export const portfolioWidgetTemplate = html`
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
     </div>
+    <ppp-widget-resize-controls></ppp-widget-resize-controls>
   </template>
 `;
 
@@ -235,8 +236,6 @@ export async function widgetDefinition() {
       template: portfolioWidgetTemplate,
       styles: portfolioWidgetStyles
     }).define(),
-    maxHeight: 1200,
-    maxWidth: 1920,
     defaultWidth: 620,
     defaultHeight: 375,
     minHeight: 120,

@@ -21,13 +21,15 @@ export const topLoaderStyles = css`
     width: 100%;
     height: 5px;
     z-index: 999999;
-    transition: opacity 0.4s;
+    transition: opacity 0.4s, visibility 0.4s;
     opacity: 0;
+    visibility: hidden;
   }
 
   :host(.visible) {
     opacity: 1;
     transition: none;
+    visibility: visible;
   }
 
   .bar {

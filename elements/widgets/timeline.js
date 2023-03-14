@@ -384,8 +384,6 @@ export async function widgetDefinition() {
       template: timelineWidgetTemplate,
       styles: timelineWidgetStyles
     }).define(),
-    maxHeight: 2560,
-    maxWidth: 2560,
     defaultHeight: 375,
     defaultWidth: 280,
     minHeight: 120,

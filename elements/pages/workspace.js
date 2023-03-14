@@ -148,7 +148,7 @@ export class WorkspacePage extends Page {
         (n) => n?.tagName?.toLowerCase?.() === 'ppp-widget-resize-controls'
       ))
     ) {
-      this.resizeControls = this.resizeControls ?? resizeControls;
+      this.resizeControls = resizeControls;
       this.resizing = true;
     }
 
@@ -200,17 +200,13 @@ export class WorkspacePage extends Page {
         if (this.dragging) {
           this.draggedWidget = widget;
 
-          const tempBCR = this.draggedWidget.getBoundingClientRect();
-
-          this.draggedWidgetCR = {
-            width: tempBCR.width,
-            height: tempBCR.height
-          };
-
+          const bcr = this.draggedWidget.getBoundingClientRect();
           const styles = getComputedStyle(widget);
 
           widget.x = parseInt(styles.left);
           widget.y = parseInt(styles.top);
+          widget.width = bcr.width;
+          widget.height = bcr.height;
         } else if (this.resizing) {
           resizeControls.onPointerDown({ event, node: cp[0] });
         }
@@ -218,101 +214,105 @@ export class WorkspacePage extends Page {
     }
   }
 
+  applySnapping({ widget, newTop, newRight, newBottom, newLeft }) {
+    this.rectangles.forEach((rect) => {
+      const hasVerticalIntersection =
+        (newTop >= rect.top - this.snapDistance &&
+          newTop <= rect.bottom + this.snapDistance) ||
+        (newBottom >= rect.top - this.snapDistance &&
+          newBottom <= rect.bottom + this.snapDistance) ||
+        (newTop <= rect.top - this.snapDistance &&
+          newBottom >= rect.bottom + this.snapDistance);
+
+      if (hasVerticalIntersection) {
+        // 1. Vertical, this.left -> rect.right
+        const deltaLeftRight = Math.abs(
+          newLeft - (rect.x - this.x + rect.width)
+        );
+
+        if (deltaLeftRight <= this.snapDistance) {
+          newLeft = rect.x - this.x + rect.width + this.snapMargin;
+        }
+
+        // 2. Vertical, this.left -> rect.left
+        const deltaLeftLeft = Math.abs(newLeft - (rect.x - this.x));
+
+        if (deltaLeftLeft <= this.snapDistance) {
+          newLeft = rect.x - this.x;
+        }
+
+        // 3. Vertical, this.right -> rect.right
+        const deltaRightRight = Math.abs(
+          newRight - (rect.x - this.x + rect.width)
+        );
+
+        if (deltaRightRight <= this.snapDistance) {
+          newLeft = rect.x - this.x + rect.width - widget.width;
+        }
+
+        // 4. Vertical, this.right -> rect.left
+        const deltaRightLeft = Math.abs(newRight - (rect.x - this.x));
+
+        if (deltaRightLeft <= this.snapDistance) {
+          newLeft = rect.x - this.x - widget.width - this.snapMargin;
+        }
+      }
+
+      const hasHorizontalIntersection =
+        (newLeft >= rect.left - this.x - this.snapDistance &&
+          newLeft <= rect.right - this.x + this.snapDistance) ||
+        (newRight >= rect.left - this.x - this.snapDistance &&
+          newRight <= rect.right - this.x + this.snapDistance) ||
+        (newLeft <= rect.left - this.x - this.snapDistance &&
+          newRight >= rect.right - this.x + this.snapDistance);
+
+      if (hasHorizontalIntersection) {
+        // 1. Horizontal, this.top -> rect.bottom
+        const deltaTopBottom = Math.abs(newTop - rect.bottom);
+
+        if (deltaTopBottom <= this.snapDistance) {
+          newTop = rect.bottom + this.snapMargin;
+        }
+
+        // 2. Horizontal, this.top -> rect.top
+        const deltaTopTop = Math.abs(newTop - rect.y);
+
+        if (deltaTopTop <= this.snapDistance) {
+          newTop = rect.y;
+        }
+
+        // 3. Horizontal, this.bottom -> rect.bottom
+        const deltaBottomBottom = Math.abs(
+          rect.bottom - (newTop + widget.height)
+        );
+
+        if (deltaBottomBottom <= this.snapDistance) {
+          newTop = rect.bottom - widget.height;
+        }
+
+        // 4. Horizontal, this.bottom -> rect.top
+        const deltaBottomTop = Math.abs(rect.y - (newTop + widget.height));
+
+        if (deltaBottomTop <= this.snapDistance) {
+          newTop = rect.y - widget.height - this.snapMargin;
+        }
+      }
+    });
+
+    return { newTop, newRight, newBottom, newLeft };
+  }
+
   onPointerMove(event) {
     if (this.dragging) {
       const deltaX = event.clientX - this.clientX;
       const deltaY = event.clientY - this.clientY;
 
-      let newTop = this.draggedWidget.y + deltaY;
-      let newLeft = this.draggedWidget.x + deltaX;
-      const newRight = newLeft + this.draggedWidgetCR.width;
-      const newBottom = newTop + this.draggedWidgetCR.height;
-
-      this.rectangles.forEach((rect) => {
-        const hasVerticalIntersection =
-          (newTop >= rect.top - this.snapDistance &&
-            newTop <= rect.bottom + this.snapDistance) ||
-          (newBottom >= rect.top - this.snapDistance &&
-            newBottom <= rect.bottom + this.snapDistance) ||
-          (newTop <= rect.top - this.snapDistance &&
-            newBottom >= rect.bottom + this.snapDistance);
-
-        if (hasVerticalIntersection) {
-          // 1. Vertical, this.left -> rect.right
-          const deltaLeftRight = Math.abs(
-            newLeft - (rect.x - this.x + rect.width)
-          );
-
-          if (deltaLeftRight <= this.snapDistance) {
-            newLeft = rect.x - this.x + rect.width + this.snapMargin;
-          }
-
-          // 2. Vertical, this.left -> rect.left
-          const deltaLeftLeft = Math.abs(newLeft - (rect.x - this.x));
-
-          if (deltaLeftLeft <= this.snapDistance) {
-            newLeft = rect.x - this.x;
-          }
-
-          // 3. Vertical, this.right -> rect.right
-          const deltaRightRight = Math.abs(
-            newRight - (rect.x - this.x + rect.width)
-          );
-
-          if (deltaRightRight <= this.snapDistance) {
-            newLeft = rect.x - this.x + rect.width - this.draggedWidgetCR.width;
-          }
-
-          // 4. Vertical, this.right -> rect.left
-          const deltaRightLeft = Math.abs(newRight - (rect.x - this.x));
-
-          if (deltaRightLeft <= this.snapDistance) {
-            newLeft =
-              rect.x - this.x - this.draggedWidgetCR.width - this.snapMargin;
-          }
-        }
-
-        const hasHorizontalIntersection =
-          (newLeft >= rect.left - this.x - this.snapDistance &&
-            newLeft <= rect.right - this.x + this.snapDistance) ||
-          (newRight >= rect.left - this.x - this.snapDistance &&
-            newRight <= rect.right - this.x + this.snapDistance) ||
-          (newLeft <= rect.left - this.x - this.snapDistance &&
-            newRight >= rect.right - this.x + this.snapDistance);
-
-        if (hasHorizontalIntersection) {
-          // 1. Horizontal, this.top -> rect.bottom
-          const deltaTopBottom = Math.abs(newTop - rect.bottom);
-
-          if (deltaTopBottom <= this.snapDistance) {
-            newTop = rect.bottom + this.snapMargin;
-          }
-
-          // 2. Horizontal, this.top -> rect.top
-          const deltaTopTop = Math.abs(newTop - rect.y);
-
-          if (deltaTopTop <= this.snapDistance) {
-            newTop = rect.y;
-          }
-
-          // 3. Horizontal, this.bottom -> rect.bottom
-          const deltaBottomBottom = Math.abs(
-            rect.bottom - (newTop + this.draggedWidgetCR.height)
-          );
-
-          if (deltaBottomBottom <= this.snapDistance) {
-            newTop = rect.bottom - this.draggedWidgetCR.height;
-          }
-
-          // 4. Horizontal, this.bottom -> rect.top
-          const deltaBottomTop = Math.abs(
-            rect.y - (newTop + this.draggedWidgetCR.height)
-          );
-
-          if (deltaBottomTop <= this.snapDistance) {
-            newTop = rect.y - this.draggedWidgetCR.height - this.snapMargin;
-          }
-        }
+      let { newTop, newLeft } = this.applySnapping({
+        widget: this.draggedWidget,
+        newTop: this.draggedWidget.y + deltaY,
+        newRight: this.draggedWidget.x + deltaX + this.draggedWidget.width,
+        newBottom: this.draggedWidget.y + deltaY + this.draggedWidget.height,
+        newLeft: this.draggedWidget.x + deltaX
       });
 
       if (newLeft < 0) newLeft = 0;
@@ -337,7 +337,6 @@ export class WorkspacePage extends Page {
         });
 
         this.draggedWidget = null;
-        this.draggedWidgetCR = {};
       }
 
       if (this.resizing) {

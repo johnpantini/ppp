@@ -179,6 +179,7 @@ export const orderbookWidgetTemplate = html`
         )}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
+      <ppp-widget-resize-controls></ppp-widget-resize-controls>
     </div>
   </template>
 `;
@@ -824,8 +825,6 @@ export async function widgetDefinition() {
       template: orderbookWidgetTemplate,
       styles: orderbookWidgetStyles
     }).define(),
-    maxHeight: 1440,
-    maxWidth: 2560,
     defaultHeight: 375,
     defaultWidth: 280,
     minHeight: 120,

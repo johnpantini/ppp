@@ -1783,24 +1783,176 @@ export class WidgetResizeControls extends PPPElement {
     super.connectedCallback();
 
     this.widget = this.getRootNode().host;
+    this.snapDistance = this.widget.container.snapDistance;
+    this.snapMargin = this.widget.container.snapMargin;
   }
 
-  onPointerDown({ event, node }) {
+  onPointerDown({ node }) {
+    const bcr = this.widget.getBoundingClientRect();
+    const styles = getComputedStyle(this.widget);
 
+    this.x = this.widget.container.x;
+    this.widget.x = parseInt(styles.left);
+    this.widget.y = parseInt(styles.top);
+    this.widget.width = bcr.width;
+    this.widget.height = bcr.height;
+    this.widget.handle = node.getAttribute('class');
   }
 
   onPointerMove({ event }) {
+    const handle = this.widget.handle;
     const clientX = this.widget.container.clientX;
     const clientY = this.widget.container.clientY;
+    let deltaX = event.clientX - clientX;
+    let deltaY = event.clientY - clientY;
+    const { minWidth = 275, minHeight = 395 } = this.widget.widgetDefinition;
 
-    const deltaX = event.clientX - clientX;
-    const deltaY = event.clientY - clientY;
+    if (handle === 'top' || handle === 'bottom') {
+      deltaX = 0;
+    }
 
-    console.log(deltaX, deltaY)
+    if (handle === 'right' || handle === 'left') {
+      deltaY = 0;
+    }
+
+    let newTop = this.widget.y + deltaY;
+    let newLeft = this.widget.x + deltaX;
+    let newRight = newLeft + this.widget.width;
+    let newBottom = newTop + this.widget.height;
+
+    if (handle === 'left' || handle === 'nw' || handle === 'sw') {
+      newRight -= deltaX;
+
+      if (newRight - newLeft < minWidth) {
+        newLeft = newRight - minWidth;
+      }
+    }
+
+    if (handle === 'right' || handle === 'se' || handle === 'ne') {
+      newLeft -= deltaX;
+
+      if (newRight - newLeft < minWidth) {
+        newRight = newLeft + minWidth;
+      }
+    }
+
+    if (handle === 'top' || handle === 'nw' || handle === 'ne') {
+      newBottom -= deltaY;
+
+      if (newBottom - newTop < minHeight) {
+        newTop = newBottom - minHeight;
+      }
+    }
+
+    if (handle === 'bottom' || handle === 'se' || handle === 'sw') {
+      newTop -= deltaY;
+
+      if (newBottom - newTop < minHeight) {
+        newBottom = newTop + minHeight;
+      }
+    }
+
+    this.widget.container.rectangles.forEach((rect) => {
+      const hasVerticalIntersection =
+        (newTop >= rect.top - this.snapDistance &&
+          newTop <= rect.bottom + this.snapDistance) ||
+        (newBottom >= rect.top - this.snapDistance &&
+          newBottom <= rect.bottom + this.snapDistance) ||
+        (newTop <= rect.top - this.snapDistance &&
+          newBottom >= rect.bottom + this.snapDistance);
+
+      if (hasVerticalIntersection) {
+        // 1. Vertical, this.left -> rect.right
+        const deltaLeftRight = Math.abs(
+          newLeft - (rect.x - this.x + rect.width)
+        );
+
+        if (deltaLeftRight <= this.snapDistance) {
+          newLeft = rect.x - this.x + rect.width + this.snapMargin;
+        }
+
+        // 2. Vertical, this.left -> rect.left
+        const deltaLeftLeft = Math.abs(newLeft - (rect.x - this.x));
+
+        if (deltaLeftLeft <= this.snapDistance) {
+          newLeft = rect.x - this.x;
+        }
+
+        // 3. Vertical, this.right -> rect.right
+        const deltaRightRight = Math.abs(
+          newRight - (rect.x - this.x + rect.width)
+        );
+
+        if (deltaRightRight <= this.snapDistance) {
+          newRight = rect.right - this.x;
+        }
+
+        // 4. Vertical, this.right -> rect.left
+        const deltaRightLeft = Math.abs(newRight - (rect.x - this.x));
+
+        if (deltaRightLeft <= this.snapDistance) {
+          newRight = rect.x - this.x - this.snapMargin;
+        }
+      }
+
+      const hasHorizontalIntersection =
+        (newLeft >= rect.left - this.x - this.snapDistance &&
+          newLeft <= rect.right - this.x + this.snapDistance) ||
+        (newRight >= rect.left - this.x - this.snapDistance &&
+          newRight <= rect.right - this.x + this.snapDistance) ||
+        (newLeft <= rect.left - this.x - this.snapDistance &&
+          newRight >= rect.right - this.x + this.snapDistance);
+
+      if (hasHorizontalIntersection) {
+        // 1. Horizontal, this.top -> rect.bottom
+        const deltaTopBottom = Math.abs(newTop - rect.bottom);
+
+        if (deltaTopBottom <= this.snapDistance) {
+          newTop = rect.bottom + this.snapMargin;
+        }
+
+        // 2. Horizontal, this.top -> rect.top
+        const deltaTopTop = Math.abs(newTop - rect.y);
+
+        if (deltaTopTop <= this.snapDistance) {
+          newTop = rect.y;
+        }
+
+        // 3. Horizontal, this.bottom -> rect.bottom
+        const deltaBottomBottom = Math.abs(rect.bottom - newBottom);
+
+        if (deltaBottomBottom <= this.snapDistance) {
+          newBottom = rect.bottom;
+        }
+
+        // 4. Horizontal, this.bottom -> rect.top
+        const deltaBottomTop = Math.abs(rect.top - newBottom);
+
+        if (deltaBottomTop <= this.snapDistance) {
+          newBottom = rect.top - this.snapMargin;
+        }
+      }
+    });
+
+    if (newLeft < 0) newLeft = 0;
+
+    if (newTop < 0) newTop = 0;
+
+    this.widget.style.left = `${newLeft}px`;
+    this.widget.style.top = `${newTop}px`;
+    this.widget.style.width = `${newRight - newLeft}px`;
+    this.widget.style.height = `${newBottom - newTop}px`;
   }
 
-  onPointerUp({ event }) {
-
+  onPointerUp() {
+    void this.widget.updateDocumentFragment({
+      $set: {
+        'widgets.$.x': parseInt(this.widget.style.left),
+        'widgets.$.y': parseInt(this.widget.style.top),
+        'widgets.$.width': parseInt(this.widget.style.width),
+        'widgets.$.height': parseInt(this.widget.style.height)
+      }
+    });
   }
 }
 

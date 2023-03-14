@@ -2,7 +2,6 @@ import { css } from '../vendor/fast-element.min.js';
 import {
   themeConditional,
   scrollBarSize,
-  paletteGrayLight3,
   paletteGrayDark4,
   paletteGrayDark2,
   paletteGrayLight2,
@@ -37,9 +36,8 @@ import {
   linkColor,
   paletteWhite,
   paletteGrayDark3,
-  toColorComponents,
-  paletteGreenBase
-} from './design-tokens.js';
+  toColorComponents, paletteGrayLight3
+} from './design-tokens.js'
 
 export const normalize = () => css`
   *:not(:defined) {
@@ -81,13 +79,14 @@ export const normalize = () => css`
     color: currentColor;
   }
 
-  a, :any-link {
+  a,
+  :any-link {
     color: currentColor;
     position: relative;
   }
 
   a:after {
-    content: "";
+    content: '';
     position: absolute;
     width: 100%;
     height: 2px;
@@ -108,7 +107,7 @@ export const scrollbars = (selector = '') => css`
   }
 
   ${selector}::-webkit-scrollbar-track {
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark4)};
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)};
   }
 
   ${selector}::-webkit-scrollbar-thumb {
@@ -122,7 +121,7 @@ export const scrollbars = (selector = '') => css`
   }
 
   :host {
-    scrollbar-color: ${themeConditional(paletteGrayLight2, paletteGrayDark4)}
+    scrollbar-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)}
       rgba(
         ${themeConditional(
           toColorComponents(paletteGrayDark1),
@@ -136,7 +135,7 @@ export const scrollbars = (selector = '') => css`
 
 [
   scrollBarSize,
-  themeConditional(paletteGrayLight2, paletteGrayDark4),
+  themeConditional(paletteGrayLight3, paletteGrayDark3),
   themeConditional(
     toColorComponents(paletteGrayDark1),
     toColorComponents(paletteGrayLight1)

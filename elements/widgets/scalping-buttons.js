@@ -284,8 +284,6 @@ export async function widgetDefinition() {
       template: scalpingButtonsWidgetTemplate,
       styles: scalpingButtonsWidgetStyles
     }).define(),
-    maxHeight: 512,
-    maxWidth: 1900,
     minHeight: 120,
     defaultHeight: 160,
     minWidth: 275,

@@ -29,6 +29,7 @@ export const activeOrdersWidgetTemplate = html`
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
     </div>
+    <ppp-widget-resize-controls></ppp-widget-resize-controls>
   </template>
 `;
 
@@ -221,8 +222,6 @@ export async function widgetDefinition() {
       template: activeOrdersWidgetTemplate,
       styles: activeOrdersWidgetStyles
     }).define(),
-    maxHeight: 1200,
-    maxWidth: 365,
     defaultHeight: 400,
     defaultWidth: 280,
     minHeight: 132,

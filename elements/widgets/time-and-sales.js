@@ -136,6 +136,7 @@ export const timeAndSalesWidgetTemplate = html`
         )}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
+      <ppp-widget-resize-controls></ppp-widget-resize-controls>
     </div>
   </template>
 `;
@@ -401,8 +402,6 @@ export async function widgetDefinition() {
       template: timeAndSalesWidgetTemplate,
       styles: timeAndSalesWidgetStyles
     }).define(),
-    maxHeight: 2560,
-    maxWidth: 2560,
     defaultHeight: 375,
     defaultWidth: 280,
     minHeight: 120,
