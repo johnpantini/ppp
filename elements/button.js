@@ -127,10 +127,6 @@ export const buttonStyles = css`
     gap: ${spacing2};
   }
 
-  .control:disabled {
-    pointer-events: none;
-  }
-
   :host(.xsmall) .control {
     height: 22px;
     text-transform: uppercase;
@@ -244,11 +240,12 @@ export const buttonStyles = css`
   }
 
   :host([disabled]) {
-    cursor: not-allowed;
+    pointer-events: none;
   }
 
   :host([disabled]) .control {
-    pointer-events: none;
+    cursor: not-allowed;
+    pointer-events: all;
     user-select: none;
   }
 

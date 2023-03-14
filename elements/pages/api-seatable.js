@@ -13,8 +13,8 @@ export const apiSeatablePageTemplate = html`
       <ppp-page-header>
         ${(x) =>
           x.document.name
-            ? `Внешний API - Seatable - ${x.document.name}`
-            : 'Внешний API - Seatable'}
+            ? `Внешние API - Seatable - ${x.document.name}`
+            : 'Внешние API - Seatable'}
       </ppp-page-header>
       <section>
         <div class="label-group">

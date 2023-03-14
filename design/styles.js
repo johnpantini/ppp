@@ -177,6 +177,10 @@ export const hotkey = () => css`
     line-height: ${lineHeightCode1};
   }
 
+  .hotkey.static {
+    pointer-events: none;
+  }
+
   .hotkey:hover {
     background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }

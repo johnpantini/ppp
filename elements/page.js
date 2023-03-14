@@ -34,7 +34,7 @@ import { uuidv4 } from '../lib/ppp-crypto.js';
 
 await ppp.i18n(import.meta.url);
 
-(class PageHeader extends PPPElement {}
+(class PageHeader extends PPPElement {})
   .compose({
     template: html`
       <h3 class="title">
@@ -78,7 +78,7 @@ await ppp.i18n(import.meta.url);
       }
     `
   })
-  .define());
+  .define();
 
 export const pageStyles = css`
   ${normalize()}
@@ -230,6 +230,23 @@ export const pageStyles = css`
     grid-template-columns: repeat(auto-fill, 370px);
     grid-gap: 24px;
   }
+
+  .control-line {
+    display: flex;
+    flex-direction: row;
+    gap: 0 8px;
+  }
+
+  .control-line.centered {
+    align-items: center;
+  }
+
+  .control-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 8px 0;
+  }
 `;
 
 class ScratchMap extends Map {
@@ -258,6 +275,9 @@ class Page extends PPPElement {
 
   @observable
   document;
+
+  @observable
+  documents;
 
   @attr
   status;
@@ -289,6 +309,7 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.NOT_READY;
     this.scratch = new ScratchMap(this);
     this.document = {};
+    this.documents = [];
   }
 
   async connectedCallback() {
@@ -312,7 +333,10 @@ class Page extends PPPElement {
     }
 
     if (!this.hasAttribute('disable-auto-read')) {
-      return this.readDocument();
+      await this.readDocument();
+
+      if (!this.hasAttribute('disable-auto-populate'))
+        return this.populateDocuments();
     } else {
       this.status = PAGE_STATUS.READY;
     }
@@ -434,6 +458,94 @@ class Page extends PPPElement {
     }
   }
 
+  async populateDocuments() {
+    this.beginOperation();
+
+    try {
+      if (typeof this.populate === 'function') {
+        let populateMethodResult = await this.populate();
+
+        if (typeof populateMethodResult === 'function') {
+          populateMethodResult = await new Tmpl().render(
+            this,
+            populateMethodResult.toString(),
+            {}
+          );
+        }
+
+        if (typeof populateMethodResult === 'string') {
+          const code = populateMethodResult.split(/\r?\n/);
+
+          code.pop();
+          code.shift();
+
+          this.documents = await ppp.user.functions.eval(code.join('\n'));
+        } else {
+          this.documents = populateMethodResult ?? [];
+        }
+      } else if (this.collection) {
+        this.documents = await ppp.user.functions.aggregate(
+          { collection: this.collection },
+          [{ $match: { removed: { $not: { $eq: true } } } }]
+        );
+      } else {
+        this.documents = [];
+      }
+
+      if (typeof this.transformMany === 'function') {
+        this.documents = await this.transformMany();
+      }
+
+      this.status = PAGE_STATUS.READY;
+    } catch (e) {
+      this.documents = [];
+
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async removeDocumentFromListing(datum) {
+    this.beginOperation();
+
+    try {
+      await ppp.user.functions.updateOne(
+        {
+          collection: this.collection
+        },
+        {
+          _id: datum._id
+        },
+        {
+          $set: {
+            removed: true
+          }
+        },
+        {
+          upsert: true
+        }
+      );
+
+      const index = this.documents.findIndex((d) => d._id === datum._id);
+
+      if (index > -1) {
+        this.documents.splice(index, 1);
+      }
+
+      Observable.notify(this, 'documents');
+
+      this.showSuccessNotification(
+        ppp.t('$operations.operationSucceeded'),
+        'Удаление'
+      );
+    } catch (e) {
+      this.failOperation(e, 'Удаление');
+    } finally {
+      this.endOperation();
+    }
+  }
+
   getToastTitle() {
     let toastTitle = 'PPP';
 
@@ -487,12 +599,16 @@ class Page extends PPPElement {
   }
 
   endOperation() {
-    this.status = PAGE_STATUS.OPERATION_ENDED;
+    if (!this.lastError)
+      this.status = PAGE_STATUS.OPERATION_ENDED;
+
+    this.lastError = null;
   }
 
   failOperation(e, toastTitle = this.getToastTitle()) {
     console.dir(e);
 
+    this.lastError = e;
     this.status = PAGE_STATUS.OPERATION_FAILED;
 
     const errorName = e?.errorCode ?? e?.error_code ?? e?.name;
@@ -727,4 +843,44 @@ class Page extends PPPElement {
   }
 }
 
-export { Page };
+/**
+ *
+ * @mixin
+ * @var {HTMLElement} shiftLockContainer
+ */
+class PageWithShiftLock {
+  ctor() {
+    this.onShiftLockKeyUpDown = this.onShiftLockKeyUpDown.bind(this);
+  }
+
+  onShiftLockKeyUpDown(event) {
+    if (this.shiftLockContainer && !Array.isArray(this.shiftLockContainer))
+      this.shiftLockContainer = [this.shiftLockContainer];
+
+    if (event.key === 'Shift') {
+      this.shiftLockContainer?.forEach((container) => {
+        container.shadowRoot
+          .querySelectorAll('[shiftlock]')
+          .forEach((element) => {
+            if (event.type === 'keydown') {
+              element.removeAttribute('disabled');
+            } else {
+              element.setAttribute('disabled', '');
+            }
+          });
+      });
+    }
+  }
+
+  connectedCallback() {
+    document.addEventListener('keydown', this.onShiftLockKeyUpDown);
+    document.addEventListener('keyup', this.onShiftLockKeyUpDown);
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('keydown', this.onShiftLockKeyUpDown);
+    document.removeEventListener('keyup', this.onShiftLockKeyUpDown);
+  }
+}
+
+export { Page, PageWithShiftLock };
