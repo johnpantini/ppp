@@ -182,7 +182,7 @@ export const traderPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('tinkoff')}"
           />
-          <div slot="title">Tinkoff Invest API (gRPC-web)</div>
+          <div slot="title">Tinkoff Invest API (gRPC-Web)</div>
           <span slot="description">
             Торговля через брокерский профиль Tinkoff Invest API.
           </span>
