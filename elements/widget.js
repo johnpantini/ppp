@@ -1,6 +1,10 @@
 /** @decorator */
 
-import { PPPElement, PPPOffClickElement } from '../lib/ppp-element.js';
+import {
+  PPPAppearanceElement,
+  PPPElement,
+  PPPOffClickElement
+} from '../lib/ppp-element.js';
 import {
   attr,
   css,
@@ -2428,6 +2432,12 @@ export const widgetBoxRadioStyles = css`
 
 export class WidgetBoxRadio extends BoxRadio {}
 
+export const widgetCardTemplate = html``;
+
+export const widgetCardStyles = css``;
+
+export class WidgetCard extends PPPAppearanceElement {}
+
 export default {
   WidgetGroupControlComposition: WidgetGroupControl.compose({
     template: widgetGroupControlTemplate,
@@ -2478,5 +2488,9 @@ export default {
   WidgetBoxRadioComposition: WidgetBoxRadio.compose({
     template: boxRadioTemplate,
     styles: widgetBoxRadioStyles
+  }).define(),
+  WidgetCardComposition: WidgetCard.compose({
+    template: widgetCardTemplate,
+    styles: widgetCardStyles
   }).define()
 };

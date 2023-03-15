@@ -3,6 +3,7 @@ import { css, html } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
 import { normalize, typography } from '../design/styles.js';
 import {
+  fontSizeBody1,
   paletteBlack,
   paletteGrayBase,
   paletteGrayDark1,
@@ -11,7 +12,7 @@ import {
   paletteGrayLight2,
   paletteWhite,
   themeConditional
-} from '../design/design-tokens.js';
+} from '../design/design-tokens.js'
 
 export function filterCards(cards, text) {
   for (const card of Array.from(cards)) {
@@ -64,7 +65,7 @@ export const genericCardStyles = css`
 
   .description {
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
-    font-size: 14px;
+    font-size: ${fontSizeBody1};
     padding-bottom: 16px;
   }
 
