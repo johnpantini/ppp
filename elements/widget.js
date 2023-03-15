@@ -37,8 +37,10 @@ import {
   paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
-  paletteGreenBase, paletteGreenLight3,
-  paletteRedBase, paletteRedLight3,
+  paletteGreenBase,
+  paletteGreenLight3,
+  paletteRedBase,
+  paletteRedLight3,
   paletteWhite,
   positive,
   sell,
@@ -55,7 +57,7 @@ import {
   widgetGroup7,
   widgetGroup8,
   widgetGroup9
-} from '../design/design-tokens.js'
+} from '../design/design-tokens.js';
 import {
   circleNotch,
   close,
@@ -1987,7 +1989,7 @@ export const widgetNotificationsAreaTemplate = html`
                 </div>
               </div>
               <div
-                class="widget-notification-close-button"
+                class="widget-notification-close-icon"
                 @click="${(x) => x.setAttribute('hidden', '')}"
               >
                 ${html.partial(close)}
@@ -2053,15 +2055,25 @@ export const widgetNotificationsAreaStyles = css`
     background: ${themeConditional(paletteGreenBase, paletteGreenLight3)};
   }
 
-  .widget-notification-close-button {
+  .widget-notification-close-icon {
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
     margin-left: ${spacing1};
     width: 16px;
     height: 16px;
   }
 
+  .widget-notification-close-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .widget-notification-icon {
     margin-right: 8px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .widget-notification-icon svg {
     width: 16px;
     height: 16px;
   }
@@ -2092,7 +2104,7 @@ export const widgetNotificationsAreaStyles = css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
 
-  .widget-notification-close-button {
+  .widget-notification-close-icon {
     margin-left: 4px;
     cursor: pointer;
   }
