@@ -27,7 +27,7 @@ export default function (i18n) {
       broker: {
         [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
         [BROKERS.TINKOFF_INVEST_API]: 'Tinkoff Invest API',
-        [BROKERS.UTEX_AURORA]: 'UTEX Aurora',
+        [BROKERS.UTEX_AURORA]: 'UTEX',
         [BROKERS.PSINA]: 'Psina',
         [BROKERS.BINANCE]: 'Binance'
       },

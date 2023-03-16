@@ -58,6 +58,7 @@ export const activeOrdersWidgetTemplate = html`
             </ppp-widget-box-radio-group>
           </div>
           <button
+            hidden
             class="active-orders-widget-cancel-orders"
             title="Отменить все заявки"
             @click="${(x) => x.cancelAllOrders()}"
@@ -72,7 +73,7 @@ export const activeOrdersWidgetTemplate = html`
               widgetEmptyStateTemplate('Активных заявок нет.')
             )}`
           )}
-          <div class="active-orders-widget-order-list-inner">
+          <div class="active-orders-widget-order-list-inner" hidden>
             ${repeat(
               (x) => x.getOrdersArray(),
               html`
@@ -84,7 +85,7 @@ export const activeOrdersWidgetTemplate = html`
                         <div class="active-order-card-logo">
                           <div
                             style="${(o) =>
-                              o.instrument.isin
+                              o.instrument?.isin
                                 ? `background-image:url(${
                                     'static/instruments/' +
                                     o.instrument.isin +
@@ -94,7 +95,8 @@ export const activeOrdersWidgetTemplate = html`
                           ></div>
                           ${(o) =>
                             o.instrument?.fullName?.[0] ??
-                            o.instrument.symbol[0] ??
+                            o.instrument?.symbol[0] ??
+                            o.symbol[0] ??
                             ''}
                         </div>
                         <div class="active-order-card-text">
