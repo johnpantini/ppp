@@ -5,6 +5,65 @@ import { Worker } from 'node:worker_threads';
 import uWS from '../uWebSockets.js/uws.js';
 import * as inspector from 'node:inspector';
 
+const httpStatuses = {
+  100: 'Continue',
+  101: 'Switching Protocols',
+  102: 'Processing',
+  200: 'OK',
+  201: 'Created',
+  202: 'Accepted',
+  203: 'Non Authoritative Information',
+  204: 'No Content',
+  205: 'Reset Content',
+  206: 'Partial Content',
+  207: 'Multi-Status',
+  300: 'Multiple Choices',
+  301: 'Moved Permanently',
+  302: 'Moved Temporarily',
+  303: 'See Other',
+  304: 'Not Modified',
+  305: 'Use Proxy',
+  307: 'Temporary Redirect',
+  308: 'Permanent Redirect',
+  400: 'Bad Request',
+  401: 'Unauthorized',
+  402: 'Payment Required',
+  403: 'Forbidden',
+  404: 'Not Found',
+  405: 'Method Not Allowed',
+  406: 'Not Acceptable',
+  407: 'Proxy Authentication Required',
+  408: 'Request Timeout',
+  409: 'Conflict',
+  410: 'Gone',
+  411: 'Length Required',
+  412: 'Precondition Failed',
+  413: 'Request Entity Too Large',
+  414: 'Request-URI Too Long',
+  415: 'Unsupported Media Type',
+  416: 'Requested Range Not Satisfiable',
+  417: 'Expectation Failed',
+  418: "I'm a teapot",
+  419: 'Insufficient Space on Resource',
+  420: 'Method Failure',
+  421: 'Misdirected Request',
+  422: 'Unprocessable Entity',
+  423: 'Locked',
+  424: 'Failed Dependency',
+  428: 'Precondition Required',
+  429: 'Too Many Requests',
+  431: 'Request Header Fields Too Large',
+  451: 'Unavailable For Legal Reasons',
+  500: 'Internal Server Error',
+  501: 'Not Implemented',
+  502: 'Bad Gateway',
+  503: 'Service Unavailable',
+  504: 'Gateway Timeout',
+  505: 'HTTP Version Not Supported',
+  507: 'Insufficient Storage',
+  511: 'Network Authentication Required'
+};
+
 async function later(delay) {
   return new Promise(function (resolve) {
     setTimeout(resolve, delay);
@@ -324,6 +383,59 @@ export default class Aspirant {
         cors(res)
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
           .end('pong');
+      })
+      .post('/fetch', async (res) => {
+        readJSON(res, async (payload = {}) => {
+          try {
+            const headers = payload.headers ?? {};
+            const requestOptions = {
+              method: payload.method?.toUpperCase() ?? 'POST',
+              headers
+            };
+
+            if (!headers['User-Agent']) {
+              headers['User-Agent'] =
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36';
+            }
+
+            if (!headers['Content-Type']) {
+              headers['Content-Type'] = 'application/json';
+            }
+
+            if (typeof payload.body === 'string') {
+              requestOptions.body = payload.body;
+            } else if (typeof payload.body === 'object')
+              requestOptions.body = JSON.stringify(payload.body);
+
+            if (
+              requestOptions.body &&
+              typeof requestOptions.headers['Content-Length'] === 'undefined'
+            )
+              requestOptions.headers['Content-Length'] = Buffer.byteLength(
+                requestOptions.body
+              );
+
+            const response = await fetch(payload.url, requestOptions);
+            const ct = response.headers.get('content-type');
+
+            const chain = cors(res).writeStatus(
+              `${response.status} ${
+                httpStatuses[response.status] ?? 'Unknown Error'
+              }`
+            );
+
+            if (ct) chain.writeHeader('Content-Type', ct);
+
+            chain.end(await response.text());
+          } catch (e) {
+            console.error(e);
+
+            cors(res)
+              .writeStatus('500 Internal Server Error')
+              .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
+              .end('500 Internal Server Error');
+          }
+        });
       })
       .get('/inspector_url', async (res) => {
         cors(res)
