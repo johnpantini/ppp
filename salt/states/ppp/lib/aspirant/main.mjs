@@ -275,10 +275,10 @@ export default class Aspirant {
       .get('/workers', async (res) => {
         res
           .writeHeader('Content-Type', 'application/json;charset=UTF-8')
-          .end(JSON.stringify(Object.fromEntries(this.#workers)));
+          .end(JSON.stringify(Object.fromEntries(this.#workers)), true);
       })
       .options('/*', (res) => {
-        return cors(res).writeStatus('200 OK').end();
+        return cors(res).writeStatus('200 OK').end('', true);
       })
       .post('/workers', async (res) => {
         readJSON(res, async (payload = {}) => {
@@ -289,13 +289,13 @@ export default class Aspirant {
               return cors(res)
                 .writeStatus('400 Bad Request')
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-                .end('Missing worker _id.');
+                .end('Missing worker _id.', true);
 
             if (!source)
               return cors(res)
                 .writeStatus('400 Bad Request')
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-                .end('Missing worker source.');
+                .end('Missing worker source.', true);
 
             await this.#redisCommand('hset', [
               this.key,
@@ -311,14 +311,14 @@ export default class Aspirant {
 
             cors(res)
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-              .end('200 OK');
+              .end('200 OK', true);
           } catch (e) {
             console.error(e);
 
             cors(res)
               .writeStatus('500 Internal Server Error')
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-              .end('500 Internal Server Error');
+              .end('500 Internal Server Error', true);
           }
         });
       })
@@ -331,7 +331,7 @@ export default class Aspirant {
               return cors(res)
                 .writeStatus('400 Bad Request')
                 .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-                .end('Missing worker _id.');
+                .end('Missing worker _id.', true);
 
             await this.#redisCommand('hdel', [this.key, _id]);
 
@@ -350,14 +350,14 @@ export default class Aspirant {
 
             cors(res)
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-              .end('200 OK');
+              .end('200 OK', true);
           } catch (e) {
             console.error(e);
 
             cors(res)
               .writeStatus('500 Internal Server Error')
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-              .end('500 Internal Server Error');
+              .end('500 Internal Server Error', true);
           }
         });
       })
@@ -369,20 +369,20 @@ export default class Aspirant {
         try {
           cors(res)
             .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-            .end(await (await this.#redisCommand('ping')).text());
+            .end(await (await this.#redisCommand('ping')).text(), true);
         } catch (e) {
           console.error(e);
 
           cors(res)
             .writeStatus('500 Internal Server Error')
             .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-            .end('500 Internal Server Error');
+            .end('500 Internal Server Error', true);
         }
       })
       .get('/ping', async (res) => {
         cors(res)
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-          .end('pong');
+          .end('pong', true);
       })
       .post('/fetch', async (res) => {
         readJSON(res, async (payload = {}) => {
@@ -426,26 +426,26 @@ export default class Aspirant {
 
             if (ct) chain.writeHeader('Content-Type', ct);
 
-            chain.end(await response.text());
+            chain.end(await response.text(), true);
           } catch (e) {
             console.error(e);
 
             cors(res)
               .writeStatus('500 Internal Server Error')
               .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-              .end('500 Internal Server Error');
+              .end('500 Internal Server Error', true);
           }
         });
       })
       .get('/inspector_url', async (res) => {
         cors(res)
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-          .end(inspector.url());
+          .end(inspector.url(), true);
       })
       .get('/', async (res) => {
         cors(res)
           .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-          .end(this.#id);
+          .end(this.#id, true);
       })
       .listen('0.0.0.0', PORT, async (listenSocket) => {
         if (listenSocket) {
