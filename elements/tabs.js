@@ -143,7 +143,7 @@ export const tabStyles = css`
     background-color: transparent;
   }
 
-  :host(:hover:not([disabled])) {
+  :host(:hover:not([disabled]):not([aria-selected='true'])) {
     color: ${themeConditional(paletteGrayDark3, paletteWhite)};
   }
 

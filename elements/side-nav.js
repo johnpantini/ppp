@@ -248,7 +248,7 @@ export const sideNavGroupTemplate = html`
       </div>
     </div>
     <ul class="items-container">
-      <slot name="items"></slot>
+      <slot></slot>
     </ul>
   </template>
 `;
@@ -302,6 +302,10 @@ export const sideNavGroupStyles = css`
     padding: 0;
     list-style-type: none;
   }
+
+  ::slotted(a) {
+    text-decoration: none;
+  }
 `;
 
 export class SideNavGroup extends PPPElement {
@@ -326,7 +330,7 @@ export const sideNavItemTemplate = html`
   <template>
     ${startSlotTemplate()}
     <li class="content" part="content" ${ref('content')}>
-      <slot name="title"></slot>
+      <slot></slot>
     </li>
     ${endSlotTemplate()}
   </template>
@@ -416,6 +420,10 @@ export const sideNavItemStyles = css`
 
   ::slotted(.action-icon) {
     color: ${themeConditional(paletteGreenDark2, paletteGreenLight1)};
+  }
+
+  ::slotted(a) {
+    text-decoration: none;
   }
 `;
 

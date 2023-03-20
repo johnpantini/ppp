@@ -466,18 +466,24 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.empty = true;
-    this.orders = new Map();
-    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
-    this.searchControl.trader = this.ordersTrader;
+    try {
+      this.empty = true;
+      this.orders = new Map();
+      this.ordersTrader = await ppp.getOrCreateTrader(
+        this.document.ordersTrader
+      );
+      this.searchControl.trader = this.ordersTrader;
 
-    if (this.ordersTrader) {
-      await this.ordersTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
-        }
-      });
+      if (this.ordersTrader) {
+        await this.ordersTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            currentOrder: TRADER_DATUM.CURRENT_ORDER
+          }
+        });
+      }
+    } catch (e) {
+      return this.catchException(e);
     }
   }
 

@@ -17,8 +17,19 @@ import {
   Updates
 } from '../vendor/fast-element.min.js';
 import { debounce } from '../lib/ppp-decorators.js';
-import { display } from '../vendor/fast-utilities.js';
-import { ellipsis, normalize, scrollbars } from '../design/styles.js';
+import {
+  display,
+  keyArrowDown,
+  keyArrowUp,
+  keyEnter,
+  keyEscape
+} from '../vendor/fast-utilities.js';
+import {
+  ellipsis,
+  normalize,
+  scrollbars,
+  typography
+} from '../design/styles.js';
 import {
   bodyFont,
   buy,
@@ -33,6 +44,7 @@ import {
   paletteBlueBase,
   paletteBlueLight1,
   paletteBlueLight2,
+  paletteBlueLight3,
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark2,
@@ -69,16 +81,51 @@ import {
   search,
   notificationError,
   notificationSuccess,
-  emptyWidgetState
+  emptyWidgetState,
+  notificationNote
 } from '../static/svg/sprite.js';
 import { Tab, Tabs, tabsTemplate, tabTemplate } from './tabs.js';
 import { TextField, textFieldStyles, textFieldTemplate } from './text-field.js';
 import { Button, buttonStyles, buttonTemplate } from './button.js';
 import { RadioGroup, radioGroupTemplate } from './radio-group.js';
 import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
+import {
+  NoInstrumentsError,
+  StaleInstrumentCacheError
+} from '../lib/ppp-errors.js';
 
-const searchDebounceTimeout =
-  ppp.keyVault.getKey('use-alternative-mongo') === '1' ? 0 : 200;
+export const importInstrumentsSuggestion = ({ trader }) => html`
+  <span>
+    <a
+      class="link"
+      href="?page=instruments&tab=import"
+      @click="${(x) => x.openInstrumentsImport(trader)}"
+    >
+      Импортируйте</a
+    >
+    торговые инструменты, затем обновите страницу.
+  </span>
+`;
+
+export const staleInstrumentCacheSuggestion = (e) => html`
+  <span>
+    Локальные инструменты устарели, необходима
+    <a
+      class="link"
+      @click="${async (x) => {
+        x.widget.container.beginOperation();
+
+        try {
+          await e.trader.syncInstrumentCache(e);
+        } finally {
+          window.location.reload();
+        }
+      }}"
+    >
+      синхронизация </a
+    >.
+  </span>
+`;
 
 export const widgetEmptyState = () => css`
   .widget-empty-state-holder {
@@ -383,6 +430,31 @@ export class Widget extends PPPElement {
     }
   }
 
+  catchException(e) {
+    const title = this.document.name ?? 'Виджет';
+
+    if (e instanceof NoInstrumentsError) {
+      return this.notificationsArea.note({
+        title,
+        text: importInstrumentsSuggestion(e),
+        keep: true
+      });
+    } else if (e instanceof StaleInstrumentCacheError) {
+      return this.notificationsArea.note({
+        title,
+        text: staleInstrumentCacheSuggestion(e),
+        keep: true
+      });
+    } else {
+      console.error(e);
+
+      return this.notificationsArea.error({
+        title,
+        text: 'Не удалось подключиться к источнику данных.'
+      });
+    }
+  }
+
   adjustTitleEllipsis() {
     const title = this.shadowRoot.querySelector('.widget-title > .title');
 
@@ -450,26 +522,17 @@ export class WidgetWithInstrument extends Widget {
    */
   isolated;
 
-  connectedCallback() {
-    super.connectedCallback();
-
-    if (!this.preview) {
+  selectInstrument(instrument, options = {}) {
+    if (options.isolate) {
       this.isolated = true;
-      this.instrument = this.document.instrument;
+      this.instrument = instrument;
       this.isolated = false;
-    }
-  }
 
-  async findAndSelectSymbol(findClause = {}, selectOnThis = false) {
-    const instrument = await ppp.user.functions.findOne(
-      {
-        collection: 'instruments'
-      },
-      findClause
-    );
+      return instrument;
+    }
 
     if (instrument) {
-      if (selectOnThis) {
+      if (options.selectOnSelf) {
         this.instrument = instrument;
       }
 
@@ -477,7 +540,7 @@ export class WidgetWithInstrument extends Widget {
         .filter(
           (w) =>
             w !== this &&
-            w?.instrument?._id !== instrument._id &&
+            w?.instrument?.symbol !== instrument.symbol &&
             w?.groupControl?.selection === this.groupControl?.selection
         )
         .forEach((w) => (w.instrument = instrument));
@@ -518,7 +581,7 @@ export class WidgetWithInstrument extends Widget {
                   },
                   update: {
                     $set: {
-                      'widgets.$.instrumentId': w.instrument?._id
+                      'widgets.$.symbol': w.instrument?.symbol
                     }
                   },
                   upsert: true
@@ -538,7 +601,7 @@ export class WidgetWithInstrument extends Widget {
           },
           update: {
             $set: {
-              'widgets.$.instrumentId': this.instrument?._id
+              'widgets.$.symbol': this.instrument?.symbol
             }
           },
           upsert: true
@@ -896,7 +959,7 @@ export class WidgetGroupControl extends PPPOffClickElement {
 
       if (
         sourceWidget?.instrument &&
-        sourceWidget?.instrument?._id !== this.widget?.instrument?._id
+        sourceWidget?.instrument?.symbol !== this.widget?.instrument?.symbol
       ) {
         this.widget.isolated = true;
         this.widget.instrument = sourceWidget.instrument;
@@ -904,7 +967,7 @@ export class WidgetGroupControl extends PPPOffClickElement {
 
         void this.widget.updateDocumentFragment({
           $set: {
-            'widgets.$.instrumentId': this.widget.instrument._id
+            'widgets.$.symbol': this.widget.instrument.symbol
           }
         });
       }
@@ -966,7 +1029,7 @@ export const widgetSearchControlTemplate = html`
           <div class="menu-item-holder">
             <div
               class="menu-item"
-              @click="${(x) => x.selectInstrument(x.widget?.instrument)}"
+              @click="${(x) => x.chooseInstrument(x.widget?.instrument)}"
             >
               <div class="menu-item-icon-holder">
                 <div class="menu-item-icon-fallback">
@@ -992,7 +1055,7 @@ export const widgetSearchControlTemplate = html`
                   <span>${(x) => x.widget?.instrument.symbol}</span>
                 </div>
                 <div
-                  @click="${(x) => x.selectInstrument()}"
+                  @click="${(x) => x.chooseInstrument()}"
                   class="menu-item-close"
                 >
                   <span>${html.partial(close)}</span>
@@ -1010,6 +1073,7 @@ export const widgetSearchControlTemplate = html`
               !x.ticker &&
               !x.stocks.length &&
               !x.bonds.length &&
+              !x.etfs.length &&
               !x.futures.length &&
               !x.cryptocurrencies.length,
             html`
@@ -1024,7 +1088,7 @@ export const widgetSearchControlTemplate = html`
               <div class="menu-title">Тикер</div>
               <div
                 class="menu-item"
-                @click="${(x) => x.selectInstrument(x.ticker)}"
+                @click="${(x) => x.chooseInstrument(x.ticker)}"
               >
                 <div class="menu-item-icon-holder">
                   <div class="menu-item-icon-fallback">
@@ -1058,7 +1122,7 @@ export const widgetSearchControlTemplate = html`
                 html`
                   <div
                     class="menu-item"
-                    @click="${(x, c) => c.parent.selectInstrument(x)}"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
                   >
                     <div class="menu-item-icon-holder">
                       <div class="menu-item-icon-fallback">
@@ -1090,7 +1154,7 @@ export const widgetSearchControlTemplate = html`
                 html`
                   <div
                     class="menu-item"
-                    @click="${(x, c) => c.parent.selectInstrument(x)}"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
                   >
                     <div class="menu-item-icon-holder">
                       <div class="menu-item-icon-fallback">
@@ -1114,6 +1178,38 @@ export const widgetSearchControlTemplate = html`
             `
           )}
           ${when(
+            (x) => x.etfs.length,
+            html`
+              <div class="menu-title">Фонды</div>
+              ${repeat(
+                (x) => x.etfs,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
+                        <div
+                          class="menu-item-icon-logo"
+                          style="${(x) =>
+                            `background-image:url(${
+                              'static/instruments/' + x.symbol + '.svg'
+                            })`}"
+                        ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
             (x) => x.futures.length,
             html`
               <div class="menu-title">Фьючерсы</div>
@@ -1122,7 +1218,7 @@ export const widgetSearchControlTemplate = html`
                 html`
                   <div
                     class="menu-item"
-                    @click="${(x, c) => c.parent.selectInstrument(x)}"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
                   >
                     <div class="menu-item-icon-holder">
                       <div class="menu-item-icon-fallback">
@@ -1154,7 +1250,7 @@ export const widgetSearchControlTemplate = html`
                 html`
                   <div
                     class="menu-item"
-                    @click="${(x, c) => c.parent.selectInstrument(x)}"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
                   >
                     <div class="menu-item-icon-holder">
                       <div class="menu-item-icon-fallback">
@@ -1512,6 +1608,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
   bonds;
 
   @observable
+  etfs;
+
+  @observable
   futures;
 
   @observable
@@ -1522,6 +1621,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
 
     this.stocks = [];
     this.bonds = [];
+    this.etfs = [];
     this.futures = [];
     this.cryptocurrencies = [];
   }
@@ -1540,11 +1640,11 @@ export class WidgetSearchControl extends PPPOffClickElement {
   documentKeydownHandler(event) {
     if (!event.composedPath().find((n) => n === this)) return;
 
-    if (event.key === 'Escape') {
+    if (event.key === keyEscape) {
       this.open = false;
-    } else if (event.key === 'Enter') {
+    } else if (event.key === keyEnter) {
       this.activeItem && this.activeItem.click();
-    } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    } else if (event.key === keyArrowDown || event.key === keyArrowUp) {
       const items = Array.from(this.menuHolder.querySelectorAll('.menu-item'));
 
       if (items.length) {
@@ -1552,13 +1652,13 @@ export class WidgetSearchControl extends PPPOffClickElement {
           i.classList.contains('active')
         );
 
-        if (event.key === 'ArrowDown' && activeItemIndex < items.length - 1) {
+        if (event.key === keyArrowDown && activeItemIndex < items.length - 1) {
           this.activeItem = items[activeItemIndex + 1];
 
           this.activeItem?.scrollIntoView?.({
             block: 'nearest'
           });
-        } else if (event.key === 'ArrowUp' && activeItemIndex > 0) {
+        } else if (event.key === keyArrowUp && activeItemIndex > 0) {
           this.activeItem = items[activeItemIndex - 1];
 
           if (activeItemIndex === 1) {
@@ -1601,7 +1701,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
     }
   }
 
-  selectInstrument(instrument) {
+  chooseInstrument(instrument) {
     this.widget.instrument = instrument;
     this.open = false;
     this.suggestInput.value = '';
@@ -1619,81 +1719,68 @@ export class WidgetSearchControl extends PPPOffClickElement {
     }
   }
 
-  @debounce(searchDebounceTimeout)
-  search(text) {
+  search(text = '') {
     this.searching = true;
 
-    if (text?.trim() && typeof this.trader?.search === 'function') {
-      this.trader
-        .search(text)
-        .then((results = {}) => {
-          if (results?.exactSymbolMatch?.length === 1) {
-            [this.ticker] = results?.exactSymbolMatch;
-          } else {
-            this.ticker = null;
+    if (typeof this.trader?.search === 'function') {
+      try {
+        const {
+          exactSymbolMatch,
+          startsWithSymbolMatches,
+          regexSymbolMatches,
+          startsWithFullNameMatches,
+          regexFullNameMatches
+        } = this.trader.search(text) ?? {};
+
+        this.ticker = exactSymbolMatch ?? null;
+
+        const seen = {};
+
+        this.stocks = [];
+        this.bonds = [];
+        this.etfs = [];
+        this.futures = [];
+        this.cryptocurrencies = [];
+
+        [
+          startsWithSymbolMatches,
+          startsWithFullNameMatches,
+          regexSymbolMatches,
+          regexFullNameMatches
+        ].forEach((instruments) => {
+          for (const i of instruments) {
+            if (seen[i.symbol]) continue;
+
+            if (i.type === 'stock') this.stocks.push(i);
+            else if (i.type === 'bond') this.bonds.push(i);
+            else if (i.type === 'etf') this.etfs.push(i);
+            else if (i.type === 'future') this.futures.push(i);
+            else if (i.type === 'cryptocurrency') this.cryptocurrencies.push(i);
+
+            seen[i.symbol] = true;
           }
-
-          const seen = {};
-          const stocks = [];
-          const bonds = [];
-          const futures = [];
-          const cryptocurrencies = [];
-
-          for (const i of results?.regexSymbolMatch ?? []) {
-            if (seen[i._id]) continue;
-
-            if (i.type === 'stock') stocks.push(i);
-            else if (i.type === 'bond') bonds.push(i);
-            else if (i.type === 'future') futures.push(i);
-            else if (i.type === 'cryptocurrency') cryptocurrencies.push(i);
-
-            seen[i._id] = true;
-          }
-
-          for (const i of results?.regexFullNameMatch ?? []) {
-            if (seen[i._id]) continue;
-
-            if (i.type === 'stock') stocks.push(i);
-            else if (i.type === 'bond') bonds.push(i);
-            else if (i.type === 'future') futures.push(i);
-            else if (i.type === 'cryptocurrency') cryptocurrencies.push(i);
-
-            seen[i._id] = true;
-          }
-
-          this.stocks = stocks.sort((a, b) =>
-            a.fullName.localeCompare(b.fullName)
-          );
-          this.bonds = bonds.sort((a, b) =>
-            a.fullName.localeCompare(b.fullName)
-          );
-          this.futures = futures.sort((a, b) =>
-            a.fullName.localeCompare(b.fullName)
-          );
-          this.cryptocurrencies = cryptocurrencies.sort((a, b) =>
-            a.fullName.localeCompare(b.fullName)
-          );
-
-          this.searching = false;
-
-          Updates.enqueue(() => {
-            this.activeItem = this.menuHolder.querySelector('.menu-item');
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-
-          this.stocks = [];
-          this.bonds = [];
-          this.futures = [];
-          this.cryptocurrencies = [];
-          this.ticker = null;
-          this.searching = false;
         });
+
+        Updates.enqueue(() => {
+          this.activeItem = this.menuHolder.querySelector('.menu-item');
+        });
+      } catch (e) {
+        console.error(e);
+
+        this.stocks = [];
+        this.bonds = [];
+        this.etfs = [];
+        this.futures = [];
+        this.cryptocurrencies = [];
+        this.ticker = null;
+      } finally {
+        this.searching = false;
+      }
     } else {
       this.activeItem = null;
       this.stocks = [];
       this.bonds = [];
+      this.etfs = [];
       this.futures = [];
       this.cryptocurrencies = [];
       this.ticker = null;
@@ -1981,6 +2068,8 @@ export const widgetNotificationsAreaTemplate = html`
                   html`${html.partial(
                     (x.status ?? 'success') === 'success'
                       ? notificationSuccess
+                      : x.status === 'note'
+                      ? notificationNote
                       : notificationError
                   )}`}
               </div>
@@ -2008,6 +2097,7 @@ export const widgetNotificationsAreaTemplate = html`
 
 export const widgetNotificationsAreaStyles = css`
   ${normalize()}
+  ${typography()}
   :host {
     position: absolute;
     width: 100%;
@@ -2059,6 +2149,10 @@ export const widgetNotificationsAreaStyles = css`
     background: ${themeConditional(paletteGreenBase, paletteGreenLight3)};
   }
 
+  .widget-notification[status='note']::before {
+    background: ${themeConditional(paletteBlueBase, paletteBlueLight3)};
+  }
+
   .widget-notification-close-icon {
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
     margin-left: ${spacing1};
@@ -2088,6 +2182,10 @@ export const widgetNotificationsAreaStyles = css`
 
   .widget-notification[status='success'] .widget-notification-icon {
     color: ${themeConditional(paletteGreenBase, paletteGreenLight3)};
+  }
+
+  .widget-notification[status='note'] .widget-notification-icon {
+    color: ${themeConditional(paletteBlueBase, paletteBlueLight3)};
   }
 
   .widget-notification-text-container {
@@ -2128,29 +2226,34 @@ export class WidgetNotificationsArea extends PPPElement {
 
   connectedCallback() {
     super.connectedCallback();
-
     this.setAttribute('hidden', '');
 
     this.widget = this.getRootNode().host;
     this.widget.notificationsArea = this;
   }
 
-  success({ title, text }) {
-    this.status = 'success';
-    this.title = title;
-    this.text = text;
+  async openInstrumentsImport(trader) {
+    await import(`${ppp.rootUrl}/elements/pages/instruments-import.js`);
 
-    this.removeAttribute('hidden');
+    const workspace = this.widget.container;
+    const mountPoint = workspace.mountPoint;
+    const page = document.createElement('ppp-instruments-import-page');
 
-    clearTimeout(this.#timeout);
+    page.setAttribute('disable-auto-read', '');
 
-    this.#timeout = setTimeout(() => {
-      this.setAttribute('hidden', '');
-    }, 3000);
+    if (!mountPoint.childNodes.length) {
+      const pageElement = mountPoint.appendChild(page);
+
+      if (typeof trader.getDictionary === 'function')
+        pageElement.dictionary.value = trader.getDictionary();
+    }
+
+    workspace.mountPointTitle.textContent = 'Импорт инструментов';
+    workspace.mountPointModal.removeAttribute('hidden');
   }
 
-  error({ title, text }) {
-    this.status = 'error';
+  #appearance({ status, title, text, keep, timeout }) {
+    this.status = status;
     this.title = title;
     this.text = text;
 
@@ -2158,9 +2261,23 @@ export class WidgetNotificationsArea extends PPPElement {
 
     clearTimeout(this.#timeout);
 
-    this.#timeout = setTimeout(() => {
-      this.setAttribute('hidden', '');
-    }, 3000);
+    if (!keep) {
+      this.#timeout = setTimeout(() => {
+        this.setAttribute('hidden', '');
+      }, timeout ?? 3000);
+    }
+  }
+
+  success({ title, text, keep, timeout }) {
+    return this.#appearance({ status: 'success', title, text, keep, timeout });
+  }
+
+  error({ title, text, keep, timeout }) {
+    return this.#appearance({ status: 'error', title, text, keep, timeout });
+  }
+
+  note({ title, text, keep, timeout }) {
+    return this.#appearance({ status: 'note', title, text, keep, timeout });
   }
 }
 
@@ -2195,7 +2312,6 @@ export class WidgetHeaderButtons extends PPPElement {
 
   showWidgetSettings() {
     if (!this.widget.preview) {
-      console.log(this.widget.document._id);
     }
   }
 }

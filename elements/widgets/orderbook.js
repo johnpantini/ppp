@@ -55,7 +55,25 @@ export const orderbookWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${when(
-          (x) => x.instrument,
+          (x) => !x.instrument,
+          html`${html.partial(
+            widgetEmptyStateTemplate('Выберите инструмент.')
+          )}`
+        )}
+        ${when(
+          (x) =>
+            x.bookTrader &&
+            x.instrument &&
+            !x.bookTrader.supportsInstrument(x.instrument),
+          html`${html.partial(
+            widgetEmptyStateTemplate('Инструмент не поддерживается.')
+          )}`
+        )}
+        ${when(
+          (x) =>
+            x.bookTrader &&
+            x.instrument &&
+            x.bookTrader.supportsInstrument(x.instrument),
           html`
             <table class="orderbook-table">
               <thead>
@@ -170,12 +188,6 @@ export const orderbookWidgetTemplate = html`
               )}`
             )}
           `
-        )}
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
         )}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
@@ -399,41 +411,41 @@ export class OrderbookWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
+    try {
+      this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
 
-    if (this.document.ordersTrader) {
-      this.ordersTrader = await ppp.getOrCreateTrader(
-        this.document.ordersTrader
+      this.selectInstrument(
+        this.bookTrader.instruments.get(this.document.symbol),
+        { isolate: true }
       );
-    }
 
-    this.searchControl.trader = this.bookTrader;
+      if (this.document.ordersTrader) {
+        this.ordersTrader = await ppp.getOrCreateTrader(
+          this.document.ordersTrader
+        );
+      }
 
-    if (this.ordersTrader) {
-      await this.ordersTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
-        }
-      });
-    }
+      this.searchControl.trader = this.bookTrader;
 
-    if (this.bookTrader) {
-      try {
+      if (this.ordersTrader) {
+        await this.ordersTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            currentOrder: TRADER_DATUM.CURRENT_ORDER
+          }
+        });
+      }
+
+      if (this.bookTrader) {
         await this.bookTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
             orderbook: TRADER_DATUM.ORDERBOOK
           }
         });
-      } catch (e) {
-        console.error(e);
-
-        return this.notificationsArea.error({
-          title: 'Книга заявок',
-          text: 'Не удалось подключиться к источнику данных.'
-        });
       }
+    } catch (e) {
+      return this.catchException(e);
     }
   }
 

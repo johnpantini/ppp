@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   html,
   css,
@@ -26,40 +27,47 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 import { dragAndDrop } from '../../static/svg/sprite.js';
-import ppp from '../../ppp.js';
+import '../modal.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-top-loader ${ref('topLoader')}></ppp-top-loader>
-    ${when(
-      (x) => x.isSteady() && !x.document.widgets?.length,
-      html`
-        <div class="empty-state">
-          <div class="picture">${html.partial(dragAndDrop)}</div>
-          <h3>В этом терминале нет виджетов</h3>
-          <p>
-            Перед тем, как начать торговать, разместите виджеты на рабочей
-            области. Чтобы в дальнейшем добавлять виджеты, выберите терминал в
-            боковом меню и нажмите&nbsp;<code
+    <ppp-loader></ppp-loader>
+    <form novalidate>
+      ${when(
+        (x) => x.isSteady() && !x.document.widgets?.length,
+        html`
+          <div class="empty-state">
+            <div class="picture">${html.partial(dragAndDrop)}</div>
+            <h3>В этом терминале нет виджетов</h3>
+            <p>
+              Перед тем, как начать торговать, разместите виджеты на рабочей
+              области. Чтобы в дальнейшем добавлять виджеты, выберите терминал в
+              боковом меню и нажмите&nbsp;<code
+                @click="${() => ppp.app.showWidgetSelector()}"
+                class="hotkey"
+                >+W</code
+              >
+            </p>
+            <ppp-button
+              appearance="primary"
+              class="large"
               @click="${() => ppp.app.showWidgetSelector()}"
-              class="hotkey"
-              >+W</code
             >
-          </p>
-          <ppp-button
-            appearance="primary"
-            class="large"
-            @click="${() => ppp.app.showWidgetSelector()}"
-          >
-            Разместить виджет
-          </ppp-button>
-        </div>
-      `
-    )}
-    ${when(
-      (x) => x.isSteady() && x.document.widgets?.length,
-      html` <div class="workspace" ${ref('workspace')}></div> `
-    )}
+              Разместить виджет
+            </ppp-button>
+          </div>
+        `
+      )}
+      ${when(
+        (x) => x.isSteady() && x.document.widgets?.length,
+        html` <div class="workspace" ${ref('workspace')}></div> `
+      )}
+      <ppp-modal ${ref('mountPointModal')} class="large" hidden dismissible>
+        <span slot="title" ${ref('mountPointTitle')}></span>
+        <div class="mount" slot="body" ${ref('mountPoint')}></div>
+      </ppp-modal>
+    </form>
   </template>
 `;
 
@@ -128,6 +136,10 @@ export class WorkspacePage extends Page {
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onDblClick = this.onDblClick.bind(this);
+  }
+
+  async submitDocument() {
+    // No-op
   }
 
   onPointerDown(event) {
@@ -434,14 +446,6 @@ export class WorkspacePage extends Page {
           },
           {
             $lookup: {
-              from: 'instruments',
-              localField: 'widgets.instrumentId',
-              foreignField: '_id',
-              as: 'instruments'
-            }
-          },
-          {
-            $lookup: {
               from: 'apis',
               pipeline: [
                 {
@@ -540,11 +544,11 @@ export class WorkspacePage extends Page {
 
     this.denormalization.fillRefs(this.document);
 
-    for (const [i, w] of this.document.widgets?.entries?.() ?? []) {
+    for (const [, w] of this.document.widgets?.entries?.() ?? []) {
       widgets.push(
         Object.assign(
           {},
-          // Denormalize instrumentId, if present.
+          // Denormalize widget itself
           await this.denormalization.denormalize(w),
           // Denormalize everything else.
           await this.denormalization.denormalize(

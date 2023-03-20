@@ -18,7 +18,7 @@ export const brokerPageTemplate = html`
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
-        <span slot="end">${html.partial(search)}</span>
+        <span class="icon" slot="end">${html.partial(search)}</span>
       </ppp-text-field>
       <div class="card-container" ${ref('cards')}>
         <ppp-generic-card>
@@ -29,7 +29,7 @@ export const brokerPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('alor')}"
           />
-          <span slot="title">Alor Open API V2</span>
+          <span slot="title">Alor</span>
           <span slot="description">
             Торговля и рыночные данные через Alor Open API.&nbsp;<a
               class="link"
@@ -43,7 +43,7 @@ export const brokerPageTemplate = html`
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `broker-${BROKERS.ALOR_OPENAPI_V2}`
+                page: `broker-${BROKERS.ALOR}`
               })}"
           >
             Продолжить
@@ -57,7 +57,7 @@ export const brokerPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('tinkoff')}"
           />
-          <span slot="title">Tinkoff Invest API</span>
+          <span slot="title">Tinkoff</span>
           <span slot="description">
             Торговля и рыночные данные через Tinkoff Invest API.&nbsp;<a
               class="link"
@@ -71,7 +71,7 @@ export const brokerPageTemplate = html`
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `broker-${BROKERS.TINKOFF_INVEST_API}`
+                page: `broker-${BROKERS.TINKOFF}`
               })}"
           >
             Продолжить
@@ -99,7 +99,7 @@ export const brokerPageTemplate = html`
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `broker-${BROKERS.UTEX_AURORA}`
+                page: `broker-${BROKERS.UTEX}`
               })}"
           >
             Продолжить

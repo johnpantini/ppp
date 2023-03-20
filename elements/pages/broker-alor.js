@@ -5,7 +5,7 @@ import { BROKERS } from '../../lib/const.js';
 import '../text-field.js';
 import '../button.js';
 
-export const brokerAlorOpenApiV2Template = html`
+export const brokerAlorTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -75,7 +75,7 @@ export const brokerAlorOpenApiV2Template = html`
   </template>
 `;
 
-export const brokerAlorOpenApiV2Styles = css`
+export const brokerAlorStyles = css`
   ${pageStyles}
 `;
 
@@ -86,7 +86,7 @@ export async function checkAlorOAPIV2RefreshToken({ refreshToken }) {
   });
 }
 
-export class BrokerAlorOpenApiV2Page extends Page {
+export class BrokerAlorPage extends Page {
   collection = 'brokers';
 
   async validate() {
@@ -115,14 +115,14 @@ export class BrokerAlorOpenApiV2Page extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).BROKERS.ALOR_OPENAPI_V2%]`
+          type: `[%#(await import('../../lib/const.js')).BROKERS.ALOR%]`
         });
     };
   }
 
   async find() {
     return {
-      type: BROKERS.ALOR_OPENAPI_V2,
+      type: BROKERS.ALOR,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -134,18 +134,17 @@ export class BrokerAlorOpenApiV2Page extends Page {
         name: this.name.value.trim(),
         refreshToken: this.refreshToken.value.trim(),
         version: 1,
+        type: BROKERS.ALOR,
         updatedAt: new Date()
       },
       $setOnInsert: {
-        type: BROKERS.ALOR_OPENAPI_V2,
         createdAt: new Date()
       }
     };
   }
 }
 
-export default BrokerAlorOpenApiV2Page.compose({
-  name: 'ppp-broker-alor-openapi-v2-page',
-  template: brokerAlorOpenApiV2Template,
-  styles: brokerAlorOpenApiV2Styles
+export default BrokerAlorPage.compose({
+  template: brokerAlorTemplate,
+  styles: brokerAlorStyles
 }).define();

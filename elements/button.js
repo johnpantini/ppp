@@ -19,7 +19,8 @@ import { normalize } from '../design/styles.js';
 import {
   bodyFont,
   darken,
-  fontSizeBody1, fontWeightBody1,
+  fontSizeBody1,
+  fontWeightBody1,
   lineHeightBody1,
   paletteBlack,
   paletteBlueLight1,
@@ -41,7 +42,7 @@ import {
   paletteWhite,
   spacing2,
   themeConditional
-} from '../design/design-tokens.js'
+} from '../design/design-tokens.js';
 
 export const buttonTemplate = html`
   <button
@@ -250,14 +251,20 @@ export const buttonStyles = css`
   }
 
   :host([disabled]) .control {
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark3)};
-    border-color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
-    color: ${themeConditional(paletteGrayBase, paletteGrayDark1)};
+    background-color: ${themeConditional(
+      paletteGrayLight2,
+      paletteGrayDark3
+    )} !important;
+    border-color: ${themeConditional(
+      paletteGrayLight1,
+      paletteGrayDark1
+    )} !important;
+    color: ${themeConditional(paletteGrayBase, paletteGrayDark1)} !important;
   }
 
   :host([disabled]) ::slotted(span[slot='start']),
   :host([disabled]) ::slotted(span[slot='end']) {
-    color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
+    color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)} !important;
   }
 `;
 

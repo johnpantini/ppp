@@ -15,7 +15,8 @@ import {
   paletteGrayLight2,
   paletteGrayLight3,
   paletteWhite,
-  spacing2, spacing3,
+  spacing2,
+  spacing3,
   themeConditional,
   toColorComponents
 } from '../design/design-tokens.js';
@@ -60,7 +61,7 @@ export const modalStyles = css`
     background-color: rgba(
       ${themeConditional(
         toColorComponents(paletteBlack),
-        toColorComponents(paletteGrayDark2)
+        toColorComponents(paletteGrayBase)
       )},
       0.4
     );
@@ -166,6 +167,10 @@ export const modalStyles = css`
   .close-icon svg {
     width: 16px;
     height: 16px;
+  }
+
+  ::slotted(.mount) {
+    padding: 0 11px 11px 10px;
   }
 `;
 

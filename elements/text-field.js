@@ -15,6 +15,7 @@ import {
 import { normalize, typography } from '../design/styles.js';
 import {
   bodyFont,
+  darken,
   fontSizeBody1,
   fontWeightBody1,
   lineHeightBody1,
@@ -221,8 +222,6 @@ export const textFieldStyles = css`
     align-items: center;
     right: 12px;
     z-index: 1;
-    width: 16px;
-    height: 16px;
     color: ${themeConditional(paletteBlack, paletteGrayLight3)};
   }
 
@@ -249,7 +248,10 @@ export const textFieldStyles = css`
   }
 
   input::placeholder {
-    color: ${paletteGrayLight1};
+    color: ${themeConditional(
+      paletteGrayLight1,
+      darken(paletteGrayLight1, 60)
+    )};
   }
 
   :host(.error:not([disabled])) input {
@@ -284,8 +286,12 @@ export const textFieldStyles = css`
   :host([disabled]) input {
     color: ${themeConditional(paletteGrayBase, paletteGrayDark1)};
     background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)};
-    border-color: ${themeConditional(paletteGrayLight1, paletteGrayDark2)};
+    border-color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
     cursor: not-allowed;
+  }
+
+  :host([disabled]) input::placeholder {
+    color: ${themeConditional(paletteGrayLight1, paletteGrayBase)};
   }
 
   .helper {

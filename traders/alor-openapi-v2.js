@@ -66,43 +66,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async #buildFuturesCache() {
-    await this.waitForInstrumentCache();
-
-    return (
-      this.#pendingFuturesCachePromise ??
-      (this.#pendingFuturesCachePromise = new Promise((resolve, reject) => {
-        const tx = this.cacheRequest.result.transaction(
-          'instruments',
-          'readonly'
-        );
-
-        const store = tx.objectStore('instruments');
-        const cursorRequest = store.openCursor();
-
-        cursorRequest.onsuccess = (event) => {
-          const result = event.target.result;
-
-          if (result?.value) {
-            if (result.value.fullName) {
-              this.#futures.set(
-                result.value.fullName.split(/\s+/)[0],
-                result.value
-              );
-            }
-
-            result['continue']();
-          }
-        };
-
-        tx.oncomplete = () => {
-          resolve(this.#futures);
-        };
-
-        tx.onerror = () => reject();
-      }))
-    );
-  }
+  async #buildFuturesCache() {}
 
   async ensureAccessTokenIsOk() {
     try {
@@ -165,8 +129,8 @@ class AlorOpenAPIV2Trader extends Trader {
 
     let symbol;
 
-    if (this.document.exchange === 'SPBX' && instrument.spbexSymbol)
-      symbol = instrument.spbexSymbol;
+    if (this.document.exchange === 'SPBX' && instrument.spbxSymbol)
+      symbol = instrument.spbxSymbol;
     else symbol = instrument.symbol;
 
     if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
@@ -1243,18 +1207,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   getExchange() {
-    switch (this.document.exchange) {
-      case 'SPBX':
-        return ['spbex'];
-      case 'MOEX':
-        return ['moex'];
-      default:
-        return [];
-    }
-  }
-
-  getBrokerType() {
-    return this.document.broker.type;
+    return this.document.exchange;
   }
 
   async formatError(instrument, error) {
@@ -1320,125 +1273,6 @@ class AlorOpenAPIV2Trader extends Trader {
       return 'Нехватка средств по лимитам клиента.';
 
     return 'Неизвестная ошибка, смотрите консоль браузера.';
-  }
-
-  async search(searchText) {
-    const instrumentType = [];
-
-    if (this.document.portfolioType === 'stock') {
-      instrumentType.push('stock', 'bond');
-    } else if (this.document.portfolioType === 'currency') {
-      instrumentType.push('currency');
-    } else if (this.document.portfolioType === 'futures') {
-      instrumentType.push('future');
-    }
-
-    if (searchText?.trim()) {
-      searchText = searchText.trim().replaceAll("'", "\\'");
-
-      const lines = ((context) => {
-        const collection = context.services
-          .get('mongodb-atlas')
-          .db('ppp')
-          .collection('instruments');
-
-        const exactSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: {
-                  $in: '$instrumentType'
-                }
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                $or: [
-                  {
-                    symbol: '$text'
-                  },
-                  {
-                    symbol: '$latin'
-                  }
-                ]
-              }
-            ]
-          })
-          .limit(1);
-
-        const regexSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: {
-                  $in: '$instrumentType'
-                }
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        const regexFullNameMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: {
-                  $in: '$instrumentType'
-                }
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                fullName: { $regex: '($text|$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
-      })
-        .toString()
-        .split(/\r?\n/);
-
-      lines.pop();
-      lines.shift();
-
-      return ppp.user.functions.eval(
-        lines
-          .join('\n')
-          .replaceAll("'$exchange'", JSON.stringify(this.getExchange()))
-          .replaceAll("'$instrumentType'", JSON.stringify(instrumentType))
-          .replaceAll('$broker', this.getBrokerType?.() ?? '')
-          .replaceAll('$text', searchText.toUpperCase())
-          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
-      );
-    }
   }
 }
 

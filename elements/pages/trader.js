@@ -22,7 +22,7 @@ export const traderPageTemplate = html`
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
-        <span slot="end">${html.partial(search)}</span>
+        <span class="icon" slot="end">${html.partial(search)}</span>
       </ppp-text-field>
       <div class="card-container" ${ref('cards')}>
         <ppp-generic-card>

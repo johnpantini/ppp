@@ -102,7 +102,7 @@ createServer(async (request, response) => {
             response.end();
           }
         } else {
-          const result = await client
+          let result = await client
             .db('ppp')
             .collection(body.arguments[0].collection)
             [body.name](
@@ -111,6 +111,13 @@ createServer(async (request, response) => {
               body.arguments[3],
               body.arguments[4]
             );
+
+          if (
+            result?.constructor?.name === 'AggregationCursor' ||
+            result?.constructor?.name === 'FindCursor'
+          ) {
+            result = await result.toArray();
+          }
 
           response.setHeader('Content-Type', 'application/json; charset=UTF-8');
           response.write(JSON.stringify(EJSON.serialize(result)));

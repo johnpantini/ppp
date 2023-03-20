@@ -6,7 +6,7 @@ import { BROKERS } from '../../lib/const.js';
 import '../text-field.js';
 import '../button.js';
 
-export const brokerUtexAuroraPageTemplate = html`
+export const brokerUtexPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -70,11 +70,11 @@ export const brokerUtexAuroraPageTemplate = html`
   </template>
 `;
 
-export const brokerUtexAuroraPageStyles = css`
+export const brokerUtexPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkUtexAuroraCredentials({
+export async function checkUtexCredentials({
   serviceMachineUrl,
   login,
   password
@@ -101,7 +101,7 @@ export async function checkUtexAuroraCredentials({
   });
 }
 
-export class BrokerUtexAuroraPage extends Page {
+export class BrokerUtexPage extends Page {
   collection = 'brokers';
 
   async validate() {
@@ -109,7 +109,7 @@ export class BrokerUtexAuroraPage extends Page {
     await validate(this.login);
     await validate(this.password);
 
-    const request = await checkUtexAuroraCredentials({
+    const request = await checkUtexCredentials({
       serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
       login: this.login.value.trim(),
       password: this.password.value.trim()
@@ -137,14 +137,14 @@ export class BrokerUtexAuroraPage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX_AURORA%]`
+          type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX%]`
         });
     };
   }
 
   async find() {
     return {
-      type: BROKERS.UTEX_AURORA,
+      type: BROKERS.UTEX,
       name: this.name.value.trim()
     };
   }
@@ -156,17 +156,17 @@ export class BrokerUtexAuroraPage extends Page {
         login: this.login.value.trim(),
         password: this.password.value.trim(),
         version: 1,
+        type: BROKERS.UTEX,
         updatedAt: new Date()
       },
       $setOnInsert: {
-        type: BROKERS.UTEX_AURORA,
         createdAt: new Date()
       }
     };
   }
 }
 
-export default BrokerUtexAuroraPage.compose({
-  template: brokerUtexAuroraPageTemplate,
-  styles: brokerUtexAuroraPageStyles
+export default BrokerUtexPage.compose({
+  template: brokerUtexPageTemplate,
+  styles: brokerUtexPageStyles
 }).define();

@@ -180,11 +180,17 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
-    this.searchControl.trader = this.ordersTrader;
+    try {
+      this.ordersTrader = await ppp.getOrCreateTrader(
+        this.document.ordersTrader
+      );
+      this.searchControl.trader = this.ordersTrader;
 
-    if (this.ordersTrader) {
-      await this.ordersTrader.sayHello(WIDGET_TYPES.SCALPING_BUTTONS);
+      if (this.ordersTrader) {
+        await this.ordersTrader.sayHello(WIDGET_TYPES.SCALPING_BUTTONS);
+      }
+    } catch (e) {
+      return this.catchException(e);
     }
   }
 

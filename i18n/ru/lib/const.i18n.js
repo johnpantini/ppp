@@ -8,7 +8,8 @@ import {
   TRADERS,
   SERVER_STATE,
   TRADER_CAPS,
-  VERSIONING_STATUS
+  VERSIONING_STATUS,
+  EXCHANGE
 } from '../../../lib/const.js';
 
 export default function (i18n) {
@@ -25,11 +26,18 @@ export default function (i18n) {
         [APIS.CLOUDFLARE]: 'Cloudflare'
       },
       broker: {
-        [BROKERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
-        [BROKERS.TINKOFF_INVEST_API]: 'Tinkoff Invest API',
-        [BROKERS.UTEX_AURORA]: 'UTEX',
+        [BROKERS.ALOR]: 'Alor',
+        [BROKERS.TINKOFF]: 'Tinkoff',
+        [BROKERS.UTEX]: 'UTEX',
         [BROKERS.PSINA]: 'Psina',
         [BROKERS.BINANCE]: 'Binance'
+      },
+      exchange: {
+        [EXCHANGE.BINANCE]: 'Binance',
+        [EXCHANGE.MOEX]: 'Московская биржа',
+        [EXCHANGE.SPBX]: 'СПБ Биржа',
+        [EXCHANGE.UTEX]: 'UTEX',
+        [EXCHANGE.US]: 'Биржи США'
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
@@ -46,6 +54,7 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_ACTIVE_ORDERS]: 'Активные заявки',
         [TRADER_CAPS.CAPS_ORDERBOOK]: 'Книга заявок',
         [TRADER_CAPS.CAPS_TIME_AND_SALES]: 'Лента всех сделок',
+        [TRADER_CAPS.CAPS_TIME_AND_SALES_HISTORY]: 'История ленты сделок',
         [TRADER_CAPS.CAPS_POSITIONS]: 'Портфель',
         [TRADER_CAPS.CAPS_TIMELINE]: 'Лента операций',
         [TRADER_CAPS.CAPS_LEVEL1]: 'Данные L1',

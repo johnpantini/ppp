@@ -394,6 +394,10 @@ export const orderWidgetStyles = css`
     bottom: 55px;
   }
 
+  div.widget-empty-state-holder + ppp-widget-notifications-area {
+    bottom: 20px;
+  }
+
   .company-card {
     width: 100%;
     padding: 10px 10px 0;
@@ -613,73 +617,81 @@ export class OrderWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.ordersTrader = await ppp.getOrCreateTrader(this.document.ordersTrader);
-    this.level1Trader = await ppp.getOrCreateTrader(this.document.level1Trader);
-
-    if (this.document.extraLevel1Trader) {
-      this.extraLevel1Trader = await ppp.getOrCreateTrader(
-        this.document.extraLevel1Trader
+    try {
+      this.ordersTrader = await ppp.getOrCreateTrader(
+        this.document.ordersTrader
       );
-    }
+      this.level1Trader = await ppp.getOrCreateTrader(
+        this.document.level1Trader
+      );
 
-    this.positionTrader = await ppp.getOrCreateTrader(
-      this.document.positionTrader
-    );
-    this.searchControl.trader = this.ordersTrader;
-
-    if (this.level1Trader) {
-      await this.level1Trader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          lastPrice: TRADER_DATUM.LAST_PRICE,
-          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
-          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
-          bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK
-        }
-      });
-    }
-
-    if (this.extraLevel1Trader) {
-      await this.extraLevel1Trader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          lastPrice: TRADER_DATUM.LAST_PRICE,
-          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
-          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
-          bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK
-        }
-      });
-    }
-
-    if (this.positionTrader) {
-      await this.positionTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          positionSize: TRADER_DATUM.POSITION_SIZE,
-          positionAverage: TRADER_DATUM.POSITION_AVERAGE
-        }
-      });
-    }
-
-    if (this.ordersTrader) {
-      this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
-
-      if (this.document.pusherApi) {
-        const connection = await ppp.getOrCreatePusherConnection(
-          this.document.pusherApi
+      if (this.document.extraLevel1Trader) {
+        this.extraLevel1Trader = await ppp.getOrCreateTrader(
+          this.document.extraLevel1Trader
         );
+      }
 
-        if (connection) {
-          connection
-            .channel('telegram')
-            ?.bind('ticker', this.pusherTelegramHandler);
+      this.positionTrader = await ppp.getOrCreateTrader(
+        this.document.positionTrader
+      );
+      this.searchControl.trader = this.ordersTrader;
+
+      if (this.level1Trader) {
+        await this.level1Trader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            lastPrice: TRADER_DATUM.LAST_PRICE,
+            lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+            lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            bestBid: TRADER_DATUM.BEST_BID,
+            bestAsk: TRADER_DATUM.BEST_ASK
+          }
+        });
+      }
+
+      if (this.extraLevel1Trader) {
+        await this.extraLevel1Trader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            lastPrice: TRADER_DATUM.LAST_PRICE,
+            lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+            lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            bestBid: TRADER_DATUM.BEST_BID,
+            bestAsk: TRADER_DATUM.BEST_ASK
+          }
+        });
+      }
+
+      if (this.positionTrader) {
+        await this.positionTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            positionSize: TRADER_DATUM.POSITION_SIZE,
+            positionAverage: TRADER_DATUM.POSITION_AVERAGE
+          }
+        });
+      }
+
+      if (this.ordersTrader) {
+        this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
+
+        if (this.document.pusherApi) {
+          const connection = await ppp.getOrCreatePusherConnection(
+            this.document.pusherApi
+          );
+
+          if (connection) {
+            connection
+              .channel('telegram')
+              ?.bind('ticker', this.pusherTelegramHandler);
+          }
         }
       }
-    }
 
-    this.calculateTotalAmount();
+      this.calculateTotalAmount();
+    } catch (e) {
+      return this.catchException(e);
+    }
   }
 
   async disconnectedCallback() {
@@ -736,30 +748,10 @@ export class OrderWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
-  async selectSymbol(symbol, exchange) {
-    if (this.ordersTrader) {
-      const instrument = await this.ordersTrader.findInstrumentInCache(symbol);
-
-      if (instrument) {
-        await this.findAndSelectSymbol(
-          {
-            type: instrument.type,
-            symbol,
-            exchange: {
-              $in:
-                typeof exchange !== 'undefined'
-                  ? [exchange]
-                  : this.ordersTrader.getExchange() ?? instrument.exchange ?? []
-            }
-          },
-          true
-        );
-      }
-    }
-  }
-
   pusherTelegramHandler(data) {
-    void this.selectSymbol(data.t, data.ex);
+    return this.selectInstrument(this.ordersTrader.instruments.get(data.t), {
+      selectOnSelf: true
+    });
   }
 
   instrumentChanged(oldValue, newValue) {

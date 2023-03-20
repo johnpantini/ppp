@@ -193,6 +193,7 @@ export const tableStyles = css`
   }
 
   .empty-message {
+    font-size: ${fontSizeBody1};
     color: ${themeConditional(paletteGrayDark3, paletteGrayLight2)};
     font-style: italic;
     padding: 5px;

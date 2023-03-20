@@ -1,9 +1,6 @@
 /** @decorator */
 
-import {
-  widget,
-  WidgetWithInstrument
-} from '../widget.js';
+import { widget, WidgetWithInstrument } from '../widget.js';
 import {
   html,
   css,
@@ -80,26 +77,30 @@ export class PortfolioWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.balances = new Map();
-    this.stocks = new Map();
-    this.bonds = new Map();
-    this.futures = new Map();
-    this.zombies = new Map();
+    try {
+      this.balances = new Map();
+      this.stocks = new Map();
+      this.bonds = new Map();
+      this.futures = new Map();
+      this.zombies = new Map();
 
-    this.portfolioTrader = await ppp.getOrCreateTrader(
-      this.document.portfolioTrader
-    );
-    this.searchControl.trader = this.portfolioTrader;
+      this.portfolioTrader = await ppp.getOrCreateTrader(
+        this.document.portfolioTrader
+      );
+      this.searchControl.trader = this.portfolioTrader;
 
-    if (this.portfolioTrader) {
-      this.portfolioTrader.onError = this.onTraderError.bind(this);
+      if (this.portfolioTrader) {
+        this.portfolioTrader.onError = this.onTraderError.bind(this);
 
-      await this.portfolioTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          position: TRADER_DATUM.POSITION
-        }
-      });
+        await this.portfolioTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            position: TRADER_DATUM.POSITION
+          }
+        });
+      }
+    } catch (e) {
+      return this.catchException(e);
     }
   }
 
@@ -130,34 +131,18 @@ export class PortfolioWidget extends WidgetWithInstrument {
       const symbol = cp
         .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
         ?.getAttribute('symbol');
-      const type = cp
-        .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
-        ?.getAttribute('type');
 
-      if (symbol && type) {
+      if (symbol) {
         this.topLoader.start();
 
         try {
-          const instrument = await this.findAndSelectSymbol({
-            type,
-            symbol,
-            exchange: {
-              $in: this.portfolioTrader.getExchange()
-            }
-          });
-
-          if (!instrument) {
-            this.notificationsArea.error({
-              title: 'Портфель',
-              text: 'Инструмент не найден в базе данных.'
-            });
-          }
+          this.selectInstrument(this.portfolioTrader.instruments.get(symbol));
         } catch (e) {
           console.log(e);
 
           this.notificationsArea.error({
             title: 'Портфель',
-            text: 'Ошибка поиска инструмента в базе данных.'
+            text: 'Ошибка поиска инструмента.'
           });
         } finally {
           this.topLoader.stop();

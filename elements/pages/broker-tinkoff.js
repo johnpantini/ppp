@@ -13,15 +13,15 @@ import {
 import '../text-field.js';
 import '../button.js';
 
-export const brokerTinkoffInvestApiPageTemplate = html`
+export const brokerTinkoffPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
         ${(x) =>
           x.document.name
-            ? `Брокеры - Tinkoff Invest API - ${x.document.name}`
-            : 'Брокеры - Tinkoff Invest API'}
+            ? `Брокеры - Tinkoff - ${x.document.name}`
+            : 'Брокеры - Tinkoff'}
       </ppp-page-header>
       <section>
         <div class="label-group">
@@ -75,11 +75,11 @@ export const brokerTinkoffInvestApiPageTemplate = html`
   </template>
 `;
 
-export const brokerTinkoffInvestApiPageStyles = css`
+export const brokerTinkoffPageStyles = css`
   ${pageStyles}
 `;
 
-export class BrokerTinkoffInvestApiPage extends Page {
+export class BrokerTinkoffPage extends Page {
   collection = 'brokers';
 
   async validate() {
@@ -141,14 +141,14 @@ export class BrokerTinkoffInvestApiPage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).BROKERS.TINKOFF_INVEST_API%]`
+          type: `[%#(await import('../../lib/const.js')).BROKERS.TINKOFF%]`
         });
     };
   }
 
   async find() {
     return {
-      type: BROKERS.TINKOFF_INVEST_API,
+      type: BROKERS.TINKOFF,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -160,17 +160,17 @@ export class BrokerTinkoffInvestApiPage extends Page {
         name: this.name.value.trim(),
         apiToken: this.apiToken.value.trim(),
         version: 1,
+        type: BROKERS.TINKOFF,
         updatedAt: new Date()
       },
       $setOnInsert: {
-        type: BROKERS.TINKOFF_INVEST_API,
         createdAt: new Date()
       }
     };
   }
 }
 
-export default BrokerTinkoffInvestApiPage.compose({
-  template: brokerTinkoffInvestApiPageTemplate,
-  styles: brokerTinkoffInvestApiPageStyles
+export default BrokerTinkoffPage.compose({
+  template: brokerTinkoffPageTemplate,
+  styles: brokerTinkoffPageStyles
 }).define();

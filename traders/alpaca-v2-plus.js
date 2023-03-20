@@ -225,7 +225,7 @@ class AlpacaV2PlusTrader extends Trader {
 
               lastOrderbookMontage.bids = [...lastOrderbookMap.bids.values()]
                 .filter((b) => {
-                  if (this.document.broker.type === BROKERS.UTEX_AURORA) {
+                  if (this.document.broker.type === BROKERS.UTEX) {
                     // Fix for invalid NYSE pool data
                     if ((nowHours >= 21 || nowHours < 11) && b.pool === 'N')
                       return false;
@@ -239,7 +239,7 @@ class AlpacaV2PlusTrader extends Trader {
 
               lastOrderbookMontage.asks = [...lastOrderbookMap.asks.values()]
                 .filter((a) => {
-                  if (this.document.broker.type === BROKERS.UTEX_AURORA) {
+                  if (this.document.broker.type === BROKERS.UTEX) {
                     // Fix for invalid NYSE pool data
                     if ((nowHours >= 21 || nowHours < 11) && a.pool === 'N')
                       return false;
@@ -346,121 +346,6 @@ class AlpacaV2PlusTrader extends Trader {
           }
         }
       }
-    }
-  }
-
-  getExchange() {
-    switch (this.document.exchange) {
-      case 'SPBX':
-        return ['spbex'];
-      default:
-        return [];
-    }
-  }
-
-  getBrokerType() {
-    return this.document.broker.type;
-  }
-
-  async search(searchText) {
-    if (searchText?.trim()) {
-      searchText = searchText.trim().replaceAll("'", "\\'");
-
-      const lines = ((context) => {
-        const collection = context.services
-          .get('mongodb-atlas')
-          .db('ppp')
-          .collection('instruments');
-
-        const exactSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: 'stock'
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                $or: [
-                  {
-                    symbol: '$text'
-                  },
-                  {
-                    symbol: '$latin'
-                  }
-                ]
-              }
-            ]
-          })
-          .limit(1);
-
-        const regexSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: 'stock'
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        const regexFullNameMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: 'stock'
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                fullName: { $regex: '($text|$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
-      })
-        .toString()
-        .split(/\r?\n/);
-
-      lines.pop();
-      lines.shift();
-
-      return ppp.user.functions.eval(
-        lines
-          .join('\n')
-          .replaceAll("'$exchange'", JSON.stringify(this.getExchange()))
-          .replaceAll('$broker', this.getBrokerType?.() ?? '')
-          .replaceAll('$text', searchText.toUpperCase())
-          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
-      );
     }
   }
 }

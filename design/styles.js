@@ -85,7 +85,7 @@ export const normalize = () => css`
     position: relative;
   }
 
-  a:after {
+  .link:after {
     content: '';
     position: absolute;
     width: 100%;
@@ -95,7 +95,7 @@ export const normalize = () => css`
     border-radius: 2px;
   }
 
-  a:hover:after {
+  .link:hover::after {
     background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 `;

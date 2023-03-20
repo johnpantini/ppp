@@ -132,8 +132,7 @@ export async function checkBinanceCredentials({
       method: 'GET',
       url: `https://api.binance.com/api/v3/account?${queryString}&signature=${signature}`,
       headers: {
-        'X-MBX-APIKEY': apiKey,
-        'User-Agent': `${ppp.keyVault.getKey('github-login')}.ppp`
+        'X-MBX-APIKEY': apiKey
       }
     })
   });
@@ -191,10 +190,10 @@ export class BrokerBinancePage extends Page {
         apiKey: this.apiKey.value.trim(),
         secret: this.secret.value.trim(),
         version: 1,
+        type: BROKERS.BINANCE,
         updatedAt: new Date()
       },
       $setOnInsert: {
-        type: BROKERS.BINANCE,
         createdAt: new Date()
       }
     };

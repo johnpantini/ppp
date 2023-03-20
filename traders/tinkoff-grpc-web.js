@@ -86,49 +86,6 @@ class TinkoffGrpcWebTrader extends Trader {
     });
   }
 
-  async sayHello(widget) {
-    if (widget === WIDGET_TYPES.SCALPING_BUTTONS) {
-      await this.#buildInstrumentCache();
-    }
-
-    return super.sayHello();
-  }
-
-  async #buildInstrumentCache() {
-    await this.waitForInstrumentCache();
-
-    return (
-      this.#pendingInstrumentCachePromise ??
-      (this.#pendingInstrumentCachePromise = new Promise((resolve, reject) => {
-        const tx = this.cacheRequest.result.transaction(
-          'instruments',
-          'readonly'
-        );
-
-        const store = tx.objectStore('instruments');
-        const cursorRequest = store.openCursor();
-
-        cursorRequest.onsuccess = (event) => {
-          const result = event.target.result;
-
-          if (result?.value) {
-            if (result.value.tinkoffFigi) {
-              this.#instruments.set(result.value.tinkoffFigi, result.value);
-            }
-
-            result['continue']();
-          }
-        };
-
-        tx.oncomplete = () => {
-          resolve(this.#instruments);
-        };
-
-        tx.onerror = () => reject();
-      }))
-    );
-  }
-
   getOrCreateClient(service) {
     if (!this.#clients.has(service)) {
       this.#clients.set(
@@ -450,10 +407,6 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async subscribeField({ source, field, datum }) {
-    if (datum === TRADER_DATUM.CURRENT_ORDER) {
-      await this.#buildInstrumentCache();
-    }
-
     await super.subscribeField({ source, field, datum });
 
     switch (datum) {
@@ -774,139 +727,6 @@ class TinkoffGrpcWebTrader extends Trader {
         orderbook: this.refs.orderbook.get(newValue._id)?.lastOrderbookData,
         instrument: newValue
       });
-    }
-  }
-
-  getBrokerType() {
-    return this.document.broker.type;
-  }
-
-  getExchange() {
-    return ['moex', 'spbex'];
-  }
-
-  async search(searchText) {
-    if (searchText?.trim()) {
-      searchText = searchText.trim().replaceAll("'", "\\'");
-
-      const lines = ((context) => {
-        const collection = context.services
-          .get('mongodb-atlas')
-          .db('ppp')
-          .collection('instruments');
-
-        const exactSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                tinkoffFigi: {
-                  $exists: true,
-                  $ne: null
-                }
-              },
-              {
-                type: {
-                  $in: ['currency', 'bond', 'stock', 'future', 'option']
-                }
-              },
-              {
-                exchange: {
-                  $in: ['spbex', 'moex']
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                $or: [
-                  {
-                    symbol: '$text'
-                  },
-                  {
-                    symbol: '$latin'
-                  }
-                ]
-              }
-            ]
-          })
-          .limit(1);
-
-        const regexSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                tinkoffFigi: {
-                  $exists: true,
-                  $ne: null
-                }
-              },
-              {
-                type: {
-                  $in: ['currency', 'bond', 'stock', 'future', 'option']
-                }
-              },
-              {
-                exchange: {
-                  $in: ['spbex', 'moex']
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        const regexFullNameMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                tinkoffFigi: {
-                  $exists: true,
-                  $ne: null
-                }
-              },
-              {
-                type: {
-                  $in: ['currency', 'bond', 'stock', 'future', 'option']
-                }
-              },
-              {
-                exchange: {
-                  $in: ['spbex', 'moex']
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                fullName: { $regex: '($text|$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
-      })
-        .toString()
-        .split(/\r?\n/);
-
-      lines.pop();
-      lines.shift();
-
-      return ppp.user.functions.eval(
-        lines
-          .join('\n')
-          .replaceAll('$broker', this.getBrokerType?.() ?? '')
-          .replaceAll('$text', searchText.toUpperCase())
-          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
-      );
     }
   }
 

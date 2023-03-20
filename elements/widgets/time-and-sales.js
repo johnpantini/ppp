@@ -53,7 +53,25 @@ export const timeAndSalesWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${when(
-          (x) => x.instrument,
+          (x) => !x.instrument,
+          html`${html.partial(
+            widgetEmptyStateTemplate('Выберите инструмент.')
+          )}`
+        )}
+        ${when(
+          (x) =>
+            x.tradesTrader &&
+            x.instrument &&
+            !x.tradesTrader.supportsInstrument(x.instrument),
+          html`${html.partial(
+            widgetEmptyStateTemplate('Инструмент не поддерживается.')
+          )}`
+        )}
+        ${when(
+          (x) =>
+            x.tradesTrader &&
+            x.instrument &&
+            x.tradesTrader.supportsInstrument(x.instrument),
           html`
             <table class="trades-table">
               <thead>
@@ -128,12 +146,6 @@ export const timeAndSalesWidgetTemplate = html`
             )}
           `
         )}
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
-        )}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -164,7 +176,10 @@ export const timeAndSalesWidgetStyles = css`
     font-size: ${fontSizeWidget};
     line-height: 20px;
     white-space: nowrap;
-    color: ${themeConditional(paletteGrayDark1, lighten(paletteGrayLight1, 10))};
+    color: ${themeConditional(
+      paletteGrayDark1,
+      lighten(paletteGrayLight1, 10)
+    )};
     background: ${themeConditional(paletteWhite, paletteBlack)};
   }
 
@@ -245,50 +260,53 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.tradesTrader = await ppp.getOrCreateTrader(this.document.tradesTrader);
-    this.searchControl.trader = this.tradesTrader;
+    try {
+      this.tradesTrader = await ppp.getOrCreateTrader(
+        this.document.tradesTrader
+      );
 
-    if (this.tradesTrader) {
-      if (
-        this.instrument &&
-        typeof this.tradesTrader.allTrades === 'function'
-      ) {
-        try {
-          this.trades = (
-            await this.tradesTrader.allTrades({
-              instrument: this.instrument,
-              depth: this.document.depth
-            })
-          )?.filter((t) => {
-            if (this.document.threshold) {
-              return t.volume >= this.document.threshold;
-            } else return true;
-          });
-        } catch (e) {
-          console.error(e);
+      this.selectInstrument(
+        this.tradesTrader.instruments.get(this.document.symbol),
+        { isolate: true }
+      );
 
-          return this.notificationsArea.error({
-            title: 'Лента всех сделок',
-            text: 'Не удалось загрузить историю сделок.'
-          });
+      this.searchControl.trader = this.tradesTrader;
+
+      if (this.tradesTrader) {
+        if (
+          this.instrument &&
+          typeof this.tradesTrader.allTrades === 'function'
+        ) {
+          try {
+            this.trades = (
+              await this.tradesTrader.allTrades({
+                instrument: this.instrument,
+                depth: this.document.depth
+              })
+            )?.filter((t) => {
+              if (this.document.threshold) {
+                return t.volume >= this.document.threshold;
+              } else return true;
+            });
+          } catch (e) {
+            console.error(e);
+
+            return this.notificationsArea.error({
+              title: 'Лента всех сделок',
+              text: 'Не удалось загрузить историю сделок.'
+            });
+          }
         }
-      }
 
-      try {
         await this.tradesTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
             print: TRADER_DATUM.MARKET_PRINT
           }
         });
-      } catch (e) {
-        console.error(e);
-
-        return this.notificationsArea.error({
-          title: 'Лента всех сделок',
-          text: 'Не удалось подключиться к источнику данных.'
-        });
       }
+    } catch (e) {
+      return this.catchException(e);
     }
   }
 

@@ -53,7 +53,7 @@ export const appTemplate = html`
             <span slot="start" class="action-icon">
               ${html.partial(plus)}
             </span>
-            <span slot="title">Новый терминал</span>
+            <span>Новый терминал</span>
           </ppp-side-nav-item>
           ${when(
             () => ppp.workspaces.length,
@@ -73,7 +73,8 @@ export const appTemplate = html`
                 ${repeat(
                   () => ppp.workspaces,
                   html`
-                    <ppp-side-nav-item
+                    <a
+                      href="${(x) => `?page=workspace&document=${x._id}`}"
                       @click="${(x, c) => {
                         if (
                           c.event.target
@@ -87,14 +88,16 @@ export const appTemplate = html`
                           document: x._id
                         });
                       }}"
-                      ?active="${(x, c) =>
-                        c.parent.page === 'workspace' &&
-                        c.parent.workspace === x._id}"
-                      slot="items"
-                      id="${(x) => x._id}"
                     >
-                      <span slot="title">${(x) => x.name}</span>
-                    </ppp-side-nav-item>
+                      <ppp-side-nav-item
+                        ?active="${(x, c) =>
+                          c.parent.page === 'workspace' &&
+                          c.parent.workspace === x._id}"
+                        id="${(x) => x._id}"
+                      >
+                        <span>${(x) => x.name}</span>
+                      </ppp-side-nav-item>
+                    </a>
                   `
                 )}
               </ppp-side-nav-group>
@@ -103,66 +106,81 @@ export const appTemplate = html`
           <ppp-side-nav-group>
             <span slot="start"> ${html.partial(trading)} </span>
             <span slot="title">Торговля</span>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('widget')}"
+            <a
+              href="?page=widgets"
               @click="${(x) =>
                 x.navigate({
                   page: 'widgets'
                 })}"
-              slot="items"
             >
-              <span slot="title">Виджеты</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page === 'instruments'}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('widget')}"
+              >
+                <span>Виджеты</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=instruments"
               @click="${(x) =>
                 x.navigate({
                   page: 'instruments'
                 })}"
-              slot="items"
             >
-              <span slot="title">Инструменты</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page === 'workspaces'}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page === 'instruments'}"
+              >
+                <span>Инструменты</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=workspaces"
               @click="${(x) =>
                 x.navigate({
                   page: 'workspaces'
                 })}"
-              slot="items"
             >
-              <span slot="title">Терминалы</span>
-            </ppp-side-nav-item>
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page === 'workspaces'}"
+              >
+                <span>Терминалы</span>
+              </ppp-side-nav-item>
+            </a>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             <span slot="start"> ${html.partial(services)} </span>
             <span slot="title">Сервисы</span>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page === 'services'}"
+            <a
+              href="?page=services"
               @click="${(x) =>
                 x.navigate({
                   page: 'services'
                 })}"
-              slot="items"
             >
-              <span slot="title">Список сервисов</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) =>
-                x.page === 'service' || x.page.startsWith('service-')}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page === 'services'}"
+              >
+                <span>Список сервисов</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=service"
               @click="${(x) =>
                 x.navigate({
                   page: 'service'
                 })}"
-              slot="items"
             >
-              <span slot="title">Установить сервис</span>
-            </ppp-side-nav-item>
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) =>
+                  x.page === 'service' || x.page.startsWith('service-')}"
+              >
+                <span>Установить сервис</span>
+              </ppp-side-nav-item>
+            </a>
           </ppp-side-nav-group>
           ${when(
             () => ppp.extensions.length,
@@ -173,7 +191,8 @@ export const appTemplate = html`
                 ${repeat(
                   () => ppp.extensions,
                   html`
-                    <ppp-side-nav-item
+                    <a
+                      href="${(x) => `?page=${x.page}&extension=${x._id}`}"
                       @click="${(x, c) => {
                         c.parent.extension = x._id;
 
@@ -181,12 +200,14 @@ export const appTemplate = html`
                           page: x.page,
                           extension: x._id
                         });
-                      }} }"
-                      ?active="${(x, c) => c.parent.extension === x._id}"
-                      slot="items"
+                      }}"
                     >
-                      <span slot="title"> ${(x) => x.title} </span>
-                    </ppp-side-nav-item>
+                      <ppp-side-nav-item
+                        ?active="${(x, c) => c.parent.extension === x._id}"
+                      >
+                        <span> ${(x) => x.title} </span>
+                      </ppp-side-nav-item>
+                    </a>
                   `
                 )}
               </ppp-side-nav-group>
@@ -195,123 +216,153 @@ export const appTemplate = html`
           <ppp-side-nav-group>
             <span slot="start"> ${html.partial(connections)} </span>
             <span slot="title">Подключения</span>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('api')}"
+            <a
+              href="?page=apis"
               @click="${(x) =>
                 x.navigate({
                   page: 'apis'
                 })}"
-              slot="items"
             >
-              <span slot="title">Внешние API</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('broker')}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('api')}"
+              >
+                <span>Внешние API</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=brokers"
               @click="${(x) =>
                 x.navigate({
                   page: 'brokers'
                 })}"
-              slot="items"
             >
-              <span slot="title">Брокеры</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('trader')}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('broker')}"
+              >
+                <span>Брокеры</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=traders"
               @click="${(x) =>
                 x.navigate({
                   page: 'traders'
                 })}"
-              slot="items"
             >
-              <span slot="title">Трейдеры</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('telegram-bot')}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('trader')}"
+              >
+                <span>Трейдеры</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=telegram-bots"
               @click="${(x) =>
                 x.navigate({
                   page: 'telegram-bots'
                 })}"
-              slot="items"
             >
-              <span slot="title">Боты Telegram</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('endpoint')}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('telegram-bot')}"
+              >
+                <span>Боты Telegram</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=endpoints"
               @click="${(x) =>
                 x.navigate({
                   page: 'endpoints'
                 })}"
-              slot="items"
             >
-              <span slot="title">Конечные точки</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page.startsWith('server')}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('endpoint')}"
+              >
+                <span>Конечные точки</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=servers"
               @click="${(x) =>
                 x.navigate({
                   page: 'servers'
                 })}"
-              slot="items"
             >
-              <span slot="title">Серверы</span>
-            </ppp-side-nav-item>
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('server')}"
+              >
+                <span>Серверы</span>
+              </ppp-side-nav-item>
+            </a>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             <span slot="start"> ${html.partial(settings)} </span>
             <span slot="title">Конфигурация</span>
-            <ppp-side-nav-item
-              ?active="${(x) => x.page === 'cloud-services'}"
+            <a
+              href="?page=cloud-services"
               @click="${(x) =>
                 x.navigate({
                   page: 'cloud-services'
                 })}"
-              slot="items"
             >
-              <span slot="title">Облачные сервисы</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page === 'extensions'}"
+              <ppp-side-nav-item
+                ?active="${(x) => x.page === 'cloud-services'}"
+              >
+                <span>Облачные сервисы</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=extensions"
               @click="${(x) =>
                 x.navigate({
                   page: 'extensions'
                 })}"
-              slot="items"
             >
-              <span slot="title">Дополнения</span>
-            </ppp-side-nav-item>
-            <ppp-side-nav-item
-              ?disabled="${() => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page === 'settings'}"
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page === 'extensions'}"
+              >
+                <span>Дополнения</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=settings"
               @click="${(x) =>
                 x.navigate({
                   page: 'settings'
                 })}"
-              slot="items"
             >
-              <span slot="title">Параметры</span>
-            </ppp-side-nav-item>
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page === 'settings'}"
+              >
+                <span>Параметры</span>
+              </ppp-side-nav-item>
+            </a>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             <span slot="start"> ${html.partial(cloud)} </span>
             <span slot="title">Обновление</span>
-            <ppp-side-nav-item
-              ?disabled="${(x) => !ppp.keyVault.ok()}"
-              ?active="${(x) => x.page === 'updates'}"
+            <a
+              href="?page=updates"
               @click="${(x) =>
                 x.navigate({
                   page: 'updates'
                 })}"
-              slot="items"
             >
-              <span slot="title">Центр обновлений</span>
-            </ppp-side-nav-item>
+              <ppp-side-nav-item
+                ?disabled="${(x) => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page === 'updates'}"
+              >
+                <span>Центр обновлений</span>
+              </ppp-side-nav-item>
+            </a>
           </ppp-side-nav-group>
         </ppp-side-nav>
         <div ?workspace="${(x) => x.page === 'workspace'}" class="page-content">

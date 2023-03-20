@@ -10,13 +10,7 @@ import ppp from '../ppp.js';
  */
 
 class UtexMarginStocksTrader extends Trader {
-  getExchange() {
-    return ['utex'];
-  }
 
-  getBrokerType() {
-    return this.document.broker.type;
-  }
 }
 
 export default UtexMarginStocksTrader;

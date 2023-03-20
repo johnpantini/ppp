@@ -34,7 +34,7 @@ import { uuidv4 } from '../lib/ppp-crypto.js';
 
 await ppp.i18n(import.meta.url);
 
-(class PageHeader extends PPPElement {})
+(class PageHeader extends PPPElement {}
   .compose({
     template: html`
       <h3 class="title">
@@ -47,8 +47,8 @@ await ppp.i18n(import.meta.url);
     styles: css`
       ${display('flex')}
       ${normalize()}
-    ${typography()}
-    :host {
+      ${typography()}
+      :host {
         position: relative;
         align-items: center;
         border-bottom: 3px solid
@@ -78,7 +78,7 @@ await ppp.i18n(import.meta.url);
       }
     `
   })
-  .define();
+  .define());
 
 export const pageStyles = css`
   ${normalize()}
@@ -107,6 +107,11 @@ export const pageStyles = css`
     opacity: 0.5;
     pointer-events: none;
     user-select: none;
+  }
+
+  form[novalidate] {
+    width: 100%;
+    height: 100%;
   }
 
   footer,
@@ -247,6 +252,11 @@ export const pageStyles = css`
     align-items: start;
     gap: 8px 0;
   }
+
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
 `;
 
 class ScratchMap extends Map {
@@ -380,7 +390,7 @@ class Page extends PPPElement {
     );
   }
 
-  async readDocument() {
+  async readDocument(options = {}) {
     const documentId = await this.documentId();
 
     if (documentId) {
@@ -448,6 +458,8 @@ class Page extends PPPElement {
         this.status = PAGE_STATUS.READY;
       } catch (e) {
         this.document = {};
+
+        if (options.raiseException) throw e;
 
         this.failOperation(e);
       } finally {
@@ -599,8 +611,7 @@ class Page extends PPPElement {
   }
 
   endOperation() {
-    if (!this.lastError)
-      this.status = PAGE_STATUS.OPERATION_ENDED;
+    if (!this.lastError) this.status = PAGE_STATUS.OPERATION_ENDED;
 
     this.lastError = null;
   }
@@ -643,18 +654,22 @@ class Page extends PPPElement {
         });
       case 'FetchError':
         return invalidate(ppp.app.toast, {
-          errorMessage: e?.pppMessage ?? e.message
+          errorMessage:
+            e?.pppMessage ??
+            (e?.message || void 0) ??
+            ppp.t('$pppErrors.E_FETCH_FAILED')
         });
       case 'DocumentNotFoundError':
         if (typeof this.notFound === 'function') this.notFound();
 
         return invalidate(ppp.app.toast, {
-          errorMessage: e.message
+          errorMessage:
+            (e?.message || void 0) ?? ppp.t('$pppErrors.E_DOCUMENT_NOT_FOUND')
         });
       case 'ConflictError':
         return invalidate(ppp.app.toast, {
           errorMessage:
-            e?.message ??
+            (e?.message || void 0) ??
             html`Документ с таким названием уже существует, перейдите по
               <a href="${e.href}">ссылке</a> для редактирования.`
         });
@@ -662,7 +677,7 @@ class Page extends PPPElement {
         invalidate(ppp.app.toast, {
           errorMessage:
             e?.pppMessage ??
-            e?.message ??
+            (e?.message || void 0) ??
             ppp.t('$operations.operationFailedDetailsInConsole')
         });
     }
@@ -836,6 +851,8 @@ class Page extends PPPElement {
 
       if (!options.silent) this.showSuccessNotification();
     } catch (e) {
+      if (options.raiseException) throw e;
+
       this.failOperation(e);
     } finally {
       this.endOperation();

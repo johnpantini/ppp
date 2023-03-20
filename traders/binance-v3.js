@@ -1,8 +1,6 @@
-import { TRADER_DATUM } from '../lib/const.js';
+import { BROKERS, EXCHANGE, TRADER_DATUM } from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
-import { cyrillicToLatin } from '../lib/intl.js';
-import ppp from '../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -12,10 +10,6 @@ import ppp from '../ppp.js';
 class BinanceTrader extends Trader {
   #idCounter = 0;
 
-  #instruments = new Map();
-
-  #pendingInstrumentCachePromise;
-
   #pendingConnection;
 
   // Key: widget instance; Value: [{ field, datum }] array
@@ -24,7 +18,7 @@ class BinanceTrader extends Trader {
     allTrades: new Map()
   };
 
-  // Key: instrumentId; Value: { instrument, refCount }
+  // Key: instrument symbol; Value: { instrument, refCount }
   // Value contains lastOrderbook for orderbook
   refs = {
     orderbook: new Map(),
@@ -32,41 +26,6 @@ class BinanceTrader extends Trader {
   };
 
   connection;
-
-  async #buildInstrumentCache() {
-    await this.waitForInstrumentCache();
-
-    return (
-      this.#pendingInstrumentCachePromise ??
-      (this.#pendingInstrumentCachePromise = new Promise((resolve, reject) => {
-        const tx = this.cacheRequest.result.transaction(
-          'instruments',
-          'readonly'
-        );
-
-        const store = tx.objectStore('instruments');
-        const cursorRequest = store.openCursor();
-
-        cursorRequest.onsuccess = (event) => {
-          const result = event.target.result;
-
-          if (result?.value) {
-            if (result.value.broker?.indexOf?.(this.getBrokerType()) > -1) {
-              this.#instruments.set(result.value.symbol, result.value);
-            }
-
-            result['continue']();
-          }
-        };
-
-        tx.oncomplete = () => {
-          resolve(this.#instruments);
-        };
-
-        tx.onerror = () => reject();
-      }))
-    );
-  }
 
   async #connectWebSocket(reconnect) {
     if (this.#pendingConnection) {
@@ -84,8 +43,7 @@ class BinanceTrader extends Trader {
             const params = [];
 
             // 1. Orderbook
-            for (const [instrumentId, { instrument, refCount }] of this.refs
-              .orderbook) {
+            for (const [, { instrument, refCount }] of this.refs.orderbook) {
               if (refCount > 0) {
                 params.push(
                   `${this.getSymbol(instrument).toLowerCase()}@depth20@${
@@ -96,8 +54,7 @@ class BinanceTrader extends Trader {
             }
 
             // 2. All trades
-            for (const [instrumentId, { instrument, refCount }] of this.refs
-              .allTrades) {
+            for (const [, { instrument, refCount }] of this.refs.allTrades) {
               if (refCount > 0) {
                 params.push(
                   `${this.getSymbol(instrument).toLowerCase()}@aggTrade`
@@ -134,14 +91,14 @@ class BinanceTrader extends Trader {
             if (/depth20/i.test(payload?.stream)) {
               this.onOrderbookMessage({
                 orderbook: payload.data,
-                instrument: this.#instruments.get(
+                instrument: this.instruments.get(
                   payload.stream.split('@')[0].toUpperCase()
                 )
               });
             } else if (/aggTrade/i.test(payload?.stream)) {
               this.onTradeMessage({
                 trade: payload.data,
-                instrument: this.#instruments.get(
+                instrument: this.instruments.get(
                   payload.stream.split('@')[0].toUpperCase()
                 )
               });
@@ -155,10 +112,7 @@ class BinanceTrader extends Trader {
   async onTradeMessage({ trade, instrument }) {
     if (trade && instrument) {
       for (const [source, fields] of this.subs.allTrades) {
-        if (
-          source.instrument?.symbol &&
-          this.getSymbol(instrument) === this.getSymbol(source.instrument)
-        ) {
+        if (this.instrumentsAreEqual(instrument, source.instrument)) {
           for (const { field, datum } of fields) {
             switch (datum) {
               case TRADER_DATUM.MARKET_PRINT:
@@ -182,11 +136,8 @@ class BinanceTrader extends Trader {
   async onOrderbookMessage({ orderbook, instrument }) {
     if (orderbook && instrument) {
       for (const [source, fields] of this.subs.orderbook) {
-        if (
-          source.instrument?.symbol &&
-          this.getSymbol(instrument) === this.getSymbol(source.instrument)
-        ) {
-          const ref = this.refs.orderbook.get(source.instrument?._id);
+        if (this.instrumentsAreEqual(instrument, source.instrument)) {
+          const ref = this.refs.orderbook.get(source.instrument.symbol);
 
           if (ref) {
             const lastOrderbook = (ref.lastOrderbook = {
@@ -226,14 +177,13 @@ class BinanceTrader extends Trader {
   }
 
   async subscribeField({ source, field, datum }) {
-    await this.#buildInstrumentCache();
     await this.#connectWebSocket();
     await super.subscribeField({ source, field, datum });
   }
 
   async addFirstRef(instrument, refs) {
     if (this.connection.readyState === WebSocket.OPEN) {
-      refs.set(instrument._id, {
+      refs.set(instrument.symbol, {
         refCount: 1,
         instrument
       });
@@ -291,18 +241,15 @@ class BinanceTrader extends Trader {
   async instrumentChanged(source, oldValue, newValue) {
     await super.instrumentChanged(source, oldValue, newValue);
 
-    if (newValue?._id) {
-      // Handle no real subscription case for orderbook.
+    if (newValue?.symbol) {
+      // Handle no real subscription case for orderbook, just broadcast.
       for (const [source, fields] of this.subs.orderbook) {
-        if (
-          source.instrument?.symbol &&
-          this.getSymbol(newValue) === this.getSymbol(source.instrument)
-        ) {
+        if (this.instrumentsAreEqual(newValue, source.instrument)) {
           for (const { field, datum } of fields) {
             switch (datum) {
               case TRADER_DATUM.ORDERBOOK:
                 source[field] = this.refs.orderbook.get(
-                  newValue._id
+                  newValue.symbol
                 )?.lastOrderbook;
 
                 break;
@@ -313,114 +260,16 @@ class BinanceTrader extends Trader {
     }
   }
 
+  getDictionary() {
+    return 'BINANCE';
+  }
+
   getExchange() {
-    return ['binance'];
+    return EXCHANGE.BINANCE;
   }
 
-  getBrokerType() {
-    return this.document.broker.type;
-  }
-
-  async search(searchText) {
-    if (searchText?.trim()) {
-      searchText = searchText.trim().replaceAll("'", "\\'");
-
-      const lines = ((context) => {
-        const collection = context.services
-          .get('mongodb-atlas')
-          .db('ppp')
-          .collection('instruments');
-
-        const exactSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: 'cryptocurrency'
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                $or: [
-                  {
-                    symbol: '$text'
-                  },
-                  {
-                    symbol: '$latin'
-                  }
-                ]
-              }
-            ]
-          })
-          .limit(1);
-
-        const regexSymbolMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: 'cryptocurrency'
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                symbol: { $regex: '(^$text|^$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        const regexFullNameMatch = collection
-          .find({
-            $and: [
-              { removed: { $ne: true } },
-              {
-                type: 'cryptocurrency'
-              },
-              {
-                exchange: {
-                  $in: '$exchange'
-                }
-              },
-              {
-                broker: '$broker'
-              },
-              {
-                fullName: { $regex: '($text|$latin)', $options: 'i' }
-              }
-            ]
-          })
-          .limit(20);
-
-        return { exactSymbolMatch, regexSymbolMatch, regexFullNameMatch };
-      })
-        .toString()
-        .split(/\r?\n/);
-
-      lines.pop();
-      lines.shift();
-
-      return ppp.user.functions.eval(
-        lines
-          .join('\n')
-          .replaceAll("'$exchange'", JSON.stringify(this.getExchange()))
-          .replaceAll('$broker', this.getBrokerType?.() ?? '')
-          .replaceAll('$text', searchText.toUpperCase())
-          .replaceAll('$latin', cyrillicToLatin(searchText).toUpperCase())
-      );
-    }
+  getBroker() {
+    return BROKERS.BINANCE;
   }
 }
 

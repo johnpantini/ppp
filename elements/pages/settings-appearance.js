@@ -742,7 +742,9 @@ export class SettingsAppearancePage extends Page {
   async submitDocument(options = {}) {
     try {
       await this.validate();
-      await super.submitDocument(Object.assign(options, { silent: true }));
+      await super.submitDocument(
+        Object.assign(options, { silent: true, raiseException: true })
+      );
       sessionStorage.setItem('ppp-show-success-notification', '1');
       location.reload();
     } catch (e) {

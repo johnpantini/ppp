@@ -1,123 +1,164 @@
-import { getInstrumentPrecision } from '../lib/intl.js';
+import ppp from '../ppp.js';
+import { getInstrumentPrecision, latinToCyrillic } from '../lib/intl.js';
 import { TRADER_DATUM } from '../lib/const.js';
+import {
+  NoInstrumentsError,
+  StaleInstrumentCacheError
+} from '../lib/ppp-errors.js';
+import { cyrillicToLatin } from '../lib/intl.js';
 
 export class Trader {
-  document = {};
+  #instruments = new Map();
 
-  #cacheRequest;
+  #pendingInstrumentCachePromise;
+
+  get instruments() {
+    return this.#instruments;
+  }
+
+  document = {};
 
   async sayHello() {
     return 'Hi';
   }
 
-  get cacheRequest() {
-    return this.#cacheRequest;
-  }
-
-  #cacheRequestPendingSuccess;
-
   constructor(document) {
     this.document = document;
-    this.#cacheRequest = indexedDB.open('ppp', 1);
-    this.#cacheRequestPendingSuccess = new Promise((resolve, reject) => {
-      this.#cacheRequest.onupgradeneeded = () => {
-        const db = this.#cacheRequest.result;
+  }
 
-        if (!db.objectStoreNames.contains('instruments')) {
-          db.createObjectStore('instruments', { keyPath: 'symbol' });
-        }
+  async syncInstrumentCache({ lastCacheVersion }) {
+    const exchange = this.getExchange();
+    const broker = this.getBroker();
+    const instruments = await ppp.user.functions.find(
+      {
+        collection: 'instruments'
+      },
+      {
+        exchange,
+        broker
+      }
+    );
+    const cache = await ppp.openInstrumentCache({
+      exchange,
+      broker
+    });
 
-        db.onerror = (event) => {
-          console.error(event.target.error);
+    try {
+      await new Promise((resolve, reject) => {
+        const storeName = `${exchange}:${broker}`;
+        const tx = cache.transaction(storeName, 'readwrite');
+        const instrumentsStore = tx.objectStore(storeName);
+
+        instrumentsStore.put({
+          symbol: '@version',
+          version: lastCacheVersion
+        });
+
+        instruments.forEach((i) => instrumentsStore.put(i));
+
+        tx.oncomplete = () => {
+          resolve();
+        };
+
+        tx.onerror = (event) => {
           reject(event.target.error);
         };
-      };
+      });
+    } finally {
+      cache.close();
+    }
+  }
 
-      this.#cacheRequest.onsuccess = () => resolve(this.#cacheRequest.result);
-    });
+  async buildInstrumentCache() {
+    if (this.#pendingInstrumentCachePromise) {
+      return this.#pendingInstrumentCachePromise;
+    } else {
+      return (this.#pendingInstrumentCachePromise = (async () => {
+        this.#instruments.clear();
+
+        const exchange = this.getExchange();
+        const broker = this.getBroker();
+
+        if (exchange === '*' || broker === '*') return;
+
+        const cache = await ppp.openInstrumentCache({
+          exchange,
+          broker
+        });
+
+        const lastCacheVersion = ppp.settings.get(
+          `instrumentCache:${exchange}:${broker}`
+        );
+        let currentCacheVersion = 0;
+
+        try {
+          await new Promise((resolve, reject) => {
+            const storeName = `${exchange}:${broker}`;
+            const tx = cache.transaction(storeName, 'readonly');
+            const instrumentsStore = tx.objectStore(storeName);
+            const cursorRequest = instrumentsStore.openCursor();
+
+            cursorRequest.onsuccess = (event) => {
+              const result = event.target.result;
+
+              if (result?.value) {
+                const instrument = result.value;
+
+                if (
+                  instrument.symbol === '@version' &&
+                  typeof instrument.version === 'number'
+                ) {
+                  currentCacheVersion = instrument.version;
+                } else {
+                  this.#instruments.set(instrument.symbol, instrument);
+                }
+
+                result['continue']();
+              }
+            };
+
+            tx.oncomplete = () => {
+              resolve();
+            };
+
+            tx.onerror = (event) => {
+              reject(event.target.error);
+            };
+          });
+        } finally {
+          cache.close();
+        }
+
+        if (!this.#instruments.size) {
+          throw new NoInstrumentsError({ trader: this });
+        }
+
+        if (currentCacheVersion < lastCacheVersion) {
+          throw new StaleInstrumentCacheError({
+            trader: this,
+            currentCacheVersion,
+            lastCacheVersion
+          });
+        }
+
+        return this;
+      })());
+    }
   }
 
   getSymbol(instrument = {}) {
     let symbol = instrument.symbol;
+
+    if (!symbol) return '';
 
     if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
 
     return symbol;
   }
 
-  async waitForInstrumentCache() {
-    return this.#cacheRequestPendingSuccess;
-  }
+  async waitForInstrumentCache() {}
 
-  async findInstrumentInCache(symbol) {
-    await this.waitForInstrumentCache();
-
-    return new Promise((resolve, reject) => {
-      if (/@/.test(symbol)) [symbol] = symbol.split('@');
-
-      const tx = this.#cacheRequest.result.transaction(
-        'instruments',
-        'readonly'
-      );
-      const store = tx.objectStore('instruments');
-      const storeRequest = store.get(symbol);
-
-      storeRequest.onsuccess = (event) => {
-        if (event.target.result) {
-          const instrument = event.target.result;
-
-          if (
-            instrument.broker?.indexOf?.(this.document.broker.type) > -1 &&
-            this.hasCommonExchange(instrument.exchange, this.getExchange())
-          ) {
-            resolve(instrument);
-          } else {
-            // Try with exchange suffix
-            const symbolWithSuffix = `${symbol}~${
-              this.document.exchange ?? instrument.exchange
-            }`;
-            const storeRequestWithSuffix = store.get(symbolWithSuffix);
-
-            storeRequestWithSuffix.onsuccess = (eventWithSuffix) => {
-              if (eventWithSuffix.target.result) {
-                resolve(eventWithSuffix.target.result);
-              } else {
-                resolve({
-                  symbol: symbolWithSuffix
-                });
-              }
-            };
-
-            storeRequestWithSuffix.onerror = (eventWithSuffix) => {
-              console.error(eventWithSuffix.target.error);
-
-              this.onError?.(eventWithSuffix.target.error);
-              reject(event.target.error);
-            };
-          }
-        } else resolve(null);
-      };
-
-      storeRequest.onerror = (event) => {
-        console.error(event.target.error);
-
-        this.onError?.(event.target.error);
-        reject(event.target.error);
-      };
-    });
-  }
-
-  hasCommonExchange(e1 = [], e2 = []) {
-    for (let i = 0; i < e1.length; i++) {
-      for (let j = 0; j < e2.length; j++) {
-        if (e1[i] === e2[j]) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
+  async findInstrumentInCache(symbol) {}
 
   relativeBondPriceToPrice(relativePrice, instrument) {
     return +this.fixPrice(
@@ -158,11 +199,11 @@ export class Trader {
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE:
-        return 'POSITIONS';
+        return '@POSITIONS';
       case TRADER_DATUM.CURRENT_ORDER:
-        return 'ORDERS';
+        return '@ORDERS';
       case TRADER_DATUM.TIMELINE_ITEM:
-        return 'TIMELINE';
+        return '@TIMELINE';
     }
   }
 
@@ -194,7 +235,7 @@ export class Trader {
         // This reference is instrument-agnostic.
         await this.addRef(
           {
-            _id: globalRefName
+            symbol: globalRefName
           },
           refs
         );
@@ -231,7 +272,7 @@ export class Trader {
         if (globalRefName) {
           await this.removeRef(
             {
-              _id: globalRefName
+              symbol: globalRefName
             },
             refs
           );
@@ -249,19 +290,10 @@ export class Trader {
   }
 
   async addRef(instrument, refs) {
-    if (instrument?._id && refs) {
-      const ref = refs.get(instrument._id);
+    if (instrument?.symbol && refs) {
+      const ref = refs.get(instrument.symbol);
 
-      if (typeof ref === 'undefined') {
-        if (
-          instrument.broker?.indexOf?.(this.document.broker.type) === -1 ||
-          // Exchange is undefined for global (instrument-agnostic) datums
-          (typeof instrument.exchange !== 'undefined' &&
-            !this.hasCommonExchange(instrument.exchange, this.getExchange()))
-        ) {
-          return;
-        }
-
+      if (typeof ref === 'undefined' && this.supportsInstrument(instrument)) {
         await this.addFirstRef?.(instrument, refs);
       } else {
         ref.refCount++;
@@ -270,8 +302,8 @@ export class Trader {
   }
 
   async removeRef(instrument, refs) {
-    if (instrument?._id && refs) {
-      const ref = refs.get(instrument._id);
+    if (instrument?.symbol && refs) {
+      const ref = refs.get(instrument.symbol);
 
       if (typeof ref !== 'undefined') {
         if (ref.refCount > 0) {
@@ -280,13 +312,17 @@ export class Trader {
 
         if (ref.refCount === 0) {
           await this.removeLastRef?.(instrument, refs, ref);
-          refs.delete(instrument._id);
+          refs.delete(instrument.symbol);
         }
       }
     }
   }
 
   async instrumentChanged(source, oldValue, newValue) {
+    if (newValue && !this.supportsInstrument(newValue)) {
+      return;
+    }
+
     for (const key of Object.keys(this.subs)) {
       const sub = this.subs[key];
 
@@ -308,7 +344,105 @@ export class Trader {
     }
   }
 
+  instrumentsAreEqual(i1, i2) {
+    if (!this.supportsInstrument(i1) || !this.supportsInstrument(i2))
+      return false;
+
+    return (
+      i1?.symbol && i2?.symbol && this.getSymbol(i1) === this.getSymbol(i2)
+    );
+  }
+
+  supportsInstrument(instrument) {
+    return this.instruments.has(instrument.symbol);
+  }
+
   getExchange() {
-    return [];
+    return '*';
+  }
+
+  getBroker() {
+    return '*';
+  }
+
+  search(searchText = '') {
+    let exactSymbolMatch = null;
+    const startsWithSymbolMatches = [];
+    const regexSymbolMatches = [];
+    const startsWithFullNameMatches = [];
+    const regexFullNameMatches = [];
+    const text = searchText
+      .trim()
+      .replaceAll(/[^a-z0-9\u0400-\u04FF]/gi, '')
+      .toUpperCase();
+    const latin = cyrillicToLatin(text);
+    const cyrillic = latinToCyrillic(text);
+
+    if (text.length) {
+      for (let [symbol, instrument] of this.instruments) {
+        symbol = symbol
+          .replaceAll(/[^a-z0-9\u0400-\u04FF]/gi, '')
+          .toUpperCase();
+
+        const fullName = instrument.fullName.toUpperCase();
+
+        if (symbol === text && exactSymbolMatch === null) {
+          exactSymbolMatch = instrument;
+        }
+
+        if (
+          startsWithSymbolMatches.length < 10 &&
+          (symbol.startsWith(text) ||
+            symbol.startsWith(latin) ||
+            symbol.startsWith(cyrillic))
+        ) {
+          startsWithSymbolMatches.push(instrument);
+        }
+
+        if (
+          startsWithFullNameMatches.length < 10 &&
+          (fullName.startsWith(text) ||
+            fullName.startsWith(latin) ||
+            fullName.startsWith(cyrillic))
+        ) {
+          startsWithFullNameMatches.push(instrument);
+        }
+
+        if (
+          regexSymbolMatches.length < 10 &&
+          (new RegExp(text, 'ig').test(symbol) ||
+            new RegExp(latin, 'ig').test(symbol) ||
+            new RegExp(cyrillic, 'ig').test(symbol))
+        ) {
+          regexSymbolMatches.push(instrument);
+        }
+
+        if (
+          fullName &&
+          regexFullNameMatches.length < 10 &&
+          (new RegExp(text, 'ig').test(fullName) ||
+            new RegExp(latin, 'ig').test(fullName) ||
+            new RegExp(cyrillic, 'ig').test(fullName))
+        ) {
+          regexFullNameMatches.push(instrument);
+        }
+      }
+    }
+
+    return {
+      exactSymbolMatch,
+      startsWithSymbolMatches: startsWithSymbolMatches.sort((a, b) =>
+        a.fullName.localeCompare(b.fullName)
+      ),
+      regexSymbolMatches: regexSymbolMatches.sort((a, b) =>
+        a.fullName.localeCompare(b.fullName)
+      ),
+      startsWithFullNameMatches: startsWithFullNameMatches.sort((a, b) =>
+        a.fullName.localeCompare(b.fullName)
+      ),
+      regexFullNameMatches: regexFullNameMatches.sort((a, b) =>
+        a.fullName.localeCompare(b.fullName)
+      )
+    };
   }
 }

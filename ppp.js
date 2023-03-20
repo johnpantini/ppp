@@ -10,7 +10,7 @@ import { DesignToken } from './design/design-token.js';
 import { KeyVault } from './lib/key-vault.js';
 import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
 import { PPPElement } from './lib/ppp-element.js';
-import { APIS, TRADERS } from './lib/const.js';
+import { APIS, BROKERS, TRADERS } from './lib/const.js';
 
 (class DesignSystemCanvas extends PPPElement {
   connectedCallback() {
@@ -18,7 +18,7 @@ import { APIS, TRADERS } from './lib/const.js';
 
     DesignToken.registerDefaultStyleTarget(this);
   }
-})
+}
   .compose({
     template: html` <slot></slot> `,
     styles: css`
@@ -28,7 +28,7 @@ import { APIS, TRADERS } from './lib/const.js';
       }
     `
   })
-  .define();
+  .define());
 
 class SettingsMap extends Map {
   #observable;
@@ -451,7 +451,7 @@ class PPP {
         this.traders.set(document._id, new module.default(document));
       }
 
-      return this.traders.get(document._id);
+      return this.traders.get(document._id).buildInstrumentCache();
     }
   }
 
@@ -477,6 +477,105 @@ class PPP {
 
       return this.traders.get(document._id);
     }
+  }
+
+  async nextInstrumentCacheVersion({ exchange, broker }) {
+    const cacheFieldName = `instrumentCache:${exchange}:${broker}`;
+
+    const lines = ((context) => {
+      const db = context.services.get('mongodb-atlas').db('ppp');
+
+      return db
+        .collection('app')
+        .updateOne(
+          {
+            _id: '@settings'
+          },
+          {
+            $inc: {
+              $field: 1
+            }
+          },
+          {
+            upsert: true
+          }
+        )
+        .then(() => db.collection('app').findOne({ _id: '@settings' }));
+    })
+      .toString()
+      .replaceAll('$field', `'${cacheFieldName}'`)
+      .split(/\r?\n/);
+
+    lines.pop();
+    lines.shift();
+
+    const response = await this.user.functions.eval(lines.join('\n'));
+    const result = +response[cacheFieldName];
+
+    this.settings.load(cacheFieldName, result);
+
+    return result;
+  }
+
+  async openInstrumentCache({ exchange, broker }) {
+    let version = 1;
+    const [database] = await indexedDB.databases();
+
+    if (database) {
+      version = database.version;
+    }
+
+    const checkStoreRequest = indexedDB.open('ppp', version);
+    let storeNames;
+
+    try {
+      storeNames = Array.from(
+        await new Promise((resolve, reject) => {
+          checkStoreRequest.onsuccess = () => {
+            resolve(checkStoreRequest.result.objectStoreNames);
+          };
+
+          checkStoreRequest.onerror = (event) => {
+            reject(event.target.error);
+          };
+        })
+      );
+    } finally {
+      checkStoreRequest.result.close();
+    }
+
+    const storeName = `${exchange}:${broker}`;
+
+    if (storeNames.indexOf(storeName) === -1) {
+      version++;
+    }
+
+    const openRequest = indexedDB.open('ppp', version);
+
+    return new Promise((resolve, reject) => {
+      openRequest.onupgradeneeded = () => {
+        const db = openRequest.result;
+
+        if (!db.objectStoreNames.contains(storeName)) {
+          db.createObjectStore(storeName, { keyPath: 'symbol' });
+        }
+
+        db.onerror = (event) => {
+          console.error(event.target.error);
+          reject(event.target.error);
+        };
+      };
+
+      openRequest.onsuccess = () => {
+        const db = openRequest.result;
+
+        db.onversionchange = () => {
+          db.close();
+        };
+
+        resolve(openRequest.result);
+      };
+    });
   }
 }
 
