@@ -380,6 +380,9 @@ export class Trader {
 
     if (text.length) {
       for (let [symbol, instrument] of this.instruments) {
+        if (instrument.removed)
+          continue;
+
         symbol = symbol
           .replaceAll(/[^a-z0-9\u0400-\u04FF]/gi, '')
           .toUpperCase();
