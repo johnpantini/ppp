@@ -714,6 +714,27 @@ export class App extends PPPElement {
         .shadowRoot.querySelector('ppp-modal:not([hidden])')
     );
   }
+
+  async showWidgetSelector() {
+    await import(`${ppp.rootUrl}/elements/pages/widget-selector-modal.js`);
+
+    const { mountPoint, mountPointTitle, mountPointModal } =
+      this.shadowRoot.querySelector('.page');
+    const page = document.createElement('ppp-widget-selector-modal-page');
+
+    page.setAttribute('disable-auto-read', '');
+
+    mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
+
+    const pageElement = mountPoint.appendChild(page);
+
+    pageElement.mountPointModal = mountPointModal;
+
+    await pageElement.populateDocuments();
+
+    mountPointTitle.textContent = 'Разместить виджет';
+    mountPointModal.removeAttribute('hidden');
+  }
 }
 
 export default App.compose({

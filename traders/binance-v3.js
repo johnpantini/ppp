@@ -1,4 +1,9 @@
-import { BROKERS, EXCHANGE, TRADER_DATUM } from '../lib/const.js';
+import {
+  BROKERS,
+  EXCHANGE,
+  INSTRUMENT_DICTIONARY,
+  TRADER_DATUM
+} from '../lib/const.js'
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
 
@@ -261,7 +266,7 @@ class BinanceTrader extends Trader {
   }
 
   getDictionary() {
-    return 'BINANCE';
+    return INSTRUMENT_DICTIONARY.BINANCE;
   }
 
   getExchange() {

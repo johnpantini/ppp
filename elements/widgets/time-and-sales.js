@@ -264,13 +264,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.tradesTrader = await ppp.getOrCreateTrader(
         this.document.tradesTrader
       );
+      this.instrumentTrader = this.tradesTrader;
 
       this.selectInstrument(
         this.tradesTrader.instruments.get(this.document.symbol),
         { isolate: true }
       );
-
-      this.searchControl.trader = this.tradesTrader;
 
       if (this.tradesTrader) {
         if (

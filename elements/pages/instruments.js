@@ -25,15 +25,21 @@ export const instrumentsTemplate = html`
     </ppp-tabs>
     ${when(
       (x) => x.tabs.activeid === 'manage',
-      html` <ppp-instruments-manage-page></ppp-instruments-manage-page>`
+      html` <ppp-instruments-manage-page
+        disable-auto-read
+      ></ppp-instruments-manage-page>`
     )}
     ${when(
       (x) => x.tabs.activeid === 'import',
-      html` <ppp-instruments-import-page></ppp-instruments-import-page>`
+      html` <ppp-instruments-import-page
+        disable-auto-read
+      ></ppp-instruments-import-page>`
     )}
     ${when(
       (x) => x.tabs.activeid === 'remove',
-      html` <ppp-instruments-remove-page></ppp-instruments-remove-page>`
+      html` <ppp-instruments-remove-page
+        disable-auto-read
+      ></ppp-instruments-remove-page>`
     )}
   </template>
 `;

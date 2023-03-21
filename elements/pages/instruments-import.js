@@ -3,7 +3,7 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { BROKERS, EXCHANGE } from '../../lib/const.js';
+import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
 import { maybeFetchError } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../select.js';
@@ -22,6 +22,9 @@ export const instrumentsImportPageTemplate = html`
         <div class="input-group">
           <ppp-select value="BINANCE" ${ref('dictionary')}>
             <ppp-option value="BINANCE">Binance</ppp-option>
+            <ppp-option value="UTEX_MARGIN_STOCKS"
+              >UTEX Margin (акции)
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -46,7 +49,49 @@ export const instrumentsImportPageStyles = css`
 export class InstrumentsImportPage extends Page {
   collection = 'instruments';
 
-  async importFromBinance() {
+  async [INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS]() {
+    const rSymbols = await fetch(
+      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'POST',
+          url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
+          body: JSON.stringify({})
+        })
+      }
+    );
+
+    await maybeFetchError(
+      rSymbols,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const symbols = await rSymbols.json();
+    const { symbolsInfo } = symbols;
+
+    return symbolsInfo
+      .filter((s) => {
+        return s.tagetCurrencyInfo.description;
+      })
+      .map((s) => {
+        return {
+          symbol: s.tagetCurrencyInfo.code.split('M_')[1].replace('/', ' '),
+          exchange: EXCHANGE.UTEX_MARGIN_STOCKS,
+          broker: BROKERS.UTEX,
+          fullName: s.tagetCurrencyInfo.description,
+          minPriceIncrement: s.priceStep / 1e8,
+          type: 'stock',
+          currency: s.baseCurrencyInfo.code.split('M_')[1],
+          forQualInvestorFlag: false,
+          utexSymbolID: s.id,
+          lot: s.qtyStep
+        };
+      });
+  }
+
+  async [INSTRUMENT_DICTIONARY.BINANCE]() {
     const rExchangeInfo = await fetch(
       `https://api.binance.com/api/v3/exchangeInfo`,
       {
@@ -91,12 +136,7 @@ export class InstrumentsImportPage extends Page {
     this.beginOperation();
 
     try {
-      let instruments = [];
-
-      switch (this.dictionary.value) {
-        case 'BINANCE':
-          instruments = await this.importFromBinance();
-      }
+      const instruments = await this[this.dictionary.value].call(this);
 
       await ppp.user.functions.bulkWrite(
         {
@@ -128,9 +168,14 @@ export class InstrumentsImportPage extends Page {
       let broker;
 
       switch (this.dictionary.value) {
-        case 'BINANCE':
+        case INSTRUMENT_DICTIONARY.BINANCE:
           exchange = EXCHANGE.BINANCE;
           broker = BROKERS.BINANCE;
+
+          break;
+        case INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS:
+          exchange = EXCHANGE.UTEX_MARGIN_STOCKS;
+          broker = BROKERS.UTEX;
 
           break;
       }
@@ -193,7 +238,9 @@ export class InstrumentsImportPage extends Page {
         }
       }
 
-      this.showSuccessNotification();
+      this.showSuccessNotification(
+        `Операция выполнена, импортировано инструментов: ${instruments.length}`
+      );
     } catch (e) {
       this.failOperation(e);
     } finally {

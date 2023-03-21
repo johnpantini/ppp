@@ -93,6 +93,7 @@ import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
+import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 
 export const importInstrumentsSuggestion = ({ trader }) => html`
   <span>
@@ -517,36 +518,45 @@ export class WidgetWithInstrument extends Widget {
   @observable
   instrument;
 
+  @observable
+  instrumentTrader;
+
+  instrumentTraderChanged(o, n) {
+    if (this.searchControl) this.searchControl.trader = n;
+  }
+
   /**
    * @description Isolated widget ignores instrumentChanged() callback.
    */
   isolated;
 
   selectInstrument(instrument, options = {}) {
+    const adoptedInstrument = this.instrumentTrader.adoptInstrument(instrument);
+
     if (options.isolate) {
       this.isolated = true;
-      this.instrument = instrument;
+      this.instrument = adoptedInstrument;
       this.isolated = false;
 
-      return instrument;
+      return adoptedInstrument;
     }
 
-    if (instrument) {
+    if (adoptedInstrument) {
       if (options.selectOnSelf) {
-        this.instrument = instrument;
+        this.instrument = adoptedInstrument;
       }
 
       Array.from(this.container.shadowRoot.querySelectorAll('.widget'))
         .filter(
           (w) =>
             w !== this &&
-            w?.instrument?.symbol !== instrument.symbol &&
+            w?.instrument?.symbol !== adoptedInstrument.symbol &&
             w?.groupControl?.selection === this.groupControl?.selection
         )
-        .forEach((w) => (w.instrument = instrument));
+        .forEach((w) => (w.instrument = adoptedInstrument));
     }
 
-    return instrument;
+    return adoptedInstrument;
   }
 
   instrumentChanged() {
@@ -572,7 +582,11 @@ export class WidgetWithInstrument extends Widget {
               this.groupControl.selection &&
               w.groupControl.selection === this.groupControl.selection
             ) {
-              w.instrument = this.instrument;
+              const adoptedInstrument = w.instrumentTrader.adoptInstrument(
+                this.instrument
+              );
+
+              w.instrument = adoptedInstrument;
 
               bulkWritePayload.push({
                 updateOne: {
@@ -581,7 +595,7 @@ export class WidgetWithInstrument extends Widget {
                   },
                   update: {
                     $set: {
-                      'widgets.$.symbol': w.instrument?.symbol
+                      'widgets.$.symbol': adoptedInstrument?.symbol
                     }
                   },
                   upsert: true
@@ -962,7 +976,9 @@ export class WidgetGroupControl extends PPPOffClickElement {
         sourceWidget?.instrument?.symbol !== this.widget?.instrument?.symbol
       ) {
         this.widget.isolated = true;
-        this.widget.instrument = sourceWidget.instrument;
+        this.widget.instrument = this.widget.instrumentTrader.adoptInstrument(
+          sourceWidget.instrument
+        );
         this.widget.isolated = false;
 
         void this.widget.updateDocumentFragment({
@@ -1702,7 +1718,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
   }
 
   chooseInstrument(instrument) {
-    this.widget.instrument = instrument;
+    this.widget.instrument = this.trader.adoptInstrument(instrument);
     this.open = false;
     this.suggestInput.value = '';
   }
@@ -2241,12 +2257,12 @@ export class WidgetNotificationsArea extends PPPElement {
 
     page.setAttribute('disable-auto-read', '');
 
-    if (!mountPoint.childNodes.length) {
-      const pageElement = mountPoint.appendChild(page);
+    mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
 
-      if (typeof trader.getDictionary === 'function')
-        pageElement.dictionary.value = trader.getDictionary();
-    }
+    const pageElement = mountPoint.appendChild(page);
+
+    if (typeof trader.getDictionary === 'function')
+      pageElement.dictionary.value = trader.getDictionary();
 
     workspace.mountPointTitle.textContent = 'Импорт инструментов';
     workspace.mountPointModal.removeAttribute('hidden');
@@ -2287,7 +2303,9 @@ export const widgetHeaderButtonsTemplate = html`
       <div class="button" @click="${(x) => x.showWidgetSettings()}">
         ${html.partial(settings)}
       </div>
-      <div class="button">${html.partial(close)}</div>
+      <div class="button" @click="${(x) => x.closeWidget()}">
+        ${html.partial(close)}
+      </div>
     </slot>
   </template>
 `;
@@ -2313,6 +2331,10 @@ export class WidgetHeaderButtons extends PPPElement {
   showWidgetSettings() {
     if (!this.widget.preview) {
     }
+  }
+
+  closeWidget() {
+    this.widget.close();
   }
 }
 

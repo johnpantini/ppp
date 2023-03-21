@@ -354,7 +354,15 @@ export class Trader {
   }
 
   supportsInstrument(instrument) {
+    if (!instrument) return true;
+
     return this.instruments.has(instrument.symbol);
+  }
+
+  adoptInstrument(instrument) {
+    if (!this.supportsInstrument(instrument)) return;
+
+    if (instrument) return this.instruments.get(instrument.symbol);
   }
 
   getExchange() {
@@ -380,8 +388,7 @@ export class Trader {
 
     if (text.length) {
       for (let [symbol, instrument] of this.instruments) {
-        if (instrument.removed)
-          continue;
+        if (instrument.removed) continue;
 
         symbol = symbol
           .replaceAll(/[^a-z0-9\u0400-\u04FF]/gi, '')

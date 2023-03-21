@@ -50,7 +50,9 @@ export const instrumentsManagePageTemplate = html`
               Московская биржа
             </ppp-option>
             <ppp-option value="${() => EXCHANGE.SPBX}">СПБ Биржа</ppp-option>
-            <ppp-option value="${() => EXCHANGE.UTEX}">UTEX</ppp-option>
+            <ppp-option value="${() => EXCHANGE.UTEX_MARGIN_STOCKS}">
+              UTEX Margin (акции)
+            </ppp-option>
             <ppp-option value="${() => EXCHANGE.US}">Биржи США</ppp-option>
             <ppp-option value="${() => EXCHANGE.BINANCE}">Binance</ppp-option>
           </ppp-select>
@@ -165,6 +167,24 @@ export const instrumentsManagePageTemplate = html`
                     <ppp-option value="RUB">RUB</ppp-option>
                     <ppp-option value="HKD">HKD</ppp-option>
                   </ppp-select>
+                </div>
+              </section>
+            `
+          )}
+          ${when(
+            (x) => x.exchange.value === EXCHANGE.UTEX_MARGIN_STOCKS,
+            html`
+              <section>
+                <div class="label-group">
+                  <h5>Идентификатор инструмента UTEX</h5>
+                </div>
+                <div class="input-group">
+                  <ppp-text-field
+                    type="number"
+                    placeholder="Идентификатор"
+                    value="${(x) => x.document.utexSymbolID ?? ''}"
+                    ${ref('utexSymbolID')}
+                  ></ppp-text-field>
                 </div>
               </section>
             `
@@ -320,8 +340,7 @@ export const instrumentsManagePageTemplate = html`
                     <div class="label-group">
                       <h5>Идентификатор FIGI</h5>
                       <ppp-badge appearance="green">
-                        ${(x) =>
-                          ppp.t(`$const.broker.${BROKERS.TINKOFF}`)}
+                        ${(x) => ppp.t(`$const.broker.${BROKERS.TINKOFF}`)}
                       </ppp-badge>
                     </div>
                     <div class="input-group">
@@ -683,6 +702,10 @@ export class InstrumentsManagePage extends Page {
     await validate(this.symbol);
     await validate(this.fullName);
 
+    if (this.exchange.value === EXCHANGE.UTEX_MARGIN_STOCKS) {
+      await validate(this.utexSymbolID);
+    }
+
     if (
       this.type.value === 'stock' ||
       this.type.value === 'bond' ||
@@ -693,8 +716,7 @@ export class InstrumentsManagePage extends Page {
 
     await validate(this.minPriceIncrement);
 
-    if (this.broker.value === BROKERS.TINKOFF)
-      await validate(this.tinkoffFigi);
+    if (this.broker.value === BROKERS.TINKOFF) await validate(this.tinkoffFigi);
 
     if (this.type.value === 'bond') {
       await validate(this.initialNominal);
@@ -767,6 +789,10 @@ export class InstrumentsManagePage extends Page {
       $set.currency = this.currency.value;
       $set.isin = this.isin.value.trim();
       $set.classCode = this.classCode.value.trim();
+    }
+
+    if (this.exchange.value === EXCHANGE.UTEX_MARGIN_STOCKS) {
+      $set.utexSymbolID = this.utexSymbolID.value;
     }
 
     if (this.exchange.value === EXCHANGE.SPBX) {

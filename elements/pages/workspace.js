@@ -63,7 +63,7 @@ export const workspacePageTemplate = html`
         (x) => x.isSteady() && x.document.widgets?.length,
         html` <div class="workspace" ${ref('workspace')}></div> `
       )}
-      <ppp-modal ${ref('mountPointModal')} class="large" hidden dismissible>
+      <ppp-modal ${ref('mountPointModal')} class="xlarge" hidden dismissible>
         <span slot="title" ${ref('mountPointTitle')}></span>
         <div class="mount" slot="body" ${ref('mountPoint')}></div>
       </ppp-modal>
@@ -582,55 +582,65 @@ export class WorkspacePage extends Page {
     const wUrl = new URL(url);
     const baseWidgetUrl = wUrl.href.slice(0, wUrl.href.lastIndexOf('/'));
 
-    // TODO - remove in v2
-    try {
-      widgetDocument.widgetDefinition = await module.widgetDefinition?.({
-        ppp,
-        baseWidgetUrl
-      });
+    widgetDocument.widgetDefinition = await module.widgetDefinition?.({
+      ppp,
+      baseWidgetUrl
+    });
 
-      const tagName = widgetDocument.widgetDefinition.customElement.name;
-      const domElement = document.createElement(tagName);
-      const minWidth = widgetDocument.widgetDefinition.minWidth ?? '275';
-      const minHeight = widgetDocument.widgetDefinition.minHeight ?? '395';
+    const tagName = widgetDocument.widgetDefinition.customElement.name;
+    const domElement = document.createElement(tagName);
+    const minWidth = widgetDocument.widgetDefinition.minWidth ?? '275';
+    const minHeight = widgetDocument.widgetDefinition.minHeight ?? '395';
+    const widgetWidth = parseInt(
+      widgetDocument.width ??
+        widgetDocument.widgetDefinition.defaultWidth ??
+        minWidth
+    );
+    const widgetHeight = parseInt(
+      widgetDocument.height ??
+        widgetDocument.widgetDefinition.defaultHeight ??
+        minHeight
+    );
 
-      domElement.style.left = `${parseInt(widgetDocument.x ?? '0')}px`;
-      domElement.style.top = `${parseInt(widgetDocument.y ?? '0')}px`;
-      domElement.style.width = `${parseInt(
-        widgetDocument.width ??
-          widgetDocument.widgetDefinition.defaultWidth ??
-          minWidth
-      )}px`;
-      domElement.style.height = `${parseInt(
-        widgetDocument.height ??
-          widgetDocument.widgetDefinition.defaultHeight ??
-          minHeight
-      )}px`;
+    domElement.style.width = `${widgetWidth}px`;
+    domElement.style.height = `${widgetHeight}px`;
 
-      if (typeof widgetDocument.zIndex === 'number') {
-        this.zIndex = Math.max(this.zIndex, widgetDocument.zIndex);
+    if (
+      typeof widgetDocument.x === 'undefined' ||
+      typeof widgetDocument.y === 'undefined'
+    ) {
+      const { scrollLeft, scrollTop } = this.workspace;
+      const { width, height } = this.workspace.getBoundingClientRect();
 
-        domElement.style.zIndex = widgetDocument.zIndex;
-      } else {
-        domElement.style.zIndex = (++this.zIndex).toString();
-      }
-
-      domElement.widgetDefinition = widgetDocument.widgetDefinition;
-      domElement.document = widgetDocument;
-
-      return new Promise((resolve) => {
-        Updates.enqueue(() => {
-          widgetDocument.widgetElement = this.workspace.appendChild(domElement);
-          widgetDocument.widgetElement.container = this;
-          widgetDocument.widgetElement.topLoader = this.topLoader;
-          widgetDocument.widgetElement.classList.add('widget');
-        });
-
-        resolve();
-      });
-    } catch (e) {
-      console.error(e);
+      widgetDocument.x = Math.floor(width / 2 + scrollLeft - widgetWidth / 2);
+      widgetDocument.y = Math.floor(height / 2 + scrollTop - widgetHeight / 2);
     }
+
+    domElement.style.left = `${parseInt(widgetDocument.x ?? '0')}px`;
+    domElement.style.top = `${parseInt(widgetDocument.y ?? '0')}px`;
+
+    if (typeof widgetDocument.zIndex === 'number') {
+      this.zIndex = Math.max(this.zIndex, widgetDocument.zIndex);
+
+      domElement.style.zIndex = widgetDocument.zIndex;
+    } else {
+      domElement.style.zIndex = (++this.zIndex).toString();
+    }
+
+    domElement.widgetDefinition = widgetDocument.widgetDefinition;
+    domElement.document = widgetDocument;
+
+    return new Promise((resolve) => {
+      Updates.enqueue(() => {
+        domElement.container = this;
+        domElement.topLoader = this.topLoader;
+        domElement.classList.add('widget');
+
+        widgetDocument.widgetElement = this.workspace.appendChild(domElement);
+      });
+
+      resolve();
+    });
   }
 }
 

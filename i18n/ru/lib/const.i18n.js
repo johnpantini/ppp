@@ -30,13 +30,15 @@ export default function (i18n) {
         [BROKERS.TINKOFF]: 'Tinkoff',
         [BROKERS.UTEX]: 'UTEX',
         [BROKERS.PSINA]: 'Psina',
-        [BROKERS.BINANCE]: 'Binance'
+        [BROKERS.BINANCE]: 'Binance',
+        [BROKERS.HUOBI]: 'Huobi',
+        [BROKERS.BYBIT]: 'Bybit'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
         [EXCHANGE.MOEX]: 'Московская биржа',
         [EXCHANGE.SPBX]: 'СПБ Биржа',
-        [EXCHANGE.UTEX]: 'UTEX',
+        [EXCHANGE.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
         [EXCHANGE.US]: 'Биржи США'
       },
       trader: {

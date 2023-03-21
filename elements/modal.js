@@ -103,12 +103,20 @@ export const modalStyles = css`
     background-color: ${themeConditional(paletteWhite, paletteBlack)};
   }
 
+  :host(.auto) .content {
+    width: auto;
+  }
+
   :host(.small) .content {
     width: 400px;
   }
 
   :host(.large) .content {
     width: 720px;
+  }
+
+  :host(.xlarge) .content {
+    width: 900px;
   }
 
   .content:focus-visible {

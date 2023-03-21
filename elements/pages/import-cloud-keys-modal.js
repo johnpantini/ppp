@@ -72,12 +72,12 @@ export class ImportCloudKeysModalPage extends Page {
   }
 
   disconnectedCallback() {
-    super.disconnectedCallback();
-
     Observable.getNotifier(this.closest('ppp-modal')).unsubscribe(
       this.modalNotifier,
       'hidden'
     );
+
+    super.disconnectedCallback();
   }
 
   async submitDocument() {
