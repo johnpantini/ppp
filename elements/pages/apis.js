@@ -59,6 +59,7 @@ export const apisPageTemplate = html`
               datum,
               cells: [
                 html`<a
+                  class="link"
                   @click="${() => {
                     ppp.app.navigate({
                       page: `api-${datum.type}`,

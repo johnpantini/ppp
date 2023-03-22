@@ -54,32 +54,6 @@ export const importCloudKeysModalPageStyles = css`
 `;
 
 export class ImportCloudKeysModalPage extends Page {
-  modalNotifier = {
-    handleChange: (modal, attr) => {
-      if (modal.hasAttribute(attr)) {
-        ppp.app.toast.setAttribute('hidden', '');
-      }
-    }
-  };
-
-  async connectedCallback() {
-    await super.connectedCallback();
-
-    Observable.getNotifier(this.closest('ppp-modal')).subscribe(
-      this.modalNotifier,
-      'hidden'
-    );
-  }
-
-  disconnectedCallback() {
-    Observable.getNotifier(this.closest('ppp-modal')).unsubscribe(
-      this.modalNotifier,
-      'hidden'
-    );
-
-    super.disconnectedCallback();
-  }
-
   async submitDocument() {
     this.beginOperation();
 

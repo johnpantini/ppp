@@ -383,6 +383,10 @@ export const appTemplate = html`
             (x) => x.pageNotFound,
             html` <ppp-not-found-page></ppp-not-found-page>`
           )}
+          <ppp-modal ${ref('mountPointModal')} hidden dismissible>
+            <span slot="title" ${ref('mountPointTitle')}></span>
+            <div class="mount" slot="body" ${ref('mountPoint')}></div>
+          </ppp-modal>
         </div>
       </div>
     </div>
@@ -424,6 +428,7 @@ export const appStyles = css`
   }
 
   .app-loader {
+    z-index: 10000000;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -590,6 +595,29 @@ export class App extends PPPElement {
     );
   }
 
+  async mountPage(page, options = {}) {
+    this.pageConnected = false;
+
+    try {
+      await import(`${ppp.rootUrl}/elements/pages/${page}.js`);
+
+      const mountPoint = this.mountPoint;
+      const pageElement = document.createElement(`ppp-${page}-page`);
+
+      pageElement.mountPointModal = this.mountPointModal;
+      pageElement.setAttribute('disable-auto-read', '');
+      mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
+
+      this.mountPointTitle.textContent = options.title ?? 'PPP';
+      this.mountPointModal.setAttribute('class', options.size ?? 'large');
+      this.mountPointModal.removeAttribute('hidden');
+
+      return mountPoint.appendChild(pageElement);
+    } finally {
+      this.pageConnected = true;
+    }
+  }
+
   query(params = {}) {
     const filtered = {};
 
@@ -716,24 +744,12 @@ export class App extends PPPElement {
   }
 
   async showWidgetSelector() {
-    await import(`${ppp.rootUrl}/elements/pages/widget-selector-modal.js`);
+    const page = await ppp.app.mountPage('widget-selector-modal', {
+      title: 'Разместить виджет',
+      size: 'auto'
+    });
 
-    const { mountPoint, mountPointTitle, mountPointModal } =
-      this.shadowRoot.querySelector('.page');
-    const page = document.createElement('ppp-widget-selector-modal-page');
-
-    page.setAttribute('disable-auto-read', '');
-
-    mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
-
-    const pageElement = mountPoint.appendChild(page);
-
-    pageElement.mountPointModal = mountPointModal;
-
-    await pageElement.populateDocuments();
-
-    mountPointTitle.textContent = 'Разместить виджет';
-    mountPointModal.removeAttribute('hidden');
+    await page.populateDocuments();
   }
 }
 

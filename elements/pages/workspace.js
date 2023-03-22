@@ -63,10 +63,6 @@ export const workspacePageTemplate = html`
         (x) => x.isSteady() && x.document.widgets?.length,
         html` <div class="workspace" ${ref('workspace')}></div> `
       )}
-      <ppp-modal ${ref('mountPointModal')} class="xlarge" hidden dismissible>
-        <span slot="title" ${ref('mountPointTitle')}></span>
-        <div class="mount" slot="body" ${ref('mountPoint')}></div>
-      </ppp-modal>
     </form>
   </template>
 `;

@@ -1,11 +1,14 @@
 import ppp from '../ppp.js';
-import { getInstrumentPrecision, latinToCyrillic } from '../lib/intl.js';
+import {
+  getInstrumentPrecision,
+  latinToCyrillic,
+  cyrillicToLatin
+} from '../lib/intl.js';
 import { TRADER_DATUM } from '../lib/const.js';
 import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
-import { cyrillicToLatin } from '../lib/intl.js';
 
 export class Trader {
   #instruments = new Map();

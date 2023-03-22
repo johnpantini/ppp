@@ -59,6 +59,7 @@ export const brokersPageTemplate = html`
               datum,
               cells: [
                 html`<a
+                  class="link"
                   @click="${() => {
                     ppp.app.navigate({
                       page: `broker-${datum.type}`,

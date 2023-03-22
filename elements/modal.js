@@ -1,7 +1,14 @@
 /** @decorator */
 
 import { PPPElement } from '../lib/ppp-element.js';
-import { css, ref, html, attr, when } from '../vendor/fast-element.min.js';
+import {
+  css,
+  ref,
+  html,
+  attr,
+  when,
+  Observable
+} from '../vendor/fast-element.min.js';
 import { normalize, scrollbars, typography } from '../design/styles.js';
 import { close } from '../static/svg/sprite.js';
 import {
@@ -21,6 +28,7 @@ import {
   toColorComponents
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
+import ppp from '../ppp.js';
 
 export const modalTemplate = html`
   <template>
@@ -68,7 +76,7 @@ export const modalStyles = css`
     overflow-y: auto;
     position: fixed;
     inset: 0;
-    z-index: 100;
+    z-index: 100000000;
   }
 
   .holder {
@@ -188,6 +196,12 @@ export class Modal extends PPPElement {
 
   @attr({ mode: 'boolean' })
   dismissible;
+
+  hiddenChanged(oldValue, newValue) {
+    if (newValue && ppp.app.toast.getAttribute('appearance') !== 'note') {
+      ppp.app.toast.setAttribute('hidden', '');
+    }
+  }
 }
 
 export default Modal.compose({

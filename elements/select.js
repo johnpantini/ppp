@@ -322,6 +322,9 @@ export class Select extends ListboxElement {
   @attr({ mode: 'boolean' })
   readOnly;
 
+  @attr({ mode: 'boolean' })
+  deselectable;
+
   @attr
   name;
 
@@ -440,7 +443,7 @@ export class Select extends ListboxElement {
     this.open = !this.open;
 
     if (!this.open) {
-      if (this.value === this.firstSelectedOption?.value) {
+      if (this.deselectable && this.value === this.firstSelectedOption?.value) {
         this.value = void 0;
       } else {
         this.value = this.firstSelectedOption

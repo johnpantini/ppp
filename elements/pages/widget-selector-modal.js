@@ -240,16 +240,6 @@ export class WidgetSelectorModalPage extends Page {
   @observable
   activeItem;
 
-  mountPointModal;
-
-  modalNotifier = {
-    handleChange: (modal, attr) => {
-      if (modal.hasAttribute(attr)) {
-        ppp.app.toast.setAttribute('hidden', '');
-      }
-    }
-  };
-
   async activeItemChanged(oldValue, newValue) {
     ppp.settings.set('widgetSelectorChoice', newValue);
 
@@ -259,21 +249,7 @@ export class WidgetSelectorModalPage extends Page {
   async connectedCallback() {
     this.activeItem = ppp.settings.get('widgetSelectorChoice') ?? 'order';
 
-    await super.connectedCallback();
-
-    Observable.getNotifier(this.mountPointModal).subscribe(
-      this.modalNotifier,
-      'hidden'
-    );
-  }
-
-  disconnectedCallback() {
-    Observable.getNotifier(this.mountPointModal).unsubscribe(
-      this.modalNotifier,
-      'hidden'
-    );
-
-    super.disconnectedCallback();
+    return super.connectedCallback();
   }
 
   async handleTypeSelectorClick({ event }) {
@@ -318,7 +294,7 @@ export class WidgetSelectorModalPage extends Page {
     this.beginOperation();
 
     try {
-      const workspacePage = this.mountPointModal.getRootNode().host;
+      const workspacePage = ppp.app.shadowRoot.querySelector('.page');
       // Refs will be OK
       const widget = await workspacePage.denormalization.denormalize(datum);
       const uniqueID = uuidv4();

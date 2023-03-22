@@ -2249,23 +2249,12 @@ export class WidgetNotificationsArea extends PPPElement {
   }
 
   async openInstrumentsImport(trader) {
-    await import(`${ppp.rootUrl}/elements/pages/instruments-import.js`);
-
-    const workspace = this.widget.container;
-    const mountPoint = workspace.mountPoint;
-    const page = document.createElement('ppp-instruments-import-page');
-
-    page.setAttribute('disable-auto-read', '');
-
-    mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
-
-    const pageElement = mountPoint.appendChild(page);
+    const page = await ppp.app.mountPage('instruments-import', {
+      title: 'Импорт инструментов'
+    });
 
     if (typeof trader.getDictionary === 'function')
-      pageElement.dictionary.value = trader.getDictionary();
-
-    workspace.mountPointTitle.textContent = 'Импорт инструментов';
-    workspace.mountPointModal.removeAttribute('hidden');
+      page.dictionary.value = trader.getDictionary();
   }
 
   #appearance({ status, title, text, keep, timeout }) {
