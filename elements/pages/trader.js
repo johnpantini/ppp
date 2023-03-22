@@ -159,12 +159,10 @@ export const traderPageTemplate = html`
               <li>
                 ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
               </li>
-              <li>
-                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
-              </li>
             </ul>
           </div>
           <ppp-button
+            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
@@ -278,6 +276,7 @@ export const traderPageTemplate = html`
             Собственная реализация трейдера, загружаемая по ссылке.
           </span>
           <ppp-button
+            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({

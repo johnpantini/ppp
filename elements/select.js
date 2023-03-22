@@ -46,7 +46,9 @@ import { display } from '../vendor/fast-utilities.js';
 export const selectTemplate = html`
   <template
     class="${(x) => (x.open ? 'open' : '')} ${(x) =>
-      x.disabled ? 'disabled' : ''} ${(x) => x.position}"
+      x.appearance ?? 'default'} ${(x) => (x.disabled ? 'disabled' : '')} ${(
+      x
+    ) => x.position}"
     role="${(x) => x.role}"
     tabindex="${(x) => (!x.disabled ? '0' : null)}"
     aria-disabled="${(x) => x.ariaDisabled}"
@@ -119,7 +121,7 @@ export const selectTemplate = html`
     </div>
     ${when(
       (x) => x.appearance === 'error' && x.errorMessage,
-      html` <div class="helper error">
+      html` <div class="helper body1 error">
         <label>${(x) => x.errorMessage}</label>
       </div>`
     )}
@@ -188,7 +190,7 @@ export const selectStyles = css`
     cursor: pointer;
   }
 
-  :host(:hover) .control:hover {
+  :host(:hover:not([disabled])) .control:hover {
     border-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }
 
@@ -279,8 +281,14 @@ export const selectStyles = css`
     padding-top: ${spacing1};
   }
 
-  :host(.error) .helper {
+  :host(.error) .helper,
+  :host(.error) .indicator {
     color: ${themeConditional(paletteRedBase, paletteRedLight1)};
+  }
+
+  :host(.error:not([disabled])) .control {
+    border-color: ${themeConditional(paletteRedBase, paletteRedLight1)};
+    padding-right: 10px;
   }
 `;
 
@@ -369,7 +377,7 @@ export class Select extends ListboxElement {
     }
   }
 
-  valueChanged(prev, next) {
+  valueChanged() {
     if (this.$fastController.isConnected && this.options) {
       this.update();
 
@@ -432,9 +440,13 @@ export class Select extends ListboxElement {
     this.open = !this.open;
 
     if (!this.open) {
-      this.value = this.firstSelectedOption
-        ? this.firstSelectedOption.value
-        : void 0;
+      if (this.value === this.firstSelectedOption?.value) {
+        this.value = void 0;
+      } else {
+        this.value = this.firstSelectedOption
+          ? this.firstSelectedOption.value
+          : void 0;
+      }
     }
 
     return true;
