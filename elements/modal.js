@@ -198,8 +198,10 @@ export class Modal extends PPPElement {
   dismissible;
 
   hiddenChanged(oldValue, newValue) {
-    if (newValue && ppp.app.toast.getAttribute('appearance') !== 'note') {
-      ppp.app.toast.setAttribute('hidden', '');
+    if (typeof oldValue !== 'undefined') {
+      if (newValue && ppp.app.toast.getAttribute('appearance') !== 'note') {
+        ppp.app.toast.setAttribute('hidden', '');
+      }
     }
   }
 }

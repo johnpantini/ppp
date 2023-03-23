@@ -29,6 +29,7 @@ import {
   extensions,
   connections
 } from '../static/svg/sprite.js';
+import './modal.js';
 import './pages/not-found.js';
 import './side-nav.js';
 
@@ -741,6 +742,13 @@ export class App extends PPPElement {
         .querySelector(`ppp-${this.page}-page`)
         .shadowRoot.querySelector('ppp-modal:not([hidden])')
     );
+  }
+
+  async handleNewWorkspaceClick() {
+    return ppp.app.mountPage('new-workspace-modal', {
+      title: 'Новый терминал',
+      size: 'large'
+    });
   }
 
   async showWidgetSelector() {

@@ -120,7 +120,7 @@ export const toastStyles = css`
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid;
-    z-index: 1000;
+    z-index: 200000000;
   }
 
   :host .link {
