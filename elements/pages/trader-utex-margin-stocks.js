@@ -89,10 +89,9 @@ export const traderUtexMarginStocksTemplate = html`
         </div>
         <div class="input-group">
           <ppp-text-field
-            optional
             placeholder="0,04"
-            value="${(x) => x.document.flatCommissionRate}"
-            ${ref('flatCommissionRate')}
+            value="${(x) => x.document.commissionRate}"
+            ${ref('commissionRate')}
           ></ppp-text-field>
         </div>
       </section>
@@ -138,60 +137,19 @@ export class TraderUtexMarginStocksPage extends Page {
   async validate() {
     await validate(this.name);
     await validate(this.brokerId);
-    await validate(this.wsUrl);
+    await validate(this.commissionRate);
 
-    try {
-      new URL(this.wsUrl.value);
-    } catch (e) {
-      invalidate(this.wsUrl, {
-        errorMessage: 'Неверный или неполный URL',
-        raiseException: true
+    if (this.commissionRate.value.trim()) {
+      await validate(this.commissionRate, {
+        hook: async (value) => +value > 0 + value <= 100,
+        errorMessage: 'Введите значение в диапазоне от 0 до 100'
       });
     }
-
-    await validate(this.wsUrl, {
-      hook: async (value) => {
-        const url = new URL(value);
-
-        return url.protocol === 'wss:' || url.protocol === 'ws:';
-      },
-      errorMessage: 'Недопустимый протокол URL'
-    });
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
         errorMessage: 'Введите значение в диапазоне от 100 до 10000'
-      });
-    }
-
-    try {
-      await new Promise((resolve, reject) => {
-        const timer = setTimeout(reject, 5000);
-        const ws = new WebSocket(this.wsUrl.value);
-
-        ws.onmessage = ({ data }) => {
-          const payload = JSON.parse(data);
-
-          if (Array.isArray(payload) && payload[0]?.msg === 'connected') {
-            ws.close();
-            clearTimeout(timer);
-            resolve();
-          } else {
-            ws.close();
-            clearTimeout(timer);
-            reject();
-          }
-        };
-        ws.onerror = () => {
-          clearTimeout(timer);
-          reject();
-        };
-      });
-    } catch (e) {
-      invalidate(this.wsUrl, {
-        errorMessage: 'Не удалось соединиться',
-        raiseException: true
       });
     }
   }
@@ -206,7 +164,7 @@ export class TraderUtexMarginStocksPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.ALPACA_V2_PLUS%]`
+              type: `[%#(await import('../../lib/const.js')).TRADERS.UTEX_MARGIN_STOCKS%]`
             }
           },
           {
@@ -226,7 +184,7 @@ export class TraderUtexMarginStocksPage extends Page {
 
   async find() {
     return {
-      type: TRADERS.ALPACA_V2_PLUS,
+      type: TRADERS.UTEX_MARGIN_STOCKS,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -237,19 +195,21 @@ export class TraderUtexMarginStocksPage extends Page {
       $set: {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
-        wsUrl: this.wsUrl.value.trim(),
-        dictionary: this.dictionary.value,
+        commissionRate: Math.abs(
+          parseFloat(this.commissionRate.value.replace(',', '.'))
+        ),
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
-        useLots: this.useLots.checked,
         caps: [
-          TRADER_CAPS.CAPS_ORDERBOOK,
-          TRADER_CAPS.CAPS_TIME_AND_SALES,
-          TRADER_CAPS.CAPS_MIC
+          TRADER_CAPS.CAPS_LIMIT_ORDERS,
+          TRADER_CAPS.CAPS_MARKET_ORDERS,
+          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+          TRADER_CAPS.CAPS_POSITIONS,
+          TRADER_CAPS.CAPS_TIMELINE
         ],
         version: 1,
-        type: TRADERS.ALPACA_V2_PLUS,
+        type: TRADERS.UTEX_MARGIN_STOCKS,
         updatedAt: new Date()
       },
       $setOnInsert: {
