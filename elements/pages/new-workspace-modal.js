@@ -1,5 +1,3 @@
-/** @decorator */
-
 import ppp from '../../ppp.js';
 import { html, css, Observable, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
@@ -16,7 +14,7 @@ export const newWorkspaceModalPageTemplate = html`
           <h5>Название</h5>
           <p class="description">Будет отображаться в боковой панели.</p>
           <ppp-text-field
-            placeholder="Название пространства"
+            placeholder="Название терминала"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>

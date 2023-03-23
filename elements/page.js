@@ -7,7 +7,8 @@ import {
   css,
   observable,
   Observable,
-  attr
+  attr,
+  ref
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
 import { ellipsis, normalize, spacing, typography } from '../design/styles.js';
@@ -37,7 +38,7 @@ await ppp.i18n(import.meta.url);
 (class PageHeader extends PPPElement {}
   .compose({
     template: html`
-      <h3 class="title">
+      <h3 class="title" ${ref('titleContent')}>
         <slot></slot>
       </h3>
       <div class="controls">
@@ -47,8 +48,8 @@ await ppp.i18n(import.meta.url);
     styles: css`
       ${display('flex')}
       ${normalize()}
-      ${typography()}
-      :host {
+    ${typography()}
+    :host {
         position: relative;
         align-items: center;
         border-bottom: 3px solid
@@ -668,10 +669,10 @@ class Page extends PPPElement {
         });
       case 'ConflictError':
         return invalidate(ppp.app.toast, {
-          errorMessage:
-            (e?.message || void 0) ??
-            html`Документ с таким названием уже существует, перейдите по
-              <a href="${e.href}">ссылке</a> для редактирования.`
+          errorMessage: e?.href
+            ? html`Документ с таким названием уже существует, перейдите по
+                <a href="${e.href}">ссылке</a> для редактирования.`
+            : e?.message ?? ppp.t('$pppErrors.E_DOCUMENT_CONFLICT')
         });
       default:
         invalidate(ppp.app.toast, {
@@ -839,9 +840,9 @@ class Page extends PPPElement {
           if (existingDocument) {
             // noinspection ExceptionCaughtLocallyJS
             throw new ConflictError({
-              href: `?page=${ppp.app.params().page}&document=${
-                existingDocument._id
-              }`
+              href: `?page=${
+                this.getAttribute('href') ?? ppp.app.params().page
+              }&document=${existingDocument._id}`
             });
           }
         }

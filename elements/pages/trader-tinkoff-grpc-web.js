@@ -79,7 +79,10 @@ export const traderTinkoffGrpcWebTemplate = html`
           <div class="spacing2"></div>
           <ppp-button
             @click="${() =>
-              window.open('?page=broker-tinkoff', '_blank').focus()}"
+              ppp.app.mountPage('broker-tinkoff', {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
             appearance="primary"
           >
             Добавить профиль Tinkoff

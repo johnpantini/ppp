@@ -74,10 +74,14 @@ export const traderAlpacaV2PlusTemplate = html`
           ></ppp-query-select>
           <div class="spacing2"></div>
           <ppp-button
-            @click="${() => window.open('?page=broker-utex', '_blank').focus()}"
+            @click="${() =>
+              ppp.app.mountPage('broker-utex', {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
             appearance="primary"
           >
-            Добавить профиль UTEX Aurora
+            Добавить профиль UTEX
           </ppp-button>
         </div>
       </section>

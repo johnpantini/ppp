@@ -69,7 +69,10 @@ export const traderBinanceV3Template = html`
           <div class="spacing2"></div>
           <ppp-button
             @click="${() =>
-              window.open('?page=broker-binance', '_blank').focus()}"
+              ppp.app.mountPage('broker-binance', {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
             appearance="primary"
           >
             Добавить профиль Binance

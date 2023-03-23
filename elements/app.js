@@ -607,13 +607,28 @@ export class App extends PPPElement {
 
       pageElement.mountPointModal = this.mountPointModal;
       pageElement.setAttribute('disable-auto-read', '');
+      pageElement.setAttribute('href', page);
       mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
 
-      this.mountPointTitle.textContent = options.title ?? 'PPP';
+      if (!options.adoptHeader) {
+        this.mountPointTitle.textContent = options.title ?? 'PPP';
+      } else {
+        this.mountPointTitle.textContent = '';
+      }
+
       this.mountPointModal.setAttribute('class', options.size ?? 'large');
       this.mountPointModal.removeAttribute('hidden');
 
-      return mountPoint.appendChild(pageElement);
+      const result = mountPoint.appendChild(pageElement);
+      const header = pageElement.shadowRoot.querySelector('ppp-page-header');
+
+      if (header) {
+        header.style.display = 'none';
+
+        this.mountPointTitle.textContent = header.textContent;
+      }
+
+      return result;
     } finally {
       this.pageConnected = true;
     }

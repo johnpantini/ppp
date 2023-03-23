@@ -2,6 +2,7 @@ export default function (i18n) {
   i18n.extend({
     $pppErrors: {
       E_REQUIRED_FIELD: 'Это поле обязательно',
+      E_DOCUMENT_CONFLICT: 'Документ не может быть записан',
       E_DOCUMENT_NOT_FOUND: 'Документ не найден',
       E_FETCH_FAILED: 'Ошибка сетевого запроса',
       E_BAD_FORM: 'Форма заполнена некорректно или не полностью',

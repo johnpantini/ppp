@@ -1,22 +1,21 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate, maybeFetchError } from '../../lib/ppp-errors.js';
+import { validate, invalidate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
-import { EXCHANGE, TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { uuidv4 } from '../../lib/ppp-crypto.js';
+import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import '../button.js';
-import '../radio-group.js';
+import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
 
-export const traderAlorOpenApiV2Template = html`
+export const traderUtexMarginStocksTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
         ${(x) =>
           x.document.name
-            ? `Трейдеры - Alor Open API V2 - ${x.document.name}`
-            : 'Трейдеры - Alor Open API V2'}
+            ? `Трейдеры - UTEX Margin (акции) - ${x.document.name}`
+            : 'Трейдеры - UTEX Margin (акции)'}
       </ppp-page-header>
       <section>
         <div class="label-group">
@@ -28,7 +27,7 @@ export const traderAlorOpenApiV2Template = html`
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Alor"
+            placeholder="UTEX Margin Stocks"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -53,7 +52,7 @@ export const traderAlorOpenApiV2Template = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).BROKERS.ALOR%]`
+                        type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX%]`
                       },
                       {
                         $or: [
@@ -71,78 +70,27 @@ export const traderAlorOpenApiV2Template = html`
           <div class="spacing2"></div>
           <ppp-button
             @click="${() =>
-              ppp.app.mountPage('broker-alor', {
+              ppp.app.mountPage('broker-utex', {
                 size: 'xlarge',
                 adoptHeader: true
               })}"
             appearance="primary"
           >
-            Добавить профиль Alor
+            Добавить профиль UTEX
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Идентификатор клиентского портфеля</h5>
+          <h5>Комиссия UTEX</h5>
           <p class="description">
-            Портфель Алор для требуемой торговой секции.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="D70000"
-            value="${(x) => x.document.portfolio}"
-            ${ref('portfolio')}
-          ></ppp-text-field>
-        </div>
-      </section>
-      <section>
-        <div class="label-group">
-          <h5>Тип клиентского портфеля</h5>
-        </div>
-        <div class="input-group">
-          <ppp-radio-group
-            orientation="vertical"
-            value="${(x) => x.document.portfolioType ?? 'stock'}"
-            ${ref('portfolioType')}
-          >
-            <ppp-radio value="stock">Фондовый рынок</ppp-radio>
-            <ppp-radio value="futures">Срочный рынок</ppp-radio>
-            <ppp-radio value="currency"
-              >Валютный рынок и рынок драг. металлов
-            </ppp-radio>
-          </ppp-radio-group>
-        </div>
-      </section>
-      <section>
-        <div class="label-group">
-          <h5>Торговая площадка</h5>
-        </div>
-        <div class="input-group">
-          <ppp-radio-group
-            orientation="vertical"
-            value="${(x) => x.document.exchange ?? EXCHANGE.SPBX}"
-            ${ref('exchange')}
-          >
-            <ppp-radio value="${() => EXCHANGE.SPBX}">СПБ Биржа</ppp-radio>
-            <ppp-radio value="${() => EXCHANGE.MOEX}"
-              >Московская биржа
-            </ppp-radio>
-          </ppp-radio-group>
-        </div>
-      </section>
-      <section>
-        <div class="label-group">
-          <h5>Комиссия плоского тарифа</h5>
-          <p class="description">
-            Укажите в % комиссию вашего тарифа, если он отличается от
-            стандартных, предлагаемых брокером.
+            Укажите в % комиссию вашего торгового счёта UTEX.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             optional
-            placeholder="0,025"
+            placeholder="0,04"
             value="${(x) => x.document.flatCommissionRate}"
             ${ref('flatCommissionRate')}
           ></ppp-text-field>
@@ -153,7 +101,7 @@ export const traderAlorOpenApiV2Template = html`
           <h5>Тайм-аут восстановления соединения</h5>
           <p class="description">
             Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверам брокера. Задаётся в
+            восстановить прерванное подключение к серверу. Задаётся в
             миллисекундах, по умолчанию 1000 мс.
           </p>
         </div>
@@ -180,24 +128,35 @@ export const traderAlorOpenApiV2Template = html`
   </template>
 `;
 
-export const traderAlorOpenApiV2Styles = css`
+export const traderUtexMarginStocksStyles = css`
   ${pageStyles}
 `;
 
-export class TraderAlorOpenApiV2Page extends Page {
+export class TraderUtexMarginStocksPage extends Page {
   collection = 'traders';
 
   async validate() {
     await validate(this.name);
     await validate(this.brokerId);
-    await validate(this.portfolio);
+    await validate(this.wsUrl);
 
-    if (this.flatCommissionRate.value.trim()) {
-      await validate(this.flatCommissionRate, {
-        hook: async (value) => +value > 0 + value <= 100,
-        errorMessage: 'Введите значение в диапазоне от 0 до 100'
+    try {
+      new URL(this.wsUrl.value);
+    } catch (e) {
+      invalidate(this.wsUrl, {
+        errorMessage: 'Неверный или неполный URL',
+        raiseException: true
       });
     }
+
+    await validate(this.wsUrl, {
+      hook: async (value) => {
+        const url = new URL(value);
+
+        return url.protocol === 'wss:' || url.protocol === 'ws:';
+      },
+      errorMessage: 'Недопустимый протокол URL'
+    });
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
@@ -206,33 +165,35 @@ export class TraderAlorOpenApiV2Page extends Page {
       });
     }
 
-    const broker = this.brokerId.datum();
-    const jwtRequest = await fetch(
-      `https://oauth.alor.ru/refresh?token=${broker.refreshToken}`,
-      {
-        method: 'POST'
-      }
-    );
+    try {
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(reject, 5000);
+        const ws = new WebSocket(this.wsUrl.value);
 
-    await maybeFetchError(jwtRequest, 'Неверный токен Alor.');
+        ws.onmessage = ({ data }) => {
+          const payload = JSON.parse(data);
 
-    const { AccessToken } = await jwtRequest.json();
-    const summaryRequest = await fetch(
-      `https://api.alor.ru/md/v2/Clients/${
-        this.exchange.value
-      }/${this.portfolio.value.trim()}/summary`,
-      {
-        headers: {
-          'X-ALOR-REQID': uuidv4(),
-          Authorization: `Bearer ${AccessToken}`
-        }
-      }
-    );
-
-    await maybeFetchError(
-      summaryRequest,
-      'Не удаётся получить информацию о портфеле.'
-    );
+          if (Array.isArray(payload) && payload[0]?.msg === 'connected') {
+            ws.close();
+            clearTimeout(timer);
+            resolve();
+          } else {
+            ws.close();
+            clearTimeout(timer);
+            reject();
+          }
+        };
+        ws.onerror = () => {
+          clearTimeout(timer);
+          reject();
+        };
+      });
+    } catch (e) {
+      invalidate(this.wsUrl, {
+        errorMessage: 'Не удалось соединиться',
+        raiseException: true
+      });
+    }
   }
 
   async read() {
@@ -245,7 +206,7 @@ export class TraderAlorOpenApiV2Page extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.ALOR_OPENAPI_V2%]`
+              type: `[%#(await import('../../lib/const.js')).TRADERS.ALPACA_V2_PLUS%]`
             }
           },
           {
@@ -265,7 +226,7 @@ export class TraderAlorOpenApiV2Page extends Page {
 
   async find() {
     return {
-      type: TRADERS.ALOR_OPENAPI_V2,
+      type: TRADERS.ALPACA_V2_PLUS,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -276,31 +237,19 @@ export class TraderAlorOpenApiV2Page extends Page {
       $set: {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
-        portfolio: this.portfolio.value.trim(),
-        portfolioType: this.portfolioType.value,
-        exchange: this.exchange.value,
+        wsUrl: this.wsUrl.value.trim(),
+        dictionary: this.dictionary.value,
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
-        flatCommissionRate: this.flatCommissionRate.value
-          ? Math.abs(
-              parseFloat(this.flatCommissionRate.value.replace(',', '.'))
-            )
-          : void 0,
-        version: 1,
+        useLots: this.useLots.checked,
         caps: [
-          TRADER_CAPS.CAPS_LIMIT_ORDERS,
-          TRADER_CAPS.CAPS_MARKET_ORDERS,
-          TRADER_CAPS.CAPS_STOP_ORDERS,
-          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
           TRADER_CAPS.CAPS_ORDERBOOK,
           TRADER_CAPS.CAPS_TIME_AND_SALES,
-          TRADER_CAPS.CAPS_POSITIONS,
-          TRADER_CAPS.CAPS_TIMELINE,
-          TRADER_CAPS.CAPS_LEVEL1,
-          TRADER_CAPS.CAPS_CHARTS
+          TRADER_CAPS.CAPS_MIC
         ],
-        type: TRADERS.ALOR_OPENAPI_V2,
+        version: 1,
+        type: TRADERS.ALPACA_V2_PLUS,
         updatedAt: new Date()
       },
       $setOnInsert: {
@@ -310,8 +259,7 @@ export class TraderAlorOpenApiV2Page extends Page {
   }
 }
 
-export default TraderAlorOpenApiV2Page.compose({
-  name: 'ppp-trader-alor-openapi-v2-page',
-  template: traderAlorOpenApiV2Template,
-  styles: traderAlorOpenApiV2Styles
+export default TraderUtexMarginStocksPage.compose({
+  template: traderUtexMarginStocksTemplate,
+  styles: traderUtexMarginStocksStyles
 }).define();
