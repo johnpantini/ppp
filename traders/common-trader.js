@@ -376,6 +376,10 @@ export class Trader {
     return '*';
   }
 
+  getInstrumentIconUrl() {
+    return 'static/instruments/unknown.svg';
+  }
+
   search(searchText = '') {
     let exactSymbolMatch = null;
     const startsWithSymbolMatches = [];

@@ -3,7 +3,7 @@ import {
   EXCHANGE,
   INSTRUMENT_DICTIONARY,
   TRADER_DATUM
-} from '../lib/const.js'
+} from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
 
@@ -275,6 +275,12 @@ class BinanceTrader extends Trader {
 
   getBroker() {
     return BROKERS.BINANCE;
+  }
+
+  getInstrumentIconUrl(instrument) {
+    return instrument?.baseCryptoAsset
+      ? `static/instruments/crypto/${instrument.baseCryptoAsset}.svg`
+      : super.getInstrumentIconUrl(instrument);
   }
 }
 

@@ -1052,13 +1052,9 @@ export const widgetSearchControlTemplate = html`
                   <div
                     class="menu-item-icon-logo"
                     style="${(x) =>
-                      `background-image:url(${
-                        'static/instruments/' +
-                        (x.widget?.instrument.isin ??
-                          x.widget?.instrument.baseCryptoAsset ??
-                          x.widget?.instrument.symbol) +
-                        '.svg'
-                      })`}"
+                      `background-image:url(${x.getInstrumentIconUrl(
+                        x.widget?.instrument
+                      )})`}"
                   ></div>
                   ${(x) => x.widget?.instrument.fullName[0]}
                 </div>
@@ -1111,13 +1107,9 @@ export const widgetSearchControlTemplate = html`
                     <div
                       class="menu-item-icon-logo"
                       style="${(x) =>
-                        `background-image:url(${
-                          'static/instruments/' +
-                          (x.ticker?.isin ??
-                            x.ticker?.baseCryptoAsset ??
-                            x.ticker?.symbol) +
-                          '.svg'
-                        })`}"
+                        `background-image:url(${x.getInstrumentIconUrl(
+                          x.ticker
+                        )})`}"
                     ></div>
                     ${(x) => x.ticker?.fullName[0]}
                   </div>
@@ -1144,10 +1136,10 @@ export const widgetSearchControlTemplate = html`
                       <div class="menu-item-icon-fallback">
                         <div
                           class="menu-item-icon-logo"
-                          style="${(x) =>
-                            `background-image:url(${
-                              'static/instruments/' + x.isin + '.svg'
-                            })`}"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
                         ></div>
                         ${(x) => x.fullName[0]}
                       </div>
@@ -1176,10 +1168,10 @@ export const widgetSearchControlTemplate = html`
                       <div class="menu-item-icon-fallback">
                         <div
                           class="menu-item-icon-logo"
-                          style="${(x) =>
-                            `background-image:url(${
-                              'static/instruments/' + x.isin + '.svg'
-                            })`}"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
                         ></div>
                         ${(x) => x.fullName[0]}
                       </div>
@@ -1208,10 +1200,10 @@ export const widgetSearchControlTemplate = html`
                       <div class="menu-item-icon-fallback">
                         <div
                           class="menu-item-icon-logo"
-                          style="${(x) =>
-                            `background-image:url(${
-                              'static/instruments/' + x.symbol + '.svg'
-                            })`}"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
                         ></div>
                         ${(x) => x.fullName[0]}
                       </div>
@@ -1240,10 +1232,10 @@ export const widgetSearchControlTemplate = html`
                       <div class="menu-item-icon-fallback">
                         <div
                           class="menu-item-icon-logo"
-                          style="${(x) =>
-                            `background-image:url(${
-                              'static/instruments/' + x.symbol + '.svg'
-                            })`}"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
                         ></div>
                         ${(x) => x.fullName[0]}
                       </div>
@@ -1272,10 +1264,10 @@ export const widgetSearchControlTemplate = html`
                       <div class="menu-item-icon-fallback">
                         <div
                           class="menu-item-icon-logo"
-                          style="${(x) =>
-                            `background-image:url(${
-                              'static/instruments/' + x.baseCryptoAsset + '.svg'
-                            })`}"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
                         ></div>
                         ${(x) => x.fullName[0]}
                       </div>
@@ -1688,6 +1680,13 @@ export class WidgetSearchControl extends PPPOffClickElement {
         }
       }
     }
+  }
+
+  getInstrumentIconUrl(instrument) {
+    return (
+      this.widget?.instrumentTrader?.getInstrumentIconUrl?.(instrument) ??
+      'static/instruments/unknown.svg'
+    );
   }
 
   activeItemChanged(oldValue, newValue) {
