@@ -1,0 +1,26 @@
+<!-- by TradingView --><svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="18" height="18" fill="#F0F3FA"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M9.00006 2C9.55006 2 10.0001 2.45 10.0001 3C10.0001 3.55 9.55006 4 9.00006 4C8.45006 4 8.00006 3.55 8.00006 3C8.00006 2.45 8.45006 2 9.00006 2Z" fill="#F47735"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12.7502 13.7979C12.7502 13.7979 12.3249 14.1941 12.0543 13.8772C11.7837 13.5602 10.1599 11.5 9.00015 11.5C7.84036 11.5 6.21665 13.5602 5.94603 13.8772C5.67541 14.1941 5.25015 13.7979 5.25015 13.7979L5.79139 12.5698L9.00015 7L12.2862 12.5698L12.7502 13.7979Z" fill="url(#paint0_linear_5099_144514)"/>
+<path d="M12.4376 10H14.0001C13.9987 11.3469 13.5288 12.8486 12.7511 13.7911L11.6308 12.8461C12.1059 12.1624 12.4065 10.9573 12.4376 10Z" fill="url(#paint1_linear_5099_144514)"/>
+<path d="M6.36473 12.8395C5.89226 12.1568 5.59626 10.9542 5.56526 10H4.00006C4.00142 11.3579 4.4741 12.8585 5.2492 13.7953L6.36473 12.8395Z" fill="url(#paint2_linear_5099_144514)"/>
+<path d="M14.0001 9C13.5632 6.51209 11.4302 5 9.00006 5C6.57349 5 4.46019 6.53805 4.00006 9H5.56256C5.8826 7.09249 7.34802 6 9.00006 6C10.6845 6 12.124 7.09249 12.4376 9H14.0001Z" fill="url(#paint3_linear_5099_144514)"/>
+<defs>
+<linearGradient id="paint0_linear_5099_144514" x1="9.00015" y1="7" x2="9.00015" y2="14.0001" gradientUnits="userSpaceOnUse">
+<stop stop-color="#181B1E"/>
+<stop offset="1" stop-color="#181B1E"/>
+</linearGradient>
+<linearGradient id="paint1_linear_5099_144514" x1="9.00006" y1="5" x2="9.00006" y2="13.7953" gradientUnits="userSpaceOnUse">
+<stop stop-color="#181B1E"/>
+<stop offset="1" stop-color="#181B1E"/>
+</linearGradient>
+<linearGradient id="paint2_linear_5099_144514" x1="9.00006" y1="5" x2="9.00006" y2="13.7953" gradientUnits="userSpaceOnUse">
+<stop stop-color="#181B1E"/>
+<stop offset="1" stop-color="#181B1E"/>
+</linearGradient>
+<linearGradient id="paint3_linear_5099_144514" x1="9.00006" y1="5" x2="9.00006" y2="13.7953" gradientUnits="userSpaceOnUse">
+<stop stop-color="#181B1E"/>
+<stop offset="1" stop-color="#181B1E"/>
+</linearGradient>
+</defs>
+</svg>
