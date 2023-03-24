@@ -20,10 +20,17 @@ export const instrumentsImportPageTemplate = html`
           </p>
         </div>
         <div class="input-group">
-          <ppp-select value="BINANCE" ${ref('dictionary')}>
-            <ppp-option value="BINANCE">Binance</ppp-option>
-            <ppp-option value="UTEX_MARGIN_STOCKS"
-              >UTEX Margin (акции)
+          <ppp-select
+            value="${() => INSTRUMENT_DICTIONARY.BINANCE}"
+            ${ref('dictionary')}
+          >
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.BINANCE}">
+              Binance
+            </ppp-option>
+            <ppp-option
+              value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
+            >
+              UTEX Margin (акции)
             </ppp-option>
           </ppp-select>
         </div>
