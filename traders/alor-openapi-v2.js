@@ -24,8 +24,6 @@ class AlorOpenAPIV2Trader extends Trader {
 
   #futures = new Map();
 
-  #pendingFuturesCachePromise;
-
   positions = new Map();
 
   orders = new Map();
@@ -65,8 +63,6 @@ class AlorOpenAPIV2Trader extends Trader {
       this.document.portfolioType = 'stock';
     }
   }
-
-  async #buildFuturesCache() {}
 
   async ensureAccessTokenIsOk() {
     try {
@@ -684,10 +680,6 @@ class AlorOpenAPIV2Trader extends Trader {
   async subscribeField({ source, field, datum }) {
     await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
-
-    if (this.document.portfolioType === 'futures') {
-      await this.#buildFuturesCache();
-    }
 
     if (
       datum === TRADER_DATUM.POSITION ||
