@@ -75,7 +75,7 @@ createServer(async (request, response) => {
             response.write(JSON.stringify(invocation));
             response.end();
           } else {
-            let result = {};
+            let result;
 
             if (
               invocation?.constructor?.name === 'AggregationCursor' ||
@@ -83,14 +83,20 @@ createServer(async (request, response) => {
             ) {
               result = await invocation.toArray();
             } else if (typeof invocation === 'object') {
-              for (const key in invocation) {
-                const name = invocation[key]?.constructor?.name;
+              if (Array.isArray(invocation)) {
+                result = invocation;
+              } else {
+                result = {};
 
-                if (name === 'Promise') {
-                  result[key] = await invocation[key];
-                } else if (name === 'FindCursor') {
-                  result[key] = await invocation[key].toArray();
-                } else result[key] = invocation[key];
+                for (const key in invocation) {
+                  const name = invocation[key]?.constructor?.name;
+
+                  if (name === 'Promise') {
+                    result[key] = await invocation[key];
+                  } else if (name === 'FindCursor') {
+                    result[key] = await invocation[key].toArray();
+                  } else result[key] = invocation[key];
+                }
               }
             }
 

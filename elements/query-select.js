@@ -182,6 +182,12 @@ export class QuerySelect extends PPPAppearanceElement {
   }
 
   async #onControlOpenChanged() {
+    if (this.options.length) {
+      this.control.listboxHolder.removeAttribute('hidden');
+    } else {
+      this.control.listboxHolder.setAttribute('hidden', '');
+    }
+
     if (this.control.open) {
       this.loading = true;
 
@@ -200,8 +206,16 @@ export class QuerySelect extends PPPAppearanceElement {
           queryResult = await this.transform.call(this.context, queryResult);
 
         this.options = this.#formatter().call(this, queryResult);
+
+        if (this.options.length) {
+          this.control.listboxHolder.removeAttribute('hidden');
+        } else {
+          this.control.listboxHolder.setAttribute('hidden', '');
+        }
       } catch (e) {
         console.dir(e);
+
+        this.control.open = false;
 
         invalidate(this, {
           errorMessage: 'Не удалось загрузить данные'

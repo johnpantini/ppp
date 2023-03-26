@@ -10,7 +10,7 @@ import { DesignToken } from './design/design-token.js';
 import { KeyVault } from './lib/key-vault.js';
 import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
 import { PPPElement } from './lib/ppp-element.js';
-import { APIS, BROKERS, TRADERS } from './lib/const.js';
+import { APIS, TRADERS } from './lib/const.js';
 
 (class DesignSystemCanvas extends PPPElement {
   connectedCallback() {

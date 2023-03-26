@@ -5,7 +5,7 @@ import { BROKERS } from '../../lib/const.js';
 import '../text-field.js';
 import '../button.js';
 
-export const brokerAlorTemplate = html`
+export const brokerAlorPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -75,7 +75,7 @@ export const brokerAlorTemplate = html`
   </template>
 `;
 
-export const brokerAlorStyles = css`
+export const brokerAlorPageStyles = css`
   ${pageStyles}
 `;
 
@@ -145,6 +145,6 @@ export class BrokerAlorPage extends Page {
 }
 
 export default BrokerAlorPage.compose({
-  template: brokerAlorTemplate,
-  styles: brokerAlorStyles
+  template: brokerAlorPageTemplate,
+  styles: brokerAlorPageStyles
 }).define();

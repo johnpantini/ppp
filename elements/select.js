@@ -99,23 +99,25 @@ export const selectTemplate = html`
             )}
           </slot>
         </div>
-        <div
-          aria-disabled="${(x) => x.disabled}"
-          class="listbox"
-          id="listbox"
-          part="listbox"
-          role="listbox"
-          ?disabled="${(x) => x.disabled}"
-          ?hidden="${(x) => !x.open}"
-          ${ref('listbox')}
-        >
-          <slot
-            ${slotted({
-              filter: Listbox.slottedOptionFilter,
-              flatten: true,
-              property: 'slottedOptions'
-            })}
-          ></slot>
+        <div ${ref('listboxHolder')}>
+          <div
+            aria-disabled="${(x) => x.disabled}"
+            class="listbox"
+            id="listbox"
+            part="listbox"
+            role="listbox"
+            ?disabled="${(x) => x.disabled}"
+            ?hidden="${(x) => !x.open}"
+            ${ref('listbox')}
+          >
+            <slot
+              ${slotted({
+                filter: Listbox.slottedOptionFilter,
+                flatten: true,
+                property: 'slottedOptions'
+              })}
+            ></slot>
+          </div>
         </div>
       </div>
     </div>
@@ -177,7 +179,7 @@ export const selectStyles = css`
     width: 100%;
     height: 36px;
     border-radius: 4px;
-    padding: 0 4px 0 12px;
+    padding: 0 10px 0 12px;
     border: 1px solid ${paletteGrayBase};
     z-index: 1;
     outline: none;

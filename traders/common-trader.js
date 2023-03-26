@@ -82,7 +82,7 @@ export class Trader {
         const exchange = this.getExchange();
         const broker = this.getBroker();
 
-        if (exchange === '*' || broker === '*') return;
+        if (exchange === '*' || broker === '*') return this;
 
         const cache = await ppp.openInstrumentCache({
           exchange,
@@ -298,7 +298,7 @@ export class Trader {
 
       if (typeof ref === 'undefined' && this.supportsInstrument(instrument)) {
         await this.addFirstRef?.(instrument, refs);
-      } else {
+      } else if (ref) {
         ref.refCount++;
       }
     }
