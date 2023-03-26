@@ -96,8 +96,6 @@ class PPP {
   traders = new Map();
 
   constructor(appType) {
-    globalThis.ppp = this;
-
     this.workspaces = [];
     this.extensions = [];
     this.settings = new SettingsMap(this);
@@ -146,6 +144,12 @@ class PPP {
   }
 
   async #rebuildDictionary() {
+    let savedPhrases = {};
+
+    if (this.dict) {
+      savedPhrases = ppp.structuredClone(this.dict.phrases);
+    }
+
     this.dict = new Polyglot({
       locale: this.locale
     });
@@ -153,6 +157,8 @@ class PPP {
     (await import(`./i18n/${this.locale}/loading-errors.i18n.js`)).default(
       this.dict
     );
+
+    this.dict.extend(savedPhrases);
   }
 
   async #createApplication({ emergency }) {
@@ -579,4 +585,6 @@ class PPP {
   }
 }
 
-export default new PPP(document.documentElement.getAttribute('ppp-app-type'));
+globalThis.ppp = new PPP(document.documentElement.getAttribute('ppp-app-type'));
+
+export default globalThis.ppp;
