@@ -11,6 +11,11 @@ import {
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
 import { scrollbars } from '../../design/styles.js';
+import { validate } from '../../lib/ppp-errors.js';
+import '../button.js';
+import '../query-select.js';
+import '../snippet.js';
+import '../text-field.js';
 
 const defaultBuySideButtonsTemplate = `+1,+2,+5,+10
 -1,-2,-5,-10`;
@@ -40,8 +45,8 @@ export const scalpingButtonsWidgetTemplate = html`
               ${ref('orderTypeSelector')}
             >
               <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
-              <ppp-widget-box-radio value="limit"
-                >Лимитные
+              <ppp-widget-box-radio value="limit">
+                Лимитные
               </ppp-widget-box-radio>
               <ppp-widget-box-radio value="stop" disabled>
                 Отложенные
@@ -180,6 +185,13 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    if (!this.document.ordersTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер для модификации заявок.',
+        keep: true
+      });
+    }
+
     try {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
@@ -266,7 +278,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
     await validate(this.container.sellSideButtonsTemplate);
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
@@ -290,56 +302,60 @@ export async function widgetDefinition() {
       template: scalpingButtonsWidgetTemplate,
       styles: scalpingButtonsWidgetStyles
     }).define(),
-    minHeight: 120,
-    defaultHeight: 160,
     minWidth: 275,
+    minHeight: 120,
+    defaultWidth: 275,
+    defaultHeight: 160,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер лимитных заявок</h5>
-          <p>Трейдер, который будет переставлять лимитные заявки.</p>
+          <p class="description">
+            Трейдер, который будет переставлять лимитные заявки.
+          </p>
         </div>
-        <ppp-collection-select
-          ${ref('ordersTraderId')}
-          value="${(x) => x.document.ordersTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.ordersTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('ordersTraderId')}
+            value="${(x) => x.document.ordersTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Задержка после использования кнопок</h5>
-          <p>
+          <p class="description">
             В течение этого времени после нажатия кнопка будет недоступна.
             Указывается в миллисекундах.
           </p>
@@ -357,7 +373,7 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Кнопки для заявок на покупку</h5>
-          <p>
+          <p class="description">
             Перечислите значения (со знаком) кнопок через запятую. Для создания
             нового ряда выполните перенос строки. Чтобы сделать отступ, оставьте
             очередную строку пустой. Значения задаются в шагах цены торгового
@@ -365,25 +381,12 @@ export async function widgetDefinition() {
           </p>
         </div>
         <div class="widget-settings-input-group">
-          <ppp-codeflask
+          <ppp-snippet
             :code="${(x) =>
               x.document.buySideButtonsTemplate ??
               defaultBuySideButtonsTemplate}"
             ${ref('buySideButtonsTemplate')}
-          ></ppp-codeflask>
-          <ppp-button
-            class="margin-top"
-            @click="${(x) => {
-              x.buySideButtonsTemplate.updateCode(
-                defaultBuySideButtonsTemplate
-              );
-
-              x.buySideButtonsTemplate.$emit('input');
-            }}"
-            appearance="primary"
-          >
-            Восстановить значение по умолчанию
-          </ppp-button>
+          ></ppp-snippet>
         </div>
       </div>
       <div class="widget-settings-section">
@@ -391,25 +394,12 @@ export async function widgetDefinition() {
           <h5>Кнопки для заявок на продажу</h5>
         </div>
         <div class="widget-settings-input-group">
-          <ppp-codeflask
+          <ppp-snippet
             :code="${(x) =>
               x.document.sellSideButtonsTemplate ??
               defaultSellSideButtonsTemplate}"
             ${ref('sellSideButtonsTemplate')}
-          ></ppp-codeflask>
-          <ppp-button
-            class="margin-top"
-            @click="${(x) => {
-              x.sellSideButtonsTemplate.updateCode(
-                defaultSellSideButtonsTemplate
-              );
-
-              x.sellSideButtonsTemplate.$emit('input');
-            }}"
-            appearance="primary"
-          >
-            Восстановить значение по умолчанию
-          </ppp-button>
+          ></ppp-snippet>
         </div>
       </div>
     `

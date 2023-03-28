@@ -2,7 +2,6 @@ import { css } from '../vendor/fast-element.min.js';
 import {
   themeConditional,
   scrollBarSize,
-  paletteGrayDark4,
   paletteGrayDark2,
   paletteGrayLight2,
   fontSizeHeading3,
@@ -36,8 +35,9 @@ import {
   linkColor,
   paletteWhite,
   paletteGrayDark3,
-  toColorComponents, paletteGrayLight3
-} from './design-tokens.js'
+  toColorComponents,
+  paletteGrayLight3
+} from './design-tokens.js';
 
 export const normalize = () => css`
   *:not(:defined) {
@@ -111,6 +111,16 @@ export const scrollbars = (selector = '') => css`
   }
 
   ${selector}::-webkit-scrollbar-thumb {
+    background-color: rgba(
+      ${themeConditional(
+        toColorComponents(paletteGrayDark1),
+        toColorComponents(paletteGrayLight1)
+      )},
+      0.2
+    );
+  }
+
+  ${selector}::-webkit-scrollbar-corner {
     background-color: rgba(
       ${themeConditional(
         toColorComponents(paletteGrayDark1),

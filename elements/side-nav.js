@@ -40,7 +40,8 @@ import {
   paletteGreenLight3,
   paletteGreenDark3,
   paletteGreenDark1,
-  paletteGreenBase
+  paletteGreenBase,
+  paletteGrayLight1
 } from '../design/design-tokens.js';
 
 export const sideNavTemplate = html`
@@ -366,7 +367,7 @@ export const sideNavItemStyles = css`
   }
 
   :host([disabled]) {
-    color: ${paletteGrayBase};
+    color: ${themeConditional(paletteGrayLight1, paletteGrayBase)};
     background-color: rgba(${toColorComponents(paletteGrayLight3)}, 0);
     pointer-events: none;
   }
@@ -436,6 +437,10 @@ export class SideNavItem extends PPPElement {
 
   connectedCallback() {
     super.connectedCallback();
+
+    if (this.disabled) {
+      this.parentNode.style.pointerEvents = 'none';
+    }
 
     Updates.enqueue(() => {
       if (this.content.offsetWidth < this.content.scrollWidth) {

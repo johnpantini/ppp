@@ -21,6 +21,11 @@ import {
   priceCurrencySymbol
 } from '../../lib/intl.js';
 import { normalize } from '../../design/styles.js';
+import { validate } from '../../lib/ppp-errors.js';
+import '../button.js';
+import '../checkbox.js';
+import '../query-select.js';
+import '../text-field.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -75,6 +80,13 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   async connectedCallback() {
     super.connectedCallback();
+
+    if (!this.document.timelineTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер ленты операций.',
+        keep: true
+      });
+    }
 
     try {
       this.timelineTrader = await ppp.getOrCreateTrader(
@@ -366,7 +378,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     await validate(this.container.timelineTraderId);
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         timelineTraderId: this.container.timelineTraderId.value,
@@ -388,52 +400,55 @@ export async function widgetDefinition() {
       template: timelineWidgetTemplate,
       styles: timelineWidgetStyles
     }).define(),
-    defaultHeight: 375,
-    defaultWidth: 280,
-    minHeight: 120,
     minWidth: 140,
+    minHeight: 120,
+    defaultWidth: 280,
+    defaultHeight: 375,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер ленты операций</h5>
-          <p>Трейдер, который будет источником ленты операций.</p>
+          <p class="description">
+            Трейдер, который будет источником ленты операций.
+          </p>
         </div>
-        <ppp-collection-select
-          ${ref('timelineTraderId')}
-          value="${(x) => x.document.timelineTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.timelineTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_TIMELINE%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.timelineTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('timelineTraderId')}
+            value="${(x) => x.document.timelineTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.timelineTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_TIMELINE%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.timelineTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

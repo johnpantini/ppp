@@ -161,7 +161,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?disabled="${() => true || !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'services'}"
               >
                 <span>Список сервисов</span>
@@ -175,7 +175,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?disabled="${() => true || !ppp.keyVault.ok()}"
                 ?active="${(x) =>
                   x.page === 'service' || x.page.startsWith('service-')}"
               >
@@ -281,7 +281,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?disabled="${() => true || !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('endpoint')}"
               >
                 <span>Конечные точки</span>
@@ -295,7 +295,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?disabled="${() => true || !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('server')}"
               >
                 <span>Серверы</span>
@@ -607,6 +607,11 @@ export class App extends PPPElement {
 
       pageElement.mountPointModal = this.mountPointModal;
       pageElement.setAttribute('disable-auto-read', '');
+
+      if (options.documentId) {
+        pageElement.setAttribute('document-id', options.documentId);
+      }
+
       pageElement.setAttribute('href', page);
       mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
 
@@ -620,12 +625,15 @@ export class App extends PPPElement {
       this.mountPointModal.removeAttribute('hidden');
 
       const result = mountPoint.appendChild(pageElement);
+
       const header = pageElement.shadowRoot.querySelector('ppp-page-header');
 
       if (header) {
         header.style.display = 'none';
 
-        this.mountPointTitle.textContent = header.textContent;
+        if (options.adoptHeader) {
+          this.mountPointTitle.textContent = header.textContent;
+        }
       }
 
       return result;

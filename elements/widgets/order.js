@@ -28,7 +28,7 @@ import {
   getInstrumentQuantityPrecision
 } from '../../lib/intl.js';
 import { ellipsis, normalize, spacing } from '../../design/styles.js';
-import { decrement, increment } from '../../static/svg/sprite.js';
+import { decrement, increment, plus } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteBlack,
@@ -46,6 +46,11 @@ import {
   positive,
   negative
 } from '../../design/design-tokens.js';
+import { validate } from '../../lib/ppp-errors.js';
+import '../button.js';
+import '../checkbox.js';
+import '../query-select.js';
+import '../text-field.js';
 
 const decSeparator = decimalSeparator();
 
@@ -617,6 +622,20 @@ export class OrderWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    if (!this.document.ordersTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер для выставления заявок.',
+        keep: true
+      });
+    }
+
+    if (!this.document.level1Trader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер данных L1.',
+        keep: true
+      });
+    }
+
     try {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
@@ -787,7 +806,7 @@ export class OrderWidget extends WidgetWithInstrument {
     }
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
@@ -1305,218 +1324,183 @@ export async function widgetDefinition() {
       template: orderWidgetTemplate,
       styles: orderWidgetStyles
     }).define(),
-    defaultHeight: 375,
-    defaultWidth: 280,
-    minHeight: 370,
     minWidth: 250,
+    minHeight: 370,
+    defaultWidth: 280,
+    defaultHeight: 375,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер лимитных и рыночных заявок</h5>
-          <p>
+          <p class="description">
             Трейдер, который будет выставлять лимитные и рыночные заявки, а
             также фильтровать инструменты в поиске.
           </p>
         </div>
-        <ppp-collection-select
-          ${ref('ordersTraderId')}
-          value="${(x) => x.document.ordersTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.ordersTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: {
-                        $all: [
-                          `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
-                          `[%#(await import('./const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
-                        ]
-                      }
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер позиций</h5>
-          <p>Трейдер, ответственный за отображение средней цены и размера
-            позиции в виджете.</p>
-        </div>
-        <ppp-collection-select
-          ${ref('positionTraderId')}
-          value="${(x) => x.document.positionTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.positionTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.positionTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер L1</h5>
-          <p>Трейдер, выступающий источником L1-данных виджета.</p>
-        </div>
-        <ppp-collection-select
-          ${ref('level1TraderId')}
-          value="${(x) => x.document.level1TraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.level1Trader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.level1TraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Дополнительный трейдер L1</h5>
-          <p>Трейдер, выступающий дополнительным источником L1-данных
-            виджета.</p>
-        </div>
-        <ppp-collection-select
-          ${ref('extraLevel1TraderId')}
-          placeholder="Опционально, нажмите для выбора"
-          value="${(x) => x.document.extraLevel1TraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.extraLevel1TraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Интеграция с Pusher</h5>
-          <p>Для управления виджетом из внешних систем.</p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-collection-select
-            ${ref('pusherApiId')}
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.pusherApiId}"
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('ordersTraderId')}
+            value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"
-            :preloaded="${(x) => x.document.pusherApi ?? ''}"
+            :preloaded="${(x) => x.document.ordersTrader ?? ''}"
             :query="${() => {
               return (context) => {
                 return context.services
                   .get('mongodb-atlas')
                   .db('ppp')
-                  .collection('apis')
+                  .collection('traders')
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('./const.js')).APIS.PUSHER%]`
+                        caps: {
+                          $all: [
+                            `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
+                            `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
+                          ]
+                        }
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер позиций</h5>
+          <p class="description">
+            Трейдер, ответственный за отображение средней цены и размера позиции
+            в виджете.
+          </p>
+        </div>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('positionTraderId')}
+            value="${(x) => x.document.positionTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.positionTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.positionTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер L1</h5>
+          <p class="description">
+            Трейдер, выступающий источником L1-данных виджета.
+          </p>
+        </div>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('level1TraderId')}
+            value="${(x) => x.document.level1TraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.level1Trader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.level1TraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Дополнительный трейдер L1</h5>
+          <p class="description">
+            Трейдер, выступающий дополнительным источником L1-данных виджета.
+          </p>
+        </div>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('extraLevel1TraderId')}
+            placeholder="Опционально, нажмите для выбора"
+            value="${(x) => x.document.extraLevel1TraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
                       },
                       {
                         $or: [
                           { removed: { $ne: true } },
                           {
-                            _id: `[%#this.document.pusherApiId ?? ''%]`
+                            _id: `[%#this.document.extraLevel1TraderId ?? ''%]`
                           }
                         ]
                       }
@@ -1525,22 +1509,72 @@ export async function widgetDefinition() {
                   .sort({ updatedAt: -1 });
               };
             }}"
-            :transform="${() => ppp.decryptDocumentsTransformation(['key'])}"
-          ></ppp-collection-select>
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
           <ppp-button
-            class="margin-top"
-            @click="${() => window.open('?page=api-pusher', '_blank').focus()}"
-            appearance="primary"
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
           >
-            Добавить API Pusher
+            +
           </ppp-button>
         </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
+          <h5>Интеграция с Pusher</h5>
+          <p class="description">Для управления виджетом из внешних систем.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <div class="control-line">
+            <ppp-query-select
+              ${ref('pusherApiId')}
+              placeholder="Опционально, нажмите для выбора"
+              value="${(x) => x.document.pusherApiId}"
+              :context="${(x) => x}"
+              :preloaded="${(x) => x.document.pusherApi ?? ''}"
+              :query="${() => {
+                return (context) => {
+                  return context.services
+                    .get('mongodb-atlas')
+                    .db('ppp')
+                    .collection('apis')
+                    .find({
+                      $and: [
+                        {
+                          type: `[%#(await import('../../lib/const.js')).APIS.PUSHER%]`
+                        },
+                        {
+                          $or: [
+                            { removed: { $ne: true } },
+                            {
+                              _id: `[%#this.document.pusherApiId ?? ''%]`
+                            }
+                          ]
+                        }
+                      ]
+                    })
+                    .sort({ updatedAt: -1 });
+                };
+              }}"
+              :transform="${() => ppp.decryptDocumentsTransformation(['key'])}"
+            ></ppp-query-select>
+            <ppp-button
+              appearance="default"
+              @click="${() =>
+                window.open('?page=api-pusher', '_blank').focus()}"
+            >
+              +
+            </ppp-button>
+          </div>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
           <h5>Горячая клавиша для покупки</h5>
-          <p>Покупка сработает, если фокус ввода будет находиться в поле цены
-            или количества. Нажмите Esc, чтобы отменить эту функцию.</p>
+          <p class="description">
+            Покупка сработает, если фокус ввода будет находиться в поле цены или
+            количества. Нажмите Esc, чтобы отменить эту функцию.
+          </p>
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field
@@ -1571,8 +1605,10 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Горячая клавиша для продажи</h5>
-          <p>Продажа сработает, если фокус ввода будет находиться в поле цены
-            или количества. Нажмите Esc, чтобы отменить эту функцию.</p>
+          <p class="description">
+            Продажа сработает, если фокус ввода будет находиться в поле цены или
+            количества. Нажмите Esc, чтобы отменить эту функцию.
+          </p>
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field
@@ -1603,9 +1639,11 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Кнопки быстрого объёма</h5>
-          <p>Перечислите значения через точку с запятой. Нажатие на кнопку
+          <p class="description">
+            Перечислите значения через точку с запятой. Нажатие на кнопку
             подставляет номинал в поле количества. Поставьте ~ перед значением,
-            чтобы указать объём в единицах валюты.</p>
+            чтобы указать объём в единицах валюты.
+          </p>
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field
@@ -1634,7 +1672,7 @@ export async function widgetDefinition() {
           ${ref('changePriceQuantityViaMouseWheel')}
         >
           Изменять цену и количество колесом мыши
-          <ppp-checkbox>
+        </ppp-checkbox>
       </div>
     `
   };

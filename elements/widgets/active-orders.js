@@ -20,6 +20,9 @@ import { ellipsis, normalize } from '../../design/styles.js';
 import { cancelOrders, trash } from '../../static/svg/sprite.js';
 import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
 import { fontSizeWidget } from '../../design/design-tokens.js';
+import '../button.js';
+import '../query-select.js';
+import '../text-field.js';
 
 export const activeOrdersWidgetTemplate = html`
   <template>
@@ -466,6 +469,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    if (!this.document.ordersTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер лимитных заявок.',
+        keep: true
+      });
+    }
+
     try {
       this.empty = true;
       this.orders = new Map();
@@ -619,7 +629,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     await validate(this.container.ordersTraderId);
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value
@@ -648,46 +658,47 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер лимитных заявок</h5>
-          <p>
+          <p class="description">
             Трейдер, который будет источником списка активных лимитных заявок.
           </p>
         </div>
-        <ppp-collection-select
-          ${ref('ordersTraderId')}
-          value="${(x) => x.document.ordersTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.ordersTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('ordersTraderId')}
+            value="${(x) => x.document.ordersTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
     `
   };

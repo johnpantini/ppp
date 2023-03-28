@@ -18,8 +18,6 @@ import {
   scrollbars,
   typography
 } from '../../design/styles.js';
-import '../button.js';
-import '../top-loader.js';
 import {
   paletteGrayDark4,
   paletteGrayLight2,
@@ -27,7 +25,8 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 import { dragAndDrop } from '../../static/svg/sprite.js';
-import '../modal.js';
+import '../button.js';
+import '../top-loader.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">

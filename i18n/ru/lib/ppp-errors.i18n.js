@@ -5,7 +5,7 @@ export default function (i18n) {
       E_DOCUMENT_CONFLICT: 'Документ не может быть записан',
       E_DOCUMENT_NOT_FOUND: 'Документ не найден',
       E_FETCH_FAILED: 'Ошибка сетевого запроса',
-      E_BAD_FORM: 'Форма заполнена некорректно или не полностью',
+      E_BAD_FORM: 'Форма заполнена с ошибками или не полностью',
       E_UNKNOWN: 'Неизвестная ошибка'
     },
     $exceptions: {

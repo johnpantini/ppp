@@ -16,6 +16,11 @@ import {
   priceCurrencySymbol
 } from '../../lib/intl.js';
 import { normalize } from '../../design/styles.js';
+import { validate } from '../../lib/ppp-errors.js';
+import '../button.js';
+import '../checkbox.js';
+import '../query-select.js';
+import '../text-field.js';
 
 export const portfolioWidgetTemplate = html`
   <template>
@@ -76,6 +81,13 @@ export class PortfolioWidget extends WidgetWithInstrument {
 
   async connectedCallback() {
     super.connectedCallback();
+
+    if (!this.document.portfolioTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер портфеля.',
+        keep: true
+      });
+    }
 
     try {
       this.balances = new Map();
@@ -200,7 +212,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
     await validate(this.container.portfolioTraderId);
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         portfolioTraderId: this.container.portfolioTraderId.value,
@@ -221,63 +233,66 @@ export async function widgetDefinition() {
       template: portfolioWidgetTemplate,
       styles: portfolioWidgetStyles
     }).define(),
+    minWidth: 275,
+    minHeight: 120,
     defaultWidth: 620,
     defaultHeight: 375,
-    minHeight: 120,
-    minWidth: 275,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер портфеля</h5>
-          <p>Трейдер, который будет источником портфельных данных.</p>
+          <p class="description">
+            Трейдер, который будет источником портфельных данных.
+          </p>
         </div>
-        <ppp-collection-select
-          ${ref('portfolioTraderId')}
-          value="${(x) => x.document.portfolioTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.portfolioTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <${'ppp-button'}
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('portfolioTraderId')}
+            value="${(x) => x.document.portfolioTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.portfolioTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Параметры отображения</h5>
         </div>
-        <${'ppp-checkbox'}
+        <ppp-checkbox
           ?checked="${(x) => x.document.hideBalances}"
           ${ref('hideBalances')}
         >
           Скрывать валютные балансы
-        </${'ppp-checkbox'}>
+        </ppp-checkbox>
       </div>
     `
   };

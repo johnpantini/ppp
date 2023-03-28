@@ -336,8 +336,10 @@ class Page extends PPPElement {
         '<input type="submit" hidden>'
       );
 
-      this.form.onsubmit = () => {
-        void this.submitDocument();
+      this.form.onsubmit = (e) => {
+        if (this.canSubmit(e)) {
+          void this.submitDocument();
+        }
 
         return false;
       };
@@ -384,7 +386,7 @@ class Page extends PPPElement {
   }
 
   async documentId() {
-    return (
+     return (
       this.getAttribute('document-id') ??
       (await this.getDocumentId?.()) ??
       ppp.app.params()?.document
@@ -803,6 +805,10 @@ class Page extends PPPElement {
         return this.#applyDocumentUpdates({ _id: upsertedId }, fragments);
       }
     }
+  }
+
+  canSubmit() {
+    return true;
   }
 
   async submitDocument(options = {}) {

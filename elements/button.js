@@ -15,7 +15,7 @@ import {
   endSlotTemplate
 } from '../vendor/fast-patterns.js';
 import { applyMixins, display } from '../vendor/fast-utilities.js';
-import { normalize } from '../design/styles.js';
+import { ellipsis, normalize } from '../design/styles.js'
 import {
   bodyFont,
   darken,
@@ -126,6 +126,7 @@ export const buttonStyles = css`
     z-index: 0;
     padding: 0 15px;
     gap: ${spacing2};
+    ${ellipsis()};
   }
 
   :host(.xsmall) .control {

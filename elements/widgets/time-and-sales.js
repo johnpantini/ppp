@@ -37,6 +37,10 @@ import {
   themeConditional,
   toColorComponents
 } from '../../design/design-tokens.js';
+import { validate } from '../../lib/ppp-errors.js';
+import '../button.js';
+import '../query-select.js';
+import '../text-field.js';
 
 export const timeAndSalesWidgetTemplate = html`
   <template>
@@ -260,6 +264,13 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    if (!this.document.tradesTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер ленты.',
+        keep: true
+      });
+    }
+
     try {
       this.tradesTrader = await ppp.getOrCreateTrader(
         this.document.tradesTrader
@@ -395,7 +406,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         depth: Math.abs(this.container.depth.value),
@@ -419,57 +430,60 @@ export async function widgetDefinition() {
       template: timeAndSalesWidgetTemplate,
       styles: timeAndSalesWidgetStyles
     }).define(),
-    defaultHeight: 375,
-    defaultWidth: 280,
-    minHeight: 120,
     minWidth: 140,
+    minHeight: 120,
+    defaultWidth: 280,
+    defaultHeight: 375,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер ленты</h5>
-          <p>Трейдер, который будет источником ленты сделок.</p>
+          <p class="description">
+            Трейдер, который будет источником ленты сделок.
+          </p>
         </div>
-        <ppp-collection-select
-          ${ref('tradesTraderId')}
-          value="${(x) => x.document.tradesTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.tradesTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.tradesTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('tradesTraderId')}
+            value="${(x) => x.document.tradesTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.tradesTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.tradesTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Глубина истории ленты</h5>
-          <p>
+          <p class="description">
             Количество записей, запрашиваемое из истории сделок текущего дня при
             смене торгового инструмента в виджете.
           </p>
@@ -486,7 +500,7 @@ export async function widgetDefinition() {
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Фильтр объёма</h5>
-          <p>
+          <p class="description">
             Сделки с объёмом меньше указанного не будут отображены в ленте.
             Чтобы всегда отображать все сделки, введите 0 или не заполняйте
             поле.

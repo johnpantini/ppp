@@ -16,7 +16,6 @@ import {
   when,
   Updates
 } from '../vendor/fast-element.min.js';
-import { debounce } from '../lib/ppp-decorators.js';
 import {
   display,
   keyArrowDown,
@@ -174,6 +173,10 @@ export const widget = () => css`
     user-select: none;
   }
 
+  :host([preview]) .widget-root {
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
   :host([dragging]) .widget-root,
   :host([resizing]) .widget-root {
     border: 1px solid ${paletteBlueLight1};
@@ -191,6 +194,10 @@ export const widget = () => css`
     background: ${themeConditional(darken(paletteGrayLight3, 5), paletteBlack)};
     align-items: center;
     justify-content: space-between;
+  }
+
+  :host([preview]) .widget-header {
+    cursor: default;
   }
 
   .widget-header::after {
@@ -424,15 +431,11 @@ export class Widget extends PPPElement {
 
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
-
-      if (this.container.savedInstrument) {
-        this.instrument = this.container.savedInstrument;
-      }
     }
   }
 
   catchException(e) {
-    const title = this.document.name ?? 'Виджет';
+    const title = this.document.name;
 
     if (e instanceof NoInstrumentsError) {
       return this.notificationsArea.note({
@@ -531,6 +534,12 @@ export class WidgetWithInstrument extends Widget {
   isolated;
 
   selectInstrument(instrument, options = {}) {
+    if (this.preview && this.container.savedInstrument) {
+      this.instrument = this.container.savedInstrument;
+
+      return this.instrument;
+    }
+
     const adoptedInstrument = this.instrumentTrader.adoptInstrument(instrument);
 
     if (options.isolate) {
@@ -1706,12 +1715,12 @@ export class WidgetSearchControl extends PPPOffClickElement {
     if (this.widget.preview) {
       if (newValue) {
         this.widget.style.position = 'absolute';
-        this.widget.parentNode.style.height = `${
-          parseInt(this.widget.style.height) + 8
-        }px`;
+        this.widget.container.widgetArea.style.height = `${parseInt(
+          this.widget.style.height
+        )}px`;
       } else {
         this.widget.style.position = 'relative';
-        this.widget.parentNode.style.height = null;
+        this.widget.container.widgetArea.style.height = null;
       }
     }
   }
@@ -1894,8 +1903,8 @@ export class WidgetResizeControls extends PPPElement {
     super.connectedCallback();
 
     this.widget = this.getRootNode().host;
-    this.snapDistance = this.widget.container.snapDistance;
-    this.snapMargin = this.widget.container.snapMargin;
+    this.snapDistance = this.widget.container.snapDistance ?? 5;
+    this.snapMargin = this.widget.container.snapMargin ?? 1;
   }
 
   onPointerDown({ node }) {
@@ -1963,87 +1972,88 @@ export class WidgetResizeControls extends PPPElement {
       }
     }
 
-    this.widget.container.rectangles.forEach((rect) => {
-      const hasVerticalIntersection =
-        (newTop >= rect.top - this.snapDistance &&
-          newTop <= rect.bottom + this.snapDistance) ||
-        (newBottom >= rect.top - this.snapDistance &&
-          newBottom <= rect.bottom + this.snapDistance) ||
-        (newTop <= rect.top - this.snapDistance &&
-          newBottom >= rect.bottom + this.snapDistance);
+    !this.widget.preview &&
+      this.widget.container.rectangles.forEach((rect) => {
+        const hasVerticalIntersection =
+          (newTop >= rect.top - this.snapDistance &&
+            newTop <= rect.bottom + this.snapDistance) ||
+          (newBottom >= rect.top - this.snapDistance &&
+            newBottom <= rect.bottom + this.snapDistance) ||
+          (newTop <= rect.top - this.snapDistance &&
+            newBottom >= rect.bottom + this.snapDistance);
 
-      if (hasVerticalIntersection) {
-        // 1. Vertical, this.left -> rect.right
-        const deltaLeftRight = Math.abs(
-          newLeft - (rect.x - this.x + rect.width)
-        );
+        if (hasVerticalIntersection) {
+          // 1. Vertical, this.left -> rect.right
+          const deltaLeftRight = Math.abs(
+            newLeft - (rect.x - this.x + rect.width)
+          );
 
-        if (deltaLeftRight <= this.snapDistance) {
-          newLeft = rect.x - this.x + rect.width + this.snapMargin;
+          if (deltaLeftRight <= this.snapDistance) {
+            newLeft = rect.x - this.x + rect.width + this.snapMargin;
+          }
+
+          // 2. Vertical, this.left -> rect.left
+          const deltaLeftLeft = Math.abs(newLeft - (rect.x - this.x));
+
+          if (deltaLeftLeft <= this.snapDistance) {
+            newLeft = rect.x - this.x;
+          }
+
+          // 3. Vertical, this.right -> rect.right
+          const deltaRightRight = Math.abs(
+            newRight - (rect.x - this.x + rect.width)
+          );
+
+          if (deltaRightRight <= this.snapDistance) {
+            newRight = rect.right - this.x;
+          }
+
+          // 4. Vertical, this.right -> rect.left
+          const deltaRightLeft = Math.abs(newRight - (rect.x - this.x));
+
+          if (deltaRightLeft <= this.snapDistance) {
+            newRight = rect.x - this.x - this.snapMargin;
+          }
         }
 
-        // 2. Vertical, this.left -> rect.left
-        const deltaLeftLeft = Math.abs(newLeft - (rect.x - this.x));
+        const hasHorizontalIntersection =
+          (newLeft >= rect.left - this.x - this.snapDistance &&
+            newLeft <= rect.right - this.x + this.snapDistance) ||
+          (newRight >= rect.left - this.x - this.snapDistance &&
+            newRight <= rect.right - this.x + this.snapDistance) ||
+          (newLeft <= rect.left - this.x - this.snapDistance &&
+            newRight >= rect.right - this.x + this.snapDistance);
 
-        if (deltaLeftLeft <= this.snapDistance) {
-          newLeft = rect.x - this.x;
+        if (hasHorizontalIntersection) {
+          // 1. Horizontal, this.top -> rect.bottom
+          const deltaTopBottom = Math.abs(newTop - rect.bottom);
+
+          if (deltaTopBottom <= this.snapDistance) {
+            newTop = rect.bottom + this.snapMargin;
+          }
+
+          // 2. Horizontal, this.top -> rect.top
+          const deltaTopTop = Math.abs(newTop - rect.y);
+
+          if (deltaTopTop <= this.snapDistance) {
+            newTop = rect.y;
+          }
+
+          // 3. Horizontal, this.bottom -> rect.bottom
+          const deltaBottomBottom = Math.abs(rect.bottom - newBottom);
+
+          if (deltaBottomBottom <= this.snapDistance) {
+            newBottom = rect.bottom;
+          }
+
+          // 4. Horizontal, this.bottom -> rect.top
+          const deltaBottomTop = Math.abs(rect.top - newBottom);
+
+          if (deltaBottomTop <= this.snapDistance) {
+            newBottom = rect.top - this.snapMargin;
+          }
         }
-
-        // 3. Vertical, this.right -> rect.right
-        const deltaRightRight = Math.abs(
-          newRight - (rect.x - this.x + rect.width)
-        );
-
-        if (deltaRightRight <= this.snapDistance) {
-          newRight = rect.right - this.x;
-        }
-
-        // 4. Vertical, this.right -> rect.left
-        const deltaRightLeft = Math.abs(newRight - (rect.x - this.x));
-
-        if (deltaRightLeft <= this.snapDistance) {
-          newRight = rect.x - this.x - this.snapMargin;
-        }
-      }
-
-      const hasHorizontalIntersection =
-        (newLeft >= rect.left - this.x - this.snapDistance &&
-          newLeft <= rect.right - this.x + this.snapDistance) ||
-        (newRight >= rect.left - this.x - this.snapDistance &&
-          newRight <= rect.right - this.x + this.snapDistance) ||
-        (newLeft <= rect.left - this.x - this.snapDistance &&
-          newRight >= rect.right - this.x + this.snapDistance);
-
-      if (hasHorizontalIntersection) {
-        // 1. Horizontal, this.top -> rect.bottom
-        const deltaTopBottom = Math.abs(newTop - rect.bottom);
-
-        if (deltaTopBottom <= this.snapDistance) {
-          newTop = rect.bottom + this.snapMargin;
-        }
-
-        // 2. Horizontal, this.top -> rect.top
-        const deltaTopTop = Math.abs(newTop - rect.y);
-
-        if (deltaTopTop <= this.snapDistance) {
-          newTop = rect.y;
-        }
-
-        // 3. Horizontal, this.bottom -> rect.bottom
-        const deltaBottomBottom = Math.abs(rect.bottom - newBottom);
-
-        if (deltaBottomBottom <= this.snapDistance) {
-          newBottom = rect.bottom;
-        }
-
-        // 4. Horizontal, this.bottom -> rect.top
-        const deltaBottomTop = Math.abs(rect.top - newBottom);
-
-        if (deltaBottomTop <= this.snapDistance) {
-          newBottom = rect.top - this.snapMargin;
-        }
-      }
-    });
+      });
 
     if (newLeft < 0) newLeft = 0;
 
@@ -2056,14 +2066,16 @@ export class WidgetResizeControls extends PPPElement {
   }
 
   onPointerUp() {
-    void this.widget.updateDocumentFragment({
-      $set: {
-        'widgets.$.x': parseInt(this.widget.style.left),
-        'widgets.$.y': parseInt(this.widget.style.top),
-        'widgets.$.width': parseInt(this.widget.style.width),
-        'widgets.$.height': parseInt(this.widget.style.height)
-      }
-    });
+    if (!this.widget.preview) {
+      void this.widget.updateDocumentFragment({
+        $set: {
+          'widgets.$.x': parseInt(this.widget.style.left),
+          'widgets.$.y': parseInt(this.widget.style.top),
+          'widgets.$.width': parseInt(this.widget.style.width),
+          'widgets.$.height': parseInt(this.widget.style.height)
+        }
+      });
+    }
   }
 }
 
@@ -2256,7 +2268,7 @@ export class WidgetNotificationsArea extends PPPElement {
       page.dictionary.value = trader.getDictionary();
   }
 
-  #appearance({ status, title, text, keep, timeout }) {
+  #appearance({ status, title = 'Виджет', text, keep, timeout }) {
     this.status = status;
     this.title = title;
     this.text = text;
@@ -2316,8 +2328,11 @@ export class WidgetHeaderButtons extends PPPElement {
     this.widget = this.getRootNode().host;
   }
 
-  showWidgetSettings() {
+  async showWidgetSettings() {
     if (!this.widget.preview) {
+      window
+        .open(`?page=widget&document=${this.widget.document._id}`, '_blank')
+        .focus();
     }
   }
 

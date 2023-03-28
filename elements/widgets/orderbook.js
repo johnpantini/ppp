@@ -39,6 +39,12 @@ import {
   themeConditional,
   toColorComponents
 } from '../../design/design-tokens.js';
+import { validate } from '../../lib/ppp-errors.js';
+import '../button.js';
+import '../checkbox.js';
+import '../query-select.js';
+import '../radio-group.js';
+import '../text-field.js';
 
 export const orderbookWidgetTemplate = html`
   <template>
@@ -410,6 +416,13 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
   async connectedCallback() {
     super.connectedCallback();
+
+    if (!this.document.bookTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер книги заявок.',
+        keep: true
+      });
+    }
 
     try {
       this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
@@ -811,7 +824,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
     });
   }
 
-  async update() {
+  async submit() {
     return {
       $set: {
         bookTraderId: this.container.bookTraderId.value,
@@ -836,98 +849,102 @@ export async function widgetDefinition() {
       template: orderbookWidgetTemplate,
       styles: orderbookWidgetStyles
     }).define(),
-    defaultHeight: 375,
-    defaultWidth: 280,
-    minHeight: 120,
     minWidth: 140,
+    minHeight: 120,
+    defaultWidth: 280,
+    defaultHeight: 375,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер книги заявок</h5>
-          <p>Трейдер, который будет источником книги заявок.</p>
+          <p class="description">
+            Трейдер, который будет источником книги заявок.
+          </p>
         </div>
-        <ppp-collection-select
-          ${ref('bookTraderId')}
-          value="${(x) => x.document.bookTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.bookTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.bookTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('bookTraderId')}
+            value="${(x) => x.document.bookTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.bookTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.bookTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Трейдер активных заявок</h5>
-          <p>
+          <p class="description">
             Трейдер, который будет отображать собственные лимитные заявки
             (количество) на ценовых уровнях.
           </p>
         </div>
-        <ppp-collection-select
-          ${ref('ordersTraderId')}
-          placeholder="Опционально, нажмите для выбора"
-          value="${(x) => x.document.ordersTraderId}"
-          :context="${(x) => x}"
-          :preloaded="${(x) => x.document.ordersTrader ?? ''}"
-          :query="${() => {
-            return (context) => {
-              return context.services
-                .get('mongodb-atlas')
-                .db('ppp')
-                .collection('traders')
-                .find({
-                  $and: [
-                    {
-                      caps: `[%#(await import('./const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
-                    },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.ordersTraderId ?? ''%]` }
-                      ]
-                    }
-                  ]
-                })
-                .sort({ updatedAt: -1 });
-            };
-          }}"
-          :transform="${() => ppp.decryptDocumentsTransformation()}"
-        ></ppp-collection-select>
-        <ppp-button
-          class="margin-top"
-          @click="${() => window.open('?page=trader', '_blank').focus()}"
-          appearance="primary"
-        >
-          Создать нового трейдера
-        </ppp-button>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('ordersTraderId')}
+            placeholder="Опционально, нажмите для выбора"
+            value="${(x) => x.document.ordersTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
@@ -940,19 +957,13 @@ export async function widgetDefinition() {
             ${ref('displayMode')}
           >
             <ppp-radio value="compact">Компактный</ppp-radio>
-            <ppp-radio disabled value="classic-1"
-              >Классический, 1 колонка
-            </ppp-radio>
-            <ppp-radio disabled value="classic-2"
-              >Классический, 2 колонки
-            </ppp-radio>
           </ppp-radio-group>
         </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
           <h5>Глубина книги заявок</h5>
-          <p>
+          <p class="description">
             Количество строк <span class="positive">bid</span> и
             <span class="negative">ask</span> для отображения.
           </p>
