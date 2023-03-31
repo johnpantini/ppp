@@ -1,11 +1,7 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
-import {
-  INSTRUMENT_DICTIONARY,
-  TRADER_CAPS,
-  TRADERS
-} from '../../lib/const.js';
+import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
@@ -87,8 +83,10 @@ export const traderAlpacaV2PlusTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>URL для подключения к потоку рыночных данных</h5>
-          <p class="description">Ссылка для установки WebSocket-соединения.</p>
+          <h5>URL для подключения к общему потоку рыночных данных</h5>
+          <p class="description">
+            Ссылка для передачи данных книги заявок и ленты всех сделок.
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -100,21 +98,19 @@ export const traderAlpacaV2PlusTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Словарь инструментов</h5>
-          <p class="description">Будет использован для поиска в виджетах.</p>
+          <h5>URL для подключения к потоку ленты сделок</h5>
+          <p class="description">
+            Введите адрес, если лента всех сделок передаётся по отдельному
+            каналу.
+          </p>
         </div>
         <div class="input-group">
-          <ppp-radio-group
-            orientation="vertical"
-            value="${(x) =>
-              x.document.dictionary ??
-              INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
-            ${ref('dictionary')}
-          >
-            <ppp-radio value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
-              >UTEX Margin (акции)
-            </ppp-radio>
-          </ppp-radio-group>
+          <ppp-text-field
+            optional
+            placeholder="wss://example.com"
+            value="${(x) => x.document.wsUrlForTimeAndSales}"
+            ${ref('wsUrlForTimeAndSales')}
+          ></ppp-text-field>
         </div>
       </section>
       <section>
@@ -228,6 +224,56 @@ export class TraderAlpacaV2PlusPage extends Page {
         raiseException: true
       });
     }
+
+    if (this.wsUrlForTimeAndSales.value.trim()) {
+      try {
+        new URL(this.wsUrlForTimeAndSales.value);
+      } catch (e) {
+        invalidate(this.wsUrlForTimeAndSales, {
+          errorMessage: 'Неверный или неполный URL',
+          raiseException: true
+        });
+      }
+
+      await validate(this.wsUrlForTimeAndSales, {
+        hook: async (value) => {
+          const url = new URL(value);
+
+          return url.protocol === 'wss:' || url.protocol === 'ws:';
+        },
+        errorMessage: 'Недопустимый протокол URL'
+      });
+
+      try {
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(reject, 5000);
+          const ws = new WebSocket(this.wsUrlForTimeAndSales.value);
+
+          ws.onmessage = ({ data }) => {
+            const payload = JSON.parse(data);
+
+            if (Array.isArray(payload) && payload[0]?.msg === 'connected') {
+              ws.close();
+              clearTimeout(timer);
+              resolve();
+            } else {
+              ws.close();
+              clearTimeout(timer);
+              reject();
+            }
+          };
+          ws.onerror = () => {
+            clearTimeout(timer);
+            reject();
+          };
+        });
+      } catch (e) {
+        invalidate(this.wsUrlForTimeAndSales, {
+          errorMessage: 'Не удалось соединиться',
+          raiseException: true
+        });
+      }
+    }
   }
 
   async read() {
@@ -272,7 +318,7 @@ export class TraderAlpacaV2PlusPage extends Page {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
         wsUrl: this.wsUrl.value.trim(),
-        dictionary: this.dictionary.value,
+        wsUrlForTimeAndSales: this.wsUrlForTimeAndSales.value.trim(),
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,

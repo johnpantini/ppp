@@ -259,11 +259,23 @@ export const snippetStyles = css`
   }
 
   .control::selection {
-    background: rgba(${toColorComponents(paletteGrayBase)}, 0.1);
+    background: rgba(
+      ${themeConditional(
+        toColorComponents(paletteGrayBase),
+        toColorComponents(paletteGrayLight3)
+      )},
+      0.1
+    );
   }
 
   .control::-moz-selection {
-    background: rgba(${toColorComponents(paletteGrayBase)}, 0.1);
+    background: rgba(
+      ${themeConditional(
+        toColorComponents(paletteGrayBase),
+        toColorComponents(paletteGrayLight3)
+      )},
+      0.1
+    );
   }
 
   .pre {

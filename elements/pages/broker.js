@@ -109,6 +109,26 @@ export const brokerPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
+            alt="UTEX"
+            style="height: 42px"
+            src="${() => ppp.brandSvg('psina')}"
+          />
+          <span slot="title">Psina</span>
+          <span slot="description"> Рыночные данные проекта Psina. </span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.PSINA}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
             alt="Binance"
             style="height: 32px"
             src="${() => ppp.brandSvg('binance')}"
