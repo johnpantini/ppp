@@ -708,13 +708,13 @@ export class OrderbookWidget extends WidgetWithInstrument {
         const ask = orderbook.asks[i] ?? null;
 
         if (bid) {
-          bid.pool = this.normalizePool(bid.pool);
+          bid.pool = this.normalizePool(bid.pool, 'bid');
 
           this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
         }
 
         if (ask) {
-          ask.pool = this.normalizePool(ask.pool);
+          ask.pool = this.normalizePool(ask.pool, 'ask');
 
           this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
         }
@@ -729,8 +729,12 @@ export class OrderbookWidget extends WidgetWithInstrument {
     } else this.spreadString = '—';
   }
 
-  normalizePool(pool) {
-    if (!pool || !this.document.useMicsForPools) return pool;
+  normalizePool(pool, type) {
+    if (!pool || !this.document.useMicsForPools) {
+      if (pool === 'LULD') return type === 'bid' ? 'LD' : 'LU';
+
+      return pool;
+    }
 
     const mic = {
       PA: 'ARCA',
@@ -738,6 +742,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       DX: 'EDGX',
       SPBX: 'SPBX',
       BT: 'BZX',
+      LULD: type === 'bid' ? 'LD' : 'LU',
       // M
       MW: 'CHX',
       // NYSE American (AMEX)

@@ -1,14 +1,18 @@
-import { BROKERS, TRADER_DATUM } from '../lib/const.js';
+import {
+  BROKERS,
+  EXCHANGE,
+  INSTRUMENT_DICTIONARY,
+  TRADER_DATUM
+} from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
+import { isDST } from '../lib/intl.js';
 import { Trader } from './common-trader.js';
-import { cyrillicToLatin } from '../lib/intl.js';
-import ppp from '../../ppp.js';
 
-// noinspection JSUnusedGlobalSymbols
 /**
  * @typedef {Object} AlpacaV2PlusTrader
+ * @extends Trader
  */
-
+// noinspection JSUnusedGlobalSymbols
 class AlpacaV2PlusTrader extends Trader {
   #pendingConnection;
 
@@ -95,7 +99,7 @@ class AlpacaV2PlusTrader extends Trader {
                 );
               } else if (payload.msg === 'authenticated') {
                 // 1. All trades
-                for (const [instrumentId, { instrument, refCount }] of this.refs
+                for (const [, { instrument, refCount }] of this.refs
                   .allTrades) {
                   if (refCount > 0) {
                     this.connection.send(
@@ -108,7 +112,7 @@ class AlpacaV2PlusTrader extends Trader {
                 }
 
                 // 2. Orderbook
-                for (const [instrumentId, { instrument, refCount }] of this.refs
+                for (const [, { instrument, refCount }] of this.refs
                   .orderbook) {
                   if (refCount > 0) {
                     this.connection.send(
@@ -122,9 +126,9 @@ class AlpacaV2PlusTrader extends Trader {
 
                 resolve(this.connection);
               } else if (payload.T === 't') {
-                return this.onTradeMessage({ data: payload });
+                this.onTradeMessage({ data: payload });
               } else if (payload.T === 'q') {
-                return this.onOrderbookMessage({ data: payload });
+                this.onOrderbookMessage({ data: payload });
               } else if (payload.T === 'error') {
                 console.error(payload);
 
@@ -139,14 +143,11 @@ class AlpacaV2PlusTrader extends Trader {
 
   async onTradeMessage({ data }) {
     if (data) {
-      const instrument = await this.findInstrumentInCache(data.S);
+      const instrument = this.instruments.get(data.S);
 
       if (instrument) {
         for (const [source, fields] of this.subs.allTrades) {
-          if (
-            source.instrument?.symbol &&
-            this.getSymbol(instrument) === this.getSymbol(source.instrument)
-          ) {
+          if (this.instrumentsAreEqual(instrument, source.instrument)) {
             for (const { field, datum } of fields) {
               switch (datum) {
                 case TRADER_DATUM.MARKET_PRINT:
@@ -176,14 +177,11 @@ class AlpacaV2PlusTrader extends Trader {
 
   async onOrderbookMessage({ data }) {
     if (data) {
-      const instrument = await this.findInstrumentInCache(data.S);
+      const instrument = this.instruments.get(data.S);
 
       if (instrument) {
         for (const [source, fields] of this.subs.orderbook) {
-          if (
-            source.instrument?.symbol &&
-            this.getSymbol(instrument) === this.getSymbol(source.instrument)
-          ) {
+          if (this.instrumentsAreEqual(instrument, source.instrument)) {
             const ref = this.refs.orderbook.get(source.instrument?._id);
 
             if (ref) {
@@ -197,21 +195,21 @@ class AlpacaV2PlusTrader extends Trader {
               const lastOrderbookMap = ref.lastOrderbookMap;
               const coeff = this.document.useLots ? 1 : 100;
 
-              lastOrderbookMap.bids.set(data.bx, {
+              lastOrderbookMap.bids.set(`${data.bx}|${data.bp}|${data.bs}`, {
                 price: data.bp,
                 volume: data.bs * coeff,
                 time: data.t,
                 condition: data.c?.join?.(' '),
-                timestamp: new Date(data.t).valueOf(),
+                timestamp: data.t ? new Date(data.t).valueOf() : null,
                 pool: this.alpacaExchangeToUTEXExchange(data.bx)
               });
 
-              lastOrderbookMap.asks.set(data.ax, {
+              lastOrderbookMap.asks.set(`${data.bx}|${data.ap}|${data.as}`, {
                 price: data.ap,
                 volume: data.as * coeff,
                 time: data.t,
                 condition: data.c?.join?.(' '),
-                timestamp: new Date(data.t).valueOf(),
+                timestamp: data.t ? new Date(data.t).valueOf() : null,
                 pool: this.alpacaExchangeToUTEXExchange(data.ax)
               });
 
@@ -227,7 +225,11 @@ class AlpacaV2PlusTrader extends Trader {
                 .filter((b) => {
                   if (this.document.broker.type === BROKERS.UTEX) {
                     // Fix for invalid NYSE pool data
-                    if ((nowHours >= 21 || nowHours < 11) && b.pool === 'N')
+                    if (
+                      (nowHours >= (isDST() ? 20 : 21) ||
+                        nowHours < (isDST() ? 10 : 11)) &&
+                      a.pool === 'N'
+                    )
                       return false;
                   }
 
@@ -241,7 +243,11 @@ class AlpacaV2PlusTrader extends Trader {
                 .filter((a) => {
                   if (this.document.broker.type === BROKERS.UTEX) {
                     // Fix for invalid NYSE pool data
-                    if ((nowHours >= 21 || nowHours < 11) && a.pool === 'N')
+                    if (
+                      (nowHours >= (isDST() ? 20 : 21) ||
+                        nowHours < (isDST() ? 10 : 11)) &&
+                      a.pool === 'N'
+                    )
                       return false;
                   }
 
@@ -275,7 +281,6 @@ class AlpacaV2PlusTrader extends Trader {
 
   async subscribeField({ source, field, datum }) {
     await this.#connectWebSocket();
-    await this.waitForInstrumentCache();
     await super.subscribeField({ source, field, datum });
   }
 
@@ -330,10 +335,7 @@ class AlpacaV2PlusTrader extends Trader {
     if (newValue?._id) {
       // Handle no real subscription case for orderbook.
       for (const [source, fields] of this.subs.orderbook) {
-        if (
-          source.instrument?.symbol &&
-          this.getSymbol(newValue) === this.getSymbol(source.instrument)
-        ) {
+        if (this.instrumentsAreEqual(newValue, source.instrument)) {
           for (const { field, datum } of fields) {
             switch (datum) {
               case TRADER_DATUM.ORDERBOOK:
@@ -347,6 +349,31 @@ class AlpacaV2PlusTrader extends Trader {
         }
       }
     }
+  }
+
+  getDictionary() {
+    if (this.document.broker.type === BROKERS.PSINA) {
+      return INSTRUMENT_DICTIONARY.PSINA_US_STOCKS;
+    }
+
+    return null;
+  }
+
+  getExchange() {
+    return EXCHANGE.US;
+  }
+
+  getBroker() {
+    return this.document.broker.type;
+  }
+
+  getInstrumentIconUrl(instrument) {
+    return instrument?.symbol
+      ? `static/instruments/stocks/us/${instrument.symbol.replace(
+          ' ',
+          '-'
+        )}.svg`
+      : super.getInstrumentIconUrl(instrument);
   }
 }
 

@@ -680,15 +680,6 @@ class AlorOpenAPIV2Trader extends Trader {
   async subscribeField({ source, field, datum }) {
     await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
-
-    if (
-      datum === TRADER_DATUM.POSITION ||
-      datum === TRADER_DATUM.CURRENT_ORDER ||
-      datum === TRADER_DATUM.TIMELINE_ITEM
-    ) {
-      await this.waitForInstrumentCache();
-    }
-
     await super.subscribeField({ source, field, datum });
 
     // Broadcast data for instrument-agnostic global datum subscriptions.

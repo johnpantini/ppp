@@ -5,7 +5,8 @@ import {
   html,
   css,
   Observable,
-  observable
+  observable,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { later } from '../../lib/ppp-decorators.js';
@@ -310,33 +311,35 @@ export class WidgetSelectorModalPage extends Page {
 
       workspacePage.locked = true;
 
-      try {
-        await workspacePage.placeWidget(widget);
-        await ppp.user.functions.updateOne(
-          {
-            collection: 'workspaces'
-          },
-          {
-            _id: ppp.app.params().document
-          },
-          {
-            $push: {
-              widgets: {
-                _id: datum._id,
-                uniqueID,
-                x: widget.x,
-                y: widget.y,
-                zIndex: workspacePage.zIndex
+      // Fix for undefined workspace ref (hidden behind "when()" when there are no widgets)
+      Updates.enqueue(async () => {
+        try {
+          await workspacePage.placeWidget(widget);
+          await ppp.user.functions.updateOne(
+            {
+              collection: 'workspaces'
+            },
+            {
+              _id: ppp.app.params().document
+            },
+            {
+              $push: {
+                widgets: {
+                  _id: datum._id,
+                  uniqueID,
+                  x: widget.x,
+                  y: widget.y,
+                  zIndex: workspacePage.zIndex
+                }
               }
             }
-          }
-        );
+          );
 
-        this.mountPointModal.setAttribute('hidden', '');
-        await later(250);
-      } finally {
-        workspacePage.locked = false;
-      }
+          this.mountPointModal.setAttribute('hidden', '');
+        } finally {
+          workspacePage.locked = false;
+        }
+      });
     } catch (e) {
       this.failOperation(e, 'Размещение виджета');
     } finally {

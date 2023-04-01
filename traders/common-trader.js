@@ -81,8 +81,9 @@ export class Trader {
 
         const exchange = this.getExchange();
         const broker = this.getBroker();
+        const dictionary = this.getDictionary();
 
-        if (exchange === '*' || broker === '*') return this;
+        if (exchange === '*' || broker === '*' || !dictionary) return this;
 
         const cache = await ppp.openInstrumentCache({
           exchange,
@@ -159,8 +160,7 @@ export class Trader {
     return symbol;
   }
 
-  async waitForInstrumentCache() {}
-
+  // TODO - get rid of this crap
   async findInstrumentInCache(symbol) {}
 
   relativeBondPriceToPrice(relativePrice, instrument) {
@@ -374,6 +374,10 @@ export class Trader {
 
   getBroker() {
     return '*';
+  }
+
+  getDictionary() {
+    return null;
   }
 
   getInstrumentIconUrl() {

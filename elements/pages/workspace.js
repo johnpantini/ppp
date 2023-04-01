@@ -402,8 +402,9 @@ export class WorkspacePage extends Page {
 
         for (const w of widgets) {
           // Skip first widget added from modal
-          if (!this.locked && typeof w.type !== 'undefined')
+          if (!this.locked && typeof w.type !== 'undefined' && this.workspace) {
             await this.placeWidget(w);
+          }
         }
       } catch (e) {
         this.failOperation(e, 'Загрузка терминала');

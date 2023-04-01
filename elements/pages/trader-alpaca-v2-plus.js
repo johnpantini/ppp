@@ -53,7 +53,14 @@ export const traderAlpacaV2PlusTemplate = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX%]`
+                        $or: [
+                          {
+                            type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX%]`
+                          },
+                          {
+                            type: `[%#(await import('../../lib/const.js')).BROKERS.PSINA%]`
+                          }
+                        ]
                       },
                       {
                         $or: [
@@ -69,16 +76,28 @@ export const traderAlpacaV2PlusTemplate = html`
             :transform="${() => ppp.decryptDocumentsTransformation()}"
           ></ppp-query-select>
           <div class="spacing2"></div>
-          <ppp-button
-            @click="${() =>
-              ppp.app.mountPage('broker-utex', {
-                size: 'xlarge',
-                adoptHeader: true
-              })}"
-            appearance="primary"
-          >
-            Добавить профиль UTEX
-          </ppp-button>
+          <div class="control-line">
+            <ppp-button
+              @click="${() =>
+                ppp.app.mountPage('broker-utex', {
+                  size: 'xlarge',
+                  adoptHeader: true
+                })}"
+              appearance="primary"
+            >
+              Добавить профиль UTEX
+            </ppp-button>
+            <ppp-button
+              @click="${() =>
+                ppp.app.mountPage('broker-psina', {
+                  size: 'xlarge',
+                  adoptHeader: true
+                })}"
+              appearance="primary"
+            >
+              Добавить профиль Psina
+            </ppp-button>
+          </div>
         </div>
       </section>
       <section>
@@ -162,6 +181,67 @@ export const traderAlpacaV2PlusStyles = css`
   ${pageStyles}
 `;
 
+const checkConnection = async (control, login, password) => {
+  try {
+    new URL(control.value);
+  } catch (e) {
+    invalidate(control, {
+      errorMessage: 'Неверный или неполный URL',
+      raiseException: true
+    });
+  }
+
+  await validate(control, {
+    hook: async (value) => {
+      const url = new URL(value);
+
+      return url.protocol === 'wss:' || url.protocol === 'ws:';
+    },
+    errorMessage: 'Недопустимый протокол URL'
+  });
+
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(reject, 5000);
+      const ws = new WebSocket(control.value);
+
+      ws.onmessage = ({ data }) => {
+        const payload = JSON.parse(data);
+
+        if (Array.isArray(payload) && payload[0]?.msg === 'connected') {
+          ws.send(
+            JSON.stringify({
+              action: 'auth',
+              key: login,
+              secret: password
+            })
+          );
+        } else if (
+          Array.isArray(payload) &&
+          payload[0]?.msg === 'authenticated'
+        ) {
+          ws.close();
+          clearTimeout(timer);
+          resolve();
+        } else {
+          ws.close();
+          clearTimeout(timer);
+          reject();
+        }
+      };
+      ws.onerror = () => {
+        clearTimeout(timer);
+        reject();
+      };
+    });
+  } catch (e) {
+    invalidate(control, {
+      errorMessage: 'Не удалось соединиться, проверьте ссылку и брокера',
+      raiseException: true
+    });
+  }
+};
+
 export class TraderAlpacaV2PlusPage extends Page {
   collection = 'traders';
 
@@ -170,109 +250,20 @@ export class TraderAlpacaV2PlusPage extends Page {
     await validate(this.brokerId);
     await validate(this.wsUrl);
 
-    try {
-      new URL(this.wsUrl.value);
-    } catch (e) {
-      invalidate(this.wsUrl, {
-        errorMessage: 'Неверный или неполный URL',
-        raiseException: true
-      });
+    const login = this.brokerId.datum().login;
+    const password = this.brokerId.datum().password;
+
+    await checkConnection(this.wsUrl, login, password);
+
+    if (this.wsUrlForTimeAndSales.value.trim()) {
+      await checkConnection(this.wsUrlForTimeAndSales, login, password);
     }
-
-    await validate(this.wsUrl, {
-      hook: async (value) => {
-        const url = new URL(value);
-
-        return url.protocol === 'wss:' || url.protocol === 'ws:';
-      },
-      errorMessage: 'Недопустимый протокол URL'
-    });
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
         errorMessage: 'Введите значение в диапазоне от 100 до 10000'
       });
-    }
-
-    try {
-      await new Promise((resolve, reject) => {
-        const timer = setTimeout(reject, 5000);
-        const ws = new WebSocket(this.wsUrl.value);
-
-        ws.onmessage = ({ data }) => {
-          const payload = JSON.parse(data);
-
-          if (Array.isArray(payload) && payload[0]?.msg === 'connected') {
-            ws.close();
-            clearTimeout(timer);
-            resolve();
-          } else {
-            ws.close();
-            clearTimeout(timer);
-            reject();
-          }
-        };
-        ws.onerror = () => {
-          clearTimeout(timer);
-          reject();
-        };
-      });
-    } catch (e) {
-      invalidate(this.wsUrl, {
-        errorMessage: 'Не удалось соединиться',
-        raiseException: true
-      });
-    }
-
-    if (this.wsUrlForTimeAndSales.value.trim()) {
-      try {
-        new URL(this.wsUrlForTimeAndSales.value);
-      } catch (e) {
-        invalidate(this.wsUrlForTimeAndSales, {
-          errorMessage: 'Неверный или неполный URL',
-          raiseException: true
-        });
-      }
-
-      await validate(this.wsUrlForTimeAndSales, {
-        hook: async (value) => {
-          const url = new URL(value);
-
-          return url.protocol === 'wss:' || url.protocol === 'ws:';
-        },
-        errorMessage: 'Недопустимый протокол URL'
-      });
-
-      try {
-        await new Promise((resolve, reject) => {
-          const timer = setTimeout(reject, 5000);
-          const ws = new WebSocket(this.wsUrlForTimeAndSales.value);
-
-          ws.onmessage = ({ data }) => {
-            const payload = JSON.parse(data);
-
-            if (Array.isArray(payload) && payload[0]?.msg === 'connected') {
-              ws.close();
-              clearTimeout(timer);
-              resolve();
-            } else {
-              ws.close();
-              clearTimeout(timer);
-              reject();
-            }
-          };
-          ws.onerror = () => {
-            clearTimeout(timer);
-            reject();
-          };
-        });
-      } catch (e) {
-        invalidate(this.wsUrlForTimeAndSales, {
-          errorMessage: 'Не удалось соединиться',
-          raiseException: true
-        });
-      }
     }
   }
 

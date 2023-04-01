@@ -1,10 +1,10 @@
 /** @decorator */
 
 import ppp from '../../ppp.js';
-import { html, css, ref } from '../../vendor/fast-element.min.js';
+import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
-import { maybeFetchError } from '../../lib/ppp-errors.js';
+import { maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../select.js';
 
@@ -32,9 +32,29 @@ export const instrumentsImportPageTemplate = html`
             >
               UTEX Margin (акции)
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
+              Акции US (Psina)
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
+      ${when(
+        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS,
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Ссылка на словарь</h5>
+            </div>
+            <div class="input-group">
+              <ppp-text-field
+                type="url"
+                placeholder="https://example.com"
+                ${ref('dictionaryUrl')}
+              ></ppp-text-field>
+            </div>
+          </section>
+        `
+      )}
       <footer>
         <ppp-button
           type="submit"
@@ -96,6 +116,44 @@ export class InstrumentsImportPage extends Page {
           lot: s.qtyStep
         };
       });
+  }
+
+  async [INSTRUMENT_DICTIONARY.PSINA_US_STOCKS]() {
+    await validate(this.dictionaryUrl);
+
+    const rStocks = await fetch(
+      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'GET',
+          url: this.dictionaryUrl.value
+        })
+      }
+    );
+
+    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
+
+    const stocks = await rStocks.json();
+
+    return stocks.map((s) => {
+      return {
+        symbol: s.symbol.replace('-', ' '),
+        exchange: EXCHANGE.US,
+        broker: BROKERS.PSINA,
+        fullName: s.fullName,
+        minPriceIncrement: 0.01,
+        type:
+          s.fullName.toUpperCase().endsWith(' ETF') ||
+          /Invesco|ProShares|iShares/i.test(s.fullName)
+            ? 'etf'
+            : 'stock',
+        currency: 'USD',
+        forQualInvestorFlag: false,
+        lot: 1
+      };
+    });
   }
 
   async [INSTRUMENT_DICTIONARY.BINANCE]() {
@@ -183,6 +241,11 @@ export class InstrumentsImportPage extends Page {
         case INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS:
           exchange = EXCHANGE.UTEX_MARGIN_STOCKS;
           broker = BROKERS.UTEX;
+
+          break;
+        case INSTRUMENT_DICTIONARY.PSINA_US_STOCKS:
+          exchange = EXCHANGE.US;
+          broker = BROKERS.PSINA;
 
           break;
       }
