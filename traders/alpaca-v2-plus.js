@@ -182,7 +182,7 @@ class AlpacaV2PlusTrader extends Trader {
       if (instrument) {
         for (const [source, fields] of this.subs.orderbook) {
           if (this.instrumentsAreEqual(instrument, source.instrument)) {
-            const ref = this.refs.orderbook.get(source.instrument?._id);
+            const ref = this.refs.orderbook.get(source.instrument?.symbol);
 
             if (ref) {
               if (typeof ref.lastOrderbookMontage === 'undefined') {
@@ -286,11 +286,6 @@ class AlpacaV2PlusTrader extends Trader {
 
   async addFirstRef(instrument, refs) {
     if (this.connection.readyState === WebSocket.OPEN) {
-      refs.set(instrument._id, {
-        refCount: 1,
-        instrument
-      });
-
       if (refs === this.refs.allTrades) {
         this.connection.send(
           JSON.stringify({
@@ -332,7 +327,7 @@ class AlpacaV2PlusTrader extends Trader {
   async instrumentChanged(source, oldValue, newValue) {
     await super.instrumentChanged(source, oldValue, newValue);
 
-    if (newValue?._id) {
+    if (newValue?.symbol) {
       // Handle no real subscription case for orderbook.
       for (const [source, fields] of this.subs.orderbook) {
         if (this.instrumentsAreEqual(newValue, source.instrument)) {
@@ -340,7 +335,7 @@ class AlpacaV2PlusTrader extends Trader {
             switch (datum) {
               case TRADER_DATUM.ORDERBOOK:
                 source[field] = this.refs.orderbook.get(
-                  newValue._id
+                  newValue.symbol
                 )?.lastOrderbookMontage;
 
                 break;

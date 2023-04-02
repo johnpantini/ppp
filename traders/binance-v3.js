@@ -188,11 +188,6 @@ class BinanceTrader extends Trader {
 
   async addFirstRef(instrument, refs) {
     if (this.connection.readyState === WebSocket.OPEN) {
-      refs.set(instrument.symbol, {
-        refCount: 1,
-        instrument
-      });
-
       if (refs === this.refs.allTrades) {
         this.connection.send(
           JSON.stringify({

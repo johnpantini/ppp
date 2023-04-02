@@ -100,24 +100,22 @@ export class Trader {
             const storeName = `${exchange}:${broker}`;
             const tx = cache.transaction(storeName, 'readonly');
             const instrumentsStore = tx.objectStore(storeName);
-            const cursorRequest = instrumentsStore.openCursor();
+            const cursorRequest = instrumentsStore.getAll();
 
             cursorRequest.onsuccess = (event) => {
               const result = event.target.result;
 
-              if (result?.value) {
-                const instrument = result.value;
-
-                if (
-                  instrument.symbol === '@version' &&
-                  typeof instrument.version === 'number'
-                ) {
-                  currentCacheVersion = instrument.version;
-                } else {
-                  this.#instruments.set(instrument.symbol, instrument);
+              if (Array.isArray(result)) {
+                for (const instrument of result) {
+                  if (
+                    instrument.symbol === '@version' &&
+                    typeof instrument.version === 'number'
+                  ) {
+                    currentCacheVersion = instrument.version;
+                  } else {
+                    this.#instruments.set(instrument.symbol, instrument);
+                  }
                 }
-
-                result['continue']();
               }
             };
 
@@ -297,6 +295,11 @@ export class Trader {
       const ref = refs.get(instrument.symbol);
 
       if (typeof ref === 'undefined' && this.supportsInstrument(instrument)) {
+        refs.set(instrument.symbol, {
+          refCount: 1,
+          instrument
+        });
+
         await this.addFirstRef?.(instrument, refs);
       } else if (ref) {
         ref.refCount++;

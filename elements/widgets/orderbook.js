@@ -589,7 +589,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
                 price,
                 volume,
                 my: volume,
-                pool: this.bookTrader?.document?.exchange ?? 'SPBX'
+                pool: 'SPBX'
               });
             } else {
               orderbook.bids[i].my = volume;
@@ -607,7 +607,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
               volume,
               my: volume,
               pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                ? this.bookTrader?.document?.exchange ?? 'SPBX'
+                ? 'SPBX'
                 : void 0
             });
 
