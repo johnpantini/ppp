@@ -33,6 +33,11 @@ import {
   paletteGrayDark4,
   paletteGrayLight1,
   paletteGrayLight2,
+  paletteGreenLight1,
+  paletteGreenLight2,
+  paletteGreenLight3,
+  paletteRedLight2,
+  paletteRedLight3,
   paletteWhite,
   positive,
   sell,
@@ -111,6 +116,7 @@ export const orderbookWidgetTemplate = html`
                         <div
                           class="quote-line bid-line"
                           price="${(x) => x.bid?.price}"
+                          pool="${(x) => x.bid?.pool || 'none'}"
                         >
                           <div class="volume">
                             ${when(
@@ -123,7 +129,7 @@ export const orderbookWidgetTemplate = html`
                                 </div>
                               `
                             )}
-                            ${(x) => x.bid?.volume}
+                            ${(x) => x.bid?.pool === 'LD' ? '⬇️' : x.bid?.volume}
                           </div>
                           <div class="spacer"></div>
                           <div class="price">
@@ -152,9 +158,10 @@ export const orderbookWidgetTemplate = html`
                         <div
                           class="quote-line ask-line"
                           price="${(x) => x.ask?.price}"
+                          pool="${(x) => x.ask?.pool || 'none'}"
                         >
                           <div class="volume">
-                            ${(x) => x.ask?.volume}
+                            ${(x) => x.ask?.pool === 'LU' ? '⬆️' : x.ask?.volume}
                             ${when(
                               (x) => x.ask?.my > 0,
                               html`
@@ -295,6 +302,20 @@ export const orderbookWidgetStyles = css`
     display: flex;
     padding: 2px 4px;
     font-variant-numeric: tabular-nums;
+  }
+
+  .quote-line[pool='LD'] {
+    background: rgba(
+      ${toColorComponents(paletteGrayBase)},
+      ${ppp.darkMode ? 0.7 : 0.3}
+    );
+  }
+
+  .quote-line[pool='LU'] {
+    background: rgba(
+      ${toColorComponents(paletteGrayBase)},
+      ${ppp.darkMode ? 0.7 : 0.3}
+    );
   }
 
   .ask-line:hover,

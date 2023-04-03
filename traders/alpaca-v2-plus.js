@@ -88,7 +88,20 @@ class AlpacaV2PlusTrader extends Trader {
           this.connection.onerror = () => this.connection.close();
 
           this.connection.onmessage = ({ data }) => {
-            for (const payload of JSON.parse(data) ?? []) {
+            const parsed = JSON.parse(data) ?? [];
+
+            if (this.document.broker.type === BROKERS.PSINA) {
+              if (Array.isArray(parsed) && parsed[0].T === 'q') {
+                const ref = this.refs.orderbook.get(parsed[0].S);
+
+                if (typeof ref.lastOrderbookMap !== 'undefined') {
+                  ref.lastOrderbookMap.bids.clear();
+                  ref.lastOrderbookMap.asks.clear();
+                }
+              }
+            }
+
+            for (const payload of parsed) {
               if (payload.msg === 'connected') {
                 this.connection.send(
                   JSON.stringify({
@@ -193,11 +206,11 @@ class AlpacaV2PlusTrader extends Trader {
               }
 
               const lastOrderbookMap = ref.lastOrderbookMap;
-              const coeff = this.document.useLots ? 1 : 100;
+              const volumeCoefficient = this.document.useLots ? 1 : 100;
 
               lastOrderbookMap.bids.set(`${data.bx}|${data.bp}|${data.bs}`, {
                 price: data.bp,
-                volume: data.bs * coeff,
+                volume: data.bs * volumeCoefficient,
                 time: data.t,
                 condition: data.c?.join?.(' '),
                 timestamp: data.t ? new Date(data.t).valueOf() : null,
@@ -206,7 +219,7 @@ class AlpacaV2PlusTrader extends Trader {
 
               lastOrderbookMap.asks.set(`${data.bx}|${data.ap}|${data.as}`, {
                 price: data.ap,
-                volume: data.as * coeff,
+                volume: data.as * volumeCoefficient,
                 time: data.t,
                 condition: data.c?.join?.(' '),
                 timestamp: data.t ? new Date(data.t).valueOf() : null,
@@ -233,7 +246,7 @@ class AlpacaV2PlusTrader extends Trader {
                       return false;
                   }
 
-                  return b.price > 0 && b.volume > 0;
+                  return b.price > 0 && (b.volume > 0 || b.pool === 'LULD');
                 })
                 .sort((a, b) => {
                   return b.price - a.price || b.volume - a.volume;
@@ -251,7 +264,7 @@ class AlpacaV2PlusTrader extends Trader {
                       return false;
                   }
 
-                  return a.price > 0 && a.volume > 0;
+                  return a.price > 0 && (a.volume > 0 || a.pool === 'LULD');
                 })
                 .sort((a, b) => {
                   return a.price - b.price || b.volume - a.volume;

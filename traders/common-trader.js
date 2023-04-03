@@ -219,7 +219,7 @@ export class Trader {
   }
 
   fixPrice(instrument, price) {
-    const precision = getInstrumentPrecision(instrument);
+    const precision = getInstrumentPrecision(instrument, price);
 
     price = parseFloat(price?.toString?.()?.replace(',', '.'));
 
