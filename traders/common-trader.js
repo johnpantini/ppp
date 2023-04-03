@@ -57,7 +57,17 @@ export class Trader {
           version: lastCacheVersion
         });
 
-        instruments.forEach((i) => instrumentsStore.put(i));
+        instruments.forEach((i) => {
+          const stripped = {};
+
+          for (const k in i) {
+            if (k !== '_id') {
+              stripped[k] = i[k];
+            }
+          }
+
+          instrumentsStore.put(stripped);
+        });
 
         tx.oncomplete = () => {
           resolve();

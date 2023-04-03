@@ -261,6 +261,10 @@ export const instrumentsManagePageTemplate = html`
           <section>
             <div class="label-group">
               <h5>Шаг цены</h5>
+              <p class="description">
+                Если указать нулевое значение, шаг будет определяться
+                автоматически по цене инструмента.
+              </p>
             </div>
             <div class="input-group">
               <ppp-text-field

@@ -143,7 +143,7 @@ export class InstrumentsImportPage extends Page {
         exchange: EXCHANGE.US,
         broker: BROKERS.PSINA,
         fullName: s.fullName,
-        minPriceIncrement: 0.01,
+        minPriceIncrement: 0,
         type:
           s.fullName.toUpperCase().endsWith(' ETF') ||
           /Invesco|ProShares|iShares/i.test(s.fullName)
