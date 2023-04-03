@@ -488,34 +488,32 @@ class PPP {
   async nextInstrumentCacheVersion({ exchange, broker }) {
     const cacheFieldName = `instrumentCache:${exchange}:${broker}`;
 
-    const lines = ((context) => {
-      const db = context.services.get('mongodb-atlas').db('ppp');
+    await this.user.functions.updateOne(
+      {
+        collection: 'app'
+      },
+      {
+        _id: '@settings'
+      },
+      {
+        $inc: {
+          [cacheFieldName]: 1
+        }
+      },
+      {
+        upsert: true
+      }
+    );
 
-      return db
-        .collection('app')
-        .updateOne(
-          {
-            _id: '@settings'
-          },
-          {
-            $inc: {
-              $field: 1
-            }
-          },
-          {
-            upsert: true
-          }
-        )
-        .then(() => db.collection('app').findOne({ _id: '@settings' }));
-    })
-      .toString()
-      .replaceAll('$field', `'${cacheFieldName}'`)
-      .split(/\r?\n/);
+    const response = await this.user.functions.findOne(
+      {
+        collection: 'app'
+      },
+      {
+        _id: '@settings'
+      }
+    );
 
-    lines.pop();
-    lines.shift();
-
-    const response = await this.user.functions.eval(lines.join('\n'));
     const result = +response[cacheFieldName];
 
     this.settings.load(cacheFieldName, result);
