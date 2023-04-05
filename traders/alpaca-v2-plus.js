@@ -94,7 +94,7 @@ class AlpacaV2PlusTrader extends Trader {
               if (Array.isArray(parsed) && parsed[0]?.T === 'q') {
                 const ref = this.refs.orderbook.get(parsed[0].S);
 
-                if (typeof ref.lastOrderbookMap !== 'undefined') {
+                if (ref && typeof ref.lastOrderbookMap !== 'undefined') {
                   ref.lastOrderbookMap.bids.clear();
                   ref.lastOrderbookMap.asks.clear();
                 }
