@@ -376,7 +376,7 @@ export class Trader {
   }
 
   adoptInstrument(instrument) {
-    if (!this.supportsInstrument(instrument)) return;
+    if (!this.supportsInstrument(instrument)) return instrument;
 
     if (instrument) return this.instruments.get(instrument.symbol);
   }

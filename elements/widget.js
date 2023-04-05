@@ -990,11 +990,13 @@ export class WidgetGroupControl extends PPPOffClickElement {
         );
         this.widget.isolated = false;
 
-        void this.widget.updateDocumentFragment({
-          $set: {
-            'widgets.$.symbol': this.widget.instrument.symbol
-          }
-        });
+        if (this.widget.instrument) {
+          void this.widget.updateDocumentFragment({
+            $set: {
+              'widgets.$.symbol': this.widget.instrument.symbol
+            }
+          });
+        }
       }
 
       void this.widget.updateDocumentFragment({
