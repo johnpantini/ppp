@@ -126,7 +126,8 @@ export const traderAlpacaV2PlusTemplate = html`
         <div class="input-group">
           <ppp-text-field
             optional
-            placeholder="wss://example.com"
+            disabled
+            placeholder="В настоящий момент не реализовано"
             value="${(x) => x.document.wsUrlForTimeAndSales}"
             ${ref('wsUrlForTimeAndSales')}
           ></ppp-text-field>

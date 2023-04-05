@@ -91,7 +91,7 @@ class AlpacaV2PlusTrader extends Trader {
             const parsed = JSON.parse(data) ?? [];
 
             if (this.document.broker.type === BROKERS.PSINA) {
-              if (Array.isArray(parsed) && parsed[0].T === 'q') {
+              if (Array.isArray(parsed) && parsed[0]?.T === 'q') {
                 const ref = this.refs.orderbook.get(parsed[0].S);
 
                 if (typeof ref.lastOrderbookMap !== 'undefined') {
@@ -100,6 +100,8 @@ class AlpacaV2PlusTrader extends Trader {
                 }
               }
             }
+
+            let levelCounter = 0;
 
             for (const payload of parsed) {
               if (payload.msg === 'connected') {
@@ -141,7 +143,11 @@ class AlpacaV2PlusTrader extends Trader {
               } else if (payload.T === 't') {
                 this.onTradeMessage({ data: payload });
               } else if (payload.T === 'q') {
+                payload.level = levelCounter;
+
                 this.onOrderbookMessage({ data: payload });
+
+                levelCounter++;
               } else if (payload.T === 'error') {
                 console.error(payload);
 
@@ -208,23 +214,29 @@ class AlpacaV2PlusTrader extends Trader {
               const lastOrderbookMap = ref.lastOrderbookMap;
               const volumeCoefficient = this.document.useLots ? 1 : 100;
 
-              lastOrderbookMap.bids.set(`${data.bx}|${data.bp}|${data.bs}`, {
-                price: data.bp,
-                volume: data.bs * volumeCoefficient,
-                time: data.t,
-                condition: data.c?.join?.(' '),
-                timestamp: data.t ? new Date(data.t).valueOf() : null,
-                pool: this.alpacaExchangeToUTEXExchange(data.bx)
-              });
+              lastOrderbookMap.bids.set(
+                `${data.bx}|${data.bp}|${data.bs}|${data.level}`,
+                {
+                  price: data.bp,
+                  volume: data.bs * volumeCoefficient,
+                  time: data.t,
+                  condition: data.c?.join?.(' '),
+                  timestamp: data.t ? new Date(data.t).valueOf() : null,
+                  pool: this.alpacaExchangeToUTEXExchange(data.bx)
+                }
+              );
 
-              lastOrderbookMap.asks.set(`${data.bx}|${data.ap}|${data.as}`, {
-                price: data.ap,
-                volume: data.as * volumeCoefficient,
-                time: data.t,
-                condition: data.c?.join?.(' '),
-                timestamp: data.t ? new Date(data.t).valueOf() : null,
-                pool: this.alpacaExchangeToUTEXExchange(data.ax)
-              });
+              lastOrderbookMap.asks.set(
+                `${data.bx}|${data.ap}|${data.as}|${data.level}`,
+                {
+                  price: data.ap,
+                  volume: data.as * volumeCoefficient,
+                  time: data.t,
+                  condition: data.c?.join?.(' '),
+                  timestamp: data.t ? new Date(data.t).valueOf() : null,
+                  pool: this.alpacaExchangeToUTEXExchange(data.ax)
+                }
+              );
 
               ref.lastOrderbookMontage = {
                 bids: [],

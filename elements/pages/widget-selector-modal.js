@@ -170,7 +170,6 @@ export const widgetSelectorModalPageTemplate = html`
                     datum.collection,
                     html`
                       <ppp-button
-                        disabled
                         class="xsmall"
                         @click="${() => {
                           ppp.app.navigate({

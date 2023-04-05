@@ -845,8 +845,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
     await validate(this.container.bookTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
-      hook: async (value) => +value > 0 && +value <= 50,
-      errorMessage: 'Введите значение в диапазоне от 1 до 50'
+      hook: async (value) => +value > 0 && +value <= 5000,
+      errorMessage: 'Введите значение в диапазоне от 1 до 5000'
     });
   }
 
