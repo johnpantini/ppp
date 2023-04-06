@@ -124,7 +124,8 @@ export const orderbookWidgetTemplate = html`
                                 </div>
                               `
                             )}
-                            ${(x) => x.bid?.pool === 'LD' ? '⬇️' : x.bid?.volume}
+                            ${(x) =>
+                              x.bid?.pool === 'LD' ? '⬇️' : x.bid?.volume}
                           </div>
                           <div class="spacer"></div>
                           <div class="price">
@@ -156,7 +157,8 @@ export const orderbookWidgetTemplate = html`
                           pool="${(x) => x.ask?.pool || 'none'}"
                         >
                           <div class="volume">
-                            ${(x) => x.ask?.pool === 'LU' ? '⬆️' : x.ask?.volume}
+                            ${(x) =>
+                              x.ask?.pool === 'LU' ? '⬆️' : x.ask?.volume}
                             ${when(
                               (x) => x.ask?.my > 0,
                               html`
@@ -571,6 +573,52 @@ export class OrderbookWidget extends WidgetWithInstrument {
     return { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes };
   }
 
+  cloneOrderbook(orderbook) {
+    const bids = [];
+    const asks = [];
+
+    for (let i = 0; i < orderbook.bids.length; i++) {
+      const bid = orderbook.bids[i];
+      const newBid = {};
+
+      if (bid.pool) newBid.pool = bid.pool;
+
+      if (bid.condition) newBid.condition = bid.condition;
+
+      newBid.price = +bid.price;
+      newBid.volume = +bid.volume;
+
+      if (bid.time) newBid.time = bid.time;
+
+      if (bid.timestamp) newBid.timestamp = bid.timestamp;
+
+      bids[i] = newBid;
+    }
+
+    for (let i = 0; i < orderbook.asks.length; i++) {
+      const ask = orderbook.asks[i];
+      const newAsk = {};
+
+      if (ask.pool) newAsk.pool = ask.pool;
+
+      if (ask.condition) newAsk.condition = ask.condition;
+
+      newAsk.price = +ask.price;
+      newAsk.volume = +ask.volume;
+
+      if (ask.time) newAsk.time = ask.time;
+
+      if (ask.timestamp) newAsk.timestamp = ask.timestamp;
+
+      asks[i] = newAsk;
+    }
+
+    return {
+      bids,
+      asks
+    };
+  }
+
   orderbookChanged(oldValue, newValue) {
     if (newValue === '—') {
       newValue = {
@@ -580,9 +628,9 @@ export class OrderbookWidget extends WidgetWithInstrument {
     }
 
     if (oldValue !== null && newValue)
-      this.#lastOrderBookValue = ppp.structuredClone(newValue);
+      this.#lastOrderBookValue = this.cloneOrderbook(newValue);
 
-    const orderbook = ppp.structuredClone(newValue);
+    const orderbook = this.cloneOrderbook(newValue);
 
     if (orderbook && this.instrument) {
       if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
@@ -740,8 +788,6 @@ export class OrderbookWidget extends WidgetWithInstrument {
           ask
         });
       }
-
-      Observable.notify(this, 'quoteLines');
     } else this.spreadString = '—';
   }
 
