@@ -114,6 +114,7 @@ export default function (i18n) {
         [WIDGET_TYPES.PARSER]: 'Парсер',
         [WIDGET_TYPES.FRAME]: 'Фрейм',
         [WIDGET_TYPES.NEWS]: 'Новости',
+        [WIDGET_TYPES.NOII]: 'NOII',
         [WIDGET_TYPES.OTHER]: 'Специальный виджет'
       }
     }

@@ -395,6 +395,22 @@ class AlpacaV2PlusTrader extends Trader {
         )}.svg`
       : super.getInstrumentIconUrl(instrument);
   }
+
+  supportsInstrument(instrument) {
+    if (!instrument) return true;
+
+    const symbol = instrument.symbol.split('@')[0];
+
+    return this.instruments.has(symbol);
+  }
+
+  adoptInstrument(instrument) {
+    if (!this.supportsInstrument(instrument)) return instrument;
+
+    const symbol = instrument?.symbol.split('@')[0];
+
+    if (instrument) return this.instruments.get(symbol);
+  }
 }
 
 export default AlpacaV2PlusTrader;

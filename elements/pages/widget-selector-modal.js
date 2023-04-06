@@ -132,6 +132,13 @@ export const widgetSelectorModalPageTemplate = html`
                 <span>Фрейм</span>
               </ppp-side-nav-item>
               <ppp-side-nav-item
+                slug="noii"
+                title="NOII"
+                ?active="${(x) => x.activeItem === 'noii'}"
+              >
+                <span>NOII</span>
+              </ppp-side-nav-item>
+              <ppp-side-nav-item
                 slug="other"
                 title="Специальный виджет"
                 ?active="${(x) => x.activeItem === 'other'}"

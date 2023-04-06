@@ -138,7 +138,7 @@ export const scalpingButtonsWidgetStyles = css`
   }
 
   .tabs {
-    padding: 8px;
+    padding: 10px 8px 8px 8px;
   }
 
   .holder {

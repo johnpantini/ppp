@@ -985,6 +985,13 @@ export class WidgetGroupControl extends PPPOffClickElement {
         sourceWidget?.instrument?.symbol !== this.widget?.instrument?.symbol
       ) {
         this.widget.isolated = true;
+
+        if (typeof this.widget.instrumentTrader === 'undefined') {
+          return this.widget.notificationsArea.error({
+            text: 'Не задан трейдер для работы с инструментом.'
+          });
+        }
+
         this.widget.instrument = this.widget.instrumentTrader.adoptInstrument(
           sourceWidget.instrument
         );

@@ -170,7 +170,7 @@ export const activeOrdersWidgetStyles = css`
   }
 
   .active-orders-widget-tabs {
-    padding: 8px;
+    padding: 10px 8px 8px 8px;
   }
 
   .active-orders-widget-cancel-orders {

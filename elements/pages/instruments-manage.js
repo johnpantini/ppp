@@ -345,7 +345,7 @@ export const instrumentsManagePageTemplate = html`
                     <div class="label-group">
                       <h5>Идентификатор FIGI</h5>
                       <ppp-badge appearance="green">
-                        ${(x) => ppp.t(`$const.broker.${BROKERS.TINKOFF}`)}
+                        ${() => ppp.t(`$const.broker.${BROKERS.TINKOFF}`)}
                       </ppp-badge>
                     </div>
                     <div class="input-group">
@@ -354,25 +354,6 @@ export const instrumentsManagePageTemplate = html`
                         value="${(x) => x.document.tinkoffFigi}"
                         style="text-transform: uppercase"
                         ${ref('tinkoffFigi')}
-                      ></ppp-text-field>
-                    </div>
-                  </section>
-                `
-              )}
-              ${when(
-                (x) => x.exchange.value === EXCHANGE.SPBX,
-                html`
-                  <section>
-                    <div class="label-group">
-                      <h5>Тикер на СПБ Бирже</h5>
-                      <ppp-badge appearance="green"> СПБ Биржа</ppp-badge>
-                    </div>
-                    <div class="input-group">
-                      <ppp-text-field
-                        optional
-                        placeholder="Тикер"
-                        value="${(x) => x.document.spbxSymbol}"
-                        ${ref('spbxSymbol')}
                       ></ppp-text-field>
                     </div>
                   </section>

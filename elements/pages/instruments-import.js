@@ -35,6 +35,9 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
               Акции US (Psina)
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
+              Alor (СПБ Биржа)
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -197,6 +200,42 @@ export class InstrumentsImportPage extends Page {
     return result;
   }
 
+  async [INSTRUMENT_DICTIONARY.ALOR_SPBX]() {
+    const rSymbols = await fetch(
+      `https://api.alor.ru/md/v2/Securities?exchange=SPBX&type=FOND&limit=4000&offset=0`,
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(
+      rSymbols,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const symbols = await rSymbols.json();
+
+    return symbols.map((s) => {
+      let type = 'stock';
+
+      if (s.cfiCode?.startsWith?.('C') && !s.cfiCode?.startsWith?.('CB'))
+        type = 'etf';
+
+      return {
+        symbol: s.symbol,
+        exchange: EXCHANGE.SPBX,
+        broker: BROKERS.ALOR,
+        fullName: s.description,
+        minPriceIncrement: s.minstep,
+        type,
+        currency: s.currency,
+        forQualInvestorFlag: s.currency !== 'RUB',
+        lot: s.lotsize,
+        isin: s.ISIN
+      };
+    });
+  }
+
   async submitDocument() {
     this.beginOperation();
 
@@ -246,6 +285,12 @@ export class InstrumentsImportPage extends Page {
         case INSTRUMENT_DICTIONARY.PSINA_US_STOCKS:
           exchange = EXCHANGE.US;
           broker = BROKERS.PSINA;
+
+          break;
+
+        case INSTRUMENT_DICTIONARY.ALOR_SPBX:
+          exchange = EXCHANGE.SPBX;
+          broker = BROKERS.ALOR;
 
           break;
       }

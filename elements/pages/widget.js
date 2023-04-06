@@ -362,7 +362,7 @@ export const widgetPageTemplate = html`
                                 <h5>URL</h5>
                                 <p class="description">
                                   Ссылка на реализацию виджета. Нельзя изменить
-                                  после создания
+                                  после создания.
                                 </p>
                               </div>
                               <div class="widget-settings-input-group">
