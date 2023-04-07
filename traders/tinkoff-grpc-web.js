@@ -1,8 +1,12 @@
 /** @decorator */
 
-import { TRADER_DATUM, WIDGET_TYPES } from '../lib/const.js';
+import {
+  BROKERS,
+  EXCHANGE,
+  INSTRUMENT_DICTIONARY,
+  TRADER_DATUM
+} from '../lib/const.js';
 import { Trader } from './common-trader.js';
-import { cyrillicToLatin } from '../lib/intl.js';
 import { debounce } from '../lib/ppp-decorators.js';
 import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../vendor/nice-grpc-web/client/channel.js';
@@ -23,7 +27,6 @@ import {
 import { isAbortError } from '../vendor/abort-controller-x.js';
 import { TradingError } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
-import ppp from '../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -55,8 +58,6 @@ class TinkoffGrpcWebTrader extends Trader {
 
   #marketDataAbortController;
 
-  #pendingInstrumentCachePromise;
-
   // Key: figi ; Value: instrument object
   #figis = new Map();
 
@@ -82,7 +83,7 @@ class TinkoffGrpcWebTrader extends Trader {
 
     this.#metadata = new Metadata({
       Authorization: `Bearer ${this.document.broker.apiToken}`,
-      'x-app-name': `${ppp.keyVault.getKey('github-login')}.ppp`
+      'x-app-name': 'johnpantini.ppp'
     });
   }
 
@@ -423,11 +424,6 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
-    refs.set(instrument._id, {
-      refCount: 1,
-      instrument
-    });
-
     this.#figis.set(instrument.tinkoffFigi, instrument);
 
     if (refs === this.refs.orderbook) {
@@ -453,11 +449,11 @@ class TinkoffGrpcWebTrader extends Trader {
 
   async removeLastRef(instrument, refs) {
     if (refs === this.refs.orderbook) {
-      this.refs.orderbook.delete(instrument._id);
+      this.refs.orderbook.delete(instrument.symbol);
     }
 
     if (refs === this.refs.allTrades) {
-      this.refs.allTrades.delete(instrument._id);
+      this.refs.allTrades.delete(instrument.symbol);
     }
 
     if (refs === this.refs.orders) {
@@ -473,8 +469,8 @@ class TinkoffGrpcWebTrader extends Trader {
   onOrderbookMessage({ orderbook, instrument }) {
     if (orderbook && instrument) {
       for (const [source, fields] of this.subs.orderbook) {
-        if (source.instrument?._id === instrument._id) {
-          const ref = this.refs.orderbook.get(source.instrument._id);
+        if (this.instrumentsAreEqual(instrument, source.instrument)) {
+          const ref = this.refs.orderbook.get(source.instrument.symbol);
 
           if (ref) {
             ref.lastOrderbookData = orderbook;
@@ -568,7 +564,7 @@ class TinkoffGrpcWebTrader extends Trader {
   onTradeMessage({ trade, instrument }) {
     if (trade && instrument) {
       for (const [source, fields] of this.subs.allTrades) {
-        if (source.instrument?._id === instrument._id) {
+        if (this.instrumentsAreEqual(instrument, source.instrument)) {
           for (const { field, datum } of fields) {
             switch (datum) {
               case TRADER_DATUM.MARKET_PRINT:
@@ -721,13 +717,60 @@ class TinkoffGrpcWebTrader extends Trader {
   async instrumentChanged(source, oldValue, newValue) {
     await super.instrumentChanged(source, oldValue, newValue);
 
-    if (newValue?._id) {
+    if (newValue?.symbol) {
       // Handle no real subscription case for orderbook.
       this.onOrderbookMessage({
-        orderbook: this.refs.orderbook.get(newValue._id)?.lastOrderbookData,
+        orderbook: this.refs.orderbook.get(newValue.symbol)?.lastOrderbookData,
         instrument: newValue
       });
     }
+  }
+
+  getDictionary() {
+    return INSTRUMENT_DICTIONARY.TINKOFF;
+  }
+
+  getExchange() {
+    return EXCHANGE.RUS;
+  }
+
+  getBroker() {
+    return BROKERS.TINKOFF;
+  }
+
+  getInstrumentIconUrl(instrument) {
+    if (instrument?.classCode === 'SPBHKEX') {
+      return `static/instruments/stocks/hk/${instrument.symbol.replace(
+        ' ',
+        '-'
+      )}.svg`;
+    }
+
+    if (instrument?.exchange === EXCHANGE.MOEX) {
+      return `static/instruments/stocks/rus/${instrument.symbol.replace(
+        ' ',
+        '-'
+      )}.svg`;
+    }
+
+    if (
+      instrument?.exchange === EXCHANGE.SPBX &&
+      instrument?.symbol !== 'TCS'
+    ) {
+      return `static/instruments/stocks/us/${instrument.symbol.replace(
+        ' ',
+        '-'
+      )}.svg`;
+    }
+
+    return super.getInstrumentIconUrl(instrument);
+  }
+
+  supportsInstrument(instrument) {
+    if (instrument?.symbol === 'FIVE' && instrument?.exchange === EXCHANGE.SPBX)
+      return false;
+
+    return super.supportsInstrument(instrument);
   }
 
   async formatError(instrument, error) {

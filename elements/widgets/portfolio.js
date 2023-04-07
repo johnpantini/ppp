@@ -99,18 +99,21 @@ export class PortfolioWidget extends WidgetWithInstrument {
       this.portfolioTrader = await ppp.getOrCreateTrader(
         this.document.portfolioTrader
       );
-      this.searchControl.trader = this.portfolioTrader;
+      this.instrumentTrader = this.portfolioTrader;
 
-      if (this.portfolioTrader) {
-        this.portfolioTrader.onError = this.onTraderError.bind(this);
+      this.selectInstrument(
+        this.instrumentTrader.instruments.get(this.document.symbol),
+        { isolate: true }
+      );
 
-        await this.portfolioTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            position: TRADER_DATUM.POSITION
-          }
-        });
-      }
+      this.portfolioTrader.onError = this.onTraderError.bind(this);
+
+      await this.portfolioTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          position: TRADER_DATUM.POSITION
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }

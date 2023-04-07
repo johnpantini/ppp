@@ -116,9 +116,7 @@ export const traderTinkoffGrpcWebTemplate = html`
                     '*': {
                       metadata: new Metadata({
                         Authorization: `Bearer ${x.brokerId.datum().apiToken}`,
-                        'x-app-name': `${ppp.keyVault.getKey(
-                          'github-login'
-                        )}.ppp`
+                        'x-app-name': 'johnpantini.ppp'
                       })
                     }
                   }

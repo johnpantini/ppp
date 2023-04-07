@@ -102,7 +102,25 @@ export const orderWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${when(
-          (x) => x.instrument,
+          (x) => !x.instrument,
+          html`${html.partial(
+            widgetEmptyStateTemplate('Выберите инструмент.')
+          )}`
+        )}
+        ${when(
+          (x) =>
+            x.ordersTrader &&
+            x.instrument &&
+            !x.ordersTrader.supportsInstrument(x.instrument),
+          html`${html.partial(
+            widgetEmptyStateTemplate('Инструмент не поддерживается.')
+          )}`
+        )}
+        ${when(
+          (x) =>
+            x.ordersTrader &&
+            x.instrument &&
+            x.ordersTrader.supportsInstrument(x.instrument),
           html`
             <ppp-widget-tabs
               activeid="${(x) => x.getActiveWidgetTab()}"
@@ -122,8 +140,9 @@ export const orderWidgetTemplate = html`
                   <span
                     title="${(x) => x.instrument?.fullName}"
                     class="company-name"
-                    >${(x) => x.instrument?.fullName}</span
                   >
+                    ${(x) => x.instrument?.fullName}
+                  </span>
                   <span
                     @click="${(x) => x.setPrice(x.lastPrice)}"
                     class="company-last-price ${(x) =>
@@ -158,11 +177,9 @@ export const orderWidgetTemplate = html`
                       <div
                         class="nbbo-line-icon-logo"
                         style="${(x) =>
-                          `background-image:url(${
-                            'static/instruments/' +
-                            (x.instrument?.isin ?? x.instrument?.symbol) +
-                            '.svg'
-                          })`}"
+                          `background-image:url(${x.searchControl.getInstrumentIconUrl(
+                            x.instrument
+                          )})`}"
                       ></div>
                       ${(x) => x.instrument?.fullName[0]}
                     </div>
@@ -377,12 +394,6 @@ export const orderWidgetTemplate = html`
               </div>
             </div>
           `
-        )}
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
         )}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
@@ -640,6 +651,14 @@ export class OrderWidget extends WidgetWithInstrument {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
+
+      this.instrumentTrader = this.ordersTrader;
+
+      this.selectInstrument(
+        this.instrumentTrader.instruments.get(this.document.symbol),
+        { isolate: true }
+      );
+
       this.level1Trader = await ppp.getOrCreateTrader(
         this.document.level1Trader
       );
@@ -653,20 +672,17 @@ export class OrderWidget extends WidgetWithInstrument {
       this.positionTrader = await ppp.getOrCreateTrader(
         this.document.positionTrader
       );
-      this.searchControl.trader = this.ordersTrader;
 
-      if (this.level1Trader) {
-        await this.level1Trader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            lastPrice: TRADER_DATUM.LAST_PRICE,
-            lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
-            lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
-            bestBid: TRADER_DATUM.BEST_BID,
-            bestAsk: TRADER_DATUM.BEST_ASK
-          }
-        });
-      }
+      await this.level1Trader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          lastPrice: TRADER_DATUM.LAST_PRICE,
+          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          bestBid: TRADER_DATUM.BEST_BID,
+          bestAsk: TRADER_DATUM.BEST_ASK
+        }
+      });
 
       if (this.extraLevel1Trader) {
         await this.extraLevel1Trader.subscribeFields?.({
@@ -691,19 +707,17 @@ export class OrderWidget extends WidgetWithInstrument {
         });
       }
 
-      if (this.ordersTrader) {
-        this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
+      this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
 
-        if (this.document.pusherApi) {
-          const connection = await ppp.getOrCreatePusherConnection(
-            this.document.pusherApi
-          );
+      if (this.document.pusherApi) {
+        const connection = await ppp.getOrCreatePusherConnection(
+          this.document.pusherApi
+        );
 
-          if (connection) {
-            connection
-              .channel('telegram')
-              ?.bind('ticker', this.pusherTelegramHandler);
-          }
+        if (connection) {
+          connection
+            .channel('telegram')
+            ?.bind('ticker', this.pusherTelegramHandler);
         }
       }
 

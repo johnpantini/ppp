@@ -447,7 +447,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       this.instrumentTrader = this.bookTrader;
 
       this.selectInstrument(
-        this.bookTrader.instruments.get(this.document.symbol),
+        this.instrumentTrader.instruments.get(this.document.symbol),
         { isolate: true }
       );
 
@@ -466,14 +466,12 @@ export class OrderbookWidget extends WidgetWithInstrument {
         });
       }
 
-      if (this.bookTrader) {
-        await this.bookTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            orderbook: TRADER_DATUM.ORDERBOOK
-          }
-        });
-      }
+      await this.bookTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          orderbook: TRADER_DATUM.ORDERBOOK
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }
@@ -577,7 +575,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
     const bids = [];
     const asks = [];
 
-    for (let i = 0; i < orderbook.bids.length; i++) {
+    for (let i = 0; i < orderbook?.bids?.length; i++) {
       const bid = orderbook.bids[i];
       const newBid = {};
 
@@ -595,7 +593,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       bids[i] = newBid;
     }
 
-    for (let i = 0; i < orderbook.asks.length; i++) {
+    for (let i = 0; i < orderbook?.asks?.length; i++) {
       const ask = orderbook.asks[i];
       const newAsk = {};
 

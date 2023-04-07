@@ -92,16 +92,19 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.timelineTrader = await ppp.getOrCreateTrader(
         this.document.timelineTrader
       );
-      this.searchControl.trader = this.timelineTrader;
+      this.instrumentTrader = this.timelineTrader;
 
-      if (this.timelineTrader) {
-        await this.timelineTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            timelineItem: TRADER_DATUM.TIMELINE_ITEM
-          }
-        });
-      }
+      this.selectInstrument(
+        this.instrumentTrader.instruments.get(this.document.symbol),
+        { isolate: true }
+      );
+
+      await this.timelineTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          timelineItem: TRADER_DATUM.TIMELINE_ITEM
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }

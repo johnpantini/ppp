@@ -278,43 +278,41 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.instrumentTrader = this.tradesTrader;
 
       this.selectInstrument(
-        this.tradesTrader.instruments.get(this.document.symbol),
+        this.instrumentTrader.instruments.get(this.document.symbol),
         { isolate: true }
       );
 
-      if (this.tradesTrader) {
-        if (
-          this.instrument &&
-          typeof this.tradesTrader.allTrades === 'function'
-        ) {
-          try {
-            this.trades = (
-              await this.tradesTrader.allTrades({
-                instrument: this.instrument,
-                depth: this.document.depth
-              })
-            )?.filter((t) => {
-              if (this.document.threshold) {
-                return t.volume >= this.document.threshold;
-              } else return true;
-            });
-          } catch (e) {
-            console.error(e);
+      if (
+        this.instrument &&
+        typeof this.tradesTrader.allTrades === 'function'
+      ) {
+        try {
+          this.trades = (
+            await this.tradesTrader.allTrades({
+              instrument: this.instrument,
+              depth: this.document.depth
+            })
+          )?.filter((t) => {
+            if (this.document.threshold) {
+              return t.volume >= this.document.threshold;
+            } else return true;
+          });
+        } catch (e) {
+          console.error(e);
 
-            return this.notificationsArea.error({
-              title: 'Лента всех сделок',
-              text: 'Не удалось загрузить историю сделок.'
-            });
-          }
+          return this.notificationsArea.error({
+            title: 'Лента всех сделок',
+            text: 'Не удалось загрузить историю сделок.'
+          });
         }
-
-        await this.tradesTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            print: TRADER_DATUM.MARKET_PRINT
-          }
-        });
       }
+
+      await this.tradesTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }

@@ -401,6 +401,11 @@ class AlpacaV2PlusTrader extends Trader {
 
     const symbol = instrument.symbol.split('@')[0];
 
+    if (symbol === 'TCS' && instrument.exchange === EXCHANGE.SPBX) return false;
+
+    if (symbol === 'FIVE' && instrument.exchange === EXCHANGE.MOEX)
+      return false;
+
     return this.instruments.has(symbol);
   }
 

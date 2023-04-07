@@ -5,7 +5,9 @@ import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
 import { maybeFetchError, validate } from '../../lib/ppp-errors.js';
+import { toNumber } from '../../traders/tinkoff-grpc-web.js';
 import '../button.js';
+import '../query-select.js';
 import '../select.js';
 
 export const instrumentsImportPageTemplate = html`
@@ -38,6 +40,9 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
               Alor (СПБ Биржа)
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
+              Tinkoff
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -54,6 +59,41 @@ export const instrumentsImportPageTemplate = html`
                 placeholder="https://example.com"
                 ${ref('dictionaryUrl')}
               ></ppp-text-field>
+            </div>
+          </section>
+        `
+      )}
+      ${when(
+        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.TINKOFF,
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Брокерский профиль Tinkoff</h5>
+              <p class="description">Необходим для формирования словаря.</p>
+            </div>
+            <div class="input-group">
+              <ppp-query-select
+                ${ref('tinkoffBrokerId')}
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('brokers')
+                      .find({
+                        $and: [
+                          {
+                            type: `[%#(await import('../../lib/const.js')).BROKERS.TINKOFF%]`
+                          },
+                          { removed: { $ne: true } }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
             </div>
           </section>
         `
@@ -236,6 +276,73 @@ export class InstrumentsImportPage extends Page {
     });
   }
 
+  async #tinkoffSecurities(security = 'Shares', token) {
+    try {
+      return (
+        await (
+          await fetch(
+            `https://invest-public-api.tinkoff.ru/rest/tinkoff.public.invest.api.contract.v1.InstrumentsService/${security}`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+                'x-app-name': 'johnpantini.ppp'
+              },
+              body: JSON.stringify({
+                instrumentStatus: 'INSTRUMENT_STATUS_UNSPECIFIED'
+              })
+            }
+          )
+        ).json()
+      ).instruments;
+    } catch (e) {
+      console.error(e);
+
+      return [];
+    }
+  }
+
+  async [INSTRUMENT_DICTIONARY.TINKOFF]() {
+    await validate(this.tinkoffBrokerId);
+
+    const instruments = [];
+    const stocks =
+      (await this.#tinkoffSecurities(
+        'Shares',
+        this.tinkoffBrokerId.datum().apiToken
+      )) ?? [];
+
+    for (const s of stocks) {
+      const realExchange = s.realExchange;
+
+      if (
+        realExchange === 'REAL_EXCHANGE_MOEX' ||
+        realExchange === 'REAL_EXCHANGE_RTS'
+      ) {
+        instruments.push({
+          symbol: s.ticker.replace('.', ' '),
+          exchange:
+            realExchange === 'REAL_EXCHANGE_MOEX'
+              ? EXCHANGE.MOEX
+              : EXCHANGE.SPBX,
+          broker: BROKERS.TINKOFF,
+          tinkoffFigi: s.figi,
+          fullName: s.name,
+          minPriceIncrement: toNumber(s.minPriceIncrement),
+          type: 'stock',
+          currency: s.currency.toUpperCase(),
+          forQualInvestorFlag: s.forQualInvestorFlag,
+          lot: s.lot,
+          isin: s.isin,
+          classCode: s.classCode
+        });
+      }
+    }
+
+    return instruments;
+  }
+
   async submitDocument() {
     this.beginOperation();
 
@@ -291,6 +398,12 @@ export class InstrumentsImportPage extends Page {
         case INSTRUMENT_DICTIONARY.ALOR_SPBX:
           exchange = EXCHANGE.SPBX;
           broker = BROKERS.ALOR;
+
+          break;
+
+        case INSTRUMENT_DICTIONARY.TINKOFF:
+          exchange = EXCHANGE.RUS;
+          broker = BROKERS.TINKOFF;
 
           break;
       }

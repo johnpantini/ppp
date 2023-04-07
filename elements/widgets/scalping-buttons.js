@@ -196,11 +196,14 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
-      this.searchControl.trader = this.ordersTrader;
+      this.instrumentTrader = this.ordersTrader;
 
-      if (this.ordersTrader) {
-        await this.ordersTrader.sayHello(WIDGET_TYPES.SCALPING_BUTTONS);
-      }
+      this.selectInstrument(
+        this.instrumentTrader.instruments.get(this.document.symbol),
+        { isolate: true }
+      );
+
+      await this.ordersTrader.sayHello(WIDGET_TYPES.SCALPING_BUTTONS);
     } catch (e) {
       return this.catchException(e);
     }

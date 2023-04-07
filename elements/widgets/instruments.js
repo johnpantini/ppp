@@ -55,12 +55,12 @@ export class InstrumentsWidget extends WidgetWithInstrument {}
 
 export async function widgetDefinition() {
   return {
-    type: WIDGET_TYPES.LIGHT_CHART,
+    type: WIDGET_TYPES.INSTRUMENTS,
     collection: 'PPP',
-    title: html`Лёгкий график`,
-    description: html`Виджет
-      <span class="positive">Лёгкий график</span> отображает график финансового
-      инструмента в минимальной комплектации.`,
+    title: html`Инструменты`,
+    description: html`Виджет <span class="positive">Инструменты</span> позволяет
+      настраивать списки торговых инструментов, группируя их для различных
+      целей.`,
     customElement: InstrumentsWidget.compose({
       template: instrumentsWidgetTemplate,
       styles: instrumentsWidgetStyles

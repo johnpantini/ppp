@@ -482,16 +482,19 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
-      this.searchControl.trader = this.ordersTrader;
+      this.instrumentTrader = this.ordersTrader;
 
-      if (this.ordersTrader) {
-        await this.ordersTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            currentOrder: TRADER_DATUM.CURRENT_ORDER
-          }
-        });
-      }
+      this.selectInstrument(
+        this.instrumentTrader.instruments.get(this.document.symbol),
+        { isolate: true }
+      );
+
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          currentOrder: TRADER_DATUM.CURRENT_ORDER
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }

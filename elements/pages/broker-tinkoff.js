@@ -96,7 +96,7 @@ export class BrokerTinkoffPage extends Page {
           '*': {
             metadata: new Metadata({
               Authorization: `Bearer ${this.apiToken.value.trim()}`,
-              'x-app-name': `${ppp.keyVault.getKey('github-login')}.ppp`
+              'x-app-name': 'johnpantini.ppp'
             })
           }
         }
