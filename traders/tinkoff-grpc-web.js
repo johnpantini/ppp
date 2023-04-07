@@ -734,6 +734,12 @@ class TinkoffGrpcWebTrader extends Trader {
     return EXCHANGE.RUS;
   }
 
+  getExchangeForSync() {
+    return {
+      $in: [EXCHANGE.SPBX, EXCHANGE.MOEX]
+    };
+  }
+
   getBroker() {
     return BROKERS.TINKOFF;
   }

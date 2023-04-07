@@ -94,15 +94,30 @@ import {
 } from '../lib/ppp-errors.js';
 import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 
-export const importInstrumentsSuggestion = ({ trader }) => html`
+export const importInstrumentsSuggestion = (e) => html`
   <span>
     <a
       class="link"
       href="?page=instruments&tab=import"
-      @click="${(x) => x.openInstrumentsImport(trader)}"
+      @click="${(x) => x.openInstrumentsImport(e.trader)}"
     >
       Импортируйте</a
     >
+    или
+    <a
+      class="link"
+      @click="${async (x) => {
+        x.widget.container.beginOperation();
+
+        try {
+          await e.trader.syncInstrumentCache(e);
+        } finally {
+          window.location.reload();
+        }
+      }}"
+    >
+      синхронизируйте
+    </a>
     торговые инструменты, затем обновите страницу.
   </span>
 `;

@@ -37,10 +37,14 @@ export class Trader {
         collection: 'instruments'
       },
       {
-        exchange,
+        exchange:
+          typeof this.getExchangeForSync === 'function'
+            ? await this.getExchangeForSync()
+            : exchange,
         broker
       }
     );
+
     const cache = await ppp.openInstrumentCache({
       exchange,
       broker
@@ -142,7 +146,11 @@ export class Trader {
         }
 
         if (!this.#instruments.size) {
-          throw new NoInstrumentsError({ trader: this });
+          throw new NoInstrumentsError({
+            trader: this,
+            currentCacheVersion,
+            lastCacheVersion
+          });
         }
 
         if (currentCacheVersion < lastCacheVersion) {
