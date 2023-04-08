@@ -6,15 +6,15 @@ import { APIS } from '../../lib/const.js';
 import '../button.js';
 import '../text-field.js';
 
-export const apiSeatablePageTemplate = html`
+export const apiBitioPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
         ${(x) =>
           x.document.name
-            ? `Внешние API - Seatable - ${x.document.name}`
-            : 'Внешние API - Seatable'}
+            ? `Внешние API - bit.io - ${x.document.name}`
+            : 'Внешние API - bit.io'}
       </ppp-page-header>
       <section>
         <div class="label-group">
@@ -26,7 +26,7 @@ export const apiSeatablePageTemplate = html`
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Seatable"
+            placeholder="PostgreSQL"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -34,17 +34,31 @@ export const apiSeatablePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен базы</h5>
+          <h5>Ключ API базы данных</h5>
           <p class="description">
-            API-токен базы Seatable. Можно получить в панели управления.
+            API-ключ базы bit.io. Можно получить в панели управления на вкладке
+            Connect.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Token"
-            value="${(x) => x.document.baseToken}"
-            ${ref('baseToken')}
+            placeholder="API-ключ"
+            value="${(x) => x.document.apiKey}"
+            ${ref('apiKey')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>База данных</h5>
+          <p class="description">Название базы данных для подключения.</p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            placeholder="ppp"
+            value="${(x) => x.document.db}"
+            ${ref('db')}
           ></ppp-text-field>
         </div>
       </section>
@@ -61,44 +75,39 @@ export const apiSeatablePageTemplate = html`
   </template>
 `;
 
-export const apiSeatablePageStyles = css`
+export const apiBitioPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkSeatableCredentials({
-  baseToken,
-  serviceMachineUrl
-}) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: 'https://cloud.seatable.io/api/v2.1/dtable/app-access-token/',
-      headers: {
-        Authorization: `Token ${baseToken}`
-      }
-    })
-  });
-}
-
-export class ApiSeatablePage extends Page {
+export class ApiBitioPage extends Page {
   collection = 'apis';
 
   async validate() {
     await validate(this.name);
-    await validate(this.baseToken);
+    await validate(this.apiKey);
+    await validate(this.db);
 
-    if (
-      !(
-        await checkSeatableCredentials({
-          baseToken: this.baseToken.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+    const checkCredentialsRequest = await fetch(
+      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          url: 'https://api.bit.io/v2beta/query',
+          headers: {
+            Authorization: `Bearer ${this.apiKey.value.trim()}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query_string: 'SELECT 42;',
+            database_name: this.db.value.trim()
+          })
         })
-      ).ok
-    ) {
-      invalidate(this.baseToken, {
-        errorMessage: 'Неверный токен',
+      }
+    );
+
+    if (!checkCredentialsRequest.ok) {
+      invalidate(this.apiKey, {
+        errorMessage: 'Неверный ключ API',
         raiseException: true
       });
     }
@@ -112,14 +121,14 @@ export class ApiSeatablePage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).APIS.SEATABLE%]`
+          type: `[%#(await import('../../lib/const.js')).APIS.BITIO%]`
         });
     };
   }
 
   async find() {
     return {
-      type: APIS.SEATABLE,
+      type: APIS.BITIO,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -129,19 +138,20 @@ export class ApiSeatablePage extends Page {
     return {
       $set: {
         name: this.name.value.trim(),
-        baseToken: this.baseToken.value.trim(),
+        apiKey: this.apiKey.value.trim(),
+        db: this.db.value.trim(),
         version: 1,
         updatedAt: new Date()
       },
       $setOnInsert: {
-        type: APIS.SEATABLE,
+        type: APIS.BITIO,
         createdAt: new Date()
       }
     };
   }
 }
 
-export default ApiSeatablePage.compose({
-  template: apiSeatablePageTemplate,
-  styles: apiSeatablePageStyles
+export default ApiBitioPage.compose({
+  template: apiBitioPageTemplate,
+  styles: apiBitioPageStyles
 }).define();

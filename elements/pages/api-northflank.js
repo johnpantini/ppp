@@ -6,15 +6,15 @@ import { APIS } from '../../lib/const.js';
 import '../button.js';
 import '../text-field.js';
 
-export const apiSeatablePageTemplate = html`
+export const apiNorthflankPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
         ${(x) =>
           x.document.name
-            ? `Внешние API - Seatable - ${x.document.name}`
-            : 'Внешние API - Seatable'}
+            ? `Внешние API - Northflank - ${x.document.name}`
+            : 'Внешние API - Northflank'}
       </ppp-page-header>
       <section>
         <div class="label-group">
@@ -26,7 +26,7 @@ export const apiSeatablePageTemplate = html`
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Seatable"
+            placeholder="Northflank"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -34,17 +34,17 @@ export const apiSeatablePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен базы</h5>
+          <h5>Токен API</h5>
           <p class="description">
-            API-токен базы Seatable. Можно получить в панели управления.
+            API-токен Northflank. Можно получить в настройках профиля.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
             placeholder="Token"
-            value="${(x) => x.document.baseToken}"
-            ${ref('baseToken')}
+            value="${(x) => x.document.token}"
+            ${ref('token')}
           ></ppp-text-field>
         </div>
       </section>
@@ -61,43 +61,40 @@ export const apiSeatablePageTemplate = html`
   </template>
 `;
 
-export const apiSeatablePageStyles = css`
+export const apiNorthflankPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkSeatableCredentials({
-  baseToken,
-  serviceMachineUrl
-}) {
+export async function checkNorthflankCredentials({ token, serviceMachineUrl }) {
   return fetch(new URL('fetch', serviceMachineUrl).toString(), {
     cache: 'no-cache',
     method: 'POST',
     body: JSON.stringify({
       method: 'GET',
-      url: 'https://cloud.seatable.io/api/v2.1/dtable/app-access-token/',
+      url: 'https://api.northflank.com/v1/projects',
       headers: {
-        Authorization: `Token ${baseToken}`
+        Authorization: `Bearer ${token}`
       }
     })
   });
 }
 
-export class ApiSeatablePage extends Page {
+export class ApiNorthflankPage extends Page {
   collection = 'apis';
 
   async validate() {
     await validate(this.name);
-    await validate(this.baseToken);
+    await validate(this.token);
 
     if (
       !(
-        await checkSeatableCredentials({
-          baseToken: this.baseToken.value.trim(),
+        await checkNorthflankCredentials({
+          token: this.token.value.trim(),
           serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
         })
       ).ok
     ) {
-      invalidate(this.baseToken, {
+      invalidate(this.token, {
         errorMessage: 'Неверный токен',
         raiseException: true
       });
@@ -112,14 +109,14 @@ export class ApiSeatablePage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).APIS.SEATABLE%]`
+          type: `[%#(await import('../../lib/const.js')).APIS.NORTHFLANK%]`
         });
     };
   }
 
   async find() {
     return {
-      type: APIS.SEATABLE,
+      type: APIS.NORTHFLANK,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -129,19 +126,19 @@ export class ApiSeatablePage extends Page {
     return {
       $set: {
         name: this.name.value.trim(),
-        baseToken: this.baseToken.value.trim(),
+        token: this.token.value.trim(),
         version: 1,
         updatedAt: new Date()
       },
       $setOnInsert: {
-        type: APIS.SEATABLE,
+        type: APIS.NORTHFLANK,
         createdAt: new Date()
       }
     };
   }
 }
 
-export default ApiSeatablePage.compose({
-  template: apiSeatablePageTemplate,
-  styles: apiSeatablePageStyles
+export default ApiNorthflankPage.compose({
+  template: apiNorthflankPageTemplate,
+  styles: apiNorthflankPageStyles
 }).define();

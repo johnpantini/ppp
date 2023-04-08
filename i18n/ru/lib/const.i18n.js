@@ -23,7 +23,8 @@ export default function (i18n) {
         [APIS.ALGOLIA]: 'Algolia',
         [APIS.NORTHFLANK]: 'Northflank',
         [APIS.REDIS]: 'Redis',
-        [APIS.CLOUDFLARE]: 'Cloudflare'
+        [APIS.CLOUDFLARE]: 'Cloudflare',
+        [APIS.BITIO]: 'bit.io'
       },
       broker: {
         [BROKERS.ALOR]: 'Alor',
