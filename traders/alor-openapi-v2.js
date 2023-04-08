@@ -125,6 +125,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
     let symbol;
 
+    // TODO
     if (this.document.exchange === 'SPBX' && instrument.spbxSymbol)
       symbol = instrument.spbxSymbol;
     else symbol = instrument.symbol;

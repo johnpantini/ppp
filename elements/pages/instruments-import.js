@@ -40,6 +40,11 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
               Alor (СПБ Биржа)
             </ppp-option>
+            <ppp-option
+              value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}"
+            >
+              Alor (Московская биржа), фондовый рынок
+            </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
               Tinkoff
             </ppp-option>
@@ -242,7 +247,7 @@ export class InstrumentsImportPage extends Page {
 
   async [INSTRUMENT_DICTIONARY.ALOR_SPBX]() {
     const rSymbols = await fetch(
-      `https://api.alor.ru/md/v2/Securities?exchange=SPBX&type=FOND&limit=4000&offset=0`,
+      'https://api.alor.ru/md/v2/Securities?exchange=SPBX&limit=5000&offset=0',
       {
         cache: 'reload'
       }
@@ -270,6 +275,44 @@ export class InstrumentsImportPage extends Page {
         type,
         currency: s.currency,
         forQualInvestorFlag: s.currency !== 'RUB',
+        lot: s.lotsize,
+        isin: s.ISIN
+      };
+    });
+  }
+
+  async [INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES]() {
+    const rSymbols = await fetch(
+      'https://api.alor.ru/md/v2/Securities?exchange=MOEX&sector=FOND&limit=5000&offset=0',
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(
+      rSymbols,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const symbols = await rSymbols.json();
+
+    return symbols.map((s) => {
+      let type = 'stock';
+
+      if (s.cfiCode?.startsWith?.('DB')) type = 'bond';
+
+      if (s.type === 'ETF' || s.type === 'MF') type = 'etf';
+
+      return {
+        symbol: s.symbol,
+        exchange: EXCHANGE.MOEX,
+        broker: BROKERS.ALOR,
+        fullName: s.description,
+        minPriceIncrement: s.minstep,
+        type,
+        currency: s.currency,
+        forQualInvestorFlag: false,
+        classCode: s.board,
         lot: s.lotsize,
         isin: s.ISIN
       };
@@ -321,7 +364,7 @@ export class InstrumentsImportPage extends Page {
         realExchange === 'REAL_EXCHANGE_RTS'
       ) {
         instruments.push({
-          symbol: s.ticker.replace('.', ' '),
+          symbol: s.ticker.replace('.', ' ').toUpperCase(),
           exchange:
             realExchange === 'REAL_EXCHANGE_MOEX'
               ? EXCHANGE.MOEX
@@ -361,7 +404,7 @@ export class InstrumentsImportPage extends Page {
           return {
             updateOne: {
               filter: {
-                symbol: i.symbol,
+                symbol: i.symbol.toUpperCase(),
                 exchange: i.exchange,
                 broker: i.broker
               },
@@ -376,46 +419,61 @@ export class InstrumentsImportPage extends Page {
       );
 
       let exchange;
+      let exchangeForDBRequest;
       let broker;
 
       switch (this.dictionary.value) {
         case INSTRUMENT_DICTIONARY.BINANCE:
           exchange = EXCHANGE.BINANCE;
+          exchangeForDBRequest = EXCHANGE.BINANCE;
           broker = BROKERS.BINANCE;
 
           break;
         case INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS:
           exchange = EXCHANGE.UTEX_MARGIN_STOCKS;
+          exchangeForDBRequest = EXCHANGE.UTEX_MARGIN_STOCKS;
           broker = BROKERS.UTEX;
 
           break;
         case INSTRUMENT_DICTIONARY.PSINA_US_STOCKS:
           exchange = EXCHANGE.US;
+          exchangeForDBRequest = EXCHANGE.US;
           broker = BROKERS.PSINA;
 
           break;
 
         case INSTRUMENT_DICTIONARY.ALOR_SPBX:
           exchange = EXCHANGE.SPBX;
+          exchangeForDBRequest = EXCHANGE.SPBX;
+          broker = BROKERS.ALOR;
+
+          break;
+
+        case INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES:
+          exchange = EXCHANGE.MOEX_SECURITIES;
+          exchangeForDBRequest = EXCHANGE.MOEX;
           broker = BROKERS.ALOR;
 
           break;
 
         case INSTRUMENT_DICTIONARY.TINKOFF:
           exchange = EXCHANGE.RUS;
+          exchangeForDBRequest = {
+            $in: [EXCHANGE.SPBX, EXCHANGE.MOEX]
+          };
           broker = BROKERS.TINKOFF;
 
           break;
       }
 
-      if (exchange && broker) {
+      if (exchange && broker && exchangeForDBRequest) {
         // Use this to preserve user field values
         const existingInstruments = await ppp.user.functions.find(
           {
             collection: 'instruments'
           },
           {
-            exchange,
+            exchange: exchangeForDBRequest,
             broker
           }
         );

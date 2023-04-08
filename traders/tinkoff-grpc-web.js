@@ -46,7 +46,7 @@ export function toQuotation(value) {
 }
 
 export function toNumber(value) {
-  return value ? value.units + value.nano / 1000000000 : value;
+  return value ? +value.units + +value.nano / 1000000000 : value;
 }
 
 class TinkoffGrpcWebTrader extends Trader {
@@ -734,7 +734,7 @@ class TinkoffGrpcWebTrader extends Trader {
     return EXCHANGE.RUS;
   }
 
-  getExchangeForSync() {
+  getExchangeForDBRequest() {
     return {
       $in: [EXCHANGE.SPBX, EXCHANGE.MOEX]
     };

@@ -735,7 +735,7 @@ export class InstrumentsManagePage extends Page {
           {
             exchange: '[%#this.exchange.value%]',
             broker: '[%#this.broker.value%]',
-            symbol: '[%#this.symbol.value%]'
+            symbol: '[%#this.symbol.value.toUpperCase()%]'
           },
           {
             _id: 0
@@ -781,10 +781,6 @@ export class InstrumentsManagePage extends Page {
       $set.utexSymbolID = this.utexSymbolID.value;
     }
 
-    if (this.exchange.value === EXCHANGE.SPBX) {
-      $set.spbxSymbol = this.spbxSymbol.value.trim();
-    }
-
     if (this.broker.value === BROKERS.TINKOFF) {
       $set.tinkoffFigi = this.tinkoffFigi.value.trim();
     }
@@ -826,18 +822,25 @@ export class InstrumentsManagePage extends Page {
   }
 
   async updateLocalCache() {
+    let exchange = this.exchange.value;
+
+    // Handle special cases
+    if (this.broker.value === BROKERS.TINKOFF) {
+      exchange = EXCHANGE.RUS;
+    }
+
     const nextCacheVersion = await ppp.nextInstrumentCacheVersion({
-      exchange: this.exchange.value,
+      exchange,
       broker: this.broker.value
     });
     const cache = await ppp.openInstrumentCache({
-      exchange: this.exchange.value,
+      exchange,
       broker: this.broker.value
     });
 
     try {
       await new Promise((resolve, reject) => {
-        const storeName = `${this.exchange.value}:${this.broker.value}`;
+        const storeName = `${exchange}:${this.broker.value}`;
         const tx = cache.transaction(storeName, 'readwrite');
         const instrumentsStore = tx.objectStore(storeName);
 

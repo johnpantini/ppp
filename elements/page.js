@@ -86,9 +86,9 @@ export const pageStyles = css`
   ${spacing()}
   ${typography()}
   :host(.page) {
+    display: block;
     position: relative;
     width: 100%;
-    height: 100%;
   }
 
   :host(.page) ppp-loader {

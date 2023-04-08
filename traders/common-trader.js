@@ -37,10 +37,7 @@ export class Trader {
         collection: 'instruments'
       },
       {
-        exchange:
-          typeof this.getExchangeForSync === 'function'
-            ? await this.getExchangeForSync()
-            : exchange,
+        exchange: this.getExchangeForDBRequest(),
         broker
       }
     );
@@ -387,6 +384,10 @@ export class Trader {
     if (!this.supportsInstrument(instrument)) return instrument;
 
     if (instrument) return this.instruments.get(instrument.symbol);
+  }
+
+  getExchangeForDBRequest() {
+    return this.getExchange();
   }
 
   getExchange() {
