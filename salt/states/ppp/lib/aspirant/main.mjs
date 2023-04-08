@@ -124,7 +124,7 @@ function cors(res) {
         'Access-Control-Allow-Methods',
         'GET, POST, OPTIONS, PUT, PATCH, DELETE'
       )
-      .writeHeader('Access-Control-Allow-Headers', 'content-type');
+      .writeHeader('Access-Control-Allow-Headers', '*');
   }
 
   return res;

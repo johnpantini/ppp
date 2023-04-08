@@ -404,7 +404,7 @@ createServer((request, response) => {
     'Access-Control-Allow-Methods',
     'GET, POST, OPTIONS, PUT, PATCH, DELETE'
   );
-  response.setHeader('Access-Control-Allow-Headers', 'content-type');
+  response.setHeader('Access-Control-Allow-Headers', '*');
 
   if (/options/i.test(request.method)) {
     return response.writeHead(200).end();
