@@ -59,6 +59,9 @@ export function parseConnectionString(str) {
   if (query.application_name)
     cfg.applicationName = decodeURI(getFirst(query.application_name));
 
+  if (query.ssl)
+    cfg.ssl = true;
+
   if (parsed.username) cfg.user = parsed.username;
 
   if (parsed.password) cfg.password = decodeURIComponent(parsed.password);
