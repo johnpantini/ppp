@@ -668,7 +668,7 @@ export class InstrumentsManagePage extends Page {
     const symbol = this.symbol.value.trim();
 
     ppp.app.setURLSearchParams({
-      symbol: encodeURIComponent(symbol)
+      symbol: encodeURIComponent(symbol.toUpperCase())
     });
 
     if (symbol) {
