@@ -484,10 +484,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.ordersTrader;
 
-      this.selectInstrument(
-        this.instrumentTrader.instruments.get(this.document.symbol),
-        { isolate: true }
-      );
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       await this.ordersTrader.subscribeFields?.({
         source: this,

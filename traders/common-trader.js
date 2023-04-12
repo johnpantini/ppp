@@ -173,9 +173,6 @@ export class Trader {
     return symbol;
   }
 
-  // TODO - get rid of this crap
-  async findInstrumentInCache(symbol) {}
-
   relativeBondPriceToPrice(relativePrice, instrument) {
     return +this.fixPrice(
       instrument,
@@ -322,7 +319,7 @@ export class Trader {
     }
   }
 
-  async removeRef(instrument, refs) {
+  async removeRef(instrument, refs, key) {
     if (instrument?.symbol && refs) {
       const ref = refs.get(instrument.symbol);
 
@@ -332,8 +329,8 @@ export class Trader {
         }
 
         if (ref.refCount === 0) {
-          await this.removeLastRef?.(instrument, refs, ref);
           refs.delete(instrument.symbol);
+          await this.removeLastRef?.(instrument, refs, ref, key);
         }
       }
     }
@@ -354,11 +351,11 @@ export class Trader {
           if (this.getDatumGlobalReferenceName(datum)) continue;
 
           if (oldValue) {
-            await this.removeRef(oldValue, this.refs[key]);
+            await this.removeRef(oldValue, this.refs[key], key);
           }
 
           if (newValue) {
-            await this.addRef(newValue, this.refs[key]);
+            await this.addRef(newValue, this.refs[key], key);
           }
         }
       }
@@ -377,10 +374,16 @@ export class Trader {
   supportsInstrument(instrument) {
     if (!instrument) return true;
 
+    if (!instrument.type) {
+      return false;
+    }
+
     return this.instruments.has(instrument.symbol);
   }
 
   adoptInstrument(instrument) {
+    if (!instrument?.type) return instrument;
+
     if (!this.supportsInstrument(instrument)) return instrument;
 
     if (instrument) return this.instruments.get(instrument.symbol);

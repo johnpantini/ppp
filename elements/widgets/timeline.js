@@ -94,10 +94,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.timelineTrader;
 
-      this.selectInstrument(
-        this.instrumentTrader.instruments.get(this.document.symbol),
-        { isolate: true }
-      );
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       await this.timelineTrader.subscribeFields?.({
         source: this,

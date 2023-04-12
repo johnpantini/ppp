@@ -1,10 +1,14 @@
 import { isJWTTokenExpired, uuidv4 } from '../lib/ppp-crypto.js';
 import { TradingError } from '../lib/ppp-errors.js';
-import { TRADER_DATUM, TIMELINE_OPERATION_TYPE } from '../lib/const.js';
+import {
+  TRADER_DATUM,
+  TIMELINE_OPERATION_TYPE,
+  EXCHANGE,
+  BROKERS,
+  INSTRUMENT_DICTIONARY
+} from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
-import { cyrillicToLatin } from '../lib/intl.js';
-import ppp from '../../ppp.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -40,8 +44,8 @@ class AlorOpenAPIV2Trader extends Trader {
     allTrades: new Map()
   };
 
-  // Key: instrumentId; Value: { instrument, refCount, guid }
-  // Value contains lastQuotesData for quotes & lastOrderbookData for orderbook
+  // Key: instrument symbol; Value: { instrument, refCount, guid }
+  // Value contains lastQuotesData for quotes & lastOrderbook for orderbook
   refs = {
     quotes: new Map(),
     orders: new Map(),
@@ -123,12 +127,15 @@ class AlorOpenAPIV2Trader extends Trader {
     if (instrument.type === 'future')
       return instrument.fullName.split(/\s+/)[0];
 
-    let symbol;
+    if (
+      instrument?.currency === 'USD' &&
+      instrument?.symbol === 'SPB' &&
+      this.document.exchange === EXCHANGE.SPBX
+    ) {
+      return 'SPB@US';
+    }
 
-    // TODO
-    if (this.document.exchange === 'SPBX' && instrument.spbxSymbol)
-      symbol = instrument.spbxSymbol;
-    else symbol = instrument.symbol;
+    let symbol = instrument.symbol;
 
     if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
 
@@ -330,7 +337,7 @@ class AlorOpenAPIV2Trader extends Trader {
           if (this.document.portfolioType === 'futures') {
             orderInstrument = this.#futures.get(o.symbol);
           } else {
-            orderInstrument = await this.findInstrumentInCache(o.symbol);
+            orderInstrument = this.instruments.get(o.symbol);
           }
 
           if (
@@ -458,12 +465,12 @@ class AlorOpenAPIV2Trader extends Trader {
 
           this.connection.onopen = () => {
             // 1. Quotes
-            for (const [instrumentId, { instrument, refCount }] of this.refs
+            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
               .quotes) {
               if (refCount > 0) {
                 const guid = this.#reqId();
 
-                this.refs.quotes.get(instrumentId).guid = guid;
+                this.refs.quotes.get(instrumentSymbol).guid = guid;
                 this.#guids.set(guid, {
                   instrument,
                   refs: this.refs.quotes
@@ -483,12 +490,12 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             // 2. Orderbook
-            for (const [instrumentId, { instrument, refCount }] of this.refs
+            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
               .orderbook) {
               if (refCount > 0) {
                 const guid = this.#reqId();
 
-                this.refs.orderbook.get(instrumentId).guid = guid;
+                this.refs.orderbook.get(instrumentSymbol).guid = guid;
                 this.#guids.set(guid, {
                   instrument,
                   refs: this.refs.orderbook
@@ -509,12 +516,12 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             // 3. All trades
-            for (const [instrumentId, { instrument, refCount }] of this.refs
+            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
               .allTrades) {
               if (refCount > 0) {
                 const guid = this.#reqId();
 
-                this.refs.allTrades.get(instrumentId).guid = guid;
+                this.refs.allTrades.get(instrumentSymbol).guid = guid;
                 this.#guids.set(guid, {
                   instrument,
                   refs: this.refs.allTrades
@@ -537,12 +544,12 @@ class AlorOpenAPIV2Trader extends Trader {
             // 4. Positions
             this.positions.clear();
 
-            for (const [instrumentId, { instrument, refCount }] of this.refs
+            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
               .positions) {
               if (refCount > 0) {
                 const guid = this.#reqId();
 
-                this.refs.positions.get(instrumentId).guid = guid;
+                this.refs.positions.get(instrumentSymbol).guid = guid;
                 this.#guids.set(guid, {
                   instrument,
                   refs: this.refs.positions
@@ -562,12 +569,12 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             // 5. Current orders
-            for (const [instrumentId, { instrument, refCount }] of this.refs
+            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
               .orders) {
               if (refCount > 0) {
                 const guid = this.#reqId();
 
-                this.refs.orders.get(instrumentId).guid = guid;
+                this.refs.orders.get(instrumentSymbol).guid = guid;
                 this.#guids.set(guid, {
                   instrument,
                   refs: this.refs.orders
@@ -587,12 +594,12 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             // 6. Timeline
-            for (const [instrumentId, { instrument, refCount }] of this.refs
+            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
               .timeline) {
               if (refCount > 0) {
                 const guid = this.#reqId();
 
-                this.refs.timeline.get(instrumentId).guid = guid;
+                this.refs.timeline.get(instrumentSymbol).guid = guid;
                 this.#guids.set(guid, {
                   instrument,
                   refs: this.refs.timeline
@@ -699,7 +706,7 @@ class AlorOpenAPIV2Trader extends Trader {
       }
       case TRADER_DATUM.CURRENT_ORDER: {
         for (const [_, data] of this.orders) {
-          await this.onOrdersMessage({
+          this.onOrdersMessage({
             data,
             fromCache: true
           });
@@ -709,7 +716,7 @@ class AlorOpenAPIV2Trader extends Trader {
       }
       case TRADER_DATUM.TIMELINE_ITEM: {
         for (const [_, data] of this.timeline) {
-          await this.onTimelineMessage({
+          this.onTimelineMessage({
             data,
             fromCache: true
           });
@@ -735,11 +742,7 @@ class AlorOpenAPIV2Trader extends Trader {
         refs
       });
 
-      refs.set(instrument._id, {
-        refCount: 1,
-        guid,
-        instrument
-      });
+      refs.get(instrument.symbol).guid = guid;
 
       if (refs === this.refs.quotes) {
         this.connection.send(
@@ -854,27 +857,39 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  adoptInstrument(instrument) {
+    if (
+      instrument?.symbol === 'SPB' &&
+      instrument?.currency === 'USD' &&
+      this.document.exchange === EXCHANGE.SPBX
+    ) {
+      return this.instruments.get('SPB@US');
+    }
+
+    return super.adoptInstrument(instrument);
+  }
+
   async instrumentChanged(source, oldValue, newValue) {
     await this.ensureAccessTokenIsOk();
     await super.instrumentChanged(source, oldValue, newValue);
 
-    if (newValue?._id) {
+    if (newValue?.symbol) {
       // Handle no real subscription case for quotes and orderbook.
       // Use saved snapshot data for new widgets.
       // Time and sales uses allTrades REST API call,
       // so no special handling needed.
       this.onQuotesMessage({
-        data: this.refs.quotes.get(newValue._id)?.lastQuotesData
+        data: this.refs.quotes.get(newValue.symbol)?.lastQuotesData
       });
 
       this.onOrderbookMessage({
-        data: this.refs.orderbook.get(newValue._id)?.lastOrderbookData
+        data: this.refs.orderbook.get(newValue.symbol)?.lastOrderbook
       });
     }
 
     // Broadcast positions for order widgets (at least).
     if (this.subs.positions.has(source)) {
-      for (const [symbol, data] of this.positions) {
+      for (const [, data] of this.positions) {
         await this.onPositionsMessage({
           data,
           fromCache: true
@@ -911,11 +926,11 @@ class AlorOpenAPIV2Trader extends Trader {
         }
 
         for (const [source, fields] of this.subs.orderbook) {
-          if (instrument._id === source.instrument?._id) {
-            const ref = this.refs.orderbook.get(source.instrument?._id);
+          if (this.instrumentsAreEqual(instrument, source.instrument)) {
+            const ref = this.refs.orderbook.get(source.instrument?.symbol);
 
             if (ref) {
-              ref.lastOrderbookData = data;
+              ref.lastOrderbook = data;
 
               for (const { field, datum } of fields) {
                 switch (datum) {
@@ -941,8 +956,8 @@ class AlorOpenAPIV2Trader extends Trader {
 
       if (instrument) {
         for (const [source, fields] of this.subs.quotes) {
-          if (instrument._id === source.instrument?._id) {
-            const ref = this.refs.quotes.get(source.instrument?._id);
+          if (this.instrumentsAreEqual(instrument, source.instrument)) {
+            const ref = this.refs.quotes.get(source.instrument?.symbol);
 
             if (ref) ref.lastQuotesData = data;
 
@@ -1010,7 +1025,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
       if (instrument) {
         for (const [source, fields] of this.subs.allTrades) {
-          if (instrument._id === source.instrument?._id) {
+          if (this.instrumentsAreEqual(instrument, source.instrument)) {
             for (const { field, datum } of fields) {
               switch (datum) {
                 case TRADER_DATUM.MARKET_PRINT:
@@ -1035,7 +1050,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async onPositionsMessage({ data, fromCache }) {
+  onPositionsMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.positions.set(data.symbol, data);
 
@@ -1064,9 +1079,7 @@ class AlorOpenAPIV2Trader extends Trader {
               if (this.document.portfolioType === 'futures') {
                 payload.instrument = this.#futures.get(data.symbol);
               } else {
-                payload.instrument = await this.findInstrumentInCache(
-                  data.symbol
-                );
+                payload.instrument = this.instruments.get(data.symbol);
               }
 
               if (payload.instrument?.type === 'bond') {
@@ -1102,7 +1115,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async onOrdersMessage({ data, fromCache }) {
+  onOrdersMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.orders.set(data.id, data);
 
@@ -1126,9 +1139,7 @@ class AlorOpenAPIV2Trader extends Trader {
             if (this.document.portfolioType === 'futures') {
               payload.instrument = this.#futures.get(data.symbol);
             } else {
-              payload.instrument = await this.findInstrumentInCache(
-                data.symbol
-              );
+              payload.instrument = this.instruments.get(data.symbol);
             }
 
             if (payload.instrument?.type === 'bond') {
@@ -1145,7 +1156,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async onTimelineMessage({ data, fromCache }) {
+  onTimelineMessage({ data, fromCache }) {
     if (data) {
       if (!fromCache) this.timeline.set(data.id, data);
 
@@ -1171,9 +1182,7 @@ class AlorOpenAPIV2Trader extends Trader {
             if (this.document.portfolioType === 'futures') {
               payload.instrument = this.#futures.get(data.symbol);
             } else {
-              payload.instrument = await this.findInstrumentInCache(
-                data.symbol
-              );
+              payload.instrument = this.instruments.get(data.symbol);
             }
 
             if (payload.instrument?.type === 'bond') {
@@ -1190,8 +1199,85 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  getDictionary() {
+    if (this.document.exchange === EXCHANGE.SPBX)
+      return INSTRUMENT_DICTIONARY.ALOR_SPBX;
+
+    // MOEX
+    switch (this.document.portfolioType) {
+      case 'stock':
+        return INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES;
+      case 'futures':
+        return null;
+      case 'currency':
+        return null;
+    }
+  }
+
   getExchange() {
+    if (this.document.exchange === EXCHANGE.SPBX) return EXCHANGE.SPBX;
+
+    // MOEX
+    switch (this.document.portfolioType) {
+      case 'stock':
+        return EXCHANGE.MOEX_SECURITIES;
+      case 'futures':
+        return EXCHANGE.MOEX_FORTS;
+      case 'currency':
+        return EXCHANGE.MOEX_CURRENCY;
+    }
+  }
+
+  getExchangeForDBRequest() {
     return this.document.exchange;
+  }
+
+  getBroker() {
+    return BROKERS.ALOR;
+  }
+
+  getInstrumentIconUrl(instrument) {
+    let symbol = instrument?.symbol;
+
+    if (typeof symbol === 'string') {
+      symbol = symbol.split('/')[0].split('-')[0].split('-RM')[0];
+
+      if (
+        symbol.endsWith('@GS') ||
+        symbol.endsWith('@DE') ||
+        symbol.endsWith('@GR') ||
+        symbol.endsWith('@UR') ||
+        symbol.endsWith('@KT')
+      ) {
+        return 'static/instruments/unknown.svg';
+      }
+
+      symbol = symbol.split('@US')[0];
+    }
+
+    if (instrument?.currency === 'HKD') {
+      return `static/instruments/stocks/hk/${symbol.replace(' ', '-')}.svg`;
+    }
+
+    const isRM = instrument?.symbol.endsWith('-RM');
+
+    if (!isRM) {
+      if (
+        instrument?.exchange === EXCHANGE.MOEX ||
+        instrument.currency === 'RUB'
+      ) {
+        return `static/instruments/${instrument.type}s/rus/${symbol.replace(
+          ' ',
+          '-'
+        )}.svg`;
+      }
+    }
+
+    if ((instrument?.exchange === EXCHANGE.SPBX || isRM) && symbol !== 'TCS') {
+      return `static/instruments/stocks/us/${symbol.replace(' ', '-')}.svg`;
+    }
+
+    return super.getInstrumentIconUrl(instrument);
   }
 
   async formatError(instrument, error) {

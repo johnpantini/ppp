@@ -101,10 +101,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.portfolioTrader;
 
-      this.selectInstrument(
-        this.instrumentTrader.instruments.get(this.document.symbol),
-        { isolate: true }
-      );
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       this.portfolioTrader.onError = this.onTraderError.bind(this);
 
@@ -151,7 +148,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
         this.topLoader.start();
 
         try {
-          this.selectInstrument(this.portfolioTrader.instruments.get(symbol));
+          this.selectInstrument(symbol);
         } catch (e) {
           console.log(e);
 

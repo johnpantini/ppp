@@ -277,14 +277,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.tradesTrader;
 
-      this.selectInstrument(
-        this.instrumentTrader.instruments.get(this.document.symbol),
-        { isolate: true }
-      );
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       if (
         this.instrument &&
-        typeof this.tradesTrader.allTrades === 'function'
+        typeof this.tradesTrader.allTrades === 'function' &&
+        this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
         try {
           this.trades = (
@@ -369,7 +367,8 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     if (this.tradesTrader) {
       if (
         this.instrument &&
-        typeof this.tradesTrader.allTrades === 'function'
+        typeof this.tradesTrader.allTrades === 'function' &&
+        this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
         this.trades = (
           await this.tradesTrader.allTrades({

@@ -654,10 +654,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
       this.instrumentTrader = this.ordersTrader;
 
-      this.selectInstrument(
-        this.instrumentTrader.instruments.get(this.document.symbol),
-        { isolate: true }
-      );
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       this.level1Trader = await ppp.getOrCreateTrader(
         this.document.level1Trader
@@ -782,7 +779,7 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   pusherTelegramHandler(data) {
-    return this.selectInstrument(this.ordersTrader.instruments.get(data.t), {
+    return this.selectInstrument(data.t, {
       selectOnSelf: true
     });
   }
@@ -1135,7 +1132,7 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   setQuantity(quantity, options = {}) {
-    if (this.instrument && quantity > 0) {
+    if (this.instrument && quantity > 0 && quantity !== Infinity) {
       const precision = getInstrumentQuantityPrecision(this.instrument);
 
       this.quantity.value =

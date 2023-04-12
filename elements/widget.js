@@ -548,12 +548,23 @@ export class WidgetWithInstrument extends Widget {
    */
   isolated;
 
-  selectInstrument(instrument, options = {}) {
+  selectInstrument(symbol, options = {}) {
+    if (!symbol) return;
+
     if (this.preview && this.container.savedInstrument) {
       this.instrument = this.container.savedInstrument;
 
       return this.instrument;
     }
+
+    if (!this.instrumentTrader) {
+      return;
+    }
+
+    const instrument = this.instrumentTrader.instruments.get(symbol) ?? {
+      symbol,
+      fullName: 'Инструмент не поддерживается'
+    };
 
     const adoptedInstrument = this.instrumentTrader.adoptInstrument(instrument);
 
@@ -606,25 +617,27 @@ export class WidgetWithInstrument extends Widget {
               this.groupControl.selection &&
               w.groupControl.selection === this.groupControl.selection
             ) {
-              const adoptedInstrument = w.instrumentTrader.adoptInstrument(
-                this.instrument
-              );
+              if (typeof w.instrumentTrader !== 'undefined') {
+                const adoptedInstrument = w.instrumentTrader.adoptInstrument(
+                  this.instrument
+                );
 
-              w.instrument = adoptedInstrument;
+                w.instrument = adoptedInstrument;
 
-              bulkWritePayload.push({
-                updateOne: {
-                  filter: {
-                    'widgets.uniqueID': w.document.uniqueID
-                  },
-                  update: {
-                    $set: {
-                      'widgets.$.symbol': adoptedInstrument?.symbol
-                    }
-                  },
-                  upsert: true
-                }
-              });
+                bulkWritePayload.push({
+                  updateOne: {
+                    filter: {
+                      'widgets.uniqueID': w.document.uniqueID
+                    },
+                    update: {
+                      $set: {
+                        'widgets.$.symbol': adoptedInstrument?.symbol
+                      }
+                    },
+                    upsert: true
+                  }
+                });
+              }
             }
 
             w.isolated = false;

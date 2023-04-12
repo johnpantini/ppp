@@ -71,7 +71,7 @@ class TinkoffGrpcWebTrader extends Trader {
   };
 
   // Key: instrumentId; Value: { instrument, refCount }
-  // Value contains lastOrderbookData for orderbook
+  // Value contains lastOrderbook for orderbook
   refs = {
     orderbook: new Map(),
     allTrades: new Map(),
@@ -473,7 +473,7 @@ class TinkoffGrpcWebTrader extends Trader {
           const ref = this.refs.orderbook.get(source.instrument.symbol);
 
           if (ref) {
-            ref.lastOrderbookData = orderbook;
+            ref.lastOrderbook = orderbook;
 
             for (const { field, datum } of fields) {
               switch (datum) {
@@ -718,9 +718,9 @@ class TinkoffGrpcWebTrader extends Trader {
     await super.instrumentChanged(source, oldValue, newValue);
 
     if (newValue?.symbol) {
-      // Handle no real subscription case for orderbook.
+      // Handle no real subscription case for orderbook, just broadcast.
       this.onOrderbookMessage({
-        orderbook: this.refs.orderbook.get(newValue.symbol)?.lastOrderbookData,
+        orderbook: this.refs.orderbook.get(newValue.symbol)?.lastOrderbook,
         instrument: newValue
       });
     }
@@ -745,28 +745,25 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   getInstrumentIconUrl(instrument) {
-    if (instrument?.classCode === 'SPBHKEX') {
-      return `static/instruments/stocks/hk/${instrument.symbol.replace(
-        ' ',
-        '-'
-      )}.svg`;
+    let symbol = instrument?.symbol;
+
+    if (typeof symbol === 'string') {
+      symbol = symbol.split('@')[0];
     }
 
-    if (instrument?.exchange === EXCHANGE.MOEX) {
-      return `static/instruments/stocks/rus/${instrument.symbol.replace(
-        ' ',
-        '-'
-      )}.svg`;
+    if (instrument?.currency === 'HKD') {
+      return `static/instruments/stocks/hk/${symbol.replace(' ', '-')}.svg`;
     }
 
     if (
-      instrument?.exchange === EXCHANGE.SPBX &&
-      instrument?.symbol !== 'TCS'
+      instrument?.exchange === EXCHANGE.MOEX ||
+      instrument?.currency === 'RUB'
     ) {
-      return `static/instruments/stocks/us/${instrument.symbol.replace(
-        ' ',
-        '-'
-      )}.svg`;
+      return `static/instruments/stocks/rus/${symbol.replace(' ', '-')}.svg`;
+    }
+
+    if (instrument?.exchange === EXCHANGE.SPBX && symbol !== 'TCS') {
+      return `static/instruments/stocks/us/${symbol.replace(' ', '-')}.svg`;
     }
 
     return super.getInstrumentIconUrl(instrument);

@@ -446,10 +446,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
       this.instrumentTrader = this.bookTrader;
 
-      this.selectInstrument(
-        this.instrumentTrader.instruments.get(this.document.symbol),
-        { isolate: true }
-      );
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       if (this.document.ordersTrader) {
         this.ordersTrader = await ppp.getOrCreateTrader(

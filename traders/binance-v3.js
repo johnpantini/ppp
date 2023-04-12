@@ -114,7 +114,7 @@ class BinanceTrader extends Trader {
     }
   }
 
-  async onTradeMessage({ trade, instrument }) {
+  onTradeMessage({ trade, instrument }) {
     if (trade && instrument) {
       for (const [source, fields] of this.subs.allTrades) {
         if (this.instrumentsAreEqual(instrument, source.instrument)) {
@@ -138,7 +138,7 @@ class BinanceTrader extends Trader {
     }
   }
 
-  async onOrderbookMessage({ orderbook, instrument }) {
+  onOrderbookMessage({ orderbook, instrument }) {
     if (orderbook && instrument) {
       for (const [source, fields] of this.subs.orderbook) {
         if (this.instrumentsAreEqual(instrument, source.instrument)) {
