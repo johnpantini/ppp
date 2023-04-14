@@ -15,7 +15,12 @@ import {
   repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
+import {
+  WIDGET_TYPES,
+  TRADER_DATUM,
+  EXCHANGE,
+  TRADERS
+} from '../../lib/const.js';
 import {
   formatRelativeChange,
   formatAbsoluteChange,
@@ -678,6 +683,13 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
+        },
+        condition: function ({ instrument }) {
+          // Example: SBER
+          return !(
+            this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
+            instrument?.exchange !== this.document.exchange
+          );
         }
       });
 
@@ -690,6 +702,12 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
+          },
+          condition: function ({ instrument }) {
+            return !(
+              this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
+              instrument?.exchange !== this.document.exchange
+            );
           }
         });
       }

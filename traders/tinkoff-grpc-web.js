@@ -27,6 +27,7 @@ import {
 import { isAbortError } from '../vendor/abort-controller-x.js';
 import { TradingError } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
+import constI18n from '../i18n/ru/lib/const.i18n.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -50,8 +51,6 @@ export function toNumber(value) {
 }
 
 class TinkoffGrpcWebTrader extends Trader {
-  #instruments = new Map();
-
   #clients = new Map();
 
   #metadata;
@@ -255,7 +254,7 @@ class TinkoffGrpcWebTrader extends Trader {
         if (status === 'working' && orderSide === side) {
           if (instrument && o.figi !== instrument.tinkoffFigi) continue;
 
-          const orderInstrument = this.#instruments.get(o.figi);
+          const orderInstrument = this.#figis.get(o.figi);
 
           if (orderInstrument && orderInstrument.minPriceIncrement > 0) {
             await client.replaceOrder({
@@ -424,7 +423,9 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
-    this.#figis.set(instrument.tinkoffFigi, instrument);
+    if (instrument.tinkoffFigi) {
+      this.#figis.set(instrument.tinkoffFigi, instrument);
+    }
 
     if (refs === this.refs.orderbook) {
       this.onOrderbookMessage({
@@ -672,15 +673,7 @@ class TinkoffGrpcWebTrader extends Trader {
       for (const [source, fields] of this.subs.orders) {
         for (const { field, datum } of fields) {
           if (datum === TRADER_DATUM.CURRENT_ORDER) {
-            const instrument = this.#instruments.get(order.figi) ?? {
-              symbol: order.figi,
-              currency: order.currency.toUpperCase(),
-              lot: Math.round(
-                toNumber(order.initialOrderPrice) /
-                  toNumber(order.initialSecurityPrice) /
-                  order.lotsRequested
-              )
-            };
+            const instrument = this.#figis.get(order.figi);
 
             source[field] = {
               instrument,

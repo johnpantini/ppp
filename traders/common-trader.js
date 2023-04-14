@@ -212,11 +212,11 @@ export class Trader {
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE:
-        return '@POSITIONS';
+        return '@@POSITIONS';
       case TRADER_DATUM.CURRENT_ORDER:
-        return '@ORDERS';
+        return '@@ORDERS';
       case TRADER_DATUM.TIMELINE_ITEM:
-        return '@TIMELINE';
+        return '@@TIMELINE';
     }
   }
 
@@ -230,16 +230,18 @@ export class Trader {
     return price.toFixed(precision).toString();
   }
 
-  async subscribeField({ source, field, datum }) {
+  async subscribeField({ source, field, datum, condition }) {
     const [subs, refs] = this.subsAndRefs?.(datum) ?? [];
 
     if (subs) {
       const array = subs.get(source);
 
       if (Array.isArray(array)) {
-        if (!array.find((e) => e.field === field)) array.push({ field, datum });
+        if (!array.find((e) => e.field === field)) {
+          array.push({ field, datum, condition });
+        } else return;
       } else {
-        subs.set(source, [{ field, datum }]);
+        subs.set(source, [{ field, datum, condition }]);
       }
 
       const globalRefName = this.getDatumGlobalReferenceName(datum);
@@ -258,9 +260,18 @@ export class Trader {
     }
   }
 
-  async subscribeFields({ source, fieldDatumPairs = {} }) {
+  async subscribeFields({ source, fieldDatumPairs = {}, condition }) {
     for (const [field, datum] of Object.entries(fieldDatumPairs)) {
-      await this.subscribeField({ source, field, datum });
+      if (typeof datum === 'string') {
+        await this.subscribeField({ source, field, datum, condition });
+      } else if (typeof datum === 'object') {
+        await this.subscribeField({
+          source,
+          field,
+          datum: datum.datum,
+          condition: datum.condition ?? condition
+        });
+      }
     }
   }
 
@@ -303,10 +314,15 @@ export class Trader {
   }
 
   async addRef(instrument, refs) {
-    if (instrument?.symbol && refs) {
+    if (typeof instrument?.symbol === 'string' && refs) {
       const ref = refs.get(instrument.symbol);
 
-      if (typeof ref === 'undefined' && this.supportsInstrument(instrument)) {
+      if (
+        typeof ref === 'undefined' &&
+        // Global instrument-agnostic datum
+        (instrument.symbol.startsWith('@@') ||
+          this.supportsInstrument(instrument))
+      ) {
         refs.set(instrument.symbol, {
           refCount: 1,
           instrument

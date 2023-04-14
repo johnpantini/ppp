@@ -685,10 +685,10 @@ class AlorOpenAPIV2Trader extends Trader {
     }[datum];
   }
 
-  async subscribeField({ source, field, datum }) {
+  async subscribeField({ source, field, datum, condition }) {
     await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
-    await super.subscribeField({ source, field, datum });
+    await super.subscribeField({ source, field, datum, condition });
 
     // Broadcast data for instrument-agnostic global datum subscriptions.
     switch (datum) {
@@ -961,7 +961,17 @@ class AlorOpenAPIV2Trader extends Trader {
 
             if (ref) ref.lastQuotesData = data;
 
-            for (const { field, datum } of fields) {
+            for (const { field, datum, condition } of fields) {
+              if (typeof condition === 'function') {
+                const conditionResult = condition.call(this, {
+                  source,
+                  instrument,
+                  ref
+                });
+
+                if (!conditionResult) continue;
+              }
+
               switch (datum) {
                 case TRADER_DATUM.LAST_PRICE:
                   source[field] = data.last_price;

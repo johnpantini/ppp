@@ -14,6 +14,7 @@ import {
   observable,
   repeat,
   when,
+  slotted,
   Updates
 } from '../vendor/fast-element.min.js';
 import {
@@ -27,6 +28,7 @@ import {
   ellipsis,
   normalize,
   scrollbars,
+  spacing,
   typography
 } from '../design/styles.js';
 import {
@@ -63,6 +65,7 @@ import {
   spacing1,
   spacing2,
   themeConditional,
+  toColorComponents,
   widgetGroup1,
   widgetGroup2,
   widgetGroup3,
@@ -371,6 +374,36 @@ export const widget = () => css`
   .widget-footer {
     padding: 8px 0;
     position: relative;
+  }
+
+  .widget-card-holder {
+    padding-top: 6px;
+    margin: 0 8px;
+  }
+
+  .widget-card-holder:first-child {
+    padding-top: 0;
+  }
+
+  .widget-card-holder:last-child {
+    padding-bottom: 8px;
+  }
+
+  .widget-card-holder-inner {
+    cursor: default;
+  }
+
+  .widget-action-button span {
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin: 0 -8px;
+    color: ${paletteGrayLight1};
+    vertical-align: text-bottom;
+  }
+
+  .widget-action-button span svg {
+    width: 16px;
+    height: 16px;
   }
 `;
 
@@ -1585,7 +1618,7 @@ export const widgetSearchControlStyles = css`
   .menu-item-text {
     color: ${themeConditional(
       paletteGrayDark1,
-      lighten(paletteGrayLight1, 20)
+      lighten(paletteGrayLight1, 15)
     )};
     word-break: break-word;
     flex-grow: 1;
@@ -2610,11 +2643,270 @@ export const widgetBoxRadioStyles = css`
 
 export class WidgetBoxRadio extends BoxRadio {}
 
-export const widgetCardTemplate = html``;
+export const widgetCardTemplate = html`
+  <template>
+    <div class="card">
+      <slot name="indicator"></slot>
+      <div class="payload">
+        <div class="icon">
+          <slot name="icon"></slot>
+          <slot name="icon-fallback"></slot>
+        </div>
+        <div class="text-content">
+          <div class="text-line first">
+            <div class="text-line-inner">
+              <span>
+                <div>
+                  <slot name="title-left"></slot>
+                </div>
+              </span>
+            </div>
+            <span>
+              <slot name="title-right"></slot>
+            </span>
+          </div>
+          <div class="text-line second">
+            <div class="text-line-inner">
+              <div>
+                <slot name="subtitle-left"></slot>
+              </div>
+            </div>
+            <span>
+              <slot name="subtitle-right"></slot>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="actions"
+        style="display: ${(x) => (x.slottedActions.length ? 'flex' : 'none')}"
+      >
+        <slot name="actions" ${slotted('slottedActions')}></slot>
+      </div>
+    </div>
+  </template>
+`;
 
-export const widgetCardStyles = css``;
+export const widgetCardStyles = css`
+  ${normalize()}
+  :host {
+    position: relative;
+  }
 
-export class WidgetCard extends PPPAppearanceElement {}
+  .card {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    min-height: 36px;
+    height: auto;
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
+    padding: 0 12px;
+    border-radius: 4px;
+    user-select: none;
+    min-width: 200px;
+    align-items: center;
+    overflow: hidden;
+    cursor: default;
+  }
+
+  :host(.new) .card {
+  }
+
+  :host([clickable]) .card {
+    cursor: pointer;
+  }
+
+  :host([clickable]) .card:hover {
+  }
+
+  :host(:first-child) {
+    padding-top: 8px;
+  }
+
+  :host(:last-child) {
+    padding-bottom: 8px;
+  }
+
+  slot[name='indicator']::slotted(div) {
+    height: 100%;
+    border-radius: 8px 0 0 8px;
+    position: absolute;
+    width: 4px;
+    left: 0;
+    top: 0;
+  }
+
+  slot[name='indicator']::slotted(div.buy) {
+    background: linear-gradient(90deg, ${positive} 50%, transparent 0);
+  }
+
+  slot[name='indicator']::slotted(div.sell) {
+    background: linear-gradient(90deg, ${negative} 50%, transparent 0);
+  }
+
+  .actions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding-right: 16px;
+    width: 116px;
+    height: 100%;
+    opacity: 0;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background: linear-gradient(
+      90deg,
+      rgba(
+          ${themeConditional(
+            toColorComponents(paletteGrayLight3),
+            toColorComponents(paletteGrayDark2)
+          )},
+          0
+        )
+        0,
+      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 30%,
+      ${themeConditional(paletteGrayLight3, paletteGrayDark2)}
+    );
+  }
+
+  slot[name='actions']::slotted(button) {
+    border-radius: 50%;
+    min-height: 24px;
+    min-width: 24px;
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+    font-size: ${fontSizeWidget};
+    justify-content: center;
+    text-align: left;
+    vertical-align: middle;
+    padding: 0 8px;
+  }
+
+  slot[name='actions']::slotted(button:hover) {
+    background-color: ${themeConditional(
+      darken(paletteGrayLight2, 10),
+      paletteGrayBase
+    )};
+  }
+
+  .card:hover .actions {
+    opacity: 1;
+  }
+
+  .payload {
+    width: 100%;
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .icon {
+    display: flex;
+    position: relative;
+    margin-right: 8px;
+    justify-content: center;
+    align-items: center;
+    color: ${themeConditional(paletteGrayLight1, paletteBlack)};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
+    min-width: 28px;
+    min-height: 28px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    word-wrap: break-word;
+    font-size: calc(${fontSizeWidget} + 2px);
+    line-height: 20px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: capitalize;
+  }
+
+  slot[name='icon']::slotted(div) {
+    width: 28px;
+    height: 28px;
+    left: 0;
+    top: 0;
+    position: absolute;
+    border-radius: 50%;
+    background-size: 100%;
+  }
+
+  .text-content {
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .text-line {
+    display: flex;
+    white-space: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    word-wrap: break-word;
+    font-size: ${fontSizeWidget};
+    letter-spacing: 0;
+  }
+
+  .text-line.first {
+    font-weight: 500;
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  .text-line-inner {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    overflow: hidden;
+  }
+
+  .text-line-inner > span {
+    flex: 1;
+    ${ellipsis()};
+  }
+
+  .text-line-inner > span > div {
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    font-weight: 500;
+    letter-spacing: 0;
+    ${ellipsis()};
+  }
+
+  .text-line.second {
+    font-weight: ${fontWeightWidget};
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+`;
+
+export class WidgetCard extends PPPAppearanceElement {
+  @observable
+  slottedActions;
+
+  constructor() {
+    super();
+
+    this.slottedActions = [];
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (
+      this.classList.contains('new') &&
+      document.visibilityState === 'visible'
+    ) {
+      setTimeout(() => {
+        this.classList.remove('new');
+      }, 3000);
+    }
+  }
+}
 
 export default {
   WidgetGroupControlComposition: WidgetGroupControl.compose({

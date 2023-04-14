@@ -519,7 +519,10 @@ export class OrderbookWidget extends WidgetWithInstrument {
         if (
           needToChangeOrderbook &&
           this.instrument &&
-          newValue.instrument?.symbol === this.instrument.symbol
+          this.instrumentTrader.instrumentsAreEqual(
+            newValue.instrument,
+            this.instrument
+          )
         ) {
           this.orderbookChanged(null, this.#lastOrderBookValue);
         }
@@ -543,11 +546,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
     const sellOrdersPricesAndSizes = new Map();
 
     if (this.instrument) {
-      for (const [_, order] of this.orders) {
+      for (const [, order] of this.orders) {
         if (
           order.status === 'working' &&
           order.filled < order.quantity &&
-          order.instrument?.symbol === this.instrument.symbol
+          this.ordersTrader.instrumentsAreEqual(
+            order.instrument,
+            this.instrument
+          )
         ) {
           const map = {
             buy: buyOrdersPricesAndSizes,
@@ -632,6 +638,12 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
       if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
 
+      if (!orderbook.bids.length && !orderbook.asks.length) {
+        this.quoteLines = [];
+
+        return;
+      }
+
       const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
         this.#getMyOrdersPricesAndSizes();
 
@@ -648,7 +660,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
                 price,
                 volume,
                 my: volume,
-                pool: 'SPBX'
+                pool: this.instrument.exchange
               });
             } else {
               orderbook.bids[i].my = volume;
@@ -666,7 +678,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
               volume,
               my: volume,
               pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                ? 'SPBX'
+                ? this.instrument.exchange
                 : void 0
             });
 
@@ -682,7 +694,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
             volume,
             my: volume,
             pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-              ? this.bookTrader?.document?.exchange ?? 'SPBX'
+              ? this.instrument.exchange
               : void 0
           });
         }
