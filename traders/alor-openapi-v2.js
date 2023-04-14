@@ -9,6 +9,7 @@ import {
 } from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
+import { formatPrice } from '../lib/intl.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**

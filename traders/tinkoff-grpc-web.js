@@ -27,7 +27,6 @@ import {
 import { isAbortError } from '../vendor/abort-controller-x.js';
 import { TradingError } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
-import constI18n from '../i18n/ru/lib/const.i18n.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -257,25 +256,46 @@ class TinkoffGrpcWebTrader extends Trader {
           const orderInstrument = this.#figis.get(o.figi);
 
           if (orderInstrument && orderInstrument.minPriceIncrement > 0) {
-            await client.replaceOrder({
-              accountId: this.document.account,
-              orderId: o.orderId,
-              idempotencyKey: this.#orderId(),
-              quantity: o.lotsRequested - o.lotsExecuted,
-              price: toQuotation(
-                +this.fixPrice(
-                  orderInstrument,
-                  (orderInstrument.type === 'bond'
-                    ? this.relativeBondPriceToPrice(
-                        toNumber(o.initialSecurityPrice),
-                        orderInstrument
-                      )
-                    : toNumber(o.initialSecurityPrice)) +
-                    orderInstrument.minPriceIncrement * value
-                )
-              ),
-              priceType: PriceType.PRICE_TYPE_CURRENCY
-            });
+            const price = +this.fixPrice(
+              orderInstrument,
+              (orderInstrument.type === 'bond'
+                ? this.relativeBondPriceToPrice(
+                    toNumber(o.initialSecurityPrice),
+                    orderInstrument
+                  )
+                : toNumber(o.initialSecurityPrice)) +
+                orderInstrument.minPriceIncrement * value
+            );
+
+            if (
+              o.executionReportStatus ===
+              OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_NEW
+            ) {
+              await client.replaceOrder({
+                accountId: this.document.account,
+                orderId: o.orderId,
+                idempotencyKey: this.#orderId(),
+                quantity: o.lotsRequested - o.lotsExecuted,
+                price: toQuotation(price),
+                priceType: PriceType.PRICE_TYPE_CURRENCY
+              });
+            } else if (
+              o.executionReportStatus ===
+              OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_PARTIALLYFILL
+            ) {
+              const quantity = o.lotsRequested - o.lotsExecuted;
+
+              await this.cancelLimitOrder({
+                orderId: o.orderId,
+                orderType: 'limit'
+              });
+              await this.placeLimitOrder({
+                instrument: orderInstrument,
+                price,
+                quantity,
+                direction: orderSide
+              });
+            }
           }
         }
       }

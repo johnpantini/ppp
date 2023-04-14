@@ -705,6 +705,8 @@ export class App extends PPPElement {
 
     if (this.page === 'workspace') {
       this.workspace = this.params().document;
+    } else {
+      this.mountPointModal.setAttribute('hidden', '');
     }
 
     if (this.page) {

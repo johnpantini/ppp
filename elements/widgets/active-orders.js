@@ -20,15 +20,15 @@ import { normalize, scrollbars, spacing } from '../../design/styles.js';
 import { cancelOrders, trash } from '../../static/svg/sprite.js';
 import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
 import {
+  themeConditional,
   darken,
-  fontSizeWidget,
   lighten,
+  fontSizeWidget,
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayLight1,
   paletteGrayLight2,
-  spacing1,
-  themeConditional
+  spacing1
 } from '../../design/design-tokens.js';
 import '../button.js';
 import '../query-select.js';
