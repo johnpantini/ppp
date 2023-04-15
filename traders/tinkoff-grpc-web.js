@@ -443,7 +443,7 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async addFirstRef(instrument, refs) {
-    if (instrument.tinkoffFigi) {
+    if (instrument.tinkoffFigi && !this.#figis.has(instrument.tinkoffFigi)) {
       this.#figis.set(instrument.tinkoffFigi, instrument);
     }
 

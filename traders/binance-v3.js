@@ -58,11 +58,13 @@ class BinanceTrader extends Trader {
               }
             }
 
+            const subType = this.document.showAggTrades ? 'aggTrade' : 'trade';
+
             // 2. All trades
             for (const [, { instrument, refCount }] of this.refs.allTrades) {
               if (refCount > 0) {
                 params.push(
-                  `${this.getSymbol(instrument).toLowerCase()}@aggTrade`
+                  `${this.getSymbol(instrument).toLowerCase()}@${subType}`
                 );
               }
             }
@@ -100,7 +102,7 @@ class BinanceTrader extends Trader {
                   payload.stream.split('@')[0].toUpperCase()
                 )
               });
-            } else if (/aggTrade/i.test(payload?.stream)) {
+            } else if (/@trade|@aggTrade/i.test(payload?.stream)) {
               this.onTradeMessage({
                 trade: payload.data,
                 instrument: this.instruments.get(
@@ -189,10 +191,12 @@ class BinanceTrader extends Trader {
   async addFirstRef(instrument, refs) {
     if (this.connection.readyState === WebSocket.OPEN) {
       if (refs === this.refs.allTrades) {
+        const subType = this.document.showAggTrades ? 'aggTrade' : 'trade';
+
         this.connection.send(
           JSON.stringify({
             method: 'SUBSCRIBE',
-            params: [`${this.getSymbol(instrument).toLowerCase()}@aggTrade`],
+            params: [`${this.getSymbol(instrument).toLowerCase()}@${subType}`],
             id: ++this.#idCounter
           })
         );
@@ -215,10 +219,12 @@ class BinanceTrader extends Trader {
   async removeLastRef(instrument, refs) {
     if (this.connection.readyState === WebSocket.OPEN) {
       if (refs === this.refs.allTrades) {
+        const subType = this.document.showAggTrades ? 'aggTrade' : 'trade';
+
         this.connection.send(
           JSON.stringify({
             method: 'UNSUBSCRIBE',
-            params: [`${this.getSymbol(instrument).toLowerCase()}@aggTrade`],
+            params: [`${this.getSymbol(instrument).toLowerCase()}@${subType}`],
             id: ++this.#idCounter
           })
         );

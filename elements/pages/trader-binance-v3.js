@@ -4,6 +4,7 @@ import { Page, pageStyles } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import '../button.js';
 import '../query-select.js';
+import '../radio-group.js';
 import '../text-field.js';
 
 export const traderBinanceV3Template = html`
@@ -91,6 +92,25 @@ export const traderBinanceV3Template = html`
               x.document.wsUrl ?? 'wss://data-stream.binance.com'}"
             ${ref('wsUrl')}
           ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Режим ленты сделок</h5>
+          <p class="description">
+            В режиме агрегирования сделки суммируются по количеству и попадают в
+            ленту как одна, если они принадлежат одной заявке тейкера.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-radio-group
+            orientation="vertical"
+            value="${(x) => (x.document.showAggTrades ?? true ? 'agg' : 'raw')}"
+            ${ref('showAggTrades')}
+          >
+            <ppp-radio value="agg">Агрегированные сделки</ppp-radio>
+            <ppp-radio value="raw">Все сделки</ppp-radio>
+          </ppp-radio-group>
         </div>
       </section>
       <section>
@@ -247,11 +267,16 @@ export class TraderBinanceV3Page extends Page {
   }
 
   async submit() {
+    if (ppp.traders.has(this.document._id)) {
+      ppp.traders.delete(this.document._id);
+    }
+
     return {
       $set: {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
         wsUrl: this.wsUrl.value.trim(),
+        showAggTrades: this.showAggTrades.value === 'agg',
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
