@@ -214,29 +214,35 @@ class AlpacaV2PlusTrader extends Trader {
               const lastOrderbookMap = ref.lastOrderbookMap;
               const volumeCoefficient = this.document.useLots ? 1 : 100;
 
-              lastOrderbookMap.bids.set(
-                `${data.bx}|${data.bp}|${data.bs}|${data.level}`,
-                {
-                  price: data.bp,
-                  volume: data.bs * volumeCoefficient,
-                  time: data.t,
-                  condition: data.c?.join?.(' '),
-                  timestamp: data.t ? new Date(data.t).valueOf() : null,
-                  pool: this.alpacaExchangeToUTEXExchange(data.bx)
-                }
-              );
+              let bidKey = data.bx;
 
-              lastOrderbookMap.asks.set(
-                `${data.bx}|${data.ap}|${data.as}|${data.level}`,
-                {
-                  price: data.ap,
-                  volume: data.as * volumeCoefficient,
-                  time: data.t,
-                  condition: data.c?.join?.(' '),
-                  timestamp: data.t ? new Date(data.t).valueOf() : null,
-                  pool: this.alpacaExchangeToUTEXExchange(data.ax)
-                }
-              );
+              if (this.document.broker.type === BROKERS.PSINA) {
+                bidKey = `${data.bx}|${data.bp}|${data.bs}|${data.level}`;
+              }
+
+              lastOrderbookMap.bids.set(bidKey, {
+                price: data.bp,
+                volume: data.bs * volumeCoefficient,
+                time: data.t,
+                condition: data.c?.join?.(' '),
+                timestamp: data.t ? new Date(data.t).valueOf() : null,
+                pool: this.alpacaExchangeToUTEXExchange(data.bx)
+              });
+
+              let askKey = data.ax;
+
+              if (this.document.broker.type === BROKERS.PSINA) {
+                askKey = `${data.ax}|${data.ap}|${data.as}|${data.level}`;
+              }
+
+              lastOrderbookMap.asks.set(askKey, {
+                price: data.ap,
+                volume: data.as * volumeCoefficient,
+                time: data.t,
+                condition: data.c?.join?.(' '),
+                timestamp: data.t ? new Date(data.t).valueOf() : null,
+                pool: this.alpacaExchangeToUTEXExchange(data.ax)
+              });
 
               ref.lastOrderbookMontage = {
                 bids: [],
