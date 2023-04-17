@@ -64,8 +64,8 @@ export const timeAndSalesWidgetTemplate = html`
         )}
         ${when(
           (x) =>
-            x.tradesTrader &&
             x.instrument &&
+            x.tradesTrader &&
             !x.tradesTrader.supportsInstrument(x.instrument),
           html`${html.partial(
             widgetEmptyStateTemplate('Инструмент не поддерживается.')
@@ -73,8 +73,8 @@ export const timeAndSalesWidgetTemplate = html`
         )}
         ${when(
           (x) =>
-            x.tradesTrader &&
             x.instrument &&
+            x.tradesTrader &&
             x.tradesTrader.supportsInstrument(x.instrument),
           html`
             <table class="trades-table">
@@ -279,32 +279,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
       this.selectInstrument(this.document.symbol, { isolate: true });
 
-      if (
-        this.instrument &&
-        typeof this.tradesTrader.allTrades === 'function' &&
-        this.instrumentTrader.supportsInstrument(this.instrument)
-      ) {
-        try {
-          this.trades = (
-            await this.tradesTrader.allTrades({
-              instrument: this.instrument,
-              depth: this.document.depth
-            })
-          )?.filter((t) => {
-            if (this.document.threshold) {
-              return t.volume >= this.document.threshold;
-            } else return true;
-          });
-        } catch (e) {
-          console.error(e);
-
-          return this.notificationsArea.error({
-            title: 'Лента всех сделок',
-            text: 'Не удалось загрузить историю сделок.'
-          });
-        }
-      }
-
       await this.tradesTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
@@ -362,24 +336,31 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async instrumentChanged(oldValue, newValue) {
     this.trades = [];
 
-    super.instrumentChanged(oldValue, newValue);
-
     if (this.tradesTrader) {
       if (
         this.instrument &&
         typeof this.tradesTrader.allTrades === 'function' &&
         this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
-        this.trades = (
-          await this.tradesTrader.allTrades({
-            instrument: this.instrument,
-            depth: this.document.depth
-          })
-        )?.filter((t) => {
-          if (this.document.threshold) {
-            return t.volume >= this.document.threshold;
-          } else return true;
-        });
+        try {
+          this.trades = (
+            await this.tradesTrader.allTrades({
+              instrument: this.instrument,
+              depth: this.document.depth
+            })
+          )?.filter((t) => {
+            if (this.document.threshold) {
+              return t.volume >= this.document.threshold;
+            } else return true;
+          });
+        } catch (e) {
+          console.error(e);
+
+          return this.notificationsArea.error({
+            title: 'Лента всех сделок',
+            text: 'Не удалось загрузить историю сделок.'
+          });
+        }
       }
 
       await this.tradesTrader.instrumentChanged?.(this, oldValue, newValue);

@@ -316,7 +316,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       if (order.status !== 'working') continue;
 
       if (this.instrument) {
-        if (order.instrument?.symbol === this.instrument.symbol) {
+        if (
+          this.ordersTrader?.instrumentsAreEqual?.(
+            order.instrument,
+            this.instrument
+          )
+        ) {
           orders.push(order);
         }
       } else orders.push(order);

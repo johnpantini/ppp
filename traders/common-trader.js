@@ -230,7 +230,7 @@ export class Trader {
     return price.toFixed(precision).toString();
   }
 
-  async subscribeField({ source, field, datum, condition }) {
+  async subscribeField({ source, field, datum, condition, options }) {
     const [subs, refs] = this.subsAndRefs?.(datum) ?? [];
 
     if (subs) {
@@ -238,10 +238,10 @@ export class Trader {
 
       if (Array.isArray(array)) {
         if (!array.find((e) => e.field === field)) {
-          array.push({ field, datum, condition });
+          array.push({ field, datum, condition, options });
         } else return;
       } else {
-        subs.set(source, [{ field, datum, condition }]);
+        subs.set(source, [{ field, datum, condition, options }]);
       }
 
       const globalRefName = this.getDatumGlobalReferenceName(datum);
@@ -260,16 +260,17 @@ export class Trader {
     }
   }
 
-  async subscribeFields({ source, fieldDatumPairs = {}, condition }) {
+  async subscribeFields({ source, fieldDatumPairs = {}, condition, options }) {
     for (const [field, datum] of Object.entries(fieldDatumPairs)) {
       if (typeof datum === 'string') {
-        await this.subscribeField({ source, field, datum, condition });
+        await this.subscribeField({ source, field, datum, condition, options });
       } else if (typeof datum === 'object') {
         await this.subscribeField({
           source,
           field,
           datum: datum.datum,
-          condition: datum.condition ?? condition
+          condition: datum.condition ?? condition,
+          option: datum.options ?? options
         });
       }
     }

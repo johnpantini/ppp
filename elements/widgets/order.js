@@ -114,8 +114,8 @@ export const orderWidgetTemplate = html`
         )}
         ${when(
           (x) =>
-            x.ordersTrader &&
             x.instrument &&
+            x.ordersTrader &&
             !x.ordersTrader.supportsInstrument(x.instrument),
           html`${html.partial(
             widgetEmptyStateTemplate('Инструмент не поддерживается.')
@@ -123,8 +123,8 @@ export const orderWidgetTemplate = html`
         )}
         ${when(
           (x) =>
-            x.ordersTrader &&
             x.instrument &&
+            x.ordersTrader &&
             x.ordersTrader.supportsInstrument(x.instrument),
           html`
             <ppp-widget-tabs
@@ -797,9 +797,10 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   pusherTelegramHandler(data) {
-    return this.selectInstrument(data.t, {
-      selectOnSelf: true
-    });
+    if (typeof data.t === 'string')
+      return this.selectInstrument(data.t.toUpperCase().split('~')[0], {
+        selectOnSelf: true
+      });
   }
 
   instrumentChanged(oldValue, newValue) {

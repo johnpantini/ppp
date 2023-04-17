@@ -68,8 +68,8 @@ export const orderbookWidgetTemplate = html`
         )}
         ${when(
           (x) =>
-            x.bookTrader &&
             x.instrument &&
+            x.bookTrader &&
             !x.bookTrader.supportsInstrument(x.instrument),
           html`${html.partial(
             widgetEmptyStateTemplate('Инструмент не поддерживается.')
@@ -77,8 +77,8 @@ export const orderbookWidgetTemplate = html`
         )}
         ${when(
           (x) =>
-            x.bookTrader &&
             x.instrument &&
+            x.bookTrader &&
             x.bookTrader.supportsInstrument(x.instrument),
           html`
             <table class="orderbook-table">

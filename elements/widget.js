@@ -228,6 +228,7 @@ export const widget = () => css`
     border-bottom: 1px solid
       ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
     pointer-events: none;
+    z-index: 2;
   }
 
   .widget-header-inner {
@@ -2133,6 +2134,15 @@ export class WidgetResizeControls extends PPPElement {
     this.widget.style.top = `${newTop}px`;
     this.widget.style.width = `${newRight - newLeft}px`;
     this.widget.style.height = `${newBottom - newTop}px`;
+
+    if (typeof this.widget.onResize === 'function') {
+      this.widget.onResize({
+        top: newTop,
+        left: newLeft,
+        width: newRight - newLeft,
+        height: newBottom - newTop
+      });
+    }
   }
 
   onPointerUp() {

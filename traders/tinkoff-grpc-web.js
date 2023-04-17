@@ -12,6 +12,7 @@ import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
 import {
+  CandleInterval,
   MarketDataServiceDefinition,
   MarketDataStreamServiceDefinition,
   SubscriptionAction,
@@ -577,6 +578,39 @@ class TinkoffGrpcWebTrader extends Trader {
             volume: trade.quantity
           };
         });
+    }
+
+    return [];
+  }
+
+  async historicalQuotes({ instrument }) {
+    if (instrument) {
+      const to = new Date();
+      const from = new Date();
+
+      to.setUTCHours(to.getUTCHours() + 1);
+      from.setUTCHours(from.getUTCHours() - 23);
+
+      const { candles } = await this.getOrCreateClient(
+        MarketDataServiceDefinition
+      ).getCandles({
+        instrumentId: instrument.tinkoffFigi,
+        interval: CandleInterval.CANDLE_INTERVAL_5_MIN,
+        from,
+        to
+      });
+
+      return candles.map((c) => {
+        return {
+          open: toNumber(c.open),
+          high: toNumber(c.high),
+          low: toNumber(c.low),
+          close: toNumber(c.close),
+          time: c.time.valueOf(),
+          isComplete: c.isComplete,
+          volume: c.volume
+        };
+      });
     }
 
     return [];
