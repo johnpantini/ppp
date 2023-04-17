@@ -401,7 +401,11 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   printChanged(oldValue, newValue) {
-    if (newValue?.price && newValue?.volume > 0) {
+    if (
+      newValue?.price &&
+      newValue?.volume > 0 &&
+      this.chartTrader.getSymbol(this.instrument) === newValue.symbol
+    ) {
       // Update the last candle here
       const printTime = new Date(newValue.timestamp);
       const coefficient = 1000 * 60 * 5;

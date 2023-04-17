@@ -253,7 +253,7 @@ class AlpacaV2PlusTrader extends Trader {
                     if (
                       (nowHours >= (isDST() ? 20 : 21) ||
                         nowHours < (isDST() ? 10 : 11)) &&
-                      a.pool === 'N'
+                      b.pool === 'N'
                     )
                       return false;
                   }
@@ -374,13 +374,21 @@ class AlpacaV2PlusTrader extends Trader {
   getDictionary() {
     if (this.document.broker.type === BROKERS.PSINA) {
       return INSTRUMENT_DICTIONARY.PSINA_US_STOCKS;
+    } else if (this.document.broker.type === BROKERS.UTEX) {
+      return INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS;
     }
 
     return null;
   }
 
   getExchange() {
-    return EXCHANGE.US;
+    if (this.document.broker.type === BROKERS.PSINA) {
+      return EXCHANGE.US;
+    } else if (this.document.broker.type === BROKERS.UTEX) {
+      return EXCHANGE.UTEX_MARGIN_STOCKS;
+    }
+
+    return null;
   }
 
   getBroker() {
