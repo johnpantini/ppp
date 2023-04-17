@@ -222,8 +222,6 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
       this.instrumentTrader = this.ordersTrader;
 
       this.selectInstrument(this.document.symbol, { isolate: true });
-
-      await this.ordersTrader.sayHello(WIDGET_TYPES.SCALPING_BUTTONS);
     } catch (e) {
       return this.catchException(e);
     }

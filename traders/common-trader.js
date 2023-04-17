@@ -21,10 +21,6 @@ export class Trader {
 
   document = {};
 
-  async sayHello() {
-    return 'Hi';
-  }
-
   constructor(document) {
     this.document = document;
   }

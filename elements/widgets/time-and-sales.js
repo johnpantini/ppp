@@ -25,7 +25,6 @@ import { ellipsis, normalize } from '../../design/styles.js';
 import {
   buy,
   fontSizeWidget,
-  lighten,
   paletteBlack,
   paletteGrayBase,
   paletteGrayDark1,
@@ -35,7 +34,8 @@ import {
   paletteWhite,
   sell,
   themeConditional,
-  toColorComponents
+  toColorComponents,
+  lighten
 } from '../../design/design-tokens.js';
 import { validate } from '../../lib/ppp-errors.js';
 import '../button.js';
@@ -334,6 +334,8 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async instrumentChanged(oldValue, newValue) {
+    super.instrumentChanged(oldValue, newValue);
+
     this.trades = [];
 
     if (this.tradesTrader) {

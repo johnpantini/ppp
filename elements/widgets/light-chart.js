@@ -12,7 +12,8 @@ import {
   ref,
   repeat,
   observable,
-  Observable
+  Observable,
+  attr
 } from '../../vendor/fast-element.min.js';
 import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
@@ -137,6 +138,19 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   chartTrader;
 
+  @observable
+  tradesTrader;
+
+  // Ready to receive realtime updates
+  @attr({ mode: 'boolean' })
+  ready;
+
+  @observable
+  print;
+
+  @observable
+  lastCandle;
+
   css(dt) {
     const value = dt.$value;
 
@@ -146,11 +160,20 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   async connectedCallback() {
+    this.ready = false;
+
     super.connectedCallback();
 
     if (!this.document.chartTrader) {
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер котировок.',
+        keep: true
+      });
+    }
+
+    if (!this.document.tradesTrader) {
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер ленты сделок.',
         keep: true
       });
     }
@@ -213,6 +236,17 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
 
       await this.setupChart();
+
+      this.tradesTrader = await ppp.getOrCreateTrader(
+        this.document.tradesTrader
+      );
+
+      await this.tradesTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }
@@ -305,6 +339,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
+  // Older quotes come first
   setData(quotes) {
     this.mainSeries.setData(
       quotes.map((c) => {
@@ -334,6 +369,8 @@ export class LightChartWidget extends WidgetWithInstrument {
         };
       })
     );
+
+    this.lastCandle = quotes[quotes.length - 1];
   }
 
   async instrumentChanged(oldValue, newValue) {
@@ -345,27 +382,93 @@ export class LightChartWidget extends WidgetWithInstrument {
         typeof this.chartTrader.historicalQuotes === 'function' &&
         this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
+        this.ready = false;
+
         this.setData(
           await this.chartTrader.historicalQuotes({
             instrument: this.instrument
           })
         );
 
+        this.ready = true;
+
         this.chart.timeScale().scrollToPosition(3);
       }
 
-      await this.chartTrader.instrumentChanged?.(this, oldValue, newValue);
+      await this.chartTrader?.instrumentChanged?.(this, oldValue, newValue);
+      await this.tradesTrader?.instrumentChanged?.(this, oldValue, newValue);
+    }
+  }
+
+  printChanged(oldValue, newValue) {
+    if (newValue?.price && newValue?.volume > 0) {
+      // Update the last candle here
+      const printTime = new Date(newValue.timestamp);
+      const coefficient = 1000 * 60 * 5;
+      const roundedTime = new Date(
+        Math.floor(printTime.getTime() / coefficient) * coefficient
+      );
+      const time =
+        Math.floor(roundedTime.valueOf() / 1000) -
+        (3600 * new Date().getTimezoneOffset()) / 60;
+
+      if (
+        typeof this.lastCandle === 'undefined' ||
+        this.lastCandle.time < time
+      ) {
+        this.lastCandle = {
+          open: newValue.price,
+          high: newValue.price,
+          low: newValue.price,
+          close: newValue.price,
+          time,
+          volume: newValue.volume
+        };
+      } else {
+        const { high, low, volume, open } = this.lastCandle;
+
+        this.lastCandle = {
+          open,
+          high: Math.max(high, newValue.price),
+          low: Math.min(low, newValue.price),
+          close: newValue.price,
+          time,
+          volume: newValue.volume + volume
+        };
+      }
+    }
+  }
+
+  lastCandleChanged(oldValue, newValue) {
+    if (newValue) {
+      this.mainSeries.update(newValue);
+      this.volumeSeries.update({
+        time: newValue.time,
+        value: newValue.volume,
+        color:
+          newValue.close < newValue.open
+            ? `rgba(${themeConditional(
+                toColorComponents(paletteRedLight3),
+                toColorComponents(paletteRedDark1)
+              ).$value.createCSS()}, 0.56)`
+            : `rgba(${themeConditional(
+                toColorComponents(paletteGreenLight2),
+                toColorComponents(paletteGreenDark1)
+              ).$value.createCSS()}, 0.56)`
+      });
     }
   }
 
   async validate() {
     await validate(this.container.chartTraderId);
+    await validate(this.container.tradesTraderId);
   }
 
   async submit() {
     return {
       $set: {
-        chartTraderId: this.container.chartTraderId.value
+        chartTraderId: this.container.chartTraderId.value,
+        tradesTraderId: this.container.tradesTraderId.value
       }
     };
   }
@@ -416,6 +519,52 @@ export async function widgetDefinition() {
                         $or: [
                           { removed: { $ne: true } },
                           { _id: `[%#this.document.chartTraderId ?? ''%]` }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Трейдер ленты сделок</h5>
+          <p class="description">
+            Лента сделок используется для формирования графика в режиме
+            реального времени.
+          </p>
+        </div>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('tradesTraderId')}
+            value="${(x) => x.document.tradesTraderId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.tradesTrader ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          { _id: `[%#this.document.tradesTraderId ?? ''%]` }
                         ]
                       }
                     ]

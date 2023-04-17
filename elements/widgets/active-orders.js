@@ -303,9 +303,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
   }
 
-  instrumentChanged() {
+  async instrumentChanged(oldValue, newValue) {
     super.instrumentChanged();
 
+    await this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
     Observable.notify(this, 'orders');
   }
 

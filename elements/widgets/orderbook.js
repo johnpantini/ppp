@@ -878,14 +878,15 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   async instrumentChanged(oldValue, newValue) {
+    super.instrumentChanged(oldValue, newValue);
+
     this.orderbook = {
       bids: [],
       asks: []
     };
 
-    super.instrumentChanged(oldValue, newValue);
-
     await this.bookTrader?.instrumentChanged?.(this, oldValue, newValue);
+    await this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
     Observable.notify(this, 'orders');
   }
 

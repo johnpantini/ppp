@@ -607,7 +607,6 @@ class TinkoffGrpcWebTrader extends Trader {
           low: toNumber(c.low),
           close: toNumber(c.close),
           time: c.time.valueOf(),
-          isComplete: c.isComplete,
           volume: c.volume
         };
       });
