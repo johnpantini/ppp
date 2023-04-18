@@ -9,10 +9,10 @@ import {
   Updates
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { later } from '../../lib/ppp-decorators.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { formatDate } from '../../lib/intl.js';
 import { scrollbars } from '../../design/styles.js';
+import { search, settings } from '../../static/svg/sprite.js'
 import '../banner.js';
 import '../button.js';
 import '../side-nav.js';
@@ -25,10 +25,7 @@ export const widgetSelectorModalPageTemplate = html`
     <form novalidate>
       <ppp-banner
         class="inline"
-        appearance="${(x) =>
-          !x.isPredefinedWidgetType(x.activeItem) || x.documents.length
-            ? 'info'
-            : 'warning'}"
+        appearance="warning"
         style="margin-bottom: 1rem"
       >
         <div
@@ -37,8 +34,20 @@ export const widgetSelectorModalPageTemplate = html`
               ? 'initial'
               : 'none'}"
         >
-          Найдите виджет, используя боковое меню, а затем нажмите на строку в
-          таблице, чтобы разместить в терминале.
+          Найдите виджет в меню сбоку и нажмите на строку в таблице, чтобы
+          разместить в терминале, или
+          <a
+            class="link"
+            style="font-weight: 700"
+            @click="${(x) => {
+              ppp.app.navigate({
+                page: 'widget',
+                type: x.activeItem
+              });
+            }}}"
+            href="javascript:void(0)"
+            >создайте новый</a
+          >.
         </div>
         <div
           style="display: ${(x) =>
@@ -47,8 +56,10 @@ export const widgetSelectorModalPageTemplate = html`
               : 'none'}"
         >
           Похоже, у вас нет ни одного виджета данного типа. Добавьте и настройте
-          их в
+          в
           <a
+            class="link"
+            style="font-weight: 700"
             @click="${(x) => {
               ppp.app.navigate({
                 page: 'widget',
@@ -187,7 +198,8 @@ export const widgetSelectorModalPageTemplate = html`
                           return false;
                         }}"
                       >
-                        Настройки виджета
+                        <span slot="start"> ${html.partial(settings)} </span>
+                        К настройкам
                       </ppp-button>
                     `
                   ]

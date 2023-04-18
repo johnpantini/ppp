@@ -406,6 +406,23 @@ export const widget = () => css`
     width: 16px;
     height: 16px;
   }
+
+  tr.table-group {
+    word-wrap: break-word;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    font-weight: 500;
+    letter-spacing: 0;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  tr.table-group td {
+    text-align: left;
+    padding: 4px 8px;
+    max-width: 134px;
+    white-space: nowrap;
+  }
+
 `;
 
 export const widgetEmptyStateTemplate = (text) => `

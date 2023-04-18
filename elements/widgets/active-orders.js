@@ -96,7 +96,7 @@ export const activeOrdersWidgetTemplate = html`
                       <div
                         slot="icon"
                         style="${(o, c) =>
-                          `background-image:url(${c.parent.instrumentTrader.getInstrumentIconUrl(
+                          `background-image:url(${c.parent.searchControl.getInstrumentIconUrl(
                             o.instrument
                           )})`}"
                       ></div>

@@ -389,6 +389,9 @@ export class WorkspacePage extends Page {
       const value = !ppp.settings.get('sideNavVisible');
 
       ppp.settings.set('sideNavVisible', value);
+
+      if (ppp.app.page === 'workspace')
+        ppp.app.sideNav.style.display = value ? 'flex' : 'none';
     }
   }
 

@@ -403,7 +403,6 @@ export class LightChartWidget extends WidgetWithInstrument {
   printChanged(oldValue, newValue) {
     if (
       newValue?.price &&
-      newValue?.volume > 0 &&
       this.chartTrader.getSymbol(this.instrument) === newValue.symbol
     ) {
       // Update the last candle here

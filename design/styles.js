@@ -96,7 +96,7 @@ export const normalize = () => css`
   }
 
   .link:hover::after {
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
   }
 `;
 
