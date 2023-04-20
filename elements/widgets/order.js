@@ -351,13 +351,27 @@ export const orderWidgetTemplate = html`
               <div class="widget-section">
                 <div class="widget-subsection">
                   <div class="widget-summary">
-                    <div class="widget-summary-line">
+                    <div
+                      class="widget-summary-line"
+                      style="cursor:pointer;"
+                      @click="${(x) =>
+                        x.setQuantity(x.buyingPowerQuantity ?? 0, {
+                          force: true
+                        })}"
+                    >
                       <span>Доступно</span>
                       <span class="positive">
                         ${(x) => x.buyingPowerQuantity ?? '—'}
                       </span>
                     </div>
-                    <div class="widget-summary-line">
+                    <div
+                      class="widget-summary-line"
+                      style="cursor:pointer;"
+                      @click="${(x) =>
+                        x.setQuantity(x.marginBuyingPowerQuantity ?? 0, {
+                          force: true
+                        })}"
+                    >
                       <span>С плечом</span>
                       <span class="positive">
                         ${(x) => x.marginBuyingPowerQuantity ?? '—'}
@@ -365,13 +379,27 @@ export const orderWidgetTemplate = html`
                     </div>
                   </div>
                   <div class="widget-summary">
-                    <div class="widget-summary-line">
+                    <div
+                      class="widget-summary-line"
+                      style="cursor:pointer;"
+                      @click="${(x) =>
+                        x.setQuantity(x.sellingPowerQuantity ?? 0, {
+                          force: true
+                        })}"
+                    >
                       <span>Доступно</span>
                       <span class="negative">
                         ${(x) => x.sellingPowerQuantity ?? '—'}
                       </span>
                     </div>
-                    <div class="widget-summary-line">
+                    <div
+                      class="widget-summary-line"
+                      style="cursor:pointer;"
+                      @click="${(x) =>
+                        x.setQuantity(x.marginSellingPowerQuantity ?? 0, {
+                          force: true
+                        })}"
+                    >
                       <span>С плечом</span>
                       <span class="negative">
                         ${(x) => x.marginSellingPowerQuantity ?? '—'}
@@ -1154,6 +1182,14 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   setQuantity(quantity, options = {}) {
+    if (options.force && quantity === 0) {
+      this.quantity.value = '';
+
+      if (options.focusOnQuantity !== false) this.quantity.focus();
+
+      return;
+    }
+
     if (this.instrument && quantity > 0 && quantity !== Infinity) {
       const precision = getInstrumentQuantityPrecision(this.instrument);
 

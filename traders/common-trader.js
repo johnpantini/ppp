@@ -198,6 +198,8 @@ export class Trader {
         return 0;
       case TRADER_DATUM.POSITION_AVERAGE:
         return 0;
+      case TRADER_DATUM.CANDLE:
+        return {};
     }
 
     return '—';
@@ -213,6 +215,8 @@ export class Trader {
         return '@@ORDERS';
       case TRADER_DATUM.TIMELINE_ITEM:
         return '@@TIMELINE';
+      case TRADER_DATUM.TRADER:
+        return '@@TRADER';
     }
   }
 

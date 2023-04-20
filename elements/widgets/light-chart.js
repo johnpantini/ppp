@@ -10,12 +10,10 @@ import {
   css,
   when,
   ref,
-  repeat,
   observable,
-  Observable,
   attr
 } from '../../vendor/fast-element.min.js';
-import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { createChart, CrosshairMode, LineStyle } from '../../lib/ppp-charts.js';
@@ -44,7 +42,8 @@ import {
   themeConditional,
   toColorComponents
 } from '../../design/design-tokens.js';
-import { formatDate, formatPriceWithoutCurrency } from '../../lib/intl.js';
+import { formatPriceWithoutCurrency } from '../../lib/intl.js';
+import { CandleInterval } from '../../vendor/tinkoff/definitions/market-data.js';
 
 export const lightChartWidgetTemplate = html`
   <template>
@@ -149,6 +148,12 @@ export class LightChartWidget extends WidgetWithInstrument {
   print;
 
   @observable
+  traderEvent;
+
+  @observable
+  candle;
+
+  @observable
   lastCandle;
 
   css(dt) {
@@ -247,9 +252,40 @@ export class LightChartWidget extends WidgetWithInstrument {
           print: TRADER_DATUM.MARKET_PRINT
         }
       });
+
+      await this.chartTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          candle: TRADER_DATUM.CANDLE,
+          traderEvent: TRADER_DATUM.TRADER
+        }
+      });
     } catch (e) {
       return this.catchException(e);
     }
+  }
+
+  async disconnectedCallback() {
+    if (this.chartTrader) {
+      await this.chartTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          candle: TRADER_DATUM.CANDLE,
+          traderEvent: TRADER_DATUM.TRADER
+        }
+      });
+    }
+
+    if (this.tradesTrader) {
+      await this.tradesTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
+    }
+
+    super.disconnectedCallback();
   }
 
   onResize({ width, height }) {
@@ -314,7 +350,6 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     if (
       this.instrument &&
-      typeof this.chartTrader.historicalQuotes === 'function' &&
       this.instrumentTrader.supportsInstrument(this.instrument)
     ) {
       try {
@@ -341,20 +376,12 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   // Older quotes come first
   setData(quotes) {
-    this.mainSeries.setData(
-      quotes.map((c) => {
-        c.time =
-          Math.floor(c.time / 1000) -
-          (3600 * new Date().getTimezoneOffset()) / 60;
-
-        return c;
-      })
-    );
+    this.mainSeries.setData(quotes.map(this.traderQuoteToChartQuote));
 
     this.volumeSeries.setData(
       quotes.map((c) => {
         return {
-          time: c.time,
+          time: new Date(c.time).valueOf(),
           value: c.volume,
           color:
             c.close < c.open
@@ -373,26 +400,48 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.lastCandle = quotes[quotes.length - 1];
   }
 
+  async traderEventChanged(oldValue, newValue) {
+    if (newValue?.event === 'reconnect') {
+      await this.loadHistory();
+    }
+  }
+
+  async loadHistory() {
+    if (typeof this.chartTrader.historicalCandles === 'function') {
+      this.ready = false;
+
+      try {
+        // TODO
+        const to = new Date();
+        const from = new Date();
+
+        from.setUTCHours(from.getUTCHours() - 24);
+
+        this.setData(
+          await this.chartTrader.historicalCandles({
+            instrument: this.instrument,
+            interval: CandleInterval.CANDLE_INTERVAL_5_MIN,
+            from,
+            to
+          })
+        );
+      } finally {
+        this.ready = true;
+
+        this.chart.timeScale().scrollToPosition(3);
+      }
+    }
+  }
+
   async instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
 
     if (this.chartTrader) {
       if (
         this.instrument &&
-        typeof this.chartTrader.historicalQuotes === 'function' &&
         this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
-        this.ready = false;
-
-        this.setData(
-          await this.chartTrader.historicalQuotes({
-            instrument: this.instrument
-          })
-        );
-
-        this.ready = true;
-
-        this.chart.timeScale().scrollToPosition(3);
+        await this.loadHistory();
       }
 
       await this.chartTrader?.instrumentChanged?.(this, oldValue, newValue);
@@ -400,20 +449,40 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
+  traderQuoteToChartQuote(quote) {
+    quote.time = new Date(quote.time).valueOf();
+    quote.time =
+      Math.floor(quote.time / 1000) -
+      (3600 * new Date().getTimezoneOffset()) / 60;
+
+    return quote;
+  }
+
+  roundTimestampForTimeframe(timestamp, tf = 1) {
+    const printTime = new Date(timestamp);
+    const coefficient = 1000 * 60 * tf;
+    const roundedTime = new Date(
+      Math.floor(printTime.getTime() / coefficient) * coefficient
+    );
+
+    return (
+      Math.floor(roundedTime.valueOf() / 1000) -
+      (3600 * new Date().getTimezoneOffset()) / 60
+    );
+  }
+
   printChanged(oldValue, newValue) {
     if (
+      this.ready &&
       newValue?.price &&
       this.chartTrader.getSymbol(this.instrument) === newValue.symbol
     ) {
+      if (newValue.timestamp < Date.now() - 3600 * 1000) {
+        return;
+      }
+
       // Update the last candle here
-      const printTime = new Date(newValue.timestamp);
-      const coefficient = 1000 * 60 * 5;
-      const roundedTime = new Date(
-        Math.floor(printTime.getTime() / coefficient) * coefficient
-      );
-      const time =
-        Math.floor(roundedTime.valueOf() / 1000) -
-        (3600 * new Date().getTimezoneOffset()) / 60;
+      const time = this.roundTimestampForTimeframe(newValue.timestamp, 5);
 
       if (
         typeof this.lastCandle === 'undefined' ||
@@ -428,15 +497,51 @@ export class LightChartWidget extends WidgetWithInstrument {
           volume: newValue.volume
         };
       } else {
-        const { high, low, volume, open } = this.lastCandle;
+        const { high, low, open, volume } = this.lastCandle;
 
+        // Do not touch volume here
         this.lastCandle = {
           open,
           high: Math.max(high, newValue.price),
           low: Math.min(low, newValue.price),
           close: newValue.price,
           time,
-          volume: newValue.volume + volume
+          volume
+        };
+      }
+    }
+  }
+
+  candleChanged(oldValue, newValue) {
+    if (this.ready && newValue?.close) {
+      const roundedTime = this.roundTimestampForTimeframe(
+        new Date(newValue.time).valueOf(),
+        5
+      );
+
+      if (
+        typeof this.lastCandle === 'undefined' ||
+        this.lastCandle.time < roundedTime
+      ) {
+        this.lastCandle = {
+          open: newValue.open,
+          high: newValue.high,
+          low: newValue.low,
+          close: newValue.price,
+          time: roundedTime,
+          volume: newValue.volume
+        };
+      } else {
+        const { open, high, low, volume } = this.lastCandle;
+
+        // TODO - volume
+        this.lastCandle = {
+          open,
+          high: Math.max(high, newValue.high),
+          low: Math.min(low, newValue.low),
+          close: newValue.close,
+          time: roundedTime,
+          volume
         };
       }
     }
@@ -444,21 +549,26 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   lastCandleChanged(oldValue, newValue) {
     if (newValue) {
-      this.mainSeries.update(newValue);
-      this.volumeSeries.update({
-        time: newValue.time,
-        value: newValue.volume,
-        color:
-          newValue.close < newValue.open
-            ? `rgba(${themeConditional(
-                toColorComponents(paletteRedLight3),
-                toColorComponents(paletteRedDark1)
-              ).$value.createCSS()}, 0.56)`
-            : `rgba(${themeConditional(
-                toColorComponents(paletteGreenLight2),
-                toColorComponents(paletteGreenDark1)
-              ).$value.createCSS()}, 0.56)`
-      });
+      try {
+        this.mainSeries.update(newValue);
+        this.volumeSeries.update({
+          time: newValue.time,
+          value: newValue.volume,
+          color:
+            newValue.close < newValue.open
+              ? `rgba(${themeConditional(
+                  toColorComponents(paletteRedLight3),
+                  toColorComponents(paletteRedDark1)
+                ).$value.createCSS()}, 0.56)`
+              : `rgba(${themeConditional(
+                  toColorComponents(paletteGreenLight2),
+                  toColorComponents(paletteGreenDark1)
+                ).$value.createCSS()}, 0.56)`
+        });
+      } catch (e) {
+        // Supress TV errors
+        void 0;
+      }
     }
   }
 

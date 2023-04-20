@@ -12,10 +12,10 @@ import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
 import {
-  CandleInterval,
   MarketDataServiceDefinition,
   MarketDataStreamServiceDefinition,
   SubscriptionAction,
+  SubscriptionInterval,
   TradeDirection
 } from '../vendor/tinkoff/definitions/market-data.js';
 import {
@@ -66,7 +66,9 @@ class TinkoffGrpcWebTrader extends Trader {
   subs = {
     orderbook: new Map(),
     allTrades: new Map(),
-    orders: new Map()
+    orders: new Map(),
+    candles: new Map(),
+    trader: new Map()
   };
 
   // Key: instrumentId; Value: { instrument, refCount }
@@ -74,7 +76,9 @@ class TinkoffGrpcWebTrader extends Trader {
   refs = {
     orderbook: new Map(),
     allTrades: new Map(),
-    orders: new Map()
+    orders: new Map(),
+    candles: new Map(),
+    trader: new Map()
   };
 
   constructor(document) {
@@ -314,13 +318,18 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async #resubscribeToMarketDataStream(reconnect = false) {
-    if (!this.refs.orderbook.size && !this.refs.allTrades.size) {
+    if (
+      !this.refs.orderbook.size &&
+      !this.refs.allTrades.size &&
+      !this.refs.candles.size
+    ) {
       return;
     }
 
     const marketDataServerSideStreamRequest = {};
     const orderbookRefsArray = [...this.refs.orderbook.values()];
     const allTradesRefsArray = [...this.refs.allTrades.values()];
+    const candlesRefsArray = [...this.refs.candles.values()];
 
     if (orderbookRefsArray.length) {
       marketDataServerSideStreamRequest.subscribeOrderBookRequest = {
@@ -348,6 +357,23 @@ class TinkoffGrpcWebTrader extends Trader {
         marketDataServerSideStreamRequest.subscribeTradesRequest.instruments.push(
           {
             instrumentId: instrument.tinkoffFigi
+          }
+        );
+      });
+    }
+
+    if (candlesRefsArray.length) {
+      marketDataServerSideStreamRequest.subscribeCandlesRequest = {
+        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
+        instruments: [],
+        waitingClose: false
+      };
+
+      [...this.refs.candles.values()].forEach(({ instrument }) => {
+        marketDataServerSideStreamRequest.subscribeCandlesRequest.instruments.push(
+          {
+            instrumentId: instrument.tinkoffFigi,
+            interval: SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
           }
         );
       });
@@ -391,6 +417,18 @@ class TinkoffGrpcWebTrader extends Trader {
             })();
           })
         );
+
+        for (const [source, fields] of this.subs.trader) {
+          for (const { field, datum } of fields) {
+            if (datum === TRADER_DATUM.TRADER) {
+              source[field] = {
+                event: 'reconnect',
+                timestamp: Date.now(),
+                trader: this
+              };
+            }
+          }
+        }
       }
 
       for await (const data of stream) {
@@ -403,6 +441,11 @@ class TinkoffGrpcWebTrader extends Trader {
           this.onTradeMessage({
             trade: data.trade,
             instrument: this.#figis.get(data.trade.figi)
+          });
+        } else if (data.candle) {
+          this.onCandleMessage({
+            candle: data.candle,
+            instrument: this.#figis.get(data.candle.figi)
           });
         }
       }
@@ -423,7 +466,9 @@ class TinkoffGrpcWebTrader extends Trader {
     return {
       [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
       [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades],
-      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders]
+      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders],
+      [TRADER_DATUM.CANDLE]: [this.subs.candles, this.refs.candles],
+      [TRADER_DATUM.TRADER]: [this.subs.trader, this.refs.trader]
     }[datum];
   }
 
@@ -460,7 +505,11 @@ class TinkoffGrpcWebTrader extends Trader {
       });
     }
 
-    if (refs === this.refs.orderbook || refs === this.refs.allTrades) {
+    if (
+      refs === this.refs.orderbook ||
+      refs === this.refs.allTrades ||
+      refs === this.refs.candles
+    ) {
       this.resubscribeToMarketDataStream();
     }
 
@@ -476,6 +525,10 @@ class TinkoffGrpcWebTrader extends Trader {
 
     if (refs === this.refs.allTrades) {
       this.refs.allTrades.delete(instrument.symbol);
+    }
+
+    if (refs === this.refs.candles) {
+      this.refs.candles.delete(instrument.symbol);
     }
 
     if (refs === this.refs.orders) {
@@ -583,19 +636,13 @@ class TinkoffGrpcWebTrader extends Trader {
     return [];
   }
 
-  async historicalQuotes({ instrument }) {
+  async historicalCandles({ instrument, interval, from, to }) {
     if (instrument?.tinkoffFigi) {
-      const to = new Date();
-      const from = new Date();
-
-      to.setUTCHours(to.getUTCHours() + 1);
-      from.setUTCHours(from.getUTCHours() - 23);
-
       const { candles } = await this.getOrCreateClient(
         MarketDataServiceDefinition
       ).getCandles({
         instrumentId: instrument.tinkoffFigi,
-        interval: CandleInterval.CANDLE_INTERVAL_5_MIN,
+        interval,
         from,
         to
       });
@@ -606,7 +653,7 @@ class TinkoffGrpcWebTrader extends Trader {
           high: toNumber(c.high),
           low: toNumber(c.low),
           close: toNumber(c.close),
-          time: c.time.valueOf(),
+          time: c.time.toISOString(),
           volume: c.volume
         };
       });
@@ -644,6 +691,30 @@ class TinkoffGrpcWebTrader extends Trader {
                   symbol: instrument.symbol,
                   price,
                   volume: trade.quantity
+                };
+
+                break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  onCandleMessage({ candle, instrument }) {
+    if (candle && instrument) {
+      for (const [source, fields] of this.subs.candles) {
+        if (this.instrumentsAreEqual(instrument, source.instrument)) {
+          for (const { field, datum } of fields) {
+            switch (datum) {
+              case TRADER_DATUM.CANDLE:
+                source[field] = {
+                  open: toNumber(candle.open),
+                  high: toNumber(candle.high),
+                  low: toNumber(candle.low),
+                  close: toNumber(candle.close),
+                  time: candle.time.toISOString(),
+                  volume: candle.volume
                 };
 
                 break;

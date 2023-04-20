@@ -185,7 +185,7 @@ export const widget = () => css`
   .widget-root {
     position: relative;
     background: ${themeConditional(paletteWhite, paletteBlack)};
-    border: 1px solid ${themeConditional(paletteGrayLight2, paletteBlack)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
     width: 100%;
     height: 100%;
     user-select: none;
