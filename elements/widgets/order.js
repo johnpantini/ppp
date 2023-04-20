@@ -798,9 +798,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
   pusherTelegramHandler(data) {
     if (typeof data.t === 'string')
-      return this.selectInstrument(data.t.toUpperCase().split('~')[0], {
-        selectOnSelf: true
-      });
+      return this.selectInstrument(data.t.toUpperCase().split('~')[0]);
   }
 
   instrumentChanged(oldValue, newValue) {
@@ -811,7 +809,10 @@ export class OrderWidget extends WidgetWithInstrument {
     this.extraLevel1Trader?.instrumentChanged?.(this, oldValue, newValue);
     this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
 
-    if (this.price && (oldValue?._id !== newValue?._id || !oldValue)) {
+    if (
+      this.price &&
+      (!this.ordersTrader.instrumentsAreEqual(oldValue, newValue) || !oldValue)
+    ) {
       setTimeout(() => {
         this.price.value = '';
         this.price.focus();

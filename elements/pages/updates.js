@@ -4,13 +4,18 @@ import ppp from '../../ppp.js';
 import { maybeFetchError } from '../../lib/ppp-errors.js';
 import { html, when, css, observable } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { emptyState, typography } from '../../design/styles.js';
+import { emptyState } from '../../design/styles.js';
 import { framedCloud } from '../../static/svg/sprite.js';
 import { formatDate } from '../../lib/intl.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
 import '../text-field.js';
+
+const isAlwaysUpToDateDomain =
+  window.location.origin === 'https://onaryx.ru' ||
+  window.location.origin === 'https://johnpantini.johnpantini.pages.dev' ||
+  window.location.origin === 'https://johnpantini.pages.dev';
 
 export const updatesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -19,6 +24,7 @@ export const updatesPageTemplate = html`
       <ppp-page-header>Центр обновлений</ppp-page-header>
       ${when(
         (x) =>
+          !isAlwaysUpToDateDomain &&
           x.currentCommit?.sha &&
           x.targetCommit?.sha &&
           x.currentCommit?.sha !== x.targetCommit?.sha,
@@ -67,7 +73,9 @@ export const updatesPageTemplate = html`
       )}
       ${when(
         (x) =>
-          x.currentCommit?.sha && x.currentCommit?.sha === x.targetCommit?.sha,
+          isAlwaysUpToDateDomain ||
+          (x.currentCommit?.sha &&
+            x.currentCommit?.sha === x.targetCommit?.sha),
         html` <div class="empty-state">
           <div class="picture">${html.partial(framedCloud)}</div>
           <h3>Репозиторий приложения синхронизирован с последней версией</h3>
@@ -76,6 +84,7 @@ export const updatesPageTemplate = html`
             ${() => localStorage.getItem('ppp-version') ?? '1.0.0'}
           </p>
           <ppp-button
+            ?hidden="${() => isAlwaysUpToDateDomain}"
             appearance="primary"
             class="large"
             @click="${(x) => x.checkForUpdates()}"
@@ -110,6 +119,8 @@ export class UpdatesPage extends Page {
   }
 
   async checkForUpdates() {
+    if (isAlwaysUpToDateDomain) return;
+
     this.beginOperation();
 
     try {

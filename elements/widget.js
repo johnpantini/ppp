@@ -422,7 +422,6 @@ export const widget = () => css`
     max-width: 134px;
     white-space: nowrap;
   }
-
 `;
 
 export const widgetEmptyStateTemplate = (text) => `
@@ -628,18 +627,8 @@ export class WidgetWithInstrument extends Widget {
     }
 
     if (adoptedInstrument) {
-      if (options.selectOnSelf) {
-        this.instrument = adoptedInstrument;
-      }
-
-      Array.from(this.container.shadowRoot.querySelectorAll('.widget'))
-        .filter(
-          (w) =>
-            w !== this &&
-            w?.instrument?.symbol !== adoptedInstrument.symbol &&
-            w?.groupControl?.selection === this.groupControl?.selection
-        )
-        .forEach((w) => (w.instrument = adoptedInstrument));
+      this.isolated = false;
+      this.instrument = adoptedInstrument;
     }
 
     return adoptedInstrument;
@@ -2739,6 +2728,20 @@ export const widgetCardStyles = css`
   :host(.new) .card {
   }
 
+  :host(.positive) .card {
+    background-color: rgba(
+      ${toColorComponents(buy)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+  }
+
+  :host(.negative) .card {
+    background-color: rgba(
+      ${toColorComponents(sell)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+  }
+
   :host([clickable]) .card {
     cursor: pointer;
   }
@@ -2911,7 +2914,7 @@ export const widgetCardStyles = css`
   }
 `;
 
-export class WidgetCard extends PPPAppearanceElement {
+export class WidgetCard extends PPPElement {
   @observable
   slottedActions;
 

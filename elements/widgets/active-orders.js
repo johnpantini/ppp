@@ -11,8 +11,8 @@ import {
   when,
   ref,
   observable,
-  Observable,
-  repeat
+  repeat,
+  attr
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { validate } from '../../lib/ppp-errors.js';
@@ -87,7 +87,7 @@ export const activeOrdersWidgetTemplate = html`
           )}
           <div class="order-list-inner">
             ${repeat(
-              (x) => x.getOrdersArray(),
+              (x) => x.orders,
               html`
                 <div class="widget-card-holder">
                   <div class="widget-card-holder-inner">
@@ -100,11 +100,6 @@ export const activeOrdersWidgetTemplate = html`
                             o.instrument
                           )})`}"
                       ></div>
-                      <span slot="icon-fallback">
-                        ${(o) =>
-                          o.instrument?.fullName?.[0] ??
-                          o.instrument?.symbol[0]}
-                      </span>
                       <span slot="icon-fallback">
                         ${(o) =>
                           o.instrument?.fullName?.[0] ??
@@ -239,8 +234,16 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   @observable
   orders;
 
-  @observable
+  @attr
   empty;
+
+  constructor() {
+    super();
+
+    this.orders = [];
+    this.ordersMap = new Map();
+    this.empty = true;
+  }
 
   async connectedCallback() {
     super.connectedCallback();
@@ -253,8 +256,6 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
 
     try {
-      this.empty = true;
-      this.orders = new Map();
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
@@ -293,12 +294,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
           newValue.quantity === newValue.filled ||
           newValue.status !== 'working'
         )
-          this.orders.delete(newValue.orderId);
+          this.ordersMap.delete(newValue.orderId);
         else if (newValue.status === 'working') {
-          this.orders.set(newValue.orderId, newValue);
+          this.ordersMap.set(newValue.orderId, newValue);
         }
 
-        Observable.notify(this, 'orders');
+        this.orders = this.getOrdersArray();
       }
     }
   }
@@ -307,13 +308,14 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     super.instrumentChanged();
 
     await this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
-    Observable.notify(this, 'orders');
+
+    this.orders = this.getOrdersArray();
   }
 
   getOrdersArray() {
     const orders = [];
 
-    for (const [_, order] of this.orders ?? []) {
+    for (const [_, order] of this.ordersMap ?? []) {
       if (order.status !== 'working') continue;
 
       if (this.instrument) {

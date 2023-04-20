@@ -11,17 +11,26 @@ import {
   when,
   ref,
   observable,
-  Observable,
+  attr,
+  repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import {
-  formatPercentage,
-  formatPriceWithoutCurrency,
-  priceCurrencySymbol
+  formatAmount,
+  formatDateWithOptions,
+  formatPrice
 } from '../../lib/intl.js';
-import { normalize } from '../../design/styles.js';
+import { normalize, scrollbars } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
+import {
+  fontSizeWidget,
+  lineHeightWidget,
+  paletteGrayBase,
+  paletteGrayLight1,
+  themeConditional
+} from '../../design/design-tokens.js';
+import { OperationType } from '../../vendor/tinkoff/definitions/operations.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
@@ -43,6 +52,80 @@ export const timelineWidgetTemplate = html`
         </div>
       </div>
       <div class="widget-body">
+        <div class="timeline-list">
+          ${when(
+            (x) => x.empty,
+            html`${html.partial(
+              widgetEmptyStateTemplate('Нет операций для отображения.')
+            )}`
+          )}
+          <div class="timeline-list-inner">
+            ${repeat(
+              (x) => x.timeline,
+              html`
+                ${when(
+                  (x) => typeof x === 'string',
+                  html`
+                    <div class="timeline-item-headline">
+                      ${(i) =>
+                        formatDateWithOptions(new Date(i), {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                    </div>
+                  `
+                )}
+                ${when(
+                  (x) => typeof x === 'object',
+                  html`
+                    <div class="widget-card-holder">
+                      <div class="widget-card-holder-inner">
+                        <ppp-widget-card
+                          class="${(x, c) => c.parent.getExtraCardClasses(x)}"
+                        >
+                          <div
+                            slot="icon"
+                            style="${(x, c) => `${c.parent.getLogo(x)}`}"
+                          ></div>
+                          <span slot="icon-fallback">
+                            ${(x, c) => c.parent.getLogoFallback(x)}
+                          </span>
+                          <span slot="icon-fallback">
+                            ${(o) =>
+                              o.instrument?.fullName?.[0] ??
+                              o.instrument?.symbol[0]}
+                          </span>
+                          <span slot="title-left">
+                            ${(x, c) => c.parent.formatCardTitle(x)}
+                          </span>
+                          <span slot="title-right">
+                            <span
+                              class="${(x, c) =>
+                                c.parent.getCardAmountExtraClasses(x)}"
+                            >
+                              ${(x, c) => c.parent.formatCardAmount(x)}
+                            </span>
+                          </span>
+                          <span slot="subtitle-left">
+                            ${(x, c) => c.parent.formatCardDescription(x)}
+                          </span>
+                          <div slot="subtitle-right">
+                            ${(x) =>
+                              formatDateWithOptions(x[x.length - 1].createdAt, {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                          </div>
+                        </ppp-widget-card>
+                      </div>
+                    </div>
+                  `
+                )}
+              `
+            )}
+          </div>
+        </div>
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -53,6 +136,36 @@ export const timelineWidgetTemplate = html`
 export const timelineWidgetStyles = css`
   ${normalize()}
   ${widget()}
+  ${scrollbars('.timeline-list')}
+  .timeline-list {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  .timeline-list-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+  }
+
+  .timeline-item-headline {
+    width: 100%;
+    margin: 0 8px;
+    word-wrap: break-word;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    font-weight: 500;
+    letter-spacing: 0;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    padding-top: 8px;
+  }
+
+  .timeline-item-headline:has(+ .timeline-item-headline) {
+    display: none;
+  }
 `;
 
 export class TimelineWidget extends WidgetWithInstrument {
@@ -65,17 +178,16 @@ export class TimelineWidget extends WidgetWithInstrument {
   @observable
   timeline;
 
-  @observable
-  emptyIndicator;
-
-  @observable
-  needsRefresh;
+  @attr({ mode: 'boolean' })
+  empty;
 
   constructor() {
     super();
 
-    this.timeline = new Map();
-    this.emptyIndicator = new Map();
+    this.empty = true;
+    this.timeline = [];
+    this.timelineMap = new Map();
+    this.emptyIndicatorMap = new Map();
   }
 
   async connectedCallback() {
@@ -120,29 +232,15 @@ export class TimelineWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
-  instrumentChanged() {
-    super.instrumentChanged();
-
-    this.needsRefresh = true;
-
-    Updates.enqueue(() => {
-      this.needsRefresh = false;
-
-      Observable.notify(this, 'timeline');
-    });
-  }
-
   getLogo(operations) {
     const [firstOperation] = operations;
 
     switch (firstOperation.type) {
-      case TIMELINE_OPERATION_TYPE.BUY:
-      case TIMELINE_OPERATION_TYPE.SELL:
-        return firstOperation.instrument.isin
-          ? `background-image:url(${
-              'static/instruments/' + firstOperation.instrument.isin + '.svg'
-            })`
-          : '';
+      case OperationType.OPERATION_TYPE_BUY:
+      case OperationType.OPERATION_TYPE_SELL:
+        return `background-image:url(${this.searchControl.getInstrumentIconUrl(
+          firstOperation.instrument
+        )}`;
 
       default:
         return '';
@@ -153,8 +251,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     const [firstOperation] = operations;
 
     switch (firstOperation.type) {
-      case TIMELINE_OPERATION_TYPE.BUY:
-      case TIMELINE_OPERATION_TYPE.SELL:
+      case OperationType.OPERATION_TYPE_BUY:
+      case OperationType.OPERATION_TYPE_SELL:
         return (
           firstOperation.instrument.symbol?.[0] ?? firstOperation.symbol[0]
         );
@@ -172,10 +270,10 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     for (const item of operations) {
       if (
-        item.type === TIMELINE_OPERATION_TYPE.SELL ||
-        item.type === TIMELINE_OPERATION_TYPE.BUY
+        item.type === OperationType.OPERATION_TYPE_SELL ||
+        item.type === OperationType.OPERATION_TYPE_BUY
       ) {
-        if (item.type === TIMELINE_OPERATION_TYPE.BUY) negative = true;
+        if (item.type === OperationType.OPERATION_TYPE_BUY) negative = true;
 
         totalAmount += item.price * item.quantity;
       }
@@ -191,7 +289,7 @@ export class TimelineWidget extends WidgetWithInstrument {
   getCardAmountExtraClasses(operations) {
     const [firstOperation] = operations;
 
-    return firstOperation.type === TIMELINE_OPERATION_TYPE.SELL
+    return firstOperation.type === OperationType.OPERATION_TYPE_SELL
       ? 'positive'
       : '';
   }
@@ -203,8 +301,8 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     for (const item of operations) {
       if (
-        item.type === TIMELINE_OPERATION_TYPE.SELL ||
-        item.type === TIMELINE_OPERATION_TYPE.BUY
+        item.type === OperationType.OPERATION_TYPE_SELL ||
+        item.type === OperationType.OPERATION_TYPE_BUY
       ) {
         totalQuantity += item.quantity;
       }
@@ -213,7 +311,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     totalQuantity *= firstOperation.instrument?.lot ?? 1;
 
     switch (firstOperation.type) {
-      case TIMELINE_OPERATION_TYPE.SELL:
+      case OperationType.OPERATION_TYPE_SELL:
         return ppp.dict.t('$timeLineWidget.sellOperation', {
           tradedCount: ppp.dict.t(
             `$timeLineWidget.${firstOperation.instrument.type ?? 'other'}Count`,
@@ -226,7 +324,7 @@ export class TimelineWidget extends WidgetWithInstrument {
             firstOperation.instrument.symbol
         });
 
-      case TIMELINE_OPERATION_TYPE.BUY:
+      case OperationType.OPERATION_TYPE_BUY:
         return ppp.dict.t('$timeLineWidget.buyOperation', {
           tradedCount: ppp.dict.t(
             `$timeLineWidget.${firstOperation.instrument.type ?? 'other'}Count`,
@@ -251,8 +349,8 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     for (const item of operations) {
       if (
-        item.type === TIMELINE_OPERATION_TYPE.SELL ||
-        item.type === TIMELINE_OPERATION_TYPE.BUY
+        item.type === OperationType.OPERATION_TYPE_SELL ||
+        item.type === OperationType.OPERATION_TYPE_BUY
       ) {
         totalQuantity += item.quantity;
         totalAmount += item.price * item.quantity;
@@ -260,8 +358,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     }
 
     switch (firstOperation.type) {
-      case TIMELINE_OPERATION_TYPE.SELL:
-      case TIMELINE_OPERATION_TYPE.BUY:
+      case OperationType.OPERATION_TYPE_SELL:
+      case OperationType.OPERATION_TYPE_BUY:
         return ppp.dict.t('$timeLineWidget.lotAtPrice', {
           lotCount: ppp.dict.t('$timeLineWidget.lotCount', {
             smart_count: totalQuantity
@@ -275,10 +373,13 @@ export class TimelineWidget extends WidgetWithInstrument {
   }
 
   getCards(dateKey) {
-    return Array.from(this.timeline.get(dateKey).values())
+    return Array.from(this.timelineMap.get(dateKey).values())
       .filter(([i]) => {
         if (this.instrument) {
-          return i.instrument.symbol === this.instrument.symbol;
+          return this.instrumentTrader.instrumentsAreEqual(
+            i.instrument,
+            this.instrument
+          );
         } else return true;
       })
       .sort((a, b) => {
@@ -291,16 +392,12 @@ export class TimelineWidget extends WidgetWithInstrument {
     const classList = [];
 
     switch (firstOperation.type) {
-      case TIMELINE_OPERATION_TYPE.BUY:
-        classList.push('expandable');
-
+      case OperationType.OPERATION_TYPE_BUY:
         if (this.document.highlightTrades) classList.push('positive');
 
         break;
 
-      case TIMELINE_OPERATION_TYPE.SELL:
-        classList.push('expandable');
-
+      case OperationType.OPERATION_TYPE_SELL:
         if (this.document.highlightTrades) classList.push('negative');
 
         break;
@@ -314,20 +411,18 @@ export class TimelineWidget extends WidgetWithInstrument {
   }
 
   timelineItemChanged(oldValue, newValue) {
-    this.needsRefresh = true;
-
     const date = new Date(newValue.createdAt);
     const topLevelKey = `${date.getFullYear()}-${this.#padTo2Digits(
       date.getMonth() + 1
     )}-${this.#padTo2Digits(date.getDate())}`;
 
-    if (!this.timeline.has(topLevelKey)) {
-      this.timeline.set(
+    if (!this.timelineMap.has(topLevelKey)) {
+      this.timelineMap.set(
         topLevelKey,
         new Map().set(newValue.parentId, [newValue])
       );
     } else {
-      const topLevelMap = this.timeline.get(topLevelKey);
+      const topLevelMap = this.timelineMap.get(topLevelKey);
 
       if (topLevelMap.has(newValue.parentId)) {
         const parent = topLevelMap.get(newValue.parentId);
@@ -345,30 +440,64 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     const symbol = newValue.instrument?.symbol ?? newValue.symbol;
 
-    if (this.emptyIndicator.has(symbol)) {
-      this.emptyIndicator.get(symbol).push(topLevelKey);
+    if (this.emptyIndicatorMap.has(symbol)) {
+      const array = this.emptyIndicatorMap.get(symbol);
+
+      if (array.indexOf(topLevelKey) === -1) {
+        array.push(topLevelKey);
+      }
     } else {
-      this.emptyIndicator.set(symbol, [topLevelKey]);
+      this.emptyIndicatorMap.set(symbol, [topLevelKey]);
     }
 
-    Updates.enqueue(() => {
-      this.needsRefresh = false;
+    this.timeline = [];
 
-      Observable.notify(this, 'timeline');
-      Observable.notify(this, 'emptyIndicator');
-    });
+    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+  }
+
+  instrumentChanged() {
+    super.instrumentChanged();
+
+    this.timeline = [];
+
+    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+  }
+
+  getTimelineArray() {
+    this.empty = this.isEmpty();
+
+    const timeline = [];
+    const topLevelKeys = Array.from(this.timelineMap.keys()).sort(
+      (a, b) => new Date(b) - new Date(a)
+    );
+
+    for (const tk of topLevelKeys) {
+      timeline.push(tk);
+
+      const cards = this.getCards(tk);
+
+      if (!cards.length) {
+        timeline.pop();
+      }
+
+      for (const card of cards) {
+        timeline.push(card);
+      }
+    }
+
+    return timeline;
   }
 
   isEmpty(dateKey) {
     if (!dateKey) {
-      if (!this.instrument) return !this.timeline.size;
+      if (!this.instrument) return !this.timelineMap.size;
       else {
-        return !this.emptyIndicator.has(this.instrument.symbol);
+        return !this.emptyIndicatorMap.has(this.instrument.symbol);
       }
     } else {
-      if (!this.instrument) return !this.timeline.get(dateKey).size;
+      if (!this.instrument) return !this.timelineMap.get(dateKey).size;
       else
-        return !this.emptyIndicator
+        return !this.emptyIndicatorMap
           .get(this.instrument.symbol)
           .find((key) => key === dateKey);
     }
@@ -395,7 +524,7 @@ export async function widgetDefinition() {
     title: html`Лента операций`,
     description: html`Виджет
       <span class="positive">Лента операций</span> отображает историю сделок и
-      других биржевых событий одного или нескольких торговых инструментов.`,
+      других биржевых событий по одному или нескольким торговым инструментам.`,
     customElement: TimelineWidget.compose({
       template: timelineWidgetTemplate,
       styles: timelineWidgetStyles

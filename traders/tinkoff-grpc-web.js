@@ -584,7 +584,7 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async historicalQuotes({ instrument }) {
-    if (instrument) {
+    if (instrument?.tinkoffFigi) {
       const to = new Date();
       const from = new Date();
 

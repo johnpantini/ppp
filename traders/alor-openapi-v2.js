@@ -2,11 +2,11 @@ import { isJWTTokenExpired, uuidv4 } from '../lib/ppp-crypto.js';
 import { TradingError } from '../lib/ppp-errors.js';
 import {
   TRADER_DATUM,
-  TIMELINE_OPERATION_TYPE,
   EXCHANGE,
   BROKERS,
   INSTRUMENT_DICTIONARY
 } from '../lib/const.js';
+import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
 import { formatPrice } from '../lib/intl.js';
@@ -1182,8 +1182,8 @@ class AlorOpenAPIV2Trader extends Trader {
               symbol: data.symbol,
               type:
                 data.side === 'buy'
-                  ? TIMELINE_OPERATION_TYPE.BUY
-                  : TIMELINE_OPERATION_TYPE.SELL,
+                  ? OperationType.OPERATION_TYPE_BUY
+                  : OperationType.OPERATION_TYPE_SELL,
               exchange: data.exchange,
               quantity: data.qty,
               price: data.price,

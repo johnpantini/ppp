@@ -35,8 +35,6 @@ export default {
   paletteGrayLight1: '#8CA7BE', // *
   paletteGrayLight2: '#DFE6ED', // *
   paletteGrayLight3: '#F3F5F8', // *
-
-  d: '#2c3c4b',
   paletteGrayDark1: '#334657', // *
   paletteGrayDark2: '#243442', // *
   paletteGrayDark3: '#21313F', // *

@@ -13,7 +13,7 @@ import {
   observable,
   repeat
 } from '../../vendor/fast-element.min.js';
-import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import {
   currencyName,
   formatAmount,
@@ -298,6 +298,7 @@ export const portfolioWidgetStyles = css`
     line-height: ${lineHeightWidget};
     font-weight: ${fontWeightWidget};
     display: flex;
+    align-items: center;
     width: 100%;
     letter-spacing: 0;
   }
@@ -425,14 +426,12 @@ export class PortfolioWidget extends WidgetWithInstrument {
 
   async handlePortfolioTableClick({ event }) {
     if (this.groupControl.selection && !this.preview && this.portfolioTrader) {
-      const cp = event.composedPath();
-      const symbol = cp
-        .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
-        ?.getAttribute('symbol');
-
-      if (symbol) {
-        this.selectInstrument(symbol);
-      }
+      this.selectInstrument(
+        event
+          .composedPath()
+          .find((n) => n?.tagName?.toLowerCase?.() === 'tr')
+          ?.getAttribute('symbol')
+      );
     }
   }
 

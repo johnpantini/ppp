@@ -1569,7 +1569,6 @@ function createBaseTradeInstrument() {
 
 export const TradeInstrument = {
   encode(message, writer = protobuf.Writer.create()) {
-
     if (message.instrumentId !== '') {
       writer.uint32(18).string(message.instrumentId);
     }
