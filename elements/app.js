@@ -27,7 +27,8 @@ import {
   settings,
   services,
   extensions,
-  connections
+  connections,
+  expand
 } from '../static/svg/sprite.js';
 import './modal.js';
 import './pages/not-found.js';
@@ -365,6 +366,18 @@ export const appTemplate = html`
               </ppp-side-nav-item>
             </a>
           </ppp-side-nav-group>
+          <ppp-side-nav-group class="expando">
+            <ppp-side-nav-item @click="${(x) => x.expandCollapseSideNav()}">
+              <span
+                slot="start"
+                class="action-icon"
+                style="${(x) =>
+                  x.sideNav.expanded ? '' : 'transform: rotate(180deg)'}"
+              >
+                ${html.partial(expand)}
+              </span>
+            </ppp-side-nav-item>
+          </ppp-side-nav-group>
         </ppp-side-nav>
         <div ?workspace="${(x) => x.page === 'workspace'}" class="page-content">
           ${when(
@@ -560,6 +573,18 @@ export class App extends PPPElement {
     this.extension = this.params()?.extension;
 
     void this.navigate(this.url(this.params()));
+  }
+
+  expandCollapseSideNav() {
+    const expanded = this.sideNav.hasAttribute('expanded');
+
+    if (expanded) {
+      this.sideNav.removeAttribute('expanded');
+    } else {
+      this.sideNav.setAttribute('expanded', '');
+    }
+
+    ppp.settings.set('sideNavCollapsed', expanded);
   }
 
   constructor() {
