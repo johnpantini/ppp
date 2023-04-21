@@ -50,12 +50,13 @@ export const cloudServicesPageTemplate = html`
           <ppp-banner class="inline" appearance="warning">
             Сохраните заново или
             <a
+              class="link"
               @click="${(x) =>
                 x.importCloudKeysModal.removeAttribute('hidden')}"
               href="javascript:void(0)"
               >импортируйте</a
             >
-            ключи облачных сервисов.
+            ключи облачных сервисов, чтобы пользоваться приложением.
           </ppp-banner>
         `
       )}
@@ -224,7 +225,7 @@ export const cloudServicesPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить пароль и ключи
+          Сохранить пароль и ключи в облаке
         </ppp-button>
       </footer>
     </form>

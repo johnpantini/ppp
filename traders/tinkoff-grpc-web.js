@@ -799,6 +799,9 @@ class TinkoffGrpcWebTrader extends Trader {
           if (datum === TRADER_DATUM.CURRENT_ORDER) {
             const instrument = this.#figis.get(order.figi);
 
+            if (!instrument)
+              continue;
+
             source[field] = {
               instrument,
               orderId: order.orderId,

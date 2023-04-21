@@ -1,6 +1,6 @@
 {
   "name": "ppp",
-  "version": "2.10.9",
+  "version": "2.10.10",
   "description": "ppp monorepo",
   "author": "johnpantini",
   "main": "ppp-dyno.mjs",

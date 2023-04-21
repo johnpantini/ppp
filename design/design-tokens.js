@@ -31,6 +31,10 @@ export const createThemed = (name) => {
 };
 
 export const themeConditional = (light, dark) => {
+  if (typeof light === 'undefined') {
+    return;
+  }
+
   if (typeof dark === 'undefined') dark = light;
 
   const name = `${light.name}-with-${dark.name}`;
@@ -272,6 +276,14 @@ export const buy = fromPair('buy');
 export const sell = fromPair('sell');
 export const buyHover = fromPair('buyHover');
 export const sellHover = fromPair('sellHover');
+// Charts
+export const chartUpColor = fromPair('chartUpColor');
+export const chartDownColor = fromPair('chartDownColor');
+export const chartBorderUpColor = fromPair('chartBorderUpColor');
+export const chartBorderDownColor = fromPair('chartBorderDownColor');
+export const chartWickUpColor = fromPair('chartWickUpColor');
+export const chartWickDownColor = fromPair('chartWickDownColor');
+
 // For loader
 document.body.style.setProperty(
   '--success-color',

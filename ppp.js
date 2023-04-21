@@ -184,6 +184,11 @@ class PPP {
               this.#showLoadingError({
                 errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
               });
+
+              setTimeout(() => {
+                localStorage.removeItem('ppp-use-alternative-mongo');
+                window.location.reload();
+              }, 5000);
             } else {
               this.#showLoadingError({
                 errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
@@ -282,6 +287,11 @@ class PPP {
             this.#showLoadingError({
               errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
             });
+
+            setTimeout(() => {
+              localStorage.removeItem('ppp-use-alternative-mongo');
+              window.location.reload();
+            }, 5000);
           } else {
             this.#showLoadingError({
               errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),

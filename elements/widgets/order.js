@@ -971,6 +971,42 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   @debounce(250)
+  calculateCommission() {
+    if (this.instrument && typeof this.ordersTrader?.estimate === 'function') {
+      this.commission = '—';
+
+      const price = parseFloat(this.price?.value.replace(',', '.'));
+
+      if (!isNaN(price) && price) {
+        const quantity = parseInt(this.quantity.value || '0');
+
+        this.ordersTrader
+          .estimate(this.instrument, price, quantity)
+          .then((estimate) => {
+            const flatCommissionRate =
+              this.ordersTrader?.document?.flatCommissionRate ?? void 0;
+
+            if (typeof flatCommissionRate === 'undefined') {
+              this.commission = estimate.commission;
+            } else {
+              this.commission =
+                (price * quantity * this.instrument.lot * flatCommissionRate) /
+                100;
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+
+            this.notificationsArea.error({
+              title: 'Ошибка заявки',
+              text: 'Не удалось рассчитать комиссию.'
+            });
+          });
+      }
+    }
+  }
+
+  @debounce(250)
   calculateEstimate() {
     if (this.instrument && typeof this.ordersTrader?.estimate === 'function') {
       this.marginBuyingPowerQuantity = '—';
@@ -1016,7 +1052,7 @@ export class OrderWidget extends WidgetWithInstrument {
     }
   }
 
-  calculateTotalAmount() {
+  calculateTotalAmount(calculateEstimate = true) {
     if (!this.instrument) return;
 
     if (this.instrument.type === 'future') return;
@@ -1026,7 +1062,11 @@ export class OrderWidget extends WidgetWithInstrument {
       parseInt(this.quantity?.value) *
       this.instrument.lot;
 
-    this.calculateEstimate();
+    if (calculateEstimate) {
+      this.calculateEstimate();
+    } else {
+      this.calculateCommission();
+    }
   }
 
   async handlePriceOrQuantityKeydown({ event, type }) {
@@ -1184,6 +1224,8 @@ export class OrderWidget extends WidgetWithInstrument {
   setQuantity(quantity, options = {}) {
     if (options.force && quantity === 0) {
       this.quantity.value = '';
+      this.commission = 0;
+      this.totalAmount = '—';
 
       if (options.focusOnQuantity !== false) this.quantity.focus();
 
@@ -1201,7 +1243,7 @@ export class OrderWidget extends WidgetWithInstrument {
         this.quantity.value = '';
       }
 
-      this.calculateTotalAmount();
+      this.calculateTotalAmount(false);
 
       if (options.focusOnQuantity !== false) this.quantity.focus();
 
@@ -1225,7 +1267,7 @@ export class OrderWidget extends WidgetWithInstrument {
       this.quantity.value = this.quantity.value.substring(1);
     }
 
-    this.calculateTotalAmount();
+    this.calculateTotalAmount(false);
     this.saveLastQuantity();
   }
 
@@ -1261,7 +1303,7 @@ export class OrderWidget extends WidgetWithInstrument {
       this.quantity.value = this.quantity.control.value;
 
       this.quantity.control.focus();
-      this.calculateTotalAmount();
+      this.calculateTotalAmount(false);
       this.saveLastQuantity();
     } else {
       if (this.price.value.endsWith(decSeparator))

@@ -2,53 +2,67 @@ import defaultTheme from './tinkoff.js';
 
 export default Object.assign({}, defaultTheme, {
   // Base colors
-  paletteWhite: '#FFFFFF', // *
-  paletteBlack: '#181A20', // *
+  paletteWhite: '#FFFFFF',
+  paletteBlack: '#181A20',
   // Gray
-  paletteGrayBase: '#848E9C',
-  paletteGrayLight1: '#B7BDC6', // *
-  paletteGrayLight2: '#EAECEF', // *
-  paletteGrayLight3: '#F9FBFA',
-  paletteGrayDark1: '#474D57', // *
-  paletteGrayDark2: '#40464F', // *
-  paletteGrayDark3: '#1C2D38',
-  paletteGrayDark4: '#0B0E11', // *
-  // Green
-  paletteGreenBase: '#F0B90B', // *
-  paletteGreenLight1: '#FCD535', // *
-  paletteGreenLight2: '#FCF0C6', // *
-  paletteGreenLight3: '#FAF3E0', // *
-  paletteGreenDark1: '#EC8D42', // *
-  paletteGreenDark2: '#B66C32', // *
-  paletteGreenDark3: '#3C2601', // *
-  // Purple
-  palettePurpleBase: '#B45AF2',
-  palettePurpleLight2: '#F1D4FD',
-  palettePurpleLight3: '#F9EBFF',
-  palettePurpleDark2: '#5E0C9E',
-  palettePurpleDark3: '#2D0B59',
+  paletteGrayBase: '#707A8A',
+  paletteGrayLight1: '#B7BDC6',
+  paletteGrayLight2: '#EAECEF',
+  paletteGrayLight3: '#F5F5F5',
+  paletteGrayDark1: '#474d57',
+  paletteGrayDark2: '#252930',
+  paletteGrayDark3: '#20262d',
+  paletteGrayDark4: '#181E25',
+  // Green (yellow)
+  paletteGreenBase: '#C99400',
+  paletteGreenLight1: '#F0B90B',
+  paletteGreenLight2: '#FCD535',
+  paletteGreenLight3: '#FFEF87',
+  paletteGreenDark1: '#A37200',
+  paletteGreenDark2: '#8D5F02',
+  paletteGreenDark3: '#6A4403',
+  // Purple (green)
+  palettePurpleBase: '#1CD264',
+  palettePurpleLight2: '#4EE088',
+  palettePurpleLight3: '#85F2BE',
+  palettePurpleDark2: '#0ECB81',
+  palettePurpleDark3: '#03A66D',
   // Blue
-  paletteBlueBase: '#1F8DF9', // *
-  paletteBlueLight1: '#0498ED', // *
-  paletteBlueLight2: '#C3E7FE', // *
-  paletteBlueLight3: '#E1F7FF', // *
-  paletteBlueDark1: '#297FD4', // *
-  paletteBlueDark2: '#15589a', // *
-  paletteBlueDark3: '#0a2559', // *
+  paletteBlueBase: '#328DFD',
+  paletteBlueLight1: '#5CA7F7',
+  paletteBlueLight2: '#82C1FC',
+  paletteBlueLight3: '#AAD8FD',
+  paletteBlueDark1: '#1773EB',
+  paletteBlueDark2: '#1D53AB',
+  paletteBlueDark3: '#153263',
   // Yellow
-  paletteYellowBase: '#C99400', // *
-  paletteYellowLight2: '#F0B90B', // *
-  paletteYellowLight3: '#FEF7DB', // *
-  paletteYellowDark2: '#B66C32', // *
-  paletteYellowDark3: '#3C2601', // *
+  paletteYellowBase: '#F0B90B',
+  paletteYellowLight2: '#FCD535',
+  paletteYellowLight3: '#FFEF87',
+  paletteYellowDark2: '#C99400',
+  paletteYellowDark3: '#A37200',
   // Red
-  paletteRedBase: '#F6465D', // *
-  paletteRedLight1: '#FF6960',
-  paletteRedLight2: '#FFCDC7',
-  paletteRedLight3: '#FFEAE5',
-  paletteRedDark1: '#970606',
-  paletteRedDark2: '#970606',
-  paletteRedDark3: '#5B0000',
+  paletteRedBase: '#E33B54',
+  paletteRedLight1: '#F6465D',
+  paletteRedLight2: '#FF707E',
+  paletteRedLight3: '#FF99A0',
+  paletteRedDark1: '#CF304A',
+  paletteRedDark2: '#A81E3A',
+  paletteRedDark3: '#82112B',
   // Links
-  linkColor: ['palette-yellow-base', 'palette-yellow-light-2'],
+  linkColor: ['palette-yellow-dark-2', 'palette-yellow-light-2'],
+  // Buy and sell
+  positive: ['palette-purple-dark-2', 'palette-purple-base'],
+  negative: ['palette-red-dark-1', 'palette-red-light-1'],
+  buy: ['palette-purple-dark-2', 'palette-purple-base'],
+  sell: ['palette-red-dark-1', 'palette-red-light-1'],
+  buyHover: ['palette-purple-base', 'palette-purple-light-2'],
+  sellHover: ['palette-red-base', 'palette-red-base'],
+  // Charts
+  chartUpColor: ['palette-purple-dark-2', 'palette-purple-dark-2'],
+  chartDownColor: ['palette-red-light-1', 'palette-red-light-1'],
+  chartBorderUpColor: ['palette-purple-dark-2', 'palette-purple-dark-2'],
+  chartBorderDownColor: ['palette-red-light-1', 'palette-red-light-1'],
+  chartWickUpColor: ['palette-purple-dark-2', 'palette-purple-dark-2'],
+  chartWickDownColor: ['palette-red-light-1', 'palette-red-light-1']
 });

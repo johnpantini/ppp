@@ -53,6 +53,30 @@ const colorPairs = [
   {
     h: 'Продажа (активно)',
     pair: 'sellHover'
+  },
+  {
+    h: 'Тело свечи на графике (рост)',
+    pair: 'chartUpColor'
+  },
+  {
+    h: 'Тело свечи на графике (падение)',
+    pair: 'chartDownColor'
+  },
+  {
+    h: 'Обрамление свечи на графике (рост)',
+    pair: 'chartBorderUpColor'
+  },
+  {
+    h: 'Обрамление свечи на графике (падение)',
+    pair: 'chartBorderDownColor'
+  },
+  {
+    h: 'Фитиль свечи на графике (рост)',
+    pair: 'chartWickUpColor'
+  },
+  {
+    h: 'Фитиль свечи на графике (падение)',
+    pair: 'chartWickDownColor'
   }
 ];
 
@@ -194,6 +218,7 @@ export const settingsAppearancePageTemplate = html`
               ${ref('themeColorsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
+              <ppp-option value="binance">Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
@@ -362,6 +387,7 @@ export const settingsAppearancePageTemplate = html`
               ${ref('themeColorPairsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
+              <ppp-option value="binance">Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
@@ -417,6 +443,7 @@ export const settingsAppearancePageTemplate = html`
               ${ref('themeFontsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
+              <ppp-option value="binance">Binance</ppp-option>
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button

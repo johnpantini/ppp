@@ -1,3 +1,14 @@
+import {
+  paletteGreenDark1,
+  paletteGreenLight1,
+  paletteGreenLight2,
+  paletteRedDark1,
+  paletteRedLight1,
+  paletteRedLight2,
+  paletteRedLight3,
+  themeConditional
+} from '../design-tokens.js';
+
 export default {
   // Types
   bodyFont:
@@ -106,5 +117,12 @@ export default {
   buy: ['palette-green-light-1', 'palette-green-base'],
   sell: ['palette-red-light-1', 'palette-red-dark-1'],
   buyHover: ['palette-green-light-2', 'palette-green-light-1'],
-  sellHover: ['palette-red-light-2', 'palette-red-base']
+  sellHover: ['palette-red-light-2', 'palette-red-base'],
+  // Charts
+  chartUpColor: ['palette-green-light-2', 'palette-green-dark-1'],
+  chartDownColor: ['palette-red-light-3', 'palette-red-dark-1'],
+  chartBorderUpColor: ['palette-green-light-1', 'palette-green-light-1'],
+  chartBorderDownColor: ['palette-red-light-2', 'palette-red-light-1'],
+  chartWickUpColor: ['palette-green-light-1', 'palette-green-light-1'],
+  chartWickDownColor: ['palette-red-light-2', 'palette-red-light-1']
 };

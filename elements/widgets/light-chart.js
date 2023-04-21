@@ -22,7 +22,12 @@ import '../query-select.js';
 import '../text-field.js';
 import {
   bodyFont,
-  darken,
+  chartBorderDownColor,
+  chartBorderUpColor,
+  chartDownColor,
+  chartUpColor,
+  chartWickDownColor,
+  chartWickUpColor,
   fontSizeWidget,
   paletteBlack,
   paletteGrayBase,
@@ -32,13 +37,11 @@ import {
   paletteGrayLight2,
   paletteGrayLight3,
   paletteGreenDark1,
-  paletteGreenLight1,
   paletteGreenLight2,
   paletteRedDark1,
-  paletteRedLight1,
-  paletteRedLight2,
   paletteRedLight3,
   paletteWhite,
+  darken,
   themeConditional,
   toColorComponents
 } from '../../design/design-tokens.js';
@@ -325,14 +328,12 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.chart.resize(parseInt(width) - 2, parseInt(height) - 32);
 
     this.mainSeries = this.chart.addCandlestickSeries({
-      upColor: themeConditional(paletteGreenLight2, paletteGreenDark1).$value,
-      downColor: themeConditional(paletteRedLight3, paletteRedDark1).$value,
-      borderDownColor: themeConditional(paletteRedLight2, paletteRedLight1)
-        .$value,
-      borderUpColor: paletteGreenLight1.$value,
-      wickDownColor: themeConditional(paletteRedLight2, paletteRedLight1)
-        .$value,
-      wickUpColor: paletteGreenLight1.$value
+      downColor: chartDownColor.$value,
+      upColor: chartUpColor.$value,
+      borderDownColor: chartBorderDownColor.$value,
+      borderUpColor: chartBorderUpColor.$value,
+      wickDownColor: chartWickDownColor.$value,
+      wickUpColor: chartWickUpColor.$value
     });
 
     this.volumeSeries = this.chart.addHistogramSeries({
@@ -385,13 +386,11 @@ export class LightChartWidget extends WidgetWithInstrument {
           value: c.volume,
           color:
             c.close < c.open
-              ? `rgba(${themeConditional(
-                  toColorComponents(paletteRedLight3),
-                  toColorComponents(paletteRedDark1)
+              ? `rgba(${toColorComponents(
+                  chartDownColor
                 ).$value.createCSS()}, 0.56)`
-              : `rgba(${themeConditional(
-                  toColorComponents(paletteGreenLight2),
-                  toColorComponents(paletteGreenDark1)
+              : `rgba(${toColorComponents(
+                  chartUpColor
                 ).$value.createCSS()}, 0.56)`
         };
       })
@@ -548,7 +547,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   lastCandleChanged(oldValue, newValue) {
-    if (newValue) {
+    if (newValue?.close) {
       try {
         this.mainSeries.update(newValue);
         this.volumeSeries.update({
