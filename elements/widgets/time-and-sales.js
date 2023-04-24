@@ -82,11 +82,11 @@ export const timeAndSalesWidgetTemplate = html`
                 <tr>
                   <th>
                     ${(x) =>
-                      x.instrument
+                      x.instrument && x.document.displayCurrency
                         ? 'Цена, ' + priceCurrencySymbol(x.instrument)
                         : 'Цена'}
                   </th>
-                  <th>Количество</th>
+                  <th>Лоты</th>
                   <th>Время</th>
                   <th
                     style="display: ${(x) =>
@@ -391,7 +391,8 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       $set: {
         depth: Math.abs(this.container.depth.value),
         tradesTraderId: this.container.tradesTraderId.value,
-        threshold: +this.container.threshold.value.replace(',', '.') || ''
+        threshold: +this.container.threshold.value.replace(',', '.') || '',
+        displayCurrency: this.container.displayCurrency.checked
       }
     };
   }
@@ -496,6 +497,17 @@ export async function widgetDefinition() {
             ${ref('threshold')}
           ></ppp-text-field>
         </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Параметры отображения и работы</h5>
+        </div>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.displayCurrency}"
+          ${ref('displayCurrency')}
+        >
+          Показывать валюту в столбце "Цена"
+        </ppp-checkbox>
       </div>
     `
   };
