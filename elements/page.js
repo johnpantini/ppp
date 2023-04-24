@@ -620,7 +620,7 @@ class Page extends PPPElement {
   }
 
   failOperation(e, toastTitle = this.getToastTitle()) {
-    console.dir(e);
+    console.error(e);
 
     this.lastError = e;
     this.status = PAGE_STATUS.OPERATION_FAILED;

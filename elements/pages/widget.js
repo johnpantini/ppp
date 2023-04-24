@@ -52,7 +52,7 @@ import {
   timelineWidget
 } from '../../static/svg/sprite.js';
 import { normalize } from '../../design/styles.js';
-import { PAGE_STATUS } from '../../lib/const.js';
+import { PAGE_STATUS, WIDGET_TYPES } from '../../lib/const.js';
 import { PPPElement } from '../../lib/ppp-element.js';
 import '../badge.js';
 import '../banner.js';
@@ -783,7 +783,9 @@ export class WidgetPage extends Page {
   }
 
   async validate() {
-    await validate(this.name);
+    if (this.widgetDefinition.type !== WIDGET_TYPES.MIGRATION) {
+      await validate(this.name);
+    }
 
     if (typeof this.widgetDefinition?.customElement !== 'object') {
       invalidate(this.url, {
@@ -943,7 +945,7 @@ export class WidgetPage extends Page {
     let widgetUpdateResult = {};
 
     // Needed to prevent widget preview null document
-    this.widgetPreview.shadowRoot.firstChild &&
+    this.widgetPreview?.shadowRoot.firstChild &&
       this.widgetPreview.shadowRoot.removeChild(
         this.widgetPreview.shadowRoot.firstChild
       );
@@ -980,6 +982,8 @@ export class WidgetPage extends Page {
             widgetUpdateResult[key]
           );
         }
+      } else if (widgetUpdateResult === false) {
+        return false;
       }
     }
 
@@ -1136,7 +1140,14 @@ export class WidgetPage extends Page {
         this.document = await this.denormalizePartialDocument();
       }
 
-      await validate(this.name);
+      if (
+        !(
+          this.document.type === 'custom' &&
+          /migration/i.test(this.document.url)
+        )
+      ) {
+        await validate(this.name);
+      }
 
       if (this.url?.isConnected && this.document.type === 'custom') {
         await validate(this.url);
@@ -1163,7 +1174,7 @@ export class WidgetPage extends Page {
       if (typeof this.widgetElement?.validate === 'function')
         await this.widgetElement.validate();
     } finally {
-      this.widgetPreview.shadowRoot.firstChild &&
+      this.widgetPreview?.shadowRoot.firstChild &&
         this.widgetPreview.shadowRoot.removeChild(
           this.widgetPreview.shadowRoot.firstChild
         );

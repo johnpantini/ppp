@@ -236,7 +236,7 @@ export class InstrumentsImportPage extends Page {
         baseCryptoAsset: s.baseAsset,
         quoteCryptoAsset: s.quoteAsset,
         minNotional: parseFloat(
-          s.filters.find((f) => f.filterType === 'MIN_NOTIONAL').minNotional
+          s.filters.find((f) => f.filterType === 'NOTIONAL').minNotional
         ),
         forQualInvestorFlag: false
       });

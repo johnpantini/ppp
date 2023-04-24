@@ -95,7 +95,6 @@ import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
-import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 
 export const importInstrumentsSuggestion = (e) => html`
   <span>
@@ -189,6 +188,11 @@ export const widget = () => css`
     width: 100%;
     height: 100%;
     user-select: none;
+  }
+
+  :host([dragging]) .widget-body,
+  :host([resizing]) .widget-body {
+    pointer-events: none !important;
   }
 
   :host([preview]) .widget-root {

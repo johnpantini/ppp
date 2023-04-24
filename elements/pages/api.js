@@ -240,7 +240,6 @@ export const apiPageTemplate = html`
           <span slot="title">Cloudflare</span>
           <span slot="description">Доступ к API Cloudflare Workers.</span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
