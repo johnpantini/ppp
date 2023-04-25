@@ -591,6 +591,22 @@ class PPP {
       };
     });
   }
+
+  getWorkerTemplateFullUrl(relativeOrAbsoluteUrl) {
+    let url;
+
+    if (relativeOrAbsoluteUrl.startsWith('/')) {
+      const rootUrl = window.location.origin;
+
+      if (rootUrl.endsWith('.github.io'))
+        url = new URL('/ppp' + relativeOrAbsoluteUrl, rootUrl);
+      else url = new URL(relativeOrAbsoluteUrl, rootUrl);
+    } else {
+      url = new URL(relativeOrAbsoluteUrl);
+    }
+
+    return url;
+  }
 }
 
 globalThis.ppp = new PPP(document.documentElement.getAttribute('ppp-app-type'));

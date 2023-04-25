@@ -86,7 +86,8 @@ export default function (i18n) {
         [SERVICES.CLOUD_PPP_ASPIRANT]: 'PPP Aspirant (в облаке)',
         [SERVICES.SYSTEMD_PPP_ASPIRANT]: 'PPP Aspirant (systemd)',
         [SERVICES.DEPLOYED_PPP_ASPIRANT]: 'PPP Aspirant (по адресу)',
-        [SERVICES.PPP_ASPIRANT_WORKER]: 'PPP Aspirant Worker'
+        [SERVICES.PPP_ASPIRANT_WORKER]: 'PPP Aspirant Worker',
+        [SERVICES.CLOUDFLARE_WORKER]: 'Cloudflare Worker'
       },
       versioningStatus: {
         [VERSIONING_STATUS.OLD]: 'Требуется обновление',

@@ -134,7 +134,6 @@ export const telegramBotPageTemplate = html`
               }}"
             ></ppp-query-select>
             <ppp-button
-              class="margin-top"
               @click="${(x) => x.setWebhookUrlByEndpoint()}"
               appearance="primary"
             >
@@ -184,7 +183,7 @@ export class TelegramBotPage extends Page {
         skipScrollIntoView: true
       });
     } else {
-      this.webhook.state = 'default';
+      this.webhook.appearance = 'default';
       this.webhook.value =
         ppp.keyVault
           .getKey('mongo-location-url')

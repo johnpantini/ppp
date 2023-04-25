@@ -258,6 +258,25 @@ export const pageStyles = css`
     width: 16px;
     height: 16px;
   }
+
+  .implementation-area {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 0 20px;
+  }
+
+  .implementation-area .label-group:not(:first-child) {
+    margin-top: 25px;
+  }
+
+  .implementation-area ppp-banner {
+    width: 100%;
+  }
+
+  .implementation-area ppp-banner .label-group {
+    padding-bottom: 8px;
+  }
 `;
 
 class ScratchMap extends Map {

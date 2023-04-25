@@ -265,13 +265,20 @@ export const widget = () => css`
     font-size: ${fontSizeWidget};
     font-weight: 500;
     line-height: ${lineHeightWidget};
-    margin-left: 8px;
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
     white-space: nowrap;
     overflow: hidden;
     flex-grow: 1;
     padding: 0 ${spacing1};
     margin-right: 6px;
+  }
+
+  ppp-widget-group-control + .widget-title {
+    margin-left: 8px;
+  }
+
+  ppp-widget-search-control + .widget-title {
+    margin-left: 8px;
   }
 
   .widget-title > .title {

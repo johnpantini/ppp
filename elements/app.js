@@ -162,7 +162,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => true || !ppp.keyVault.ok()}"
+                ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'services'}"
               >
                 <span>Список сервисов</span>
@@ -176,7 +176,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => true || !ppp.keyVault.ok()}"
+                ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) =>
                   x.page === 'service' || x.page.startsWith('service-')}"
               >
