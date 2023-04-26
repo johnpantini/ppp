@@ -14,7 +14,7 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
-import { debounce } from '../../lib/ppp-decorators.js';
+import { debounce, later } from '../../lib/ppp-decorators.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   bodyFont,
@@ -391,7 +391,12 @@ export const widgetPageTemplate = html`
               <ppp-button
                 appearance="primary"
                 class="save-widget"
-                @click="${(x) => x.submitDocument()}"
+                @click="${async (x) => {
+                  await x.applyModifications();
+                  await later(100);
+
+                  Updates.enqueue(() => x.submitDocument());
+                }}"
               >
                 Сохранить виджет
               </ppp-button>
