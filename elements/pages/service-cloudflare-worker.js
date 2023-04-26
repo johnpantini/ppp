@@ -299,7 +299,7 @@ export class ServiceCloudflareWorkerPage extends Page {
         method: 'POST',
         body: JSON.stringify({
           method: 'GET',
-          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}`,
+          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/subdomain`,
           headers: {
             'X-Auth-Email': email,
             'X-Auth-Key': apiKey
@@ -314,7 +314,7 @@ export class ServiceCloudflareWorkerPage extends Page {
     );
 
     const subdomainResponse = await subdomainRequest.json();
-    const subdomain = subdomainResponse?.result?.name;
+    const subdomain = subdomainResponse?.result?.subdomain;
 
     if (!subdomain) {
       invalidate(this.cloudflareApiId, {
