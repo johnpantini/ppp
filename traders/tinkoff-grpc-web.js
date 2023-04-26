@@ -998,7 +998,7 @@ class TinkoffGrpcWebTrader extends Trader {
                 break;
             }
 
-            if (!position) {
+            if (!position?.balance) {
               source[field] = 0;
             } else {
               switch (datum) {
