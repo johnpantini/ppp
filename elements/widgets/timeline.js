@@ -224,7 +224,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       await this.timelineTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          print: TRADER_DATUM.TIMELINE_ITEM
+          timelineItem: TRADER_DATUM.TIMELINE_ITEM
         }
       });
     }

@@ -121,6 +121,10 @@ export class Trader {
                     currentCacheVersion = instrument.version;
                   } else {
                     this.#instruments.set(instrument.symbol, instrument);
+
+                    if (typeof this.onCacheInstrument === 'function') {
+                      this.onCacheInstrument(instrument);
+                    }
                   }
                 }
               }

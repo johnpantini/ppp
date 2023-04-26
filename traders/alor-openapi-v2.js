@@ -1079,9 +1079,7 @@ class AlorOpenAPIV2Trader extends Trader {
               isCurrency: data.isCurrency,
               isBalance,
               size: data.qty,
-              accountId: data.portfolio,
-              dailyUnrealizedProfit: '—',
-              unrealizedProfit: '—'
+              accountId: data.portfolio
             };
 
             if (isBalance) {

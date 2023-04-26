@@ -1,6 +1,6 @@
 import Long from '../../long.js';
 import protobuf from '../../protobuf/minimal.js';
-import { MoneyValue, Quotation, Ping } from './common.js';
+import { MoneyValue, Ping, Quotation } from './common.js';
 import { Timestamp } from './google/protobuf/timestamp.js';
 
 export const protobufPackage = 'tinkoff.public.invest.api.contract.v1';
@@ -202,6 +202,57 @@ export var OperationType;
   /** OPERATION_TYPE_TAX_CORRECTION_COUPON - Корректировка налога по купонам. */
   OperationType[(OperationType['OPERATION_TYPE_TAX_CORRECTION_COUPON'] = 44)] =
     'OPERATION_TYPE_TAX_CORRECTION_COUPON';
+  /** OPERATION_TYPE_CASH_FEE - Комиссия за валютный остаток. */
+  OperationType[(OperationType['OPERATION_TYPE_CASH_FEE'] = 45)] =
+    'OPERATION_TYPE_CASH_FEE';
+  /** OPERATION_TYPE_OUT_FEE - Комиссия за вывод валюты с брокерского счета. */
+  OperationType[(OperationType['OPERATION_TYPE_OUT_FEE'] = 46)] =
+    'OPERATION_TYPE_OUT_FEE';
+  /** OPERATION_TYPE_OUT_STAMP_DUTY - Гербовый сбор. */
+  OperationType[(OperationType['OPERATION_TYPE_OUT_STAMP_DUTY'] = 47)] =
+    'OPERATION_TYPE_OUT_STAMP_DUTY';
+  /** OPERATION_TYPE_OUTPUT_SWIFT - SWIFT-перевод */
+  OperationType[(OperationType['OPERATION_TYPE_OUTPUT_SWIFT'] = 50)] =
+    'OPERATION_TYPE_OUTPUT_SWIFT';
+  /** OPERATION_TYPE_INPUT_SWIFT - SWIFT-перевод */
+  OperationType[(OperationType['OPERATION_TYPE_INPUT_SWIFT'] = 51)] =
+    'OPERATION_TYPE_INPUT_SWIFT';
+  /** OPERATION_TYPE_OUTPUT_ACQUIRING - Перевод на карту */
+  OperationType[(OperationType['OPERATION_TYPE_OUTPUT_ACQUIRING'] = 53)] =
+    'OPERATION_TYPE_OUTPUT_ACQUIRING';
+  /** OPERATION_TYPE_INPUT_ACQUIRING - Перевод с карты */
+  OperationType[(OperationType['OPERATION_TYPE_INPUT_ACQUIRING'] = 54)] =
+    'OPERATION_TYPE_INPUT_ACQUIRING';
+  /** OPERATION_TYPE_OUTPUT_PENALTY - Комиссия за вывод средств */
+  OperationType[(OperationType['OPERATION_TYPE_OUTPUT_PENALTY'] = 55)] =
+    'OPERATION_TYPE_OUTPUT_PENALTY';
+  /** OPERATION_TYPE_ADVICE_FEE - Списание оплаты за сервис Советов */
+  OperationType[(OperationType['OPERATION_TYPE_ADVICE_FEE'] = 56)] =
+    'OPERATION_TYPE_ADVICE_FEE';
+  /** OPERATION_TYPE_TRANS_IIS_BS - Перевод ценных бумаг с ИИС на Брокерский счет */
+  OperationType[(OperationType['OPERATION_TYPE_TRANS_IIS_BS'] = 57)] =
+    'OPERATION_TYPE_TRANS_IIS_BS';
+  /** OPERATION_TYPE_TRANS_BS_BS - Перевод ценных бумаг с одного брокерского счета на другой */
+  OperationType[(OperationType['OPERATION_TYPE_TRANS_BS_BS'] = 58)] =
+    'OPERATION_TYPE_TRANS_BS_BS';
+  /** OPERATION_TYPE_OUT_MULTI - Вывод денежных средств со счета */
+  OperationType[(OperationType['OPERATION_TYPE_OUT_MULTI'] = 59)] =
+    'OPERATION_TYPE_OUT_MULTI';
+  /** OPERATION_TYPE_INP_MULTI - Пополнение денежных средств со счета */
+  OperationType[(OperationType['OPERATION_TYPE_INP_MULTI'] = 60)] =
+    'OPERATION_TYPE_INP_MULTI';
+  /** OPERATION_TYPE_OVER_PLACEMENT - Размещение биржевого овернайта */
+  OperationType[(OperationType['OPERATION_TYPE_OVER_PLACEMENT'] = 61)] =
+    'OPERATION_TYPE_OVER_PLACEMENT';
+  /** OPERATION_TYPE_OVER_COM - Списание комиссии */
+  OperationType[(OperationType['OPERATION_TYPE_OVER_COM'] = 62)] =
+    'OPERATION_TYPE_OVER_COM';
+  /** OPERATION_TYPE_OVER_INCOME - Доход от оверанайта */
+  OperationType[(OperationType['OPERATION_TYPE_OVER_INCOME'] = 63)] =
+    'OPERATION_TYPE_OVER_INCOME';
+  /** OPERATION_TYPE_OPTION_EXPIRATION - Экспирация */
+  OperationType[(OperationType['OPERATION_TYPE_OPTION_EXPIRATION'] = 64)] =
+    'OPERATION_TYPE_OPTION_EXPIRATION';
   OperationType[(OperationType['UNRECOGNIZED'] = -1)] = 'UNRECOGNIZED';
 })(OperationType || (OperationType = {}));
 
@@ -342,6 +393,57 @@ export function operationTypeFromJSON(object) {
     case 44:
     case 'OPERATION_TYPE_TAX_CORRECTION_COUPON':
       return OperationType.OPERATION_TYPE_TAX_CORRECTION_COUPON;
+    case 45:
+    case 'OPERATION_TYPE_CASH_FEE':
+      return OperationType.OPERATION_TYPE_CASH_FEE;
+    case 46:
+    case 'OPERATION_TYPE_OUT_FEE':
+      return OperationType.OPERATION_TYPE_OUT_FEE;
+    case 47:
+    case 'OPERATION_TYPE_OUT_STAMP_DUTY':
+      return OperationType.OPERATION_TYPE_OUT_STAMP_DUTY;
+    case 50:
+    case 'OPERATION_TYPE_OUTPUT_SWIFT':
+      return OperationType.OPERATION_TYPE_OUTPUT_SWIFT;
+    case 51:
+    case 'OPERATION_TYPE_INPUT_SWIFT':
+      return OperationType.OPERATION_TYPE_INPUT_SWIFT;
+    case 53:
+    case 'OPERATION_TYPE_OUTPUT_ACQUIRING':
+      return OperationType.OPERATION_TYPE_OUTPUT_ACQUIRING;
+    case 54:
+    case 'OPERATION_TYPE_INPUT_ACQUIRING':
+      return OperationType.OPERATION_TYPE_INPUT_ACQUIRING;
+    case 55:
+    case 'OPERATION_TYPE_OUTPUT_PENALTY':
+      return OperationType.OPERATION_TYPE_OUTPUT_PENALTY;
+    case 56:
+    case 'OPERATION_TYPE_ADVICE_FEE':
+      return OperationType.OPERATION_TYPE_ADVICE_FEE;
+    case 57:
+    case 'OPERATION_TYPE_TRANS_IIS_BS':
+      return OperationType.OPERATION_TYPE_TRANS_IIS_BS;
+    case 58:
+    case 'OPERATION_TYPE_TRANS_BS_BS':
+      return OperationType.OPERATION_TYPE_TRANS_BS_BS;
+    case 59:
+    case 'OPERATION_TYPE_OUT_MULTI':
+      return OperationType.OPERATION_TYPE_OUT_MULTI;
+    case 60:
+    case 'OPERATION_TYPE_INP_MULTI':
+      return OperationType.OPERATION_TYPE_INP_MULTI;
+    case 61:
+    case 'OPERATION_TYPE_OVER_PLACEMENT':
+      return OperationType.OPERATION_TYPE_OVER_PLACEMENT;
+    case 62:
+    case 'OPERATION_TYPE_OVER_COM':
+      return OperationType.OPERATION_TYPE_OVER_COM;
+    case 63:
+    case 'OPERATION_TYPE_OVER_INCOME':
+      return OperationType.OPERATION_TYPE_OVER_INCOME;
+    case 64:
+    case 'OPERATION_TYPE_OPTION_EXPIRATION':
+      return OperationType.OPERATION_TYPE_OPTION_EXPIRATION;
     case -1:
     case 'UNRECOGNIZED':
     default:
@@ -441,6 +543,40 @@ export function operationTypeToJSON(object) {
       return 'OPERATION_TYPE_DIV_EXT';
     case OperationType.OPERATION_TYPE_TAX_CORRECTION_COUPON:
       return 'OPERATION_TYPE_TAX_CORRECTION_COUPON';
+    case OperationType.OPERATION_TYPE_CASH_FEE:
+      return 'OPERATION_TYPE_CASH_FEE';
+    case OperationType.OPERATION_TYPE_OUT_FEE:
+      return 'OPERATION_TYPE_OUT_FEE';
+    case OperationType.OPERATION_TYPE_OUT_STAMP_DUTY:
+      return 'OPERATION_TYPE_OUT_STAMP_DUTY';
+    case OperationType.OPERATION_TYPE_OUTPUT_SWIFT:
+      return 'OPERATION_TYPE_OUTPUT_SWIFT';
+    case OperationType.OPERATION_TYPE_INPUT_SWIFT:
+      return 'OPERATION_TYPE_INPUT_SWIFT';
+    case OperationType.OPERATION_TYPE_OUTPUT_ACQUIRING:
+      return 'OPERATION_TYPE_OUTPUT_ACQUIRING';
+    case OperationType.OPERATION_TYPE_INPUT_ACQUIRING:
+      return 'OPERATION_TYPE_INPUT_ACQUIRING';
+    case OperationType.OPERATION_TYPE_OUTPUT_PENALTY:
+      return 'OPERATION_TYPE_OUTPUT_PENALTY';
+    case OperationType.OPERATION_TYPE_ADVICE_FEE:
+      return 'OPERATION_TYPE_ADVICE_FEE';
+    case OperationType.OPERATION_TYPE_TRANS_IIS_BS:
+      return 'OPERATION_TYPE_TRANS_IIS_BS';
+    case OperationType.OPERATION_TYPE_TRANS_BS_BS:
+      return 'OPERATION_TYPE_TRANS_BS_BS';
+    case OperationType.OPERATION_TYPE_OUT_MULTI:
+      return 'OPERATION_TYPE_OUT_MULTI';
+    case OperationType.OPERATION_TYPE_INP_MULTI:
+      return 'OPERATION_TYPE_INP_MULTI';
+    case OperationType.OPERATION_TYPE_OVER_PLACEMENT:
+      return 'OPERATION_TYPE_OVER_PLACEMENT';
+    case OperationType.OPERATION_TYPE_OVER_COM:
+      return 'OPERATION_TYPE_OVER_COM';
+    case OperationType.OPERATION_TYPE_OVER_INCOME:
+      return 'OPERATION_TYPE_OVER_INCOME';
+    case OperationType.OPERATION_TYPE_OPTION_EXPIRATION:
+      return 'OPERATION_TYPE_OPTION_EXPIRATION';
     case OperationType.UNRECOGNIZED:
     default:
       return 'UNRECOGNIZED';
@@ -595,6 +731,129 @@ export function instrumentTypeToJSON(object) {
     case InstrumentType.INSTRUMENT_TYPE_OPTION:
       return 'INSTRUMENT_TYPE_OPTION';
     case InstrumentType.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
+/** Результат подписки. */
+export var PositionsAccountSubscriptionStatus;
+(function (PositionsAccountSubscriptionStatus) {
+  /** POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED - Тип не определён. */
+  PositionsAccountSubscriptionStatus[
+    (PositionsAccountSubscriptionStatus[
+      'POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED'
+    ] = 0)
+  ] = 'POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED';
+  /** POSITIONS_SUBSCRIPTION_STATUS_SUCCESS - Успешно. */
+  PositionsAccountSubscriptionStatus[
+    (PositionsAccountSubscriptionStatus[
+      'POSITIONS_SUBSCRIPTION_STATUS_SUCCESS'
+    ] = 1)
+  ] = 'POSITIONS_SUBSCRIPTION_STATUS_SUCCESS';
+  /** POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND - Счёт не найден или недостаточно прав. */
+  PositionsAccountSubscriptionStatus[
+    (PositionsAccountSubscriptionStatus[
+      'POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND'
+    ] = 2)
+  ] = 'POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND';
+  /** POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR - Произошла ошибка. */
+  PositionsAccountSubscriptionStatus[
+    (PositionsAccountSubscriptionStatus[
+      'POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR'
+    ] = 3)
+  ] = 'POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR';
+  PositionsAccountSubscriptionStatus[
+    (PositionsAccountSubscriptionStatus['UNRECOGNIZED'] = -1)
+  ] = 'UNRECOGNIZED';
+})(
+  PositionsAccountSubscriptionStatus ||
+    (PositionsAccountSubscriptionStatus = {})
+);
+
+export function positionsAccountSubscriptionStatusFromJSON(object) {
+  switch (object) {
+    case 0:
+    case 'POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED':
+      return PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED;
+    case 1:
+    case 'POSITIONS_SUBSCRIPTION_STATUS_SUCCESS':
+      return PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_SUCCESS;
+    case 2:
+    case 'POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND':
+      return PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND;
+    case 3:
+    case 'POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR':
+      return PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return PositionsAccountSubscriptionStatus.UNRECOGNIZED;
+  }
+}
+
+export function positionsAccountSubscriptionStatusToJSON(object) {
+  switch (object) {
+    case PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED:
+      return 'POSITIONS_SUBSCRIPTION_STATUS_UNSPECIFIED';
+    case PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_SUCCESS:
+      return 'POSITIONS_SUBSCRIPTION_STATUS_SUCCESS';
+    case PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND:
+      return 'POSITIONS_SUBSCRIPTION_STATUS_ACCOUNT_NOT_FOUND';
+    case PositionsAccountSubscriptionStatus.POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR:
+      return 'POSITIONS_SUBSCRIPTION_STATUS_INTERNAL_ERROR';
+    case PositionsAccountSubscriptionStatus.UNRECOGNIZED:
+    default:
+      return 'UNRECOGNIZED';
+  }
+}
+
+export var PortfolioRequest_CurrencyRequest;
+(function (PortfolioRequest_CurrencyRequest) {
+  /** RUB - Рубли */
+  PortfolioRequest_CurrencyRequest[
+    (PortfolioRequest_CurrencyRequest['RUB'] = 0)
+  ] = 'RUB';
+  /** USD - Доллары */
+  PortfolioRequest_CurrencyRequest[
+    (PortfolioRequest_CurrencyRequest['USD'] = 1)
+  ] = 'USD';
+  /** EUR - Евро */
+  PortfolioRequest_CurrencyRequest[
+    (PortfolioRequest_CurrencyRequest['EUR'] = 2)
+  ] = 'EUR';
+  PortfolioRequest_CurrencyRequest[
+    (PortfolioRequest_CurrencyRequest['UNRECOGNIZED'] = -1)
+  ] = 'UNRECOGNIZED';
+})(PortfolioRequest_CurrencyRequest || (PortfolioRequest_CurrencyRequest = {}));
+
+export function portfolioRequest_CurrencyRequestFromJSON(object) {
+  switch (object) {
+    case 0:
+    case 'RUB':
+      return PortfolioRequest_CurrencyRequest.RUB;
+    case 1:
+    case 'USD':
+      return PortfolioRequest_CurrencyRequest.USD;
+    case 2:
+    case 'EUR':
+      return PortfolioRequest_CurrencyRequest.EUR;
+    case -1:
+    case 'UNRECOGNIZED':
+    default:
+      return PortfolioRequest_CurrencyRequest.UNRECOGNIZED;
+  }
+}
+
+export function portfolioRequest_CurrencyRequestToJSON(object) {
+  switch (object) {
+    case PortfolioRequest_CurrencyRequest.RUB:
+      return 'RUB';
+    case PortfolioRequest_CurrencyRequest.USD:
+      return 'USD';
+    case PortfolioRequest_CurrencyRequest.EUR:
+      return 'EUR';
+    case PortfolioRequest_CurrencyRequest.UNRECOGNIZED:
     default:
       return 'UNRECOGNIZED';
   }
@@ -770,7 +1029,8 @@ function createBaseOperation() {
     date: undefined,
     type: '',
     operationType: 0,
-    trades: []
+    trades: [],
+    assetUid: ''
   };
 }
 
@@ -833,6 +1093,10 @@ export const Operation = {
 
     for (const v of message.trades) {
       OperationTrade.encode(v, writer.uint32(114).fork()).ldelim();
+    }
+
+    if (message.assetUid !== '') {
+      writer.uint32(130).string(message.assetUid);
     }
 
     return writer;
@@ -905,6 +1169,10 @@ export const Operation = {
           message.trades.push(OperationTrade.decode(reader, reader.uint32()));
 
           break;
+        case 16:
+          message.assetUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -943,7 +1211,8 @@ export const Operation = {
         : 0,
       trades: Array.isArray(object?.trades)
         ? object.trades.map((e) => OperationTrade.fromJSON(e))
-        : []
+        : [],
+      assetUid: isSet(object.assetUid) ? String(object.assetUid) : ''
     };
   },
   toJSON(message) {
@@ -982,6 +1251,8 @@ export const Operation = {
     } else {
       obj.trades = [];
     }
+
+    message.assetUid !== undefined && (obj.assetUid = message.assetUid);
 
     return obj;
   }
@@ -1079,13 +1350,17 @@ export const OperationTrade = {
 };
 
 function createBasePortfolioRequest() {
-  return { accountId: '' };
+  return { accountId: '', currency: 0 };
 }
 
 export const PortfolioRequest = {
   encode(message, writer = protobuf.Writer.create()) {
     if (message.accountId !== '') {
       writer.uint32(10).string(message.accountId);
+    }
+
+    if (message.currency !== 0) {
+      writer.uint32(16).int32(message.currency);
     }
 
     return writer;
@@ -1104,6 +1379,10 @@ export const PortfolioRequest = {
           message.accountId = reader.string();
 
           break;
+        case 2:
+          message.currency = reader.int32();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -1115,13 +1394,18 @@ export const PortfolioRequest = {
   },
   fromJSON(object) {
     return {
-      accountId: isSet(object.accountId) ? String(object.accountId) : ''
+      accountId: isSet(object.accountId) ? String(object.accountId) : '',
+      currency: isSet(object.currency)
+        ? portfolioRequest_CurrencyRequestFromJSON(object.currency)
+        : 0
     };
   },
   toJSON(message) {
     const obj = {};
 
     message.accountId !== undefined && (obj.accountId = message.accountId);
+    message.currency !== undefined &&
+      (obj.currency = portfolioRequest_CurrencyRequestToJSON(message.currency));
 
     return obj;
   }
@@ -1135,7 +1419,12 @@ function createBasePortfolioResponse() {
     totalAmountCurrencies: undefined,
     totalAmountFutures: undefined,
     expectedYield: undefined,
-    positions: []
+    positions: [],
+    accountId: '',
+    totalAmountOptions: undefined,
+    totalAmountSp: undefined,
+    totalAmountPortfolio: undefined,
+    virtualPositions: []
   };
 }
 
@@ -1185,6 +1474,35 @@ export const PortfolioResponse = {
 
     for (const v of message.positions) {
       PortfolioPosition.encode(v, writer.uint32(58).fork()).ldelim();
+    }
+
+    if (message.accountId !== '') {
+      writer.uint32(66).string(message.accountId);
+    }
+
+    if (message.totalAmountOptions !== undefined) {
+      MoneyValue.encode(
+        message.totalAmountOptions,
+        writer.uint32(74).fork()
+      ).ldelim();
+    }
+
+    if (message.totalAmountSp !== undefined) {
+      MoneyValue.encode(
+        message.totalAmountSp,
+        writer.uint32(82).fork()
+      ).ldelim();
+    }
+
+    if (message.totalAmountPortfolio !== undefined) {
+      MoneyValue.encode(
+        message.totalAmountPortfolio,
+        writer.uint32(90).fork()
+      ).ldelim();
+    }
+
+    for (const v of message.virtualPositions) {
+      VirtualPortfolioPosition.encode(v, writer.uint32(98).fork()).ldelim();
     }
 
     return writer;
@@ -1238,6 +1556,34 @@ export const PortfolioResponse = {
           );
 
           break;
+        case 8:
+          message.accountId = reader.string();
+
+          break;
+        case 9:
+          message.totalAmountOptions = MoneyValue.decode(
+            reader,
+            reader.uint32()
+          );
+
+          break;
+        case 10:
+          message.totalAmountSp = MoneyValue.decode(reader, reader.uint32());
+
+          break;
+        case 11:
+          message.totalAmountPortfolio = MoneyValue.decode(
+            reader,
+            reader.uint32()
+          );
+
+          break;
+        case 12:
+          message.virtualPositions.push(
+            VirtualPortfolioPosition.decode(reader, reader.uint32())
+          );
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -1269,6 +1615,21 @@ export const PortfolioResponse = {
         : undefined,
       positions: Array.isArray(object?.positions)
         ? object.positions.map((e) => PortfolioPosition.fromJSON(e))
+        : [],
+      accountId: isSet(object.accountId) ? String(object.accountId) : '',
+      totalAmountOptions: isSet(object.totalAmountOptions)
+        ? MoneyValue.fromJSON(object.totalAmountOptions)
+        : undefined,
+      totalAmountSp: isSet(object.totalAmountSp)
+        ? MoneyValue.fromJSON(object.totalAmountSp)
+        : undefined,
+      totalAmountPortfolio: isSet(object.totalAmountPortfolio)
+        ? MoneyValue.fromJSON(object.totalAmountPortfolio)
+        : undefined,
+      virtualPositions: Array.isArray(object?.virtualPositions)
+        ? object.virtualPositions.map((e) =>
+            VirtualPortfolioPosition.fromJSON(e)
+          )
         : []
     };
   },
@@ -1306,6 +1667,28 @@ export const PortfolioResponse = {
       );
     } else {
       obj.positions = [];
+    }
+
+    message.accountId !== undefined && (obj.accountId = message.accountId);
+    message.totalAmountOptions !== undefined &&
+      (obj.totalAmountOptions = message.totalAmountOptions
+        ? MoneyValue.toJSON(message.totalAmountOptions)
+        : undefined);
+    message.totalAmountSp !== undefined &&
+      (obj.totalAmountSp = message.totalAmountSp
+        ? MoneyValue.toJSON(message.totalAmountSp)
+        : undefined);
+    message.totalAmountPortfolio !== undefined &&
+      (obj.totalAmountPortfolio = message.totalAmountPortfolio
+        ? MoneyValue.toJSON(message.totalAmountPortfolio)
+        : undefined);
+
+    if (message.virtualPositions) {
+      obj.virtualPositions = message.virtualPositions.map((e) =>
+        e ? VirtualPortfolioPosition.toJSON(e) : undefined
+      );
+    } else {
+      obj.virtualPositions = [];
     }
 
     return obj;
@@ -1367,7 +1750,8 @@ function createBasePositionsResponse() {
     blocked: [],
     securities: [],
     limitsLoadingInProgress: false,
-    futures: []
+    futures: [],
+    options: []
   };
 }
 
@@ -1391,6 +1775,10 @@ export const PositionsResponse = {
 
     for (const v of message.futures) {
       PositionsFutures.encode(v, writer.uint32(42).fork()).ldelim();
+    }
+
+    for (const v of message.options) {
+      PositionsOptions.encode(v, writer.uint32(50).fork()).ldelim();
     }
 
     return writer;
@@ -1429,6 +1817,12 @@ export const PositionsResponse = {
           );
 
           break;
+        case 6:
+          message.options.push(
+            PositionsOptions.decode(reader, reader.uint32())
+          );
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -1454,6 +1848,9 @@ export const PositionsResponse = {
         : false,
       futures: Array.isArray(object?.futures)
         ? object.futures.map((e) => PositionsFutures.fromJSON(e))
+        : [],
+      options: Array.isArray(object?.options)
+        ? object.options.map((e) => PositionsOptions.fromJSON(e))
         : []
     };
   },
@@ -1493,6 +1890,14 @@ export const PositionsResponse = {
       );
     } else {
       obj.futures = [];
+    }
+
+    if (message.options) {
+      obj.options = message.options.map((e) =>
+        e ? PositionsOptions.toJSON(e) : undefined
+      );
+    } else {
+      obj.options = [];
     }
 
     return obj;
@@ -1657,7 +2062,11 @@ function createBasePortfolioPosition() {
     currentPrice: undefined,
     averagePositionPriceFifo: undefined,
     quantityLots: undefined,
-    blocked: false
+    blocked: false,
+    positionUid: '',
+    instrumentUid: '',
+    varMargin: undefined,
+    expectedYieldFifo: undefined
   };
 }
 
@@ -1720,6 +2129,25 @@ export const PortfolioPosition = {
 
     if (message.blocked === true) {
       writer.uint32(168).bool(message.blocked);
+    }
+
+    if (message.positionUid !== '') {
+      writer.uint32(194).string(message.positionUid);
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(202).string(message.instrumentUid);
+    }
+
+    if (message.varMargin !== undefined) {
+      MoneyValue.encode(message.varMargin, writer.uint32(210).fork()).ldelim();
+    }
+
+    if (message.expectedYieldFifo !== undefined) {
+      Quotation.encode(
+        message.expectedYieldFifo,
+        writer.uint32(218).fork()
+      ).ldelim();
     }
 
     return writer;
@@ -1787,6 +2215,22 @@ export const PortfolioPosition = {
           message.blocked = reader.bool();
 
           break;
+        case 24:
+          message.positionUid = reader.string();
+
+          break;
+        case 25:
+          message.instrumentUid = reader.string();
+
+          break;
+        case 26:
+          message.varMargin = MoneyValue.decode(reader, reader.uint32());
+
+          break;
+        case 27:
+          message.expectedYieldFifo = Quotation.decode(reader, reader.uint32());
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -1826,7 +2270,17 @@ export const PortfolioPosition = {
       quantityLots: isSet(object.quantityLots)
         ? Quotation.fromJSON(object.quantityLots)
         : undefined,
-      blocked: isSet(object.blocked) ? Boolean(object.blocked) : false
+      blocked: isSet(object.blocked) ? Boolean(object.blocked) : false,
+      positionUid: isSet(object.positionUid) ? String(object.positionUid) : '',
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : '',
+      varMargin: isSet(object.varMargin)
+        ? MoneyValue.fromJSON(object.varMargin)
+        : undefined,
+      expectedYieldFifo: isSet(object.expectedYieldFifo)
+        ? Quotation.fromJSON(object.expectedYieldFifo)
+        : undefined
     };
   },
   toJSON(message) {
@@ -1868,6 +2322,245 @@ export const PortfolioPosition = {
         ? Quotation.toJSON(message.quantityLots)
         : undefined);
     message.blocked !== undefined && (obj.blocked = message.blocked);
+    message.positionUid !== undefined &&
+      (obj.positionUid = message.positionUid);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
+    message.varMargin !== undefined &&
+      (obj.varMargin = message.varMargin
+        ? MoneyValue.toJSON(message.varMargin)
+        : undefined);
+    message.expectedYieldFifo !== undefined &&
+      (obj.expectedYieldFifo = message.expectedYieldFifo
+        ? Quotation.toJSON(message.expectedYieldFifo)
+        : undefined);
+
+    return obj;
+  }
+};
+
+function createBaseVirtualPortfolioPosition() {
+  return {
+    positionUid: '',
+    instrumentUid: '',
+    figi: '',
+    instrumentType: '',
+    quantity: undefined,
+    averagePositionPrice: undefined,
+    expectedYield: undefined,
+    expectedYieldFifo: undefined,
+    expireDate: undefined,
+    currentPrice: undefined,
+    averagePositionPriceFifo: undefined
+  };
+}
+
+export const VirtualPortfolioPosition = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.positionUid !== '') {
+      writer.uint32(10).string(message.positionUid);
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(18).string(message.instrumentUid);
+    }
+
+    if (message.figi !== '') {
+      writer.uint32(26).string(message.figi);
+    }
+
+    if (message.instrumentType !== '') {
+      writer.uint32(34).string(message.instrumentType);
+    }
+
+    if (message.quantity !== undefined) {
+      Quotation.encode(message.quantity, writer.uint32(42).fork()).ldelim();
+    }
+
+    if (message.averagePositionPrice !== undefined) {
+      MoneyValue.encode(
+        message.averagePositionPrice,
+        writer.uint32(50).fork()
+      ).ldelim();
+    }
+
+    if (message.expectedYield !== undefined) {
+      Quotation.encode(
+        message.expectedYield,
+        writer.uint32(58).fork()
+      ).ldelim();
+    }
+
+    if (message.expectedYieldFifo !== undefined) {
+      Quotation.encode(
+        message.expectedYieldFifo,
+        writer.uint32(66).fork()
+      ).ldelim();
+    }
+
+    if (message.expireDate !== undefined) {
+      Timestamp.encode(
+        toTimestamp(message.expireDate),
+        writer.uint32(74).fork()
+      ).ldelim();
+    }
+
+    if (message.currentPrice !== undefined) {
+      MoneyValue.encode(
+        message.currentPrice,
+        writer.uint32(82).fork()
+      ).ldelim();
+    }
+
+    if (message.averagePositionPriceFifo !== undefined) {
+      MoneyValue.encode(
+        message.averagePositionPriceFifo,
+        writer.uint32(90).fork()
+      ).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseVirtualPortfolioPosition();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.positionUid = reader.string();
+
+          break;
+        case 2:
+          message.instrumentUid = reader.string();
+
+          break;
+        case 3:
+          message.figi = reader.string();
+
+          break;
+        case 4:
+          message.instrumentType = reader.string();
+
+          break;
+        case 5:
+          message.quantity = Quotation.decode(reader, reader.uint32());
+
+          break;
+        case 6:
+          message.averagePositionPrice = MoneyValue.decode(
+            reader,
+            reader.uint32()
+          );
+
+          break;
+        case 7:
+          message.expectedYield = Quotation.decode(reader, reader.uint32());
+
+          break;
+        case 8:
+          message.expectedYieldFifo = Quotation.decode(reader, reader.uint32());
+
+          break;
+        case 9:
+          message.expireDate = fromTimestamp(
+            Timestamp.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 10:
+          message.currentPrice = MoneyValue.decode(reader, reader.uint32());
+
+          break;
+        case 11:
+          message.averagePositionPriceFifo = MoneyValue.decode(
+            reader,
+            reader.uint32()
+          );
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      positionUid: isSet(object.positionUid) ? String(object.positionUid) : '',
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : '',
+      figi: isSet(object.figi) ? String(object.figi) : '',
+      instrumentType: isSet(object.instrumentType)
+        ? String(object.instrumentType)
+        : '',
+      quantity: isSet(object.quantity)
+        ? Quotation.fromJSON(object.quantity)
+        : undefined,
+      averagePositionPrice: isSet(object.averagePositionPrice)
+        ? MoneyValue.fromJSON(object.averagePositionPrice)
+        : undefined,
+      expectedYield: isSet(object.expectedYield)
+        ? Quotation.fromJSON(object.expectedYield)
+        : undefined,
+      expectedYieldFifo: isSet(object.expectedYieldFifo)
+        ? Quotation.fromJSON(object.expectedYieldFifo)
+        : undefined,
+      expireDate: isSet(object.expireDate)
+        ? fromJsonTimestamp(object.expireDate)
+        : undefined,
+      currentPrice: isSet(object.currentPrice)
+        ? MoneyValue.fromJSON(object.currentPrice)
+        : undefined,
+      averagePositionPriceFifo: isSet(object.averagePositionPriceFifo)
+        ? MoneyValue.fromJSON(object.averagePositionPriceFifo)
+        : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.positionUid !== undefined &&
+      (obj.positionUid = message.positionUid);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
+    message.figi !== undefined && (obj.figi = message.figi);
+    message.instrumentType !== undefined &&
+      (obj.instrumentType = message.instrumentType);
+    message.quantity !== undefined &&
+      (obj.quantity = message.quantity
+        ? Quotation.toJSON(message.quantity)
+        : undefined);
+    message.averagePositionPrice !== undefined &&
+      (obj.averagePositionPrice = message.averagePositionPrice
+        ? MoneyValue.toJSON(message.averagePositionPrice)
+        : undefined);
+    message.expectedYield !== undefined &&
+      (obj.expectedYield = message.expectedYield
+        ? Quotation.toJSON(message.expectedYield)
+        : undefined);
+    message.expectedYieldFifo !== undefined &&
+      (obj.expectedYieldFifo = message.expectedYieldFifo
+        ? Quotation.toJSON(message.expectedYieldFifo)
+        : undefined);
+    message.expireDate !== undefined &&
+      (obj.expireDate = message.expireDate.toISOString());
+    message.currentPrice !== undefined &&
+      (obj.currentPrice = message.currentPrice
+        ? MoneyValue.toJSON(message.currentPrice)
+        : undefined);
+    message.averagePositionPriceFifo !== undefined &&
+      (obj.averagePositionPriceFifo = message.averagePositionPriceFifo
+        ? MoneyValue.toJSON(message.averagePositionPriceFifo)
+        : undefined);
 
     return obj;
   }
@@ -1878,6 +2571,8 @@ function createBasePositionsSecurities() {
     figi: '',
     blocked: 0,
     balance: 0,
+    positionUid: '',
+    instrumentUid: '',
     exchangeBlocked: false,
     instrumentType: ''
   };
@@ -1895,6 +2590,14 @@ export const PositionsSecurities = {
 
     if (message.balance !== 0) {
       writer.uint32(24).int64(message.balance);
+    }
+
+    if (message.positionUid !== '') {
+      writer.uint32(34).string(message.positionUid);
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(42).string(message.instrumentUid);
     }
 
     if (message.exchangeBlocked === true) {
@@ -1929,6 +2632,14 @@ export const PositionsSecurities = {
           message.balance = longToNumber(reader.int64());
 
           break;
+        case 4:
+          message.positionUid = reader.string();
+
+          break;
+        case 5:
+          message.instrumentUid = reader.string();
+
+          break;
         case 11:
           message.exchangeBlocked = reader.bool();
 
@@ -1951,6 +2662,10 @@ export const PositionsSecurities = {
       figi: isSet(object.figi) ? String(object.figi) : '',
       blocked: isSet(object.blocked) ? Number(object.blocked) : 0,
       balance: isSet(object.balance) ? Number(object.balance) : 0,
+      positionUid: isSet(object.positionUid) ? String(object.positionUid) : '',
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : '',
       exchangeBlocked: isSet(object.exchangeBlocked)
         ? Boolean(object.exchangeBlocked)
         : false,
@@ -1967,6 +2682,10 @@ export const PositionsSecurities = {
       (obj.blocked = Math.round(message.blocked));
     message.balance !== undefined &&
       (obj.balance = Math.round(message.balance));
+    message.positionUid !== undefined &&
+      (obj.positionUid = message.positionUid);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
     message.exchangeBlocked !== undefined &&
       (obj.exchangeBlocked = message.exchangeBlocked);
     message.instrumentType !== undefined &&
@@ -1977,7 +2696,13 @@ export const PositionsSecurities = {
 };
 
 function createBasePositionsFutures() {
-  return { figi: '', blocked: 0, balance: 0 };
+  return {
+    figi: '',
+    blocked: 0,
+    balance: 0,
+    positionUid: '',
+    instrumentUid: ''
+  };
 }
 
 export const PositionsFutures = {
@@ -1992,6 +2717,14 @@ export const PositionsFutures = {
 
     if (message.balance !== 0) {
       writer.uint32(24).int64(message.balance);
+    }
+
+    if (message.positionUid !== '') {
+      writer.uint32(34).string(message.positionUid);
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(42).string(message.instrumentUid);
     }
 
     return writer;
@@ -2018,6 +2751,14 @@ export const PositionsFutures = {
           message.balance = longToNumber(reader.int64());
 
           break;
+        case 4:
+          message.positionUid = reader.string();
+
+          break;
+        case 5:
+          message.instrumentUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -2031,13 +2772,106 @@ export const PositionsFutures = {
     return {
       figi: isSet(object.figi) ? String(object.figi) : '',
       blocked: isSet(object.blocked) ? Number(object.blocked) : 0,
-      balance: isSet(object.balance) ? Number(object.balance) : 0
+      balance: isSet(object.balance) ? Number(object.balance) : 0,
+      positionUid: isSet(object.positionUid) ? String(object.positionUid) : '',
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : ''
     };
   },
   toJSON(message) {
     const obj = {};
 
     message.figi !== undefined && (obj.figi = message.figi);
+    message.blocked !== undefined &&
+      (obj.blocked = Math.round(message.blocked));
+    message.balance !== undefined &&
+      (obj.balance = Math.round(message.balance));
+    message.positionUid !== undefined &&
+      (obj.positionUid = message.positionUid);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
+
+    return obj;
+  }
+};
+
+function createBasePositionsOptions() {
+  return { positionUid: '', instrumentUid: '', blocked: 0, balance: 0 };
+}
+
+export const PositionsOptions = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.positionUid !== '') {
+      writer.uint32(10).string(message.positionUid);
+    }
+
+    if (message.instrumentUid !== '') {
+      writer.uint32(18).string(message.instrumentUid);
+    }
+
+    if (message.blocked !== 0) {
+      writer.uint32(88).int64(message.blocked);
+    }
+
+    if (message.balance !== 0) {
+      writer.uint32(168).int64(message.balance);
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionsOptions();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.positionUid = reader.string();
+
+          break;
+        case 2:
+          message.instrumentUid = reader.string();
+
+          break;
+        case 11:
+          message.blocked = longToNumber(reader.int64());
+
+          break;
+        case 21:
+          message.balance = longToNumber(reader.int64());
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      positionUid: isSet(object.positionUid) ? String(object.positionUid) : '',
+      instrumentUid: isSet(object.instrumentUid)
+        ? String(object.instrumentUid)
+        : '',
+      blocked: isSet(object.blocked) ? Number(object.blocked) : 0,
+      balance: isSet(object.balance) ? Number(object.balance) : 0
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.positionUid !== undefined &&
+      (obj.positionUid = message.positionUid);
+    message.instrumentUid !== undefined &&
+      (obj.instrumentUid = message.instrumentUid);
     message.blocked !== undefined &&
       (obj.blocked = Math.round(message.blocked));
     message.balance !== undefined &&
@@ -2332,9 +3166,7 @@ export const GenerateBrokerReportResponse = {
     return message;
   },
   fromJSON(object) {
-    return {
-      taskId: isSet(object.taskId) ? String(object.taskId) : ''
-    };
+    return { taskId: isSet(object.taskId) ? String(object.taskId) : '' };
   },
   toJSON(message) {
     const obj = {};
@@ -3301,9 +4133,7 @@ export const GenerateDividendsForeignIssuerReportResponse = {
     return message;
   },
   fromJSON(object) {
-    return {
-      taskId: isSet(object.taskId) ? String(object.taskId) : ''
-    };
+    return { taskId: isSet(object.taskId) ? String(object.taskId) : '' };
   },
   toJSON(message) {
     const obj = {};
@@ -4219,7 +5049,8 @@ function createBaseOperationItem() {
     quantityDone: 0,
     cancelDateTime: undefined,
     cancelReason: '',
-    tradesInfo: undefined
+    tradesInfo: undefined,
+    assetUid: ''
   };
 }
 
@@ -4335,6 +5166,10 @@ export const OperationItem = {
         message.tradesInfo,
         writer.uint32(490).fork()
       ).ldelim();
+    }
+
+    if (message.assetUid !== '') {
+      writer.uint32(514).string(message.assetUid);
     }
 
     return writer;
@@ -4456,6 +5291,10 @@ export const OperationItem = {
           );
 
           break;
+        case 64:
+          message.assetUid = reader.string();
+
+          break;
         default:
           reader.skipType(tag & 7);
 
@@ -4523,7 +5362,8 @@ export const OperationItem = {
         : '',
       tradesInfo: isSet(object.tradesInfo)
         ? OperationItemTrades.fromJSON(object.tradesInfo)
-        : undefined
+        : undefined,
+      assetUid: isSet(object.assetUid) ? String(object.assetUid) : ''
     };
   },
   toJSON(message) {
@@ -4588,21 +5428,18 @@ export const OperationItem = {
       (obj.tradesInfo = message.tradesInfo
         ? OperationItemTrades.toJSON(message.tradesInfo)
         : undefined);
+    message.assetUid !== undefined && (obj.assetUid = message.assetUid);
 
     return obj;
   }
 };
 
 function createBaseOperationItemTrades() {
-  return { tradesSize: 0, trades: [] };
+  return { trades: [] };
 }
 
 export const OperationItemTrades = {
   encode(message, writer = protobuf.Writer.create()) {
-    if (message.tradesSize !== 0) {
-      writer.uint32(8).int32(message.tradesSize);
-    }
-
     for (const v of message.trades) {
       OperationItemTrade.encode(v, writer.uint32(50).fork()).ldelim();
     }
@@ -4619,10 +5456,6 @@ export const OperationItemTrades = {
       const tag = reader.uint32();
 
       switch (tag >>> 3) {
-        case 1:
-          message.tradesSize = reader.int32();
-
-          break;
         case 6:
           message.trades.push(
             OperationItemTrade.decode(reader, reader.uint32())
@@ -4640,7 +5473,6 @@ export const OperationItemTrades = {
   },
   fromJSON(object) {
     return {
-      tradesSize: isSet(object.tradesSize) ? Number(object.tradesSize) : 0,
       trades: Array.isArray(object?.trades)
         ? object.trades.map((e) => OperationItemTrade.fromJSON(e))
         : []
@@ -4648,9 +5480,6 @@ export const OperationItemTrades = {
   },
   toJSON(message) {
     const obj = {};
-
-    message.tradesSize !== undefined &&
-      (obj.tradesSize = Math.round(message.tradesSize));
 
     if (message.trades) {
       obj.trades = message.trades.map((e) =>
@@ -4793,11 +5622,507 @@ export const OperationItemTrade = {
     return obj;
   }
 };
+
+function createBasePositionsStreamRequest() {
+  return { accounts: [] };
+}
+
+export const PositionsStreamRequest = {
+  encode(message, writer = protobuf.Writer.create()) {
+    for (const v of message.accounts) {
+      writer.uint32(10).string(v);
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionsStreamRequest();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.accounts.push(reader.string());
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      accounts: Array.isArray(object?.accounts)
+        ? object.accounts.map((e) => String(e))
+        : []
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.accounts) {
+      obj.accounts = message.accounts.map((e) => e);
+    } else {
+      obj.accounts = [];
+    }
+
+    return obj;
+  }
+};
+
+function createBasePositionsStreamResponse() {
+  return { subscriptions: undefined, position: undefined, ping: undefined };
+}
+
+export const PositionsStreamResponse = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.subscriptions !== undefined) {
+      PositionsSubscriptionResult.encode(
+        message.subscriptions,
+        writer.uint32(10).fork()
+      ).ldelim();
+    }
+
+    if (message.position !== undefined) {
+      PositionData.encode(message.position, writer.uint32(18).fork()).ldelim();
+    }
+
+    if (message.ping !== undefined) {
+      Ping.encode(message.ping, writer.uint32(26).fork()).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionsStreamResponse();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.subscriptions = PositionsSubscriptionResult.decode(
+            reader,
+            reader.uint32()
+          );
+
+          break;
+        case 2:
+          message.position = PositionData.decode(reader, reader.uint32());
+
+          break;
+        case 3:
+          message.ping = Ping.decode(reader, reader.uint32());
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      subscriptions: isSet(object.subscriptions)
+        ? PositionsSubscriptionResult.fromJSON(object.subscriptions)
+        : undefined,
+      position: isSet(object.position)
+        ? PositionData.fromJSON(object.position)
+        : undefined,
+      ping: isSet(object.ping) ? Ping.fromJSON(object.ping) : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.subscriptions !== undefined &&
+      (obj.subscriptions = message.subscriptions
+        ? PositionsSubscriptionResult.toJSON(message.subscriptions)
+        : undefined);
+    message.position !== undefined &&
+      (obj.position = message.position
+        ? PositionData.toJSON(message.position)
+        : undefined);
+    message.ping !== undefined &&
+      (obj.ping = message.ping ? Ping.toJSON(message.ping) : undefined);
+
+    return obj;
+  }
+};
+
+function createBasePositionsSubscriptionResult() {
+  return { accounts: [] };
+}
+
+export const PositionsSubscriptionResult = {
+  encode(message, writer = protobuf.Writer.create()) {
+    for (const v of message.accounts) {
+      PositionsSubscriptionStatus.encode(v, writer.uint32(10).fork()).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionsSubscriptionResult();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.accounts.push(
+            PositionsSubscriptionStatus.decode(reader, reader.uint32())
+          );
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      accounts: Array.isArray(object?.accounts)
+        ? object.accounts.map((e) => PositionsSubscriptionStatus.fromJSON(e))
+        : []
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.accounts) {
+      obj.accounts = message.accounts.map((e) =>
+        e ? PositionsSubscriptionStatus.toJSON(e) : undefined
+      );
+    } else {
+      obj.accounts = [];
+    }
+
+    return obj;
+  }
+};
+
+function createBasePositionsSubscriptionStatus() {
+  return { accountId: '', subscriptionStatus: 0 };
+}
+
+export const PositionsSubscriptionStatus = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.accountId !== '') {
+      writer.uint32(10).string(message.accountId);
+    }
+
+    if (message.subscriptionStatus !== 0) {
+      writer.uint32(48).int32(message.subscriptionStatus);
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionsSubscriptionStatus();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.accountId = reader.string();
+
+          break;
+        case 6:
+          message.subscriptionStatus = reader.int32();
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      accountId: isSet(object.accountId) ? String(object.accountId) : '',
+      subscriptionStatus: isSet(object.subscriptionStatus)
+        ? positionsAccountSubscriptionStatusFromJSON(object.subscriptionStatus)
+        : 0
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.accountId !== undefined && (obj.accountId = message.accountId);
+    message.subscriptionStatus !== undefined &&
+      (obj.subscriptionStatus = positionsAccountSubscriptionStatusToJSON(
+        message.subscriptionStatus
+      ));
+
+    return obj;
+  }
+};
+
+function createBasePositionData() {
+  return {
+    accountId: '',
+    money: [],
+    securities: [],
+    futures: [],
+    options: [],
+    date: undefined
+  };
+}
+
+export const PositionData = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.accountId !== '') {
+      writer.uint32(10).string(message.accountId);
+    }
+
+    for (const v of message.money) {
+      PositionsMoney.encode(v, writer.uint32(18).fork()).ldelim();
+    }
+
+    for (const v of message.securities) {
+      PositionsSecurities.encode(v, writer.uint32(26).fork()).ldelim();
+    }
+
+    for (const v of message.futures) {
+      PositionsFutures.encode(v, writer.uint32(34).fork()).ldelim();
+    }
+
+    for (const v of message.options) {
+      PositionsOptions.encode(v, writer.uint32(42).fork()).ldelim();
+    }
+
+    if (message.date !== undefined) {
+      Timestamp.encode(
+        toTimestamp(message.date),
+        writer.uint32(50).fork()
+      ).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionData();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.accountId = reader.string();
+
+          break;
+        case 2:
+          message.money.push(PositionsMoney.decode(reader, reader.uint32()));
+
+          break;
+        case 3:
+          message.securities.push(
+            PositionsSecurities.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 4:
+          message.futures.push(
+            PositionsFutures.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 5:
+          message.options.push(
+            PositionsOptions.decode(reader, reader.uint32())
+          );
+
+          break;
+        case 6:
+          message.date = fromTimestamp(
+            Timestamp.decode(reader, reader.uint32())
+          );
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      accountId: isSet(object.accountId) ? String(object.accountId) : '',
+      money: Array.isArray(object?.money)
+        ? object.money.map((e) => PositionsMoney.fromJSON(e))
+        : [],
+      securities: Array.isArray(object?.securities)
+        ? object.securities.map((e) => PositionsSecurities.fromJSON(e))
+        : [],
+      futures: Array.isArray(object?.futures)
+        ? object.futures.map((e) => PositionsFutures.fromJSON(e))
+        : [],
+      options: Array.isArray(object?.options)
+        ? object.options.map((e) => PositionsOptions.fromJSON(e))
+        : [],
+      date: isSet(object.date) ? fromJsonTimestamp(object.date) : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.accountId !== undefined && (obj.accountId = message.accountId);
+
+    if (message.money) {
+      obj.money = message.money.map((e) =>
+        e ? PositionsMoney.toJSON(e) : undefined
+      );
+    } else {
+      obj.money = [];
+    }
+
+    if (message.securities) {
+      obj.securities = message.securities.map((e) =>
+        e ? PositionsSecurities.toJSON(e) : undefined
+      );
+    } else {
+      obj.securities = [];
+    }
+
+    if (message.futures) {
+      obj.futures = message.futures.map((e) =>
+        e ? PositionsFutures.toJSON(e) : undefined
+      );
+    } else {
+      obj.futures = [];
+    }
+
+    if (message.options) {
+      obj.options = message.options.map((e) =>
+        e ? PositionsOptions.toJSON(e) : undefined
+      );
+    } else {
+      obj.options = [];
+    }
+
+    message.date !== undefined && (obj.date = message.date.toISOString());
+
+    return obj;
+  }
+};
+
+function createBasePositionsMoney() {
+  return { availableValue: undefined, blockedValue: undefined };
+}
+
+export const PositionsMoney = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.availableValue !== undefined) {
+      MoneyValue.encode(
+        message.availableValue,
+        writer.uint32(10).fork()
+      ).ldelim();
+    }
+
+    if (message.blockedValue !== undefined) {
+      MoneyValue.encode(
+        message.blockedValue,
+        writer.uint32(18).fork()
+      ).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBasePositionsMoney();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          message.availableValue = MoneyValue.decode(reader, reader.uint32());
+
+          break;
+        case 2:
+          message.blockedValue = MoneyValue.decode(reader, reader.uint32());
+
+          break;
+        default:
+          reader.skipType(tag & 7);
+
+          break;
+      }
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      availableValue: isSet(object.availableValue)
+        ? MoneyValue.fromJSON(object.availableValue)
+        : undefined,
+      blockedValue: isSet(object.blockedValue)
+        ? MoneyValue.fromJSON(object.blockedValue)
+        : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    message.availableValue !== undefined &&
+      (obj.availableValue = message.availableValue
+        ? MoneyValue.toJSON(message.availableValue)
+        : undefined);
+    message.blockedValue !== undefined &&
+      (obj.blockedValue = message.blockedValue
+        ? MoneyValue.toJSON(message.blockedValue)
+        : undefined);
+
+    return obj;
+  }
+};
 export const OperationsServiceDefinition = {
   name: 'OperationsService',
   fullName: 'tinkoff.public.invest.api.contract.v1.OperationsService',
   methods: {
-    /** Метод получения списка операций по счёту. */
+    /**
+     * Метод получения списка операций по счёту.При работе с данным методом необходимо учитывать
+     * [особенности взаимодействия](/investAPI/operations_problems) с данным методом.
+     */
     getOperations: {
       name: 'GetOperations',
       requestType: OperationsRequest,
@@ -4851,7 +6176,10 @@ export const OperationsServiceDefinition = {
       responseStream: false,
       options: {}
     },
-    /** Метод получения списка операций по счёту с пагинацией. */
+    /**
+     * Метод получения списка операций по счёту с пагинацией. При работе с данным методом необходимо учитывать
+     * [особенности взаимодействия](/investAPI/operations_problems) с данным методом.
+     */
     getOperationsByCursor: {
       name: 'GetOperationsByCursor',
       requestType: GetOperationsByCursorRequest,
@@ -4874,21 +6202,30 @@ export const OperationsStreamServiceDefinition = {
       responseType: PortfolioStreamResponse,
       responseStream: true,
       options: {}
+    },
+    /** Server-side stream обновлений информации по изменению позиций портфеля */
+    positionsStream: {
+      name: 'PositionsStream',
+      requestType: PositionsStreamRequest,
+      requestStream: false,
+      responseType: PositionsStreamResponse,
+      responseStream: true,
+      options: {}
     }
   }
 };
 
 function toTimestamp(date) {
-  const seconds = date.getTime() / 1000;
-  const nanos = (date.getTime() % 1000) * 1000000;
+  const seconds = date.getTime() / 1_000;
+  const nanos = (date.getTime() % 1_000) * 1_000_000;
 
   return { seconds, nanos };
 }
 
 function fromTimestamp(t) {
-  let millis = t.seconds * 1000;
+  let millis = t.seconds * 1_000;
 
-  millis += t.nanos / 1000000;
+  millis += t.nanos / 1_000_000;
 
   return new Date(millis);
 }
@@ -4905,7 +6242,9 @@ function fromJsonTimestamp(o) {
 
 function longToNumber(long) {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error('Value is larger than Number.MAX_SAFE_INTEGER');
+    throw new Error(
+      'Value is larger than Number.MAX_SAFE_INTEGER'
+    );
   }
 
   return long.toNumber();

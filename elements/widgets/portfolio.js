@@ -109,7 +109,7 @@ export const portfolioWidgetTemplate = html`
           <thead>
             <tr>
               <th>Инструмент</th>
-              <th>В портфеле</th>
+              <th>Доступно</th>
               <th>Средняя</th>
             </tr>
           </thead>
