@@ -949,6 +949,10 @@ class TinkoffGrpcWebTrader extends Trader {
 
   @debounce(100)
   broadcastPortfolio() {
+    if (typeof this.portfolio === 'undefined') {
+      return;
+    }
+
     for (const [source, fields] of this.subs.portfolio) {
       for (const { field, datum } of fields) {
         if (datum === TRADER_DATUM.POSITION) {
@@ -997,7 +1001,6 @@ class TinkoffGrpcWebTrader extends Trader {
 
                 break;
             }
-
 
             if (!position || +(position?.balance + position?.blocked) === 0) {
               source[field] = 0;

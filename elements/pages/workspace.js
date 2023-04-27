@@ -137,6 +137,18 @@ export class WorkspacePage extends Page {
     // No-op
   }
 
+  draggingChanged(oldValue, newValue) {
+    this.widgets.forEach((w) =>
+      newValue ? w.setAttribute('frozen', '') : w.removeAttribute('frozen')
+    );
+  }
+
+  resizingChanged(oldValue, newValue) {
+    this.widgets.forEach((w) =>
+      newValue ? w.setAttribute('frozen', '') : w.removeAttribute('frozen')
+    );
+  }
+
   onPointerDown(event) {
     let resizeControls;
     const cp = event.composedPath();

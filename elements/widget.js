@@ -190,6 +190,7 @@ export const widget = () => css`
     user-select: none;
   }
 
+  :host([frozen]) .widget-body,
   :host([dragging]) .widget-body,
   :host([resizing]) .widget-body {
     pointer-events: none !important;
