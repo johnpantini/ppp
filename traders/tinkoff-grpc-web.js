@@ -979,7 +979,7 @@ class TinkoffGrpcWebTrader extends Trader {
                   averagePrice: portfolioPosition
                     ? toNumber(portfolioPosition.averagePositionPrice)
                     : void 0,
-                  size: security.balance / instrument.lot,
+                  size: (security.balance + security.blocked) / instrument.lot,
                   accountId: this.document.account
                 };
               }
@@ -998,12 +998,15 @@ class TinkoffGrpcWebTrader extends Trader {
                 break;
             }
 
-            if (!position?.balance) {
+
+            if (!position || +(position?.balance + position?.blocked) === 0) {
               source[field] = 0;
             } else {
               switch (datum) {
                 case TRADER_DATUM.POSITION_SIZE:
-                  source[field] = position.balance / source.instrument.lot;
+                  source[field] =
+                    (position.balance + position.blocked) /
+                    source.instrument.lot;
 
                   break;
                 case TRADER_DATUM.POSITION_AVERAGE:
