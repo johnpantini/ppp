@@ -33,6 +33,8 @@ import {
   OperationsServiceDefinition,
   OperationsStreamServiceDefinition
 } from '../vendor/tinkoff/definitions/operations.js';
+import { InstrumentsServiceDefinition } from '../vendor/tinkoff/definitions/instruments.js';
+import { getInstrumentPrecision } from '../lib/intl.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -85,6 +87,9 @@ class TinkoffGrpcWebTrader extends Trader {
   // Key: figi ; Value: instrument object
   #figis = new Map();
 
+  // Key: ticker ; Value: minPriceIncrementAmount
+  #futureMinPriceIncrementAmount = new Map();
+
   orders = new Map();
 
   portfolio;
@@ -127,6 +132,19 @@ class TinkoffGrpcWebTrader extends Trader {
       Authorization: `Bearer ${this.document.broker.apiToken}`,
       'x-app-name': 'johnpantini.ppp'
     });
+  }
+
+  async oneTimeInitializationCallback() {
+    const { payload } = await (
+      await fetch('https://api.tinkoff.ru/trading/futures/list')
+    ).json();
+
+    for (const f of payload.values) {
+      this.#futureMinPriceIncrementAmount.set(
+        f.instrumentInfo.ticker.toUpperCase(),
+        f.orderInfo.minPriceIncrementAmount.value
+      );
+    }
   }
 
   onCacheInstrument(instrument) {
@@ -255,9 +273,7 @@ class TinkoffGrpcWebTrader extends Trader {
         }
       );
 
-      const { orders } = await client.getOrders({
-        accountId: this.document.account
-      });
+      const { orders } = await this.#getOrders(client);
 
       for (const o of orders) {
         const status = this.#getOrderStatus(o);
@@ -291,9 +307,7 @@ class TinkoffGrpcWebTrader extends Trader {
         }
       );
 
-      const { orders } = await client.getOrders({
-        accountId: this.document.account
-      });
+      const { orders } = await this.#getOrders(client);
 
       for (const o of orders) {
         const status = this.#getOrderStatus(o);
@@ -1026,6 +1040,27 @@ class TinkoffGrpcWebTrader extends Trader {
               }
             }
           }
+
+          for (const [figi, future] of this.positions.futures) {
+            const instrument = this.#figis.get(figi);
+            const portfolioPosition = this.portfolio.positionsMap.get(figi);
+
+            if (instrument) {
+              source[field] = {
+                instrument,
+                lot: instrument.lot,
+                symbol: instrument.symbol,
+                exchange: instrument.exchange,
+                isCurrency: false,
+                isBalance: false,
+                averagePrice: portfolioPosition
+                  ? toNumber(portfolioPosition.averagePositionPrice)
+                  : void 0,
+                size: (future.balance + future.blocked) / instrument.lot,
+                accountId: this.document.account
+              };
+            }
+          }
         } else {
           const sourceFigi = source.instrument?.tinkoffFigi;
 
@@ -1036,6 +1071,11 @@ class TinkoffGrpcWebTrader extends Trader {
               case 'stock':
               case 'bond':
                 position = this.positions.securities.get(sourceFigi);
+
+                break;
+
+              case 'future':
+                position = this.positions.futures.get(sourceFigi);
 
                 break;
             }
@@ -1102,10 +1142,49 @@ class TinkoffGrpcWebTrader extends Trader {
         }
       }
 
-      // TODO - FORTS
+      for (const f of futures) {
+        this.positions.futures.set(f.figi, f);
+      }
     }
 
     this.broadcastPortfolio();
+  }
+
+  async #getOrders(client) {
+    const orders = [];
+
+    for (const o of (
+      await client.getOrders({
+        accountId: this.document.account
+      })
+    ).orders) {
+      const instrument = this.#figis.get(o.figi);
+
+      if (instrument?.type === 'future') {
+        const minPriceIncrementAmount = this.#futureMinPriceIncrementAmount.get(
+          instrument.symbol
+        );
+
+        const { initialSecurityPrice } = o;
+        const value = toNumber(initialSecurityPrice);
+        let ptValue =
+          (value * instrument.minPriceIncrement) / minPriceIncrementAmount;
+        const precision = getInstrumentPrecision(instrument, ptValue);
+
+        ptValue = parseFloat(ptValue.toFixed(precision));
+
+        const money = toQuotation(ptValue);
+
+        o.initialSecurityPrice.units = money.units;
+        o.initialSecurityPrice.nano = money.nano;
+
+        orders.push(o);
+      } else {
+        orders.push(o);
+      }
+    }
+
+    return { orders };
   }
 
   async #fetchOrdersLoop() {
@@ -1121,10 +1200,7 @@ class TinkoffGrpcWebTrader extends Trader {
           }
         );
 
-        const { orders } = await client.getOrders({
-          accountId: this.document.account
-        });
-
+        const { orders } = await this.#getOrders(client);
         const newOrders = new Set();
 
         for (const o of orders) {
@@ -1312,6 +1388,8 @@ class TinkoffGrpcWebTrader extends Trader {
         return 'Аккаунт заблокирован.';
       case 30083:
         return 'Некорректный тип заявки.';
+      case 30097:
+        return 'Торговая сессия не идёт.';
       case 30092:
         return 'Торги недоступны по нерабочим дням.';
       case 40002:

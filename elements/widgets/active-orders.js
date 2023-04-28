@@ -114,7 +114,8 @@ export const activeOrdersWidgetTemplate = html`
                             o.instrument?.lot *
                               o.price *
                               (o.quantity - o.filled),
-                            o.instrument?.currency
+                            o.instrument?.currency,
+                            o.instrument
                           )}
                       </span>
                       <span

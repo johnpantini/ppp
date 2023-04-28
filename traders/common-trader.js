@@ -86,6 +86,10 @@ export class Trader {
       return (this.#pendingInstrumentCachePromise = (async () => {
         this.#instruments.clear();
 
+        if (typeof this.oneTimeInitializationCallback === 'function') {
+          await this.oneTimeInitializationCallback();
+        }
+
         const exchange = this.getExchange();
         const broker = this.getBroker();
         const dictionary = this.getDictionary();

@@ -69,6 +69,13 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  onCacheInstrument(instrument) {
+    this.#futures.set(
+      instrument.fullName.split(/\s+/)[0].toUpperCase(),
+      instrument
+    );
+  }
+
   async ensureAccessTokenIsOk() {
     try {
       if (isJWTTokenExpired(this.#jwt)) this.#jwt = void 0;
@@ -1217,7 +1224,7 @@ class AlorOpenAPIV2Trader extends Trader {
       case 'stock':
         return INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES;
       case 'futures':
-        return null;
+        return INSTRUMENT_DICTIONARY.ALOR_FORTS;
       case 'currency':
         return null;
     }

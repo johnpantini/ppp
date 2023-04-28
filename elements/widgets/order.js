@@ -335,7 +335,11 @@ export const orderWidgetTemplate = html`
                       ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
                           ? 'по факту сделки'
-                          : formatAmount(x.totalAmount, x.instrument?.currency)}
+                          : formatAmount(
+                              x.totalAmount,
+                              x.instrument?.currency,
+                              x.instrument
+                            )}
                     </span>
                   </div>
                   <div class="widget-summary-line">
@@ -625,6 +629,9 @@ export class OrderWidget extends WidgetWithInstrument {
   extraLevel1Trader;
 
   @observable
+  extraLevel1Trader2;
+
+  @observable
   positionTrader;
 
   @observable
@@ -702,6 +709,12 @@ export class OrderWidget extends WidgetWithInstrument {
         );
       }
 
+      if (this.document.extraLevel1Trader2) {
+        this.extraLevel1Trader2 = await ppp.getOrCreateTrader(
+          this.document.extraLevel1Trader2
+        );
+      }
+
       this.positionTrader = await ppp.getOrCreateTrader(
         this.document.positionTrader
       );
@@ -726,6 +739,25 @@ export class OrderWidget extends WidgetWithInstrument {
 
       if (this.extraLevel1Trader) {
         await this.extraLevel1Trader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            lastPrice: TRADER_DATUM.LAST_PRICE,
+            lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+            lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            bestBid: TRADER_DATUM.BEST_BID,
+            bestAsk: TRADER_DATUM.BEST_ASK
+          },
+          condition: function ({ instrument }) {
+            return !(
+              this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
+              instrument?.exchange !== this.document.exchange
+            );
+          }
+        });
+      }
+
+      if (this.extraLevel1Trader2) {
+        await this.extraLevel1Trader2.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
             lastPrice: TRADER_DATUM.LAST_PRICE,
@@ -800,6 +832,19 @@ export class OrderWidget extends WidgetWithInstrument {
       });
     }
 
+    if (this.extraLevel1Trader2) {
+      await this.extraLevel1Trader2.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          lastPrice: TRADER_DATUM.LAST_PRICE,
+          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          bestBid: TRADER_DATUM.BEST_BID,
+          bestAsk: TRADER_DATUM.BEST_ASK
+        }
+      });
+    }
+
     if (this.positionTrader) {
       await this.positionTrader.unsubscribeFields?.({
         source: this,
@@ -838,6 +883,7 @@ export class OrderWidget extends WidgetWithInstrument {
     this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
     this.level1Trader?.instrumentChanged?.(this, oldValue, newValue);
     this.extraLevel1Trader?.instrumentChanged?.(this, oldValue, newValue);
+    this.extraLevel1Trader2?.instrumentChanged?.(this, oldValue, newValue);
     this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
 
     if (
@@ -876,6 +922,7 @@ export class OrderWidget extends WidgetWithInstrument {
         ordersTraderId: this.container.ordersTraderId.value,
         level1TraderId: this.container.level1TraderId.value,
         extraLevel1TraderId: this.container.extraLevel1TraderId.value,
+        extraLevel1Trader2Id: this.container.extraLevel1Trader2Id.value,
         positionTraderId: this.container.positionTraderId.value,
         pusherApiId: this.container.pusherApiId.value,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
@@ -1587,7 +1634,7 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Дополнительный трейдер L1</h5>
+          <h5>Дополнительный трейдер L1 #1</h5>
           <p class="description">
             Трейдер, выступающий дополнительным источником L1-данных виджета.
           </p>
@@ -1615,6 +1662,54 @@ export async function widgetDefinition() {
                           { removed: { $ne: true } },
                           {
                             _id: `[%#this.document.extraLevel1TraderId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <ppp-button
+            appearance="default"
+            @click="${() => window.open('?page=trader', '_blank').focus()}"
+          >
+            +
+          </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Дополнительный трейдер L1 #2</h5>
+          <p class="description">
+            Трейдер, выступающий дополнительным источником L1-данных виджета.
+          </p>
+        </div>
+        <div class="control-line">
+          <ppp-query-select
+            ${ref('extraLevel1Trader2Id')}
+            placeholder="Опционально, нажмите для выбора"
+            value="${(x) => x.document.extraLevel1Trader2Id}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('traders')
+                  .find({
+                    $and: [
+                      {
+                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.extraLevel1Trader2Id ?? ''%]`
                           }
                         ]
                       }

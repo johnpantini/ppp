@@ -283,7 +283,11 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     if (negative) totalAmount *= -1;
 
-    return formatAmount(totalAmount, firstOperation.instrument?.currency);
+    return formatAmount(
+      totalAmount,
+      firstOperation.instrument?.currency,
+      firstOperation.instrument
+    );
   }
 
   getCardAmountExtraClasses(operations) {

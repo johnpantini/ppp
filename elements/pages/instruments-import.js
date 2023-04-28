@@ -45,6 +45,9 @@ export const instrumentsImportPageTemplate = html`
             >
               Alor (Московская биржа), фондовый рынок
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_FORTS}">
+              Alor (Московская биржа), срочный рынок
+            </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
               Tinkoff
             </ppp-option>
@@ -341,6 +344,33 @@ export class InstrumentsImportPage extends Page {
     });
   }
 
+  async [INSTRUMENT_DICTIONARY.ALOR_FORTS]() {
+    const { payload } = await (
+      await fetch('https://api.tinkoff.ru/trading/futures/list')
+    ).json();
+
+    const instruments = [];
+
+    for (const f of payload.values) {
+      instruments.push({
+        symbol: f.instrumentInfo.ticker.toUpperCase(),
+        exchange: EXCHANGE.MOEX,
+        broker: BROKERS.ALOR,
+        fullName: f.viewInfo.showName,
+        minPriceIncrement: f.orderInfo.minPriceIncrement,
+        type: 'future',
+        currency: f.orderInfo.minPriceIncrementAmount.currency.toUpperCase(),
+        forQualInvestorFlag: false,
+        lot: f.orderInfo.lotSize,
+        classCode: f.instrumentInfo.classCode,
+        expirationDate: new Date(f.instrumentInfo.lastTradeDate).toISOString(),
+        baseAsset: f.instrumentInfo.basicAsset
+      });
+    }
+
+    return instruments;
+  }
+
   async #tinkoffSecurities(security = 'Shares', token) {
     try {
       return (
@@ -385,6 +415,11 @@ export class InstrumentsImportPage extends Page {
     const etfs =
       (await this.#tinkoffSecurities(
         'Etfs',
+        this.tinkoffBrokerId.datum().apiToken
+      )) ?? [];
+    const futures =
+      (await this.#tinkoffSecurities(
+        'Futures',
         this.tinkoffBrokerId.datum().apiToken
       )) ?? [];
 
@@ -478,6 +513,34 @@ export class InstrumentsImportPage extends Page {
       }
     }
 
+    for (const f of futures) {
+      const realExchange = f.realExchange;
+
+      if (
+        realExchange === 'REAL_EXCHANGE_MOEX' ||
+        realExchange === 'REAL_EXCHANGE_RTS'
+      ) {
+        instruments.push({
+          symbol: f.ticker.replace('.', ' ').toUpperCase(),
+          exchange:
+            realExchange === 'REAL_EXCHANGE_MOEX'
+              ? EXCHANGE.MOEX
+              : EXCHANGE.SPBX,
+          broker: BROKERS.TINKOFF,
+          tinkoffFigi: f.figi,
+          fullName: f.name,
+          minPriceIncrement: toNumber(f.minPriceIncrement),
+          type: 'future',
+          currency: f.currency.toUpperCase(),
+          forQualInvestorFlag: f.forQualInvestorFlag,
+          lot: f.lot,
+          classCode: f.classCode,
+          expirationDate: f.expirationDate,
+          baseAsset: f.basicAsset
+        });
+      }
+    }
+
     return instruments;
   }
 
@@ -546,6 +609,13 @@ export class InstrumentsImportPage extends Page {
 
         case INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES:
           exchange = EXCHANGE.MOEX_SECURITIES;
+          exchangeForDBRequest = EXCHANGE.MOEX;
+          broker = BROKERS.ALOR;
+
+          break;
+
+        case INSTRUMENT_DICTIONARY.ALOR_FORTS:
+          exchange = EXCHANGE.MOEX_FORTS;
           exchangeForDBRequest = EXCHANGE.MOEX;
           broker = BROKERS.ALOR;
 
