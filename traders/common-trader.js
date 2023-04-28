@@ -358,10 +358,6 @@ export class Trader {
   }
 
   async instrumentChanged(source, oldValue, newValue) {
-    if (newValue && !this.supportsInstrument(newValue)) {
-      return;
-    }
-
     for (const key of Object.keys(this.subs)) {
       const sub = this.subs[key];
 
@@ -375,7 +371,7 @@ export class Trader {
             await this.removeRef(oldValue, this.refs[key], key);
           }
 
-          if (newValue) {
+          if (newValue && this.supportsInstrument(newValue)) {
             await this.addRef(newValue, this.refs[key], key);
           }
         }

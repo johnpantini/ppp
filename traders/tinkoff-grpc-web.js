@@ -870,6 +870,17 @@ class TinkoffGrpcWebTrader extends Trader {
       });
 
       return candles.map((c) => {
+        if (instrument.type === 'bond') {
+          return {
+            open: this.relativeBondPriceToPrice(toNumber(c.open), instrument),
+            high: this.relativeBondPriceToPrice(toNumber(c.high), instrument),
+            low: this.relativeBondPriceToPrice(toNumber(c.low), instrument),
+            close: this.relativeBondPriceToPrice(toNumber(c.close), instrument),
+            time: c.time.toISOString(),
+            volume: c.volume
+          };
+        }
+
         return {
           open: toNumber(c.open),
           high: toNumber(c.high),
@@ -930,14 +941,37 @@ class TinkoffGrpcWebTrader extends Trader {
           for (const { field, datum } of fields) {
             switch (datum) {
               case TRADER_DATUM.CANDLE:
-                source[field] = {
-                  open: toNumber(candle.open),
-                  high: toNumber(candle.high),
-                  low: toNumber(candle.low),
-                  close: toNumber(candle.close),
-                  time: candle.time.toISOString(),
-                  volume: candle.volume
-                };
+                if (instrument.type === 'bond') {
+                  source[field] = {
+                    open: this.relativeBondPriceToPrice(
+                      toNumber(candle.open),
+                      instrument
+                    ),
+                    high: this.relativeBondPriceToPrice(
+                      toNumber(candle.high),
+                      instrument
+                    ),
+                    low: this.relativeBondPriceToPrice(
+                      toNumber(candle.low),
+                      instrument
+                    ),
+                    close: this.relativeBondPriceToPrice(
+                      toNumber(candle.close),
+                      instrument
+                    ),
+                    time: candle.time.toISOString(),
+                    volume: candle.volume
+                  };
+                } else {
+                  source[field] = {
+                    open: toNumber(candle.open),
+                    high: toNumber(candle.high),
+                    low: toNumber(candle.low),
+                    close: toNumber(candle.close),
+                    time: candle.time.toISOString(),
+                    volume: candle.volume
+                  };
+                }
 
                 break;
             }
@@ -968,11 +1002,14 @@ class TinkoffGrpcWebTrader extends Trader {
           }
 
           for (const [figi, security] of this.positions.securities) {
-            if (security.instrumentType === 'share') {
-              const instrument = this.#figis.get(figi);
-              const portfolioPosition = this.portfolio.positionsMap.get(figi);
+            const instrument = this.#figis.get(figi);
+            const portfolioPosition = this.portfolio.positionsMap.get(figi);
 
-              if (instrument) {
+            if (instrument) {
+              if (
+                security.instrumentType === 'share' ||
+                security.instrumentType === 'bond'
+              ) {
                 source[field] = {
                   instrument,
                   lot: instrument.lot,
@@ -997,6 +1034,7 @@ class TinkoffGrpcWebTrader extends Trader {
 
             switch (source.instrument?.type) {
               case 'stock':
+              case 'bond':
                 position = this.positions.securities.get(sourceFigi);
 
                 break;
@@ -1059,8 +1097,7 @@ class TinkoffGrpcWebTrader extends Trader {
       }
 
       for (const s of securities) {
-        // TODO - bonds
-        if (s.instrumentType === 'share') {
+        if (s.instrumentType === 'share' || s.instrumentType === 'bond') {
           this.positions.securities.set(s.figi, s);
         }
       }
@@ -1229,7 +1266,10 @@ class TinkoffGrpcWebTrader extends Trader {
       instrument?.exchange === EXCHANGE.MOEX ||
       instrument?.currency === 'RUB'
     ) {
-      return `static/instruments/stocks/rus/${symbol.replace(' ', '-')}.svg`;
+      return `static/instruments/${instrument.type}s/rus/${symbol.replace(
+        ' ',
+        '-'
+      )}.svg`;
     }
 
     if (instrument?.exchange === EXCHANGE.SPBX && symbol !== 'TCS') {

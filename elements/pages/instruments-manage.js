@@ -365,6 +365,7 @@ export const instrumentsManagePageTemplate = html`
             (x) =>
               !x.type.value ||
               x.type.value === 'stock' ||
+              x.type.value === 'etf' ||
               x.type.value === 'bond' ||
               x.type.value === 'future',
             html`
@@ -768,6 +769,7 @@ export class InstrumentsManagePage extends Page {
 
     if (
       this.type.value === 'stock' ||
+      this.type.value === 'etf' ||
       this.type.value === 'bond' ||
       this.type.value === 'future'
     ) {

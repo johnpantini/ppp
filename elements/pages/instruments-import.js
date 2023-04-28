@@ -99,6 +99,17 @@ export const instrumentsImportPageTemplate = html`
                 }}"
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
+              <div class="spacing2"></div>
+              <ppp-button
+                @click="${() =>
+                  ppp.app.mountPage('broker-tinkoff', {
+                    size: 'xlarge',
+                    adoptHeader: true
+                  })}"
+                appearance="primary"
+              >
+                Добавить профиль Tinkoff
+              </ppp-button>
             </div>
           </section>
         `
@@ -303,7 +314,7 @@ export class InstrumentsImportPage extends Page {
 
       if (s.type === 'ETF' || s.type === 'MF') type = 'etf';
 
-      return {
+      const payload = {
         symbol: s.symbol,
         exchange: EXCHANGE.MOEX,
         broker: BROKERS.ALOR,
@@ -316,6 +327,17 @@ export class InstrumentsImportPage extends Page {
         lot: s.lotsize,
         isin: s.ISIN
       };
+
+      if (type === 'bond') {
+        payload.nominal = s.facevalue;
+        payload.initialNominal = s.facevalue;
+
+        if (s.cancellation) {
+          payload.maturityDate = new Date(s.cancellation).toISOString();
+        }
+      }
+
+      return payload;
     });
   }
 
@@ -355,6 +377,16 @@ export class InstrumentsImportPage extends Page {
         'Shares',
         this.tinkoffBrokerId.datum().apiToken
       )) ?? [];
+    const bonds =
+      (await this.#tinkoffSecurities(
+        'Bonds',
+        this.tinkoffBrokerId.datum().apiToken
+      )) ?? [];
+    const etfs =
+      (await this.#tinkoffSecurities(
+        'Etfs',
+        this.tinkoffBrokerId.datum().apiToken
+      )) ?? [];
 
     for (const s of stocks) {
       const realExchange = s.realExchange;
@@ -379,6 +411,69 @@ export class InstrumentsImportPage extends Page {
           lot: s.lot,
           isin: s.isin,
           classCode: s.classCode
+        });
+      }
+    }
+
+    for (const b of bonds) {
+      const realExchange = b.realExchange;
+
+      if (
+        realExchange === 'REAL_EXCHANGE_MOEX' ||
+        realExchange === 'REAL_EXCHANGE_RTS'
+      ) {
+        instruments.push({
+          symbol: b.ticker.replace('.', ' ').toUpperCase(),
+          exchange:
+            realExchange === 'REAL_EXCHANGE_MOEX'
+              ? EXCHANGE.MOEX
+              : EXCHANGE.SPBX,
+          broker: BROKERS.TINKOFF,
+          tinkoffFigi: b.figi,
+          fullName: b.name,
+          minPriceIncrement: toNumber(b.minPriceIncrement),
+          type: 'bond',
+          currency: b.currency.toUpperCase(),
+          forQualInvestorFlag: b.forQualInvestorFlag,
+          amortizationFlag: b.amortizationFlag,
+          floatingCouponFlag: b.floatingCouponFlag,
+          perpetualFlag: b.perpetualFlag,
+          subordinatedFlag: b.subordinatedFlag,
+          lot: b.lot,
+          isin: b.isin,
+          classCode: b.classCode,
+          issueKind: b.issueKind,
+          initialNominal: toNumber(b.initialNominal),
+          nominal: toNumber(b.nominal),
+          maturityDate: b.maturityDate,
+          couponQuantityPerYear: b.couponQuantityPerYear
+        });
+      }
+    }
+
+    for (const e of etfs) {
+      const realExchange = e.realExchange;
+
+      if (
+        realExchange === 'REAL_EXCHANGE_MOEX' ||
+        realExchange === 'REAL_EXCHANGE_RTS'
+      ) {
+        instruments.push({
+          symbol: e.ticker.replace('.', ' ').toUpperCase(),
+          exchange:
+            realExchange === 'REAL_EXCHANGE_MOEX'
+              ? EXCHANGE.MOEX
+              : EXCHANGE.SPBX,
+          broker: BROKERS.TINKOFF,
+          tinkoffFigi: e.figi,
+          fullName: e.name,
+          minPriceIncrement: toNumber(e.minPriceIncrement),
+          type: 'etf',
+          currency: e.currency.toUpperCase(),
+          forQualInvestorFlag: e.forQualInvestorFlag,
+          lot: e.lot,
+          isin: e.isin,
+          classCode: e.classCode
         });
       }
     }

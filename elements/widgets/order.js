@@ -163,7 +163,10 @@ export const orderWidgetTemplate = html`
                   >
                     В портфеле: ${(x) => x.formatPositionSize()}
                   </span>
-                  <span>
+                  <span
+                    style="cursor: pointer"
+                    @click="${(x) => x.setPrice(x.positionAverage ?? 0)}"
+                  >
                     Средняя: ${(x) => x.formatPrice(x.positionAverage ?? 0)}
                   </span>
                 </div>
