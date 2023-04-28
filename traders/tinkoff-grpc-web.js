@@ -142,7 +142,7 @@ class TinkoffGrpcWebTrader extends Trader {
     for (const f of payload.values) {
       this.#futureMinPriceIncrementAmount.set(
         f.instrumentInfo.ticker.toUpperCase(),
-        f.orderInfo.minPriceIncrementAmount.value
+        f.orderInfo?.minPriceIncrementAmount?.value ?? 1
       );
     }
   }
