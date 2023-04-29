@@ -1487,8 +1487,8 @@ export async function widgetDefinition() {
     }).define(),
     minWidth: 250,
     minHeight: 370,
-    defaultWidth: 280,
-    defaultHeight: 375,
+    defaultWidth: 290,
+    defaultHeight: 385,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

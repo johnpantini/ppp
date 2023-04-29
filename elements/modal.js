@@ -127,6 +127,10 @@ export const modalStyles = css`
     width: 900px;
   }
 
+  :host(.xxlarge) .content {
+    width: 1200px;
+  }
+
   .content:focus-visible {
     outline: none;
   }

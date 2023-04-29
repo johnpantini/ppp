@@ -625,20 +625,25 @@ export class App extends PPPElement {
     this.pageConnected = false;
 
     try {
+      const mountPoint = this.mountPoint;
+
+      mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
+
       await import(`${ppp.rootUrl}/elements/pages/${page}.js`);
 
-      const mountPoint = this.mountPoint;
       const pageElement = document.createElement(`ppp-${page}-page`);
 
       pageElement.mountPointModal = this.mountPointModal;
-      pageElement.setAttribute('disable-auto-read', '');
+
+      if (!options.autoRead) {
+        pageElement.setAttribute('disable-auto-read', '');
+      }
 
       if (options.documentId) {
         pageElement.setAttribute('document-id', options.documentId);
       }
 
       pageElement.setAttribute('href', page);
-      mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
 
       if (!options.adoptHeader) {
         this.mountPointTitle.textContent = options.title ?? 'PPP';
@@ -650,6 +655,8 @@ export class App extends PPPElement {
       this.mountPointModal.removeAttribute('hidden');
 
       const result = mountPoint.appendChild(pageElement);
+
+      result.setAttribute('mounted', '');
 
       const header = pageElement.shadowRoot.querySelector('ppp-page-header');
 

@@ -44,11 +44,11 @@ import {
 
 const portfolioSection = ({ title, section }) =>
   html`
-    <tr class="table-group" ?hidden="${(x) => !x[section].length}">
+    <tr class="table-group" ?hidden="${(x) => !x?.[section].length}">
       <td colspan="1">${title}</td>
     </tr>
     ${repeat(
-      (x) => x[section],
+      (x) => x?.[section],
       html`
         <tr
           class="portfolio-row"
@@ -114,11 +114,11 @@ export const portfolioWidgetTemplate = html`
             </tr>
           </thead>
           <tbody @click="${(x, c) => x.handleBalancesTableClick(c)}">
-            <tr class="table-group" ?hidden="${(x) => !x.balances.length}">
+            <tr class="table-group" ?hidden="${(x) => !x?.balances.length}">
               <td colspan="1">Валютные балансы</td>
             </tr>
             ${repeat(
-              (x) => x.balances,
+              (x) => x?.balances,
               html`
                 <tr class="portfolio-row">
                   <td class="cell capitalize">
@@ -162,11 +162,11 @@ export const portfolioWidgetTemplate = html`
         </table>
         ${when(
           (x) =>
-            !x.balances?.length &&
-            !x.stocks?.length &&
-            !x.bonds?.length &&
-            !x.futures?.length &&
-            !x.zombies?.length,
+            !x?.balances?.length &&
+            !x?.stocks?.length &&
+            !x?.bonds?.length &&
+            !x?.futures?.length &&
+            !x?.zombies?.length,
           html`${html.partial(
             widgetEmptyStateTemplate('Нет позиций в портфеле.')
           )}`
@@ -436,6 +436,10 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   portfolioMapToArray(map) {
+    if (!map || !map.size) {
+      return [];
+    }
+
     return Array.from(map.values()).sort((a, b) =>
       a.symbol.localeCompare(b.symbol)
     );

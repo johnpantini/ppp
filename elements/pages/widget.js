@@ -19,6 +19,7 @@ import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   bodyFont,
   fontSizeBody1,
+  fontSizeHeading5,
   fontWeightBody1,
   lineHeightBody1,
   negative,
@@ -137,7 +138,7 @@ export const widgetTypeRadioStyles = css`
     align-items: center;
     width: 100%;
     color: ${themeConditional(paletteGrayBase, paletteWhite)};
-    font-size: ${fontSizeBody1} + 1px;
+    font-size: ${fontSizeHeading5};
   }
 
   [name='text']::slotted(*) {
@@ -392,10 +393,18 @@ export const widgetPageTemplate = html`
                 appearance="primary"
                 class="save-widget"
                 @click="${async (x) => {
-                  await x.applyModifications();
-                  await later(100);
-
-                  Updates.enqueue(() => x.submitDocument());
+                  // Prevent extra widget connectedCallback if exists
+                  if (!x.document._id) {
+                    try {
+                      await x.applyModifications();
+                      await later(100);
+                      Updates.enqueue(() => x.submitDocument());
+                    } catch (e) {
+                      x.failOperation(e);
+                    }
+                  } else {
+                    Updates.enqueue(() => x.submitDocument());
+                  }
                 }}"
               >
                 Сохранить виджет
@@ -536,6 +545,11 @@ export const widgetPageStyles = css`
     font-family: ${bodyFont};
   }
 
+  :host([mounted]) .content {
+    min-height: 100%;
+    justify-content: space-around;
+  }
+
   nav {
     padding: 0 10px;
     position: relative;
@@ -543,9 +557,18 @@ export const widgetPageStyles = css`
     border-left: 1px solid transparent;
   }
 
+  :host([mounted]) nav {
+    width: unset;
+  }
+
   .nav-inner {
     max-width: 470px;
     margin: 32px auto 0;
+  }
+
+  :host([mounted]) .nav-inner {
+    max-width: 450px;
+    margin: 32px 20px;
   }
 
   .right-pane {
@@ -561,8 +584,16 @@ export const widgetPageStyles = css`
     padding-bottom: 150px;
   }
 
+  :host([mounted]) .right-pane-inner {
+    padding-bottom: 10px;
+  }
+
   .widget-holder {
     padding: 15px 0 60px 20px;
+  }
+
+  :host([mounted]) .widget-holder {
+    padding: 15px 24px 60px 20px;
   }
 
   .widget-info {

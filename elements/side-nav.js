@@ -48,12 +48,19 @@ export const sideNavTemplate = html`
   <template>
     <div class="wrapper">
       <nav
+        ${ref('nav')}
         class="nav"
         aria-label="side-nav"
         ?expanded="${(x) => x.expanded}"
-        @pointerover="${(x) => (x.hovered = true)}"
-        @pointerout="${(x) => (x.hovered = false)}"
-        @pointercancel="${(x) => (x.hovered = false)}"
+        @pointerover="${(x) => {
+          x.hovered = true;
+        }}"
+        @pointerout="${(x) => {
+          x.hovered = false;
+        }}"
+        @pointercancel="${(x) => {
+          x.hovered = false;
+        }}"
       >
         <div class="expanded-content">
           <ul>

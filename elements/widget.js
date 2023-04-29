@@ -2428,9 +2428,36 @@ export class WidgetHeaderButtons extends PPPElement {
 
   async showWidgetSettings() {
     if (!this.widget.preview) {
-      window
-        .open(`?page=widget&document=${this.widget.document._id}`, '_blank')
-        .focus();
+      const page = await ppp.app.mountPage('widget', {
+        title: `Виджет - ${this.widget.document.name}`,
+        size: 'xxlarge',
+        documentId: this.widget.document._id,
+        autoRead: true
+      });
+
+      const originalMethod = page.submitDocument;
+      const that = this;
+
+      page.submitDocument = async function () {
+        await originalMethod.call(page);
+
+        const newWidgetDocument = Object.assign(
+          {},
+          that.widget.document,
+          page.document,
+          {
+            x: parseInt(that.widget.style.left),
+            y: parseInt(that.widget.style.top),
+            width: parseInt(that.widget.style.width),
+            height: parseInt(that.widget.style.height)
+          }
+        );
+
+        that.widget.remove();
+        that.widget.container.document.widgets.push(newWidgetDocument);
+
+        return that.widget.container.placeWidget(newWidgetDocument);
+      };
     }
   }
 
