@@ -393,17 +393,12 @@ export const widgetPageTemplate = html`
                 appearance="primary"
                 class="save-widget"
                 @click="${async (x) => {
-                  // Prevent extra widget connectedCallback if exists
-                  if (!x.document._id) {
-                    try {
-                      await x.applyModifications();
-                      await later(100);
-                      Updates.enqueue(() => x.submitDocument());
-                    } catch (e) {
-                      x.failOperation(e);
-                    }
-                  } else {
+                  try {
+                    await x.applyModifications();
+                    await later(100);
                     Updates.enqueue(() => x.submitDocument());
+                  } catch (e) {
+                    x.failOperation(e);
                   }
                 }}"
               >
