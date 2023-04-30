@@ -394,7 +394,7 @@ export const widgetPageTemplate = html`
                 class="save-widget"
                 @click="${async (x) => {
                   try {
-                    await x.applyModifications();
+                    await x.applyModifications({ silent: true });
                     await later(100);
                     Updates.enqueue(() => x.submitDocument());
                   } catch (e) {
@@ -1115,8 +1115,8 @@ export class WidgetPage extends Page {
     return true;
   }
 
-  async applyModifications() {
-    this.beginOperation();
+  async applyModifications({ silent }) {
+    if (!silent) this.beginOperation();
 
     await this.onChangeDelayedAsync();
   }
