@@ -59,6 +59,7 @@ import '../badge.js';
 import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
+import '../select.js';
 import '../text-field.js';
 import '../top-loader.js';
 import '../widget.js';
@@ -363,7 +364,9 @@ export const widgetPageTemplate = html`
                                 <h5>URL</h5>
                                 <p class="description">
                                   Ссылка на реализацию виджета. Нельзя изменить
-                                  после создания.
+                                  после создания. Можно воспользоваться
+                                  выпадающим списком ниже, чтобы использовать
+                                  готовую ссылку.
                                 </p>
                               </div>
                               <div class="widget-settings-input-group">
@@ -374,6 +377,24 @@ export const widgetPageTemplate = html`
                                   ?disabled="${(x) => x.document._id}"
                                   ${ref('url')}
                                 ></ppp-text-field>
+                              </div>
+                              <div class="control-stack">
+                                <ppp-select
+                                  ${ref('predefinedWidgetUrl')}
+                                  deselectable
+                                  placeholder="Выберите готовую ссылку"
+                                  @change="${(x) => {
+                                    switch (x.predefinedWidgetUrl.value) {
+                                      case 'simple-frame-widget':
+                                        x.url.value =
+                                          'https://psina.pages.dev/widgets/simple-frame-widget.js';
+                                    }
+                                  }}"
+                                >
+                                  <ppp-option value="simple-frame-widget">
+                                    Фрейм (Psina)
+                                  </ppp-option>
+                                </ppp-select>
                               </div>
                             </div>
                           `

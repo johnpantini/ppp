@@ -111,7 +111,8 @@ class TinkoffGrpcWebTrader extends Trader {
     orders: new Map(),
     candles: new Map(),
     portfolio: new Map(),
-    trader: new Map()
+    trader: new Map(),
+    timeline: new Map()
   };
 
   // Key: instrumentId; Value: { instrument, refCount }
@@ -122,7 +123,8 @@ class TinkoffGrpcWebTrader extends Trader {
     orders: new Map(),
     candles: new Map(),
     portfolio: new Map(),
-    trader: new Map()
+    trader: new Map(),
+    timeline: new Map()
   };
 
   constructor(document) {
@@ -669,7 +671,8 @@ class TinkoffGrpcWebTrader extends Trader {
       [TRADER_DATUM.POSITION_AVERAGE]: [
         this.subs.portfolio,
         this.refs.portfolio
-      ]
+      ],
+      [TRADER_DATUM.TIMELINE_ITEM]: [this.subs.timeline, this.refs.timeline]
     }[datum];
   }
 

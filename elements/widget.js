@@ -1802,15 +1802,8 @@ export class WidgetSearchControl extends PPPOffClickElement {
     else this.widget.style.overflow = 'hidden';
 
     if (this.widget.preview) {
-      if (newValue) {
-        this.widget.style.position = 'absolute';
-        this.widget.container.widgetArea.style.height = `${parseInt(
-          this.widget.style.height
-        )}px`;
-      } else {
-        this.widget.style.position = 'relative';
-        this.widget.container.widgetArea.style.height = null;
-      }
+      this.widget.style.position = 'relative';
+      this.widget.container.widgetArea.style.height = null;
     }
   }
 

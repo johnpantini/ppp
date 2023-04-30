@@ -156,7 +156,7 @@ export class WorkspacePage extends Page {
     if (
       cp.find((n) => n?.classList?.contains('widget-header')) &&
       !cp.find((n) =>
-        /ppp-widget-group-control|ppp-widget-search-control|ppp-widget-header-buttons/.test(
+        /modal|ppp-widget-group-control|ppp-widget-search-control|ppp-widget-header-buttons/.test(
           n?.tagName?.toLowerCase?.()
         )
       )

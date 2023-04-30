@@ -37,6 +37,11 @@ export default {
 }`,
     envSecret: '{}',
     url: '/lib/cloudflare-workers/tradingview/worker.js'
+  },
+  thefly: {
+    env: `{}`,
+    envSecret: '{}',
+    url: '/lib/cloudflare-workers/thefly.js'
   }
 };
 
@@ -182,6 +187,9 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 <ppp-option value="default"> По умолчанию</ppp-option>
                 <ppp-option value="tradingview">
                   Прокси для ru.tradingview.com
+                </ppp-option>
+                <ppp-option value="thefly">
+                  Прокси для thefly.com
                 </ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
