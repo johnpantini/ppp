@@ -112,10 +112,14 @@ export const timelineWidgetTemplate = html`
                           </span>
                           <div slot="subtitle-right">
                             ${(x) =>
-                              formatDateWithOptions(x[x.length - 1].createdAt, {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                              formatDateWithOptions(
+                                x[0].parentCreatedAt ??
+                                  x[x.length - 1].createdAt,
+                                {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                }
+                              )}
                           </div>
                         </ppp-widget-card>
                       </div>

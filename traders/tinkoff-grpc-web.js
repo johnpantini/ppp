@@ -31,7 +31,9 @@ import { uuidv4 } from '../lib/ppp-crypto.js';
 import {
   InstrumentType,
   OperationsServiceDefinition,
-  OperationsStreamServiceDefinition
+  OperationsStreamServiceDefinition,
+  OperationState,
+  OperationType
 } from '../vendor/tinkoff/definitions/operations.js';
 import { InstrumentsServiceDefinition } from '../vendor/tinkoff/definitions/instruments.js';
 import { getInstrumentPrecision } from '../lib/intl.js';
@@ -709,13 +711,24 @@ class TinkoffGrpcWebTrader extends Trader {
 
         break;
       }
-
       case TRADER_DATUM.CURRENT_ORDER: {
         for (const [_, order] of this.orders) {
           this.onOrdersMessage({
             order
           });
         }
+
+        break;
+      }
+      case TRADER_DATUM.TIMELINE_ITEM: {
+        const history = await this.timelineHistory({
+          cursor: ''
+        });
+
+        this.onTimelineMessage({
+          items: history.items,
+          fromHistory: true
+        });
 
         break;
       }
@@ -758,25 +771,80 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   async removeLastRef(instrument, refs) {
-    if (refs === this.refs.orderbook) {
-      this.refs.orderbook.delete(instrument.symbol);
-    }
-
-    if (refs === this.refs.allTrades) {
-      this.refs.allTrades.delete(instrument.symbol);
-    }
-
-    if (refs === this.refs.candles) {
-      this.refs.candles.delete(instrument.symbol);
-    }
-
     if (refs === this.refs.orders) {
       this.orders.clear();
     }
 
+    // Abort streams if refs are empty.
     if (!this.refs.orderbook.size && !this.refs.allTrades.size) {
-      // Abort market data stream if everything is empty.
       this.#marketDataAbortController?.abort?.();
+    }
+
+    if (!this.refs.portfolio.size) {
+      this.#portfolioAbortController?.abort?.();
+      this.#positionsAbortController?.abort?.();
+    }
+  }
+
+  async timelineHistory({ cursor, limit = 100 }) {
+    return this.getOrCreateClient(
+      OperationsServiceDefinition
+    ).getOperationsByCursor({
+      accountId: this.document.account,
+      instrumentId: '',
+      // Inclusive
+      cursor,
+      limit,
+      operationTypes: [
+        OperationType.OPERATION_TYPE_BUY,
+        OperationType.OPERATION_TYPE_SELL,
+        OperationType.OPERATION_TYPE_BUY_CARD,
+        OperationType.OPERATION_TYPE_BUY_MARGIN,
+        OperationType.OPERATION_TYPE_SELL_MARGIN
+      ],
+      state: OperationState.OPERATION_STATE_UNSPECIFIED,
+      withoutCommissions: true
+    });
+  }
+
+  onTimelineMessage({ items, fromHistory }) {
+    for (const [source, fields] of this.subs.timeline) {
+      for (const { field, datum } of fields) {
+        if (datum === TRADER_DATUM.TIMELINE_ITEM) {
+          if (Array.isArray(items)) {
+            if (fromHistory) {
+              const filtered = items.filter(
+                (i) => i.state !== OperationState.OPERATION_STATE_CANCELED
+              );
+
+              for (let i = 0; i < filtered.length; i++) {
+                const item = filtered[i];
+                const instrument = this.#figis.get(item.figi);
+
+                if (Array.isArray(item.tradesInfo?.trades)) {
+                  for (const trade of item.tradesInfo.trades) {
+                    source[field] = {
+                      instrument,
+                      operationId: trade.num,
+                      accruedInterest: toNumber(item.accruedInt),
+                      commission: toNumber(item.commission),
+                      parentId: item.id,
+                      symbol: instrument.symbol,
+                      cursor: item.cursor,
+                      type: item.type,
+                      exchange: instrument.exchange,
+                      quantity: trade.quantity / instrument.lot,
+                      price: toNumber(trade.price) * instrument.lot,
+                      createdAt: trade.date.toISOString(),
+                      parentCreatedAt: item.date.toISOString()
+                    };
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 
@@ -1308,7 +1376,7 @@ class TinkoffGrpcWebTrader extends Trader {
 
     // Broadcast portfolio for order widgets (at least).
     if (this.subs.portfolio.has(source)) {
-      await this.onPortfolioMessage(this.portfolio);
+      this.onPortfolioMessage(this.portfolio);
     }
   }
 

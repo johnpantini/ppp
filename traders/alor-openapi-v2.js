@@ -1181,7 +1181,7 @@ class AlorOpenAPIV2Trader extends Trader {
           if (datum === TRADER_DATUM.TIMELINE_ITEM) {
             const payload = {
               operationId: data.id,
-              accruedInterest: data.accruedInt,
+              accruedInterest: data.accruedInt ?? 0,
               commission: data.commission,
               parentId: data.orderno,
               symbol: data.symbol,
