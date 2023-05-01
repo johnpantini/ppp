@@ -183,11 +183,19 @@ export class TelegramBotPage extends Page {
         skipScrollIntoView: true
       });
     } else {
+      const locationUrl = ppp.keyVault.getKey('mongo-location-url');
+
+      if (!locationUrl) {
+        invalidate(ppp.app.toast, {
+          errorMessage:
+            'Не получается сгенерировать ссылку - соединитесь с облачной базой данных MongoDB Realm хотя бы один раз.',
+          raiseException: true
+        });
+      }
+
       this.webhook.appearance = 'default';
       this.webhook.value =
-        ppp.keyVault
-          .getKey('mongo-location-url')
-          .replace('aws.stitch.mongodb', 'aws.data.mongodb-api') +
+        locationUrl.replace('aws.stitch.mongodb', 'aws.data.mongodb-api') +
         `/app/${ppp.keyVault.getKey('mongo-app-client-id')}/endpoint${
           datum.value
         }`;

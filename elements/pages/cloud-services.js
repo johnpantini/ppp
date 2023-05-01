@@ -47,8 +47,25 @@ export const cloudServicesPageTemplate = html`
         html`
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Чтобы перенести ключи в другой браузер, используйте это компактное
-            представление:
+            ${when(
+              ppp.keyVault.getKey('mongo-location-url'),
+              html`
+                <span>
+                  Чтобы перенести ключи в другой браузер, используйте это
+                  компактное представление:
+                </span>
+              `
+            )}
+            ${when(
+              !ppp.keyVault.getKey('mongo-location-url'),
+              html`
+                <span>
+                  Чтобы получить компактное представление, необходимо
+                  соединиться с облачной базой данных MongoDB Realm хотя бы 1
+                  раз.
+                </span>
+              `
+            )}
           </ppp-banner>
           <div class="spacing2"></div>
           <ppp-copyable>
@@ -569,6 +586,9 @@ async function createCloudCredentialsEndpoint({
 
 export class CloudServicesPage extends Page {
   generateCloudCredentialsString() {
+    if (!ppp.keyVault.getKey('mongo-location-url'))
+      return 'Соединитесь с облачной базой MongoDB Realm';
+
     return btoa(
       JSON.stringify({
         s: ppp.keyVault.getKey('service-machine-url'),

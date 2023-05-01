@@ -1,7 +1,7 @@
 import ppp from '../../ppp.js';
 import { TAG } from '../../lib/tag.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { invalidate, validate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import '../button.js';
 import '../text-field.js';
@@ -64,6 +64,15 @@ export class ImportCloudKeysModalPage extends Page {
       await validate(this.cloudCredentialsData);
 
       const { s, u } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
+
+      if (!u.startsWith('https')) {
+        invalidate(ppp.app.toast, {
+          errorMessage:
+            'Компактное представление не содержит адреса URL базы данных.',
+          raiseException: true
+        });
+      }
+
       const { iv, data } = await (
         await fetch(new URL('fetch', s).toString(), {
           cache: 'no-cache',
