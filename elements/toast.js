@@ -56,6 +56,7 @@ import {
   spacing6,
   themeConditional
 } from '../design/design-tokens.js';
+import './progress.js';
 
 export const toastTemplate = html`
   <template>
@@ -257,9 +258,9 @@ export const toastStyles = css`
     bottom: 0;
     left: 0;
     right: 0;
-    height: 6px;
+    height: 4px;
     background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
-    border-radius: 0 0 4px 4px;
+    border-radius: 0 0 2px 2px;
     overflow: hidden;
   }
 

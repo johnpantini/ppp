@@ -37,6 +37,9 @@ export const settings =
 export const expand =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M5.46 8.846l3.444-3.442-1.058-1.058-4.5 4.5 4.5 4.5 1.058-1.057L5.46 8.84zm7.194 4.5v-9h-1.5v9h1.5z" fill-rule="evenodd"/></svg>';
 
+export const importExport =
+  '<svg viewBox="0 0 18 18" preserveAspectRatio="xMidYMid meet"><path fill="currentColor" d="M11 7h3L9 2 4 7h3v5h4V7zm2 6H5V9H3v6h12V9h-2v4z" fill-rule="evenodd"></path></svg>';
+
 export const workspaces =
   '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h6v6H4zm10 0h6l-3 3-3 3V4zM4 14h6l-3 3-3 3v-6z"/><path fill="currentColor" d="M14 14h6v6h-6v-6zm3-7l3-3v6h-6l3-3zM7 17l3-3v6H4l3-3z"/></svg>';
 

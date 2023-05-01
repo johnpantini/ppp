@@ -8,7 +8,8 @@ import {
   observable,
   Observable,
   attr,
-  ref
+  ref,
+  Updates
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
 import { ellipsis, normalize, spacing, typography } from '../design/styles.js';
@@ -367,8 +368,10 @@ class Page extends PPPElement {
     if (!this.hasAttribute('disable-auto-read')) {
       await this.readDocument();
 
-      if (!this.hasAttribute('disable-auto-populate'))
-        return this.populateDocuments();
+      if (!this.lastError) {
+        if (!this.hasAttribute('disable-auto-populate'))
+          return this.populateDocuments();
+      }
     } else {
       this.status = PAGE_STATUS.READY;
     }
@@ -405,7 +408,7 @@ class Page extends PPPElement {
   }
 
   async documentId() {
-     return (
+    return (
       this.getAttribute('document-id') ??
       (await this.getDocumentId?.()) ??
       ppp.app.params()?.document
@@ -610,6 +613,8 @@ class Page extends PPPElement {
   beginOperation() {
     if (!ppp.app) return;
 
+    this.lastError = void 0;
+
     // Do not hide update notifications
     if (ppp.app.toast.appearance !== 'note') {
       ppp.app.toast.setAttribute('hidden', '');
@@ -632,10 +637,25 @@ class Page extends PPPElement {
     ppp.app.toast.removeAttribute('hidden');
   }
 
-  endOperation() {
-    if (!this.lastError) this.status = PAGE_STATUS.OPERATION_ENDED;
+  progressOperation(progress = 0, toastText) {
+    if (!ppp.app) return;
 
-    this.lastError = null;
+    ppp.app.toast.appearance = 'progress';
+
+    Updates.enqueue(() => (ppp.app.toast.progress.value = progress));
+    ppp.app.toast.dismissible = false;
+
+    if (toastText) {
+      ppp.app.toast.text = toastText;
+    }
+
+    ppp.app.toast.removeAttribute('hidden');
+
+    this.status = PAGE_STATUS.OPERATION_STARTED;
+  }
+
+  endOperation() {
+    this.status = PAGE_STATUS.OPERATION_ENDED;
   }
 
   failOperation(e, toastTitle = this.getToastTitle()) {

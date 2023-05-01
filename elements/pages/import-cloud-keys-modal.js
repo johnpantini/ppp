@@ -1,6 +1,6 @@
 import ppp from '../../ppp.js';
 import { TAG } from '../../lib/tag.js';
-import { html, css, ref, Observable } from '../../vendor/fast-element.min.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import '../button.js';
@@ -27,7 +27,9 @@ export const importCloudKeysModalPageTemplate = html`
       <section>
         <div class="label-group">
           <h5>Компактное представление</h5>
-          <p class="description">Формат Base64.</p>
+          <p class="description">
+            Формат Base64. Скопируйте из настроенного ранее приложения.
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field

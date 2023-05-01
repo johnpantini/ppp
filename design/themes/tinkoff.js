@@ -1,14 +1,3 @@
-import {
-  paletteGreenDark1,
-  paletteGreenLight1,
-  paletteGreenLight2,
-  paletteRedDark1,
-  paletteRedLight1,
-  paletteRedLight2,
-  paletteRedLight3,
-  themeConditional
-} from '../design-tokens.js';
-
 export default {
   // Types
   bodyFont:
