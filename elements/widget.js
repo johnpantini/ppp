@@ -2817,6 +2817,12 @@ export const widgetCardStyles = css`
     top: 0;
   }
 
+  :host(.multiline) slot[name='title-left']::slotted(span) {
+    word-break: break-word;
+    white-space: normal;
+    display: inline-block;
+  }
+
   slot[name='indicator']::slotted(div.buy) {
     background: linear-gradient(90deg, ${positive} 50%, transparent 0);
   }
