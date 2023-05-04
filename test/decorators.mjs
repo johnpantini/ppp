@@ -196,7 +196,7 @@ function removeDecorators(source) {
 
         t === 'prop' && (lines[i + 1] = '');
       }
-    } else if (/^export default/.test(line)) {
+    } else if (/(^export default)|(\/\/ export default)/.test(line)) {
       hasDefaultExport = true;
 
       result += placeDecorators(decorators);

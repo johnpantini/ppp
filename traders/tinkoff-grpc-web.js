@@ -885,7 +885,7 @@ class TinkoffGrpcWebTrader extends Trader {
                 const item = filtered[i];
                 const instrument = this.#figis.get(item.figi);
 
-                if (Array.isArray(item.tradesInfo?.trades)) {
+                if (instrument && Array.isArray(item.tradesInfo?.trades)) {
                   for (const trade of item.tradesInfo.trades) {
                     source[field] = {
                       instrument,
@@ -910,7 +910,7 @@ class TinkoffGrpcWebTrader extends Trader {
               const [item] = items;
               const instrument = this.#figis.get(item.figi);
 
-              if (Array.isArray(item.trades)) {
+              if (instrument && Array.isArray(item.trades)) {
                 for (const trade of item.trades) {
                   source[field] = {
                     instrument,

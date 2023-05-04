@@ -4,7 +4,7 @@ import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
-import { maybeFetchError, validate } from '../../lib/ppp-errors.js';
+import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import { toNumber } from '../../traders/tinkoff-grpc-web.js';
 import '../button.js';
 import '../query-select.js';
@@ -549,6 +549,13 @@ export class InstrumentsImportPage extends Page {
 
     try {
       const instruments = await this[this.dictionary.value].call(this);
+
+      if (!instruments.length) {
+        invalidate(ppp.app.toast, {
+          errorMessage: 'Список инструментов для импорта пуст.',
+          raiseException: true
+        });
+      }
 
       await ppp.user.functions.bulkWrite(
         {

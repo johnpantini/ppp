@@ -3,7 +3,7 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 7;
+const OFFLINE_VERSION = 8;
 const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
@@ -70,7 +70,7 @@ function removeDecorators(source) {
 
         t === 'prop' && (lines[i + 1] = '');
       }
-    } else if (/^export default/.test(line)) {
+    } else if (/(^export default)|(\/\/ export default)/.test(line)) {
       hasDefaultExport = true;
 
       result += placeDecorators(decorators);

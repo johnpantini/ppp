@@ -38,6 +38,10 @@ export class Trader {
       }
     );
 
+    if (!instruments.length) {
+      return;
+    }
+
     const cache = await ppp.openInstrumentCache({
       exchange,
       broker
