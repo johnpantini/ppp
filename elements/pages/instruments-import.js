@@ -92,7 +92,7 @@ export const instrumentsImportPageTemplate = html`
                       .find({
                         $and: [
                           {
-                            type: `[%#(await import('../../lib/const.js')).BROKERS.TINKOFF%]`
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.TINKOFF%]`
                           },
                           { removed: { $ne: true } }
                         ]

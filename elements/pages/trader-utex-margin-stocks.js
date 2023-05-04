@@ -52,7 +52,7 @@ export const traderUtexMarginStocksTemplate = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.UTEX%]`
                       },
                       {
                         $or: [
@@ -164,7 +164,7 @@ export class TraderUtexMarginStocksPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.UTEX_MARGIN_STOCKS%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.UTEX_MARGIN_STOCKS%]`
             }
           },
           {

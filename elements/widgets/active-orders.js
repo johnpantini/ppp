@@ -447,7 +447,7 @@ export async function widgetDefinition() {
                   .find({
                     $and: [
                       {
-                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
                       },
                       {
                         $or: [

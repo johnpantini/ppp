@@ -53,7 +53,7 @@ export const traderAlorOpenApiV2Template = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).BROKERS.ALOR%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.ALOR%]`
                       },
                       {
                         $or: [
@@ -245,7 +245,7 @@ export class TraderAlorOpenApiV2Page extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.ALOR_OPENAPI_V2%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.ALOR_OPENAPI_V2%]`
             }
           },
           {

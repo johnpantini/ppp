@@ -96,7 +96,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).APIS.CLOUDFLARE%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.CLOUDFLARE%]`
                       },
                       {
                         $or: [
@@ -392,7 +392,7 @@ export class ServiceCloudflareWorkerPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
             }
           },
           {

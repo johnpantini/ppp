@@ -233,7 +233,7 @@ export class ApiSupabasePage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).APIS.SUPABASE%]`
+          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.SUPABASE%]`
         });
     };
   }

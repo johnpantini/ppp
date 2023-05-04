@@ -52,7 +52,7 @@ export const traderBinanceV3Template = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).BROKERS.BINANCE%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.BINANCE%]`
                       },
                       {
                         $or: [
@@ -240,7 +240,7 @@ export class TraderBinanceV3Page extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.BINANCE_V3%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.BINANCE_V3%]`
             }
           },
           {

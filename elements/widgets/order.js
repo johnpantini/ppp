@@ -1515,8 +1515,8 @@ export async function widgetDefinition() {
                       {
                         caps: {
                           $all: [
-                            `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
-                            `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
+                            `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
+                            `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
                           ]
                         }
                       },
@@ -1564,7 +1564,7 @@ export async function widgetDefinition() {
                   .find({
                     $and: [
                       {
-                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
                       },
                       {
                         $or: [
@@ -1609,7 +1609,7 @@ export async function widgetDefinition() {
                   .find({
                     $and: [
                       {
-                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
                       },
                       {
                         $or: [
@@ -1655,7 +1655,7 @@ export async function widgetDefinition() {
                   .find({
                     $and: [
                       {
-                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
                       },
                       {
                         $or: [
@@ -1703,7 +1703,7 @@ export async function widgetDefinition() {
                   .find({
                     $and: [
                       {
-                        caps: `[%#(await import('../../lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
                       },
                       {
                         $or: [
@@ -1750,7 +1750,7 @@ export async function widgetDefinition() {
                     .find({
                       $and: [
                         {
-                          type: `[%#(await import('../../lib/const.js')).APIS.PUSHER%]`
+                          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
                         },
                         {
                           $or: [

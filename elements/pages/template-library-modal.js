@@ -61,7 +61,7 @@ export const templateLibraryModalPageTemplate = html`
                       .find({
                         $and: [
                           {
-                            type: `[%#(await import('../../lib/const.js')).SERVICES.SUPABASE_PARSER%]`
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.SUPABASE_PARSER%]`
                           },
                           {
                             removed: { $ne: true }

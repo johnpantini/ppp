@@ -61,7 +61,7 @@ export const traderTinkoffGrpcWebTemplate = html`
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import('../../lib/const.js')).BROKERS.TINKOFF%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.TINKOFF%]`
                       },
                       {
                         $or: [
@@ -203,7 +203,7 @@ export class TraderTinkoffGrpcWebPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.TINKOFF_GRPC_WEB%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.TINKOFF_GRPC_WEB%]`
             }
           },
           {

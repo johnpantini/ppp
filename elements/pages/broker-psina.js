@@ -92,7 +92,7 @@ export class BrokerPsinaPage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).BROKERS.PSINA%]`
+          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.PSINA%]`
         });
     };
   }

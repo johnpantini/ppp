@@ -55,10 +55,10 @@ export const traderAlpacaV2PlusTemplate = html`
                       {
                         $or: [
                           {
-                            type: `[%#(await import('../../lib/const.js')).BROKERS.UTEX%]`
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.UTEX%]`
                           },
                           {
-                            type: `[%#(await import('../../lib/const.js')).BROKERS.PSINA%]`
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.PSINA%]`
                           }
                         ]
                       },
@@ -278,7 +278,7 @@ export class TraderAlpacaV2PlusPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import('../../lib/const.js')).TRADERS.ALPACA_V2_PLUS%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.ALPACA_V2_PLUS%]`
             }
           },
           {

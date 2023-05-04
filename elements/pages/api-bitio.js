@@ -121,7 +121,7 @@ export class ApiBitioPage extends Page {
         .collection('[%#this.collection%]')
         .findOne({
           _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import('../../lib/const.js')).APIS.BITIO%]`
+          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.BITIO%]`
         });
     };
   }
