@@ -1,12 +1,13 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import { Page, pageStyles, PageWithService } from '../page.js';
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
-import { stateAppearance } from './services.js';
 import { createWorkerUploadForm } from '../../lib/cloudflare.js';
+import { applyMixins } from '../../vendor/fast-utilities.js';
+import { serviceControlsPartial } from './services.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -54,17 +55,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
           x.document.name
             ? `Сервис - Cloudflare Worker - ${x.document.name}`
             : 'Сервис - Cloudflare Worker'}
-        ${when(
-          (x) => x.document._id,
-          html`
-            <ppp-badge
-              slot="controls"
-              appearance="${(x) => stateAppearance(x.document.state)}"
-            >
-              ${(x) => ppp.t(`$const.serviceState.${x.document.state}`)}
-            </ppp-badge>
-          `
-        )}
+        ${serviceControlsPartial}
       </ppp-page-header>
       <section>
         <div class="label-group">
@@ -160,7 +151,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 ?checked="${(x) => x.document.useVersioning ?? false}"
                 @change="${(x) => {
                   if (!x.useVersioning.checked)
-                    x.versioningUrl.state = 'default';
+                    x.versioningUrl.appearance = 'default';
                 }}"
                 ${ref('useVersioning')}
               >
@@ -188,9 +179,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 <ppp-option value="tradingview">
                   Прокси для ru.tradingview.com
                 </ppp-option>
-                <ppp-option value="thefly">
-                  Прокси для thefly.com
-                </ppp-option>
+                <ppp-option value="thefly"> Прокси для thefly.com</ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
               <ppp-button
@@ -240,6 +229,10 @@ export const serviceCloudflareWorkerPageTemplate = html`
         >
           Сохранить и опубликовать в Cloudflare
         </ppp-button>
+        ${when(
+          (x) => x.document._id,
+          html` <ppp-button disabled appearance="danger">Удалить</ppp-button> `
+        )}
       </footer>
     </form>
   </template>
@@ -251,6 +244,12 @@ export const serviceCloudflareWorkerPageStyles = css`
 
 export class ServiceCloudflareWorkerPage extends Page {
   collection = 'services';
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    return this.checkVersion();
+  }
 
   async fillOutFormWithTemplate() {
     this.beginOperation();
@@ -573,6 +572,8 @@ export class ServiceCloudflareWorkerPage extends Page {
     ];
   }
 }
+
+applyMixins(ServiceCloudflareWorkerPage, PageWithService);
 
 export default ServiceCloudflareWorkerPage.compose({
   template: serviceCloudflareWorkerPageTemplate,

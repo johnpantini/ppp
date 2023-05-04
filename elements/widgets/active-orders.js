@@ -16,7 +16,7 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { validate } from '../../lib/ppp-errors.js';
-import { normalize, scrollbars, spacing } from '../../design/styles.js';
+import { normalize, spacing } from '../../design/styles.js';
 import { cancelOrders, trash } from '../../static/svg/sprite.js';
 import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
 import {
@@ -78,20 +78,20 @@ export const activeOrdersWidgetTemplate = html`
             <span>${html.partial(cancelOrders)}</span>
           </button>
         </div>
-        <div class="order-list">
+        <div class="widget-card-list">
           ${when(
             (x) => x.empty,
             html`${html.partial(
               widgetEmptyStateTemplate('Активных заявок нет.')
             )}`
           )}
-          <div class="order-list-inner">
+          <div class="widget-card-list-inner">
             ${repeat(
               (x) => x.orders,
               html`
                 <div class="widget-card-holder">
                   <div class="widget-card-holder-inner">
-                    <ppp-widget-card clickable side="${(x) => x.side}">
+                    <ppp-widget-card side="${(x) => x.side}">
                       <div slot="indicator" class="${(x) => x.side}"></div>
                       <div
                         slot="icon"
@@ -153,7 +153,6 @@ export const activeOrdersWidgetTemplate = html`
 export const activeOrdersWidgetStyles = css`
   ${normalize()}
   ${widget()}
-  ${scrollbars('.order-list')}
   ${spacing()}
   .controls {
     z-index: 1;
@@ -204,20 +203,6 @@ export const activeOrdersWidgetStyles = css`
   .cancel-orders span svg {
     width: 16px;
     height: 16px;
-  }
-
-  .order-list {
-    height: 100%;
-    width: 100%;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  .order-list-inner {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
   }
 
   .dot-divider {

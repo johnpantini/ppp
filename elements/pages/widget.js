@@ -63,6 +63,7 @@ import '../select.js';
 import '../text-field.js';
 import '../top-loader.js';
 import '../widget.js';
+import '../pages/template-library-modal.js';
 
 export const widgetTypeRadioGroupStyles = css`
   ${normalize()}
@@ -182,6 +183,18 @@ export const widgetPageTemplate = html`
           <span slot="start">${html.partial(arrowLeft)}</span>
         </ppp-button>
       </ppp-page-header>
+      <ppp-modal
+        ${ref('templateLibraryModal')}
+        class="large"
+        hidden
+        dismissible
+      >
+        <span slot="title">Библиотека шаблонов</span>
+        <ppp-template-library-modal-page
+          ${ref('templateLibraryModalPage')}
+          slot="body"
+        ></ppp-template-library-modal-page>
+      </ppp-modal>
       <div class="content">
         <nav>
           <div class="nav-inner">
@@ -365,8 +378,8 @@ export const widgetPageTemplate = html`
                                 <p class="description">
                                   Ссылка на реализацию виджета. Нельзя изменить
                                   после создания. Можно воспользоваться
-                                  выпадающим списком ниже, чтобы использовать
-                                  готовую ссылку.
+                                  выпадающим списком, чтобы использовать готовую
+                                  ссылку (только при создании виджета).
                                 </p>
                               </div>
                               <div class="widget-settings-input-group">
@@ -378,24 +391,41 @@ export const widgetPageTemplate = html`
                                   ${ref('url')}
                                 ></ppp-text-field>
                               </div>
-                              <div class="control-stack">
-                                <ppp-select
-                                  ${ref('predefinedWidgetUrl')}
-                                  deselectable
-                                  placeholder="Выберите готовую ссылку"
-                                  @change="${(x) => {
-                                    switch (x.predefinedWidgetUrl.value) {
-                                      case 'simple-frame-widget':
-                                        x.url.value =
-                                          'https://psina.pages.dev/widgets/simple-frame-widget.js';
-                                    }
-                                  }}"
-                                >
-                                  <ppp-option value="simple-frame-widget">
-                                    Фрейм (Psina)
-                                  </ppp-option>
-                                </ppp-select>
-                              </div>
+                              ${when(
+                                (x) => !x.document._id,
+                                html`
+                                  <div class="control-stack">
+                                    <ppp-select
+                                      ${ref('predefinedWidgetUrl')}
+                                      deselectable
+                                      placeholder="Выберите готовую ссылку"
+                                      @change="${(x) => {
+                                        switch (x.predefinedWidgetUrl.value) {
+                                          case 'simple-frame-widget':
+                                            x.url.value =
+                                              'https://psina.pages.dev/widgets/simple-frame-widget.js';
+
+                                            break;
+                                          case 'pusher-subscription-widget':
+                                            x.url.value =
+                                              'https://psina.pages.dev/widgets/pusher-subscription-widget.js';
+
+                                            break;
+                                        }
+                                      }}"
+                                    >
+                                      <ppp-option value="simple-frame-widget">
+                                        Фрейм (Psina)
+                                      </ppp-option>
+                                      <ppp-option
+                                        value="pusher-subscription-widget"
+                                      >
+                                        Сообщения Pusher (Psina)
+                                      </ppp-option>
+                                    </ppp-select>
+                                  </div>
+                                `
+                              )}
                             </div>
                           `
                         )}
@@ -1136,7 +1166,7 @@ export class WidgetPage extends Page {
     return true;
   }
 
-  async applyModifications({ silent }) {
+  async applyModifications({ silent } = {}) {
     if (!silent) this.beginOperation();
 
     await this.onChangeDelayedAsync();

@@ -6,14 +6,17 @@ import { applyMixins } from '../../vendor/fast-utilities.js';
 import { hotkey } from '../../design/styles.js';
 import { SERVICE_STATE, SERVICES, VERSIONING_STATUS } from '../../lib/const.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
+import { cloud } from '../../static/svg/sprite.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
 
 await ppp.i18n(import.meta.url);
 
-export function stateAppearance(state) {
-  switch (state) {
+export function stateAppearance(document) {
+  if (document.removed) return 'lightgray';
+
+  switch (document.state) {
     case SERVICE_STATE.ACTIVE:
       return 'green';
     case SERVICE_STATE.STOPPED:
@@ -24,6 +27,60 @@ export function stateAppearance(state) {
 
   return 'lightgray';
 }
+
+export const serviceControlsPartial = html`
+  ${when(
+    (x) => x.document._id,
+    html`
+      <ppp-badge
+        slot="controls"
+        appearance="${(x) => stateAppearance(x.document)}"
+      >
+        ${(x) =>
+          x.document.removed
+            ? 'Удалён'
+            : ppp.t(`$const.serviceState.${x.document.state}`)}
+      </ppp-badge>
+      <ppp-badge
+        slot="controls"
+        appearance="${(x) => {
+          const vs = x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK;
+
+          if (vs === VERSIONING_STATUS.OK) return 'green';
+          else if (vs === VERSIONING_STATUS.OLD) {
+            return 'yellow';
+          } else if (vs === VERSIONING_STATUS.OFF) {
+            return 'blue';
+          }
+        }}"
+      >
+        ${(x) =>
+          ppp.t(
+            `$const.versioningStatus.${
+              x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK
+            }`
+          )}
+      </ppp-badge>
+      ${when(
+        (x) =>
+          typeof x.updateService === 'function' &&
+          (x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK) ===
+            VERSIONING_STATUS.OLD,
+        html`
+          <ppp-button
+            ?disabled="${(x) => !x.isSteady()}"
+            slot="controls"
+            appearance="primary"
+            @click="${(x) => x.updateService?.()}"
+          >
+            Обновить
+            <span slot="start">${html.partial(cloud)}</span>
+          </ppp-button>
+        `
+      )}
+    `
+  )}
+`.inline();
 
 export const servicesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -126,10 +183,10 @@ export const servicesPageTemplate = html`
                   </ppp-badge>
                 `,
                 html`
-                  <ppp-badge
-                    appearance="${stateAppearance(datum.state ?? 'N/A')}"
-                  >
-                    ${ppp.t(`$const.serviceState.${datum.state ?? 'N/A'}`)}
+                  <ppp-badge appearance="${stateAppearance(datum)}">
+                    ${datum.removed
+                      ? 'Удалён'
+                      : ppp.t(`$const.serviceState.${datum.state ?? 'N/A'}`)}
                   </ppp-badge>
                 `,
                 html`

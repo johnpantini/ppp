@@ -21,7 +21,7 @@ import {
   formatDateWithOptions,
   formatPrice
 } from '../../lib/intl.js';
-import { normalize, scrollbars } from '../../design/styles.js';
+import { normalize } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
   fontSizeWidget,
@@ -52,14 +52,14 @@ export const timelineWidgetTemplate = html`
         </div>
       </div>
       <div class="widget-body">
-        <div class="timeline-list">
+        <div class="widget-card-list">
           ${when(
             (x) => x.empty,
             html`${html.partial(
               widgetEmptyStateTemplate('Нет операций для отображения.')
             )}`
           )}
-          <div class="timeline-list-inner">
+          <div class="widget-card-list-inner">
             ${repeat(
               (x) => x.timeline,
               html`
@@ -90,11 +90,6 @@ export const timelineWidgetTemplate = html`
                           ></div>
                           <span slot="icon-fallback">
                             ${(x, c) => c.parent.getLogoFallback(x)}
-                          </span>
-                          <span slot="icon-fallback">
-                            ${(o) =>
-                              o.instrument?.fullName?.[0] ??
-                              o.instrument?.symbol[0]}
                           </span>
                           <span slot="title-left">
                             ${(x, c) => c.parent.formatCardTitle(x)}
@@ -140,21 +135,6 @@ export const timelineWidgetTemplate = html`
 export const timelineWidgetStyles = css`
   ${normalize()}
   ${widget()}
-  ${scrollbars('.timeline-list')}
-  .timeline-list {
-    height: 100%;
-    width: 100%;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  .timeline-list-inner {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-  }
-
   .timeline-item-headline {
     width: 100%;
     margin: 0 8px;

@@ -33,7 +33,7 @@ import {
   getInstrumentQuantityPrecision
 } from '../../lib/intl.js';
 import { ellipsis, normalize, spacing } from '../../design/styles.js';
-import { decrement, increment, plus } from '../../static/svg/sprite.js';
+import { decrement, increment } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteBlack,

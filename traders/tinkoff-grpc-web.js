@@ -22,6 +22,7 @@ import {
   OrderDirection,
   OrderExecutionReportStatus,
   OrdersServiceDefinition,
+  OrdersStreamServiceDefinition,
   OrderType,
   PriceType
 } from '../vendor/tinkoff/definitions/orders.js';
@@ -85,6 +86,8 @@ class TinkoffGrpcWebTrader extends Trader {
   #portfolioAbortController;
 
   #positionsAbortController;
+
+  #tradesAbortController;
 
   // Key: figi ; Value: instrument object
   #figis = new Map();
@@ -390,6 +393,11 @@ class TinkoffGrpcWebTrader extends Trader {
     return this.#resubscribeToPositionsStream(reconnect);
   }
 
+  @debounce(100)
+  resubscribeToTradesStream(reconnect = false) {
+    return this.#resubscribeToTradesStream(reconnect);
+  }
+
   async #resubscribeToMarketDataStream(reconnect = false) {
     if (
       !this.refs.orderbook.size &&
@@ -540,10 +548,6 @@ class TinkoffGrpcWebTrader extends Trader {
       return;
     }
 
-    const portfolioServerSideStreamRequest = {
-      accounts: [this.document.account]
-    };
-
     const client = createClient(
       OperationsStreamServiceDefinition,
       createChannel('https://invest-public-api.tinkoff.ru:443'),
@@ -558,9 +562,14 @@ class TinkoffGrpcWebTrader extends Trader {
 
     this.#portfolioAbortController = new AbortController();
 
-    const stream = client.portfolioStream(portfolioServerSideStreamRequest, {
-      signal: this.#portfolioAbortController?.signal
-    });
+    const stream = client.portfolioStream(
+      {
+        accounts: [this.document.account]
+      },
+      {
+        signal: this.#portfolioAbortController?.signal
+      }
+    );
 
     try {
       if (reconnect) {
@@ -596,10 +605,6 @@ class TinkoffGrpcWebTrader extends Trader {
       return;
     }
 
-    const positionsServerSideStreamRequest = {
-      accounts: [this.document.account]
-    };
-
     const client = createClient(
       OperationsStreamServiceDefinition,
       createChannel('https://invest-public-api.tinkoff.ru:443'),
@@ -614,9 +619,14 @@ class TinkoffGrpcWebTrader extends Trader {
 
     this.#positionsAbortController = new AbortController();
 
-    const stream = client.positionsStream(positionsServerSideStreamRequest, {
-      signal: this.#positionsAbortController?.signal
-    });
+    const stream = client.positionsStream(
+      {
+        accounts: [this.document.account]
+      },
+      {
+        signal: this.#positionsAbortController?.signal
+      }
+    );
 
     try {
       if (reconnect) {
@@ -656,6 +666,56 @@ class TinkoffGrpcWebTrader extends Trader {
 
         setTimeout(() => {
           this.resubscribeToPositionsStream(true);
+        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+      }
+    }
+  }
+
+  async #resubscribeToTradesStream() {
+    if (!this.refs.timeline.size) {
+      return;
+    }
+
+    const client = createClient(
+      OrdersStreamServiceDefinition,
+      createChannel('https://invest-public-api.tinkoff.ru:443'),
+      {
+        '*': {
+          metadata: this.#metadata
+        }
+      }
+    );
+
+    this.#tradesAbortController?.abort?.();
+
+    this.#tradesAbortController = new AbortController();
+
+    const stream = client.tradesStream(
+      {
+        accounts: [this.document.account]
+      },
+      {
+        signal: this.#tradesAbortController?.signal
+      }
+    );
+
+    try {
+      for await (const data of stream) {
+        if (data.orderTrades) {
+          this.onTimelineMessage({
+            items: [data.orderTrades],
+            fromHistory: false
+          });
+        }
+      }
+
+      this.resubscribeToTradesStream(true);
+    } catch (e) {
+      if (!isAbortError(e)) {
+        console.error(e);
+
+        setTimeout(() => {
+          this.resubscribeToTradesStream(true);
         }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
       }
     }
@@ -765,6 +825,10 @@ class TinkoffGrpcWebTrader extends Trader {
       this.resubscribeToPositionsStream();
     }
 
+    if (refs === this.refs.timeline) {
+      this.resubscribeToTradesStream();
+    }
+
     if (refs === this.refs.orders) {
       void this.#fetchOrdersLoop();
     }
@@ -839,6 +903,30 @@ class TinkoffGrpcWebTrader extends Trader {
                       parentCreatedAt: item.date.toISOString()
                     };
                   }
+                }
+              }
+            } else {
+              // Real-time item from TradesStream
+              const [item] = items;
+              const instrument = this.#figis.get(item.figi);
+
+              if (Array.isArray(item.trades)) {
+                for (const trade of item.trades) {
+                  source[field] = {
+                    instrument,
+                    operationId: trade.tradeId,
+                    parentId: item.orderId,
+                    symbol: instrument.symbol,
+                    type:
+                      item.direction === OrderDirection.ORDER_DIRECTION_BUY
+                        ? OperationType.OPERATION_TYPE_BUY
+                        : OperationType.OPERATION_TYPE_SELL,
+                    exchange: instrument.exchange,
+                    quantity: trade.quantity / instrument.lot,
+                    price: toNumber(trade.price) * instrument.lot,
+                    createdAt: trade.dateTime.toISOString(),
+                    parentCreatedAt: item.createdAt.toISOString()
+                  };
                 }
               }
             }
@@ -1399,6 +1487,10 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   getInstrumentIconUrl(instrument) {
+    if (!instrument) {
+      return 'static/instruments/unknown.svg';
+    }
+
     let symbol = instrument?.symbol;
 
     if (typeof symbol === 'string') {

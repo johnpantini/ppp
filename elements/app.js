@@ -9,7 +9,8 @@ import {
   observable,
   attr,
   when,
-  repeat
+  repeat,
+  Observable
 } from '../vendor/fast-element.min.js';
 import {
   bodyFont,
@@ -604,6 +605,22 @@ export class App extends PPPElement {
 
   connectedCallback() {
     super.connectedCallback();
+
+    const that = this;
+
+    Observable.getNotifier(this.mountPointModal).subscribe(
+      {
+        handleChange(mountPointModal) {
+          if (mountPointModal.hasAttribute('hidden')) {
+            const mountPoint = that.mountPoint;
+
+            mountPoint.firstChild &&
+              mountPoint.removeChild(mountPoint.firstChild);
+          }
+        }
+      },
+      'hidden'
+    );
 
     this.extension = this.params()?.extension;
 

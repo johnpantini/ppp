@@ -59,6 +59,7 @@ import {
   paletteRedBase,
   paletteRedLight3,
   paletteWhite,
+  paletteYellowLight3,
   positive,
   sell,
   sellHover,
@@ -387,6 +388,22 @@ export const widget = () => css`
   .widget-footer {
     padding: 8px 0;
     position: relative;
+  }
+
+  .widget-card-list {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  ${scrollbars('.widget-card-list')};
+
+  .widget-card-list-inner {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
   }
 
   .widget-card-holder {
@@ -2758,6 +2775,15 @@ export const widgetCardStyles = css`
   }
 
   :host(.new) .card {
+    background-color: rgba(${toColorComponents(paletteBlueBase)}, 0.3);
+  }
+
+  :host([clickable]) .card {
+    cursor: pointer;
+  }
+
+  :host([clickable]) .card:hover {
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 
   :host(.positive) .card {
@@ -2772,13 +2798,6 @@ export const widgetCardStyles = css`
       ${toColorComponents(sell)},
       ${ppp.darkMode ? 0.4 : 0.3}
     );
-  }
-
-  :host([clickable]) .card {
-    cursor: pointer;
-  }
-
-  :host([clickable]) .card:hover {
   }
 
   :host(:first-child) {

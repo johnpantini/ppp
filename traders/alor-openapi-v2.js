@@ -1253,6 +1253,10 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   getInstrumentIconUrl(instrument) {
+    if (!instrument) {
+      return 'static/instruments/unknown.svg';
+    }
+
     let symbol = instrument?.symbol;
 
     if (typeof symbol === 'string') {
@@ -1280,9 +1284,9 @@ class AlorOpenAPIV2Trader extends Trader {
     if (!isRM) {
       if (
         instrument?.exchange === EXCHANGE.MOEX ||
-        instrument.currency === 'RUB'
+        instrument?.currency === 'RUB'
       ) {
-        return `static/instruments/${instrument.type}s/rus/${symbol.replace(
+        return `static/instruments/${instrument?.type}s/rus/${symbol.replace(
           ' ',
           '-'
         )}.svg`;

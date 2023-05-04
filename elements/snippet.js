@@ -47,7 +47,12 @@ import {
   themeConditional,
   toColorComponents
 } from '../design/design-tokens.js';
-import { checkmarkWithCircle, copy } from '../static/svg/sprite.js';
+import {
+  checkmarkWithCircle,
+  copy,
+  library,
+  revert
+} from '../static/svg/sprite.js';
 
 const entityMap = {
   '&': '&amp;',
@@ -100,6 +105,40 @@ export const snippetTemplate = html`
             ${when((x) => !x.copied, html`${html.partial(copy)}`)}
           </span>
         </button>
+        ${when(
+          (x) => x.revertable,
+          html`
+            <button
+              class="revert"
+              title="Восстановить значение по умолчанию"
+              @click="${(x) => x.revert()}"
+            >
+              <span class="icon">
+                ${when(
+                  (x) => x.reverted,
+                  html`${html.partial(checkmarkWithCircle)}`
+                )}
+                ${when((x) => !x.reverted, html`${html.partial(revert)}`)}
+              </span>
+            </button>
+          `
+        )}
+        ${when(
+          (x) => x.wizard,
+          html`
+            <button
+              class="wizard"
+              title="Воспользоваться библиотекой шаблонов"
+              @click="${(x) => {
+                x.$emit('wizard', {
+                  snippet: x
+                });
+              }}"
+            >
+              <span class="icon"> ${html.partial(library)} </span>
+            </button>
+          `
+        )}
       </div>
     </div>
     ${when(
@@ -202,7 +241,11 @@ export const snippetStyles = css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight2)};
   }
 
-  :host([copied]) .panel button span svg {
+  :host([copied]) .panel button.copy span svg {
+    color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
+  }
+
+  :host([reverted]) .panel button.revert span svg {
     color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }
 
@@ -381,19 +424,40 @@ export class Snippet extends PPPAppearanceElement {
   @observable
   errorMessage;
 
-  #timeout;
+  #copyTimeout;
+
+  #revertTimeout;
 
   @attr({ mode: 'boolean' })
   copied;
+
+  @attr({ mode: 'boolean' })
+  reverted;
+
+  @attr({ mode: 'boolean' })
+  revertable;
+
+  @attr({ mode: 'boolean' })
+  wizard;
 
   async copy() {
     await navigator.clipboard.writeText(this.value);
 
     this.copied = true;
 
-    clearTimeout(this.#timeout);
+    clearTimeout(this.#copyTimeout);
 
-    this.#timeout = setTimeout(() => (this.copied = false), 2000);
+    this.#copyTimeout = setTimeout(() => (this.copied = false), 2000);
+  }
+
+  async revert() {
+    this.$emit('revert');
+
+    this.reverted = true;
+
+    clearTimeout(this.#revertTimeout);
+
+    this.#revertTimeout = setTimeout(() => (this.reverted = false), 2000);
   }
 
   onInput(c) {

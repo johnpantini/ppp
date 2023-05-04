@@ -24,15 +24,17 @@ import {
   spacing4,
   spacing3
 } from '../design/design-tokens.js';
-import { PAGE_STATUS } from '../lib/const.js';
+import { PAGE_STATUS, VERSIONING_STATUS } from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
 import {
   ConflictError,
   DocumentNotFoundError,
-  invalidate
+  invalidate,
+  maybeFetchError
 } from '../lib/ppp-errors.js';
 import './toast.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
+import { parsePPPScript } from '../lib/ppp-script.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -64,6 +66,7 @@ await ppp.i18n(import.meta.url);
       }
 
       .title {
+        max-width: 70%;
         color: ${themeConditional(paletteBlack, paletteGrayLight2)};
         margin-right: 10px;
         ${ellipsis()};
@@ -946,4 +949,67 @@ class PageWithShiftLock {
   }
 }
 
-export { Page, PageWithShiftLock };
+/**
+ * @mixin
+ */
+class PageWithService {
+  @observable
+  actualVersion;
+
+  getVersioningStatus() {
+    return this.document.useVersioning
+      ? this.document.version < this.actualVersion
+        ? VERSIONING_STATUS.OLD
+        : VERSIONING_STATUS.OK
+      : VERSIONING_STATUS.OFF;
+  }
+
+  async checkVersion() {
+    if (this.document.useVersioning) {
+      const versioningUrl = this.document.versioningUrl.trim();
+
+      if (versioningUrl) {
+        const fcRequest = await fetch(
+          ppp.getWorkerTemplateFullUrl(versioningUrl).toString(),
+          {
+            cache: 'reload'
+          }
+        );
+
+        await maybeFetchError(
+          fcRequest,
+          'Не удалось отследить версию сервиса.'
+        );
+
+        const parsed = parsePPPScript(await fcRequest.text());
+
+        if (!parsed || !Array.isArray(parsed.meta?.version)) {
+          invalidate(this.versioningUrl, {
+            errorMessage: 'Не удалось прочитать версию',
+            raiseException: true
+          });
+        }
+
+        const [version] = parsed.meta?.version;
+
+        this.actualVersion = Math.abs(parseInt(version) || 1);
+
+        if (typeof this.actualVersion !== 'number') this.actualVersion = 1;
+      } else {
+        this.actualVersion = 1;
+      }
+    } else {
+      this.actualVersion = 1;
+    }
+  }
+
+  async updateService() {}
+
+  async restartService() {}
+
+  async stopService() {}
+
+  async cleanupService() {}
+}
+
+export { Page, PageWithShiftLock, PageWithService };
