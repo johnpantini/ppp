@@ -683,8 +683,8 @@ export class WidgetWithInstrument extends Widget {
             w.isolated = true;
 
             if (
-              this.groupControl.selection &&
-              w.groupControl.selection === this.groupControl.selection
+              this.groupControl?.selection &&
+              w.groupControl?.selection === this.groupControl?.selection
             ) {
               if (typeof w.instrumentTrader !== 'undefined') {
                 const adoptedInstrument = w.instrumentTrader.adoptInstrument(
@@ -748,7 +748,7 @@ export class WidgetWithInstrument extends Widget {
         (w) =>
           w !== this.widget &&
           typeof w.setPrice === 'function' &&
-          w?.groupControl.selection === this.groupControl.selection &&
+          w?.groupControl?.selection === this.groupControl?.selection &&
           w.instrument
       );
 
