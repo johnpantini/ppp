@@ -533,7 +533,8 @@ class PPP {
 
   async openInstrumentCache({ exchange, broker }) {
     let version = 1;
-    const [database] = await indexedDB.databases();
+    const databases = await indexedDB.databases();
+    const database = databases.find((db) => db.name === 'ppp');
 
     if (database) {
       version = database.version;
