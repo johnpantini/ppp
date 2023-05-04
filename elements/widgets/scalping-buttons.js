@@ -17,6 +17,7 @@ import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
 import { scrollbars } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
+import { later } from '../../lib/ppp-decorators.js';
 import '../button.js';
 import '../query-select.js';
 import '../snippet.js';
