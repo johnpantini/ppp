@@ -557,31 +557,40 @@ export class InstrumentsImportPage extends Page {
         });
       }
 
-      await ppp.user.functions.bulkWrite(
-        {
-          collection: 'instruments'
-        },
-        instruments.map((i) => {
-          const updateClause = {
-            $set: i
-          };
+      // Fix execution timeout errors
+      const chunks = [];
 
-          return {
-            updateOne: {
-              filter: {
-                symbol: i.symbol.toUpperCase(),
-                exchange: i.exchange,
-                broker: i.broker
-              },
-              update: updateClause,
-              upsert: true
-            }
-          };
-        }),
-        {
-          ordered: false
-        }
-      );
+      for (let i = 0; i < instruments.length; i += 2000) {
+        chunks.push(instruments.slice(i, i + 2000));
+      }
+
+      for (const chunk of chunks) {
+        await ppp.user.functions.bulkWrite(
+          {
+            collection: 'instruments'
+          },
+          chunk.map((i) => {
+            const updateClause = {
+              $set: i
+            };
+
+            return {
+              updateOne: {
+                filter: {
+                  symbol: i.symbol.toUpperCase(),
+                  exchange: i.exchange,
+                  broker: i.broker
+                },
+                update: updateClause,
+                upsert: true
+              }
+            };
+          }),
+          {
+            ordered: false
+          }
+        );
+      }
 
       let exchange;
       let exchangeForDBRequest;
