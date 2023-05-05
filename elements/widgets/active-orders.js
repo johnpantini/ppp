@@ -287,7 +287,8 @@ export const activeOrdersWidgetStyles = css`
   .cancel-sell-orders span,
   .cancel-buy-orders span,
   .cancel-orders span {
-    margin: -2px -8px;
+    width: 16px;
+    height: 16px;
     display: inline-block;
     flex: 0 0 auto;
     vertical-align: text-bottom;
@@ -638,12 +639,6 @@ export async function widgetDefinition() {
           Показывать кнопку «Переставить все заявки»
         </ppp-checkbox>
         <ppp-checkbox
-          ?checked="${(x) => x.document.showCancelAllOrdersButton ?? true}"
-          ${ref('showCancelAllOrdersButton')}
-        >
-          Показывать кнопку «Отменить все заявки»
-        </ppp-checkbox>
-        <ppp-checkbox
           ?checked="${(x) => x.document.showCancelAllBuyOrdersButton ?? false}"
           ${ref('showCancelAllBuyOrdersButton')}
         >
@@ -654,6 +649,12 @@ export async function widgetDefinition() {
           ${ref('showCancelAllSellOrdersButton')}
         >
           Показывать кнопку «Отменить все заявки на продажу»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showCancelAllOrdersButton ?? true}"
+          ${ref('showCancelAllOrdersButton')}
+        >
+          Показывать кнопку «Отменить все заявки»
         </ppp-checkbox>
       </div>
     `
