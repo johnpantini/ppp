@@ -49,7 +49,8 @@ import {
   paletteGrayLight3,
   darken,
   positive,
-  negative
+  negative,
+  spacing2
 } from '../../design/design-tokens.js';
 import { validate } from '../../lib/ppp-errors.js';
 import '../button.js';
@@ -59,6 +60,45 @@ import '../text-field.js';
 
 const decSeparator = decimalSeparator();
 
+const level1TraderCondition = function ({ instrument }) {
+  if (instrument?.currency === 'USD' || instrument?.currency === 'USDT') {
+    const exchanges = [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS];
+
+    if (
+      exchanges.indexOf(instrument.exchange) > -1 &&
+      exchanges.indexOf(this.document.exchange) > -1
+    ) {
+      return true;
+    }
+  }
+
+  return !(
+    this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
+    instrument?.exchange !== this.document.exchange
+  );
+};
+
+const showLastPriceInHeaderHidden = (x) =>
+  typeof x.document.showLastPriceInHeader === 'undefined'
+    ? false
+    : !x.document.showLastPriceInHeader;
+const showAbsoluteChangeInHeaderHidden = (x) =>
+  typeof x.document.showAbsoluteChangeInHeader === 'undefined'
+    ? false
+    : !x.document.showAbsoluteChangeInHeader;
+const showRelativeChangeInHeaderHidden = (x) =>
+  typeof x.document.showRelativeChangeInHeader === 'undefined'
+    ? false
+    : !x.document.showRelativeChangeInHeader;
+const showBestBidAndAskHidden = (x) =>
+  typeof x.document.showBestBidAndAsk === 'undefined'
+    ? false
+    : !x.document.showBestBidAndAsk;
+const showEstimateSectionHidden = (x) =>
+  typeof x.document.showEstimateSection === 'undefined'
+    ? false
+    : !x.document.showEstimateSection;
+
 export const orderWidgetTemplate = html`
   <template>
     <div class="widget-root">
@@ -67,22 +107,29 @@ export const orderWidgetTemplate = html`
           <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
           <span class="widget-title">
-            ${when(
-              (x) => !x.instrument,
-              html`
-                <span class="title">${(x) => x.document?.name ?? ''}</span>
-              `
-            )}
+            <span
+              ?hidden="${(x) =>
+                !(
+                  showLastPriceInHeaderHidden(x) &&
+                  showAbsoluteChangeInHeaderHidden(x) &&
+                  showRelativeChangeInHeaderHidden(x)
+                )}"
+              class="title"
+            >
+              ${(x) => x.document?.name ?? ''}
+            </span>
             ${when(
               (x) => x.instrument,
               html`
                 <span
+                  ?hidden="${(x) => showLastPriceInHeaderHidden(x)}"
                   class="price ${(x) =>
                     x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
                 >
                   ${(x) => x.formatPrice(x.lastPrice)}
                 </span>
                 <span
+                  ?hidden="${(x) => showAbsoluteChangeInHeaderHidden(x)}"
                   class="${(x) =>
                     x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
                 >
@@ -93,6 +140,7 @@ export const orderWidgetTemplate = html`
                     )}
                 </span>
                 <span
+                  ?hidden="${(x) => showRelativeChangeInHeaderHidden(x)}"
                   class="${(x) =>
                     x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
                 >
@@ -128,6 +176,10 @@ export const orderWidgetTemplate = html`
             x.ordersTrader.supportsInstrument(x.instrument),
           html`
             <ppp-widget-tabs
+              ?hidden="${(x) =>
+                typeof x.document.showOrderTypeTabs === 'undefined'
+                  ? false
+                  : !x.document.showOrderTypeTabs}"
               activeid="${(x) => x.getActiveWidgetTab()}"
               @change="${(x, c) => x.handleWidgetTabChange(c)}"
               ${ref('orderTypeTabs')}
@@ -171,7 +223,10 @@ export const orderWidgetTemplate = html`
                   </span>
                 </div>
               </div>
-              <div class="nbbo-line">
+              <div
+                ?hidden="${(x) => showBestBidAndAskHidden(x)}"
+                class="nbbo-line"
+              >
                 <div
                   class="nbbo-line-bid"
                   @click="${(x) => x.setPrice(x.bestBid)}"
@@ -200,10 +255,19 @@ export const orderWidgetTemplate = html`
                   Ask ${(x) => x.formatPrice(x.bestAsk)}
                 </div>
               </div>
+              ${when(
+                (x) => showBestBidAndAskHidden(x),
+                html` <div class="widget-margin-spacer"></div>`
+              )}
               <div class="widget-section">
                 <div class="widget-subsection">
                   <div class="widget-subsection-item">
-                    <div class="widget-text-label">Цена исполнения</div>
+                    <div
+                      ?hidden="${(x) => showBestBidAndAskHidden(x)}"
+                      class="widget-text-label"
+                    >
+                      Цена исполнения
+                    </div>
                     <div class="widget-flex-line">
                       <ppp-widget-text-field
                         type="text"
@@ -229,7 +293,7 @@ export const orderWidgetTemplate = html`
                           )}"
                         ${ref('price')}
                       >
-                        <span slot="end">
+                        <span slot="end" style="pointer-events: none">
                           ${(x) => priceCurrencySymbol(x.instrument)}
                         </span>
                       </ppp-widget-text-field>
@@ -255,7 +319,12 @@ export const orderWidgetTemplate = html`
                     </div>
                   </div>
                   <div class="widget-subsection-item">
-                    <div class="widget-text-label">Количество</div>
+                    <div
+                      ?hidden="${(x) => showBestBidAndAskHidden(x)}"
+                      class="widget-text-label"
+                    >
+                      Количество
+                    </div>
                     <div class="widget-flex-line">
                       <ppp-widget-text-field
                         type="number"
@@ -273,7 +342,7 @@ export const orderWidgetTemplate = html`
                         value="${(x) => x.document?.lastQuantity ?? ''}"
                         ${ref('quantity')}
                       >
-                        <span slot="end">
+                        <span slot="end" style="pointer-events: none">
                           ${(x) =>
                             x.instrument?.lot ? '×' + x.instrument.lot : ''}
                         </span>
@@ -327,7 +396,13 @@ export const orderWidgetTemplate = html`
                   <div class="widget-margin-spacer"></div>
                 `
               )}
-              <div class="widget-section">
+              <div
+                ?hidden="${(x) =>
+                  typeof x.document.showAmountSection === 'undefined'
+                    ? false
+                    : !x.document.showAmountSection}"
+                class="widget-section"
+              >
                 <div class="widget-summary">
                   <div class="widget-summary-line">
                     <span>Стоимость</span>
@@ -355,7 +430,10 @@ export const orderWidgetTemplate = html`
               </div>
             </div>
             <div class="widget-footer">
-              <div class="widget-section">
+              <div
+                ?hidden="${(x) => showEstimateSectionHidden(x)}"
+                class="widget-section"
+              >
                 <div class="widget-subsection">
                   <div class="widget-summary">
                     <div
@@ -415,7 +493,10 @@ export const orderWidgetTemplate = html`
                   </div>
                 </div>
               </div>
-              <div class="widget-section-spacer"></div>
+              <div
+                ?hidden="${(x) => showEstimateSectionHidden(x)}"
+                class="widget-section-spacer"
+              ></div>
               <div class="widget-section">
                 <div class="widget-subsection">
                   <ppp-widget-button
@@ -477,6 +558,7 @@ export const orderWidgetStyles = css`
   .company-name {
     font-weight: bold;
     max-width: 70%;
+    padding-right: ${spacing2};
     ${ellipsis()};
   }
 
@@ -616,6 +698,10 @@ export const orderWidgetStyles = css`
     margin-right: 2px;
     pointer-events: none;
   }
+
+  .widget-flex-line ppp-widget-text-field {
+    width: 100%;
+  }
 `;
 
 export class OrderWidget extends WidgetWithInstrument {
@@ -728,13 +814,7 @@ export class OrderWidget extends WidgetWithInstrument {
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
         },
-        condition: function ({ instrument }) {
-          // Example: SBER
-          return !(
-            this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
-            instrument?.exchange !== this.document.exchange
-          );
-        }
+        condition: level1TraderCondition
       });
 
       if (this.extraLevel1Trader) {
@@ -747,12 +827,7 @@ export class OrderWidget extends WidgetWithInstrument {
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
           },
-          condition: function ({ instrument }) {
-            return !(
-              this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
-              instrument?.exchange !== this.document.exchange
-            );
-          }
+          condition: level1TraderCondition
         });
       }
 
@@ -766,12 +841,7 @@ export class OrderWidget extends WidgetWithInstrument {
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
           },
-          condition: function ({ instrument }) {
-            return !(
-              this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
-              instrument?.exchange !== this.document.exchange
-            );
-          }
+          condition: level1TraderCondition
         });
       }
 
@@ -899,40 +969,6 @@ export class OrderWidget extends WidgetWithInstrument {
     }
 
     this.calculateEstimate();
-  }
-
-  async validate() {
-    await validate(this.container.ordersTraderId);
-    await validate(this.container.level1TraderId);
-    await validate(this.container.positionTraderId);
-
-    if (this.container.buyShortcut.value && this.container.sellShortcut.value) {
-      await validate(this.container.sellShortcut, {
-        hook: async () =>
-          this.container.buyShortcut.value !==
-          this.container.sellShortcut.value,
-        errorMessage: 'Горячие клавиши должны различаться'
-      });
-    }
-  }
-
-  async submit() {
-    return {
-      $set: {
-        ordersTraderId: this.container.ordersTraderId.value,
-        level1TraderId: this.container.level1TraderId.value,
-        extraLevel1TraderId: this.container.extraLevel1TraderId.value,
-        extraLevel1Trader2Id: this.container.extraLevel1Trader2Id.value,
-        positionTraderId: this.container.positionTraderId.value,
-        pusherApiId: this.container.pusherApiId.value,
-        displaySizeInUnits: this.container.displaySizeInUnits.checked,
-        changePriceQuantityViaMouseWheel:
-          this.container.changePriceQuantityViaMouseWheel.checked,
-        buyShortcut: this.container.buyShortcut.value.trim(),
-        sellShortcut: this.container.sellShortcut.value.trim(),
-        fastVolumes: this.container.fastVolumes.value.trim()
-      }
-    };
   }
 
   getActiveWidgetTab() {
@@ -1472,6 +1508,49 @@ export class OrderWidget extends WidgetWithInstrument {
       this.topLoader.stop();
     }
   }
+
+  async validate() {
+    await validate(this.container.ordersTraderId);
+    await validate(this.container.level1TraderId);
+    await validate(this.container.positionTraderId);
+
+    if (this.container.buyShortcut.value && this.container.sellShortcut.value) {
+      await validate(this.container.sellShortcut, {
+        hook: async () =>
+          this.container.buyShortcut.value !==
+          this.container.sellShortcut.value,
+        errorMessage: 'Горячие клавиши должны различаться'
+      });
+    }
+  }
+
+  async submit() {
+    return {
+      $set: {
+        ordersTraderId: this.container.ordersTraderId.value,
+        level1TraderId: this.container.level1TraderId.value,
+        extraLevel1TraderId: this.container.extraLevel1TraderId.value,
+        extraLevel1Trader2Id: this.container.extraLevel1Trader2Id.value,
+        positionTraderId: this.container.positionTraderId.value,
+        pusherApiId: this.container.pusherApiId.value,
+        buyShortcut: this.container.buyShortcut.value.trim(),
+        sellShortcut: this.container.sellShortcut.value.trim(),
+        fastVolumes: this.container.fastVolumes.value.trim(),
+        displaySizeInUnits: this.container.displaySizeInUnits.checked,
+        changePriceQuantityViaMouseWheel:
+          this.container.changePriceQuantityViaMouseWheel.checked,
+        showLastPriceInHeader: this.container.showLastPriceInHeader.checked,
+        showAbsoluteChangeInHeader:
+          this.container.showAbsoluteChangeInHeader.checked,
+        showRelativeChangeInHeader:
+          this.container.showRelativeChangeInHeader.checked,
+        showOrderTypeTabs: this.container.showOrderTypeTabs.checked,
+        showBestBidAndAsk: this.container.showBestBidAndAsk.checked,
+        showAmountSection: this.container.showAmountSection.checked,
+        showEstimateSection: this.container.showEstimateSection.checked
+      }
+    };
+  }
 }
 
 export async function widgetDefinition() {
@@ -1485,8 +1564,8 @@ export async function widgetDefinition() {
       template: orderWidgetTemplate,
       styles: orderWidgetStyles
     }).define(),
-    minWidth: 250,
-    minHeight: 370,
+    minWidth: 230,
+    minHeight: 120,
     defaultWidth: 290,
     defaultHeight: 385,
     settings: html`
@@ -1881,6 +1960,49 @@ export async function widgetDefinition() {
           ${ref('changePriceQuantityViaMouseWheel')}
         >
           Изменять цену и количество колесом мыши
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showLastPriceInHeader ?? true}"
+          ${ref('showLastPriceInHeader')}
+        >
+          Показывать последнюю цену в заголовке
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showAbsoluteChangeInHeader ?? true}"
+          ${ref('showAbsoluteChangeInHeader')}
+        >
+          Показывать абсолютное изменение цены в заголовке
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showRelativeChangeInHeader ?? true}"
+          ${ref('showRelativeChangeInHeader')}
+        >
+          Показывать относительное изменение цены в заголовке
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showOrderTypeTabs ?? true}"
+          ${ref('showOrderTypeTabs')}
+        >
+          Показывать вкладки с типом заявки
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showBestBidAndAsk ?? true}"
+          ${ref('showBestBidAndAsk')}
+        >
+          Показывать лучшие цены <span class="positive">bid</span> и
+          <span class="negative">ask</span>
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showAmountSection ?? true}"
+          ${ref('showAmountSection')}
+        >
+          Показывать секцию с комиссией и стоимостью
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showEstimateSection ?? true}"
+          ${ref('showEstimateSection')}
+        >
+          Показывать секцию «Доступно/С плечом»
         </ppp-checkbox>
       </div>
     `

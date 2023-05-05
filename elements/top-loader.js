@@ -43,6 +43,8 @@ export const topLoaderStyles = css`
 `;
 
 export class TopLoader extends PPPElement {
+  #timeout;
+
   clamp(n, min, max) {
     if (n < min) return min;
 
@@ -56,6 +58,8 @@ export class TopLoader extends PPPElement {
   }
 
   set(n) {
+    clearTimeout(this.#timeout);
+
     const self = this;
 
     n = this.clamp(n, 0.08, 1);
@@ -79,17 +83,17 @@ export class TopLoader extends PPPElement {
           // noinspection BadExpressionStatementJS
           self.offsetWidth;
 
-          setTimeout(function () {
+          self.#timeout = setTimeout(function () {
             self.classList.remove('visible');
 
-            setTimeout(function () {
+            self.#timeout = setTimeout(function () {
               self.bar.setAttribute('style', `transform: translate(-100%, 0)`);
             }, 400);
 
             next();
           }, 400);
         } else {
-          setTimeout(next, 400);
+          self.#timeout = setTimeout(next, 400);
         }
       });
 
@@ -103,7 +107,7 @@ export class TopLoader extends PPPElement {
 
     // trickleSpeed = 400;
     const work = function () {
-      setTimeout(function () {
+      that.#timeout = setTimeout(function () {
         if (!that.status) return;
 
         that.trickle();

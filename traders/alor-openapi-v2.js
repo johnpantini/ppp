@@ -10,7 +10,6 @@ import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
 import { formatPrice } from '../lib/intl.js';
-import { OrderDirection } from '../vendor/tinkoff/definitions/orders.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**

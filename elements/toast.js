@@ -298,6 +298,7 @@ export const toastStyles = css`
 
   .title {
     font-weight: 700;
+    padding-right: 4px;
   }
 
   .close-icon {
