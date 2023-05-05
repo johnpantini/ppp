@@ -28,6 +28,17 @@ const defaultBuySideButtonsTemplate = `+1,+2,+5,+10
 const defaultSellSideButtonsTemplate = `+1,+2,+5,+10
 -1,-2,-5,-10`;
 
+const showAllTabHidden = (x) =>
+  typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
+const showLimitTabHidden = (x) =>
+  typeof x.document.showLimitTab === 'undefined'
+    ? false
+    : !x.document.showLimitTab;
+const showStopTabHidden = (x) =>
+  typeof x.document.showStopTab === 'undefined'
+    ? false
+    : !x.document.showStopTab;
+
 export const scalpingButtonsWidgetTemplate = html`
   <template>
     <div class="widget-root">
@@ -59,18 +70,36 @@ export const scalpingButtonsWidgetTemplate = html`
               x.ordersTrader.supportsInstrument(x.instrument)),
           html`
             <div class="controls">
-              <div class="tabs">
+              <div
+                class="tabs"
+                ?hidden="${(x) =>
+                  showAllTabHidden(x) &&
+                  showLimitTabHidden(x) &&
+                  showStopTabHidden(x)}"
+              >
                 <ppp-widget-box-radio-group
                   class="order-type-selector"
                   @change="${(x) => x.handleOrderTypeChange()}"
                   value="${(x) => x.document.activeTab ?? 'all'}"
                   ${ref('orderTypeSelector')}
                 >
-                  <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
-                  <ppp-widget-box-radio value="limit">
+                  <ppp-widget-box-radio
+                    ?hidden="${(x) => showAllTabHidden(x)}"
+                    value="all"
+                  >
+                    Все
+                  </ppp-widget-box-radio>
+                  <ppp-widget-box-radio
+                    ?hidden="${(x) => showLimitTabHidden(x)}"
+                    value="limit"
+                  >
                     Лимитные
                   </ppp-widget-box-radio>
-                  <ppp-widget-box-radio value="stop" disabled>
+                  <ppp-widget-box-radio
+                    ?hidden="${(x) => showStopTabHidden(x)}"
+                    value="stop"
+                    disabled
+                  >
                     Отложенные
                   </ppp-widget-box-radio>
                 </ppp-widget-box-radio-group>
@@ -162,7 +191,7 @@ export const scalpingButtonsWidgetStyles = css`
   }
 
   .tabs {
-    padding: 10px 8px 8px 8px;
+    padding: 10px 8px 4px 8px;
   }
 
   .holder {
@@ -306,7 +335,10 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
         ordersTraderId: this.container.ordersTraderId.value,
         coolDown: this.container.coolDown.value,
         buySideButtonsTemplate: this.container.buySideButtonsTemplate.value,
-        sellSideButtonsTemplate: this.container.sellSideButtonsTemplate.value
+        sellSideButtonsTemplate: this.container.sellSideButtonsTemplate.value,
+        showAllTab: this.container.showAllTab.checked,
+        showLimitTab: this.container.showLimitTab.checked,
+        showStopTab: this.container.showStopTab.checked
       }
     };
   }
@@ -423,6 +455,29 @@ export async function widgetDefinition() {
             ${ref('sellSideButtonsTemplate')}
           ></ppp-snippet>
         </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Параметры отображения и работы</h5>
+        </div>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showAllTab ?? true}"
+          ${ref('showAllTab')}
+        >
+          Показывать вкладку «Все»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showLimitTab ?? true}"
+          ${ref('showLimitTab')}
+        >
+          Показывать вкладку «Лимитные»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showStopTab ?? true}"
+          ${ref('showStopTab')}
+        >
+          Показывать вкладку «Отложенные»
+        </ppp-checkbox>
       </div>
     `
   };

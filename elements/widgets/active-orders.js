@@ -17,7 +17,7 @@ import {
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { normalize, spacing } from '../../design/styles.js';
-import { cancelOrders, trash } from '../../static/svg/sprite.js';
+import { cancelOrders, refresh, trash } from '../../static/svg/sprite.js';
 import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
 import {
   themeConditional,
@@ -28,11 +28,29 @@ import {
   paletteGrayDark1,
   paletteGrayLight1,
   paletteGrayLight2,
-  spacing1
+  spacing1,
+  paletteGreenBase,
+  paletteGreenLight3,
+  paletteRedBase,
+  paletteRedLight3
 } from '../../design/design-tokens.js';
 import '../button.js';
+import '../checkbox.js';
 import '../query-select.js';
+import '../radio-group.js';
 import '../text-field.js';
+import { later } from '../../lib/ppp-decorators.js';
+
+const showAllTabHidden = (x) =>
+  typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
+const showLimitTabHidden = (x) =>
+  typeof x.document.showLimitTab === 'undefined'
+    ? false
+    : !x.document.showLimitTab;
+const showStopTabHidden = (x) =>
+  typeof x.document.showStopTab === 'undefined'
+    ? false
+    : !x.document.showStopTab;
 
 export const activeOrdersWidgetTemplate = html`
   <template>
@@ -51,18 +69,29 @@ export const activeOrdersWidgetTemplate = html`
         <div class="controls">
           <div class="tabs">
             <ppp-widget-box-radio-group
+              ?hidden="${(x) =>
+                showAllTabHidden(x) &&
+                showLimitTabHidden(x) &&
+                showStopTabHidden(x)}"
               class="order-type-selector"
               @change="${(x) => x.handleOrderTypeChange()}"
               value="${(x) => x.document.activeTab ?? 'all'}"
               ${ref('orderTypeSelector')}
             >
-              <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
               <ppp-widget-box-radio
+                ?hidden="${(x) => showAllTabHidden(x)}"
+                value="all"
+              >
+                Все
+              </ppp-widget-box-radio>
+              <ppp-widget-box-radio
+                ?hidden="${(x) => showLimitTabHidden(x)}"
                 value="limit"
               >
                 Лимитные
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
+                ?hidden="${(x) => showStopTabHidden(x)}"
                 value="stop"
                 disabled
               >
@@ -70,13 +99,49 @@ export const activeOrdersWidgetTemplate = html`
               </ppp-widget-box-radio>
             </ppp-widget-box-radio-group>
           </div>
-          <button
-            class="cancel-orders"
-            title="Отменить все заявки"
-            @click="${(x) => x.cancelAllOrders()}"
-          >
-            <span>${html.partial(cancelOrders)}</span>
-          </button>
+          <div class="buttons">
+            <button
+              ?hidden="${(x) => !x.document.showRefreshOrdersButton}"
+              class="refresh-orders"
+              title="Переставить заявки"
+              @click="${(x) => x.refreshOrders()}"
+            >
+              <span>${html.partial(refresh)}</span>
+            </button>
+            <button
+              ?hidden="${(x) => !x.document.showCancelAllBuyOrdersButton}"
+              class="cancel-buy-orders"
+              title="Отменить все заявки на покупку"
+              @click="${(x) =>
+                x.cancelAllOrders({
+                  filter: 'buy'
+                })}"
+            >
+              <span>${html.partial(cancelOrders)}</span>
+            </button>
+            <button
+              ?hidden="${(x) => !x.document.showCancelAllBuyOrdersButton}"
+              class="cancel-sell-orders"
+              title="Отменить все заявки на продажу"
+              @click="${(x) =>
+                x.cancelAllOrders({
+                  filter: 'sell'
+                })}"
+            >
+              <span>${html.partial(cancelOrders)}</span>
+            </button>
+            <button
+              ?hidden="${(x) =>
+                typeof x.document.showCancelAllOrdersButton === 'undefined'
+                  ? false
+                  : !x.document.showCancelAllOrdersButton}"
+              class="cancel-orders"
+              title="Отменить все заявки"
+              @click="${(x) => x.cancelAllOrders()}"
+            >
+              <span>${html.partial(cancelOrders)}</span>
+            </button>
+          </div>
         </div>
         <div class="widget-card-list">
           ${when(
@@ -163,9 +228,23 @@ export const activeOrdersWidgetStyles = css`
   }
 
   .tabs {
-    padding: 10px 8px 14px 8px;
+    padding: 0 8px 8px 8px;
   }
 
+  .buttons {
+    padding: 0 0 8px 8px;
+    display: flex;
+    gap: 0 4px;
+  }
+
+  .tabs ppp-widget-box-radio-group:not([hidden]),
+  .buttons button:not([hidden]) {
+    margin-top: 10px;
+  }
+
+  .refresh-orders,
+  .cancel-sell-orders,
+  .cancel-buy-orders,
   .cancel-orders {
     display: inline-flex;
     flex-direction: row;
@@ -186,6 +265,17 @@ export const activeOrdersWidgetStyles = css`
     )};
   }
 
+  .cancel-buy-orders {
+    color: ${themeConditional(paletteGreenBase, paletteGreenLight3)};
+  }
+
+  .cancel-sell-orders {
+    color: ${themeConditional(paletteRedBase, paletteRedLight3)};
+  }
+
+  .refresh-orders:hover,
+  .cancel-sell-orders:hover,
+  .cancel-buy-orders:hover,
   .cancel-orders:hover {
     background-color: ${themeConditional(
       darken(paletteGrayLight2, 10),
@@ -193,6 +283,9 @@ export const activeOrdersWidgetStyles = css`
     )};
   }
 
+  .refresh-orders span,
+  .cancel-sell-orders span,
+  .cancel-buy-orders span,
   .cancel-orders span {
     margin: -2px -8px;
     display: inline-block;
@@ -200,6 +293,9 @@ export const activeOrdersWidgetStyles = css`
     vertical-align: text-bottom;
   }
 
+  .refresh-orders span svg,
+  .cancel-sell-orders span svg,
+  .cancel-buy-orders span svg,
   .cancel-orders span svg {
     width: 16px;
     height: 16px;
@@ -322,9 +418,11 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   handleOrderTypeChange() {
+    this.document.activeTab = this.orderTypeSelector.value;
+
     void this.updateDocumentFragment({
       $set: {
-        'widgets.$.activeTab': this.orderTypeSelector.value
+        'widgets.$.activeTab': this.document.activeTab
       }
     });
   }
@@ -365,7 +463,37 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
   }
 
-  async cancelAllOrders() {
+  async refreshOrders() {
+    if (typeof this.ordersTrader?.modifyLimitOrders !== 'function') {
+      return this.notificationsArea.error({
+        text: 'Трейдер не поддерживает эту операцию.'
+      });
+    }
+
+    try {
+      this.topLoader.start();
+
+      await this.ordersTrader.modifyLimitOrders({
+        instrument: this.instrument,
+        side: 'all',
+        value: 0
+      });
+
+      this.notificationsArea.success({
+        title: 'Заявки переставлены'
+      });
+    } catch (e) {
+      console.error(e);
+
+      this.notificationsArea.error({
+        text: 'Не удалось переставить заявки.'
+      });
+    } finally {
+      this.topLoader.stop();
+    }
+  }
+
+  async cancelAllOrders(options = {}) {
     if (typeof this.ordersTrader?.cancelAllLimitOrders !== 'function') {
       return this.notificationsArea.error({
         title: 'Активные заявки',
@@ -377,7 +505,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
     try {
       await this.ordersTrader?.cancelAllLimitOrders?.({
-        instrument: this.instrument
+        instrument: this.instrument,
+        filter: options.filter
       });
 
       this.notificationsArea.success({
@@ -402,7 +531,17 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   async submit() {
     return {
       $set: {
-        ordersTraderId: this.container.ordersTraderId.value
+        ordersTraderId: this.container.ordersTraderId.value,
+        showAllTab: this.container.showAllTab.checked,
+        showLimitTab: this.container.showLimitTab.checked,
+        showStopTab: this.container.showStopTab.checked,
+        showRefreshOrdersButton: this.container.showRefreshOrdersButton.checked,
+        showCancelAllOrdersButton:
+          this.container.showCancelAllOrdersButton.checked,
+        showCancelAllBuyOrdersButton:
+          this.container.showCancelAllBuyOrdersButton.checked,
+        showCancelAllSellOrdersButton:
+          this.container.showCancelAllSellOrdersButton.checked
       }
     };
   }
@@ -422,8 +561,8 @@ export async function widgetDefinition() {
     }).define(),
     defaultHeight: 400,
     defaultWidth: 280,
-    minHeight: 132,
-    minWidth: 242,
+    minHeight: 120,
+    minWidth: 140,
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
@@ -469,6 +608,53 @@ export async function widgetDefinition() {
             +
           </ppp-button>
         </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Параметры отображения и работы</h5>
+        </div>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showAllTab ?? true}"
+          ${ref('showAllTab')}
+        >
+          Показывать вкладку «Все»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showLimitTab ?? true}"
+          ${ref('showLimitTab')}
+        >
+          Показывать вкладку «Лимитные»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showStopTab ?? true}"
+          ${ref('showStopTab')}
+        >
+          Показывать вкладку «Отложенные»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showRefreshOrdersButton ?? true}"
+          ${ref('showRefreshOrdersButton')}
+        >
+          Показывать кнопку «Переставить все заявки»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showCancelAllOrdersButton ?? true}"
+          ${ref('showCancelAllOrdersButton')}
+        >
+          Показывать кнопку «Отменить все заявки»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showCancelAllBuyOrdersButton ?? false}"
+          ${ref('showCancelAllBuyOrdersButton')}
+        >
+          Показывать кнопку «Отменить все заявки на покупку»
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showCancelAllSellOrdersButton ?? false}"
+          ${ref('showCancelAllSellOrdersButton')}
+        >
+          Показывать кнопку «Отменить все заявки на продажу»
+        </ppp-checkbox>
       </div>
     `
   };

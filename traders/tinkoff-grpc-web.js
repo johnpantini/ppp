@@ -268,7 +268,7 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  async cancelAllLimitOrders({ instrument }) {
+  async cancelAllLimitOrders({ instrument, filter } = {}) {
     try {
       const client = createClient(
         OrdersServiceDefinition,
@@ -287,6 +287,20 @@ class TinkoffGrpcWebTrader extends Trader {
 
         if (status === 'working') {
           if (instrument && o.figi !== instrument.tinkoffFigi) continue;
+
+          if (
+            filter === 'buy' &&
+            o.direction !== OrderDirection.ORDER_DIRECTION_BUY
+          ) {
+            continue;
+          }
+
+          if (
+            filter === 'sell' &&
+            o.direction !== OrderDirection.ORDER_DIRECTION_SELL
+          ) {
+            continue;
+          }
 
           await client.cancelOrder({
             accountId: this.document.account,
@@ -321,7 +335,7 @@ class TinkoffGrpcWebTrader extends Trader {
         const orderSide =
           o.direction === OrderDirection.ORDER_DIRECTION_BUY ? 'buy' : 'sell';
 
-        if (status === 'working' && orderSide === side) {
+        if (status === 'working' && (orderSide === side || side === 'all')) {
           if (instrument && o.figi !== instrument.tinkoffFigi) continue;
 
           const orderInstrument = this.#figis.get(o.figi);

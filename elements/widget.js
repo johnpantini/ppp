@@ -1,10 +1,6 @@
 /** @decorator */
 
-import {
-  PPPAppearanceElement,
-  PPPElement,
-  PPPOffClickElement
-} from '../lib/ppp-element.js';
+import { PPPElement, PPPOffClickElement } from '../lib/ppp-element.js';
 import {
   attr,
   css,
@@ -28,7 +24,6 @@ import {
   ellipsis,
   normalize,
   scrollbars,
-  spacing,
   typography
 } from '../design/styles.js';
 import {
@@ -59,7 +54,6 @@ import {
   paletteRedBase,
   paletteRedLight3,
   paletteWhite,
-  paletteYellowLight3,
   positive,
   sell,
   sellHover,

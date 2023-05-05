@@ -10,6 +10,7 @@ import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Trader } from './common-trader.js';
 import { formatPrice } from '../lib/intl.js';
+import { OrderDirection } from '../vendor/tinkoff/definitions/orders.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -337,7 +338,7 @@ class AlorOpenAPIV2Trader extends Trader {
       const orders = await ordersRequest.json();
 
       for (const o of orders) {
-        if (o.status === 'working' && o.side === side) {
+        if (o.status === 'working' && (o.side === side || side === 'all')) {
           if (instrument && o.symbol !== this.getSymbol(instrument)) continue;
 
           let orderInstrument;
@@ -370,7 +371,7 @@ class AlorOpenAPIV2Trader extends Trader {
                     symbol: this.getSymbol(orderInstrument),
                     exchange: this.document.exchange
                   },
-                  side,
+                  side: o.side,
                   type: 'limit',
                   price,
                   quantity: o.qty - o.filled,
@@ -429,7 +430,7 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async cancelAllLimitOrders({ instrument }) {
+  async cancelAllLimitOrders({ instrument, filter } = {}) {
     await this.ensureAccessTokenIsOk();
 
     const request = await fetch(
@@ -447,6 +448,14 @@ class AlorOpenAPIV2Trader extends Trader {
       for (const o of orders) {
         if (o.status === 'working') {
           if (instrument && o.symbol !== this.getSymbol(instrument)) continue;
+
+          if (filter === 'buy' && o.side !== 'buy') {
+            continue;
+          }
+
+          if (filter === 'sell' && o.side !== 'sell') {
+            continue;
+          }
 
           o.orderType = o.type;
           o.orderId = o.id;

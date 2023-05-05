@@ -154,6 +154,7 @@ export class Checkbox extends PPPElement {
   constructor() {
     super();
 
+    this.checked = false;
     this.indeterminate = false;
 
     this.keypressHandler = (e) => {
