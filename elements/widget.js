@@ -30,10 +30,9 @@ import {
   bodyFont,
   buy,
   buyHover,
-  darken,
   fontSizeWidget,
   fontWeightWidget,
-  lighten,
+  buttonHeightWidget,
   lineHeightWidget,
   negative,
   paletteBlack,
@@ -59,8 +58,6 @@ import {
   sellHover,
   spacing1,
   spacing2,
-  themeConditional,
-  toColorComponents,
   widgetGroup1,
   widgetGroup2,
   widgetGroup3,
@@ -69,7 +66,11 @@ import {
   widgetGroup6,
   widgetGroup7,
   widgetGroup8,
-  widgetGroup9
+  widgetGroup9,
+  darken,
+  lighten,
+  themeConditional,
+  toColorComponents
 } from '../design/design-tokens.js';
 import {
   circleNotch,
@@ -2020,6 +2021,12 @@ export class WidgetResizeControls extends PPPElement {
     let deltaY = event.clientY - clientY;
     const { minWidth = 275, minHeight = 395 } = this.widget.widgetDefinition;
 
+    if (this.widget.preview) {
+      if (handle !== 'right' && handle !== 'bottom' && handle !== 'se') {
+        return;
+      }
+    }
+
     if (handle === 'top' || handle === 'bottom') {
       deltaX = 0;
     }
@@ -2611,7 +2618,7 @@ export const widgetButtonStyles = css`
   ${buttonStyles}
   .control {
     width: 100%;
-    height: 32px;
+    height: ${buttonHeightWidget};
     font-size: ${fontSizeWidget};
     font-weight: ${fontWeightWidget};
     border-radius: 4px;

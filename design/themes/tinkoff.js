@@ -7,6 +7,7 @@ export default {
   fontSizeWidget: '12px',
   lineHeightWidget: 'normal',
   fontWeightWidget: 400,
+  buttonHeightWidget: '32px',
   // Body 1
   fontSizeBody1: '13px',
   lineHeightBody1: '20px',

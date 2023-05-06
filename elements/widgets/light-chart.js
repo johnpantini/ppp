@@ -292,7 +292,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   onResize({ width, height }) {
-    this.chart.resize(width - 2, height - 32);
+    this.chart && this.chart.resize(width - 2, height - 32);
   }
 
   priceFormatter(price) {

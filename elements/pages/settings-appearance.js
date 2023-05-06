@@ -430,7 +430,7 @@ export const settingsAppearancePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Шрифты</h5>
+          <h5>Шрифты и размеры</h5>
           <p class="description">Настройте шрифты приложения.</p>
           <div>
             <ppp-select
@@ -538,6 +538,12 @@ export const settingsAppearancePageTemplate = html`
               </ppp-text-field>
               <ppp-text-field dt="line-height-heading-6" placeholder="24px">
                 <span slot="label">Межстрочный интервал</span>
+              </ppp-text-field>
+            </div>
+            <h5>Высота кнопок в виджетах (покупка/продажа)</h5>
+            <div class="row">
+              <ppp-text-field dt="button-height-widget" placeholder="32px">
+                <span slot="label">Высота</span>
               </ppp-text-field>
             </div>
           </div>
@@ -648,6 +654,11 @@ export class SettingsAppearancePage extends Page {
       } else if (dt.startsWith('line-height')) {
         await validate(input, {
           hook: async (value) => CSS.supports('line-height', value),
+          errorMessage: 'Недопустимое значение'
+        });
+      } else if (dt.startsWith('button-height')) {
+        await validate(input, {
+          hook: async (value) => CSS.supports('height', value),
           errorMessage: 'Недопустимое значение'
         });
       }

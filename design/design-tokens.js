@@ -176,6 +176,7 @@ export const monospaceFont = createThemed('monospace-font');
 export const fontSizeWidget = createThemed('font-size-widget');
 export const lineHeightWidget = createThemed('line-height-widget');
 export const fontWeightWidget = createThemed('font-weight-widget');
+export const buttonHeightWidget = createThemed('button-height-widget');
 // Body 1
 export const fontSizeBody1 = createThemed('font-size-body-1');
 export const lineHeightBody1 = createThemed('line-height-body-1');

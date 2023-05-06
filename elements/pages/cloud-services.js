@@ -115,7 +115,15 @@ export const cloudServicesPageTemplate = html`
               )}"
             ${ref('masterPassword')}
           ></ppp-text-field>
-        </div>
+          <div class="spacing4">
+            <ppp-text-field
+              type="password"
+              placeholder="Введите мастер-пароль ещё раз"
+              ${ref('masterPasswordConfirmation')}
+            >
+              <span slot="label">Подтверждение пароля</span>
+            </ppp-text-field>
+          </div>
       </section>
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(2))}</div>
@@ -270,7 +278,7 @@ export const cloudServicesPageTemplate = html`
               target="_blank"
               rel="noopener"
               href="https://pantini.gitbook.io/pantini-co/ppp/mongodb-proxy"
-              >здесь</a
+            >здесь</a
             >.
           </p>
         </div>
@@ -955,6 +963,12 @@ export class CloudServicesPage extends Page {
 
     try {
       await validate(this.masterPassword);
+      await validate(this.masterPasswordConfirmation);
+      await validate(this.masterPasswordConfirmation, {
+        hook: async (value) => value === this.masterPassword.value,
+        errorMessage: 'Пароли не совпадают'
+      });
+
       await validate(this.serviceMachineUrl);
       await validate(this.gitHubToken);
       await validate(this.mongoPublicKey);

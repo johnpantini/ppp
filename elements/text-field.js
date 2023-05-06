@@ -37,7 +37,9 @@ import {
 import {
   warning,
   checkmark,
-  checkmarkWithCircle
+  checkmarkWithCircle,
+  visibility,
+  visibilityOff
 } from '../static/svg/sprite.js';
 import {
   startSlotTemplate,
@@ -104,6 +106,24 @@ export const textFieldTemplate = html`
         />
       </div>
       ${when((x) => x.appearance === 'default', html`${endSlotTemplate()}`)}
+      ${when(
+        (x) => x.appearance === 'default' && x.type === 'password',
+        html`
+          <div class="end">
+            <div
+              class="show-password"
+              @click="${(x) => x.togglePasswordVisibility()}"
+            >
+              <span ?hidden="${(x) => x.passwordVisible}">
+                ${html.partial(visibility)}
+              </span>
+              <span ?hidden="${(x) => !x.passwordVisible}">
+                ${html.partial(visibilityOff)}
+              </span>
+            </div>
+          </div>
+        `
+      )}
       ${when(
         (x) => x.appearance === 'error' && x.errorMessage,
         html` <div class="end">${html.partial(warning)}</div> `
@@ -194,8 +214,9 @@ export const textFieldStyles = css`
     width: 100%;
   }
 
+  :host([type='password']) input,
   :host([slotted]) input {
-    padding-right: 30px;
+    padding-right: 36px;
   }
 
   :host([optional]) input {
@@ -217,8 +238,8 @@ export const textFieldStyles = css`
   ::slotted(span[slot='end']) {
     position: absolute;
     display: flex;
-    align-items: center;
     right: 12px;
+    height: 16px;
     z-index: 1;
     color: ${themeConditional(paletteBlack, paletteGrayLight3)};
   }
@@ -302,6 +323,11 @@ export const textFieldStyles = css`
   :host(.error) .helper {
     color: ${themeConditional(paletteRedBase, paletteRedLight1)};
   }
+
+  .show-password {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
+    cursor: pointer;
+  }
 `;
 
 export class TextField extends PPPAppearanceElement {
@@ -363,11 +389,15 @@ export class TextField extends PPPAppearanceElement {
   step;
 
   @observable
+  passwordVisible;
+
+  @observable
   defaultSlottedNodes;
 
   constructor() {
     super();
 
+    this.passwordVisible = false;
     this.value = '';
     this.type = 'text';
   }
@@ -379,6 +409,16 @@ export class TextField extends PPPAppearanceElement {
       Updates.queueUpdate(() => {
         this.focus();
       });
+    }
+  }
+
+  togglePasswordVisibility() {
+    if (this.control.type === 'password') {
+      this.control.type = 'text';
+      this.passwordVisible = true;
+    } else {
+      this.control.type = 'password';
+      this.passwordVisible = false;
     }
   }
 
