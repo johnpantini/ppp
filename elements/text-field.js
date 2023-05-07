@@ -107,6 +107,16 @@ export const textFieldTemplate = html`
       </div>
       ${when((x) => x.appearance === 'default', html`${endSlotTemplate()}`)}
       ${when(
+        (x) => x.optional,
+        html`
+          <div class="end">
+            <div class="optional-text">
+              <p>Опционально</p>
+            </div>
+          </div>
+        `
+      )}
+      ${when(
         (x) => x.appearance === 'default' && x.type === 'password',
         html`
           <div class="end">
@@ -127,16 +137,6 @@ export const textFieldTemplate = html`
       ${when(
         (x) => x.appearance === 'error' && x.errorMessage,
         html` <div class="end">${html.partial(warning)}</div> `
-      )}
-      ${when(
-        (x) => x.optional,
-        html`
-          <div class="end">
-            <div class="optional-text">
-              <p>Опционально</p>
-            </div>
-          </div>
-        `
       )}
       ${when(
         (x) => x.appearance === 'valid',
@@ -216,18 +216,29 @@ export const textFieldStyles = css`
 
   :host([type='password']) input,
   :host([slotted]) input {
-    padding-right: 36px;
+    padding-right: 40px;
   }
 
   :host([optional]) input {
-    padding-right: 90px;
+    padding-right: 95px;
+  }
+
+  :host([optional][type='password']) input {
+    padding-right: 130px;
   }
 
   .optional-text {
+    display: flex;
+    position: relative;
+    align-self: center;
     font-size: 12px;
     font-style: italic;
     font-weight: normal;
     color: ${themeConditional(paletteGrayDark1, paletteGrayBase)};
+  }
+
+  :host([optional][type='password']) .optional-text {
+    margin-right: 30px;
   }
 
   :host([disabled]) {
