@@ -7,6 +7,7 @@ import { hotkey } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
+import { APIS } from '../../lib/const.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -85,7 +86,7 @@ export const apisPageTemplate = html`
                     disabled
                     shiftlock
                     class="xsmall"
-                    @click="${() => x.removeDocumentFromListing(datum)}"
+                    @click="${() => x.removeApi(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -118,6 +119,14 @@ export class ApisPage extends Page {
         })
         .sort({ updatedAt: -1 });
     };
+  }
+
+  async removeApi(datum) {
+    if (datum.type === APIS.ASTRADB) {
+      // Remove wake up trigger
+
+      return this.removeDocumentFromListing(datum);
+    } else return this.removeDocumentFromListing(datum);
   }
 }
 
