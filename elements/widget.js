@@ -623,13 +623,13 @@ export class WidgetWithInstrument extends Widget {
   isolated;
 
   selectInstrument(symbol, options = {}) {
-    if (!symbol) return;
-
     if (this.preview && this.container.savedInstrument) {
       this.instrument = this.container.savedInstrument;
 
       return this.instrument;
     }
+
+    if (!symbol) return;
 
     if (!this.instrumentTrader) {
       return;
