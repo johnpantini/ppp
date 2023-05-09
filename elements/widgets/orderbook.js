@@ -14,7 +14,12 @@ import {
   observable,
   Observable
 } from '../../vendor/fast-element.min.js';
-import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import {
+  EXCHANGE,
+  TRADER_CAPS,
+  TRADER_DATUM,
+  WIDGET_TYPES
+} from '../../lib/const.js';
 import {
   formatPercentage,
   formatPriceWithoutCurrency,
@@ -632,6 +637,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
         result = foreignInstrument.exchange;
       }
     }
+
+    if (result === EXCHANGE.UTEX_MARGIN_STOCKS) return 'UTEX';
 
     return result;
   }

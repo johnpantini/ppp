@@ -19,13 +19,15 @@ import { formatPrice } from '../lib/intl.js';
 class AlorOpenAPIV2Trader extends Trader {
   #jwt;
 
-  #slug = uuidv4().split('-')[0];
-
-  #counter = Date.now();
+  #pendingJWTRequest;
 
   #pendingConnection;
 
-  #pendingJWTRequest;
+  connection;
+
+  #slug = uuidv4().split('-')[0];
+
+  #counter = Date.now();
 
   #futures = new Map();
 
@@ -58,8 +60,6 @@ class AlorOpenAPIV2Trader extends Trader {
 
   // Key: Alor subscription guid; Value: {instrument, reference map}
   #guids = new Map();
-
-  connection;
 
   constructor(document) {
     super(document);
@@ -94,12 +94,12 @@ class AlorOpenAPIV2Trader extends Trader {
           .then((request) => request.json())
           .then(({ AccessToken }) => {
             this.#jwt = AccessToken;
-            this.#pendingJWTRequest = null;
+            this.#pendingJWTRequest = void 0;
           })
           .catch((e) => {
             console.error(e);
 
-            this.#pendingJWTRequest = null;
+            this.#pendingJWTRequest = void 0;
 
             return new Promise((resolve) => {
               setTimeout(async () => {
@@ -115,7 +115,7 @@ class AlorOpenAPIV2Trader extends Trader {
     } catch (e) {
       console.error(e);
 
-      this.#pendingJWTRequest = null;
+      this.#pendingJWTRequest = void 0;
 
       return new Promise((resolve) => {
         setTimeout(async () => {
@@ -641,7 +641,7 @@ class AlorOpenAPIV2Trader extends Trader {
             await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
             await this.ensureAccessTokenIsOk();
 
-            this.#pendingConnection = null;
+            this.#pendingConnection = void 0;
 
             await this.#connectWebSocket(true);
           };
@@ -1369,6 +1369,9 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (/Нехватка средств по лимитам клиента/i.test(message))
       return 'Нехватка средств по лимитам клиента.';
+
+    if (/Сейчас эта сессия не идет/i.test(message))
+      return 'Сейчас эта сессия не идет.';
 
     return 'Неизвестная ошибка, смотрите консоль браузера.';
   }

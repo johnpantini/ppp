@@ -352,6 +352,10 @@ export class InstrumentsImportPage extends Page {
     const instruments = [];
 
     for (const f of payload.values) {
+      if (typeof f.orderInfo?.minPriceIncrementAmount?.currency === 'undefined') {
+        continue;
+      }
+
       instruments.push({
         symbol: f.instrumentInfo.ticker.toUpperCase(),
         exchange: EXCHANGE.MOEX,
