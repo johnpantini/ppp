@@ -5,9 +5,9 @@ import { Page, pageStyles } from '../page.js';
 import { APIS } from '../../lib/const.js';
 import { checkAstraDbCredentials } from '../../lib/astradb.js';
 import { formatDate } from '../../lib/intl.js';
+import { upsertMongoDBRealmScheduledTrigger } from '../../lib/realm.js';
 import '../button.js';
 import '../text-field.js';
-import { upsertMongoDBRealmScheduledTrigger } from '../../lib/realm.js';
 
 export const apiAstraDbPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">

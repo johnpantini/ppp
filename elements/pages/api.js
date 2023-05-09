@@ -249,6 +249,26 @@ export const apiPageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Yandex Cloud"
+            style="height: 32px"
+            src="${() => ppp.brandSvg('yc')}"
+          />
+          <span slot="title">Yandex Cloud</span>
+          <span slot="description">Доступ к облачной платформе от Yandex.</span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `api-${APIS.YC}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
       </div>
     </form>
   </template>

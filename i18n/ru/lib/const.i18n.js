@@ -24,7 +24,8 @@ export default function (i18n) {
         [APIS.NORTHFLANK]: 'Northflank',
         [APIS.REDIS]: 'Redis',
         [APIS.CLOUDFLARE]: 'Cloudflare',
-        [APIS.BITIO]: 'bit.io'
+        [APIS.BITIO]: 'bit.io',
+        [APIS.YC]: 'Yandex Cloud'
       },
       broker: {
         [BROKERS.ALOR]: 'Alor',
