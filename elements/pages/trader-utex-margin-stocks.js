@@ -84,7 +84,9 @@ export const traderUtexMarginStocksTemplate = html`
         <div class="label-group">
           <h5>Комиссия UTEX</h5>
           <p class="description">
-            Укажите в % комиссию вашего торгового счёта UTEX.
+            Укажите в % комиссию вашего торгового счёта UTEX. Если значение не
+            указано, расчет будет производиться по значению 0,04% от суммы
+            заявки.
           </p>
         </div>
         <div class="input-group">

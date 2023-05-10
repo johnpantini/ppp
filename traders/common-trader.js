@@ -327,14 +327,19 @@ export class Trader {
   }
 
   async addRef(instrument, refs) {
+    const isGlobal = instrument?.symbol?.startsWith?.('@@');
+
+    if (!isGlobal) {
+      instrument = this.adoptInstrument(instrument);
+    }
+
     if (typeof instrument?.symbol === 'string' && refs) {
       const ref = refs.get(instrument.symbol);
 
       if (
         typeof ref === 'undefined' &&
         // Global instrument-agnostic datum
-        (instrument.symbol.startsWith('@@') ||
-          this.supportsInstrument(instrument))
+        (isGlobal || this.supportsInstrument(instrument))
       ) {
         refs.set(instrument.symbol, {
           refCount: 1,
@@ -349,6 +354,12 @@ export class Trader {
   }
 
   async removeRef(instrument, refs, key) {
+    const isGlobal = instrument?.symbol?.startsWith?.('@@');
+
+    if (!isGlobal) {
+      instrument = this.adoptInstrument(instrument);
+    }
+
     if (instrument?.symbol && refs) {
       const ref = refs.get(instrument.symbol);
 

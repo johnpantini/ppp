@@ -721,6 +721,9 @@ export class OrderWidget extends WidgetWithInstrument {
   positionTrader;
 
   @observable
+  traderEvent;
+
+  @observable
   lastPrice;
 
   @observable
@@ -780,6 +783,13 @@ export class OrderWidget extends WidgetWithInstrument {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
+
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          traderEvent: TRADER_DATUM.TRADER
+        }
+      });
 
       this.instrumentTrader = this.ordersTrader;
 
@@ -876,6 +886,13 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
+    await this.ordersTrader.unsubscribeFields?.({
+      source: this,
+      fieldDatumPairs: {
+        traderEvent: TRADER_DATUM.TRADER
+      }
+    });
+
     if (this.level1Trader) {
       await this.level1Trader.unsubscribeFields?.({
         source: this,
@@ -945,6 +962,12 @@ export class OrderWidget extends WidgetWithInstrument {
   pusherTelegramHandler(data) {
     if (typeof data.t === 'string')
       return this.selectInstrument(data.t.toUpperCase().split('~')[0]);
+  }
+
+  traderEventChanged(oldValue, newValue) {
+    if (typeof newValue === 'object' && newValue.event === 'estimate') {
+      this.calculateEstimate();
+    }
   }
 
   instrumentChanged(oldValue, newValue) {
@@ -1069,16 +1092,7 @@ export class OrderWidget extends WidgetWithInstrument {
         this.ordersTrader
           .estimate(this.instrument, price, quantity)
           .then((estimate) => {
-            const flatCommissionRate =
-              this.ordersTrader?.document?.flatCommissionRate ?? void 0;
-
-            if (typeof flatCommissionRate === 'undefined') {
-              this.commission = estimate.commission;
-            } else {
-              this.commission =
-                (price * quantity * this.instrument.lot * flatCommissionRate) /
-                100;
-            }
+            this.commission = estimate.commission;
           })
           .catch((error) => {
             console.log(error);
@@ -1114,17 +1128,7 @@ export class OrderWidget extends WidgetWithInstrument {
               estimate.marginSellingPowerQuantity;
             this.buyingPowerQuantity = estimate.buyingPowerQuantity;
             this.sellingPowerQuantity = estimate.sellingPowerQuantity;
-
-            const flatCommissionRate =
-              this.ordersTrader?.document?.flatCommissionRate ?? void 0;
-
-            if (typeof flatCommissionRate === 'undefined') {
-              this.commission = estimate.commission;
-            } else {
-              this.commission =
-                (price * quantity * this.instrument.lot * flatCommissionRate) /
-                100;
-            }
+            this.commission = estimate.commission;
           })
           .catch((error) => {
             console.log(error);

@@ -38,19 +38,34 @@ class UtexMarginStocksTrader extends Trader {
 
   connection;
 
+  leftMarginBP = 0;
+
+  usedMarginBP = 0;
+
   #symbols = new Map();
 
   subs = {
     positions: new Map(),
-    orders: new Map()
+    orders: new Map(),
+    timeline: new Map(),
+    trader: new Map()
   };
 
   refs = {
     positions: new Map(),
-    orders: new Map()
+    orders: new Map(),
+    timeline: new Map(),
+    trader: new Map()
   };
 
   orders = new Map();
+
+  positions = new Map();
+
+  balance = {
+    amount: 0,
+    currency: 'USDT'
+  };
 
   onCacheInstrument(instrument) {
     if (typeof instrument.utexSymbolID === 'number') {
@@ -291,6 +306,62 @@ class UtexMarginStocksTrader extends Trader {
                   }
                 })
               );
+
+              this.connection.send(
+                JSON.stringify({
+                  t: 1,
+                  d: {
+                    topic:
+                      'com.unitedtraders.luna.utex.protocol.mobile.MarginUserPositionService.subscribeMarginPositions',
+                    i: 3,
+                    accessToken: this.#jwt,
+                    metadata: {
+                      traceId: generateTraceId(),
+                      spanId: generateTraceId()
+                    },
+                    parameters: {}
+                  }
+                })
+              );
+
+              this.connection.send(
+                JSON.stringify({
+                  t: 1,
+                  d: {
+                    topic:
+                      'com.unitedtraders.luna.utex.protocol.mobile.MobileMarginalTradingBalanceService.subscribeTradingBalanceUpdateWithSnapshot',
+                    i: 4,
+                    accessToken: this.#jwt,
+                    metadata: {
+                      traceId: generateTraceId(),
+                      spanId: generateTraceId()
+                    },
+                    parameters: {
+                      market: 'UsEquitiesUsdt'
+                    }
+                  }
+                })
+              );
+
+              // Liquidation threshold
+              // this.connection.send(
+              //   JSON.stringify({
+              //     t: 1,
+              //     d: {
+              //       topic:
+              //         'com.unitedtraders.luna.utex.protocol.mobile.MobileMarginalTradingBalanceService.subscribeMaintenanceBalanceWithSnapshot',
+              //       i: 5,
+              //       accessToken: this.#jwt,
+              //       metadata: {
+              //         traceId: generateTraceId(),
+              //         spanId: generateTraceId()
+              //       },
+              //       parameters: {
+              //         market: 'UsEquitiesUsdt'
+              //       }
+              //     }
+              //   })
+              // );
             } else if (payload.t === 7) {
               const d = payload.d?.d;
 
@@ -301,6 +372,44 @@ class UtexMarginStocksTrader extends Trader {
                   if (payload.d?.i === 1) {
                     this.onOrdersMessage({ order });
                   }
+                }
+              }
+
+              if (d.marginBuyingPower) {
+                this.leftMarginBP = +d.marginBuyingPower.left / 1e8;
+                this.usedMarginBP = +d.marginBuyingPower.used / 1e8;
+
+                for (const [source, fields] of this.subs.trader) {
+                  for (const { field, datum } of fields) {
+                    if (datum === TRADER_DATUM.TRADER) {
+                      source[field] = {
+                        event: 'estimate',
+                        timestamp: Date.now(),
+                        trader: this
+                      };
+                    }
+                  }
+                }
+              }
+
+              if (Array.isArray(d.positions)) {
+                for (const position of d.positions) {
+                  this.onPositionsMessage({ position });
+                }
+
+                // Update balance after positions
+                this.onBalanceMessage({
+                  amount: this.balance.amount,
+                  currency: this.balance.currency,
+                  fromCache: true
+                });
+              }
+
+              if (payload.d?.i === 4) {
+                const balance = payload.d?.d?.value;
+
+                if (typeof balance === 'object') {
+                  this.onBalanceMessage(balance);
                 }
               }
             }
@@ -356,12 +465,122 @@ class UtexMarginStocksTrader extends Trader {
     }
   }
 
+  onPositionsMessage({ position, fromCache }) {
+    if (position.symbolId) {
+      if (!fromCache) {
+        this.positions.set(position.symbolId, position);
+      }
+
+      for (const [source, fields] of this.subs.positions) {
+        for (const { field, datum } of fields) {
+          const instrument = this.#symbols.get(position.symbolId);
+
+          if (instrument) {
+            if (datum === TRADER_DATUM.POSITION) {
+              source[field] = {
+                instrument,
+                symbol: instrument.symbol,
+                lot: instrument.lot,
+                exchange: instrument.exchange,
+                averagePrice: +position.averageInitialPrice / 1e8,
+                isCurrency: false,
+                isBalance: false,
+                size: +position.qty / instrument.lot,
+                accountId: null
+              };
+            } else if (
+              this.instrumentsAreEqual(instrument, source.instrument)
+            ) {
+              switch (datum) {
+                case TRADER_DATUM.POSITION_SIZE:
+                  source[field] = +position.qty / instrument.lot;
+
+                  break;
+                case TRADER_DATUM.POSITION_AVERAGE:
+                  source[field] = +position.averageInitialPrice / 1e8;
+
+                  break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  onBalanceMessage({ amount, currency, fromCache }) {
+    if (!fromCache) {
+      this.balance.amount = amount;
+      this.balance.currency = currency;
+    }
+
+    for (const [source, fields] of this.subs.positions) {
+      for (const { field, datum } of fields) {
+        if (datum === TRADER_DATUM.POSITION) {
+          let profit = 0;
+
+          for (const [, position] of this.positions) {
+            profit += +position.netRealizedPnl / 1e8;
+          }
+
+          source[field] = {
+            symbol: currency,
+            lot: 1,
+            exchange: EXCHANGE.UTEX_MARGIN_STOCKS,
+            isCurrency: true,
+            isBalance: true,
+            size: +amount + profit,
+            accountId: null
+          };
+        }
+      }
+    }
+  }
+
+  async instrumentChanged(source, oldValue, newValue) {
+    await super.instrumentChanged(source, oldValue, newValue);
+
+    // Broadcast positions for order widgets (at least).
+    if (this.subs.positions.has(source)) {
+      for (const [, position] of this.positions) {
+        await this.onPositionsMessage({
+          position,
+          fromCache: true
+        });
+      }
+
+      this.onBalanceMessage({
+        amount: this.balance.amount,
+        currency: this.balance.currency,
+        fromCache: true
+      });
+    }
+  }
+
   async subscribeField({ source, field, datum, condition }) {
     await this.ensureAccessTokenIsOk();
     await this.#connectWebSocket();
     await super.subscribeField({ source, field, datum, condition });
 
     switch (datum) {
+      case TRADER_DATUM.POSITION:
+      case TRADER_DATUM.POSITION_SIZE:
+      case TRADER_DATUM.POSITION_AVERAGE: {
+        for (const [_, position] of this.positions) {
+          await this.onPositionsMessage({
+            position,
+            fromCache: true
+          });
+        }
+
+        this.onBalanceMessage({
+          amount: this.balance.amount,
+          currency: this.balance.currency,
+          fromCache: true
+        });
+
+        break;
+      }
       case TRADER_DATUM.CURRENT_ORDER: {
         for (const [_, order] of this.orders) {
           this.onOrdersMessage({
@@ -387,7 +606,9 @@ class UtexMarginStocksTrader extends Trader {
         this.subs.positions,
         this.refs.positions
       ],
-      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders]
+      [TRADER_DATUM.TRADER]: [this.subs.trader, this.refs.trader],
+      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders],
+      [TRADER_DATUM.TIMELINE_ITEM]: [this.subs.timeline, this.refs.timeline]
     }[datum];
   }
 
@@ -615,6 +836,21 @@ class UtexMarginStocksTrader extends Trader {
         orderId: order.orderId
       };
     }
+  }
+
+  async estimate(instrument, price, quantity) {
+    const commissionRate = this.document?.commissionRate ?? 0.04;
+    const commission =
+      (price * quantity * instrument.lot * commissionRate) / 100;
+
+    return {
+      marginSellingPowerQuantity: null,
+      marginBuyingPowerQuantity:
+        Math.trunc(this.leftMarginBP / price / 10) * 10,
+      sellingPowerQuantity: null,
+      buyingPowerQuantity: null,
+      commission
+    };
   }
 
   async formatError(instrument, error) {

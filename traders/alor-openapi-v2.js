@@ -150,6 +150,18 @@ class AlorOpenAPIV2Trader extends Trader {
     return symbol;
   }
 
+  instrumentsAreEqual(i1, i2) {
+    const specialCase = ['SPB', 'SPB@US'];
+
+    if (
+      specialCase.indexOf(i1?.symbol) > -1 &&
+      specialCase.indexOf(i2?.symbol) > -1
+    )
+      return true;
+
+    return super.instrumentsAreEqual(i1, i2);
+  }
+
   async placeMarketOrder({ instrument, quantity, direction }) {
     await this.ensureAccessTokenIsOk();
 
@@ -307,12 +319,20 @@ class AlorOpenAPIV2Trader extends Trader {
     if (request.status === 200) {
       const response = await request.json();
 
+      let commission = response.commission;
+      const flatCommissionRate = this.document?.flatCommissionRate ?? void 0;
+
+      if (typeof flatCommissionRate !== 'undefined') {
+        commission =
+          (price * quantity * instrument.lot * flatCommissionRate) / 100;
+      }
+
       return {
         marginSellingPowerQuantity: response.quantityToSell,
         marginBuyingPowerQuantity: response.quantityToBuy,
         sellingPowerQuantity: response.notMarginQuantityToSell,
         buyingPowerQuantity: response.notMarginQuantityToBuy,
-        commission: response.commission
+        commission
       };
     } else {
       throw new TradingError({
@@ -870,10 +890,22 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
+  supportsInstrument(instrument) {
+    if (
+      instrument?.symbol === 'SPB' &&
+      (instrument?.currency === 'USD' || instrument?.currency === 'USDT') &&
+      this.document.exchange === EXCHANGE.SPBX
+    ) {
+      return true;
+    }
+
+    return super.supportsInstrument(instrument);
+  }
+
   adoptInstrument(instrument) {
     if (
       instrument?.symbol === 'SPB' &&
-      instrument?.currency === 'USD' &&
+      (instrument?.currency === 'USD' || instrument?.currency === 'USDT') &&
       this.document.exchange === EXCHANGE.SPBX
     ) {
       return this.instruments.get('SPB@US');

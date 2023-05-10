@@ -13,7 +13,6 @@ import '../button.js';
 import '../text-field.js';
 
 const isAlwaysUpToDateDomain =
-  window.location.origin === 'https://onaryx.ru' ||
   window.location.origin === 'https://johnpantini.johnpantini.pages.dev' ||
   window.location.origin === 'https://johnpantini.pages.dev';
 

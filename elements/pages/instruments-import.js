@@ -274,25 +274,27 @@ export class InstrumentsImportPage extends Page {
 
     const symbols = await rSymbols.json();
 
-    return symbols.map((s) => {
-      let type = 'stock';
+    return symbols
+      .filter((s) => s.symbol !== 'SPB')
+      .map((s) => {
+        let type = 'stock';
 
-      if (s.cfiCode?.startsWith?.('C') && !s.cfiCode?.startsWith?.('CB'))
-        type = 'etf';
+        if (s.cfiCode?.startsWith?.('C') && !s.cfiCode?.startsWith?.('CB'))
+          type = 'etf';
 
-      return {
-        symbol: s.symbol,
-        exchange: EXCHANGE.SPBX,
-        broker: BROKERS.ALOR,
-        fullName: s.description,
-        minPriceIncrement: s.minstep,
-        type,
-        currency: s.currency,
-        forQualInvestorFlag: s.currency !== 'RUB',
-        lot: s.lotsize,
-        isin: s.ISIN
-      };
-    });
+        return {
+          symbol: s.symbol,
+          exchange: EXCHANGE.SPBX,
+          broker: BROKERS.ALOR,
+          fullName: s.description,
+          minPriceIncrement: s.minstep,
+          type,
+          currency: s.currency,
+          forQualInvestorFlag: s.currency !== 'RUB',
+          lot: s.lotsize,
+          isin: s.ISIN
+        };
+      });
   }
 
   async [INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES]() {
@@ -352,7 +354,9 @@ export class InstrumentsImportPage extends Page {
     const instruments = [];
 
     for (const f of payload.values) {
-      if (typeof f.orderInfo?.minPriceIncrementAmount?.currency === 'undefined') {
+      if (
+        typeof f.orderInfo?.minPriceIncrementAmount?.currency === 'undefined'
+      ) {
         continue;
       }
 
