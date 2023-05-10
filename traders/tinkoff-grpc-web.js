@@ -87,7 +87,7 @@ class TinkoffGrpcWebTrader extends Trader {
 
   #positionsAbortController;
 
-  #tradesAbortController;
+  #timelineHistory = [];
 
   // Key: figi ; Value: instrument object
   #figis = new Map();
@@ -407,11 +407,6 @@ class TinkoffGrpcWebTrader extends Trader {
     return this.#resubscribeToPositionsStream(reconnect);
   }
 
-  @debounce(100)
-  resubscribeToTradesStream(reconnect = false) {
-    return this.#resubscribeToTradesStream(reconnect);
-  }
-
   async #resubscribeToMarketDataStream(reconnect = false) {
     if (
       !this.refs.orderbook.size &&
@@ -594,6 +589,14 @@ class TinkoffGrpcWebTrader extends Trader {
             accountId: this.document.account
           })
         );
+
+        this.onPositionsMessage(
+          await this.getOrCreateClient(
+            OperationsServiceDefinition
+          ).getPositions({
+            accountId: this.document.account
+          })
+        );
       }
 
       for await (const data of stream) {
@@ -685,56 +688,6 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  async #resubscribeToTradesStream() {
-    if (!this.refs.timeline.size) {
-      return;
-    }
-
-    const client = createClient(
-      OrdersStreamServiceDefinition,
-      createChannel('https://invest-public-api.tinkoff.ru:443'),
-      {
-        '*': {
-          metadata: this.#metadata
-        }
-      }
-    );
-
-    this.#tradesAbortController?.abort?.();
-
-    this.#tradesAbortController = new AbortController();
-
-    const stream = client.tradesStream(
-      {
-        accounts: [this.document.account]
-      },
-      {
-        signal: this.#tradesAbortController?.signal
-      }
-    );
-
-    try {
-      for await (const data of stream) {
-        if (data.orderTrades) {
-          this.onTimelineMessage({
-            items: [data.orderTrades],
-            fromHistory: false
-          });
-        }
-      }
-
-      this.resubscribeToTradesStream(true);
-    } catch (e) {
-      if (!isAbortError(e)) {
-        console.error(e);
-
-        setTimeout(() => {
-          this.resubscribeToTradesStream(true);
-        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-      }
-    }
-  }
-
   subsAndRefs(datum) {
     return {
       [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
@@ -795,13 +748,16 @@ class TinkoffGrpcWebTrader extends Trader {
         break;
       }
       case TRADER_DATUM.TIMELINE_ITEM: {
-        const history = await this.timelineHistory({
-          cursor: ''
-        });
+        if (!this.#timelineHistory.length) {
+          this.#timelineHistory = (
+            await this.timelineHistory({
+              cursor: ''
+            })
+          ).items;
+        }
 
         this.onTimelineMessage({
-          items: history.items,
-          fromHistory: true
+          items: this.#timelineHistory
         });
 
         break;
@@ -840,7 +796,7 @@ class TinkoffGrpcWebTrader extends Trader {
     }
 
     if (refs === this.refs.timeline) {
-      this.resubscribeToTradesStream();
+      void this.#fetchTimelineLoop();
     }
 
     if (refs === this.refs.orders) {
@@ -864,12 +820,14 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  async timelineHistory({ cursor, limit = 100 }) {
+  async timelineHistory({ cursor, from, to, limit = 100 }) {
     return this.getOrCreateClient(
       OperationsServiceDefinition
     ).getOperationsByCursor({
       accountId: this.document.account,
       instrumentId: '',
+      from,
+      to,
       // Inclusive
       cursor,
       limit,
@@ -880,68 +838,36 @@ class TinkoffGrpcWebTrader extends Trader {
         OperationType.OPERATION_TYPE_BUY_MARGIN,
         OperationType.OPERATION_TYPE_SELL_MARGIN
       ],
-      state: OperationState.OPERATION_STATE_UNSPECIFIED,
+      state: OperationState.OPERATION_STATE_EXECUTED,
       withoutCommissions: true
     });
   }
 
-  onTimelineMessage({ items, fromHistory }) {
+  onTimelineMessage({ items }) {
     for (const [source, fields] of this.subs.timeline) {
       for (const { field, datum } of fields) {
         if (datum === TRADER_DATUM.TIMELINE_ITEM) {
-          if (Array.isArray(items)) {
-            if (fromHistory) {
-              const filtered = items.filter(
-                (i) => i.state !== OperationState.OPERATION_STATE_CANCELED
-              );
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const instrument = this.#figis.get(item.figi);
 
-              for (let i = 0; i < filtered.length; i++) {
-                const item = filtered[i];
-                const instrument = this.#figis.get(item.figi);
-
-                if (instrument && Array.isArray(item.tradesInfo?.trades)) {
-                  for (const trade of item.tradesInfo.trades) {
-                    source[field] = {
-                      instrument,
-                      operationId: trade.num,
-                      accruedInterest: toNumber(item.accruedInt),
-                      commission: toNumber(item.commission),
-                      parentId: item.id,
-                      symbol: instrument.symbol,
-                      cursor: item.cursor,
-                      type: item.type,
-                      exchange: instrument.exchange,
-                      quantity: trade.quantity / instrument.lot,
-                      price: toNumber(trade.price) * instrument.lot,
-                      createdAt: trade.date.toISOString(),
-                      parentCreatedAt: item.date.toISOString()
-                    };
-                  }
-                }
-              }
-            } else {
-              // Real-time item from TradesStream
-              const [item] = items;
-              const instrument = this.#figis.get(item.figi);
-
-              if (instrument && Array.isArray(item.trades)) {
-                for (const trade of item.trades) {
-                  source[field] = {
-                    instrument,
-                    operationId: trade.tradeId,
-                    parentId: item.orderId,
-                    symbol: instrument.symbol,
-                    type:
-                      item.direction === OrderDirection.ORDER_DIRECTION_BUY
-                        ? OperationType.OPERATION_TYPE_BUY
-                        : OperationType.OPERATION_TYPE_SELL,
-                    exchange: instrument.exchange,
-                    quantity: trade.quantity / instrument.lot,
-                    price: toNumber(trade.price) * instrument.lot,
-                    createdAt: trade.dateTime.toISOString(),
-                    parentCreatedAt: item.createdAt.toISOString()
-                  };
-                }
+            if (instrument && Array.isArray(item.tradesInfo?.trades)) {
+              for (const trade of item.tradesInfo.trades) {
+                source[field] = {
+                  instrument,
+                  operationId: trade.num,
+                  accruedInterest: toNumber(item.accruedInt),
+                  commission: toNumber(item.commission),
+                  parentId: item.id,
+                  symbol: instrument.symbol,
+                  cursor: item.cursor,
+                  type: item.type,
+                  exchange: instrument.exchange,
+                  quantity: trade.quantity / instrument.lot,
+                  price: toNumber(trade.price) * instrument.lot,
+                  createdAt: trade.date.toISOString(),
+                  parentCreatedAt: item.date.toISOString()
+                };
               }
             }
           }
@@ -1360,19 +1286,58 @@ class TinkoffGrpcWebTrader extends Trader {
     return { orders };
   }
 
+  async #fetchTimelineLoop() {
+    if (this.refs.timeline.size) {
+      try {
+        if (!this.#timelineHistory.length) {
+          this.#timelineHistory = (
+            await this.timelineHistory({
+              cursor: ''
+            })
+          ).items;
+
+          this.onTimelineMessage({
+            items: this.#timelineHistory
+          });
+        } else {
+          const history = await this.timelineHistory({
+            cursor: '',
+            limit: 10
+          });
+          const newItems = [];
+
+          for (const i of history.items) {
+            if (i.id !== this.#timelineHistory[0].id) {
+              newItems.push(i);
+            } else {
+              break;
+            }
+          }
+
+          this.#timelineHistory.unshift(...newItems);
+
+          this.onTimelineMessage({
+            items: newItems
+          });
+        }
+
+        setTimeout(() => {
+          this.#fetchTimelineLoop();
+        }, 750);
+      } catch (e) {
+        console.error(e);
+
+        setTimeout(() => {
+          this.#fetchTimelineLoop();
+        }, 750);
+      }
+    }
+  }
+
   async #fetchOrdersLoop() {
     if (this.refs.orders.size) {
       try {
-        const client = createClient(
-          OrdersServiceDefinition,
-          createChannel('https://invest-public-api.tinkoff.ru:443'),
-          {
-            '*': {
-              metadata: this.#metadata
-            }
-          }
-        );
-
+        const client = this.getOrCreateClient(OrdersServiceDefinition);
         const { orders } = await this.#getOrders(client);
         const newOrders = new Set();
 

@@ -263,8 +263,6 @@ export class TimelineWidget extends WidgetWithInstrument {
       }
     }
 
-    totalAmount *= firstOperation.instrument?.lot ?? 1;
-
     if (negative) totalAmount *= -1;
 
     return formatAmount(
@@ -354,7 +352,10 @@ export class TimelineWidget extends WidgetWithInstrument {
           }),
           price: formatPrice(
             totalAmount / totalQuantity,
-            firstOperation.instrument
+            firstOperation.instrument,
+            {
+              minimumFractionDigits: 0
+            }
           )
         });
     }
