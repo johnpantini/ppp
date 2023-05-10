@@ -891,7 +891,9 @@ class TinkoffGrpcWebTrader extends Trader {
                   source[field] = {
                     bids:
                       orderbook?.bids?.map?.((b) => {
-                        const p = toNumber(b.price);
+                        const p = toNumber(b.price).toFixed(
+                          getInstrumentPrecision(instrument)
+                        );
 
                         return {
                           price:
@@ -904,7 +906,9 @@ class TinkoffGrpcWebTrader extends Trader {
                       }) ?? [],
                     asks:
                       orderbook?.asks?.map?.((a) => {
-                        const p = toNumber(a.price);
+                        const p = toNumber(a.price).toFixed(
+                          getInstrumentPrecision(instrument)
+                        );
 
                         return {
                           price:
