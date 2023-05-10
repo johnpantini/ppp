@@ -250,7 +250,6 @@ export const textFieldStyles = css`
     position: absolute;
     display: flex;
     right: 12px;
-    height: 16px;
     z-index: 1;
     color: ${themeConditional(paletteBlack, paletteGrayLight3)};
   }
@@ -338,6 +337,11 @@ export const textFieldStyles = css`
   .show-password {
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
     cursor: pointer;
+  }
+
+  .show-password > span {
+    display: flex;
+    align-items: center;
   }
 `;
 

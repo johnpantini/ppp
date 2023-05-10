@@ -348,10 +348,7 @@ class AlorOpenAPIV2Trader extends Trader {
             orderInstrument = this.instruments.get(o.symbol);
           }
 
-          if (
-            orderInstrument?.symbol ??
-            orderInstrument.minPriceIncrement > 0
-          ) {
+          if (orderInstrument?.minPriceIncrement > 0) {
             let price = +this.fixPrice(
               orderInstrument,
               o.price + orderInstrument.minPriceIncrement * value

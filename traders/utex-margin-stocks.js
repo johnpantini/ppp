@@ -313,11 +313,17 @@ class UtexMarginStocksTrader extends Trader {
   #getUTEXOrderStatus(order) {
     switch (order.status) {
       case 'NEW':
+      case 'PART_FILLED':
         return 'working';
       case 'FILLED':
         return 'filled';
-      case ' CANCELED':
+      case 'PART_CANCELED':
+      case 'CANCELED':
         return 'canceled';
+      case 'REJECTED':
+        return 'rejected';
+      case 'TRIGGERED':
+        return 'triggered';
     }
 
     return 'unspecified';
@@ -413,6 +419,45 @@ class UtexMarginStocksTrader extends Trader {
     }
 
     return super.getInstrumentIconUrl(instrument);
+  }
+
+  async modifyLimitOrders({ instrument, side, value }) {
+    await this.ensureAccessTokenIsOk();
+
+    for (const [, o] of this.orders) {
+      const status = this.#getUTEXOrderStatus(o);
+      const orderInstrument = this.#symbols.get(o.symbolId);
+
+      if (
+        status === 'working' &&
+        (o.side.toLowerCase() === side || side === 'all')
+      ) {
+        if (
+          instrument &&
+          !this.instrumentsAreEqual(instrument, orderInstrument)
+        )
+          continue;
+
+        if (orderInstrument?.minPriceIncrement > 0) {
+          const price = +this.fixPrice(
+            orderInstrument,
+            +o.price + orderInstrument.minPriceIncrement * value
+          );
+
+          o.instrument = orderInstrument;
+          o.orderType = o.type.toLowerCase();
+          o.orderId = o.exchangeOrderId;
+
+          await this.cancelLimitOrder(o);
+          await this.placeLimitOrder({
+            instrument: orderInstrument,
+            price,
+            quantity: (+o.qty - +o.filled) / orderInstrument.lot,
+            direction: o.side
+          });
+        }
+      }
+    }
   }
 
   async cancelAllLimitOrders({ instrument, filter } = {}) {

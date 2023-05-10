@@ -340,7 +340,7 @@ class TinkoffGrpcWebTrader extends Trader {
 
           const orderInstrument = this.#figis.get(o.figi);
 
-          if (orderInstrument && orderInstrument.minPriceIncrement > 0) {
+          if (orderInstrument?.minPriceIncrement > 0) {
             const price = +this.fixPrice(
               orderInstrument,
               (orderInstrument.type === 'bond'
