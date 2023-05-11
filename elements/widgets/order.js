@@ -784,6 +784,12 @@ export class OrderWidget extends WidgetWithInstrument {
         this.document.ordersTrader
       );
 
+      if (typeof this.ordersTrader?.estimate === 'function') {
+        setTimeout(() => {
+          this.calculateEstimate();
+        }, 1000);
+      }
+
       await this.ordersTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
@@ -886,7 +892,7 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
-    await this.ordersTrader.unsubscribeFields?.({
+    await this.ordersTrader?.unsubscribeFields?.({
       source: this,
       fieldDatumPairs: {
         traderEvent: TRADER_DATUM.TRADER

@@ -45,8 +45,6 @@ class UtexMarginStocksTrader extends Trader {
 
   #symbols = new Map();
 
-  #tradeCounter = 0;
-
   subs = {
     positions: new Map(),
     orders: new Map(),
@@ -70,7 +68,13 @@ class UtexMarginStocksTrader extends Trader {
     currency: 'USDT'
   };
 
-  timeline = [];
+  #timelineHistory = [];
+
+  constructor(document) {
+    super(document);
+
+    this.#timelineHistory = [];
+  }
 
   onCacheInstrument(instrument) {
     if (typeof instrument.utexSymbolID === 'number') {
@@ -454,20 +458,6 @@ class UtexMarginStocksTrader extends Trader {
     }
   }
 
-  async removeLastRef(instrument, refs, ref) {
-    if (refs === this.refs.positions) {
-      this.positions.clear();
-    }
-
-    if (refs === this.refs.orders) {
-      this.orders.clear();
-    }
-
-    if (refs === this.refs.timeline) {
-      this.timeline = [];
-    }
-  }
-
   #getUTEXOrderStatus(order) {
     switch (order.status) {
       case 'NEW':
@@ -563,7 +553,7 @@ class UtexMarginStocksTrader extends Trader {
 
       if (instrument) {
         if (!fromCache) {
-          this.timeline.push(item);
+          this.#timelineHistory.push(item);
         }
 
         for (const [source, fields] of this.subs.timeline) {
@@ -580,7 +570,7 @@ class UtexMarginStocksTrader extends Trader {
               source[field] = {
                 instrument,
                 // UTEX trades are independent
-                operationId: `${item.exchangeOrderId}-${this.#tradeCounter++}`,
+                operationId: `${item.exchangeOrderId}|${item.moment}|${item.side}|${item.tradeQty}|${item.tradePrice}`,
                 accruedInterest: null,
                 commission,
                 parentId: item.exchangeOrderId,
@@ -684,7 +674,7 @@ class UtexMarginStocksTrader extends Trader {
         break;
       }
       case TRADER_DATUM.TIMELINE_ITEM: {
-        for (const item of this.timeline) {
+        for (const item of this.#timelineHistory) {
           this.onTimelineMessage({
             item,
             fromCache: true
@@ -949,9 +939,29 @@ class UtexMarginStocksTrader extends Trader {
       this.leftMarginBP / price / instrument.lot
     );
 
+    let marginSellingPowerQuantity = marginBPQuantity;
+    let marginBuyingPowerQuantity = marginBPQuantity;
+
+    for (const [, position] of this.positions) {
+      const positionInstrument = this.#symbols.get(position.symbolId);
+
+      if (
+        positionInstrument &&
+        this.instrumentsAreEqual(positionInstrument, instrument)
+      ) {
+        const quantity = +position.qty;
+
+        if (quantity > 0) {
+          marginSellingPowerQuantity += quantity / instrument.lot;
+        } else if (quantity < 0) {
+          marginBuyingPowerQuantity -= quantity / instrument.lot;
+        }
+      }
+    }
+
     return {
-      marginSellingPowerQuantity: marginBPQuantity,
-      marginBuyingPowerQuantity: marginBPQuantity,
+      marginSellingPowerQuantity,
+      marginBuyingPowerQuantity,
       sellingPowerQuantity: null,
       buyingPowerQuantity: null,
       commission
