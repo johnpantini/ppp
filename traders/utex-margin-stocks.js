@@ -945,8 +945,9 @@ class UtexMarginStocksTrader extends Trader {
     const commissionRate = this.document?.commissionRate ?? 0.04;
     const commission =
       (price * quantity * instrument.lot * commissionRate) / 100;
-    const marginBPQuantity =
-      Math.trunc(this.leftMarginBP / price / instrument.lot) * instrument.lot;
+    const marginBPQuantity = Math.trunc(
+      this.leftMarginBP / price / instrument.lot
+    );
 
     return {
       marginSellingPowerQuantity: marginBPQuantity,
