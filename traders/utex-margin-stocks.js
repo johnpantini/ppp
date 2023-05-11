@@ -13,6 +13,7 @@ import {
   TradingError,
   UTEXBlockError
 } from '../lib/ppp-errors.js';
+import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
 
 export function generateTraceId() {
   let result = '';
@@ -44,6 +45,8 @@ class UtexMarginStocksTrader extends Trader {
 
   #symbols = new Map();
 
+  #tradeCounter = 0;
+
   subs = {
     positions: new Map(),
     orders: new Map(),
@@ -66,6 +69,8 @@ class UtexMarginStocksTrader extends Trader {
     amount: 0,
     currency: 'USDT'
   };
+
+  timeline = [];
 
   onCacheInstrument(instrument) {
     if (typeof instrument.utexSymbolID === 'number') {
@@ -343,6 +348,25 @@ class UtexMarginStocksTrader extends Trader {
                 })
               );
 
+              this.connection.send(
+                JSON.stringify({
+                  t: 1,
+                  d: {
+                    topic:
+                      'com.unitedtraders.luna.utex.protocol.mobile.MobileHistoryService.subscribeAllFilledExecutions',
+                    i: 5,
+                    accessToken: this.#jwt,
+                    metadata: {
+                      traceId: generateTraceId(),
+                      spanId: generateTraceId()
+                    },
+                    parameters: {
+                      depth: 100
+                    }
+                  }
+                })
+              );
+
               // Liquidation threshold
               // this.connection.send(
               //   JSON.stringify({
@@ -350,7 +374,7 @@ class UtexMarginStocksTrader extends Trader {
               //     d: {
               //       topic:
               //         'com.unitedtraders.luna.utex.protocol.mobile.MobileMarginalTradingBalanceService.subscribeMaintenanceBalanceWithSnapshot',
-              //       i: 5,
+              //       i: 6,
               //       accessToken: this.#jwt,
               //       metadata: {
               //         traceId: generateTraceId(),
@@ -412,10 +436,35 @@ class UtexMarginStocksTrader extends Trader {
                   this.onBalanceMessage(balance);
                 }
               }
+
+              if (payload.d?.i === 5) {
+                if (Array.isArray(d.executions)) {
+                  for (const item of d.executions.sort(
+                    (a, b) =>
+                      new Date(a.moment / 1000) - new Date(b.moment / 1000)
+                  )) {
+                    this.onTimelineMessage({ item });
+                  }
+                }
+              }
             }
           };
         }
       }));
+    }
+  }
+
+  async removeLastRef(instrument, refs, ref) {
+    if (refs === this.refs.positions) {
+      this.positions.clear();
+    }
+
+    if (refs === this.refs.orders) {
+      this.orders.clear();
+    }
+
+    if (refs === this.refs.timeline) {
+      this.timeline = [];
     }
   }
 
@@ -508,6 +557,50 @@ class UtexMarginStocksTrader extends Trader {
     }
   }
 
+  onTimelineMessage({ item, fromCache }) {
+    if (item.symbolId) {
+      const instrument = this.#symbols.get(item.symbolId);
+
+      if (instrument) {
+        if (!fromCache) {
+          this.timeline.push(item);
+        }
+
+        for (const [source, fields] of this.subs.timeline) {
+          for (const { field, datum } of fields) {
+            if (datum === TRADER_DATUM.TIMELINE_ITEM) {
+              const commissionRate = this.document?.commissionRate ?? 0.04;
+              const commission =
+                ((item.price / 1e8) *
+                  item.tradeQty *
+                  instrument.lot *
+                  commissionRate) /
+                100;
+
+              source[field] = {
+                instrument,
+                // UTEX trades are independent
+                operationId: `${item.exchangeOrderId}-${this.#tradeCounter++}`,
+                accruedInterest: null,
+                commission,
+                parentId: item.exchangeOrderId,
+                symbol: instrument.symbol,
+                type:
+                  item.side.toLowerCase() === 'buy'
+                    ? OperationType.OPERATION_TYPE_BUY
+                    : OperationType.OPERATION_TYPE_SELL,
+                exchange: EXCHANGE.UTEX_MARGIN_STOCKS,
+                quantity: item.tradeQty,
+                price: item.tradePrice / 1e8,
+                createdAt: new Date(item.moment / 1e6).toISOString()
+              };
+            }
+          }
+        }
+      }
+    }
+  }
+
   onBalanceMessage({ amount, currency, fromCache }) {
     if (!fromCache) {
       this.balance.amount = amount;
@@ -585,6 +678,16 @@ class UtexMarginStocksTrader extends Trader {
         for (const [_, order] of this.orders) {
           this.onOrdersMessage({
             order
+          });
+        }
+
+        break;
+      }
+      case TRADER_DATUM.TIMELINE_ITEM: {
+        for (const item of this.timeline) {
+          this.onTimelineMessage({
+            item,
+            fromCache: true
           });
         }
 
@@ -842,11 +945,12 @@ class UtexMarginStocksTrader extends Trader {
     const commissionRate = this.document?.commissionRate ?? 0.04;
     const commission =
       (price * quantity * instrument.lot * commissionRate) / 100;
+    const marginBPQuantity =
+      Math.trunc(this.leftMarginBP / price / instrument.lot) * instrument.lot;
 
     return {
-      marginSellingPowerQuantity: null,
-      marginBuyingPowerQuantity:
-        Math.trunc(this.leftMarginBP / price / 10) * 10,
+      marginSellingPowerQuantity: marginBPQuantity,
+      marginBuyingPowerQuantity: marginBPQuantity,
       sellingPowerQuantity: null,
       buyingPowerQuantity: null,
       commission
@@ -882,6 +986,8 @@ class UtexMarginStocksTrader extends Trader {
         rejectReason === 'NotEnoughNightBP'
       ) {
         return 'Недостаточно покупательской способности для открытия позиции.';
+      } else if (rejectReason === 'MarketIsNotAvailable') {
+        return 'Рынок сейчас закрыт.';
       }
     }
   }
