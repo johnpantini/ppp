@@ -864,7 +864,7 @@ class TinkoffGrpcWebTrader extends Trader {
                   type: item.type,
                   exchange: instrument.exchange,
                   quantity: trade.quantity / instrument.lot,
-                  price: toNumber(trade.price) * instrument.lot,
+                  price: toNumber(trade.price),
                   createdAt: trade.date.toISOString(),
                   parentCreatedAt: item.date.toISOString()
                 };

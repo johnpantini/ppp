@@ -590,7 +590,7 @@ class UtexMarginStocksTrader extends Trader {
                     ? OperationType.OPERATION_TYPE_BUY
                     : OperationType.OPERATION_TYPE_SELL,
                 exchange: EXCHANGE.UTEX_MARGIN_STOCKS,
-                quantity: item.tradeQty,
+                quantity: item.tradeQty / instrument.lot,
                 price: item.tradePrice / 1e8,
                 createdAt: new Date(item.moment / 1e6).toISOString()
               };

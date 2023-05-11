@@ -265,6 +265,8 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     if (negative) totalAmount *= -1;
 
+    totalAmount *= firstOperation.instrument.lot;
+
     return formatAmount(
       totalAmount,
       firstOperation.instrument?.currency,
