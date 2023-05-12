@@ -24,11 +24,12 @@ import {
   spacing4,
   spacing3
 } from '../design/design-tokens.js';
-import { PAGE_STATUS, VERSIONING_STATUS } from '../lib/const.js';
+import { PAGE_STATUS, SERVICE_STATE, VERSIONING_STATUS } from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
 import {
   ConflictError,
   DocumentNotFoundError,
+  FetchError,
   invalidate,
   maybeFetchError
 } from '../lib/ppp-errors.js';
@@ -626,20 +627,6 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.OPERATION_STARTED;
   }
 
-  showSuccessNotification(
-    toastText = ppp.t('$operations.operationSucceeded'),
-    toastTitle = this.getToastTitle()
-  ) {
-    if (!toastText.endsWith('.')) toastText += '.';
-
-    ppp.app.toast.appearance = 'success';
-    ppp.app.toast.dismissible = true;
-    ppp.app.toast.title = toastTitle;
-    ppp.app.toast.text = toastText;
-
-    ppp.app.toast.removeAttribute('hidden');
-  }
-
   progressOperation(progress = 0, toastText) {
     if (!ppp.app) return;
 
@@ -659,6 +646,20 @@ class Page extends PPPElement {
 
   endOperation() {
     this.status = PAGE_STATUS.OPERATION_ENDED;
+  }
+
+  showSuccessNotification(
+    toastText = ppp.t('$operations.operationSucceeded'),
+    toastTitle = this.getToastTitle()
+  ) {
+    if (!toastText.endsWith('.')) toastText += '.';
+
+    ppp.app.toast.appearance = 'success';
+    ppp.app.toast.dismissible = true;
+    ppp.app.toast.title = toastTitle;
+    ppp.app.toast.text = toastText;
+
+    ppp.app.toast.removeAttribute('hidden');
   }
 
   failOperation(e, toastTitle = this.getToastTitle()) {
@@ -725,6 +726,42 @@ class Page extends PPPElement {
             (e?.message || void 0) ??
             ppp.t('$operations.operationFailedDetailsInConsole')
         });
+    }
+  }
+
+  async updateDocumentFragment(documentUpdateFragment = {}) {
+    const document = this.document;
+    const ownId = await this.getDocumentId?.();
+
+    if (document._id ?? ownId) {
+      const encryptedUpdateClause = Object.assign({}, documentUpdateFragment);
+
+      if (encryptedUpdateClause.$set) {
+        encryptedUpdateClause.$set = await ppp.encrypt(
+          encryptedUpdateClause.$set
+        );
+      }
+
+      await ppp.user.functions.updateOne(
+        {
+          collection: this.collection
+        },
+        document._id
+          ? {
+              _id: document._id
+            }
+          : ownId,
+        encryptedUpdateClause,
+        {
+          upsert: true
+        }
+      );
+
+      this.document = Object.assign(
+        {},
+        this.document,
+        documentUpdateFragment.$set ?? {}
+      );
     }
   }
 
@@ -1005,11 +1042,237 @@ class PageWithService {
 
   async updateService() {}
 
-  async restartService() {}
+  async restartService() {
+    this.beginOperation();
 
-  async stopService() {}
+    try {
+      await this.restart?.();
+      await this.updateDocumentFragment({
+        $set: {
+          state: SERVICE_STATE.ACTIVE,
+          updatedAt: new Date()
+        }
+      });
 
-  async cleanupService() {}
+      this.showSuccessNotification();
+    } catch (e) {
+      await this.updateDocumentFragment({
+        $set: {
+          state: SERVICE_STATE.FAILED,
+          updatedAt: new Date()
+        }
+      });
+
+      this.failOperation(e, 'Перезапуск сервиса');
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async stopService() {
+    this.beginOperation();
+
+    try {
+      await this.stop?.();
+      await this.updateDocumentFragment({
+        $set: {
+          state: SERVICE_STATE.STOPPED,
+          updatedAt: new Date()
+        }
+      });
+
+      this.showSuccessNotification();
+    } catch (e) {
+      await this.updateDocumentFragment({
+        $set: {
+          state: SERVICE_STATE.FAILED,
+          updatedAt: new Date()
+        }
+      });
+
+      this.failOperation(e, 'Остановка сервиса');
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async cleanupService() {
+    this.beginOperation();
+
+    try {
+      await this.cleanup?.();
+      await this.updateDocumentFragment({
+        $set: {
+          state: SERVICE_STATE.STOPPED,
+          removed: true,
+          updatedAt: new Date()
+        }
+      });
+
+      this.showSuccessNotification();
+    } catch (e) {
+      await this.updateDocumentFragment({
+        $set: {
+          state: SERVICE_STATE.FAILED,
+          removed: true,
+          updatedAt: new Date()
+        }
+      });
+
+      this.failOperation(e, 'Удаление сервиса');
+    } finally {
+      this.endOperation();
+    }
+  }
 }
 
-export { Page, PageWithShiftLock, PageWithService };
+/**
+ * @mixin
+ */
+class PageWithSupabaseService {
+  async callTemporaryFunction({ api, functionBody, returnResult, extraSQL }) {
+    const funcName = `pg_temp.ppp_${uuidv4().replaceAll('-', '_')}`;
+    // Temporary function, no need to drop
+    const query = `
+      ${extraSQL ? extraSQL : ''}
+
+      create or replace function ${funcName}()
+      returns json as
+      $$
+        ${await new Tmpl().render(this, functionBody, {})}
+      $$ language plv8;
+
+      select ${funcName}();
+    `;
+
+    const rExecuteSQL = await fetch(
+      new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query,
+          connectionString: this.getConnectionString(api)
+        })
+      }
+    );
+
+    await maybeFetchError(rExecuteSQL, 'Не удалось выполнить функцию.');
+
+    const json = await rExecuteSQL.json();
+    let result;
+
+    try {
+      result = JSON.parse(
+        json.results.find((r) => r.command.toUpperCase() === 'SELECT').rows[0]
+      );
+    } catch (e) {
+      // For [null]
+      result = json.results.find((r) => r.command.toUpperCase() === 'SELECT');
+    }
+
+    if (returnResult) {
+      return result;
+    } else console.log(result);
+  }
+
+  getSQLUrl(file) {
+    const origin = window.location.origin;
+    let scriptUrl = new URL(`sql/${file}`, origin).toString();
+
+    if (origin.endsWith('github.io'))
+      scriptUrl = new URL(`ppp/sql/${file}`, origin).toString();
+
+    return scriptUrl;
+  }
+
+  getConnectionString(api) {
+    const { hostname } = new URL(api.url);
+
+    return `postgres://${api.user}:${encodeURIComponent(
+      api.password
+    )}@db.${hostname}:${api.port}/${api.db}`;
+  }
+
+  async executeSQL({ api, query }) {
+    ppp.app.terminalModal.dismissible = false;
+    ppp.app.terminalModal.removeAttribute('hidden');
+
+    const terminal = ppp.app.terminalWindow.terminal;
+
+    try {
+      terminal.clear();
+      terminal.reset();
+      terminal.writeInfo('Выполняется запрос к базе данных...\r\n');
+
+      const rSQL = await fetch(
+        new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query,
+            connectionString: this.getConnectionString(api)
+          })
+        }
+      );
+
+      const text = await rSQL.text();
+
+      if (!rSQL.ok) {
+        console.error(text);
+        terminal.writeError(text);
+
+        // noinspection ExceptionCaughtLocallyJS
+        throw new FetchError({
+          ...rSQL,
+          ...{ message: 'SQL-запрос завершился с ошибкой.' }
+        });
+      } else {
+        terminal.writeln(text);
+        terminal.writeln(
+          '\x1b[32m\r\nОперация выполнена, это окно можно закрыть.\r\n\x1b[0m'
+        );
+      }
+    } finally {
+      ppp.app.terminalModal.dismissible = true;
+    }
+  }
+
+  async action(action) {
+    const query = await new Tmpl().render(
+      this,
+      await (
+        await fetch(this.getSQLUrl(`${this.document.type}/${action}.sql`), {
+          cache: 'reload'
+        })
+      ).text(),
+      {}
+    );
+
+    return this.executeSQL({
+      api: this.document.supabaseApi,
+      query
+    });
+  }
+
+  async restart() {
+    return this.action('start');
+  }
+
+  async stop() {
+    return this.action('stop');
+  }
+
+  async cleanup() {
+    return this.action('cleanup');
+  }
+}
+
+export { Page, PageWithShiftLock, PageWithService, PageWithSupabaseService };

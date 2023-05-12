@@ -88,17 +88,44 @@ $$ language plv8;
 create or replace function nyse_nsdq_halts_insert_trigger_[%#ctx.document._id%]()
 returns trigger as
 $$
-  const message = plv8.find_function('format_nyse_nsdq_halt_message_[%#ctx.document._id%]')(
-    NEW.halt_date, NEW.halt_time, NEW.symbol, NEW.name, NEW.market, NEW.reason_code, NEW.pause_threshold_price,
-    NEW.resumption_date, NEW.resumption_quote_time, NEW.resumption_trade_time
-  );
+  try {
+    if ([%#!!ctx.document.pusherApiId%]) {
+      const timestamp = Math.floor(Date.now() / 1000);
 
-  if (typeof message === 'string')
-    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%]')(message, {});
-  else if (typeof message === 'object' && message.text)
-    plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%]')(message.text, message.options || {});
+      const pusherBody = JSON.stringify({
+        name: '[%#ctx.document._id%]:insert',
+        channel: 'ppp',
+        data: JSON.stringify(NEW, (key, value) => typeof value === 'bigint' ? value.toString() : value)
+      });
 
-  return null;
+      const bodyMd5 = plv8.execute(`select encode(digest('${pusherBody}', 'md5'), 'hex')`)[0].encode;
+      let params = `auth_key=[%#ctx.document.pusherApi?.key%]&auth_timestamp=${timestamp}&auth_version=1.0&body_md5=${bodyMd5}`;
+
+      const authData = ['POST', '/apps/[%#ctx.document.pusherApi?.appid%]/events', params].join('\n');
+      const authSignature = plv8.execute(`select encode(hmac('${authData}', '[%#ctx.document.pusherApi?.secret%]',
+        'sha256'), 'hex')`)[0].encode;
+
+      params += `&auth_signature=${authSignature}`;
+
+      plv8.execute(`select content from http(('POST', 'https://api-[%#ctx.document.pusherApi?.cluster%].pusher.com/apps/[%#ctx.document.pusherApi?.appid%]/events?${params}', array[http_header('Content-Type', 'application/json')], 'application/json', '${pusherBody}')::http_request);`);
+    }
+
+    const message = plv8.find_function('format_nyse_nsdq_halt_message_[%#ctx.document._id%]')(
+      NEW.halt_date, NEW.halt_time, NEW.symbol, NEW.name, NEW.market, NEW.reason_code, NEW.pause_threshold_price,
+      NEW.resumption_date, NEW.resumption_quote_time, NEW.resumption_trade_time
+    );
+
+    if (typeof message === 'string')
+      plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%]')(message, {});
+    else if (typeof message === 'object' && message.text)
+      plv8.find_function('send_telegram_message_for_nyse_nsdq_halt_[%#ctx.document._id%]')(message.text, message.options || {});
+
+    return null;
+  } catch(e) {
+    plv8.elog(ERROR, e.toString());
+
+    return null;
+  }
 $$ language plv8;
 
 create or replace trigger nyse_nsdq_halts_insert_trigger_[%#ctx.document._id%]
@@ -133,7 +160,9 @@ try {
 
   for (const halt of plv8.find_function('parse_nyse_nsdq_halts_[%#ctx.document._id%]')()) {
     try {
-      if (halt.symbol && plv8.find_function('get_nyse_nsdq_halts_symbols_[%#ctx.document._id%]')().indexOf(halt.symbol) > -1) {
+      const symbols = plv8.find_function('get_nyse_nsdq_halts_symbols_[%#ctx.document._id%]')() || [];
+
+      if (halt.symbol && (!symbols.length || symbols.indexOf(halt.symbol) > -1)) {
         plv8.execute(`insert into public.nyse_nsdq_halts_[%#ctx.document._id%](halt_date, halt_time, symbol, name,
           market, reason_code, pause_threshold_price, resumption_date, resumption_quote_time,
           resumption_trade_time) values('${halt.halt_date}', '${halt.halt_time}', '${halt.symbol}',

@@ -8,7 +8,7 @@ import {
   ref,
   when
 } from '../../vendor/fast-element.min.js';
-import { invalidate, validate } from '../../lib/ppp-errors.js';
+import { validate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import '../button.js';
 import '../query-select.js';
@@ -34,6 +34,12 @@ export const templateLibraryModalPageTemplate = html`
             </ppp-option>
             <ppp-option value="thefly/history">
               The Fly - загрузка истории
+            </ppp-option>
+            <ppp-option value="nyse-nsdq-halts/formatter">
+              Паузы NYSE/NASDAQ - форматирование
+            </ppp-option>
+            <ppp-option value="nyse-nsdq-halts/history">
+              Паузы NYSE/NASDAQ - загрузка истории
             </ppp-option>
           </ppp-select>
         </div>
@@ -62,6 +68,45 @@ export const templateLibraryModalPageTemplate = html`
                         $and: [
                           {
                             type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.SUPABASE_PARSER%]`
+                          },
+                          {
+                            removed: { $ne: true }
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+            </div>
+          </section>
+        `
+      )}
+      ${when(
+        (x) =>
+          x.templateSelector.value === 'nyse-nsdq-halts/formatter' ||
+          x.templateSelector.value === 'nyse-nsdq-halts/history',
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Парсер торговых пауз NYSE/NASDAQ</h5>
+              <p class="description">Выберите сервис парсера.</p>
+            </div>
+            <div class="input-group">
+              <ppp-query-select
+                ${ref('nyseNsdqHaltsServiceId')}
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('services')
+                      .find({
+                        $and: [
+                          {
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.NYSE_NSDQ_HALTS%]`
                           },
                           {
                             removed: { $ne: true }
@@ -114,10 +159,18 @@ export class TemplateLibraryModalPage extends Page {
     this.beginOperation();
 
     try {
+      this.template = this.templateSelector.value;
+
       switch (this.template) {
         case 'thefly/formatter':
         case 'thefly/history':
           await validate(this.theflyServiceId);
+
+          break;
+
+        case 'nyse-nsdq-halts/formatter':
+        case 'nyse-nsdq-halts/history':
+          await validate(this.nyseNsdqHaltsServiceId);
 
           break;
       }
@@ -128,6 +181,15 @@ export class TemplateLibraryModalPage extends Page {
         case 'thefly/formatter':
         case 'thefly/history':
           code = code.replace('@@SERVICE_ID', this.theflyServiceId.datum()._id);
+
+          break;
+
+        case 'nyse-nsdq-halts/formatter':
+        case 'nyse-nsdq-halts/history':
+          code = code.replace(
+            '@@SERVICE_ID',
+            this.nyseNsdqHaltsServiceId.datum()._id
+          );
 
           break;
       }

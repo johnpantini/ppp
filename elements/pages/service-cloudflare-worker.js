@@ -227,7 +227,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить и опубликовать в Cloudflare
+          Сохранить в PPP и обновить в Cloudflare
         </ppp-button>
         ${when(
           (x) => x.document._id,

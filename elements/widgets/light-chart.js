@@ -598,7 +598,6 @@ export async function widgetDefinition() {
       template: lightChartWidgetTemplate,
       styles: lightChartWidgetStyles
     }).define(),
-    defaultHeight: 375,
     defaultWidth: 600,
     minHeight: 120,
     minWidth: 140,

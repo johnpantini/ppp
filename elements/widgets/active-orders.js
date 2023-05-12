@@ -560,7 +560,6 @@ export async function widgetDefinition() {
       template: activeOrdersWidgetTemplate,
       styles: activeOrdersWidgetStyles
     }).define(),
-    defaultHeight: 400,
     defaultWidth: 280,
     minHeight: 120,
     minWidth: 140,

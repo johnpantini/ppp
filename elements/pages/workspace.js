@@ -607,11 +607,7 @@ export class WorkspacePage extends Page {
         widgetDocument.widgetDefinition.defaultWidth ??
         minWidth
     );
-    const widgetHeight = parseInt(
-      widgetDocument.height ??
-        widgetDocument.widgetDefinition.defaultHeight ??
-        minHeight
-    );
+    const widgetHeight = parseInt(widgetDocument.height ?? minHeight);
 
     domElement.style.width = `${widgetWidth}px`;
     domElement.style.height = `${widgetHeight}px`;

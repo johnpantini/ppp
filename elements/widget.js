@@ -508,14 +508,13 @@ export class Widget extends PPPElement {
         }px`;
       }
 
+      this.style.maxHeight = `1024px`;
+      this.style.minHeight = `${this.widgetDefinition.minHeight ?? 120}px`;
+
       if (this.container.savedHeight > 0)
         this.style.height = `${this.container.savedHeight}px`;
       else {
-        this.style.height = `${
-          this.widgetDefinition.defaultHeight ??
-          this.widgetDefinition.minHeight ??
-          395
-        }px`;
+        this.style.height = `auto`;
       }
 
       this.document = this.container.document;
@@ -2944,6 +2943,10 @@ export const widgetCardStyles = css`
   .text-line.first {
     font-weight: 500;
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  .text-line.first + .text-line.second {
+    margin-top: 4px;
   }
 
   .text-line-inner {

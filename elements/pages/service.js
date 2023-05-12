@@ -49,6 +49,35 @@ export const servicePageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="NYSE/NASDAQ"
+            style="height: 44px"
+            src="${() => ppp.brandSvg('nsdq')}"
+          />
+          <span slot="title">Торговые паузы NYSE/NASDAQ</span>
+          <span slot="description"
+            >Оповещение о торговых паузах NYSE/NASDAQ в Telegram.
+            <a
+              class="link"
+              target="_blank"
+              rel="noopener"
+              href="http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts"
+              >RSS-лента пауз</a
+            >.</span
+          >
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `service-${SERVICES.NYSE_NSDQ_HALTS}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
       </div>
     </form>
   </template>

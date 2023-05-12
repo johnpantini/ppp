@@ -402,6 +402,14 @@ export const appTemplate = html`
             <span slot="title" ${ref('mountPointTitle')}></span>
             <div class="mount" slot="body" ${ref('mountPoint')}></div>
           </ppp-modal>
+          <ppp-modal ${ref('terminalModal')} class="auto" hidden>
+            <span slot="title" ${ref('terminalModalTitle')}>
+              Ход выполнения операции
+            </span>
+            <div slot="body" class="terminal-modal-body">
+              <ppp-terminal ${ref('terminalWindow')}></ppp-terminal>
+            </div>
+          </ppp-modal>
         </div>
       </div>
     </div>
@@ -459,6 +467,12 @@ export const appStyles = css`
   span[slot='start'] svg {
     width: 16px;
     height: 16px;
+  }
+
+  .terminal-modal-body {
+    padding: 10px 36px 40px 36px;
+    border-radius: 4px;
+    margin-bottom: 0;
   }
 `;
 
