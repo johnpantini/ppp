@@ -15,7 +15,11 @@ import {
 import {
   bodyFont,
   paletteBlack,
+  paletteRedBase,
+  paletteRedDark1,
+  paletteRedLight3,
   paletteWhite,
+  spacing2,
   themeConditional
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
@@ -29,8 +33,10 @@ import {
   services,
   extensions,
   connections,
-  expand
+  expand,
+  warning
 } from '../static/svg/sprite.js';
+import './button.js';
 import './modal.js';
 import './pages/not-found.js';
 import './side-nav.js';
@@ -402,9 +408,39 @@ export const appTemplate = html`
             <span slot="title" ${ref('mountPointTitle')}></span>
             <div class="mount" slot="body" ${ref('mountPoint')}></div>
           </ppp-modal>
+          <ppp-modal ${ref('confirmationModal')} with-icon hidden dismissible>
+            <div slot="title-icon">${html.partial(warning)}</div>
+            <span slot="title" ${ref('confirmationModalTitle')}></span>
+            <span slot="description" ${ref('confirmationModalDescription')}>
+            </span>
+            <div slot="body">
+              <div class="modal-footer">
+                <ppp-button
+                  appearance="default"
+                  @click="${(x) => {
+                    x.confirmationModal.setAttribute('hidden', '');
+
+                    x.confirmationModal.result = false;
+                  }}"
+                >
+                  Отмена
+                </ppp-button>
+                <ppp-button
+                  appearance="danger"
+                  @click="${(x) => {
+                    x.confirmationModal.setAttribute('hidden', '');
+
+                    x.confirmationModal.result = true;
+                  }}"
+                >
+                  Подтвердить
+                </ppp-button>
+              </div>
+            </div>
+          </ppp-modal>
           <ppp-modal ${ref('terminalModal')} class="auto" hidden>
             <span slot="title" ${ref('terminalModalTitle')}>
-              Ход выполнения операции
+              Настройка компонентов сервиса
             </span>
             <div slot="body" class="terminal-modal-body">
               <ppp-terminal ${ref('terminalWindow')}></ppp-terminal>
@@ -473,6 +509,39 @@ export const appStyles = css`
     padding: 10px 36px 40px 36px;
     border-radius: 4px;
     margin-bottom: 0;
+  }
+
+  div[slot='title-icon'] {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    left: 36px;
+    top: 40px;
+    background: ${themeConditional(paletteRedLight3, paletteRedDark1)};
+  }
+
+  div[slot='title-icon'] svg {
+    width: 16px;
+    height: 16px;
+    margin-top: -3px;
+    color: ${themeConditional(paletteRedBase, paletteRedLight3)};
+    flex-shrink: 0;
+  }
+
+  .modal-footer {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    gap: 0 ${spacing2};
+    justify-content: right;
+    flex-direction: row;
+    padding: 24px 35px 35px;
   }
 `;
 
@@ -846,6 +915,30 @@ export class App extends PPPElement {
     });
 
     await page.populateDocuments();
+  }
+
+  async confirm(
+    title = 'Подтвердите действие',
+    description = 'Необходимо подтверждение, чтобы продолжить.'
+  ) {
+    this.confirmationModalTitle.textContent = title;
+    this.confirmationModalDescription.textContent = description;
+    this.confirmationModal.result = null;
+
+    this.confirmationModal.removeAttribute('hidden');
+
+    return new Promise((resolve) => {
+      const notifier = Observable.getNotifier(this.confirmationModal);
+      const handler = {
+        handleChange: () => {
+          notifier.unsubscribe(handler, 'result');
+
+          resolve(this.confirmationModal.result);
+        }
+      };
+
+      notifier.subscribe(handler, 'result');
+    });
   }
 }
 

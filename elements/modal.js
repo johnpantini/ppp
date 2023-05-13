@@ -7,7 +7,8 @@ import {
   html,
   attr,
   when,
-  Observable
+  Observable,
+  observable
 } from '../vendor/fast-element.min.js';
 import { normalize, scrollbars, typography } from '../design/styles.js';
 import { close } from '../static/svg/sprite.js';
@@ -34,6 +35,7 @@ export const modalTemplate = html`
   <template>
     <div class="holder">
       <div aria-modal="true" role="dialog" tabindex="-1" class="content">
+        <slot name="title-icon"></slot>
         <h3 class="title">
           <slot name="title"></slot>
         </h3>
@@ -46,7 +48,10 @@ export const modalTemplate = html`
         ${when(
           (x) => x.dismissible,
           html` <button
-            @click="${(x) => x.setAttribute('hidden', '')}"
+            @click="${(x) => {
+              x.setAttribute('hidden', '');
+              x.result = false;
+            }}"
             aria-disabled="false"
             class="close"
             tabindex="0"
@@ -95,9 +100,17 @@ export const modalStyles = css`
     padding: 40px 36px 0;
   }
 
+  :host([with-icon]) .title {
+    padding: 40px 36px 0 78px;
+  }
+
   .description {
     color: ${themeConditional(paletteBlack, paletteGrayLight1)};
     padding: 0 36px;
+  }
+
+  :host([with-icon]) .description {
+    padding: 0 36px 0 78px;
   }
 
   .content {
@@ -195,6 +208,9 @@ export const modalStyles = css`
 `;
 
 export class Modal extends PPPElement {
+  @observable
+  result;
+
   @attr({ mode: 'boolean' })
   hidden;
 

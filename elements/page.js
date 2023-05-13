@@ -1054,7 +1054,7 @@ class PageWithService {
         }
       });
 
-      this.showSuccessNotification();
+      this.showSuccessNotification('Сервис перезапущен.', 'Перезапуск сервиса');
     } catch (e) {
       await this.updateDocumentFragment({
         $set: {
@@ -1081,7 +1081,7 @@ class PageWithService {
         }
       });
 
-      this.showSuccessNotification();
+      this.showSuccessNotification('Сервис остановлен.', 'Остановка сервиса');
     } catch (e) {
       await this.updateDocumentFragment({
         $set: {
@@ -1109,7 +1109,7 @@ class PageWithService {
         }
       });
 
-      this.showSuccessNotification();
+      this.showSuccessNotification('Сервис удалён.', 'Удаление сервиса');
     } catch (e) {
       await this.updateDocumentFragment({
         $set: {

@@ -450,7 +450,22 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
             >
               Приостановить
             </ppp-button>
-            <ppp-button disabled appearance="danger"> Удалить</ppp-button>
+            <ppp-button
+              ?disabled="${(x) => !x.isSteady() || x.document.removed}"
+              appearance="danger"
+              @click="${async (x) => {
+                if (
+                  await ppp.app.confirm(
+                    'Удаление сервиса',
+                    `Удалить сервис «${x.document.name}» ?`
+                  )
+                ) {
+                  return x.cleanupService();
+                }
+              }}"
+            >
+              Удалить
+            </ppp-button>
           `
         )}
       </footer>
