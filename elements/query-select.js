@@ -79,7 +79,13 @@ export const querySelectTemplate = html`
 export const querySelectStyles = css`
   ${normalize()}
   :host(:focus-visible) {
+    position: relative;
     outline: none;
+  }
+
+  :host ppp-select {
+    max-width: inherit;
+    width: 100%;
   }
 
   .indicator svg {

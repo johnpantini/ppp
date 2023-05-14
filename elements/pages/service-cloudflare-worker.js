@@ -12,6 +12,7 @@ import '../badge.js';
 import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
+import '../copyable.js';
 import '../query-select.js';
 import '../select.js';
 import '../snippet.js';
@@ -43,6 +44,21 @@ export default {
     env: `{}`,
     envSecret: '{}',
     url: '/lib/cloudflare-workers/thefly.js'
+  },
+  psinaPusher: {
+    env: (pusherApi) => {
+      return {
+        PUSHER_APPID: pusherApi.appid,
+        PUSHER_KEY: pusherApi.key,
+        PUSHER_CLUSTER: pusherApi.cluster
+      };
+    },
+    envSecret: (pusherApi) => {
+      return {
+        PUSHER_SECRET: pusherApi.secret
+      };
+    },
+    url: '/lib/cloudflare-workers/psina-pusher.js'
   }
 };
 
@@ -57,6 +73,22 @@ export const serviceCloudflareWorkerPageTemplate = html`
             : 'Сервис - Cloudflare Worker'}
         ${serviceControlsPartial}
       </ppp-page-header>
+      ${when(
+        (x) => x.document._id && x.document.subdomain,
+        html`
+          <section>
+            <div class="control-stack">
+              <ppp-banner class="inline" appearance="warning">
+                Глобальная ссылка сервиса в Cloudflare:
+              </ppp-banner>
+              <ppp-copyable>
+                ${(x) =>
+                  `https://ppp-${x.document._id}.${x.document.subdomain}.workers.dev/`}
+              </ppp-copyable>
+            </div>
+          </section>
+        `
+      )}
       <section>
         <div class="label-group">
           <h5>Название сервиса</h5>
@@ -179,8 +211,54 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 <ppp-option value="tradingview">
                   Прокси для ru.tradingview.com
                 </ppp-option>
-                <ppp-option value="thefly"> Прокси для thefly.com</ppp-option>
+                <ppp-option value="thefly">Прокси для thefly.com</ppp-option>
+                <ppp-option value="psinaPusher">
+                  Интеграция Pusher и Psina
+                </ppp-option>
               </ppp-select>
+              ${when(
+                (x) => x.workerPredefinedTemplate.value === 'psinaPusher',
+                html`
+                  <div class="control-line">
+                    <ppp-query-select
+                      ${ref('psinaPusherApiId')}
+                      placeholder="Выберите профиль API Pusher"
+                      :context="${(x) => x}"
+                      :query="${() => {
+                        return (context) => {
+                          return context.services
+                            .get('mongodb-atlas')
+                            .db('ppp')
+                            .collection('apis')
+                            .find({
+                              $and: [
+                                {
+                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
+                                },
+                                {
+                                  removed: { $ne: true }
+                                }
+                              ]
+                            })
+                            .sort({ updatedAt: -1 });
+                        };
+                      }}"
+                      :transform="${() => ppp.decryptDocumentsTransformation()}"
+                    ></ppp-query-select>
+                    <ppp-button
+                      style="margin-top: 8px;"
+                      appearance="default"
+                      @click="${() =>
+                        ppp.app.mountPage(`api-${APIS.PUSHER}`, {
+                          size: 'xlarge',
+                          adoptHeader: true
+                        })}"
+                    >
+                      +
+                    </ppp-button>
+                  </div>
+                `
+              )}
               <div class="spacing2"></div>
               <ppp-button
                 @click="${(x) => x.fillOutFormWithTemplate()}"
@@ -255,6 +333,10 @@ export class ServiceCloudflareWorkerPage extends Page {
     this.beginOperation();
 
     try {
+      if (this.workerPredefinedTemplate.value === 'psinaPusher') {
+        await validate(this.psinaPusherApiId);
+      }
+
       const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
 
       try {
@@ -271,14 +353,26 @@ export class ServiceCloudflareWorkerPage extends Page {
         );
 
         this.sourceCode.updateCode(await fcRequest.text());
-        this.environmentCode.updateCode(data.env);
-        this.environmentCodeSecret.updateCode(data.envSecret);
+
+        if (this.workerPredefinedTemplate.value === 'psinaPusher') {
+          const pusherApi = this.psinaPusherApiId.datum();
+
+          this.environmentCode.updateCode(
+            JSON.stringify(data.env(pusherApi), null, 2)
+          );
+          this.environmentCodeSecret.updateCode(
+            JSON.stringify(data.envSecret(pusherApi), null, 2)
+          );
+        } else {
+          this.environmentCode.updateCode(data.env);
+          this.environmentCodeSecret.updateCode(data.envSecret);
+        }
 
         this.versioningUrl.value = data.url;
         this.useVersioning.checked = true;
 
         this.showSuccessNotification(
-          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен.`
+          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен. Теперь можно сохранить сервис.`
         );
       } catch (e) {
         invalidate(this.versioningUrl, {

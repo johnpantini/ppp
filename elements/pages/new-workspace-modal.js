@@ -50,7 +50,9 @@ export const newWorkspaceModalPageStyles = css`
     padding-top: 10px;
   }
 
-  .label-group ppp-select, .label-group ppp-text-field {
+  .label-group ppp-select,
+  .label-group ppp-text-field,
+  .label-group ppp-query-select {
     max-width: unset;
   }
 `;

@@ -45,49 +45,54 @@ export const cloudServicesPageTemplate = html`
       ${when(
         () => ppp.keyVault.ok(),
         html`
-          <div class="spacing2"></div>
-          <ppp-banner class="inline" appearance="warning">
-            ${when(
-              ppp.keyVault.getKey('mongo-location-url'),
-              html`
-                <span>
-                  Чтобы перенести ключи в другой браузер, используйте это
-                  компактное представление:
-                </span>
-              `
-            )}
-            ${when(
-              !ppp.keyVault.getKey('mongo-location-url'),
-              html`
-                <span>
-                  Чтобы получить компактное представление, необходимо
-                  соединиться с облачной базой данных MongoDB Realm хотя бы 1
-                  раз.
-                </span>
-              `
-            )}
-          </ppp-banner>
-          <div class="spacing2"></div>
-          <ppp-copyable>
-            ${(x) => x.generateCloudCredentialsString()}
-          </ppp-copyable>
+          <section>
+            <div class="control-stack">
+              <ppp-banner class="inline" appearance="warning">
+                ${when(
+                  ppp.keyVault.getKey('mongo-location-url'),
+                  html`
+                    <span>
+                      Чтобы перенести ключи в другой браузер, используйте это
+                      компактное представление:
+                    </span>
+                  `
+                )}
+                ${when(
+                  !ppp.keyVault.getKey('mongo-location-url'),
+                  html`
+                    <span>
+                      Чтобы получить компактное представление, необходимо
+                      соединиться с облачной базой данных MongoDB Realm хотя бы
+                      1 раз.
+                    </span>
+                  `
+                )}
+              </ppp-banner>
+              <ppp-copyable>
+                ${(x) => x.generateCloudCredentialsString()}
+              </ppp-copyable>
+            </div>
+          </section>
         `
       )}
       ${when(
         () => !ppp.keyVault.ok(),
         html`
-          <div class="spacing2"></div>
-          <ppp-banner class="inline" appearance="warning">
-            Сохраните заново или
-            <a
-              class="link"
-              @click="${(x) =>
-                x.importCloudKeysModal.removeAttribute('hidden')}"
-              href="javascript:void(0)"
-              >импортируйте</a
-            >
-            ключи облачных сервисов, чтобы пользоваться приложением.
-          </ppp-banner>
+          <section>
+            <div class="control-stack">
+              <ppp-banner class="inline" appearance="warning">
+                Сохраните заново или
+                <a
+                  class="link"
+                  @click="${(x) =>
+                    x.importCloudKeysModal.removeAttribute('hidden')}"
+                  href="javascript:void(0)"
+                  >импортируйте</a
+                >
+                ключи облачных сервисов, чтобы пользоваться приложением.
+              </ppp-banner>
+            </div>
+          </section>
         `
       )}
       <section>

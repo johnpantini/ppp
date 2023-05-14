@@ -184,7 +184,8 @@ export const pageStyles = css`
   }
 
   .label-group ppp-select,
-  .label-group ppp-text-field {
+  .label-group ppp-text-field,
+  .label-group ppp-query-select {
     max-width: 320px;
   }
 
