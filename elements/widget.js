@@ -446,6 +446,13 @@ export const widget = () => css`
     max-width: 134px;
     white-space: nowrap;
   }
+
+  .control-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0 ${spacing2};
+  }
 `;
 
 export const widgetEmptyStateTemplate = (text) => `

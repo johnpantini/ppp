@@ -33,7 +33,7 @@ import {
   getInstrumentQuantityPrecision
 } from '../../lib/intl.js';
 import { ellipsis, normalize, spacing } from '../../design/styles.js';
-import { decrement, increment } from '../../static/svg/sprite.js';
+import { close, decrement, increment } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteBlack,
@@ -257,7 +257,8 @@ export const orderWidgetTemplate = html`
               </div>
               ${when(
                 (x) => showBestBidAndAskHidden(x),
-                html` <div class="widget-margin-spacer"></div>`
+                html`
+                  <div class="widget-margin-spacer"></div>`
               )}
               <div class="widget-section">
                 <div class="widget-subsection">
@@ -293,15 +294,31 @@ export const orderWidgetTemplate = html`
                           )}"
                         ${ref('price')}
                       >
-                        <span slot="end" style="pointer-events: none">
-                          ${(x) => priceCurrencySymbol(x.instrument)}
+                        <span class="control-line" slot="end">
+                          <span style="pointer-events: none">
+                            ${(x) => priceCurrencySymbol(x.instrument)}
+                          </span>
+                          ${when(
+                            (x) => x.price.value,
+                            html`
+                              <span
+                                class="reset-input"
+                                @click="${(x) => {
+                                  x.price.value = '';
+                                  x.price.$emit('input');
+                                }}"
+                              >
+                                ${html.partial(close)}
+                              </span>
+                            `
+                          )}
                         </span>
                       </ppp-widget-text-field>
                       <div class="step-controls">
-                        <button @click="${(x) => x.stepUp(false)}">
+                        <button @pointerdown="${(x) => x.stepUp(false)}">
                           ${html.partial(increment)}
                         </button>
-                        <button @click="${(x) => x.stepDown(false)}">
+                        <button @pointerdown="${(x) => x.stepDown(false)}">
                           ${html.partial(decrement)}
                         </button>
                       </div>
@@ -342,16 +359,30 @@ export const orderWidgetTemplate = html`
                         value="${(x) => x.document?.lastQuantity ?? ''}"
                         ${ref('quantity')}
                       >
-                        <span slot="end" style="pointer-events: none">
-                          ${(x) =>
-                            x.instrument?.lot ? '×' + x.instrument.lot : ''}
+                        <span class="control-line" slot="end">
+                          <span style="pointer-events: none">
+                            ${(x) =>
+                              x.instrument?.lot ? '×' + x.instrument.lot : ''}
+                          </span>
+                          ${when(
+                            (x) => x.quantity.value,
+                            html`
+                              <span
+                                class="reset-input"
+                                @click="${(x) =>
+                                  x.setQuantity(0, { force: true })}"
+                              >
+                                ${html.partial(close)}
+                              </span>
+                            `
+                          )}
                         </span>
                       </ppp-widget-text-field>
                       <div class="step-controls">
-                        <button @click="${(x) => x.stepUp(true)}">
+                        <button @pointerdown="${(x) => x.stepUp(true)}">
                           ${html.partial(increment)}
                         </button>
-                        <button @click="${(x) => x.stepDown(true)}">
+                        <button @pointerdown="${(x) => x.stepDown(true)}">
                           ${html.partial(decrement)}
                         </button>
                       </div>
@@ -384,7 +415,8 @@ export const orderWidgetTemplate = html`
                           >
                             ${when(
                               (x) => x.isInMoney,
-                              html` <div class="coin-icon"></div> `
+                              html`
+                                <div class="coin-icon"></div> `
                             )}
                             ${(x) => x.text}
                           </ppp-widget-box-radio>
@@ -411,19 +443,19 @@ export const orderWidgetTemplate = html`
                         x.orderTypeTabs.activeid === 'market'
                           ? 'по факту сделки'
                           : formatAmount(
-                              x.totalAmount,
-                              x.instrument?.currency,
-                              x.instrument
-                            )}
+                            x.totalAmount,
+                            x.instrument?.currency,
+                            x.instrument
+                          )}
                     </span>
                   </div>
                   <div class="widget-summary-line">
                     <span>Комиссия</span>
                     <span
-                      >${(x) =>
-                        x.orderTypeTabs.activeid === 'market'
-                          ? 'по факту сделки'
-                          : formatCommission(x.commission, x.instrument)}</span
+                    >${(x) =>
+                      x.orderTypeTabs.activeid === 'market'
+                        ? 'по факту сделки'
+                        : formatCommission(x.commission, x.instrument)}</span
                     >
                   </div>
                 </div>
@@ -701,6 +733,22 @@ export const orderWidgetStyles = css`
 
   .widget-flex-line ppp-widget-text-field {
     width: 100%;
+  }
+
+  .reset-input {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .reset-input svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .reset-input:hover svg {
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
 `;
 
@@ -1403,13 +1451,16 @@ export class OrderWidget extends WidgetWithInstrument {
       this.saveLastQuantity();
     } else {
       if (this.price.value.endsWith(decSeparator))
-        this.price.value = this.price.value.replace(/.$/, '');
+        this.price.value = this.price.value.replace(/\.$/, '');
 
       this.price.value = this.price.value.replace(',', '.');
       this.price.control.type = 'number';
 
       Updates.enqueue(() => {
-        up ? this.price.control.stepUp() : this.price.control.stepDown();
+        up
+          ? this.price.control.stepUp()
+          : +this.price.value !== this.instrument.minPriceIncrement &&
+            this.price.control.stepDown();
         this.price.control.type = 'text';
 
         const length = this.price.control.value.length;
