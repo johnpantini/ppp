@@ -1,4 +1,4 @@
-ARG TSFILE=tailscale_1.36.1_amd64.tgz
+ARG TSFILE=tailscale_1.40.1_amd64.tgz
 
 FROM alpine:latest as tailscale
 ARG TSFILE

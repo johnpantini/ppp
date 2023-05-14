@@ -11,7 +11,7 @@ sysctl -p /etc/sysctl.conf
 iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 ip6tables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
-/app/tailscaled --verbose=1 --port 41641 &
+/app/tailscaled --verbose=0 --port 41641 &
 sleep 5
 if [ ! -S /var/run/tailscale/tailscaled.sock ]; then
     echo "tailscaled.sock does not exist, terminated!"

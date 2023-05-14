@@ -1,17 +1,19 @@
-app = "tailscale-fly"
+# fly.toml app configuration file generated for tailscale-fly-ams-1405 on 2023-05-14T14:28:38+03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "tailscale-fly-ams-1405"
+primary_region = "ams"
 kill_signal = "SIGINT"
-kill_timeout = 5
+kill_timeout = "5s"
 
 [env]
   PORT = "41641"
 
-[experimental]
-  auto_rollback = false
-  private_network = true
-
 [[services]]
-  internal_port = 41641
   protocol = "udp"
+  internal_port = 41641
 
   [[services.ports]]
-    port = "41641"
+    port = 41641
