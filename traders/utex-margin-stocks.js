@@ -494,7 +494,7 @@ class UtexMarginStocksTrader extends Trader {
               status: this.#getUTEXOrderStatus(order),
               placedAt: new Date().toISOString(),
               endsAt: null,
-              quantity: parseInt(order.qty),
+              quantity: parseInt(order.qty) / instrument.lot,
               filled: parseInt(order.filled),
               price: parseFloat(order.price)
             };
