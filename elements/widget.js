@@ -70,7 +70,12 @@ import {
   darken,
   lighten,
   themeConditional,
-  toColorComponents
+  toColorComponents,
+  paletteBlueDark2,
+  paletteGreenDark2,
+  paletteGreenLight2,
+  palettePurpleDark2,
+  palettePurpleLight2
 } from '../design/design-tokens.js';
 import {
   circleNotch,
@@ -452,6 +457,44 @@ export const widget = () => css`
     flex-direction: row;
     align-items: center;
     gap: 0 ${spacing2};
+  }
+
+  .dot-divider {
+    margin: 0 4px;
+  }
+
+  .dot {
+    margin-left: 10px;
+    position: relative;
+  }
+
+  .dot::before {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    top: 6px;
+    left: -10px;
+  }
+
+  .dot-1::before {
+    background-color: ${themeConditional(paletteBlueDark2, paletteBlueLight2)};
+  }
+
+  .dot-2::before {
+    background-color: ${themeConditional(
+      paletteGreenDark2,
+      paletteGreenLight2
+    )};
+  }
+
+  .dot-3::before {
+    background-color: ${themeConditional(
+      palettePurpleDark2,
+      palettePurpleLight2
+    )};
   }
 `;
 

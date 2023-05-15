@@ -5,6 +5,8 @@ export default function (i18n) {
         '%{smart_count} акции |||| %{smart_count} акций |||| %{smart_count} акций',
       bondCount:
         '%{smart_count} облигации |||| %{smart_count} облигаций |||| %{smart_count} облигаций',
+      etfCount:
+        '%{smart_count} фонда |||| %{smart_count} фондов |||| %{smart_count} фондов',
       futureCount:
         '%{smart_count} фьючерса |||| %{smart_count} фьючерсов |||| %{smart_count} фьючерсов',
       currencyCount:

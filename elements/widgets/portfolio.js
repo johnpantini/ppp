@@ -156,6 +156,7 @@ export const portfolioWidgetTemplate = html`
           </tbody>
           <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
             ${portfolioSection({ title: 'Акции', section: 'stocks' })}
+            ${portfolioSection({ title: 'Фонды', section: 'etfs' })}
             ${portfolioSection({ title: 'Облигации', section: 'bonds' })}
             ${portfolioSection({ title: 'Фьючерсы', section: 'futures' })}
           </tbody>
@@ -338,6 +339,9 @@ export class PortfolioWidget extends WidgetWithInstrument {
   stocks;
 
   @observable
+  etfs;
+
+  @observable
   bonds;
 
   @observable
@@ -358,6 +362,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
 
     this.balances = [];
     this.stocks = [];
+    this.etfs = [];
     this.bonds = [];
     this.futures = [];
     this.zombies = [];
@@ -376,6 +381,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
     try {
       this.balancesMap = new Map();
       this.stocksMap = new Map();
+      this.etfsMap = new Map();
       this.bondsMap = new Map();
       this.futuresMap = new Map();
       this.zombiesMap = new Map();
@@ -466,6 +472,14 @@ export class PortfolioWidget extends WidgetWithInstrument {
             else this.stocksMap.delete(newValue.symbol);
 
             this.stocks = this.portfolioMapToArray(this.stocksMap);
+
+            break;
+          case 'etf':
+            if (newValue.size !== 0)
+              this.etfsMap.set(newValue.symbol, newValue);
+            else this.etfsMap.delete(newValue.symbol);
+
+            this.etfs = this.portfolioMapToArray(this.etfsMap);
 
             break;
           case 'bond':

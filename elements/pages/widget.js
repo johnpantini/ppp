@@ -411,9 +411,17 @@ export const widgetPageTemplate = html`
                                               'https://psina.pages.dev/widgets/pusher-subscription-widget.js';
 
                                             break;
+                                          case 'psina':
+                                            x.url.value =
+                                              'https://psina.pages.dev/widgets/psina.js';
+
+                                            break;
                                         }
                                       }}"
                                     >
+                                      <ppp-option value="psina">
+                                        Psina
+                                      </ppp-option>
                                       <ppp-option value="simple-frame-widget">
                                         Фрейм (Psina)
                                       </ppp-option>
