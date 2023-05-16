@@ -7,7 +7,7 @@ import { Tmpl } from '../../lib/tmpl.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
 import { createWorkerUploadForm } from '../../lib/cloudflare.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
-import { serviceControlsPartial } from './services.js';
+import { serviceHeaderControlsPartial } from './services.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -71,7 +71,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
           x.document.name
             ? `Сервис - Cloudflare Worker - ${x.document.name}`
             : 'Сервис - Cloudflare Worker'}
-        ${serviceControlsPartial}
+        ${serviceHeaderControlsPartial}
       </ppp-page-header>
       ${when(
         (x) => x.document._id && x.document.subdomain,
@@ -162,9 +162,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
         <div class="implementation-area">
           <div class="label-group full" style="min-width: 600px">
             <h5>Реализация сервиса</h5>
-            <p class="description">
-              Код для платформы Node.js с реализацией сервиса.
-            </p>
+            <p class="description">Код Cloudflare Worker.</p>
             <ppp-snippet
               style="height: 750px"
               :code="${(x) =>
@@ -190,7 +188,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 Отслеживать версию сервиса по этому файлу:
               </ppp-checkbox>
               <ppp-text-field
-                ?disabled="${(x) => !(x.useVersioning.checked ?? false)}"
+                ?disabled="${(x) => !x.useVersioning.checked}"
                 placeholder="Введите ссылку"
                 value="${(x) => x.document.versioningUrl ?? ''}"
                 ${ref('versioningUrl')}
@@ -261,7 +259,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
               )}
               <div class="spacing2"></div>
               <ppp-button
-                @click="${(x) => x.fillOutFormWithTemplate()}"
+                @click="${(x) => x.fillOutFormsWithTemplate()}"
                 appearance="primary"
               >
                 Заполнить формы по этому шаблону
@@ -329,7 +327,7 @@ export class ServiceCloudflareWorkerPage extends Page {
     return this.checkVersion();
   }
 
-  async fillOutFormWithTemplate() {
+  async fillOutFormsWithTemplate() {
     this.beginOperation();
 
     try {
@@ -372,7 +370,7 @@ export class ServiceCloudflareWorkerPage extends Page {
         this.useVersioning.checked = true;
 
         this.showSuccessNotification(
-          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен. Теперь можно сохранить сервис.`
+          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен.`
         );
       } catch (e) {
         invalidate(this.versioningUrl, {
@@ -516,7 +514,7 @@ export class ServiceCloudflareWorkerPage extends Page {
     return {
       PPP_WORKER_ID: this.document._id,
       SERVICE_MACHINE_URL: ppp.keyVault.getKey('service-machine-url'),
-      PPP_ROOT_URL: ppp.rootUrl.replace('github.io.dev', 'github.io/ppp')
+      PPP_ROOT_URL: ppp.rootUrl.replace('github.io.dev', 'pages.dev')
     };
   }
 

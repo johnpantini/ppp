@@ -210,11 +210,6 @@ export const settingsAppearancePageTemplate = html`
           <div>
             <ppp-select
               placeholder="Выберите шаблон"
-              @change="${(x) =>
-                x.scratch.set(
-                  'themeColorsTemplateSelectValue',
-                  x.themeColorsTemplateSelect.value
-                )}"
               ${ref('themeColorsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
@@ -222,8 +217,7 @@ export const settingsAppearancePageTemplate = html`
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
-              ?disabled="${(x) =>
-                !x.scratch.get('themeColorsTemplateSelectValue')}"
+              ?disabled="${(x) => !x.themeColorsTemplateSelect.value}"
               appearance="primary"
               @click="${(x) =>
                 x.applyThemeColorsTemplate(x.themeColorsTemplateSelect.value)}"
@@ -379,11 +373,6 @@ export const settingsAppearancePageTemplate = html`
           <div>
             <ppp-select
               placeholder="Выберите шаблон"
-              @change="${(x) =>
-                x.scratch.set(
-                  'themeColorPairsTemplateSelectValue',
-                  x.themeColorPairsTemplateSelect.value
-                )}"
               ${ref('themeColorPairsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
@@ -391,8 +380,7 @@ export const settingsAppearancePageTemplate = html`
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
-              ?disabled="${(x) =>
-                !x.scratch.get('themeColorPairsTemplateSelectValue')}"
+              ?disabled="${(x) => !x.themeColorPairsTemplateSelect.value}"
               appearance="primary"
               @click="${(x) =>
                 x.applyThemeColorPairsTemplate(
@@ -435,11 +423,6 @@ export const settingsAppearancePageTemplate = html`
           <div>
             <ppp-select
               placeholder="Выберите шаблон"
-              @change="${(x) =>
-                x.scratch.set(
-                  'themeFontsTemplateSelectValue',
-                  x.themeFontsTemplateSelect.value
-                )}"
               ${ref('themeFontsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
@@ -447,8 +430,7 @@ export const settingsAppearancePageTemplate = html`
             </ppp-select>
             <div class="spacing2"></div>
             <ppp-button
-              ?disabled="${(x) =>
-                !x.scratch.get('themeFontsTemplateSelectValue')}"
+              ?disabled="${(x) => !x.themeFontsTemplateSelect.value}"
               appearance="primary"
               @click="${(x) =>
                 x.applyThemeFontsTemplate(x.themeFontsTemplateSelect.value)}"

@@ -28,7 +28,7 @@ export function stateAppearance(document) {
   return 'lightgray';
 }
 
-export const serviceControlsPartial = html`
+export const serviceHeaderControlsPartial = html`
   ${when(
     (x) => x.document._id,
     html`
@@ -78,6 +78,49 @@ export const serviceControlsPartial = html`
           </ppp-button>
         `
       )}
+    `
+  )}
+`.inline();
+
+export const serviceFooterControlsPartial = html`
+  ${when(
+    (x) => x.document._id,
+    html`
+      <ppp-button
+        ?disabled="${(x) =>
+          !x.isSteady() ||
+          x.document.removed ||
+          x.document.state === SERVICE_STATE.FAILED}"
+        @click="${(x) => x.restartService()}"
+      >
+        Перезапустить
+      </ppp-button>
+      <ppp-button
+        ?disabled="${(x) =>
+          !x.isSteady() ||
+          x.document.removed ||
+          x.document.state === SERVICE_STATE.FAILED ||
+          x.document.state === SERVICE_STATE.STOPPED}"
+        @click="${(x) => x.stopService()}"
+      >
+        Приостановить
+      </ppp-button>
+      <ppp-button
+        ?disabled="${(x) => !x.isSteady() || x.document.removed}"
+        appearance="danger"
+        @click="${async (x) => {
+          if (
+            await ppp.app.confirm(
+              'Удаление сервиса',
+              `Удалить сервис «${x.document.name}» ?`
+            )
+          ) {
+            return x.cleanupService();
+          }
+        }}"
+      >
+        Удалить
+      </ppp-button>
     `
   )}
 `.inline();

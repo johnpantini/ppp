@@ -29,6 +29,7 @@ import {
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark2,
+  paletteGrayDark3,
   paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
@@ -290,6 +291,15 @@ export const snippetStyles = css`
     color: transparent;
     width: 100%;
     height: 100%;
+  }
+
+  :host([disabled]) {
+    opacity: 0.56;
+  }
+
+  :host([disabled]) .control {
+    cursor: not-allowed;
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)};
   }
 
   :host(:not([disabled])) .root:has(.control:focus),

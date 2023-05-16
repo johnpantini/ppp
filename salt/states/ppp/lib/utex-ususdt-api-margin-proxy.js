@@ -34,7 +34,7 @@ serve(async (request) => {
     },
     redirect: request.redirect,
     cache: request.cache,
-    cedentials: request.credentials
+    credentials: request.credentials
   });
   const ct = response.headers.get('content-type');
 

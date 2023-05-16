@@ -141,6 +141,10 @@ export const pageStyles = css`
     border-bottom: none;
   }
 
+  footer {
+    padding: 50px 0;
+  }
+
   .section-index-icon {
     align-self: start;
     display: flex;

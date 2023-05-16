@@ -53,26 +53,48 @@ export const servicePageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="NYSE/NASDAQ"
+            alt="Торговые паузы NYSE/NASDAQ"
             style="height: 44px"
             src="${() => ppp.brandSvg('nsdq')}"
           />
           <span slot="title">Торговые паузы NYSE/NASDAQ</span>
-          <span slot="description"
-            >Оповещение о торговых паузах NYSE/NASDAQ в Telegram.
+          <span slot="description">
+            Оповещение о торговых паузах NYSE/NASDAQ в Telegram.
             <a
               class="link"
               target="_blank"
               rel="noopener"
               href="http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts"
               >RSS-лента пауз</a
-            >.</span
-          >
+            >.
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
               ppp.app.navigate({
                 page: `service-${SERVICES.NYSE_NSDQ_HALTS}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Парсер (Supabase)"
+            style="height: 40px"
+            src="${() => ppp.brandSvg('supabase')}"
+          />
+          <span slot="title">Парсер (Supabase)</span>
+          <span slot="description">
+            Парсер общего назначения на основе Supabase.
+          </span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `service-${SERVICES.SUPABASE_PARSER}`
               })}"
           >
             Продолжить

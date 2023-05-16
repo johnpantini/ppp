@@ -83,7 +83,7 @@ export default function (i18n) {
         [SERVICES.SSH]: 'Команды SSH',
         [SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
         [SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NASDAQ',
-        [SERVICES.SUPABASE_PARSER]: 'Парсер с персистентностью',
+        [SERVICES.SUPABASE_PARSER]: 'Парсер (Supabase)',
         [SERVICES.CLOUD_PPP_ASPIRANT]: 'PPP Aspirant (в облаке)',
         [SERVICES.SYSTEMD_PPP_ASPIRANT]: 'PPP Aspirant (systemd)',
         [SERVICES.DEPLOYED_PPP_ASPIRANT]: 'PPP Aspirant (по адресу)',

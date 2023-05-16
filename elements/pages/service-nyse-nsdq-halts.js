@@ -1,5 +1,5 @@
 import ppp from '../../ppp.js';
-import { html, css, ref, when } from '../../vendor/fast-element.min.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
 import {
   Page,
   pageStyles,
@@ -11,7 +11,10 @@ import { Tmpl } from '../../lib/tmpl.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
-import { serviceControlsPartial } from './services.js';
+import {
+  serviceFooterControlsPartial,
+  serviceHeaderControlsPartial
+} from './services.js';
 import '../button.js';
 import '../query-select.js';
 import '../select.js';
@@ -36,7 +39,7 @@ return [%#JSON.stringify((await(await fetch(
   {
     cache: 'reload'
   }
-  )).json()).map(i => i.symbol))%];`;
+  )).json()).filter(i => i.symbol !== 'TCS').map(i => i.symbol))%];`;
 
 const exampleFormatterCode = `/**
  * Функция форматирования сообщения о торговой паузе.
@@ -146,7 +149,7 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
           x.document.name
             ? `Сервис - Торговые паузы NYSE/NASDAQ - ${x.document.name}`
             : 'Сервис - Торговые паузы NYSE/NASDAQ'}
-        ${serviceControlsPartial}
+        ${serviceHeaderControlsPartial}
       </ppp-page-header>
       <section>
         <div class="label-group">
@@ -428,46 +431,7 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
         >
           Сохранить в PPP и обновить в Supabase
         </ppp-button>
-        ${when(
-          (x) => x.document._id,
-          html`
-            <ppp-button
-              ?disabled="${(x) =>
-                !x.isSteady() ||
-                x.document.removed ||
-                x.document.state === SERVICE_STATE.FAILED}"
-              @click="${(x) => x.restartService()}"
-            >
-              Перезапустить
-            </ppp-button>
-            <ppp-button
-              ?disabled="${(x) =>
-                !x.isSteady() ||
-                x.document.removed ||
-                x.document.state === SERVICE_STATE.FAILED ||
-                x.document.state === SERVICE_STATE.STOPPED}"
-              @click="${(x) => x.stopService()}"
-            >
-              Приостановить
-            </ppp-button>
-            <ppp-button
-              ?disabled="${(x) => !x.isSteady() || x.document.removed}"
-              appearance="danger"
-              @click="${async (x) => {
-                if (
-                  await ppp.app.confirm(
-                    'Удаление сервиса',
-                    `Удалить сервис «${x.document.name}» ?`
-                  )
-                ) {
-                  return x.cleanupService();
-                }
-              }}"
-            >
-              Удалить
-            </ppp-button>
-          `
-        )}
+        ${serviceFooterControlsPartial}
       </footer>
     </form>
   </template>
@@ -577,13 +541,9 @@ export class ServiceNyseNsdqHaltsPage extends Page {
   }
 
   async #deploy() {
-    if (!this.document.supabaseApi)
-      this.document.supabaseApi = this.supabaseApiId.datum();
-
-    if (!this.document.pusherApi)
-      this.document.pusherApi = this.pusherApiId.datum();
-
-    if (!this.document.bot) this.document.bot = this.botId.datum();
+    this.document.supabaseApi = this.supabaseApiId.datum();
+    this.document.pusherApi = this.pusherApiId.datum();
+    this.document.bot = this.botId.datum();
 
     const [sendTelegramMessage, deployNyseNsdqHalts] = await Promise.all([
       fetch(this.getSQLUrl('send-telegram-message.sql')).then((r) => r.text()),
