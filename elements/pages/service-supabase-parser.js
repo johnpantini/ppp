@@ -793,6 +793,9 @@ export class ServiceSupabaseParserPage extends Page {
         }
 
         this.constsCode.updateCode(data.constsCode);
+        this.insertTriggerCode.updateCode(data.insertTriggerCode);
+        this.deleteTriggerCode.updateCode(data.deleteTriggerCode);
+        this.formatterCode.updateCode(data.formatterCode);
 
         this.versioningUrl.value = data.url;
         this.useVersioning.checked = true;
