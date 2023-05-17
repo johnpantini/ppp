@@ -96,6 +96,7 @@ import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
+import ppp from '../ppp.js';
 
 export const importInstrumentsSuggestion = (e) => html`
   <span>
@@ -2521,8 +2522,19 @@ export class WidgetHeaderButtons extends PPPElement {
     }
   }
 
-  closeWidget() {
-    this.widget.close();
+  async closeWidget() {
+    if (ppp.settings.get('confirmWidgetClosing')) {
+      if (
+        await ppp.app.confirm(
+          'Закрытие виджета',
+          `Закрыть виджет «${this.widget.document.name}» ?`
+        )
+      ) {
+        this.widget.close();
+      }
+    } else {
+      this.widget.close();
+    }
   }
 }
 

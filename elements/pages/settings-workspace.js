@@ -1,12 +1,9 @@
-import {
-  html,
-  css,
-  ref
-} from '../../vendor/fast-element.min.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { validate } from '../../lib/ppp-errors.js';
 import '../banner.js';
 import '../button.js';
+import '../checkbox.js';
 import '../radio-group.js';
 import '../select.js';
 import '../text-field.js';
@@ -49,6 +46,23 @@ export const settingsWorkspacePageTemplate = html`
               </ppp-text-field>
             </div>
           </div>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Подтверждать закрытие виджетов</h5>
+          <p class="description">
+            Если настройка активна, при попытке закрытия виджета будет показано
+            диалоговое окно для подтверждения.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-checkbox
+            ?checked="${(x) => x.document.confirmWidgetClosing ?? false}"
+            ${ref('confirmWidgetClosing')}
+          >
+            Подтверждать закрытие виджетов
+          </ppp-checkbox>
         </div>
       </section>
       <footer>
@@ -103,10 +117,19 @@ export class SettingsWorkspacePage extends Page {
   }
 
   async submit() {
+    const workspaceSnapDistance = Math.trunc(this.workspaceSnapDistance.value);
+    const workspaceSnapMargin = Math.trunc(this.workspaceSnapMargin.value);
+    const confirmWidgetClosing = this.confirmWidgetClosing.checked;
+
+    ppp.settings.set('workspaceSnapDistance', workspaceSnapDistance);
+    ppp.settings.set('workspaceSnapMargin', workspaceSnapMargin);
+    ppp.settings.set('confirmWidgetClosing', confirmWidgetClosing);
+
     return {
       $set: {
-        workspaceSnapDistance: Math.trunc(this.workspaceSnapDistance.value),
-        workspaceSnapMargin: Math.trunc(this.workspaceSnapMargin.value)
+        workspaceSnapDistance,
+        workspaceSnapMargin,
+        confirmWidgetClosing
       }
     };
   }

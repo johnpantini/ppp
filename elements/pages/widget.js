@@ -14,7 +14,7 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
-import { debounce, later } from '../../lib/ppp-decorators.js';
+import { debounce } from '../../lib/ppp-decorators.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   bodyFont,
@@ -404,16 +404,19 @@ export const widgetPageTemplate = html`
                                           case 'simple-frame-widget':
                                             x.url.value =
                                               'https://psina.pages.dev/widgets/simple-frame-widget.js';
+                                            x.name.value = 'Фрейм';
 
                                             break;
                                           case 'pusher-subscription-widget':
                                             x.url.value =
                                               'https://psina.pages.dev/widgets/pusher-subscription-widget.js';
+                                            x.name.value = 'Сообщения Pusher';
 
                                             break;
                                           case 'psina':
                                             x.url.value =
                                               'https://psina.pages.dev/widgets/psina.js';
+                                            x.name.value = 'Psina';
 
                                             break;
                                         }
@@ -423,12 +426,12 @@ export const widgetPageTemplate = html`
                                         Psina
                                       </ppp-option>
                                       <ppp-option value="simple-frame-widget">
-                                        Фрейм (Psina)
+                                        Фрейм
                                       </ppp-option>
                                       <ppp-option
                                         value="pusher-subscription-widget"
                                       >
-                                        Сообщения Pusher (Psina)
+                                        Сообщения Pusher
                                       </ppp-option>
                                     </ppp-select>
                                   </div>
@@ -453,15 +456,18 @@ export const widgetPageTemplate = html`
                 class="save-widget"
                 @click="${async (x) => {
                   try {
-                    await x.applyModifications({ silent: true });
-                    await later(100);
+                    await x.applyModifications();
                     Updates.enqueue(() => x.submitDocument());
                   } catch (e) {
                     x.failOperation(e);
                   }
                 }}"
               >
-                Сохранить виджет
+                ${(x) =>
+                  x.document.type === 'custom' &&
+                  typeof x.widgetDefinition?.customElement === 'undefined'
+                    ? 'Продолжить'
+                    : 'Сохранить виджет'}
               </ppp-button>
             </div>
           </div>
@@ -1116,7 +1122,7 @@ export class WidgetPage extends Page {
       this.widgetDefinition.collection = null;
       this.widgetDefinition.loaded = false;
       this.widgetDefinition.description =
-        'Укажите URL и примените текущие настройки кнопкой выше, чтобы продолжить.';
+        'Введите имя виджета и URL, чтобы продолжить.';
 
       this.endOperation();
 
@@ -1144,7 +1150,6 @@ export class WidgetPage extends Page {
         }
 
         this.widgetDefinition.loaded = true;
-        this.endOperation();
 
         Observable.notify(this, 'widgetDefinition');
       } catch (e) {
@@ -1174,8 +1179,8 @@ export class WidgetPage extends Page {
     return true;
   }
 
-  async applyModifications({ silent } = {}) {
-    if (!silent) this.beginOperation();
+  async applyModifications() {
+    this.beginOperation();
 
     await this.onChangeDelayedAsync();
   }
@@ -1259,10 +1264,11 @@ export class WidgetPage extends Page {
 
       if (this.document.type === 'custom' && !this.widgetDefinition.loaded) {
         await this.loadWidget();
+        // Do not validate here, just continue
+      } else {
+        if (typeof this.widgetElement?.validate === 'function')
+          await this.widgetElement.validate();
       }
-
-      if (typeof this.widgetElement?.validate === 'function')
-        await this.widgetElement.validate();
     } finally {
       this.widgetPreview?.shadowRoot.firstChild &&
         this.widgetPreview.shadowRoot.removeChild(
