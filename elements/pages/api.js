@@ -115,7 +115,7 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Northflank</span>
           <span slot="description">
-            Платформа для создания и развёртывания микросервисов.&nbsp;<a
+            Платформа для развёртывания приложения.&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
@@ -128,6 +128,34 @@ export const apiPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `api-${APIS.NORTHFLANK}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Render"
+            style="height: 44px"
+            src="${() => ppp.brandSvg('render')}"
+          />
+          <span slot="title">Render</span>
+          <span slot="description">
+            Платформа для развёртывания приложения.&nbsp;<a
+              class="link"
+              target="_blank"
+              rel="noopener"
+              href="https://Render.com/"
+              >Официальный ресурс</a
+            >.
+          </span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `api-${APIS.RENDER}`
               })}"
           >
             Продолжить
