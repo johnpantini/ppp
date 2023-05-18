@@ -115,7 +115,7 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Northflank</span>
           <span slot="description">
-            Платформа для развёртывания приложения.&nbsp;<a
+            Платформа для развёртывания приложений.&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
@@ -143,7 +143,7 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Render</span>
           <span slot="description">
-            Платформа для развёртывания приложения.&nbsp;<a
+            Платформа для развёртывания приложений.&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"

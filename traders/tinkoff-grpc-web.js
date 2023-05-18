@@ -889,7 +889,7 @@ class TinkoffGrpcWebTrader extends Trader {
               switch (datum) {
                 case TRADER_DATUM.ORDERBOOK:
                   source[field] = {
-                    bids:
+                    bids: (
                       orderbook?.bids?.map?.((b) => {
                         const p = toNumber(b.price).toFixed(
                           getInstrumentPrecision(instrument)
@@ -903,8 +903,20 @@ class TinkoffGrpcWebTrader extends Trader {
                           volume: b.quantity,
                           processed: true
                         };
-                      }) ?? [],
-                    asks:
+                      }) ?? []
+                    )
+                      .concat([
+                        {
+                          price: toNumber(orderbook.limitDown).toFixed(
+                            getInstrumentPrecision(instrument)
+                          ),
+                          pool: 'LD',
+                          volume: 0,
+                          processed: true
+                        }
+                      ])
+                      .sort((a, b) => b.price - a.price),
+                    asks: (
                       orderbook?.asks?.map?.((a) => {
                         const p = toNumber(a.price).toFixed(
                           getInstrumentPrecision(instrument)
@@ -919,6 +931,16 @@ class TinkoffGrpcWebTrader extends Trader {
                           processed: true
                         };
                       }) ?? []
+                    )
+                      .concat({
+                        price: toNumber(orderbook.limitUp).toFixed(
+                          getInstrumentPrecision(instrument)
+                        ),
+                        pool: 'LU',
+                        volume: 0,
+                        processed: true
+                      })
+                      .sort((a, b) => a.price - b.price)
                   };
 
                   break;
