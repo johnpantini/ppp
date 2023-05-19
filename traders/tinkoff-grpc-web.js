@@ -888,6 +888,24 @@ class TinkoffGrpcWebTrader extends Trader {
             for (const { field, datum } of fields) {
               switch (datum) {
                 case TRADER_DATUM.ORDERBOOK:
+                  let limitDownPrice = toNumber(orderbook.limitDown).toFixed(
+                    getInstrumentPrecision(instrument)
+                  );
+                  let limitUpPrice = toNumber(orderbook.limitUp).toFixed(
+                    getInstrumentPrecision(instrument)
+                  );
+
+                  if (instrument.type === 'bond') {
+                    limitDownPrice = this.relativeBondPriceToPrice(
+                      limitDownPrice,
+                      instrument
+                    );
+                    limitUpPrice = this.relativeBondPriceToPrice(
+                      limitUpPrice,
+                      instrument
+                    );
+                  }
+
                   source[field] = {
                     bids: (
                       orderbook?.bids?.map?.((b) => {
@@ -907,9 +925,7 @@ class TinkoffGrpcWebTrader extends Trader {
                     )
                       .concat([
                         {
-                          price: toNumber(orderbook.limitDown).toFixed(
-                            getInstrumentPrecision(instrument)
-                          ),
+                          price: limitDownPrice,
                           pool: 'LD',
                           volume: 0,
                           processed: true
@@ -933,9 +949,7 @@ class TinkoffGrpcWebTrader extends Trader {
                       }) ?? []
                     )
                       .concat({
-                        price: toNumber(orderbook.limitUp).toFixed(
-                          getInstrumentPrecision(instrument)
-                        ),
+                        price: limitUpPrice,
                         pool: 'LU',
                         volume: 0,
                         processed: true
