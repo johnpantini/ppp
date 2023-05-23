@@ -1,6 +1,3 @@
-Add this to Dockerfile:
-RUN apk add --no-cache --update npm make cmake g++
-
 Build:
 
 # cd salt/states/ppp/lib

@@ -100,6 +100,28 @@ export const servicePageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Aspirant"
+            style="height: 40px"
+            src="${() => ppp.brandSvg('javascript')}"
+          />
+          <span slot="title">Aspirant</span>
+          <span slot="description">
+            Сервис для запуска долго работающих процессов в облаке.
+          </span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `service-${SERVICES.CLOUD_PPP_ASPIRANT}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
       </div>
     </form>
   </template>

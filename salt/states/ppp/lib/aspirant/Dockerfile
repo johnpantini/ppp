@@ -1,26 +1,44 @@
-FROM alpine:latest as tailscale
-WORKDIR /tailscale
-COPY . ./
-ENV TSFILE=tailscale_1.34.1_amd64.tgz
-RUN wget https://pkgs.tailscale.com/stable/${TSFILE} && \
-  tar xzf ${TSFILE} --strip-components=1
-COPY . ./
+FROM nginx:1.24-alpine AS builder
 
-FROM alpine:latest
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
-RUN mkdir -p /var/run/tailscale
-RUN mkdir -p /var/cache/tailscale
-RUN mkdir -p /var/lib/tailscale
+RUN wget "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -q -O nginx.tar.gz
+RUN apk add --no-cache --virtual .build-deps \
+  gcc \
+  libc-dev \
+  make \
+  openssl-dev \
+  pcre2-dev \
+  zlib-dev \
+  linux-headers \
+  libxslt-dev \
+  gd-dev \
+  geoip-dev \
+  libedit-dev \
+  bash \
+  alpine-sdk \
+  findutils
 
-FROM alpine:latest AS base
-RUN apk add --no-cache --update nodejs-current tini gcompat freetype-dev cairo-dev pango-dev libpng libpng-dev jpeg libjpeg-turbo libjpeg-turbo-dev jpeg-dev giflib-dev librsvg-dev
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+
+RUN rm -rf /usr/src/nginx && mkdir -p /usr/src/nginx && tar -zxC /usr/src/nginx -f nginx.tar.gz
+
+COPY ./nginx/ /usr/src/
+
+WORKDIR /usr/src/nginx/nginx-${NGINX_VERSION}
+
+RUN CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p') && \
+    sh -c "./configure --with-compat $CONFARGS --add-dynamic-module=/usr/src/ngx-unzip" && make modules
+
+FROM nginx:1.24-alpine AS base
+RUN apk add --no-cache --update sudo runuser nodejs-current gcompat nomad consul fcgiwrap freetype-dev cairo-dev pango-dev \
+  libpng libpng-dev jpeg libjpeg-turbo libjpeg-turbo-dev jpeg-dev giflib-dev librsvg-dev
+
+RUN adduser -D ppp
+
+COPY --from=builder /usr/src/nginx/nginx-${NGINX_VERSION}/objs/*_module.so /etc/nginx/modules/
 
 WORKDIR /app
 
-COPY --from=tailscale /tailscale/tailscaled /app/tailscaled
-COPY --from=tailscale /tailscale/tailscale /app/tailscale
-
-COPY --chown=root ./aspirant/ ./aspirant/
+COPY ./aspirant/start.sh ./aspirant/start.sh
 COPY ./aurora/ ./aurora/
 COPY ./uWebSockets.js/ ./uWebSockets.js/
 COPY ./canvas/ ./canvas/
@@ -31,13 +49,19 @@ COPY ./pdfjs/ ./pdfjs/
 COPY ./ssh2/ ./ssh2/
 COPY ./websocket/ ./websocket/
 COPY ./vendor/lzma/ ./vendor/lzma/
-COPY ./vendor/protobuf.min.js ./vendor/protobuf.min.js
+COPY ./vendor/he.min.js ./vendor/he.min.js
 COPY ./vendor/ioredis.min.js ./vendor/ioredis.min.js
+COPY ./vendor/mongodb.min.js ./vendor/mongodb.min.js
+COPY ./vendor/protobuf.min.js ./vendor/protobuf.min.js
+
+COPY ./aspirant/etc/consul/server.json /etc/consul/server.json
+COPY ./aspirant/etc/nomad.d/server.hcl /etc/nomad.d/server.hcl
+COPY ./aspirant/etc/nginx/ /etc/nginx
+
+USER root
 
 RUN chmod +x /app/aspirant/start.sh
 
-EXPOSE 32456
-EXPOSE 9229
+EXPOSE 80
 
-USER root
 CMD ["/app/aspirant/start.sh"]

@@ -1,0 +1,25 @@
+ngx_addon_name=ngx_http_unzip_module
+
+NGX_UNZIP_SRCS="                                   \
+            $ngx_addon_dir/zip.c                   \
+            $ngx_addon_dir/ngx_http_unzip_module.c \
+            "
+
+NGX_UNZIP_DEPS="                   \
+            $ngx_addon_dir/miniz.h \
+            $ngx_addon_dir/zip.h   \
+            "
+
+if test -n "$ngx_module_link"; then
+    ngx_module_type=HTTP
+    ngx_module_name=ngx_http_unzip_module
+    ngx_module_srcs="$NGX_UNZIP_SRCS"
+    ngx_module_deps="$NGX_UNZIP_DEPS"
+
+    . auto/module
+else
+    HTTP_MODULES="$HTTP_MODULES ngx_http_unzip_module"
+    NGX_ADDON_SRCS="$NGX_ADDON_SRCS $NGX_UNZIP_SRCS"
+    NGX_ADDON_DEPS="$NGX_ADDON_DEPS $NGX_UNZIP_DEPS"
+    CORE_LIBS="$CORE_LIBS"
+fi

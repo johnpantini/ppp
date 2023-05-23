@@ -1,14 +1,30 @@
 #!/bin/sh
 
-if test -n "${TAILSCALE_AUTH_KEY-}"; then
-  echo 'Starting up tailscale...'
+# https://github.com/hashicorp/nomad/blob/85ed8ddd4fc41b371fb4d652bb9149129893ae6d/client/allocdir/fs_linux.go#L45
+rm -rf /var/lib/nomad
+mkdir -p /var/lib/nomad
+chown -R ppp /var/lib/nomad /etc/nomad.d
+chown -R nginx /etc/nginx
 
-  /app/tailscaled --tun=userspace-networking --socks5-server=localhost:1055 --outbound-http-proxy-listen=localhost:1055 &
-  /app/tailscale up --hostname=${TAILSCALE_HOSTNAME:=ppp-aspirant} --authkey=${TAILSCALE_AUTH_KEY}
+echo "ppp ALL=(ALL) NOPASSWD: /usr/sbin/nginx -s reload" >/etc/sudoers.d/ppp
 
-  echo 'Tailscale started.'
-fi
+echo 'Starting up Consul...'
+consul agent -dev -config-file=/etc/consul/server.json &
+P1=$!
 
-echo 'Starting up PPP Aspirant...'
+echo 'Starting up Nomad...'
+runuser -u ppp -- nomad agent -dev -config=/etc/nomad.d/server.hcl &
+P2=$!
 
-node --no-warnings --inspect=0.0.0.0:9229 /app/aspirant/main.mjs
+echo 'Starting up Nginx...'
+nginx -g 'daemon off;' &
+P3=$!
+
+while test -z $(curl -s http://127.0.0.1:4646/v1/agent/health); do
+  sleep 1
+done
+
+echo 'Nomad agent is OK.'
+curl -s -XPOST http://127.0.0.1/nginx/internal/resurrect -d "{\"ASPIRANT_ID\":\"$ASPIRANT_ID\",\"SERVICE_MACHINE_URL\":\"$SERVICE_MACHINE_URL\",\"REDIS_HOST\":\"$REDIS_HOST\",\"REDIS_PORT\":\"$REDIS_PORT\",\"REDIS_TLS\":\"$REDIS_TLS\",\"REDIS_REDIS_USERNAME\":\"$REDIS_REDIS_USERNAME\",\"REDIS_PASSWORD\":\"$REDIS_PASSWORD\",\"REDIS_DATABASE\":\"$REDIS_DATABASE\"}"
+
+wait $P1 $P2 $P3
