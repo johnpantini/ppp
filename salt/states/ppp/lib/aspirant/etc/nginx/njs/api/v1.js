@@ -343,7 +343,7 @@ async function resurrect(r) {
           startDeployedWorker(
             workerId,
             workerData.artifactUrl,
-            workerData.env,
+            Object.assign({}, env, workerData.env),
             workerData.enableHttp
           );
         });
