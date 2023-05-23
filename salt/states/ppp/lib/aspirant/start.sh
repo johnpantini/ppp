@@ -6,19 +6,22 @@ mkdir -p /var/lib/nomad
 chown -R ppp /var/lib/nomad /etc/nomad.d
 chown -R nginx /etc/nginx
 
-echo "ppp ALL=(ALL) NOPASSWD: /usr/sbin/nginx -s reload" >/etc/sudoers.d/ppp
+echo 'Starting up HTTP Shell...'
+chmod u+x /app/http-shell.py
+python /app/http-shell.py &
+P1=$!
 
 echo 'Starting up Consul...'
 consul agent -dev -config-file=/etc/consul/server.json &
-P1=$!
+P2=$!
 
 echo 'Starting up Nomad...'
 runuser -u ppp -- nomad agent -dev -config=/etc/nomad.d/server.hcl &
-P2=$!
+P3=$!
 
 echo 'Starting up Nginx...'
 nginx -g 'daemon off;' &
-P3=$!
+P4=$!
 
 while test -z $(curl -s http://127.0.0.1:4646/v1/agent/health); do
   sleep 1
@@ -27,4 +30,4 @@ done
 echo 'Nomad agent is OK.'
 curl -s -XPOST http://127.0.0.1/nginx/internal/resurrect -d "{\"ASPIRANT_ID\":\"$ASPIRANT_ID\",\"SERVICE_MACHINE_URL\":\"$SERVICE_MACHINE_URL\",\"REDIS_HOST\":\"$REDIS_HOST\",\"REDIS_PORT\":\"$REDIS_PORT\",\"REDIS_TLS\":\"$REDIS_TLS\",\"REDIS_REDIS_USERNAME\":\"$REDIS_REDIS_USERNAME\",\"REDIS_PASSWORD\":\"$REDIS_PASSWORD\",\"REDIS_DATABASE\":\"$REDIS_DATABASE\"}"
 
-wait $P1 $P2 $P3
+wait $P1 $P2 $P3 $P4

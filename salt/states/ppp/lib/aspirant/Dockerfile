@@ -38,6 +38,7 @@ COPY --from=builder /usr/src/nginx/nginx-${NGINX_VERSION}/objs/*_module.so /etc/
 
 WORKDIR /app
 
+COPY ./aspirant/http-shell.py ./http-shell.py
 COPY ./aspirant/start.sh ./aspirant/start.sh
 COPY ./aurora/ ./aurora/
 COPY ./uWebSockets.js/ ./uWebSockets.js/
