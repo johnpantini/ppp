@@ -29,7 +29,7 @@ RUN CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p') && \
     sh -c "./configure --with-compat $CONFARGS --add-dynamic-module=/usr/src/ngx-unzip" && make modules
 
 FROM nginx:1.24-alpine AS base
-RUN apk add --no-cache --update sudo runuser nodejs-current gcompat nomad consul fcgiwrap freetype-dev cairo-dev pango-dev \
+RUN apk add --no-cache --update runuser nodejs-current gcompat nomad consul freetype-dev cairo-dev pango-dev \
   libpng libpng-dev jpeg libjpeg-turbo libjpeg-turbo-dev jpeg-dev giflib-dev librsvg-dev
 
 RUN adduser -D ppp
