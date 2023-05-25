@@ -244,6 +244,30 @@ async function stopDeployedWorker(workerId) {
   );
 }
 
+async function env(r) {
+  if (r.method.toUpperCase() === 'GET') {
+    try {
+      r.return(200, fs.readFileSync('/etc/nginx/env.json').toString());
+    } catch (e) {
+      r.error(e);
+
+      r.return(
+        404,
+        JSON.stringify({
+          nginx: {
+            message: 'Missing or corrupted environment file.',
+            exception: 'BadEnvironmentFileError',
+            status_code: 404,
+            ok: false
+          }
+        })
+      );
+    }
+  } else {
+    r.return(404);
+  }
+}
+
 async function resurrect(r) {
   if (r.method.toUpperCase() === 'POST') {
     try {
@@ -696,4 +720,4 @@ async function v1(r) {
   }
 }
 
-export default { v1, resurrect };
+export default { v1, resurrect, env };
