@@ -15,7 +15,7 @@ import {
   endSlotTemplate
 } from '../vendor/fast-patterns.js';
 import { applyMixins, display } from '../vendor/fast-utilities.js';
-import { ellipsis, normalize } from '../design/styles.js'
+import { ellipsis, normalize } from '../design/styles.js';
 import {
   bodyFont,
   darken,
@@ -46,6 +46,12 @@ import {
 
 export const buttonTemplate = html`
   <button
+    @keydown="${(x, { event }) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }}"
     class="control"
     part="control"
     ?autofocus="${(x) => x.autofocus}"
