@@ -1,14 +1,12 @@
 import ppp from '../../ppp.js';
-import { css, html, ref } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { css, html } from '../../vendor/fast-element.min.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
 
-export const telegramBotsPageTemplate = html`
+export const botsPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -19,14 +17,18 @@ export const telegramBotsPageTemplate = html`
           slot="controls"
           @click="${() =>
             ppp.app.navigate({
-              page: 'telegram-bot'
+              page: 'bot'
             })}"
         >
           Добавить бота
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: 'bot',
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -41,11 +43,7 @@ export const telegramBotsPageTemplate = html`
             label: 'Версия'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -57,13 +55,13 @@ export const telegramBotsPageTemplate = html`
                   class="link"
                   @click="${() => {
                     ppp.app.navigate({
-                      page: 'telegram-bot',
+                      page: 'bot',
                       document: datum._id
                     });
 
                     return false;
                   }}"
-                  href="?page=telegram-bot&document=${datum._id}"
+                  href="?page=bot&document=${datum._id}"
                 >
                   ${datum.name}
                 </a>`,
@@ -76,10 +74,9 @@ export const telegramBotsPageTemplate = html`
                 `,
                 html`
                   <ppp-button
-                    disabled
-                    shiftlock
+                    action="cleanup"
+                    :datum="${() => datum}"
                     class="xsmall"
-                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -93,12 +90,11 @@ export const telegramBotsPageTemplate = html`
   </template>
 `;
 
-export const telegramBotsPageStyles = css`
+export const botsPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
-export class TelegramBotsPage extends Page {
+export class BotsPage extends Page {
   collection = 'bots';
 
   async populate() {
@@ -115,9 +111,7 @@ export class TelegramBotsPage extends Page {
   }
 }
 
-applyMixins(TelegramBotsPage, PageWithShiftLock);
-
-export default TelegramBotsPage.compose({
-  template: telegramBotsPageTemplate,
-  styles: telegramBotsPageStyles
+export default BotsPage.compose({
+  template: botsPageTemplate,
+  styles: botsPageStyles
 }).define();

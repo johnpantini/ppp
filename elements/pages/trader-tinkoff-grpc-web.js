@@ -1,6 +1,11 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { PAGE_STATUS, TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import {
   UsersServiceDefinition,
@@ -10,6 +15,7 @@ import {
 import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
+import '../badge.js';
 import '../button.js';
 import '../radio-group.js';
 import '../query-select.js';
@@ -19,12 +25,9 @@ export const traderTinkoffGrpcWebTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Трейдеры - Tinkoff Invest API - ${x.document.name}`
-            : 'Трейдеры - Tinkoff Invest API'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название трейдера</h5>
@@ -160,15 +163,7 @@ export const traderTinkoffGrpcWebTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;

@@ -1,9 +1,7 @@
 import ppp from '../../ppp.js';
-import { css, html, Observable, ref } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { css, html } from '../../vendor/fast-element.min.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
 import '../button.js';
 import '../table.js';
 
@@ -22,7 +20,11 @@ export const workspacesPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: 'workspace-manage',
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -34,11 +36,7 @@ export const workspacesPageTemplate = html`
             label: 'Последнее изменение'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -80,21 +78,9 @@ export const workspacesPageTemplate = html`
                       Перейти в терминал
                     </ppp-button>
                     <ppp-button
-                      shiftlock
-                      disabled
+                      action="cleanup"
+                      :datum="${() => datum}"
                       class="xsmall"
-                      @click="${async () => {
-                        const index = ppp.workspaces.findIndex(
-                          (w) => w._id === datum._id
-                        );
-
-                        if (index > -1) {
-                          ppp.workspaces.splice(index, 1);
-                          Observable.notify(ppp.app, 'workspaces');
-                        }
-
-                        await x.removeDocumentFromListing(datum);
-                      }}"
                     >
                       Удалить
                     </ppp-button>
@@ -111,7 +97,6 @@ export const workspacesPageTemplate = html`
 
 export const workspacesPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
 export class WorkspacesPage extends Page {
@@ -130,8 +115,6 @@ export class WorkspacesPage extends Page {
     };
   }
 }
-
-applyMixins(WorkspacesPage, PageWithShiftLock);
 
 export default WorkspacesPage.compose({
   template: workspacesPageTemplate,

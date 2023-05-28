@@ -1,7 +1,13 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import '../badge.js';
 import '../button.js';
 import '../query-select.js';
 import '../radio-group.js';
@@ -11,12 +17,9 @@ export const traderBinanceV3Template = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Трейдеры - Binance V3 - ${x.document.name}`
-            : 'Трейдеры - Binance V3'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название трейдера</h5>
@@ -147,15 +150,7 @@ export const traderBinanceV3Template = html`
           </ppp-select>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;

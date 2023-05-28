@@ -1,23 +1,26 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { checkTelegramBotToken, TelegramBot } from '../../lib/telegram.js';
 import { getMongoDBRealmAccessToken } from '../../lib/realm.js';
+import '../badge.js';
 import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
 
-export const telegramBotPageTemplate = html`
+export const botPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Бот Telegram - ${x.document.name}`
-            : 'Бот Telegram'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название бота</h5>
@@ -142,24 +145,16 @@ export const telegramBotPageTemplate = html`
           </div>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;
 
-export const telegramBotPageStyles = css`
+export const botPageStyles = css`
   ${pageStyles}
 `;
 
-export class TelegramBotPage extends Page {
+export class BotPage extends Page {
   collection = 'bots';
 
   async getMongoDBRealmAccessToken({
@@ -286,7 +281,7 @@ export class TelegramBotPage extends Page {
   }
 }
 
-export default TelegramBotPage.compose({
-  template: telegramBotPageTemplate,
-  styles: telegramBotPageStyles
+export default BotPage.compose({
+  template: botPageTemplate,
+  styles: botPageStyles
 }).define();

@@ -1,7 +1,13 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate, invalidate } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import { validate } from '../../lib/ppp-errors.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
@@ -11,12 +17,9 @@ export const traderUtexMarginStocksTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Трейдеры - UTEX Margin (акции) - ${x.document.name}`
-            : 'Трейдеры - UTEX Margin (акции)'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название трейдера</h5>
@@ -116,15 +119,7 @@ export const traderUtexMarginStocksTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;

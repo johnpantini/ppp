@@ -1,19 +1,23 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, Observable } from '../../vendor/fast-element.min.js';
-import { validate, invalidate } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
-import { BROKERS } from '../../lib/const.js';
-import '../text-field.js';
+import { validate } from '../../lib/ppp-errors.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
+import '../badge.js';
 import '../button.js';
+import '../text-field.js';
 
 export const workspaceManagePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name ? `Терминал - ${x.document.name}` : 'Терминал'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название терминала</h5>
@@ -29,15 +33,7 @@ export const workspaceManagePageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;
@@ -103,6 +99,15 @@ export class WorkspaceManagePage extends Page {
         createdAt: new Date()
       }
     };
+  }
+
+  async cleanup() {
+    const index = ppp.workspaces.findIndex((w) => w._id === this.document._id);
+
+    if (index > -1) {
+      ppp.workspaces.splice(index, 1);
+      Observable.notify(ppp, 'workspaces');
+    }
   }
 }
 

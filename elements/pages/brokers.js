@@ -1,5 +1,5 @@
 import ppp from '../../ppp.js';
-import { css, html, ref } from '../../vendor/fast-element.min.js';
+import { css, html } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
 import '../badge.js';

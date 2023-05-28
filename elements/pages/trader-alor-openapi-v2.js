@@ -1,8 +1,14 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, maybeFetchError } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { EXCHANGE, TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
+import '../badge.js';
 import '../button.js';
 import '../radio-group.js';
 import '../query-select.js';
@@ -12,12 +18,9 @@ export const traderAlorOpenApiV2Template = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Трейдеры - Alor Open API V2 - ${x.document.name}`
-            : 'Трейдеры - Alor Open API V2'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название трейдера</h5>
@@ -167,15 +170,7 @@ export const traderAlorOpenApiV2Template = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;
