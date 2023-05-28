@@ -1,11 +1,21 @@
 import ppp from '../../ppp.js';
-import { html, css, ref, when } from '../../vendor/fast-element.min.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { APIS } from '../../lib/const.js';
 import { checkAstraDbCredentials } from '../../lib/astradb.js';
 import { formatDate } from '../../lib/intl.js';
-import { upsertMongoDBRealmScheduledTrigger } from '../../lib/realm.js';
+import {
+  upsertMongoDBRealmScheduledTrigger,
+  removeMongoDBRealmTrigger
+} from '../../lib/realm.js';
+import '../badge.js';
+import '../banner.js';
 import '../button.js';
 import '../text-field.js';
 
@@ -13,24 +23,18 @@ export const apiAstraDbPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Внешние API - AstraDB - ${x.document.name}`
-            : 'Внешние API - AstraDB'}
-        ${when(
-          (x) => x.document._id,
-          html`
-            <ppp-button
-              appearance="default"
-              slot="controls"
-              @click="${(x) => x.checkLastWakeUpTime()}"
-            >
-              Проверить состояние базы
-            </ppp-button>
-          `
-        )}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url,
+        extraControls: html`
+          <ppp-button
+            appearance="default"
+            slot="controls"
+            @click="${(x) => x.checkLastWakeUpTime()}"
+          >
+            Проверить подключение к базе
+          </ppp-button>
+        `
+      })}
       <section>
         <div class="label-group">
           <h5>Название подключения</h5>
@@ -109,21 +113,22 @@ export const apiAstraDbPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial({
+        extraControls: html`
+          <ppp-banner appearance="warning">
+            Будет настроен триггер, чтобы базу не отключили за неактивность.
+          </ppp-banner>
+        `
+      })}
     </form>
   </template>
 `;
 
 export const apiAstraDbPageStyles = css`
   ${pageStyles}
+  ppp-banner {
+    margin-right: auto;
+  }
 `;
 
 export class ApiAstraDbPage extends Page {
@@ -270,6 +275,12 @@ export class ApiAstraDbPage extends Page {
         }
       })
     ];
+  }
+
+  async cleanup() {
+    return removeMongoDBRealmTrigger({
+      triggerName: `pppAstraDBWakeUpTrigger${this.document._id}`
+    });
   }
 }
 

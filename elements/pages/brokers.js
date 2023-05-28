@@ -1,9 +1,7 @@
 import ppp from '../../ppp.js';
 import { css, html, ref } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
@@ -28,7 +26,11 @@ export const brokersPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: `broker-${c.event.detail.datum.type}`,
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -46,11 +48,7 @@ export const brokersPageTemplate = html`
             label: 'Версия'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -82,10 +80,9 @@ export const brokersPageTemplate = html`
                 `,
                 html`
                   <ppp-button
-                    disabled
-                    shiftlock
+                    action="cleanup"
+                    :datum="${() => datum}"
                     class="xsmall"
-                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -101,7 +98,6 @@ export const brokersPageTemplate = html`
 
 export const brokersPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
 export class BrokersPage extends Page {
@@ -120,8 +116,6 @@ export class BrokersPage extends Page {
     };
   }
 }
-
-applyMixins(BrokersPage, PageWithShiftLock);
 
 export default BrokersPage.compose({
   template: brokersPageTemplate,

@@ -1,13 +1,10 @@
 import ppp from '../../ppp.js';
-import { css, html, ref } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { css, html } from '../../vendor/fast-element.min.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
-import { APIS } from '../../lib/const.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -29,7 +26,11 @@ export const apisPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: `api-${c.event.detail.datum.type}`,
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -47,11 +48,7 @@ export const apisPageTemplate = html`
             label: 'Версия'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -83,10 +80,9 @@ export const apisPageTemplate = html`
                 `,
                 html`
                   <ppp-button
-                    disabled
-                    shiftlock
+                    action="cleanup"
+                    :datum="${() => datum}"
                     class="xsmall"
-                    @click="${() => x.removeApi(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -102,7 +98,6 @@ export const apisPageTemplate = html`
 
 export const apisPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
 export class ApisPage extends Page {
@@ -120,17 +115,7 @@ export class ApisPage extends Page {
         .sort({ updatedAt: -1 });
     };
   }
-
-  async removeApi(datum) {
-    if (datum.type === APIS.ASTRADB) {
-      // Remove wake up trigger
-
-      return this.removeDocumentFromListing(datum);
-    } else return this.removeDocumentFromListing(datum);
-  }
 }
-
-applyMixins(ApisPage, PageWithShiftLock);
 
 export default ApisPage.compose({
   template: apisPageTemplate,

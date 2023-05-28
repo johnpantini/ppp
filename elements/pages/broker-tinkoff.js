@@ -1,7 +1,11 @@
-import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { BROKERS } from '../../lib/const.js';
 import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
@@ -10,19 +14,17 @@ import {
   UsersServiceDefinition,
   AccountStatus
 } from '../../vendor/tinkoff/definitions/users.js';
-import '../text-field.js';
+import '../badge.js';
 import '../button.js';
+import '../text-field.js';
 
 export const brokerTinkoffPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Брокеры - Tinkoff - ${x.document.name}`
-            : 'Брокеры - Tinkoff'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название подключения</h5>
@@ -62,15 +64,7 @@ export const brokerTinkoffPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;

@@ -1,21 +1,24 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
-import { Page, pageStyles } from '../page.js';
+import {
+  Page,
+  pageStyles,
+  documentPageHeaderPartial,
+  documentPageFooterPartial
+} from '../page.js';
 import { BROKERS } from '../../lib/const.js';
-import '../text-field.js';
+import '../badge.js';
 import '../button.js';
+import '../text-field.js';
 
 export const brokerUtexPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Брокеры - UTEX - ${x.document.name}`
-            : 'Брокеры - UTEX'}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <section>
         <div class="label-group">
           <h5>Название подключения</h5>
@@ -57,15 +60,7 @@ export const brokerUtexPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить изменения
-        </ppp-button>
-      </footer>
+      ${documentPageFooterPartial()}
     </form>
   </template>
 `;
