@@ -74,7 +74,14 @@ function processEnv(object) {
   return result;
 }
 
-async function startDeployedWorker(workerId, artifactUrl, env, enableHttp) {
+async function startDeployedWorker(
+  workerId,
+  artifactUrl,
+  env,
+  enableHttp,
+  command,
+  args
+) {
   const templates = [];
   const networks = [];
   const services = [];
@@ -181,10 +188,13 @@ async function startDeployedWorker(workerId, artifactUrl, env, enableHttp) {
                 Templates: templates,
                 Services: services,
                 Config: {
-                  command: '/usr/bin/node',
-                  args: [
+                  command: command || '/usr/bin/node',
+                  args: args || [
                     `\${NOMAD_TASK_DIR}/nginx/workers/${workerId}/${workerId}.mjs`
                   ]
+                },
+                Meta: {
+                  PPP_WORKER_ID: workerId
                 },
                 Env: processEnv(
                   Object.assign(env, {
@@ -368,7 +378,9 @@ async function resurrect(r) {
             workerId,
             workerData.artifactUrl,
             Object.assign({}, env, workerData.env),
-            workerData.enableHttp
+            workerData.enableHttp,
+            workerData.command,
+            workerData.args
           );
         });
 
@@ -500,7 +512,9 @@ async function v1(r) {
                 requestBody.workerId,
                 requestBody.artifactUrl,
                 env,
-                !!requestBody.enableHttp
+                !!requestBody.enableHttp,
+                requestBody.command,
+                requestBody.args
               );
             } else if (method === 'PUT') {
               response = await restartDeployedWorker(requestBody.workerId);
