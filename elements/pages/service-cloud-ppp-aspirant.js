@@ -108,7 +108,7 @@ export const serviceCloudPppAspirantTemplate = html`
           </ppp-banner>
           <div class="spacing1"></div>
           <ppp-banner class="inline" appearance="warning">
-            Render: заранее создайте пустой сервис (тип Docker) с именем
+            Render: создайте пустой сервис (тип Docker) с именем
             aspirant-<i>суффикс</i>. Суффикс сгенерируйте ниже.
           </ppp-banner>
         </div>
