@@ -167,17 +167,14 @@ export const sideNavStyles = css`
     position: absolute;
     margin-block: 0;
     padding-inline-start: 0;
-    padding: ${spacing3} 0;
+    padding-bottom: ${spacing3};
     list-style-type: none;
     overflow: hidden auto;
     inset: 0;
   }
 
-  :host([inline]) .expanded-content > ul {
-    padding: 0;
-  }
-
   .expanded-content > ul {
+    padding-top: ${spacing2};
     width: calc(${sideNavExpandedWidth} * 1px);
   }
 

@@ -30,7 +30,6 @@ import {
   cloud,
   plus,
   settings,
-  services,
   extensions,
   connections,
   expand,
@@ -40,6 +39,8 @@ import './button.js';
 import './modal.js';
 import './pages/not-found.js';
 import './side-nav.js';
+
+await ppp.i18n(import.meta.url);
 
 export const appTemplate = html`
   <template>
@@ -62,23 +63,27 @@ export const appTemplate = html`
             <span slot="start" class="action-icon">
               ${html.partial(plus)}
             </span>
-            <span>Новый терминал</span>
+            <span>${() => ppp.t('$sideNav.newWorkspace')}</span>
           </ppp-side-nav-item>
           ${when(
             () => ppp.workspaces.length,
             html`
               <ppp-side-nav-group>
-                <span slot="start"> ${html.partial(workspaces)} </span>
+                <span slot="start">${html.partial(workspaces)}</span>
                 ${when(
                   (x) => x.page === 'workspace',
-                  html` <code
-                    class="hotkey"
-                    slot="end"
-                    @click="${() => ppp.app.showWidgetSelector()}"
-                    >+W</code
-                  >`
+                  html`
+                    <code
+                      class="hotkey"
+                      slot="end"
+                      @click="${() => ppp.app.showWidgetSelector()}"
+                      >+W</code
+                    >
+                  `
                 )}
-                <span slot="title">Терминалы</span>
+                <span slot="title">
+                  ${() => ppp.t('$collection.workspaces')}
+                </span>
                 ${repeat(
                   () => ppp.workspaces,
                   html`
@@ -126,7 +131,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('widget')}"
               >
-                <span>Виджеты</span>
+                <span>${() => ppp.t('$collection.widgets')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -140,7 +145,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'instruments'}"
               >
-                <span>Инструменты</span>
+                <span>${() => ppp.t('$collection.instruments')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -154,40 +159,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'workspaces'}"
               >
-                <span>Терминалы</span>
-              </ppp-side-nav-item>
-            </a>
-          </ppp-side-nav-group>
-          <ppp-side-nav-group>
-            <span slot="start"> ${html.partial(services)} </span>
-            <span slot="title">Сервисы</span>
-            <a
-              href="?page=services"
-              @click="${(x) =>
-                x.navigate({
-                  page: 'services'
-                })}"
-            >
-              <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
-                ?active="${(x) => x.page === 'services'}"
-              >
-                <span>Список сервисов</span>
-              </ppp-side-nav-item>
-            </a>
-            <a
-              href="?page=service"
-              @click="${(x) =>
-                x.navigate({
-                  page: 'service'
-                })}"
-            >
-              <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
-                ?active="${(x) =>
-                  x.page === 'service' || x.page.startsWith('service-')}"
-              >
-                <span>Установить сервис</span>
+                <span>${() => ppp.t('$collection.workspaces')}</span>
               </ppp-side-nav-item>
             </a>
           </ppp-side-nav-group>
@@ -195,8 +167,10 @@ export const appTemplate = html`
             () => ppp.extensions.length,
             html`
               <ppp-side-nav-group>
-                <span slot="start"> ${html.partial(extensions)} </span>
-                <span slot="title">Дополнения</span>
+                <span slot="start">${html.partial(extensions)}</span>
+                <span slot="title">
+                  ${() => ppp.t('$collection.extensions')}
+                </span>
                 ${repeat(
                   () => ppp.extensions,
                   html`
@@ -213,6 +187,7 @@ export const appTemplate = html`
                     >
                       <ppp-side-nav-item
                         ?active="${(x, c) => c.parent.extension === x._id}"
+                        id="${(x) => x._id}"
                       >
                         <span> ${(x) => x.title} </span>
                       </ppp-side-nav-item>
@@ -236,7 +211,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('api')}"
               >
-                <span>Внешние API</span>
+                <span>${() => ppp.t('$collection.apis')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -250,7 +225,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('broker')}"
               >
-                <span>Брокеры</span>
+                <span>${() => ppp.t('$collection.brokers')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -264,21 +239,35 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('trader')}"
               >
-                <span>Трейдеры</span>
+                <span>${() => ppp.t('$collection.traders')}</span>
               </ppp-side-nav-item>
             </a>
             <a
-              href="?page=telegram-bots"
+              href="?page=bots"
               @click="${(x) =>
                 x.navigate({
-                  page: 'telegram-bots'
+                  page: 'bots'
                 })}"
             >
               <ppp-side-nav-item
                 ?disabled="${() => !ppp.keyVault.ok()}"
-                ?active="${(x) => x.page.startsWith('telegram-bot')}"
+                ?active="${(x) => x.page.startsWith('bot')}"
               >
-                <span>Боты Telegram</span>
+                <span>${() => ppp.t('$collection.bots')}</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=services"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'services'
+                })}"
+            >
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('service')}"
+              >
+                <span>${() => ppp.t('$collection.services')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -337,7 +326,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'extensions'}"
               >
-                <span>Дополнения</span>
+                <span>${() => ppp.t('$collection.extensions')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -351,7 +340,7 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'settings'}"
               >
-                <span>Параметры</span>
+                <span>${() => ppp.t('$collection.settings')}</span>
               </ppp-side-nav-item>
             </a>
           </ppp-side-nav-group>
@@ -752,7 +741,10 @@ export class App extends PPPElement {
       }
 
       this.mountPointModal.setAttribute('class', options.size ?? 'large');
-      this.mountPointModal.removeAttribute('hidden');
+
+      if (!options.stayHidden) {
+        this.mountPointModal.removeAttribute('hidden');
+      }
 
       const result = mountPoint.appendChild(pageElement);
 
@@ -903,7 +895,7 @@ export class App extends PPPElement {
 
   async handleNewWorkspaceClick() {
     return ppp.app.mountPage('new-workspace-modal', {
-      title: 'Новый терминал',
+      title: ppp.t('$sideNav.newWorkspace'),
       size: 'large'
     });
   }

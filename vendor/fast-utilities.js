@@ -12,6 +12,10 @@ export function uniqueId(prefix = '') {
   return `${prefix}${uniqueIdCounter++}`;
 }
 
+export const AsyncFunction = Object.getPrototypeOf(
+  async function () {}
+).constructor;
+
 /**
  * Determines if a number value is within a specified range.
  *
@@ -121,22 +125,38 @@ export function applyMixins(derivedCtor, ...baseCtors) {
           // Own property
           const _ = newDescriptor.value;
 
-          newDescriptor.value = function () {
-            existingDescriptor.value.apply(this, arguments);
+          if (_ instanceof AsyncFunction) {
+            newDescriptor.value = async function () {
+              await existingDescriptor.value.apply(this, arguments);
 
-            return _.apply(this, arguments);
-          };
+              return _.apply(this, arguments);
+            };
+          } else {
+            newDescriptor.value = function () {
+              existingDescriptor.value.apply(this, arguments);
+
+              return _.apply(this, arguments);
+            };
+          }
 
           Object.defineProperty(derivedCtor.prototype, name, newDescriptor);
         } else if (typeof deepValue === 'function') {
           // Deep property somewhere in the prototype chain
           const _ = newDescriptor.value;
 
-          derivedCtor.prototype[name] = function () {
-            deepValue.apply(this, arguments);
+          if (_ instanceof AsyncFunction) {
+            derivedCtor.prototype[name] = async function () {
+              await deepValue.apply(this, arguments);
 
-            return _.apply(this, arguments);
-          };
+              return _.apply(this, arguments);
+            };
+          } else {
+            derivedCtor.prototype[name] = function () {
+              deepValue.apply(this, arguments);
+
+              return _.apply(this, arguments);
+            };
+          }
         }
       }
     });

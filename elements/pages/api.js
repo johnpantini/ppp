@@ -233,34 +233,6 @@ export const apiPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="bit.io"
-            style="height: 32px;"
-            src="${() => ppp.brandSvg('bitio')}"
-          />
-          <span slot="title">bit.io</span>
-          <span slot="description">
-            Облачная база данных на основе PostgreSQL.&nbsp;<a
-              class="link"
-              target="_blank"
-              rel="noopener"
-              href="https://bit.io/"
-              >Официальный ресурс</a
-            >.
-          </span>
-          <ppp-button
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `api-${APIS.BITIO}`
-              })}"
-          >
-            Продолжить
-          </ppp-button>
-        </ppp-generic-card>
-        <ppp-generic-card>
-          <img
-            slot="logo"
-            draggable="false"
             alt="Cloudflare"
             style="height: 32px"
             src="${() => ppp.brandSvg('cloudflare')}"

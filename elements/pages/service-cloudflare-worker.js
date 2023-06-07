@@ -1,13 +1,18 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
-import { Page, pageStyles, PageWithService } from '../page.js';
+import {
+  documentPageFooterPartial,
+  documentPageHeaderPartial,
+  Page,
+  pageStyles,
+  PageWithService
+} from '../page.js';
+import { servicePageHeaderExtraControls } from './service.js';
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
-import { parsePPPScript } from '../../lib/ppp-script.js';
 import { createWorkerUploadForm } from '../../lib/cloudflare.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
-import { serviceHeaderControlsPartial } from './services.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -22,7 +27,8 @@ export const predefinedWorkerData = {
   default: {
     env: `{}`,
     envSecret: '{}',
-    content: `// ==PPPScript==
+    // Default value
+    sourceCode: `// ==PPPScript==
 // @version 1
 // ==/PPPScript==
 
@@ -66,13 +72,10 @@ export const serviceCloudflareWorkerPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Сервис - Cloudflare Worker - ${x.document.name}`
-            : 'Сервис - Cloudflare Worker'}
-        ${serviceHeaderControlsPartial}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url,
+        extraControls: servicePageHeaderExtraControls
+      })}
       ${when(
         (x) => x.document._id && x.document.subdomain,
         html`
@@ -166,7 +169,8 @@ export const serviceCloudflareWorkerPageTemplate = html`
             <ppp-snippet
               style="height: 750px"
               :code="${(x) =>
-                x.document.sourceCode ?? predefinedWorkerData.default.content}"
+                x.document.sourceCode ??
+                predefinedWorkerData.default.sourceCode}"
               ${ref('sourceCode')}
             ></ppp-snippet>
           </div>
@@ -297,19 +301,9 @@ export const serviceCloudflareWorkerPageTemplate = html`
           </div>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить в PPP и обновить в Cloudflare
-        </ppp-button>
-        ${when(
-          (x) => x.document._id,
-          html` <ppp-button disabled appearance="danger">Удалить</ppp-button> `
-        )}
-      </footer>
+      ${documentPageFooterPartial({
+        text: 'Сохранить в PPP и обновить в Cloudflare'
+      })}
     </form>
   </template>
 `;
@@ -320,12 +314,6 @@ export const serviceCloudflareWorkerPageStyles = css`
 
 export class ServiceCloudflareWorkerPage extends Page {
   collection = 'services';
-
-  async connectedCallback() {
-    await super.connectedCallback();
-
-    return this.checkVersion();
-  }
 
   async fillOutFormsWithTemplate() {
     this.beginOperation();
@@ -606,32 +594,12 @@ export class ServiceCloudflareWorkerPage extends Page {
 
     await maybeFetchError(
       enableSubdomainRequest,
-      'Не удалось активировать поддомен для сервиса в Cloudflare.'
+      'Не удалось активировать поддомен *.dev для сервиса в Cloudflare.'
     );
   }
 
   async submit() {
     const state = SERVICE_STATE.ACTIVE;
-    let version = 1;
-    const parsed = parsePPPScript(this.sourceCode.value);
-
-    if (parsed) {
-      [version] = parsed?.meta?.version;
-      version = Math.abs(+version) || 1;
-    }
-
-    if (this.useVersioning.checked) {
-      if (!parsed || typeof version !== 'number') {
-        invalidate(this.sourceCode, {
-          errorMessage: 'Не удалось прочитать версию',
-          raiseException: true
-        });
-      }
-    }
-
-    if (typeof version !== 'number') {
-      version = 1;
-    }
 
     return [
       {
@@ -641,7 +609,10 @@ export class ServiceCloudflareWorkerPage extends Page {
           sourceCode: this.sourceCode.value,
           environmentCode: this.environmentCode.value,
           environmentCodeSecret: this.environmentCodeSecret.value,
-          version,
+          version: this.getVersionFromSnippet(
+            this.sourceCode,
+            this.useVersioning.checked
+          ),
           workerPredefinedTemplate: this.workerPredefinedTemplate.value,
           subdomain: this.document.subdomain,
           useVersioning: this.useVersioning.checked,
@@ -662,6 +633,41 @@ export class ServiceCloudflareWorkerPage extends Page {
         }
       })
     ];
+  }
+
+  async update() {
+    const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+    const fcRequest = await fetch(
+      ppp.getWorkerTemplateFullUrl(data.url).toString(),
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+
+    this.sourceCode.updateCode(await fcRequest.text());
+  }
+
+  async cleanup() {
+    const { email, apiKey, accountID } = this.cloudflareApiId.datum();
+    const name = `ppp-${this.document._id}`;
+
+    await fetch(
+      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'no-cache',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'DELETE',
+          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}`,
+          headers: {
+            'X-Auth-Email': email,
+            'X-Auth-Key': apiKey
+          }
+        })
+      }
+    );
   }
 }
 

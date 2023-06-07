@@ -9,7 +9,8 @@ import {
   Observable,
   attr,
   ref,
-  Updates
+  Updates,
+  when
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
 import { ellipsis, normalize, spacing, typography } from '../design/styles.js';
@@ -26,6 +27,9 @@ import {
 } from '../design/design-tokens.js';
 import { PAGE_STATUS, SERVICE_STATE, VERSIONING_STATUS } from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
+import { uuidv4 } from '../lib/ppp-crypto.js';
+import { parsePPPScript } from '../lib/ppp-script.js';
+import { arrowLeft } from '../static/svg/sprite.js';
 import {
   ConflictError,
   DocumentNotFoundError,
@@ -34,8 +38,6 @@ import {
   maybeFetchError
 } from '../lib/ppp-errors.js';
 import './toast.js';
-import { uuidv4 } from '../lib/ppp-crypto.js';
-import { parsePPPScript } from '../lib/ppp-script.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -86,6 +88,81 @@ await ppp.i18n(import.meta.url);
   })
   .define());
 
+export const documentPageHeaderPartial = ({
+  pageUrl,
+  extraControls = ''
+} = {}) => {
+  const [page, type] = pageUrl
+    .split('pages/')[1]
+    .split('.js')[0]
+    .split(/(^[a-z0-9]+)-/i)
+    .filter(Boolean);
+  const collection = `${page}s`;
+
+  return html`
+    <ppp-page-header>
+      ${(x) => {
+        const nameParts = [ppp.t(`$collection.${collection}`)];
+
+        if (type && type !== 'manage') {
+          nameParts.push(ppp.t(`$const.${page}.${type}`));
+        }
+
+        if (x.document.name ?? x.document.title) {
+          nameParts.push(x.document.name ?? x.document.title);
+        }
+
+        return nameParts.join(' - ');
+      }}
+      ${when(
+        (x) => x.document._id,
+        html`
+          <ppp-badge
+            ?hidden="${(x) => !x.document.removed}"
+            slot="controls"
+            appearance="lightgray"
+          >
+            Документ удалён
+          </ppp-badge>
+          ${extraControls}
+        `
+      )}
+      <ppp-button
+        appearance="default"
+        slot="controls"
+        @click="${() =>
+          ppp.app.navigate({
+            page: collection
+          })}"
+      >
+        Перейти к списку
+        <span slot="start">${html.partial(arrowLeft)}</span>
+      </ppp-button>
+    </ppp-page-header>
+  `;
+};
+
+export const documentPageFooterPartial = ({ text, extraControls } = {}) => html`
+  <footer>
+    ${extraControls}
+    <ppp-button
+      type="submit"
+      appearance="primary"
+      @click="${(x) => x.submitDocument()}"
+    >
+      ${text ?? 'Сохранить в PPP'}
+    </ppp-button>
+    <ppp-button
+      ?hidden="${(x) => !x.document._id}"
+      ?disabled="${(x) => !x.isSteady() || x.document.removed}"
+      appearance="danger"
+      @click="${(x) => x.cleanupAndRemoveDocument()}"
+    >
+      Удалить
+    </ppp-button>
+  </footer>
+`;
+
 export const pageStyles = css`
   ${normalize()}
   ${spacing()}
@@ -133,7 +210,7 @@ export const pageStyles = css`
   footer {
     display: flex;
     gap: 0 ${spacing2};
-    align-items: baseline;
+    align-items: center;
     justify-content: flex-end;
     flex-wrap: wrap;
     flex-grow: 1;
@@ -142,7 +219,7 @@ export const pageStyles = css`
   }
 
   footer {
-    padding: 50px 0;
+    padding: 50px 25px 25px 25px;
   }
 
   .section-index-icon {
@@ -250,7 +327,7 @@ export const pageStyles = css`
   .control-line {
     display: flex;
     flex-direction: row;
-    gap: 0 8px;
+    gap: 8px;
   }
 
   .control-line.centered {
@@ -261,7 +338,7 @@ export const pageStyles = css`
     display: flex;
     flex-direction: column;
     align-items: start;
-    gap: 8px 0;
+    gap: 8px;
   }
 
   .icon {
@@ -377,9 +454,13 @@ class Page extends PPPElement {
     if (!this.hasAttribute('disable-auto-read')) {
       await this.readDocument();
 
-      if (!this.lastError) {
-        if (!this.hasAttribute('disable-auto-populate'))
-          return this.populateDocuments();
+      if (typeof this.populate === 'function') {
+        if (!this.lastError) {
+          if (!this.hasAttribute('disable-auto-populate'))
+            return this.populateDocuments();
+        }
+      } else {
+        this.documents = [];
       }
     } else {
       this.status = PAGE_STATUS.READY;
@@ -529,11 +610,6 @@ class Page extends PPPElement {
         } else {
           this.documents = populateMethodResult ?? [];
         }
-      } else if (this.collection) {
-        this.documents = await ppp.user.functions.aggregate(
-          { collection: this.collection },
-          [{ $match: { removed: { $not: { $eq: true } } } }]
-        );
       } else {
         this.documents = [];
       }
@@ -552,43 +628,74 @@ class Page extends PPPElement {
     }
   }
 
-  async removeDocumentFromListing(datum) {
-    this.beginOperation();
+  async cleanupAndRemoveDocument() {
+    if (
+      await ppp.app.confirm(
+        'Удаление документа',
+        `Подтвердите, что собираетесь удалить документ «${
+          this.document.name ?? this.document.title
+        }».`
+      )
+    ) {
+      this.beginOperation();
 
-    try {
-      await ppp.user.functions.updateOne(
-        {
-          collection: this.collection
-        },
-        {
-          _id: datum._id
-        },
-        {
+      try {
+        await this.cleanup?.();
+        await this.updateDocumentFragment({
           $set: {
-            removed: true
+            removed: true,
+            updatedAt: new Date()
           }
-        },
-        {
-          upsert: true
-        }
-      );
+        });
 
-      const index = this.documents.findIndex((d) => d._id === datum._id);
+        this.showSuccessNotification('Документ удалён.', 'Удаление документа');
+      } catch (e) {
+        await this.updateDocumentFragment({
+          $set: {
+            removed: true,
+            updatedAt: new Date()
+          }
+        });
 
-      if (index > -1) {
-        this.documents.splice(index, 1);
+        this.failOperation(e, 'Удаление документа');
+      } finally {
+        this.endOperation();
       }
 
-      Observable.notify(this, 'documents');
+      return true;
+    }
 
-      this.showSuccessNotification(
-        ppp.t('$operations.operationSucceeded'),
-        'Удаление'
-      );
-    } catch (e) {
-      this.failOperation(e, 'Удаление');
+    return false;
+  }
+
+  async cleanupFromListing({ pageName, documentId }) {
+    const page = await ppp.app.mountPage(pageName, {
+      documentId,
+      stayHidden: true
+    });
+
+    await page.readDocument();
+
+    try {
+      if (await page.cleanupAndRemoveDocument()) {
+        this.beginOperation();
+
+        const index = this.documents.findIndex((d) => d._id === documentId);
+
+        if (index > -1) {
+          this.documents.splice(index, 1);
+        }
+
+        Observable.notify(this, 'documents');
+      } else {
+        return false;
+      }
+
+      return true;
     } finally {
       this.endOperation();
+
+      page.remove();
     }
   }
 
@@ -952,51 +1059,17 @@ class Page extends PPPElement {
 }
 
 /**
- *
- * @mixin
- * @var {HTMLElement} shiftLockContainer
- */
-class PageWithShiftLock {
-  ctor() {
-    this.onShiftLockKeyUpDown = this.onShiftLockKeyUpDown.bind(this);
-  }
-
-  onShiftLockKeyUpDown(event) {
-    if (this.shiftLockContainer && !Array.isArray(this.shiftLockContainer))
-      this.shiftLockContainer = [this.shiftLockContainer];
-
-    if (event.key === 'Shift') {
-      this.shiftLockContainer?.forEach((container) => {
-        container.shadowRoot
-          .querySelectorAll('[shiftlock]')
-          .forEach((element) => {
-            if (event.type === 'keydown') {
-              element.removeAttribute('disabled');
-            } else {
-              element.setAttribute('disabled', '');
-            }
-          });
-      });
-    }
-  }
-
-  connectedCallback() {
-    document.addEventListener('keydown', this.onShiftLockKeyUpDown);
-    document.addEventListener('keyup', this.onShiftLockKeyUpDown);
-  }
-
-  disconnectedCallback() {
-    document.removeEventListener('keydown', this.onShiftLockKeyUpDown);
-    document.removeEventListener('keyup', this.onShiftLockKeyUpDown);
-  }
-}
-
-/**
  * @mixin
  */
 class PageWithService {
   @observable
   actualVersion;
+
+  statusChanged(oldValue, newValue) {
+    if (newValue === PAGE_STATUS.READY) {
+      return this.checkVersion();
+    }
+  }
 
   getVersioningStatus() {
     return this.document.useVersioning
@@ -1004,6 +1077,31 @@ class PageWithService {
         ? VERSIONING_STATUS.OLD
         : VERSIONING_STATUS.OK
       : VERSIONING_STATUS.OFF;
+  }
+
+  getVersionFromSnippet(snippet, validateVersion) {
+    let version = 1;
+    const parsed = parsePPPScript(snippet.value);
+
+    if (parsed) {
+      [version] = parsed?.meta?.version;
+      version = Math.abs(+version) || 1;
+    }
+
+    if (validateVersion) {
+      if (!parsed || typeof version !== 'number') {
+        invalidate(snippet, {
+          errorMessage: 'Не удалось прочитать версию',
+          raiseException: true
+        });
+      }
+    }
+
+    if (typeof version !== 'number') {
+      version = 1;
+    }
+
+    return version;
   }
 
   async checkVersion() {
@@ -1045,7 +1143,16 @@ class PageWithService {
     }
   }
 
-  async updateService() {}
+  async updateService() {
+    this.beginOperation();
+
+    try {
+      await this.update?.();
+      await this.submitDocument();
+    } finally {
+      this.endOperation();
+    }
+  }
 
   async restartService() {
     this.beginOperation();
@@ -1101,33 +1208,13 @@ class PageWithService {
     }
   }
 
-  async cleanupService() {
-    this.beginOperation();
-
-    try {
-      await this.cleanup?.();
-      await this.updateDocumentFragment({
-        $set: {
-          state: SERVICE_STATE.STOPPED,
-          removed: true,
-          updatedAt: new Date()
-        }
-      });
-
-      this.showSuccessNotification('Сервис удалён.', 'Удаление сервиса');
-    } catch (e) {
-      await this.updateDocumentFragment({
-        $set: {
-          state: SERVICE_STATE.FAILED,
-          removed: true,
-          updatedAt: new Date()
-        }
-      });
-
-      this.failOperation(e, 'Удаление сервиса');
-    } finally {
-      this.endOperation();
-    }
+  async cleanup() {
+    await this.updateDocumentFragment({
+      $set: {
+        state: SERVICE_STATE.STOPPED,
+        updatedAt: new Date()
+      }
+    });
   }
 }
 
@@ -1268,16 +1355,16 @@ class PageWithSupabaseService {
   }
 
   async restart() {
-    return this.action('start');
+    await this.action('start');
   }
 
   async stop() {
-    return this.action('stop');
+    await this.action('stop');
   }
 
   async cleanup() {
-    return this.action('cleanup');
+    await this.action('cleanup');
   }
 }
 
-export { Page, PageWithShiftLock, PageWithService, PageWithSupabaseService };
+export { Page, PageWithService, PageWithSupabaseService };

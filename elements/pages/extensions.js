@@ -1,9 +1,7 @@
 import ppp from '../../ppp.js';
-import { css, html, ref } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { css, html } from '../../vendor/fast-element.min.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
@@ -27,7 +25,11 @@ export const extensionsPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: 'extension-manage',
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -45,11 +47,7 @@ export const extensionsPageTemplate = html`
             label: 'Версия'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -60,11 +58,9 @@ export const extensionsPageTemplate = html`
                 html`<a
                   class="link"
                   @click="${() => {
-                    ppp.app.extension = datum._id;
-
                     ppp.app.navigate({
-                      page: datum.page,
-                      extension: datum._id
+                      page: 'extension-manage',
+                      document: datum._id
                     });
 
                     return false;
@@ -82,14 +78,30 @@ export const extensionsPageTemplate = html`
                   </ppp-badge>
                 `,
                 html`
-                  <ppp-button
-                    disabled
-                    shiftlock
-                    class="xsmall"
-                    @click="${() => x.removeDocumentFromListing(datum)}"
-                  >
-                    Удалить
-                  </ppp-button>
+                  <div class="control-line">
+                    <ppp-button
+                      class="xsmall"
+                      @click="${() => {
+                        ppp.app.extension = datum._id;
+
+                        ppp.app.navigate({
+                          page: datum.page,
+                          extension: datum._id
+                        });
+
+                        return false;
+                      }}"
+                    >
+                      Открыть дополнение
+                    </ppp-button>
+                    <ppp-button
+                      action="cleanup"
+                      :datum="${() => datum}"
+                      class="xsmall"
+                    >
+                      Удалить
+                    </ppp-button>
+                  </div>
                 `
               ]
             };
@@ -102,7 +114,6 @@ export const extensionsPageTemplate = html`
 
 export const extensionsPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
 export class ExtensionsPage extends Page {
@@ -121,8 +132,6 @@ export class ExtensionsPage extends Page {
     };
   }
 }
-
-applyMixins(ExtensionsPage, PageWithShiftLock);
 
 export default ExtensionsPage.compose({
   template: extensionsPageTemplate,

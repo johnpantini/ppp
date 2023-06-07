@@ -3,6 +3,7 @@ import { html, css, Observable, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { ConflictError, validate, invalidate } from '../../lib/ppp-errors.js';
 import '../button.js';
+import '../select.js';
 import '../text-field.js';
 
 export const newExtensionModalPageTemplate = html`
@@ -20,6 +21,25 @@ export const newExtensionModalPageTemplate = html`
             placeholder="https://example.com/ppp.json"
             ${ref('url')}
           ></ppp-text-field>
+          <ppp-select
+            deselectable
+            placeholder="Здесь можно выбрать ссылку по шаблону"
+            @change="${(x) => {
+              x.url.appearance = 'default';
+
+              switch (x.urlTemplateSelector.value) {
+                case 'liquid-equities':
+                  x.url.value = '/extensions/liquid-equities/ppp.json';
+
+                  break;
+              }
+            }}"
+            ${ref('urlTemplateSelector')}
+          >
+            <ppp-option value="liquid-equities">
+              Маржинальные инструменты
+            </ppp-option>
+          </ppp-select>
         </div>
       </section>
       <section class="last">
@@ -58,6 +78,10 @@ export const newExtensionModalPageStyles = css`
   .label-group ppp-text-field {
     max-width: unset;
   }
+
+  section .label-group ppp-select {
+    max-width: 320px;
+  }
 `;
 
 export class NewExtensionModalPage extends Page {
@@ -89,7 +113,7 @@ export class NewExtensionModalPage extends Page {
   failOperation(e) {
     if (e instanceof ConflictError) {
       invalidate(this.url, {
-        errorMessage: 'Это дополнение уже добавлено'
+        errorMessage: 'Это дополнение уже установлено'
       });
     } else {
       super.failOperation(e);

@@ -11,7 +11,7 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
-export const workspaceManagePageTemplate = html`
+export const extensionManagePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -20,16 +20,16 @@ export const workspaceManagePageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название терминала</h5>
+          <h5>Название</h5>
           <p class="description">
-            Название будет отображаться в боковой панели в списке терминалов.
+            Название для отображения в боковой панели в разделе дополнений.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             placeholder="PPP"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
+            value="${(x) => x.document.title}"
+            ${ref('titleInput')}
           ></ppp-text-field>
         </div>
       </section>
@@ -38,15 +38,15 @@ export const workspaceManagePageTemplate = html`
   </template>
 `;
 
-export const workspaceManagePageStyles = css`
+export const extensionManagePageStyles = css`
   ${pageStyles}
 `;
 
-export class WorkspaceManagePage extends Page {
-  collection = 'workspaces';
+export class ExtensionManagePage extends Page {
+  collection = 'extensions';
 
   async validate() {
-    await validate(this.name);
+    await validate(this.titleInput);
   }
 
   async read() {
@@ -63,20 +63,20 @@ export class WorkspaceManagePage extends Page {
 
   async find() {
     return {
-      name: this.name.value.trim(),
+      title: this.titleInput.value.trim(),
       removed: { $ne: true }
     };
   }
 
   async submit() {
     if (this.document._id) {
-      const index = ppp.workspaces.findIndex(
-        (w) => w._id === this.document._id
+      const index = ppp.extensions.findIndex(
+        (e) => e._id === this.document._id
       );
 
       if (index > -1) {
-        ppp.workspaces[index] = Object.assign({}, ppp.workspaces[index], {
-          name: this.name.value.trim()
+        ppp.extensions[index] = Object.assign({}, ppp.extensions[index], {
+          title: this.titleInput.value.trim()
         });
 
         const itemInSideNav = ppp.app.sideNav.querySelector(
@@ -84,16 +84,17 @@ export class WorkspaceManagePage extends Page {
         );
 
         if (itemInSideNav) {
-          itemInSideNav.firstElementChild.textContent = this.name.value.trim();
+          itemInSideNav.firstElementChild.textContent =
+            this.titleInput.value.trim();
         }
 
-        Observable.notify(ppp.app, 'workspaces');
+        Observable.notify(ppp.app, 'extensions');
       }
     }
 
     return {
       $set: {
-        name: this.name.value.trim(),
+        title: this.titleInput.value.trim(),
         updatedAt: new Date()
       },
       $setOnInsert: {
@@ -103,16 +104,16 @@ export class WorkspaceManagePage extends Page {
   }
 
   async cleanup() {
-    const index = ppp.workspaces.findIndex((w) => w._id === this.document._id);
+    const index = ppp.extensions.findIndex((e) => e._id === this.document._id);
 
     if (index > -1) {
-      ppp.workspaces.splice(index, 1);
-      Observable.notify(ppp, 'workspaces');
+      ppp.extensions.splice(index, 1);
+      Observable.notify(ppp, 'extensions');
     }
   }
 }
 
-export default WorkspaceManagePage.compose({
-  template: workspaceManagePageTemplate,
-  styles: workspaceManagePageStyles
+export default ExtensionManagePage.compose({
+  template: extensionManagePageTemplate,
+  styles: extensionManagePageStyles
 }).define();

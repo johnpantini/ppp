@@ -12,7 +12,7 @@ import {
   repeat,
   attr
 } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles } from '../page.js';
+import { documentPageHeaderPartial, Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
 import { debounce } from '../../lib/ppp-decorators.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
@@ -169,20 +169,9 @@ export const widgetPageTemplate = html`
     <ppp-top-loader ${ref('topLoader')}></ppp-top-loader>
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) => (x.document.name ? `Виджет - ${x.document.name}` : 'Виджет')}
-        <ppp-button
-          appearance="default"
-          slot="controls"
-          @click="${() =>
-            ppp.app.navigate({
-              page: 'widgets'
-            })}"
-        >
-          К списку виджетов
-          <span slot="start">${html.partial(arrowLeft)}</span>
-        </ppp-button>
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url
+      })}
       <ppp-modal
         ${ref('templateLibraryModal')}
         class="large"
@@ -384,6 +373,12 @@ export const widgetPageTemplate = html`
                               </div>
                               <div class="widget-settings-input-group">
                                 <ppp-text-field
+                                  ?disabled="${(x) =>
+                                    !(
+                                      x.document.type === 'custom' &&
+                                      typeof x.widgetDefinition
+                                        ?.customElement === 'undefined'
+                                    )}"
                                   type="url"
                                   placeholder="https://example.com/widget.js"
                                   value="${(x) => x.document.url}"
@@ -398,6 +393,12 @@ export const widgetPageTemplate = html`
                                     <ppp-select
                                       ${ref('predefinedWidgetUrl')}
                                       deselectable
+                                      ?disabled="${(x) =>
+                                        !(
+                                          x.document.type === 'custom' &&
+                                          typeof x.widgetDefinition
+                                            ?.customElement === 'undefined'
+                                        )}"
                                       placeholder="Выберите готовую ссылку"
                                       @change="${(x) => {
                                         switch (x.predefinedWidgetUrl.value) {
@@ -451,24 +452,34 @@ export const widgetPageTemplate = html`
               </form>
             </div>
             <div class="cta-holder">
-              <ppp-button
-                appearance="primary"
-                class="save-widget"
-                @click="${async (x) => {
-                  try {
-                    await x.applyModifications();
-                    Updates.enqueue(() => x.submitDocument());
-                  } catch (e) {
-                    x.failOperation(e);
-                  }
-                }}"
-              >
-                ${(x) =>
-                  x.document.type === 'custom' &&
-                  typeof x.widgetDefinition?.customElement === 'undefined'
-                    ? 'Продолжить'
-                    : 'Сохранить виджет'}
-              </ppp-button>
+              <div class="control-line">
+                <ppp-button
+                  appearance="primary"
+                  class="save-widget"
+                  @click="${async (x) => {
+                    try {
+                      await x.applyModifications();
+                      Updates.enqueue(() => x.submitDocument());
+                    } catch (e) {
+                      x.failOperation(e);
+                    }
+                  }}"
+                >
+                  ${(x) =>
+                    x.document.type === 'custom' &&
+                    typeof x.widgetDefinition?.customElement === 'undefined'
+                      ? 'Продолжить'
+                      : 'Сохранить виджет'}
+                </ppp-button>
+                <ppp-button
+                  ?hidden="${(x) => !x.document._id}"
+                  ?disabled="${(x) => !x.isSteady() || x.document.removed}"
+                  appearance="danger"
+                  @click="${(x) => x.cleanupAndRemoveDocument()}"
+                >
+                  Удалить
+                </ppp-button>
+              </div>
             </div>
           </div>
         </nav>

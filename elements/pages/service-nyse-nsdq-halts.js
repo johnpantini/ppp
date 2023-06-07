@@ -1,20 +1,23 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import {
+  documentPageFooterPartial,
+  documentPageHeaderPartial,
   Page,
   pageStyles,
   PageWithService,
   PageWithSupabaseService
 } from '../page.js';
+import {
+  servicePageFooterExtraControls,
+  servicePageHeaderExtraControls
+} from './service.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
-import {
-  serviceFooterControlsPartial,
-  serviceHeaderControlsPartial
-} from './services.js';
+import '../badge.js';
 import '../button.js';
 import '../query-select.js';
 import '../select.js';
@@ -144,13 +147,10 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Сервис - Торговые паузы NYSE/NASDAQ - ${x.document.name}`
-            : 'Сервис - Торговые паузы NYSE/NASDAQ'}
-        ${serviceHeaderControlsPartial}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url,
+        extraControls: servicePageHeaderExtraControls
+      })}
       <section>
         <div class="label-group">
           <h5>Название сервиса</h5>
@@ -423,16 +423,10 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
           </ppp-button>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить в PPP и обновить в Supabase
-        </ppp-button>
-        ${serviceFooterControlsPartial}
-      </footer>
+      ${documentPageFooterPartial({
+        text: 'Сохранить в PPP и обновить в Supabase',
+        extraControls: servicePageFooterExtraControls
+      })}
     </form>
   </template>
 `;

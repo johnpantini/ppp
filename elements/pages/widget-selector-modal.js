@@ -12,7 +12,7 @@ import { Page, pageStyles } from '../page.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { formatDate } from '../../lib/intl.js';
 import { scrollbars } from '../../design/styles.js';
-import { search, settings } from '../../static/svg/sprite.js'
+import { search, settings } from '../../static/svg/sprite.js';
 import '../banner.js';
 import '../button.js';
 import '../side-nav.js';
@@ -42,7 +42,9 @@ export const widgetSelectorModalPageTemplate = html`
             @click="${(x) => {
               ppp.app.navigate({
                 page: 'widget',
-                type: x.activeItem
+                type: x.isPredefinedWidgetType(x.activeItem)
+                  ? x.activeItem
+                  : 'order'
               });
             }}}"
             href="javascript:void(0)"

@@ -21,6 +21,7 @@ export default function (i18n) {
         [APIS.ASTRADB]: 'AstraDB',
         [APIS.SEATABLE]: 'Seatable',
         [APIS.NORTHFLANK]: 'Northflank',
+        [APIS.POSTGRESQL]: 'PostgreSQL',
         [APIS.RENDER]: 'Render',
         [APIS.REDIS]: 'Redis',
         [APIS.CLOUDFLARE]: 'Cloudflare',
@@ -85,8 +86,8 @@ export default function (i18n) {
         [SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NASDAQ',
         [SERVICES.SUPABASE_PARSER]: 'Парсер (Supabase)',
         [SERVICES.CLOUD_PPP_ASPIRANT]: 'Aspirant',
-        [SERVICES.SYSTEMD_PPP_ASPIRANT]: 'systemd Worker',
         [SERVICES.DEPLOYED_PPP_ASPIRANT]: 'Aspirant (по адресу)',
+        [SERVICES.SYSTEMD_PPP_ASPIRANT]: 'Aspirant (systemd)',
         [SERVICES.PPP_ASPIRANT_WORKER]: 'Aspirant Worker',
         [SERVICES.CLOUDFLARE_WORKER]: 'Cloudflare Worker'
       },

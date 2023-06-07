@@ -74,7 +74,18 @@ export const tableTemplate = html`
           )}
         </tr>
       </thead>
-      <tbody>
+      <tbody
+        @click="${(x, { event }) => {
+          const cp = event.composedPath();
+          let n;
+
+          if ((n = cp.find((n) => n?.hasAttribute?.('action')))) {
+            x.$emit(n?.getAttribute?.('action'), {
+              datum: n.datum
+            });
+          }
+        }}"
+      >
         ${repeat(
           (x) => x.sort(x.rows),
           html` <tr
@@ -203,11 +214,18 @@ export const tableStyles = css`
   .control-line {
     display: flex;
     flex-direction: row;
-    gap: 0 8px;
+    gap: 8px;
   }
 
   .control-line.centered {
     align-items: center;
+  }
+
+  .control-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 4px;
   }
 `;
 

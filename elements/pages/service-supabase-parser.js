@@ -2,11 +2,17 @@ import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
+  documentPageFooterPartial,
+  documentPageHeaderPartial,
   Page,
   pageStyles,
   PageWithService,
   PageWithSupabaseService
 } from '../page.js';
+import {
+  servicePageFooterExtraControls,
+  servicePageHeaderExtraControls
+} from './service.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
@@ -17,10 +23,6 @@ import {
   paletteGrayLight2,
   themeConditional
 } from '../../design/design-tokens.js';
-import {
-  serviceFooterControlsPartial,
-  serviceHeaderControlsPartial
-} from './services.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -236,13 +238,10 @@ export const serviceSupabaseParserPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>
-        ${(x) =>
-          x.document.name
-            ? `Сервис - Парсер (Supabase) - ${x.document.name}`
-            : 'Сервис - Парсер (Supabase)'}
-        ${serviceHeaderControlsPartial}
-      </ppp-page-header>
+      ${documentPageHeaderPartial({
+        pageUrl: import.meta.url,
+        extraControls: servicePageHeaderExtraControls
+      })}
       ${when(
         (x) => x.document.frameUrl,
         html` <iframe
@@ -543,7 +542,9 @@ export const serviceSupabaseParserPageTemplate = html`
                 ${ref('parserPredefinedTemplate')}
               >
                 <ppp-option value="default"> По умолчанию</ppp-option>
-                <ppp-option value="thefly">Новости TheFly</ppp-option>
+                <ppp-option value="thefly"
+                  >Новости TheFly (СПБ Биржа)
+                </ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
               <ppp-button
@@ -662,7 +663,7 @@ export const serviceSupabaseParserPageTemplate = html`
               <ppp-button
                 ?disabled="${(x) => !x.telegramEnabled.checked}"
                 @click="${() =>
-                  ppp.app.mountPage(`telegram-bot`, {
+                  ppp.app.mountPage(`bot`, {
                     size: 'xlarge',
                     adoptHeader: true
                   })}"
@@ -713,16 +714,10 @@ export const serviceSupabaseParserPageTemplate = html`
           </div>
         </div>
       </section>
-      <footer>
-        <ppp-button
-          type="submit"
-          appearance="primary"
-          @click="${(x) => x.submitDocument()}"
-        >
-          Сохранить в PPP и обновить в Supabase
-        </ppp-button>
-        ${serviceFooterControlsPartial}
-      </footer>
+      ${documentPageFooterPartial({
+        text: 'Сохранить в PPP и обновить в Supabase',
+        extraControls: servicePageFooterExtraControls
+      })}
     </form>
   </template>
 `;
@@ -1173,6 +1168,24 @@ export class ServiceSupabaseParserPage extends Page {
         }
       })
     ];
+  }
+
+  async update() {
+    const data = predefinedParserData[this.parserPredefinedTemplate.value];
+    const fcRequest = await fetch(
+      ppp.getWorkerTemplateFullUrl(data.url).toString(),
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+
+    this.parsingCode.updateCode(await fcRequest.text());
+    this.constsCode.updateCode(data.constsCode);
+    this.insertTriggerCode.updateCode(data.insertTriggerCode);
+    this.deleteTriggerCode.updateCode(data.deleteTriggerCode);
+    this.formatterCode.updateCode(data.formatterCode);
   }
 }
 

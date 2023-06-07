@@ -1,10 +1,96 @@
-import { html, css, ref } from '../../vendor/fast-element.min.js';
+import ppp from '../../ppp.js';
+import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { SERVICES } from '../../lib/const.js';
-import { search } from '../../static/svg/sprite.js';
+import { SERVICE_STATE, SERVICES, VERSIONING_STATUS } from '../../lib/const.js';
+import { cloud, search } from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
+
+export function serviceStateAppearance(document) {
+  if (document.removed) return 'lightgray';
+
+  switch (document.state) {
+    case SERVICE_STATE.ACTIVE:
+      return 'green';
+    case SERVICE_STATE.STOPPED:
+      return 'lightgray';
+    case SERVICE_STATE.FAILED:
+      return 'red';
+  }
+
+  return 'lightgray';
+}
+
+export const servicePageHeaderExtraControls = html`
+  <ppp-badge
+    slot="controls"
+    appearance="${(x) => serviceStateAppearance(x.document)}"
+  >
+    ${(x) => ppp.t(`$const.serviceState.${x.document.state}`)}
+  </ppp-badge>
+  <ppp-badge
+    slot="controls"
+    appearance="${(x) => {
+      const vs = x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK;
+
+      if (vs === VERSIONING_STATUS.OK) return 'green';
+      else if (vs === VERSIONING_STATUS.OLD) {
+        return 'yellow';
+      } else if (vs === VERSIONING_STATUS.OFF) {
+        return 'blue';
+      }
+    }}"
+  >
+    ${(x) =>
+      ppp.t(
+        `$const.versioningStatus.${
+          x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK
+        }`
+      )}
+  </ppp-badge>
+  ${when(
+    (x) =>
+      typeof x.updateService === 'function' &&
+      (x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK) ===
+        VERSIONING_STATUS.OLD,
+    html`
+      <ppp-button
+        ?disabled="${(x) => !x.isSteady()}"
+        slot="controls"
+        appearance="primary"
+        @click="${(x) => x.updateService?.()}"
+      >
+        Обновить
+        <span slot="start">${html.partial(cloud)}</span>
+      </ppp-button>
+    `
+  )}
+`;
+
+export const servicePageFooterExtraControls = html`
+  <ppp-button
+    ?hidden="${(x) => !x.document._id}"
+    ?disabled="${(x) =>
+      !x.isSteady() ||
+      x.document.removed ||
+      x.document.state === SERVICE_STATE.FAILED}"
+    @click="${(x) => x.restartService()}"
+  >
+    Перезапустить
+  </ppp-button>
+  <ppp-button
+    ?hidden="${(x) => !x.document._id}"
+    ?disabled="${(x) =>
+      !x.isSteady() ||
+      x.document.removed ||
+      x.document.state === SERVICE_STATE.FAILED ||
+      x.document.state === SERVICE_STATE.STOPPED}"
+    @click="${(x) => x.stopService()}"
+  >
+    Приостановить
+  </ppp-button>
+`;
 
 export const servicePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -112,11 +198,51 @@ export const servicePageTemplate = html`
           <span slot="description">
             Сервис для запуска долго работающих процессов в облаке.
           </span>
+          <div slot="action" class="control-line">
+            <ppp-button
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `service-${SERVICES.CLOUD_PPP_ASPIRANT}`
+                })}"
+            >
+              В облаке
+            </ppp-button>
+            <ppp-button
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `service-${SERVICES.DEPLOYED_PPP_ASPIRANT}`
+                })}"
+            >
+              По адресу
+            </ppp-button>
+            <ppp-button
+              disabled
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `service-${SERVICES.SYSTEMD_PPP_ASPIRANT}`
+                })}"
+            >
+              Systemd
+            </ppp-button>
+          </div>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Aspirant Worker"
+            style="height: 40px"
+            src="${() => ppp.brandSvg('javascript-green')}"
+          />
+          <span slot="title">Aspirant Worker</span>
+          <span slot="description">
+            Рабочий процес в облачном сервисе Aspirant.
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
               ppp.app.navigate({
-                page: `service-${SERVICES.CLOUD_PPP_ASPIRANT}`
+                page: `service-${SERVICES.PPP_ASPIRANT_WORKER}`
               })}"
           >
             Продолжить

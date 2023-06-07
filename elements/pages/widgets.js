@@ -1,9 +1,7 @@
 import ppp from '../../ppp.js';
-import { css, html, ref } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { css, html } from '../../vendor/fast-element.min.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
@@ -28,7 +26,11 @@ export const widgetsPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: 'widget',
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -46,11 +48,7 @@ export const widgetsPageTemplate = html`
             label: 'Последнее изменение'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -74,13 +72,11 @@ export const widgetsPageTemplate = html`
                 </a>`,
                 datum.type === 'custom'
                   ? html`
-                      <div
-                        style="display: flex; flex-direction: column; gap: 8px 0; align-items: flex-start"
-                      >
+                      <div class="control-stack">
                         <div>
                           ${(_) => ppp.t(`$const.widget.${datum.reportedType}`)}
                         </div>
-                        <ppp-badge appearance="blue"> По ссылке</ppp-badge>
+                        <ppp-badge appearance="yellow">По ссылке</ppp-badge>
                       </div>
                     `
                   : ppp.t(`$const.widget.${datum.reportedType}`),
@@ -89,10 +85,9 @@ export const widgetsPageTemplate = html`
                 formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
                   <ppp-button
-                    disabled
-                    shiftlock
+                    action="cleanup"
+                    :datum="${() => datum}"
                     class="xsmall"
-                    @click="${() => x.removeDocumentFromListing(datum)}"
                   >
                     Удалить
                   </ppp-button>
@@ -108,7 +103,6 @@ export const widgetsPageTemplate = html`
 
 export const widgetsPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
 export class WidgetsPage extends Page {
@@ -127,8 +121,6 @@ export class WidgetsPage extends Page {
     };
   }
 }
-
-applyMixins(WidgetsPage, PageWithShiftLock);
 
 export default WidgetsPage.compose({
   template: widgetsPageTemplate,

@@ -1,129 +1,16 @@
 import ppp from '../../ppp.js';
-import { css, html, ref, when } from '../../vendor/fast-element.min.js';
-import { Page, pageStyles, PageWithShiftLock } from '../page.js';
+import { css, html, Observable, when } from '../../vendor/fast-element.min.js';
+import { Page, pageStyles } from '../page.js';
 import { formatDate } from '../../lib/intl.js';
-import { applyMixins } from '../../vendor/fast-utilities.js';
-import { hotkey } from '../../design/styles.js';
-import { SERVICE_STATE, SERVICES, VERSIONING_STATUS } from '../../lib/const.js';
+import { SERVICES, VERSIONING_STATUS } from '../../lib/const.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
-import { cloud } from '../../static/svg/sprite.js';
+import { serviceStateAppearance } from './service.js';
+import { later } from '../../lib/ppp-decorators.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
 
 await ppp.i18n(import.meta.url);
-
-export function stateAppearance(document) {
-  if (document.removed) return 'lightgray';
-
-  switch (document.state) {
-    case SERVICE_STATE.ACTIVE:
-      return 'green';
-    case SERVICE_STATE.STOPPED:
-      return 'lightgray';
-    case SERVICE_STATE.FAILED:
-      return 'red';
-  }
-
-  return 'lightgray';
-}
-
-export const serviceHeaderControlsPartial = html`
-  ${when(
-    (x) => x.document._id,
-    html`
-      <ppp-badge
-        slot="controls"
-        appearance="${(x) => stateAppearance(x.document)}"
-      >
-        ${(x) =>
-          x.document.removed
-            ? 'Удалён'
-            : ppp.t(`$const.serviceState.${x.document.state}`)}
-      </ppp-badge>
-      <ppp-badge
-        slot="controls"
-        appearance="${(x) => {
-          const vs = x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK;
-
-          if (vs === VERSIONING_STATUS.OK) return 'green';
-          else if (vs === VERSIONING_STATUS.OLD) {
-            return 'yellow';
-          } else if (vs === VERSIONING_STATUS.OFF) {
-            return 'blue';
-          }
-        }}"
-      >
-        ${(x) =>
-          ppp.t(
-            `$const.versioningStatus.${
-              x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK
-            }`
-          )}
-      </ppp-badge>
-      ${when(
-        (x) =>
-          typeof x.updateService === 'function' &&
-          (x.getVersioningStatus?.() ?? VERSIONING_STATUS.OK) ===
-            VERSIONING_STATUS.OLD,
-        html`
-          <ppp-button
-            ?disabled="${(x) => !x.isSteady()}"
-            slot="controls"
-            appearance="primary"
-            @click="${(x) => x.updateService?.()}"
-          >
-            Обновить
-            <span slot="start">${html.partial(cloud)}</span>
-          </ppp-button>
-        `
-      )}
-    `
-  )}
-`.inline();
-
-export const serviceFooterControlsPartial = html`
-  ${when(
-    (x) => x.document._id,
-    html`
-      <ppp-button
-        ?disabled="${(x) =>
-          !x.isSteady() ||
-          x.document.removed ||
-          x.document.state === SERVICE_STATE.FAILED}"
-        @click="${(x) => x.restartService()}"
-      >
-        Перезапустить
-      </ppp-button>
-      <ppp-button
-        ?disabled="${(x) =>
-          !x.isSteady() ||
-          x.document.removed ||
-          x.document.state === SERVICE_STATE.FAILED ||
-          x.document.state === SERVICE_STATE.STOPPED}"
-        @click="${(x) => x.stopService()}"
-      >
-        Приостановить
-      </ppp-button>
-      <ppp-button
-        ?disabled="${(x) => !x.isSteady() || x.document.removed}"
-        appearance="danger"
-        @click="${async (x) => {
-          if (
-            await ppp.app.confirm(
-              'Удаление сервиса',
-              `Удалить сервис «${x.document.name}» ?`
-            )
-          ) {
-            return x.cleanupService();
-          }
-        }}"
-      >
-        Удалить
-      </ppp-button>
-    `
-  )}
-`.inline();
 
 export const servicesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -143,7 +30,40 @@ export const servicesPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        ${ref('shiftLockContainer')}
+        @update="${async (x, c) => {
+          const datum = c.event.detail.datum;
+          const page = await ppp.app.mountPage(`service-${datum.type}`, {
+            documentId: datum._id,
+            stayHidden: true
+          });
+
+          await page.readDocument();
+
+          try {
+            x.beginOperation();
+            await later(1000);
+            await page.updateService();
+
+            const index = x.documents.findIndex((d) => d._id === datum._id);
+
+            if (index > -1) {
+              x.documents[index].version = datum.actualVersion;
+              x.documents[index].versioningStatus = VERSIONING_STATUS.OK;
+              x.documents[index].updatedAt = new Date();
+            }
+
+            Observable.notify(x, 'documents');
+          } finally {
+            x.endOperation();
+
+            page.remove();
+          }
+        }}"
+        @cleanup="${(x, c) =>
+          x.cleanupFromListing({
+            pageName: `service-${c.event.detail.datum.type}`,
+            documentId: c.event.detail.datum._id
+          })}"
         :columns="${() => [
           {
             label: 'Название'
@@ -167,11 +87,7 @@ export const servicesPageTemplate = html`
             label: 'Состояние'
           },
           {
-            label: html`
-              <div class="control-line centered">
-                <span>Действия</span><code class="hotkey static">Shift</code>
-              </div>
-            `
+            label: 'Действия'
           }
         ]}"
         :rows="${(x) =>
@@ -226,35 +142,32 @@ export const servicesPageTemplate = html`
                   </ppp-badge>
                 `,
                 html`
-                  <ppp-badge appearance="${stateAppearance(datum)}">
-                    ${datum.removed
-                      ? 'Удалён'
-                      : ppp.t(`$const.serviceState.${datum.state ?? 'N/A'}`)}
+                  <ppp-badge appearance="${serviceStateAppearance(datum)}">
+                    ${ppp.t(`$const.serviceState.${datum.state ?? 'N/A'}`)}
                   </ppp-badge>
                 `,
                 html`
-                  ${when(
-                    () => datum.versioningStatus === VERSIONING_STATUS.OLD,
-                    html`
-                      <ppp-button
-                        style="margin-right: 4px"
-                        disabled
-                        shiftlock
-                        class="xsmall"
-                        @click="${() => x.updateService(datum)}"
-                      >
-                        Обновить
-                      </ppp-button>
-                    `
-                  )}
-                  <ppp-button
-                    disabled
-                    shiftlock
-                    class="xsmall"
-                    @click="${() => x.removeService(datum)}"
-                  >
-                    Удалить
-                  </ppp-button>
+                  <div class="control-line">
+                    ${when(
+                      () => datum.versioningStatus === VERSIONING_STATUS.OLD,
+                      html`
+                        <ppp-button
+                          action="update"
+                          :datum="${() => datum}"
+                          class="xsmall"
+                        >
+                          Обновить
+                        </ppp-button>
+                      `
+                    )}
+                    <ppp-button
+                      action="cleanup"
+                      :datum="${() => datum}"
+                      class="xsmall"
+                    >
+                      Удалить
+                    </ppp-button>
+                  </div>
                 `
               ]
             };
@@ -267,7 +180,6 @@ export const servicesPageTemplate = html`
 
 export const servicesPageStyles = css`
   ${pageStyles}
-  ${hotkey()}
 `;
 
 export class ServicesPage extends Page {
@@ -291,7 +203,8 @@ export class ServicesPage extends Page {
       this.documents.map((doc) => {
         if (
           doc.type !== SERVICES.PPP_ASPIRANT_WORKER &&
-          doc.type !== SERVICES.CLOUDFLARE_WORKER
+          doc.type !== SERVICES.CLOUDFLARE_WORKER &&
+          doc.type !== SERVICES.SUPABASE_PARSER
         ) {
           doc.versioningStatus = VERSIONING_STATUS.OK;
           doc.actualVersion = 1;
@@ -339,13 +252,7 @@ export class ServicesPage extends Page {
       })
     );
   }
-
-  async updateService(datum) {}
-
-  async removeService(datum) {}
 }
-
-applyMixins(ServicesPage, PageWithShiftLock);
 
 export default ServicesPage.compose({
   template: servicesPageTemplate,

@@ -63,7 +63,7 @@ export const workspacesPageTemplate = html`
                 formatDate(datum.createdAt),
                 formatDate(datum.updatedAt ?? datum.createdAt),
                 html`
-                  <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div class="control-line">
                     <ppp-button
                       class="xsmall"
                       @click="${() => {
