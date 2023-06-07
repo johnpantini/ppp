@@ -498,6 +498,22 @@ export class ServiceCloudPppAspirantPage extends Page {
 
   async restart() {
     if (this.deploymentApiId.datum().type === APIS.NORTHFLANK) {
+      await fetch(
+        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'POST',
+            url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/resume`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
+          })
+        }
+      );
+
       return maybeFetchError(
         await fetch(
           new URL(
