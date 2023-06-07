@@ -1,11 +1,6 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
-import {
-  validate,
-  invalidate,
-  maybeFetchError,
-  ValidationError
-} from '../../lib/ppp-errors.js';
+import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -18,13 +13,14 @@ import {
   servicePageFooterExtraControls,
   servicePageHeaderExtraControls
 } from './service.js';
+import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import '../badge.js';
+import '../banner.js';
 import '../button.js';
 import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
-import { uuidv4 } from '../../lib/ppp-crypto.js';
 
 export const serviceCloudPppAspirantTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -105,6 +101,16 @@ export const serviceCloudPppAspirantTemplate = html`
             Northflank или Render. Можно выбрать только на этапе создания или
             после удаления сервиса.
           </p>
+          <div class="spacing2"></div>
+          <ppp-banner class="inline" appearance="warning">
+            Northflank: у вас должен быть заранее создан проект под названием
+            ppp в облаке.
+          </ppp-banner>
+          <div class="spacing1"></div>
+          <ppp-banner class="inline" appearance="warning">
+            Render: заранее создайте пустой сервис (тип Docker) с именем
+            aspirant-<i>суффикс</i>. Суффикс сгенерируйте ниже.
+          </ppp-banner>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -175,7 +181,7 @@ export const serviceCloudPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Суффикс сервиса в облачном провайдере (12 символов)</h5>
+          <h5>Суффикс сервиса в облачном провайдере (11 символов)</h5>
           <p class="description">
             Это значение должно быть уникальным и конфиденциальным. Его можно
             задать только при создании или после удаления сервиса.
@@ -192,7 +198,7 @@ export const serviceCloudPppAspirantTemplate = html`
           <ppp-button
             ?disabled="${(x) => x.document._id && !x.document.removed}"
             @click="${(x) =>
-              (x.slug.value = `${uuidv4().replaceAll('-', '').slice(0, 12)}`)}"
+              (x.slug.value = `${uuidv4().replaceAll('-', '').slice(0, 11)}`)}"
             appearance="primary"
           >
             Сгенерировать уникальное значение
@@ -235,38 +241,48 @@ export class ServiceCloudPppAspirantPage extends Page {
         `Будет удалена информация о дочерних рабочих процессах. Подтвердите действие.`
       )
     ) {
-      const api = this.document.redisApi;
+      this.beginOperation();
 
-      return fetch(
-        new URL('redis', ppp.keyVault.getKey('service-machine-url')).toString(),
-        {
-          cache: 'reload',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            options: {
-              host: api.host,
-              port: api.port,
-              tls: api.tls
-                ? {
-                    servername: api.host
-                  }
-                : void 0,
-              username: api.username,
-              db: api.database,
-              password: api.password
+      try {
+        const api = this.document.redisApi;
+
+        await fetch(
+          new URL(
+            'redis',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'reload',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
             },
-            command: 'del',
-            // Delete legacy too
-            args: [
-              `aspirant:${this.document._id}`,
-              `ppp-aspirant:${this.document._id}:workers`
-            ]
-          })
-        }
-      );
+            body: JSON.stringify({
+              options: {
+                host: api.host,
+                port: api.port,
+                tls: api.tls
+                  ? {
+                      servername: api.host
+                    }
+                  : void 0,
+                username: api.username,
+                db: api.database,
+                password: api.password
+              },
+              command: 'del',
+              // Delete legacy too
+              args: [
+                `aspirant:${this.document._id}`,
+                `ppp-aspirant:${this.document._id}:workers`
+              ]
+            })
+          }
+        );
+      } finally {
+        this.showSuccessNotification('Команда на очистку отправлена.');
+        this.endOperation();
+      }
     }
   }
 
@@ -276,8 +292,8 @@ export class ServiceCloudPppAspirantPage extends Page {
     await validate(this.deploymentApiId);
     await validate(this.slug);
     await validate(this.slug, {
-      hook: async (value) => value.trim().length === 12,
-      errorMessage: 'Значение должно содержать 12 символов'
+      hook: async (value) => value.trim().length === 11,
+      errorMessage: 'Значение должно содержать 11 символов'
     });
     await validate(this.slug, {
       hook: async (value) => /^[a-z0-9]+$/i.test(value),
@@ -355,7 +371,7 @@ export class ServiceCloudPppAspirantPage extends Page {
     );
 
     const project = (await rProjectList.json()).data.projects.find(
-      (p) => p.name === 'ppp'
+      (p) => p.name.toLowerCase() === 'ppp'
     );
 
     if (!project) {
@@ -364,30 +380,6 @@ export class ServiceCloudPppAspirantPage extends Page {
         raiseException: true
       });
     }
-
-    const rServiceList = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
-      {
-        cache: 'reload',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          url: `https://api.northflank.com/v1/projects/${project.id}/services`,
-          headers: {
-            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-          }
-        })
-      }
-    );
-
-    await maybeFetchError(
-      rServiceList,
-      'Не удалось получить список сервисов проекта PPP.'
-    );
-
-    const service = (await rServiceList.json()).data.services.find(
-      (s) => s.name === 'ppp-aspirant'
-    );
 
     this.projectID = project.id;
 
@@ -403,119 +395,72 @@ export class ServiceCloudPppAspirantPage extends Page {
       REDIS_DATABASE: redisApi.database.toString()
     };
 
-    if (!service) {
-      const rNewService = await fetch(
-        new URL('fetch', serviceMachineUrl).toString(),
-        {
-          cache: 'reload',
-          method: 'POST',
+    const rPutService = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'PUT',
+          url: `https://api.northflank.com/v1/projects/${project.id}/services/combined`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+          },
           body: JSON.stringify({
-            method: 'PUT',
-            url: `https://api.northflank.com/v1/projects/${project.id}/services/combined`,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+            name: `aspirant-${this.document.slug}`,
+            description: 'PPP Aspirant Service',
+            billing: {
+              deploymentPlan: 'nf-compute-20'
             },
-            body: JSON.stringify({
-              name: 'ppp-aspirant',
-              description: 'PPP Aspirant Service',
-              billing: {
-                deploymentPlan: 'nf-compute-20'
-              },
-              deployment: {
-                instances: 1
-              },
-              ports: [
-                {
-                  name: 'ppp',
-                  public: true,
-                  internalPort: 32456,
-                  protocol: 'HTTP'
-                }
-              ],
-              vcsData: {
-                projectUrl: `https://github.com/${ppp.keyVault.getKey(
-                  'github-login'
-                )}/ppp`,
-                projectType: 'github',
-                accountLogin: ppp.keyVault.getKey('github-login'),
-                projectBranch: 'johnpantini'
-              },
-              buildSettings: {
-                dockerfile: {
-                  buildEngine: 'kaniko',
-                  useCache: false,
-                  dockerFilePath: '/salt/states/ppp/lib/aspirant/Dockerfile',
-                  dockerWorkDir: '/salt/states/ppp/lib'
-                }
-              },
-              buildConfiguration: {
-                pathIgnoreRules: [
-                  '*',
-                  '!salt/states/ppp/lib/aspirant',
-                  '!salt/states/ppp/lib/aspirant/*'
-                ]
-              },
-              runtimeEnvironment
-            })
+            deployment: {
+              instances: 1
+            },
+            ports: [
+              {
+                name: 'ppp',
+                public: true,
+                internalPort: 80,
+                protocol: 'HTTP'
+              }
+            ],
+            vcsData: {
+              projectUrl: `https://github.com/${ppp.keyVault.getKey(
+                'github-login'
+              )}/ppp`,
+              projectType: 'github',
+              accountLogin: ppp.keyVault.getKey('github-login'),
+              projectBranch: location.origin.endsWith('.io.dev')
+                ? 'johnpantini'
+                : 'main'
+            },
+            buildSettings: {
+              dockerfile: {
+                buildEngine: 'kaniko',
+                useCache: false,
+                dockerFilePath: '/salt/states/ppp/lib/aspirant/Dockerfile',
+                dockerWorkDir: '/salt/states/ppp/lib'
+              }
+            },
+            buildConfiguration: {
+              pathIgnoreRules: [
+                '*',
+                '!salt/states/ppp/lib/aspirant',
+                '!salt/states/ppp/lib/aspirant/*'
+              ]
+            },
+            runtimeEnvironment
           })
-        }
-      );
-
-      await maybeFetchError(
-        rNewService,
-        'Не удалось создать сервис Aspirant, подробности в консоли браузера.'
-      );
-
-      this.serviceID = (await rNewService.json()).data.id;
-    } else {
-      this.serviceID = service.id;
-
-      const rGetCurrentEnvironment = await fetch(
-        new URL('fetch', serviceMachineUrl).toString(),
-        {
-          cache: 'reload',
-          method: 'POST',
-          body: JSON.stringify({
-            method: 'GET',
-            url: `https://api.northflank.com/v1/projects/${project.id}/services/${this.serviceID}/runtime-environment`,
-            headers: {
-              Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-            }
-          })
-        }
-      );
-
-      await maybeFetchError(
-        rGetCurrentEnvironment,
-        'Не удалось прочитать переменные окружения сервиса.'
-      );
-
-      if (
-        JSON.stringify(
-          (await rGetCurrentEnvironment.json()).data.runtimeEnvironment
-        ) !== JSON.stringify(runtimeEnvironment)
-      ) {
-        await maybeFetchError(
-          await fetch(new URL('fetch', serviceMachineUrl).toString(), {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'POST',
-              url: `https://api.northflank.com/v1/projects/${project.id}/services/${this.serviceID}/runtime-environment`,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-              },
-              body: JSON.stringify({
-                runtimeEnvironment
-              })
-            })
-          }),
-          'Не удалось обновить переменные окружения сервиса.'
-        );
+        })
       }
-    }
+    );
+
+    await maybeFetchError(
+      rPutService,
+      'Не удалось создать сервис Aspirant, подробности в консоли браузера.'
+    );
+
+    this.serviceID = (await rPutService.json()).data.id;
   }
 
   async #deployOnRender() {}

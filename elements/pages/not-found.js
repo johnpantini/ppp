@@ -69,6 +69,7 @@ export const notFoundPageStyles = css`
     max-width: 100%;
     border: 0;
     vertical-align: middle;
+    user-select: none;
   }
 
   .details {
