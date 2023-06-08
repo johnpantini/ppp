@@ -691,6 +691,43 @@ export class ServiceCloudPppAspirantPage extends Page {
         'Не удалось перезапустить сервис в облаке Northflank.'
       );
     } else {
+      await fetch(
+        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'POST',
+            url: `https://api.render.com/v1/services/${this.document.serviceID}/resume`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
+          })
+        }
+      );
+
+      return maybeFetchError(
+        await fetch(
+          new URL(
+            'fetch',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'reload',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'POST',
+              url: `https://api.render.com/v1/services/${this.document.serviceID}/restart`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.document.deploymentApi.token}`
+              }
+            })
+          }
+        ),
+        'Не удалось перезапустить сервис в облаке Render.'
+      );
     }
   }
 
@@ -722,6 +759,27 @@ export class ServiceCloudPppAspirantPage extends Page {
         };
       }, 'Не удалось остановить сервис в облаке Northflank.');
     } else {
+      return maybeFetchError(
+        await fetch(
+          new URL(
+            'fetch',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'reload',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'POST',
+              url: `https://api.render.com/v1/services/${this.document.serviceID}/suspend`,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.document.deploymentApi.token}`
+              }
+            })
+          }
+        ),
+        'Не удалось остановить сервис в облаке Render.'
+      );
     }
   }
 
