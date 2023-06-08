@@ -756,7 +756,10 @@ export class App extends PPPElement {
         header.style.display = 'none';
 
         if (options.adoptHeader) {
-          this.mountPointTitle.textContent = header.textContent;
+          this.mountPointTitle.textContent =
+            header.titleContent.firstElementChild
+              .assignedNodes()[0]
+              .wholeText.trim();
         }
       }
 
