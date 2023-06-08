@@ -1,6 +1,11 @@
 import ppp from '../../ppp.js';
-import { html, css, ref, when } from '../../vendor/fast-element.min.js';
-import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
+import {
+  validate,
+  invalidate,
+  maybeFetchError,
+  ValidationError
+} from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -15,6 +20,10 @@ import {
 } from './service.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
+import {
+  removeMongoDBRealmTrigger,
+  upsertMongoDBRealmScheduledTrigger
+} from '../../lib/realm.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -103,8 +112,8 @@ export const serviceCloudPppAspirantTemplate = html`
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Northflank: у вас должен быть заранее создан проект под названием
-            ppp в облаке.
+            Northflank: должен быть заранее создан проект под названием ppp в
+            облаке.
           </ppp-banner>
           <div class="spacing1"></div>
           <ppp-banner class="inline" appearance="warning">
@@ -299,6 +308,45 @@ export class ServiceCloudPppAspirantPage extends Page {
       hook: async (value) => /^[a-z0-9]+$/i.test(value),
       errorMessage: 'Допустимы только цифры и латинские буквы'
     });
+
+    if (this.deploymentApiId.datum().type === APIS.RENDER) {
+      let r;
+
+      await maybeFetchError(
+        (r = await fetch(
+          new URL(
+            'fetch',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'reload',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'GET',
+              url: 'https://api.render.com/v1/services',
+              headers: {
+                Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+              }
+            })
+          }
+        )),
+        'Не удалось получить список сервисов в облаке Render. Операция не может быть выполнена.'
+      );
+
+      const services = await r.json();
+      const serviceName = `aspirant-${this.slug.value.trim()}`;
+
+      let s;
+
+      if (!(s = services.find((s) => s.service?.slug === serviceName))) {
+        throw new ValidationError({
+          message: `Сервис ${serviceName} не найден в облаке Render. Создайте его перед тем, как сохранять в PPP.`
+        });
+      }
+
+      this.projectID = s.service.id;
+      this.serviceID = s.service.id;
+    }
   }
 
   async read() {
@@ -348,6 +396,21 @@ export class ServiceCloudPppAspirantPage extends Page {
     };
   }
 
+  #getEnvironment() {
+    const redisApi = this.redisApiId.datum();
+
+    return {
+      ASPIRANT_ID: this.document._id,
+      SERVICE_MACHINE_URL: ppp.keyVault.getKey('service-machine-url'),
+      REDIS_HOST: redisApi.host,
+      REDIS_PORT: redisApi.port.toString(),
+      REDIS_TLS: !!redisApi.tls ? 'true' : '',
+      REDIS_USERNAME: redisApi.username?.toString() ?? 'default',
+      REDIS_PASSWORD: redisApi.password?.toString(),
+      REDIS_DATABASE: redisApi.database.toString()
+    };
+  }
+
   async #deployOnNorthflank() {
     const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
     const rProjectList = await fetch(
@@ -382,18 +445,6 @@ export class ServiceCloudPppAspirantPage extends Page {
     }
 
     this.projectID = project.id;
-
-    const redisApi = this.redisApiId.datum();
-    const runtimeEnvironment = {
-      ASPIRANT_ID: this.document._id,
-      SERVICE_MACHINE_URL: serviceMachineUrl,
-      REDIS_HOST: redisApi.host,
-      REDIS_PORT: redisApi.port.toString(),
-      REDIS_TLS: !!redisApi.tls ? 'true' : '',
-      REDIS_USERNAME: redisApi.username?.toString() ?? 'default',
-      REDIS_PASSWORD: redisApi.password?.toString(),
-      REDIS_DATABASE: redisApi.database.toString()
-    };
 
     const rPutService = await fetch(
       new URL('fetch', serviceMachineUrl).toString(),
@@ -449,7 +500,7 @@ export class ServiceCloudPppAspirantPage extends Page {
                 '!salt/states/ppp/lib/aspirant/*'
               ]
             },
-            runtimeEnvironment
+            runtimeEnvironment: this.#getEnvironment()
           })
         })
       }
@@ -463,7 +514,111 @@ export class ServiceCloudPppAspirantPage extends Page {
     this.serviceID = (await rPutService.json()).data.id;
   }
 
-  async #deployOnRender() {}
+  async #deployOnRender() {
+    const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
+    const environment = this.#getEnvironment();
+    const envVars = [];
+
+    for (const key in environment) {
+      envVars.push({
+        key,
+        value: environment[key]
+      });
+    }
+
+    const rUpdateVars = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'PUT',
+          url: `https://api.render.com/v1/services/${this.serviceID}/env-vars`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+          },
+          body: JSON.stringify(envVars)
+        })
+      }
+    );
+
+    await maybeFetchError(
+      rUpdateVars,
+      'Не удалось обновить переменные окружения сервиса в облаке Render.'
+    );
+
+    const rPatchService = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'PATCH',
+          url: `https://api.render.com/v1/services/${this.serviceID}`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+          },
+          body: JSON.stringify({
+            autoDeploy: 'no',
+            serviceDetails: {
+              env: 'docker',
+              envSpecificDetails: {
+                dockerContext: '/salt/states/ppp/lib',
+                dockerfilePath: '/salt/states/ppp/lib/aspirant/Dockerfile'
+              }
+            }
+          })
+        })
+      }
+    );
+
+    await maybeFetchError(
+      rPatchService,
+      'Не удалось обновить сервис Aspirant в облаке Render, подробности в консоли браузера.'
+    );
+
+    const rDeployService = await fetch(
+      new URL('fetch', serviceMachineUrl).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'POST',
+          url: `https://api.render.com/v1/services/${this.serviceID}/deploys`,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+          },
+          body: JSON.stringify({
+            clearCache: 'clear'
+          })
+        })
+      }
+    );
+
+    await maybeFetchError(
+      rDeployService,
+      'Не удалось развернуть сервис Aspirant в облаке Render.'
+    );
+
+    await upsertMongoDBRealmScheduledTrigger({
+      functionName: `pppAspirantOnRenderPing${this.document._id}`,
+      triggerName: `pppAspirantOnRenderPingTrigger${this.document._id}`,
+      schedule: '*/5 * * * *',
+      functionSource: `
+        exports = async function () {
+          return context.http
+            .get({
+              url: 'https://aspirant-${this.document.slug}.onrender.com/nginx/health'
+            })
+            .then((response) => response.body.text())
+            .catch(() => Promise.resolve({}));
+        };
+      `
+    });
+  }
 
   async submit() {
     return [
@@ -602,6 +757,39 @@ export class ServiceCloudPppAspirantPage extends Page {
         throw error;
       });
     } else {
+      await removeMongoDBRealmTrigger({
+        triggerName: `pppAspirantOnRenderPingTrigger${this.document._id}`
+      });
+
+      return maybeFetchError(
+        await fetch(
+          new URL(
+            'fetch',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'reload',
+            method: 'POST',
+            body: JSON.stringify({
+              method: 'DELETE',
+              url: `https://api.render.com/v1/services/${this.document.serviceID}`,
+              headers: {
+                Authorization: `Bearer ${this.document.deploymentApi.token}`
+              }
+            })
+          }
+        ),
+        'Не удалось полностью удалить сервис. Удалите его вручную в панели управления Render.'
+      ).catch(async (error) => {
+        await this.updateDocumentFragment({
+          $set: {
+            state: SERVICE_STATE.STOPPED,
+            updatedAt: new Date()
+          }
+        });
+
+        throw error;
+      });
     }
   }
 }

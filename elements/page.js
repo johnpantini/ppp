@@ -54,8 +54,8 @@ await ppp.i18n(import.meta.url);
     styles: css`
       ${display('flex')}
       ${normalize()}
-    ${typography()}
-    :host {
+      ${typography()}
+      :host {
         position: relative;
         align-items: center;
         border-bottom: 3px solid
