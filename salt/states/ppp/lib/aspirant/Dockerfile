@@ -40,7 +40,7 @@ WORKDIR /app
 
 COPY ./aspirant/http-shell.py ./http-shell.py
 COPY ./aspirant/start.sh ./aspirant/start.sh
-COPY ./aurora/ ./aurora/
+
 COPY ./uWebSockets.js/ ./uWebSockets.js/
 COPY ./canvas/ ./canvas/
 COPY ./canvas-table/ ./canvas-table/
@@ -49,11 +49,7 @@ COPY ./pg/ ./pg/
 COPY ./pdfjs/ ./pdfjs/
 COPY ./ssh2/ ./ssh2/
 COPY ./websocket/ ./websocket/
-COPY ./vendor/lzma/ ./vendor/lzma/
-COPY ./vendor/he.min.js ./vendor/he.min.js
-COPY ./vendor/ioredis.min.js ./vendor/ioredis.min.js
-COPY ./vendor/mongodb.min.js ./vendor/mongodb.min.js
-COPY ./vendor/protobuf.min.js ./vendor/protobuf.min.js
+COPY ./vendor/ ./vendor/
 
 COPY ./aspirant/etc/consul/server.json /etc/consul/server.json
 COPY ./aspirant/etc/nomad.d/server.hcl /etc/nomad.d/server.hcl

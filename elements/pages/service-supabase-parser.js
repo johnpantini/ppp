@@ -104,7 +104,7 @@ link text`,
   {
     cache: 'reload'
   }
-  )).json()).filter(i => i.symbol !== 'TCS').map(i => i.symbol))%];;
+  )).json()).filter(i => i.symbol !== 'TCS').map(i => i.symbol))%];
 
 symbols.push('$ECON');
 symbols.push('SPY');
