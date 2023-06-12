@@ -7,8 +7,8 @@ chown -R ppp /var/lib/nomad /etc/nomad.d
 chown -R nginx /etc/nginx
 
 echo 'Starting up HTTP Shell...'
-chmod u+x /app/http-shell.py
-python /app/http-shell.py &
+chmod u+x /salt/states/ppp/lib/http-shell.py
+python /salt/states/ppp/lib/http-shell.py &
 P1=$!
 
 echo 'Starting up Consul...'
