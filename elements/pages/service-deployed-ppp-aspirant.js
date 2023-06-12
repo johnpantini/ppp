@@ -73,19 +73,16 @@ export class ServiceDeployedPppAspirantPage extends Page {
     await validate(this.name);
     await validate(this.url);
 
+    const url = this.url.value.endsWith('/')
+      ? this.url.value.slice(0, -1)
+      : this.url.value;
+
     // URL validation
     try {
-      await maybeFetchError(
-        await fetch(new URL('nginx/health', this.url.value).toString())
-      );
+      await maybeFetchError(await fetch(`${url}/nginx/health`));
+      await maybeFetchError(await fetch(`${url}/nomad/health`));
 
-      await maybeFetchError(
-        await fetch(new URL('nomad/health', this.url.value).toString())
-      );
-
-      const envRequest = await fetch(
-        new URL('nginx/env', this.url.value).toString()
-      );
+      const envRequest = await fetch(`${url}/nginx/env`);
 
       await maybeFetchError(envRequest);
 

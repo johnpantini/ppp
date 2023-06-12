@@ -235,6 +235,7 @@ export class ServicesPage extends Page {
           const fcRequest = await fetch(url.toString(), {
             cache: 'reload'
           });
+
           const parsed = parsePPPScript(await fcRequest.text());
 
           if (parsed && Array.isArray(parsed.meta?.version)) {
@@ -245,6 +246,9 @@ export class ServicesPage extends Page {
               doc.version < doc.actualVersion
                 ? VERSIONING_STATUS.OLD
                 : VERSIONING_STATUS.OK;
+          } else {
+            doc.versioningStatus = VERSIONING_STATUS.OK;
+            doc.actualVersion = 'N/A';
           }
 
           return doc;

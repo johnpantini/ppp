@@ -51,6 +51,11 @@ export default {
     envSecret: '{}',
     url: '/lib/cloudflare-workers/thefly.js'
   },
+  mongoDBRealm: {
+    env: `{}`,
+    envSecret: '{}',
+    url: '/lib/cloudflare-workers/mongodb-realm.js'
+  },
   psinaPusher: {
     env: (pusherApi) => {
       return {
@@ -214,6 +219,9 @@ export const serviceCloudflareWorkerPageTemplate = html`
                   Прокси для ru.tradingview.com
                 </ppp-option>
                 <ppp-option value="thefly">Прокси для thefly.com</ppp-option>
+                <ppp-option value="mongoDBRealm">
+                  Прокси для MongoDB Realm
+                </ppp-option>
                 <ppp-option value="psinaPusher">
                   Интеграция Pusher и Psina
                 </ppp-option>

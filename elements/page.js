@@ -54,8 +54,8 @@ await ppp.i18n(import.meta.url);
     styles: css`
       ${display('flex')}
       ${normalize()}
-      ${typography()}
-      :host {
+    ${typography()}
+    :host {
         position: relative;
         align-items: center;
         border-bottom: 3px solid
@@ -1105,40 +1105,46 @@ class PageWithService {
   }
 
   async checkVersion() {
-    if (this.document.useVersioning) {
-      const versioningUrl = this.document.versioningUrl.trim();
+    try {
+      if (this.document.useVersioning) {
+        const versioningUrl = this.document.versioningUrl.trim();
 
-      if (versioningUrl) {
-        const fcRequest = await fetch(
-          ppp.getWorkerTemplateFullUrl(versioningUrl).toString(),
-          {
-            cache: 'reload'
+        if (versioningUrl) {
+          const fcRequest = await fetch(
+            ppp.getWorkerTemplateFullUrl(versioningUrl).toString(),
+            {
+              cache: 'reload'
+            }
+          );
+
+          await maybeFetchError(
+            fcRequest,
+            'Не удалось отследить версию сервиса.'
+          );
+
+          const parsed = parsePPPScript(await fcRequest.text());
+
+          if (!parsed || !Array.isArray(parsed.meta?.version)) {
+            invalidate(this.versioningUrl, {
+              errorMessage: 'Не удалось прочитать версию',
+              raiseException: true
+            });
           }
-        );
 
-        await maybeFetchError(
-          fcRequest,
-          'Не удалось отследить версию сервиса.'
-        );
+          const [version] = parsed.meta?.version;
 
-        const parsed = parsePPPScript(await fcRequest.text());
+          this.actualVersion = Math.abs(parseInt(version) || 1);
 
-        if (!parsed || !Array.isArray(parsed.meta?.version)) {
-          invalidate(this.versioningUrl, {
-            errorMessage: 'Не удалось прочитать версию',
-            raiseException: true
-          });
+          if (typeof this.actualVersion !== 'number') this.actualVersion = 1;
+        } else {
+          this.actualVersion = 1;
         }
-
-        const [version] = parsed.meta?.version;
-
-        this.actualVersion = Math.abs(parseInt(version) || 1);
-
-        if (typeof this.actualVersion !== 'number') this.actualVersion = 1;
       } else {
         this.actualVersion = 1;
       }
-    } else {
+    } catch (e) {
+      console.error(e?.pppMessage);
+
       this.actualVersion = 1;
     }
   }

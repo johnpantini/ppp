@@ -1,11 +1,14 @@
+/** @decorator */
+
 import ppp from '../../ppp.js';
 import {
   html,
   css,
   ref,
-  when,
   repeat,
-  Observable
+  Observable,
+  observable,
+  when
 } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
@@ -19,9 +22,18 @@ import {
   servicePageFooterExtraControls,
   servicePageHeaderExtraControls
 } from './service.js';
-import { APIS, BROKERS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
+import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
+import { getMongoDBRealmAccessToken } from '../../lib/realm.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
+import { trash } from '../../static/svg/sprite.js';
+import {
+  paletteGrayDark2,
+  paletteGrayLight2,
+  themeConditional
+} from '../../design/design-tokens.js';
+import '../../vendor/zip-full.min.js';
+import '../../vendor/spark-md5.min.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -31,17 +43,82 @@ import '../query-select.js';
 import '../select.js';
 import '../snippet.js';
 import '../text-field.js';
-import { trash } from '../../static/svg/sprite.js';
 
 export const predefinedWorkerData = {
   default: {
     env: `{}`,
     envSecret: '{}',
-    sourceCode: '',
+    url: '/lib/aspirant-worker/example-worker.mjs',
+    sourceCode: `// ==PPPScript==
+// @version 1
+// ==/PPPScript==
+
+import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
+
+uWS
+  .App({})
+  .get('/*', (res) => {
+    res.end('Hello from PPP!');
+  })
+  .listen('0.0.0.0', process.env.NOMAD_PORT_HTTP ?? 9001, () => {});
+`,
+    enableHttp: true,
+    fileList: []
+  },
+  utexAurora: {
+    env: `{}`,
+    envSecret: '{}',
+    url: '/lib/aspirant-worker/utex-aurora.mjs',
     enableHttp: true,
     fileList: []
   }
 };
+
+export async function getAspirantBaseUrl(datum) {
+  if (datum.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
+    return datum.url.endsWith('/') ? datum.url.slice(0, -1) : datum.url;
+  } else if (datum.type === SERVICES.CLOUD_PPP_ASPIRANT) {
+    const deployment = await ppp.decrypt(
+      await ppp.user.functions.findOne(
+        { collection: 'apis' },
+        {
+          _id: datum.deploymentApiId
+        }
+      )
+    );
+
+    if (deployment.type === APIS.NORTHFLANK) {
+      const rNFService = await fetch(
+        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'no-cache',
+          method: 'POST',
+          body: JSON.stringify({
+            method: 'GET',
+            url: `https://api.northflank.com/v1/projects/${datum.projectID}/services/${datum.serviceID}`,
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${deployment.token}`
+            }
+          })
+        }
+      );
+
+      await maybeFetchError(
+        rNFService,
+        'Не удалось получить ссылку на сервис в облаке Northflank.'
+      );
+
+      const nfService = await rNFService.json();
+
+      return `https://${
+        nfService.data.ports.find((p) => p.name === 'ppp').dns
+      }`;
+    } else if (deployment.type === APIS.RENDER) {
+      return `https://aspirant-${datum.slug}.onrender.com`;
+    }
+  }
+}
 
 export const servicePppAspirantWorkerPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -51,6 +128,27 @@ export const servicePppAspirantWorkerPageTemplate = html`
         pageUrl: import.meta.url,
         extraControls: servicePageHeaderExtraControls
       })}
+      ${when(
+        (x) => x.frameUrl,
+        html` <iframe
+          src="${(x) => x.frameUrl}"
+          width="100%"
+          height="800"
+        ></iframe>`
+      )}
+      ${when(
+        (x) => x.url,
+        html`
+          <section>
+            <div class="control-stack">
+              <ppp-banner class="inline" appearance="warning">
+                Глобальная ссылка сервиса:
+              </ppp-banner>
+              <ppp-copyable> ${(x) => x.url}</ppp-copyable>
+            </div>
+          </section>
+        `
+      )}
       <section>
         <div class="label-group">
           <h5>Название сервиса</h5>
@@ -121,6 +219,48 @@ export const servicePppAspirantWorkerPageTemplate = html`
         </div>
       </section>
       <section>
+        <div class="label-group">
+          <h5>Прокси MongoDB Realm</h5>
+          <p class="description">
+            Сервис Cloudflare Worker для проксирования запросов к MongoDB Realm.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('mongodbRealmProxyServiceId')}
+            value="${(x) => x.document.mongodbRealmProxyServiceId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.mongodbRealmProxyService ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('services')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
+                      },
+                      { sourceCode: { $regex: 'realm\\.mongodb\\.com' } },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.mongodbRealmProxyServiceId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+        </div>
+      </section>
+      <section>
         <div class="implementation-area">
           <div class="label-group full" style="min-width: 600px">
             <h5>Точка входа</h5>
@@ -129,7 +269,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
             </p>
             <ppp-snippet
               style="height: 400px"
-              :code="${(x) => x.document.sourceCode}"
+              :code="${(x) =>
+                x.document.sourceCode ??
+                predefinedWorkerData.default.sourceCode}"
               ${ref('sourceCode')}
             ></ppp-snippet>
             <div class="label-group full" style="min-width: 600px">
@@ -155,7 +297,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 относительной ссылке <code>/workers/{serviceID}</code>.
               </p>
               <ppp-checkbox
-                ?checked="${(x) => x.document.enableHttp ?? false}"
+                ?checked="${(x) =>
+                  x.document.enableHttp ??
+                  predefinedWorkerData.default.enableHttp}"
                 ${ref('enableHttp')}
               >
                 Включить сетевой доступ
@@ -170,7 +314,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
               ${repeat(
                 (x) => x.document.fileList ?? [],
                 html`
-                  <div class="control-line">
+                  <div class="control-line file-entry">
                     <ppp-text-field
                       style="width: 320px;"
                       placeholder="URL"
@@ -240,53 +384,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 ${ref('workerPredefinedTemplate')}
               >
                 <ppp-option value="default">По умолчанию</ppp-option>
-                <ppp-option value="aurora">
-                  Рыночные данные UTEX Aurora
-                </ppp-option>
               </ppp-select>
-              ${when(
-                (x) => x.workerPredefinedTemplate.value === 'aurora',
-                html`
-                  <div class="control-line">
-                    <ppp-query-select
-                      ${ref('utexAuroraBrokerId')}
-                      placeholder="Выберите брокерский профиль UTEX"
-                      :context="${(x) => x}"
-                      :query="${() => {
-                        return (context) => {
-                          return context.services
-                            .get('mongodb-atlas')
-                            .db('ppp')
-                            .collection('brokers')
-                            .find({
-                              $and: [
-                                {
-                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.UTEX%]`
-                                },
-                                {
-                                  removed: { $ne: true }
-                                }
-                              ]
-                            })
-                            .sort({ updatedAt: -1 });
-                        };
-                      }}"
-                      :transform="${() => ppp.decryptDocumentsTransformation()}"
-                    ></ppp-query-select>
-                    <ppp-button
-                      style="margin-top: 8px;"
-                      appearance="default"
-                      @click="${() =>
-                        ppp.app.mountPage(`broker-${BROKERS.UTEX}`, {
-                          size: 'xlarge',
-                          adoptHeader: true
-                        })}"
-                    >
-                      +
-                    </ppp-button>
-                  </div>
-                `
-              )}
               <div class="spacing2"></div>
               <ppp-button
                 @click="${(x) => x.fillOutFormsWithTemplate()}"
@@ -337,10 +435,47 @@ export const servicePppAspirantWorkerPageTemplate = html`
 
 export const servicePppAspirantWorkerPageStyles = css`
   ${pageStyles}
+  iframe {
+    background: transparent;
+    margin-top: 15px;
+    border-radius: 4px;
+    border: 1px ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+  }
 `;
 
 export class ServicePppAspirantWorkerPage extends Page {
   collection = 'services';
+
+  fileList = [];
+
+  zipWriter;
+
+  zipBlob = null;
+
+  @observable
+  url;
+
+  @observable
+  frameUrl;
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (
+      this.document._id &&
+      this.document.aspirantService &&
+      this.document.enableHttp
+    ) {
+      const aspirantUrl = await getAspirantBaseUrl(
+        this.document.aspirantService
+      );
+
+      if ((await fetch(`${aspirantUrl}/nomad/health`)).ok) {
+        this.url = `${aspirantUrl}/workers/${this.document._id}`;
+        this.frameUrl = `${aspirantUrl}/ui/jobs/worker-${this.document._id}@default`;
+      }
+    }
+  }
 
   addFileToFileList() {
     if (typeof this.document.fileList === 'undefined') {
@@ -365,10 +500,177 @@ export class ServicePppAspirantWorkerPage extends Page {
     Observable.notify(this, 'document');
   }
 
+  async fillOutFormsWithTemplate() {
+    this.beginOperation();
+
+    try {
+      const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+
+      try {
+        const fcRequest = await fetch(
+          ppp.getWorkerTemplateFullUrl(data.url).toString(),
+          {
+            cache: 'reload'
+          }
+        );
+
+        await maybeFetchError(
+          fcRequest,
+          'Не удалось загрузить файл с шаблоном.'
+        );
+
+        this.document.fileList = structuredClone(data.fileList ?? []);
+
+        this.sourceCode.updateCode(await fcRequest.text());
+        this.environmentCode.updateCode(data.env);
+        this.environmentCodeSecret.updateCode(data.envSecret);
+        this.enableHttp.checked = data.enableHttp;
+        this.command.value = data.command;
+        this.args.value = data.args;
+        this.versioningUrl.value = data.url;
+        this.useVersioning.checked = true;
+
+        this.document.sourceCode = this.sourceCode.value;
+        this.document.environmentCode = this.environmentCode.value;
+        this.document.environmentCodeSecret = this.environmentCodeSecret.value;
+        this.document.enableHttp = data.enableHttp;
+        this.document.command = data.command;
+        this.document.args = data.args;
+        this.document.versioningUrl = data.url;
+        this.document.useVersioning = true;
+
+        Observable.notify(this, 'document');
+        this.showSuccessNotification(
+          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен.`
+        );
+      } catch (e) {
+        invalidate(this.versioningUrl, {
+          errorMessage: 'Неверный URL',
+          raiseException: true
+        });
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
+  }
+
   async validate() {
     await validate(this.name);
     await validate(this.aspirantServiceId);
+    await validate(this.mongodbRealmProxyServiceId);
+
+    if (this.useVersioning.checked) {
+      await validate(this.versioningUrl);
+
+      // URL validation
+      try {
+        ppp.getWorkerTemplateFullUrl(this.versioningUrl.value);
+      } catch (e) {
+        invalidate(this.versioningUrl, {
+          errorMessage: 'Неверный URL',
+          raiseException: true
+        });
+      }
+    }
+
     await validate(this.sourceCode);
+
+    const zip = globalThis.zip;
+
+    this.zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'), {
+      bufferedWrite: true,
+      useCompressionStream: false
+    });
+
+    try {
+      if (this.document.fileList?.length > 0) {
+        for (const [e, index] of Array.from(
+          this.shadowRoot.querySelectorAll('.file-entry')
+        ).map((item, index) => [item, index])) {
+          const [urlField, pathField] = Array.from(
+            e.querySelectorAll('ppp-text-field')
+          );
+
+          await validate(urlField);
+          await validate(pathField);
+
+          let url;
+
+          try {
+            url = ppp.getWorkerTemplateFullUrl(urlField.value).toString();
+          } catch (e) {
+            invalidate(urlField, {
+              errorMessage: 'Неверный URL',
+              raiseException: true
+            });
+          }
+
+          const path = pathField.value.trim();
+
+          try {
+            await this.zipWriter.add(path, new zip.HttpReader(url));
+          } catch (e) {
+            console.error(e);
+
+            invalidate(urlField, {
+              errorMessage: 'Не удалось загрузить файл',
+              raiseException: true
+            });
+          }
+
+          this.document.fileList[index] = {
+            url: urlField.value.trim(),
+            path
+          };
+        }
+      }
+
+      await validate(this.environmentCode);
+      await validate(this.environmentCodeSecret);
+
+      try {
+        new Function(
+          `return ${await new Tmpl().render(
+            this,
+            this.environmentCode.value,
+            {}
+          )}`
+        )();
+      } catch (e) {
+        invalidate(this.environmentCode, {
+          errorMessage: 'Код содержит ошибки',
+          raiseException: true
+        });
+      }
+
+      try {
+        new Function(
+          `return ${await new Tmpl().render(
+            this,
+            this.environmentCodeSecret.value,
+            {}
+          )}`
+        )();
+      } catch (e) {
+        invalidate(this.environmentCodeSecret, {
+          errorMessage: 'Код содержит ошибки',
+          raiseException: true
+        });
+      }
+
+      await this.zipWriter.add(
+        `${this.document._id}.mjs`,
+        new zip.TextReader(this.sourceCode.value)
+      );
+    } finally {
+      this.zipBlob = null;
+
+      if (typeof this.zipWriter !== 'undefined') {
+        this.zipBlob = await this.zipWriter.close();
+      }
+    }
   }
 
   async read() {
@@ -394,6 +696,20 @@ export class ServicePppAspirantWorkerPage extends Page {
           },
           {
             $unwind: '$aspirantService'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'mongodbRealmProxyServiceId',
+              foreignField: '_id',
+              as: 'mongodbRealmProxyService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$mongodbRealmProxyService',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $lookup: {
@@ -423,24 +739,250 @@ export class ServicePppAspirantWorkerPage extends Page {
 
   #getInternalEnv() {
     return {
-      PPP_WORKER_ID: this.document._id,
-      SERVICE_MACHINE_URL: ppp.keyVault.getKey('service-machine-url'),
       PPP_ROOT_URL: ppp.rootUrl.replace('github.io.dev', 'pages.dev')
     };
   }
 
-  #deployAspirantWorker() {}
+  async #deployAspirantWorker() {
+    if (this.zipBlob) {
+      const groupId = ppp.keyVault.getKey('mongo-group-id');
+      const appId = ppp.keyVault.getKey('mongo-app-id');
+      const mongoDBRealmAccessToken = await getMongoDBRealmAccessToken();
+      const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
+
+      const rHostingConfiguration = await fetch(
+        new URL('fetch', serviceMachineUrl).toString(),
+        {
+          cache: 'reload',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'GET',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/config`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            }
+          })
+        }
+      );
+
+      await maybeFetchError(
+        rHostingConfiguration,
+        'Не удалось получить конфигурацию хостинга MongoDB Realm.'
+      );
+
+      const hostingConfiguration = await rHostingConfiguration.json();
+
+      if (!hostingConfiguration.enabled) {
+        await fetch(new URL('fetch', serviceMachineUrl).toString(), {
+          cache: 'reload',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            method: 'PATCH',
+            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/config`,
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: JSON.stringify({
+              enabled: true
+            })
+          })
+        });
+
+        invalidate(ppp.app.toast, {
+          errorMessage:
+            'Хостинг MongoDB Realm был выключен и сейчас приводится в состояние готовности, попробуйте повторить через несколько минут.',
+          raiseException: true
+        });
+      } else if (hostingConfiguration.status !== 'setup_ok') {
+        invalidate(ppp.app.toast, {
+          errorMessage:
+            'Хостинг MongoDB Realm ещё не готов, попробуйте повторить через несколько минут.',
+          raiseException: true
+        });
+      }
+
+      const formData = new FormData();
+      const reader = new FileReader();
+
+      reader.readAsArrayBuffer(this.zipBlob);
+
+      const hash = await new Promise((resolve) => {
+        reader.onloadend = async function () {
+          resolve(SparkMD5.ArrayBuffer.hash(reader.result));
+        };
+      });
+
+      const artifactRelativeUrl = `/aspirant/${
+        this.aspirantServiceId.datum()._id
+      }/workers/${this.document._id}.zip`;
+
+      formData.set(
+        'meta',
+        JSON.stringify({
+          path: artifactRelativeUrl,
+          size: this.zipBlob.size,
+          attrs: [
+            {
+              name: 'Cache-Control',
+              value: 'reload'
+            }
+          ],
+          hash
+        })
+      );
+      formData.set('file', this.zipBlob);
+
+      const proxyDatum = this.mongodbRealmProxyServiceId.datum();
+
+      await maybeFetchError(
+        await fetch(
+          `https://ppp-${proxyDatum._id}.${proxyDatum.subdomain}.workers.dev/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/assets/asset`,
+          {
+            cache: 'reload',
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: formData
+          }
+        ),
+        'Не удалось загрузить файлы сервиса в облачное хранилище MongoDB Realm.'
+      );
+
+      await maybeFetchError(
+        await fetch(
+          `https://ppp-${proxyDatum._id}.${proxyDatum.subdomain}.workers.dev/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/cache`,
+          {
+            cache: 'reload',
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            },
+            body: JSON.stringify({ invalidate: true, path: '/*' })
+          }
+        ),
+        'Не удалось сбросить кэш облачного хранилища MongoDB Realm.'
+      );
+
+      const aspirantUrl = await getAspirantBaseUrl(
+        this.aspirantServiceId.datum()
+      );
+
+      const redisApi = await ppp.decrypt(
+        await ppp.user.functions.findOne(
+          { collection: 'apis' },
+          {
+            _id: this.document.aspirantService.redisApiId
+          }
+        )
+      );
+
+      const artifactUrl = `https://${ppp.keyVault.getKey(
+        'mongo-app-client-id'
+      )}.mongodbstitch.com${artifactRelativeUrl}`;
+      const env = Object.assign(
+        {},
+        new Function(
+          `return Object.assign({}, ${await new Tmpl().render(
+            this,
+            this.document.environmentCode
+          )}, ${await new Tmpl().render(
+            this,
+            this.document.environmentCodeSecret
+          )});`
+        )(),
+        this.#getInternalEnv()
+      );
+
+      await maybeFetchError(
+        await fetch(
+          new URL(
+            'redis',
+            ppp.keyVault.getKey('service-machine-url')
+          ).toString(),
+          {
+            cache: 'reload',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              options: {
+                host: redisApi.host,
+                port: redisApi.port,
+                tls: redisApi.tls
+                  ? {
+                      servername: redisApi.host
+                    }
+                  : void 0,
+                username: redisApi.username,
+                db: redisApi.database,
+                password: redisApi.password
+              },
+              command: 'hset',
+              args: [
+                `aspirant:${this.aspirantServiceId.datum()._id}`,
+                this.document._id,
+                JSON.stringify({
+                  env,
+                  artifactUrl,
+                  enableHttp: this.enableHttp.checked,
+                  command: this.document.command,
+                  args: this.document.args
+                })
+              ]
+            })
+          }
+        ),
+        'Не удалось создать запись сервиса в Redis.'
+      );
+
+      await maybeFetchError(
+        await fetch(`${aspirantUrl}/api/v1/workers`, {
+          cache: 'reload',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            workerId: this.document._id,
+            artifactUrl,
+            enableHttp: this.enableHttp.checked,
+            env,
+            command: this.document.command,
+            args: this.document.args
+          })
+        }),
+        'Не удалось запланировать сервис на исполнение.'
+      );
+    }
+  }
 
   async submit() {
-    const state =
-      this.document.state === SERVICE_STATE.ACTIVE
-        ? SERVICE_STATE.ACTIVE
-        : SERVICE_STATE.STOPPED;
-
     return [
       {
         $set: {
           name: this.name.value.trim(),
+          aspirantServiceId: this.aspirantServiceId.value,
+          mongodbRealmProxyServiceId: this.mongodbRealmProxyServiceId.value,
+          sourceCode: this.sourceCode.value,
+          command: this.command.value.trim(),
+          args: this.args.value.trim(),
+          enableHttp: this.enableHttp.checked,
+          fileList: structuredClone(this.document.fileList),
+          environmentCode: this.environmentCode.value,
+          environmentCodeSecret: this.environmentCodeSecret.value,
+          version: this.getVersionFromSnippet(
+            this.sourceCode,
+            this.useVersioning.checked
+          ),
+          workerPredefinedTemplate: this.workerPredefinedTemplate.value,
           useVersioning: this.useVersioning.checked,
           versioningUrl: this.versioningUrl.value.trim(),
           state: SERVICE_STATE.FAILED,
@@ -454,16 +996,118 @@ export class ServicePppAspirantWorkerPage extends Page {
       this.#deployAspirantWorker,
       () => ({
         $set: {
-          state,
+          state: SERVICE_STATE.ACTIVE,
           updatedAt: new Date()
         }
       })
     ];
   }
 
-  async update() {}
+  async update() {
+    const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+    const fcRequest = await fetch(
+      ppp.getWorkerTemplateFullUrl(data.url).toString(),
+      {
+        cache: 'reload'
+      }
+    );
 
-  async cleanup() {}
+    await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+
+    this.sourceCode.updateCode(await fcRequest.text());
+
+    this.document.fileList = structuredClone(data.fileList);
+  }
+
+  async stop() {
+    const aspirantUrl = await getAspirantBaseUrl(
+      this.aspirantServiceId.datum()
+    );
+
+    await maybeFetchError(
+      await fetch(`${aspirantUrl}/api/v1/workers`, {
+        cache: 'reload',
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          workerId: this.document._id
+        })
+      }),
+      'Не удалось остановить сервис.'
+    );
+
+    const api = await ppp.decrypt(
+      await ppp.user.functions.findOne(
+        { collection: 'apis' },
+        {
+          _id: this.document.aspirantService.redisApiId
+        }
+      )
+    );
+
+    await maybeFetchError(
+      await fetch(
+        new URL('redis', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          cache: 'reload',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            options: {
+              host: api.host,
+              port: api.port,
+              tls: api.tls
+                ? {
+                    servername: api.host
+                  }
+                : void 0,
+              username: api.username,
+              db: api.database,
+              password: api.password
+            },
+            command: 'hdel',
+            args: [
+              `aspirant:${this.aspirantServiceId.datum()._id}`,
+              this.document._id
+            ]
+          })
+        }
+      ),
+      'Не удалось удалить запись сервиса из Redis.'
+    );
+  }
+
+  async restart() {
+    if (this.document.state === SERVICE_STATE.STOPPED) {
+      return this.submitDocument();
+    }
+
+    const aspirantUrl = await getAspirantBaseUrl(
+      this.aspirantServiceId.datum()
+    );
+
+    await maybeFetchError(
+      await fetch(`${aspirantUrl}/api/v1/workers`, {
+        cache: 'reload',
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          workerId: this.document._id
+        })
+      }),
+      'Не удалось перезапустить сервис.'
+    );
+  }
+
+  async cleanup() {
+    await this.stop();
+  }
 }
 
 applyMixins(ServicePppAspirantWorkerPage, PageWithService);
