@@ -530,6 +530,10 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.versioningUrl.value = data.url;
         this.useVersioning.checked = true;
 
+        this.document.name = this.name.value;
+        this.document.aspirantServiceId = this.aspirantServiceId.value;
+        this.document.mongodbRealmProxyServiceId =
+          this.mongodbRealmProxyServiceId.value;
         this.document.sourceCode = this.sourceCode.value;
         this.document.environmentCode = this.environmentCode.value;
         this.document.environmentCodeSecret = this.environmentCodeSecret.value;
@@ -695,7 +699,10 @@ export class ServicePppAspirantWorkerPage extends Page {
             }
           },
           {
-            $unwind: '$aspirantService'
+            $unwind: {
+              path: '$aspirantService',
+              preserveNullAndEmptyArrays: true
+            }
           },
           {
             $lookup: {
@@ -878,7 +885,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         await ppp.user.functions.findOne(
           { collection: 'apis' },
           {
-            _id: this.document.aspirantService.redisApiId
+            _id: this.aspirantServiceId.datum().redisApiId
           }
         )
       );
@@ -1042,7 +1049,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       await ppp.user.functions.findOne(
         { collection: 'apis' },
         {
-          _id: this.document.aspirantService.redisApiId
+          _id: this.aspirantServiceId.datum().redisApiId
         }
       )
     );
