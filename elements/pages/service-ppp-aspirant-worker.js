@@ -126,10 +126,19 @@ export const servicePppAspirantWorkerPageTemplate = html`
     <form novalidate>
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url,
-        extraControls: servicePageHeaderExtraControls
+        extraControls: html`
+          <ppp-button
+            appearance="primary"
+            slot="controls"
+            @click="${(x) => (x.shouldShowFrame = true)}"
+          >
+            Показать сервис в Nomad
+          </ppp-button>
+          ${servicePageHeaderExtraControls}
+        `
       })}
       ${when(
-        (x) => x.frameUrl,
+        (x) => x.shouldShowFrame && x.frameUrl,
         html` <iframe
           src="${(x) => x.frameUrl}"
           width="100%"
@@ -457,6 +466,9 @@ export class ServicePppAspirantWorkerPage extends Page {
 
   @observable
   frameUrl;
+
+  @observable
+  shouldShowFrame;
 
   async connectedCallback() {
     await super.connectedCallback();
