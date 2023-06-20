@@ -2,15 +2,15 @@
 
 import ppp from '../../ppp.js';
 import {
-  html,
   css,
-  ref,
-  repeat,
+  html,
   Observable,
   observable,
+  ref,
+  repeat,
   when
 } from '../../vendor/fast-element.min.js';
-import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
+import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -913,11 +913,22 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.aspirantServiceId.datum()
       );
 
+      const aspirantDocument = await ppp.decrypt(
+        await ppp.user.functions.findOne(
+          {
+            collection: 'services'
+          },
+          {
+            _id: this.aspirantServiceId.datum()._id
+          }
+        )
+      );
+
       const redisApi = await ppp.decrypt(
         await ppp.user.functions.findOne(
           { collection: 'apis' },
           {
-            _id: this.aspirantServiceId.datum().redisApiId
+            _id: aspirantDocument.redisApiId
           }
         )
       );
