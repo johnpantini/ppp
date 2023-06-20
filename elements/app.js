@@ -278,7 +278,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => true || !ppp.keyVault.ok()}"
+                ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('endpoint')}"
               >
                 <span>Конечные точки</span>
@@ -292,7 +292,7 @@ export const appTemplate = html`
                 })}"
             >
               <ppp-side-nav-item
-                ?disabled="${() => true || !ppp.keyVault.ok()}"
+                ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('server')}"
               >
                 <span>Серверы</span>
@@ -834,6 +834,7 @@ export class App extends PPPElement {
       this.workspace = this.params().document;
     } else {
       this.mountPointModal.setAttribute('hidden', '');
+      this.confirmationModal.setAttribute('hidden', '');
     }
 
     if (this.page) {

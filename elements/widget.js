@@ -2523,7 +2523,7 @@ export class WidgetHeaderButtons extends PPPElement {
   }
 
   async closeWidget() {
-    if (ppp.settings.get('confirmWidgetClosing')) {
+    if (!this.widget.preview && ppp.settings.get('confirmWidgetClosing')) {
       if (
         await ppp.app.confirm(
           'Закрытие виджета',

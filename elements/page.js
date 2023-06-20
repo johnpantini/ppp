@@ -25,7 +25,12 @@ import {
   spacing4,
   spacing3
 } from '../design/design-tokens.js';
-import { PAGE_STATUS, SERVICE_STATE, VERSIONING_STATUS } from '../lib/const.js';
+import {
+  PAGE_STATUS,
+  SERVER_TYPES,
+  SERVICE_STATE,
+  VERSIONING_STATUS
+} from '../lib/const.js';
 import { Tmpl } from '../lib/tmpl.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
 import { parsePPPScript } from '../lib/ppp-script.js';
@@ -106,6 +111,10 @@ export const documentPageHeaderPartial = ({
 
         if (type && type !== 'manage') {
           nameParts.push(ppp.t(`$const.${page}.${type}`));
+        }
+
+        if (page === 'endpoint') {
+          nameParts.push(x.document.route);
         }
 
         if (x.document.name ?? x.document.title) {
@@ -633,7 +642,7 @@ class Page extends PPPElement {
       await ppp.app.confirm(
         'Удаление документа',
         `Подтвердите, что собираетесь удалить документ «${
-          this.document.name ?? this.document.title
+          this.document.name ?? this.document.title ?? this.document._id
         }».`
       )
     ) {
@@ -1373,4 +1382,159 @@ class PageWithSupabaseService {
   }
 }
 
-export { Page, PageWithService, PageWithSupabaseService };
+/**
+ * @mixin
+ */
+class PageWithSSHTerminal {
+  async processChunkedResponse(response, terminal) {
+    this.terminalOutput = '';
+
+    return this.readChunk(
+      response.body.getReader(),
+      new TextDecoder(),
+      terminal
+    );
+  }
+
+  async readChunk(reader, decoder, terminal) {
+    const result = await reader.read();
+    const chunk = decoder.decode(result.value || new Uint8Array(), {
+      stream: !result.done
+    });
+
+    if (chunk.length) {
+      const string = chunk.toString();
+
+      this.terminalOutput += string;
+
+      if (terminal) {
+        // Error message
+        if (string.startsWith('{"e"')) {
+          try {
+            terminal.write(
+              '\x1b[31m' + JSON.parse(string).e.message + '\x1b[0m\r\n'
+            );
+          } catch (e) {
+            terminal.write(string);
+          }
+        } else terminal.write(string);
+      }
+    }
+
+    if (!result.done) {
+      return this.readChunk(reader, decoder, terminal);
+    }
+  }
+
+  async executeSSHCommandsSilently({ server = {}, commands }) {
+    try {
+      commands += `echo '\x1b[32m\r\nppp-ssh-ok\r\n\x1b[0m'`;
+
+      // Only for development
+      if (location.origin.endsWith('.github.io.dev')) {
+        commands = commands.replaceAll(
+          'salt-call --local',
+          'salt-call --local -c /srv/salt'
+        );
+      }
+
+      server.cmd = commands;
+
+      if (server.authType === SERVER_TYPES.PASSWORD) {
+        server.key = void 0;
+        server.privateKey = void 0;
+      } else if (server.authType === SERVER_TYPES.KEY) {
+        server.password = void 0;
+        server.privateKey = server.key;
+      }
+
+      const rSSH = await fetch(
+        new URL('ssh', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          method: 'POST',
+          body: JSON.stringify(server)
+        }
+      );
+
+      await this.processChunkedResponse(rSSH);
+
+      if (!rSSH.ok) {
+        console.dir(rSSH);
+
+        // noinspection ExceptionCaughtLocallyJS
+        throw new FetchError(rSSH);
+      }
+
+      return /ppp-ssh-ok/i.test(this.terminalOutput);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  async executeSSHCommands({ server = {}, commands, commandsToDisplay }) {
+    this.terminalOutput = '';
+
+    ppp.app.terminalModal.dismissible = false;
+    ppp.app.terminalModal.removeAttribute('hidden');
+
+    const terminal = ppp.app.terminalWindow.terminal;
+
+    try {
+      terminal.clear();
+      terminal.reset();
+      terminal.writeInfo('Выполняется настройка сервера...\r\n');
+
+      if (!commandsToDisplay) commandsToDisplay = commands;
+
+      terminal.writeInfo(commandsToDisplay);
+      terminal.writeln('');
+
+      commands += `echo '\x1b[32m\r\nppp-ssh-ok\r\n\x1b[0m'`;
+
+      // Only for development
+      if (location.origin.endsWith('.github.io.dev')) {
+        commands = commands.replaceAll(
+          'salt-call --local',
+          'salt-call --local -c /srv/salt'
+        );
+      }
+
+      server.cmd = commands;
+
+      if (server.authType === SERVER_TYPES.PASSWORD) {
+        server.key = void 0;
+        server.privateKey = void 0;
+      } else if (server.authType === SERVER_TYPES.KEY) {
+        server.password = void 0;
+        server.privateKey = server.key;
+      }
+
+      const rSSH = await fetch(
+        new URL('ssh', ppp.keyVault.getKey('service-machine-url')).toString(),
+        {
+          method: 'POST',
+          body: JSON.stringify(server)
+        }
+      );
+
+      await this.processChunkedResponse(rSSH, terminal);
+
+      if (!rSSH.ok) {
+        console.dir(rSSH);
+
+        // noinspection ExceptionCaughtLocallyJS
+        throw new FetchError(rSSH);
+      }
+
+      return /ppp-ssh-ok/i.test(this.terminalOutput);
+    } catch (e) {
+      console.error(e);
+
+      terminal.writeError(`Операция завершилась с ошибкой ${e.status ?? 503}`);
+    } finally {
+      ppp.app.terminalModal.dismissible = true;
+    }
+  }
+}
+
+export { Page, PageWithService, PageWithSupabaseService, PageWithSSHTerminal };

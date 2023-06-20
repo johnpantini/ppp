@@ -72,12 +72,12 @@ export default function (i18n) {
       },
       serverState: {
         [SERVER_STATE.OK]: 'Настроен',
-        [SERVER_STATE.FAILED]: 'Неисправен'
+        [SERVER_STATE.FAILED]: 'Проблемы с настройкой'
       },
       serviceState: {
         [SERVICE_STATE.ACTIVE]: 'Активен',
         [SERVICE_STATE.STOPPED]: 'Остановлен',
-        [SERVICE_STATE.FAILED]: 'Неисправен',
+        [SERVICE_STATE.FAILED]: 'Проблемы с настройкой',
         'N/A': 'Нет данных'
       },
       service: {

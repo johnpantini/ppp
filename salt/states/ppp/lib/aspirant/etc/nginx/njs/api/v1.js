@@ -314,8 +314,7 @@ async function resurrect(r) {
         SERVICE_MACHINE_URL: requestBody.SERVICE_MACHINE_URL,
         REDIS_HOST: requestBody.REDIS_HOST,
         REDIS_PORT: +requestBody.REDIS_PORT,
-        // Will be converted to string
-        REDIS_TLS: requestBody.REDIS_TLS === 'true' || !!requestBody.REDIS_TLS,
+        REDIS_TLS: requestBody.REDIS_TLS === 'true' ? 'true': '',
         REDIS_USERNAME: requestBody.REDIS_USERNAME,
         REDIS_DATABASE: +requestBody.REDIS_DATABASE,
         REDIS_PASSWORD: requestBody.REDIS_PASSWORD

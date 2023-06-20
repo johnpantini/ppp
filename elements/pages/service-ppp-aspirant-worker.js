@@ -48,7 +48,7 @@ export const predefinedWorkerData = {
   default: {
     env: `{}`,
     envSecret: '{}',
-    url: '/lib/aspirant-worker/example-worker.mjs',
+    url: '/salt/states/ppp/lib/aspirant-worker/example-worker.mjs',
     sourceCode: `// ==PPPScript==
 // @version 1
 // ==/PPPScript==
@@ -65,12 +65,27 @@ uWS
     enableHttp: true,
     fileList: []
   },
-  utexAurora: {
-    env: `{}`,
+  utexAlpaca: {
+    env: `{
+  UTEX_USER_AGENT: '[%#navigator.userAgent%]'
+}`,
     envSecret: '{}',
-    url: '/lib/aspirant-worker/utex-aurora.mjs',
+    url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/utex-alpaca.mjs',
     enableHttp: true,
-    fileList: []
+    fileList: [
+      {
+        url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/message-type.mjs',
+        path: 'lib/message-type.mjs'
+      },
+      {
+        url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/utex.proto',
+        path: 'lib/utex.proto'
+      },
+      {
+        url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/utex-connection.mjs',
+        path: 'lib/utex-connection.mjs'
+      }
+    ]
   }
 };
 
@@ -393,6 +408,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 ${ref('workerPredefinedTemplate')}
               >
                 <ppp-option value="default">По умолчанию</ppp-option>
+                <ppp-option value="utexAlpaca">
+                  Alpaca-совместимый API UTEX
+                </ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
               <ppp-button
@@ -552,6 +570,8 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.document.enableHttp = data.enableHttp;
         this.document.command = data.command;
         this.document.args = data.args;
+        this.document.workerPredefinedTemplate =
+          this.workerPredefinedTemplate.value;
         this.document.versioningUrl = data.url;
         this.document.useVersioning = true;
 

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package aurora;
+package utex;
 
 message DateTime {
   sint64 Timestamp = 1;

@@ -7,8 +7,10 @@ export default function (i18n) {
     $collection: {
       apis: 'API',
       brokers: 'Брокеры',
+      endpoints: 'Конечные точки',
       extensions: 'Дополнения',
       instruments: 'Инструменты',
+      servers: 'Серверы',
       services: 'Сервисы',
       settings: 'Параметры',
       bots: 'Боты',

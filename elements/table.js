@@ -84,6 +84,8 @@ export const tableTemplate = html`
               datum: n.datum
             });
           }
+
+          return true;
         }}"
       >
         ${repeat(

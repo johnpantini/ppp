@@ -106,6 +106,7 @@ export const orderbookWidgetTemplate = html`
                   html`
                     <tr>
                       <td
+                        price="${(x) => x.bid?.price}"
                         style="${(x, c) =>
                           `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
                             x.bid?.volume
@@ -149,6 +150,7 @@ export const orderbookWidgetTemplate = html`
                         </div>
                       </td>
                       <td
+                        price="${(x) => x.ask?.price}"
                         style="${(x, c) =>
                           `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
                             x.ask?.volume
@@ -539,11 +541,13 @@ export class OrderbookWidget extends WidgetWithInstrument {
     const price = parseFloat(
       event
         .composedPath()
-        .find((n) => n?.classList?.contains('quote-line'))
+        .find((n) => n?.hasAttribute('price'))
         ?.getAttribute('price')
     );
 
-    return this.broadcastPrice(price);
+    if (!isNaN(price)) {
+      return this.broadcastPrice(price);
+    }
   }
 
   #getMyOrdersPricesAndSizes() {

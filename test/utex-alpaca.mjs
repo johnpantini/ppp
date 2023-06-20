@@ -5,6 +5,8 @@ const client = new WebSocket('ws://localhost:24567');
 client.on('message', (data) => {
   const payload = JSON.parse(data);
 
+  console.log(payload);
+
   if (payload[0]?.msg === 'connected') {
     client.send(
       JSON.stringify({
@@ -21,7 +23,5 @@ client.on('message', (data) => {
         quotes: ['AAPL']
       })
     );
-  } else {
-    console.log(payload);
   }
 });

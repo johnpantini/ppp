@@ -185,10 +185,16 @@ class PPP {
                 errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
               });
 
-              setTimeout(() => {
-                localStorage.removeItem('ppp-use-alternative-mongo');
-                window.location.reload();
-              }, 5000);
+              const listener = function (event) {
+                if (event.key === 'Enter') {
+                  localStorage.removeItem('ppp-use-alternative-mongo');
+                  window.location.reload();
+                }
+
+                document.removeEventListener('keydown', listener);
+              };
+
+              document.addEventListener('keydown', listener);
             } else {
               this.#showLoadingError({
                 errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
@@ -288,10 +294,16 @@ class PPP {
               errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
             });
 
-            setTimeout(() => {
-              localStorage.removeItem('ppp-use-alternative-mongo');
-              window.location.reload();
-            }, 5000);
+            const listener = function (event) {
+              if (event.key === 'Enter') {
+                localStorage.removeItem('ppp-use-alternative-mongo');
+                window.location.reload();
+              }
+
+              document.removeEventListener('keydown', listener);
+            };
+
+            document.addEventListener('keydown', listener);
           } else {
             this.#showLoadingError({
               errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
