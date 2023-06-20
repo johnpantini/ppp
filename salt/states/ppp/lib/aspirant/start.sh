@@ -6,6 +6,8 @@ mkdir -p /var/lib/nomad
 chown -R ppp /var/lib/nomad /etc/nomad.d
 chown -R nginx /etc/nginx
 
+ln -sf  /usr/local/bin/node /usr/bin/node
+
 echo 'Starting up HTTP Shell...'
 chmod u+x /salt/states/ppp/lib/http-shell.py
 python /salt/states/ppp/lib/http-shell.py &
