@@ -7,6 +7,7 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import { getAspirantBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -107,8 +108,46 @@ export const traderAlpacaV2PlusTemplate = html`
         <div class="label-group">
           <h5>URL для подключения к общему потоку рыночных данных</h5>
           <p class="description">
-            Ссылка для передачи данных книги заявок и ленты всех сделок.
+            Ссылка для передачи данных книги заявок и ленты всех сделок. Можно
+            сформировать по сервису, если таковой имеется (воспользуйтесь
+            выпадающим списком).
           </p>
+          <div>
+            <ppp-query-select
+              ${ref('aspirantWorkerSelector')}
+              :context="${(x) => x}"
+              :placeholder="${() => 'Нажмите, чтобы выбрать сервис'}"
+              :query="${() => {
+                return (context) => {
+                  return context.services
+                    .get('mongodb-atlas')
+                    .db('ppp')
+                    .collection('services')
+                    .find({
+                      $and: [
+                        { removed: { $ne: true } },
+                        {
+                          workerPredefinedTemplate: 'utexAlpaca'
+                        },
+                        {
+                          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                        }
+                      ]
+                    })
+                    .sort({ updatedAt: -1 });
+                };
+              }}"
+              :transform="${() => ppp.decryptDocumentsTransformation()}"
+            ></ppp-query-select>
+            <div class="spacing2"></div>
+            <ppp-button
+              ?disabled="${(x) => !x.aspirantWorkerSelector.value}"
+              appearance="primary"
+              @click="${(x) => x.generateLink(x.aspirantWorkerSelector.value)}"
+            >
+              Сформировать ссылку
+            </ppp-button>
+          </div>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -240,6 +279,29 @@ const checkConnection = async (control, login, password) => {
 
 export class TraderAlpacaV2PlusPage extends Page {
   collection = 'traders';
+
+  async generateLink() {
+    const datum = this.aspirantWorkerSelector.datum();
+
+    if (datum?.workerPredefinedTemplate === 'utexAlpaca') {
+      const aspirantUrl = new URL(
+        await getAspirantBaseUrl(
+          await ppp.decrypt(
+            await ppp.user.functions.findOne(
+              {
+                collection: 'services'
+              },
+              { _id: datum.aspirantServiceId }
+            )
+          )
+        )
+      );
+
+      this.wsUrl.value = `${
+        aspirantUrl.protocol === 'https:' ? 'wss://' : 'ws://'
+      }${aspirantUrl.host}/workers/${datum._id}/`;
+    }
+  }
 
   async validate() {
     await validate(this.name);
