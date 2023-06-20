@@ -130,7 +130,7 @@ async function startDeployedWorker(
       DestPath: 'local/workers.conf',
       EmbeddedTmpl: `
         {{ range nomadServices }}
-          location /workers/{{ .Name | toLower }} {
+          location /workers/{{ .Name | toLower }}/ {
             default_type application/json;
 
             if ($request_method = OPTIONS ) {
