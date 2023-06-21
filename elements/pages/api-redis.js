@@ -216,7 +216,7 @@ export class ApiRedisPage extends Page {
     await validate(this.port);
     await validate(this.database);
 
-    if (this.document.host.endsWith('upstash.io')) {
+    if (this.host.value.endsWith('upstash.io')) {
       await validate(this.database, {
         hook: async (value) => +value === 0,
         errorMessage:
