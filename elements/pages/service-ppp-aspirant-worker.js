@@ -615,10 +615,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
     const zip = globalThis.zip;
 
-    this.zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'), {
-      bufferedWrite: true,
-      useCompressionStream: false
-    });
+    this.zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 
     try {
       if (this.document.fileList?.length > 0) {
@@ -646,7 +643,12 @@ export class ServicePppAspirantWorkerPage extends Page {
           const path = pathField.value.trim();
 
           try {
-            await this.zipWriter.add(path, new zip.HttpReader(url));
+            await this.zipWriter.add(
+              path,
+              new zip.HttpReader(url, {
+                preventHeadRequest: true
+              })
+            );
           } catch (e) {
             console.error(e);
 
