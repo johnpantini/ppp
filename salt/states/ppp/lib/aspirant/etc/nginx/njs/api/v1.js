@@ -375,7 +375,7 @@ async function resurrect(r) {
 
           let args = workerData.args;
 
-          if (typeof args === 'string') {
+          if (args && typeof args === 'string') {
             args = JSON.parse(args);
           }
 
@@ -515,7 +515,7 @@ async function v1(r) {
 
               let args = requestBody.args;
 
-              if (typeof args === 'string') {
+              if (args && typeof args === 'string') {
                 args = JSON.parse(args);
               }
 
