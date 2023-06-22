@@ -373,7 +373,7 @@ async function resurrect(r) {
         Object.keys(workers).forEach((workerId) => {
           const workerData = JSON.parse(workers[workerId]);
 
-          let args = workerData.args;
+          let args = workerData.args || '';
 
           if (args && typeof args === 'string') {
             args = JSON.parse(args);
@@ -513,7 +513,7 @@ async function v1(r) {
                 env = Object.assign({}, env, requestBody.env);
               }
 
-              let args = requestBody.args;
+              let args = requestBody.args || '';
 
               if (args && typeof args === 'string') {
                 args = JSON.parse(args);
