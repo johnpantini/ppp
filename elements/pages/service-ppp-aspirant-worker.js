@@ -508,7 +508,7 @@ export class ServicePppAspirantWorkerPage extends Page {
   }
 
   addFileToFileList() {
-    if (typeof this.document.fileList === 'undefined') {
+    if (!Array.isArray(this.document.fileList)) {
       this.document.fileList = [];
     }
 
@@ -521,7 +521,7 @@ export class ServicePppAspirantWorkerPage extends Page {
   }
 
   removeFileFromFileList(index) {
-    if (typeof this.document.fileList === 'undefined') {
+    if (!Array.isArray(this.document.fileList)) {
       this.document.fileList = [];
     }
 
