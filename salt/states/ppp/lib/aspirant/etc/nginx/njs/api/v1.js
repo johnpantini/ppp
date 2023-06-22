@@ -314,7 +314,7 @@ async function resurrect(r) {
         SERVICE_MACHINE_URL: requestBody.SERVICE_MACHINE_URL,
         REDIS_HOST: requestBody.REDIS_HOST,
         REDIS_PORT: +requestBody.REDIS_PORT,
-        REDIS_TLS: requestBody.REDIS_TLS === 'true' ? 'true': '',
+        REDIS_TLS: requestBody.REDIS_TLS === 'true' ? 'true' : '',
         REDIS_USERNAME: requestBody.REDIS_USERNAME,
         REDIS_DATABASE: +requestBody.REDIS_DATABASE,
         REDIS_PASSWORD: requestBody.REDIS_PASSWORD
@@ -373,13 +373,19 @@ async function resurrect(r) {
         Object.keys(workers).forEach((workerId) => {
           const workerData = JSON.parse(workers[workerId]);
 
+          let args = workerData.args;
+
+          if (typeof args === 'string') {
+            args = JSON.parse(args);
+          }
+
           startDeployedWorker(
             workerId,
             workerData.artifactUrl,
             Object.assign({}, env, workerData.env),
             workerData.enableHttp,
             workerData.command,
-            workerData.args
+            args
           );
         });
 
@@ -507,13 +513,19 @@ async function v1(r) {
                 env = Object.assign({}, env, requestBody.env);
               }
 
+              let args = requestBody.args;
+
+              if (typeof args === 'string') {
+                args = JSON.parse(args);
+              }
+
               response = await startDeployedWorker(
                 requestBody.workerId,
                 requestBody.artifactUrl,
                 env,
                 !!requestBody.enableHttp,
                 requestBody.command,
-                requestBody.args
+                args
               );
             } else if (method === 'PUT') {
               response = await restartDeployedWorker(requestBody.workerId);
