@@ -153,7 +153,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
         `
       })}
       ${when(
-        (x) => x.shouldShowFrame && x.frameUrl,
+        (x) => x.url && x.shouldShowFrame && x.frameUrl,
         html` <iframe
           src="${(x) => x.frameUrl}"
           width="100%"
@@ -641,6 +641,8 @@ export class ServicePppAspirantWorkerPage extends Page {
           }
 
           const path = pathField.value.trim();
+
+          await caches.delete('offline');
 
           try {
             await this.zipWriter.add(

@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 1
+// @version 2
 // ==/PPPScript==
 
 import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';

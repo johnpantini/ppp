@@ -45,9 +45,9 @@ export class MessageType {
 
   static ChangePasswordRequest = 22;
 
-  static HistoryRequest = 23;
+  static PrintsHistoryRequest = 23;
 
-  static HistoryResponse = 24;
+  static PrintsHistoryResponse = 24;
 
   static MGRTraderSettings = 25;
 

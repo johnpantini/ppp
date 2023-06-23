@@ -230,7 +230,7 @@ export class UtexConnection extends EventEmitter {
   }
 
   #isPackableMessage(messageType) {
-    if (messageType === 'HistoryResponse') return true;
+    if (messageType === 'PrintsHistoryResponse') return true;
 
     if (messageType === 'AllSymbolsResponse') return true;
 
@@ -265,7 +265,6 @@ export class UtexConnection extends EventEmitter {
       try {
         if (this.#isPackableMessage(messageType)) {
           const result = Buffer.from(lzma.decompress(protoBody));
-
           const decompressedPayload = type.decode(result);
 
           if (typeof this[messageType] === 'function') {
@@ -421,7 +420,61 @@ export class UtexConnection extends EventEmitter {
     this.authenticated = true;
   }
 
-  subscribe({ trades = [], quotes = [] } = {}) {
+  PrintsHistoryResponse(payload) {
+    this.emit(
+      'PrintsHistoryResponse.' + payload.RequestId.toString('base64'),
+      JSON.stringify(payload)
+    );
+  }
+
+  async printsHistoryRequest(ticker) {
+    const reqId = this.#createReqId();
+    const listenerName = `PrintsHistoryResponse.${reqId.toString('base64')}`;
+    const printsHistoryRequestMessage = this.#makeProtoMessage(
+      'PrintsHistoryRequest',
+      {
+        Symbol: 'TSLA~US',
+        RequestId: reqId
+      }
+    );
+
+    this.debug(`PrintsHistoryRequest sent, ticker: ${ticker}.`);
+    this.#socket.write(printsHistoryRequestMessage);
+
+    return new Promise((resolve) => {
+      try {
+        let badSituation = false;
+
+        const badSituationTimer = setTimeout(() => {
+          badSituation = true;
+
+          this.removeAllListeners(listenerName);
+
+          resolve([]);
+        }, 5000);
+
+        this.once(listenerName, (payload) => {
+          clearTimeout(badSituationTimer);
+
+          if (badSituation) {
+            return;
+          }
+
+          if (!payload) {
+            resolve([]);
+          } else {
+            resolve((JSON.parse(payload).Prints || []).reverse());
+          }
+        });
+      } catch (e) {
+        console.error(e);
+
+        resolve([]);
+      }
+    });
+  }
+
+  async subscribe({ trades = [], quotes = [] } = {}) {
     const L1List = [];
     const L2List = [];
 
@@ -446,6 +499,12 @@ export class UtexConnection extends EventEmitter {
         this.#refQuotes.set(q, qRefCount + 1);
       }
     });
+
+    // for (const ticker of L1List) {
+    //   const prints = await this.printsHistoryRequest(ticker);
+    //
+    //   prints.forEach((print) => this.emit('MarketPrint', print));
+    // }
 
     const batchDataSubscriptionRequestMessage = this.#makeProtoMessage(
       'BatchDataSubscriptionRequest',

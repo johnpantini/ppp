@@ -503,13 +503,13 @@ message Level2UpdateCache {
   string Symbol = 3;
 }
 
-message HistoryRequest {
+message PrintsHistoryRequest {
   string Symbol = 1;
   bytes RequestId = 2;
   string UserChannel = 3;
 }
 
-message HistoryResponse {
+message PrintsHistoryResponse {
   repeated MarketPrint Prints = 1;
   string Symbol = 2;
   bytes RequestId = 3;
