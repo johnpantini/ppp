@@ -103,9 +103,6 @@ export const updatesPageStyles = css`
 
 export class UpdatesPage extends Page {
   @observable
-  updateComplete;
-
-  @observable
   targetCommit;
 
   @observable
@@ -256,12 +253,15 @@ export class UpdatesPage extends Page {
         }
       );
 
-      await maybeFetchError(
-        rPagesBuildRequest,
-        'Не удалось выполнить запрос на принудительную сборку GitHub Pages.'
-      );
+      // The repository does not have a GitHub Pages site.
+      if (rPagesBuildRequest.status !== 403) {
+        await maybeFetchError(
+          rPagesBuildRequest,
+          'Не удалось выполнить запрос на принудительную сборку GitHub Pages.'
+        );
+      }
 
-      this.updateComplete = true;
+      this.currentCommit = this.targetCommit;
 
       this.showSuccessNotification(
         'Приложение синхронизировано с последней версией. Когда обновление будет готово, вы получите уведомление.'
