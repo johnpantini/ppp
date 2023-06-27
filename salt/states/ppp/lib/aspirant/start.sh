@@ -1,5 +1,7 @@
 #!/bin/sh
 
+trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+
 # https://github.com/hashicorp/nomad/blob/85ed8ddd4fc41b371fb4d652bb9149129893ae6d/client/allocdir/fs_linux.go#L45
 rm -rf /var/lib/nomad
 mkdir -p /var/lib/nomad

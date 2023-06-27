@@ -13,7 +13,17 @@
     - target: /opt/ppp/{{ filename }}/bin/node
     - force: True
 
+/usr/local/bin/node:
+  file.symlink:
+    - target: /opt/ppp/{{ filename }}/bin/node
+    - force: True
+
 /bin/npm:
+  file.symlink:
+    - target: /opt/ppp/{{ filename }}/bin/npm
+    - force: True
+
+/usr/local/bin/npm:
   file.symlink:
     - target: /opt/ppp/{{ filename }}/bin/npm
     - force: True

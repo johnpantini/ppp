@@ -429,7 +429,7 @@ export const appTemplate = html`
           </ppp-modal>
           <ppp-modal ${ref('terminalModal')} class="auto" hidden>
             <span slot="title" ${ref('terminalModalTitle')}>
-              Настройка компонентов сервиса
+              Настройка компонентов приложения
             </span>
             <div slot="body" class="terminal-modal-body">
               <ppp-terminal ${ref('terminalWindow')}></ppp-terminal>

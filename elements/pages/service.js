@@ -216,7 +216,6 @@ export const servicePageTemplate = html`
               По адресу
             </ppp-button>
             <ppp-button
-              disabled
               @click="${() =>
                 ppp.app.navigate({
                   page: `service-${SERVICES.SYSTEMD_PPP_ASPIRANT}`

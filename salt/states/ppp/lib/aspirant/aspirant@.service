@@ -1,0 +1,31 @@
+[Unit]
+Description=PPP Aspirant service (%i)
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+{% if pillar['domain'] is defined %}
+ExecStartPre=+/usr/bin/mkdir -p /usr/lib/nginx/certs/%i
+ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['domain'] }}/fullchain.pem /usr/lib/nginx/certs/%i/fullchain.pem
+ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['domain'] }}/chain.pem /usr/lib/nginx/certs/%i/chain.pem
+ExecStartPre=+/bin/cp /etc/letsencrypt/live/{{ pillar['domain'] }}/privkey.pem /usr/lib/nginx/certs/%i/privkey.pem
+ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/fullchain.pem
+ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/privkey.pem
+ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/chain.pem
+{% endif %}
+ExecStart=/usr/sbin/start-aspirant.sh
+PrivateTmp=yes
+NoNewPrivileges=yes
+WorkingDirectory=/salt/states/ppp/lib/aspirant
+{% if pillar['environment'] is defined %}
+{% for k, v in pillar['environment'].items() %}
+Environment="{{ k }}={{ v }}"
+{% endfor %}
+{% endif %}
+KillSignal=2
+RestartSec=1s
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
