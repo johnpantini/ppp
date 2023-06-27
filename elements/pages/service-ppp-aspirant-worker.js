@@ -132,6 +132,8 @@ export async function getAspirantBaseUrl(datum) {
     } else if (deployment.type === APIS.RENDER) {
       return `https://aspirant-${datum.slug}.onrender.com`;
     }
+  } else if (datum.type === SERVICES.SYSTEMD_PPP_ASPIRANT) {
+    return `https://${datum.tailnetDomain}`;
   }
 }
 
@@ -143,6 +145,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
         pageUrl: import.meta.url,
         extraControls: html`
           <ppp-button
+            ?hidden="${(x) => !x.frameUrl}"
             appearance="primary"
             slot="controls"
             @click="${(x) => (x.shouldShowFrame = true)}"
@@ -153,12 +156,10 @@ export const servicePppAspirantWorkerPageTemplate = html`
         `
       })}
       ${when(
-        (x) => x.url && x.shouldShowFrame && x.frameUrl,
-        html` <iframe
-          src="${(x) => x.frameUrl}"
-          width="100%"
-          height="800"
-        ></iframe>`
+        (x) => x.shouldShowFrame && x.frameUrl,
+        html`
+          <iframe src="${(x) => x.frameUrl}" width="100%" height="800"></iframe>
+        `
       )}
       ${when(
         (x) => x.url,
@@ -490,18 +491,20 @@ export class ServicePppAspirantWorkerPage extends Page {
 
   async connectedCallback() {
     await super.connectedCallback();
+    await this.#generateLinks();
+  }
 
-    if (
-      this.document._id &&
-      this.document.aspirantService &&
-      this.document.enableHttp
-    ) {
+  async #generateLinks() {
+    if (this.document._id && this.document.aspirantService) {
       const aspirantUrl = await getAspirantBaseUrl(
         this.document.aspirantService
       );
 
       if ((await fetch(`${aspirantUrl}/nomad/health`)).ok) {
-        this.url = `${aspirantUrl}/workers/${this.document._id}`;
+        if (this.document.enableHttp) {
+          this.url = `${aspirantUrl}/workers/${this.document._id}`;
+        }
+
         this.frameUrl = `${aspirantUrl}/ui/jobs/worker-${this.document._id}@default`;
       }
     }
@@ -1015,6 +1018,8 @@ export class ServicePppAspirantWorkerPage extends Page {
         }),
         'Не удалось запланировать сервис на исполнение.'
       );
+
+      await this.#generateLinks();
     }
   }
 

@@ -114,8 +114,8 @@ export class UpdatesPage extends Page {
     return this.checkForUpdates();
   }
 
-  async checkForUpdates() {
-    if (isAlwaysUpToDateDomain) return;
+  async checkForUpdates(force = false) {
+    if (isAlwaysUpToDateDomain && !force) return;
 
     this.beginOperation();
 
@@ -206,7 +206,7 @@ export class UpdatesPage extends Page {
     }
   }
 
-  async updateApp() {
+  async updateApp(silent = false) {
     this.beginOperation();
 
     try {
@@ -263,9 +263,11 @@ export class UpdatesPage extends Page {
 
       this.currentCommit = this.targetCommit;
 
-      this.showSuccessNotification(
-        'Приложение синхронизировано с последней версией. Когда обновление будет готово, вы получите уведомление.'
-      );
+      if (!silent) {
+        this.showSuccessNotification(
+          'Приложение синхронизировано с последней версией. Когда обновление будет готово, вы получите уведомление.'
+        );
+      }
     } catch (e) {
       this.failOperation(e);
     } finally {

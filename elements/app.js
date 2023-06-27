@@ -10,7 +10,8 @@ import {
   attr,
   when,
   repeat,
-  Observable
+  Observable,
+  Updates
 } from '../vendor/fast-element.min.js';
 import {
   bodyFont,
@@ -619,12 +620,37 @@ export class App extends PPPElement {
   }
 
   async updateApp(lastVersion) {
-    this.currentVersion = lastVersion;
+    ppp.app.toast.appearance = 'progress';
+    ppp.app.toast.dismissible = false;
+    ppp.app.toast.title = 'Идёт обновление';
+    ppp.app.toast.text = 'Страница будет перезагружена автоматически.';
 
-    localStorage.setItem('ppp-version', lastVersion);
-    await caches.delete('offline');
-    this.toast.setAttribute('hidden', '');
-    window.location.reload();
+    Updates.enqueue(async () => {
+      ppp.app.toast.progress.value = 0;
+
+      // Sync fork
+      const updatesPage = await ppp.app.mountPage('updates', {
+        stayHidden: true
+      });
+
+      this.currentVersion = lastVersion;
+
+      localStorage.setItem('ppp-version', lastVersion);
+
+      ppp.app.toast.progress.value = 45;
+
+      await caches.delete('offline');
+      await updatesPage.checkForUpdates(true);
+
+      ppp.app.toast.progress.value = 75;
+
+      await updatesPage.updateApp(true);
+
+      ppp.app.toast.progress.value = 100;
+
+      this.toast.setAttribute('hidden', '');
+      window.location.reload();
+    });
   }
 
   @attr

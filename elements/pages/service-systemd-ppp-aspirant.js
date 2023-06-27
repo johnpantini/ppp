@@ -105,11 +105,15 @@ export const serviceSystemdPppAspirantTemplate = html`
       <section>
         <div class="label-group">
           <h5>Сервер</h5>
-          <p class="description">Сервер, на котором будет запущен Aspirant.</p>
+          <p class="description">
+            Сервер, на котором будет запущен Aspirant. Нельзя изменить после
+            создания сервиса.
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
             ${ref('serverId')}
+            ?disabled="${(x) => x.document._id}"
             @change="${(x, c) => {
               // Reset domain on server change
               x.scratch.set('server', x.serverId.datum());
@@ -142,6 +146,7 @@ export const serviceSystemdPppAspirantTemplate = html`
           ></ppp-query-select>
           <div class="spacing2"></div>
           <ppp-button
+            ?disabled="${(x) => x.document._id}"
             @click="${() =>
               ppp.app.mountPage('server', {
                 size: 'xlarge',
@@ -398,6 +403,45 @@ export class ServiceSystemdPppAspirantPage extends Page {
         }
       })
     ];
+  }
+
+  async restart() {
+    if (
+      !(await this.executeSSHCommands({
+        server: this.document.server,
+        commands: `sudo systemctl restart aspirant@${this.document._id}.service &&`
+      }))
+    ) {
+      throw new Error('Не удалось перезапустить сервис Aspirant.');
+    }
+  }
+
+  async stop() {
+    if (
+      !(await this.executeSSHCommands({
+        server: this.document.server,
+        commands: `sudo systemctl stop aspirant@${this.document._id}.service &&`
+      }))
+    ) {
+      throw new Error('Не удалось отсановить сервис Aspirant.');
+    }
+  }
+
+  async cleanup() {
+    if (
+      !(await this.executeSSHCommands({
+        server: this.document.server,
+        commands: [
+          `sudo systemctl stop aspirant@${this.document._id}.service ;`,
+          `sudo systemctl disable aspirant@${this.document._id}.service ;`,
+          `sudo rm -f /etc/systemd/system/aspirant@${this.document._id}.service`,
+          `sudo systemctl daemon-reload ;`,
+          `sudo systemctl reset-failed &&`
+        ].join(' ')
+      }))
+    ) {
+      throw new Error('Не удалось отсановить сервис Aspirant.');
+    }
   }
 }
 

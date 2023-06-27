@@ -741,7 +741,10 @@ class Page extends PPPElement {
     this.lastError = void 0;
 
     // Do not hide update notifications
-    if (ppp.app.toast.appearance !== 'note') {
+    if (
+      ppp.app.toast.appearance !== 'note' &&
+      ppp.app.toast.appearance !== 'progress'
+    ) {
       ppp.app.toast.setAttribute('hidden', '');
     }
 

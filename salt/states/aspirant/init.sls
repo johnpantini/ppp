@@ -19,6 +19,6 @@ systemctl reset-failed:
 systemctl enable {{ pillar['serviceName'] }}.service:
   cmd.run: []
 
-systemctl start {{ pillar['serviceName'] }}.service:
+systemctl restart {{ pillar['serviceName'] }}.service:
   cmd.run: []
 {% endif %}
