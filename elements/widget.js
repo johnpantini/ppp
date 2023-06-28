@@ -2496,11 +2496,11 @@ export class WidgetHeaderButtons extends PPPElement {
         autoRead: true
       });
 
-      const originalMethod = page.submitDocument;
+      const originalSubmitDocument = page.submitDocument;
       const that = this;
 
       page.submitDocument = async function () {
-        await originalMethod.call(page);
+        await originalSubmitDocument.call(page);
 
         const newWidgetDocument = Object.assign(
           {},
@@ -2510,7 +2510,8 @@ export class WidgetHeaderButtons extends PPPElement {
             x: parseInt(that.widget.style.left),
             y: parseInt(that.widget.style.top),
             width: parseInt(that.widget.style.width),
-            height: parseInt(that.widget.style.height)
+            height: parseInt(that.widget.style.height),
+            symbol: that.widget?.instrument?.symbol
           }
         );
 
