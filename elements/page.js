@@ -594,12 +594,12 @@ class Page extends PPPElement {
     }
   }
 
-  async populateDocuments() {
+  async populateDocuments(anyData) {
     this.beginOperation();
 
     try {
       if (typeof this.populate === 'function') {
-        let populateMethodResult = await this.populate();
+        let populateMethodResult = await this.populate(anyData);
 
         if (typeof populateMethodResult === 'function') {
           populateMethodResult = await new Tmpl().render(

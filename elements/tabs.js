@@ -26,8 +26,6 @@ import { normalize } from '../design/styles.js';
 import {
   bodyFont,
   fontSizeBody1,
-  fontWeightBody1,
-  lineHeightBody1,
   paletteBlueBase,
   paletteBlueLight1,
   paletteGrayDark1,
@@ -135,10 +133,11 @@ export const tabStyles = css`
   :host:after {
     content: '';
     position: absolute;
+    top: -2px;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 4px;
+    height: 2px;
     border-radius: 4px 4px 0 0;
     background-color: transparent;
   }
@@ -158,7 +157,6 @@ export const tabStyles = css`
   :host([aria-selected='true']) {
     color: ${themeConditional(paletteGreenDark2, paletteGreenBase)};
     cursor: default;
-    font-weight: 700;
   }
 
   :host(:focus-visible) {

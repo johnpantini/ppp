@@ -919,7 +919,7 @@ export class App extends PPPElement {
       this.shadowRoot.querySelector('ppp-modal:not([hidden])') ??
       this.shadowRoot
         .querySelector(`ppp-${this.page}-page`)
-        .shadowRoot.querySelector('ppp-modal:not([hidden])')
+        ?.shadowRoot.querySelector('ppp-modal:not([hidden])')
     );
   }
 

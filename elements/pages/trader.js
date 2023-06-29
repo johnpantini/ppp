@@ -270,12 +270,11 @@ export const traderPageTemplate = html`
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(cloudFunctions)}</div>
-          <div slot="title">Произвольная реализация</div>
+          <div slot="title">По ссылке</div>
           <span slot="description">
             Собственная реализация трейдера, загружаемая по ссылке.
           </span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({

@@ -128,8 +128,8 @@ export const traderAlorOpenApiV2Template = html`
             ${ref('exchange')}
           >
             <ppp-radio value="${() => EXCHANGE.SPBX}">СПБ Биржа</ppp-radio>
-            <ppp-radio value="${() => EXCHANGE.MOEX}"
-              >Московская биржа
+            <ppp-radio value="${() => EXCHANGE.MOEX}">
+              Московская биржа
             </ppp-radio>
           </ppp-radio-group>
         </div>

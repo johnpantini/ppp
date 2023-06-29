@@ -46,11 +46,12 @@ export default function (i18n) {
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
+        [TRADERS.PSINA_ALOR_OPENAPI_V2]: 'Alor Open API V2 (Psina)',
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',
         [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
-        [TRADERS.CUSTOM]: 'Произвольная реализация'
+        [TRADERS.CUSTOM]: 'По ссылке'
       },
       traderCaps: {
         [TRADER_CAPS.CAPS_LIMIT_ORDERS]: 'Лимитные заявки',

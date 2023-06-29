@@ -5,6 +5,7 @@ import { formatDate } from '../../lib/intl.js';
 import '../badge.js';
 import '../button.js';
 import '../table.js';
+import { TRADERS } from '../../lib/const.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -26,11 +27,18 @@ export const tradersPageTemplate = html`
         </ppp-button>
       </ppp-page-header>
       <ppp-table
-        @cleanup="${(x, c) =>
+        @cleanup="${(x, c) => {
+          let type = c.event.detail.datum.type;
+
+          if (type === TRADERS.PSINA_ALOR_OPENAPI_V2) {
+            type = TRADERS.CUSTOM;
+          }
+
           x.cleanupFromListing({
-            pageName: `trader-${c.event.detail.datum.type}`,
+            pageName: `trader-${type}`,
             documentId: c.event.detail.datum._id
-          })}"
+          });
+        }}"
         :columns="${() => [
           {
             label: 'Название'
@@ -59,8 +67,14 @@ export const tradersPageTemplate = html`
                 html`<a
                   class="link"
                   @click="${() => {
+                    let type = datum.type;
+
+                    if (type === TRADERS.PSINA_ALOR_OPENAPI_V2) {
+                      type = TRADERS.CUSTOM;
+                    }
+
                     ppp.app.navigate({
-                      page: `trader-${datum.type}`,
+                      page: `trader-${type}`,
                       document: datum._id
                     });
 

@@ -1,7 +1,7 @@
 /** @decorator */
 
 import Prism from '../vendor/prism.min.js';
-import { PPPAppearanceElement, PPPElement } from '../lib/ppp-element.js';
+import { PPPAppearanceElement } from '../lib/ppp-element.js';
 import {
   attr,
   css,
@@ -21,10 +21,7 @@ import {
   monospaceFont,
   paletteBlack,
   paletteBlueBase,
-  paletteBlueDark1,
-  paletteBlueDark3,
   paletteBlueLight1,
-  paletteBlueLight2,
   paletteBlueLight3,
   paletteGrayBase,
   paletteGrayDark1,
@@ -37,11 +34,8 @@ import {
   paletteGreenDark1,
   paletteGreenLight3,
   palettePurpleBase,
-  palettePurpleLight2,
-  palettePurpleLight3,
   paletteRedBase,
   paletteRedLight1,
-  paletteRedLight2,
   paletteRedLight3,
   paletteWhite,
   spacing1,
