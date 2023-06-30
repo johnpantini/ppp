@@ -33,6 +33,7 @@ import {
   paletteGreenLight3,
   paletteWhite,
   positive,
+  spacing1,
   spacing5,
   themeConditional
 } from '../../design/design-tokens.js';
@@ -740,7 +741,7 @@ export const widgetPageStyles = css`
   }
 
   .widget-settings-label-group .description {
-    margin-top: 10px;
+    margin-top: ${spacing1};
     padding-right: 20px;
   }
 

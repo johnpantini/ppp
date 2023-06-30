@@ -37,9 +37,12 @@ import {
   toColorComponents,
   lighten
 } from '../../design/design-tokens.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { Tmpl } from '../../lib/tmpl.js';
+import { AsyncFunction } from '../../vendor/fast-utilities.js';
+import { invalidate, validate, ValidationError } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../query-select.js';
+import '../snippet.js';
 import '../text-field.js';
 
 export const timeAndSalesWidgetTemplate = html`
@@ -301,12 +304,30 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     return this.broadcastPrice(price);
   }
 
-  printChanged(oldValue, newValue) {
+  async getThreshold() {
+    const threshold = +this.document.threshold.toString().replace(',', '.');
+
+    if (!isNaN(threshold) && typeof threshold === 'number') {
+      return threshold;
+    } else {
+      const evaluated = await new AsyncFunction(
+        'widget',
+        await new Tmpl().render(this, this.document.threshold, {})
+      )(this);
+
+      if (isNaN(evaluated) || typeof evaluated !== 'number') {
+        return 0;
+      } else {
+        return evaluated;
+      }
+    }
+  }
+
+  async printChanged(oldValue, newValue) {
+    const threshold = await this.getThreshold();
+
     if (newValue?.price) {
-      if (
-        this.document.threshold &&
-        newValue?.volume < this.document.threshold
-      ) {
+      if (typeof threshold === 'number' && newValue?.volume < threshold) {
         return;
       }
 
@@ -339,6 +360,8 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     this.trades = [];
 
     if (this.tradesTrader) {
+      const threshold = await this.getThreshold();
+
       if (
         this.instrument &&
         typeof this.tradesTrader.allTrades === 'function' &&
@@ -351,8 +374,8 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
               depth: this.document.depth
             })
           )?.filter((t) => {
-            if (this.document.threshold) {
-              return t.volume >= this.document.threshold;
+            if (typeof threshold === 'number') {
+              return t.volume >= threshold;
             } else return true;
           });
         } catch (e) {
@@ -373,16 +396,46 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     await validate(this.container.tradesTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
-      hook: async (value) => +value > 0 && +value <= 300,
-      errorMessage: 'Введите значение в диапазоне от 1 до 300'
+      hook: async (value) => +value > 0 && +value <= 500,
+      errorMessage: 'Введите значение в диапазоне от 1 до 500'
     });
 
-    if (this.container.threshold.value) {
+    await validate(this.container.threshold);
+
+    const threshold = +this.container.threshold.value
+      .toString()
+      .replace(',', '.');
+
+    if (!isNaN(threshold) && typeof threshold === 'number') {
       await validate(this.container.threshold, {
-        hook: async (value) =>
-          +value.replace(',', '.') >= 0 && +value.replace(',', '.') <= 10000000,
+        hook: async (value) => {
+          const v = +value.toString().replace(',', '.');
+
+          return v >= 0 && v <= 10000000;
+        },
         errorMessage: 'Введите значение в диапазоне от 0 до 10000000'
       });
+    } else {
+      try {
+        const evaluated = await new AsyncFunction(
+          'widget',
+          await new Tmpl().render(this, this.container.threshold.value, {})
+        )(this);
+
+        if (isNaN(evaluated) || typeof evaluated !== 'number') {
+          // noinspection ExceptionCaughtLocallyJS
+          throw new ValidationError({
+            element: this.container.threshold
+          });
+        }
+      } catch (e) {
+        console.dir(e);
+
+        invalidate(this.container.threshold, {
+          errorMessage: 'Код содержит ошибки.',
+          raiseException: true
+        });
+      }
     }
   }
 
@@ -391,7 +444,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       $set: {
         depth: Math.abs(this.container.depth.value),
         tradesTraderId: this.container.tradesTraderId.value,
-        threshold: +this.container.threshold.value.replace(',', '.') || '',
+        threshold: this.container.threshold.value,
         displayCurrency: this.container.displayCurrency.checked
       }
     };
@@ -462,10 +515,9 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Глубина истории ленты</h5>
+          <h5>Количество сделок для отображения</h5>
           <p class="description">
-            Количество записей, запрашиваемое из истории сделок текущего дня при
-            смене торгового инструмента в виджете.
+            Максимальное количество сделок, отображаемое в ленте.
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -482,19 +534,15 @@ export async function widgetDefinition() {
           <h5>Фильтр объёма</h5>
           <p class="description">
             Сделки с объёмом меньше указанного не будут отображены в ленте.
-            Чтобы всегда отображать все сделки, введите 0 или не заполняйте
-            поле.
+            Чтобы всегда отображать все сделки, введите 0. Можно вводить целые,
+            дробные числа или код тела функции JavaScript.
           </p>
         </div>
         <div class="widget-settings-input-group">
-          <ppp-text-field
-            placeholder="Фильтр объёма"
-            value="${(x) => x.document.threshold ?? 0}"
-            @beforeinput="${(x, { event }) => {
-              return event.data === null || /[0-9.,]/.test(event.data);
-            }}"
+          <ppp-snippet
+            :code="${(x) => x.document.threshold ?? '0'}"
             ${ref('threshold')}
-          ></ppp-text-field>
+          ></ppp-snippet>
         </div>
       </div>
       <div class="widget-settings-section">
