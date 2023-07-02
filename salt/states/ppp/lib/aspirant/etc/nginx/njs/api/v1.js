@@ -121,7 +121,7 @@ async function startDeployedWorker(
       ChangeScript: {
         Args: [
           '-c',
-          '/usr/sbin/nomad system gc && /usr/bin/curl -s http://127.0.0.1:24422/reload_nginx'
+          'nomad system gc && /usr/bin/curl -s http://127.0.0.1:24422/reload_nginx'
         ],
         Command: '/bin/sh',
         FailOnError: false,
@@ -540,7 +540,7 @@ async function v1(r) {
 
               await shellExecute('/bin/sh', [
                 '-c',
-                '/usr/sbin/nomad system gc && /usr/bin/curl -s http://127.0.0.1:24422/reload_nginx'
+                'nomad system gc && /usr/bin/curl -s http://127.0.0.1:24422/reload_nginx'
               ]);
             }
 
