@@ -22,6 +22,7 @@ import '../query-select.js';
 import '../select.js';
 import '../snippet.js';
 import '../text-field.js';
+import { parsePPPScript } from '../../lib/ppp-script.js';
 
 export const predefinedWorkerData = {
   default: {
@@ -200,6 +201,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 ?disabled="${(x) => !x.useVersioning.checked}"
                 placeholder="Введите ссылку"
                 value="${(x) => x.document.versioningUrl ?? ''}"
+                @input="${(x) => (x.workerPredefinedTemplate.value = 'custom')}"
                 ${ref('versioningUrl')}
               ></ppp-text-field>
             </div>
@@ -214,7 +216,8 @@ export const serviceCloudflareWorkerPageTemplate = html`
                   x.document.workerPredefinedTemplate ?? 'default'}"
                 ${ref('workerPredefinedTemplate')}
               >
-                <ppp-option value="default"> По умолчанию</ppp-option>
+                <ppp-option value="custom">По файлу отслеживания</ppp-option>
+                <ppp-option value="default">Тестовый пример</ppp-option>
                 <ppp-option value="tradingview">
                   Прокси для ru.tradingview.com
                 </ppp-option>
@@ -331,7 +334,15 @@ export class ServiceCloudflareWorkerPage extends Page {
         await validate(this.psinaPusherApiId);
       }
 
-      const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+      let data;
+
+      if (this.workerPredefinedTemplate.value === 'custom') {
+        data = {
+          url: this.versioningUrl.value
+        };
+      } else {
+        data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+      }
 
       try {
         const fcRequest = await fetch(
@@ -346,7 +357,18 @@ export class ServiceCloudflareWorkerPage extends Page {
           'Не удалось загрузить файл с шаблоном.'
         );
 
-        this.sourceCode.updateCode(await fcRequest.text());
+        const code = await fcRequest.text();
+
+        try {
+          const { meta } = parsePPPScript(code);
+
+          Object.assign(data, JSON.parse(meta.meta[0] ?? '{}') ?? {});
+        } catch (e) {
+          // Bad or empty metadata
+          void 0;
+        }
+
+        this.sourceCode.updateCode(code);
 
         if (this.workerPredefinedTemplate.value === 'psinaPusher') {
           const pusherApi = this.psinaPusherApiId.datum();
@@ -358,8 +380,8 @@ export class ServiceCloudflareWorkerPage extends Page {
             JSON.stringify(data.envSecret(pusherApi), null, 2)
           );
         } else {
-          this.environmentCode.updateCode(data.env);
-          this.environmentCodeSecret.updateCode(data.envSecret);
+          this.environmentCode.updateCode(data.env ?? '{}');
+          this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
         }
 
         this.versioningUrl.value = data.url;
@@ -644,7 +666,16 @@ export class ServiceCloudflareWorkerPage extends Page {
   }
 
   async update() {
-    const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+    let data;
+
+    if (this.workerPredefinedTemplate.value === 'custom') {
+      data = {
+        url: this.versioningUrl.value
+      };
+    } else {
+      data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+    }
+
     const fcRequest = await fetch(
       ppp.getWorkerTemplateFullUrl(data.url).toString(),
       {

@@ -25,6 +25,7 @@ import {
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { getMongoDBRealmAccessToken } from '../../lib/realm.js';
+import { parsePPPScript } from '../../lib/ppp-script.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import { trash } from '../../static/svg/sprite.js';
 import {
@@ -394,6 +395,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 ?disabled="${(x) => !x.useVersioning.checked}"
                 placeholder="Введите ссылку"
                 value="${(x) => x.document.versioningUrl ?? ''}"
+                @input="${(x) => (x.workerPredefinedTemplate.value = 'custom')}"
                 ${ref('versioningUrl')}
               ></ppp-text-field>
             </div>
@@ -408,7 +410,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   x.document.workerPredefinedTemplate ?? 'default'}"
                 ${ref('workerPredefinedTemplate')}
               >
-                <ppp-option value="default">По умолчанию</ppp-option>
+                <ppp-option value="custom">По файлу отслеживания</ppp-option>
+                <ppp-option value="default">Тестовый пример</ppp-option>
                 <ppp-option value="utexAlpaca">
                   Alpaca-совместимый API UTEX
                 </ppp-option>
@@ -537,7 +540,15 @@ export class ServicePppAspirantWorkerPage extends Page {
     this.beginOperation();
 
     try {
-      const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+      let data;
+
+      if (this.workerPredefinedTemplate.value === 'custom') {
+        data = {
+          url: this.versioningUrl.value
+        };
+      } else {
+        data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+      }
 
       try {
         const fcRequest = await fetch(
@@ -552,12 +563,23 @@ export class ServicePppAspirantWorkerPage extends Page {
           'Не удалось загрузить файл с шаблоном.'
         );
 
+        const code = await fcRequest.text();
+
+        try {
+          const { meta } = parsePPPScript(code);
+
+          Object.assign(data, JSON.parse(meta.meta[0] ?? '{}') ?? {});
+        } catch (e) {
+          // Bad or empty metadata
+          void 0;
+        }
+
         this.document.fileList = structuredClone(data.fileList ?? []);
 
-        this.sourceCode.updateCode(await fcRequest.text());
-        this.environmentCode.updateCode(data.env);
-        this.environmentCodeSecret.updateCode(data.envSecret);
-        this.enableHttp.checked = data.enableHttp;
+        this.sourceCode.updateCode(code);
+        this.environmentCode.updateCode(data.env ?? '{}');
+        this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
+        this.enableHttp.checked = !!data.enableHttp;
         this.command.value = data.command;
         this.args.value = data.args;
         this.versioningUrl.value = data.url;
@@ -570,7 +592,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.document.sourceCode = this.sourceCode.value;
         this.document.environmentCode = this.environmentCode.value;
         this.document.environmentCodeSecret = this.environmentCodeSecret.value;
-        this.document.enableHttp = data.enableHttp;
+        this.document.enableHttp = !!data.enableHttp;
         this.document.command = data.command;
         this.document.args = data.args;
         this.document.workerPredefinedTemplate =
@@ -1063,7 +1085,16 @@ export class ServicePppAspirantWorkerPage extends Page {
   }
 
   async update() {
-    const data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+    let data;
+
+    if (this.workerPredefinedTemplate.value === 'custom') {
+      data = {
+        url: this.versioningUrl.value
+      };
+    } else {
+      data = predefinedWorkerData[this.workerPredefinedTemplate.value];
+    }
+
     const fcRequest = await fetch(
       ppp.getWorkerTemplateFullUrl(data.url).toString(),
       {
@@ -1071,11 +1102,21 @@ export class ServicePppAspirantWorkerPage extends Page {
       }
     );
 
+    const code = await fcRequest.text();
+
+    try {
+      const { meta } = parsePPPScript(code);
+
+      Object.assign(data, JSON.parse(meta.meta[0] ?? '{}') ?? {});
+    } catch (e) {
+      // Bad or empty metadata
+      void 0;
+    }
+
     await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+    this.sourceCode.updateCode(code);
 
-    this.sourceCode.updateCode(await fcRequest.text());
-
-    this.document.fileList = structuredClone(data.fileList);
+    this.document.fileList = structuredClone(data.fileList ?? []);
   }
 
   async stop() {
