@@ -1,7 +1,7 @@
 import { PPPAppearanceElement } from '../lib/ppp-element.js';
 import { css, html } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
-import { normalize, typography } from '../design/styles.js';
+import { ellipsis, normalize, typography } from '../design/styles.js';
 import {
   bodyFont,
   fontSizeBody1,
@@ -49,11 +49,12 @@ export const badgeStyles = css`
     font-weight: 700;
     font-size: calc(${fontSizeBody1} - 1px);
     line-height: calc(${lineHeightBody1} - 4px);
-    border-radius: 5px;
+    border-radius: 4px;
     height: 18px;
     padding-left: 6px;
     padding-right: 6px;
     text-transform: uppercase;
+    ${ellipsis()};
   }
 
   :host(.lightgray) {

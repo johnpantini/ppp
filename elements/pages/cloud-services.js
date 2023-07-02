@@ -2,11 +2,19 @@ import ppp from '../../ppp.js';
 import { css, html, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { bufferToString, generateIV } from '../../lib/ppp-crypto.js';
-import { importExport, numberedCircle } from '../../static/svg/sprite.js';
+import {
+  cloud,
+  database,
+  importExport,
+  numberedCircle
+} from '../../static/svg/sprite.js';
 import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
+import { shouldUseAlternativeMongo } from '../../lib/realm.js';
 import '../pages/import-cloud-keys-modal.js';
 import { TAG } from '../../lib/tag.js';
+import '../badge.js';
 import '../banner.js';
+import '../button.js';
 import '../checkbox.js';
 import '../copyable.js';
 import '../modal.js';
@@ -18,6 +26,37 @@ export const cloudServicesPageTemplate = html`
     <form novalidate>
       <ppp-page-header>
         Облачные сервисы
+        <ppp-badge
+          slot="controls"
+          appearance="yellow"
+        >
+          ${
+            shouldUseAlternativeMongo
+              ? 'Альтернативная MongoDB'
+              : 'Облачная MongoDB'
+          }
+        </ppp-badge>
+        <ppp-button
+          ?disabled="${() => !ppp.keyVault.ok()}"
+          appearance="primary"
+          slot="controls"
+          @click="${(x) => x.backupMongoDB(!shouldUseAlternativeMongo)}"
+        >
+          Создать резервную копию базы
+          <span slot="start">${html.partial(
+            shouldUseAlternativeMongo ? database : cloud
+          )}</span>
+        </ppp-button>
+        <ppp-button
+          disabled
+          slot="controls"
+          @click="${(x) => x.restoreMongoDB(!shouldUseAlternativeMongo)}"
+        >
+          Восстановить базу из копии
+          <span slot="start">${html.partial(
+            shouldUseAlternativeMongo ? database : cloud
+          )}</span>
+        </ppp-button>
         <ppp-button
           appearance="default"
           slot="controls"
@@ -598,6 +637,29 @@ async function createCloudCredentialsEndpoint({
 }
 
 export class CloudServicesPage extends Page {
+  async backupMongoDB(isCloud) {
+    this.beginOperation();
+
+    try {
+      const page = await ppp.app.mountPage('backup-mongodb-modal', {
+        title: isCloud
+          ? 'Сохранить облачную базу'
+          : 'Сохранить альтернативную базу',
+        size: 'large'
+      });
+
+      if (isCloud) {
+        page.setAttribute('cloud', '');
+      }
+    } catch (e) {
+      this.failOperation(e, 'Создание резервной копии');
+    } finally {
+      this.endOperation();
+    }
+  }
+
+  async restoreMongoDB(isCloud) {}
+
   generateCloudCredentialsString() {
     if (!ppp.keyVault.getKey('mongo-location-url'))
       return 'Соединитесь с облачной базой MongoDB Realm';

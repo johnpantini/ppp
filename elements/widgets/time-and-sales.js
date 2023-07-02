@@ -360,14 +360,14 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     this.trades = [];
 
     if (this.tradesTrader) {
-      const threshold = await this.getThreshold();
-
       if (
         this.instrument &&
         typeof this.tradesTrader.allTrades === 'function' &&
         this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
         try {
+          const threshold = await this.getThreshold();
+
           this.trades = (
             await this.tradesTrader.allTrades({
               instrument: this.instrument,

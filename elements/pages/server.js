@@ -180,6 +180,7 @@ export const serverPageTemplate = html`
           </p>
           <div class="spacing2"></div>
           <ppp-button
+            ?disabled="${(x) => !x.document._id}"
             @click="${async (x) => {
               const page = await ppp.app.mountPage('new-domain-modal', {
                 title: 'Добавить домены',

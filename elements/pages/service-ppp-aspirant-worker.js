@@ -24,7 +24,10 @@ import {
 } from './service.js';
 import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
-import { getMongoDBRealmAccessToken } from '../../lib/realm.js';
+import {
+  enableMongoDBRealmHosting,
+  getMongoDBRealmAccessToken
+} from '../../lib/realm.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import { trash } from '../../static/svg/sprite.js';
@@ -248,7 +251,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
         <div class="label-group">
           <h5>Прокси MongoDB Realm</h5>
           <p class="description">
-            Сервис Cloudflare Worker для проксирования запросов к MongoDB Realm.
+            Сервис Cloudflare Worker, который будет использован для загрузки
+            файлов на хостинг MongoDB Realm.
           </p>
         </div>
         <div class="input-group">
@@ -268,7 +272,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                       {
                         type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
                       },
-                      { sourceCode: { $regex: 'realm\\.mongodb\\.com' } },
+                      { workerPredefinedTemplate: 'mongoDBRealm' },
                       {
                         $or: [
                           { removed: { $ne: true } },
@@ -818,62 +822,12 @@ export class ServicePppAspirantWorkerPage extends Page {
       const mongoDBRealmAccessToken = await getMongoDBRealmAccessToken();
       const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
 
-      const rHostingConfiguration = await fetch(
-        new URL('fetch', serviceMachineUrl).toString(),
-        {
-          cache: 'reload',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            method: 'GET',
-            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/config`,
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            }
-          })
-        }
-      );
-
-      await maybeFetchError(
-        rHostingConfiguration,
-        'Не удалось получить конфигурацию хостинга MongoDB Realm.'
-      );
-
-      const hostingConfiguration = await rHostingConfiguration.json();
-
-      if (!hostingConfiguration.enabled) {
-        await fetch(new URL('fetch', serviceMachineUrl).toString(), {
-          cache: 'reload',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            method: 'PATCH',
-            url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/config`,
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            },
-            body: JSON.stringify({
-              enabled: true
-            })
-          })
-        });
-
-        invalidate(ppp.app.toast, {
-          errorMessage:
-            'Хостинг MongoDB Realm был выключен и сейчас приводится в состояние готовности, попробуйте повторить через несколько минут.',
-          raiseException: true
-        });
-      } else if (hostingConfiguration.status !== 'setup_ok') {
-        invalidate(ppp.app.toast, {
-          errorMessage:
-            'Хостинг MongoDB Realm ещё не готов, попробуйте повторить через несколько минут.',
-          raiseException: true
-        });
-      }
+      await enableMongoDBRealmHosting({
+        groupId,
+        appId,
+        serviceMachineUrl,
+        mongoDBRealmAccessToken
+      });
 
       const formData = new FormData();
       const reader = new FileReader();
@@ -898,7 +852,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           attrs: [
             {
               name: 'Cache-Control',
-              value: 'reload'
+              value: 'no-cache'
             }
           ],
           hash
