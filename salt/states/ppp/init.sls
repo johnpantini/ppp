@@ -1,8 +1,8 @@
-PPP User:
+PPP user:
   user.present:
     - name: ppp
 
-PPP Group:
+PPP group:
   group.present:
     - name: ppp
     - members:
