@@ -257,8 +257,7 @@ export const orderWidgetTemplate = html`
               </div>
               ${when(
                 (x) => showBestBidAndAskHidden(x),
-                html`
-                  <div class="widget-margin-spacer"></div>`
+                html` <div class="widget-margin-spacer"></div>`
               )}
               <div class="widget-section">
                 <div class="widget-subsection">
@@ -399,7 +398,10 @@ export const orderWidgetTemplate = html`
                       wrap
                       readonly
                       class="fast-volume-selector"
-                      value="${(x) => x.document.selectedFastVolume}"
+                      value="${(x) =>
+                        x.document.doNotLockFastVolume
+                          ? void 0
+                          : x.document.selectedFastVolume}"
                       @click="${(x, c) => x.handleFastVolumeClick(c)}"
                       @dblclick="${(x, c) => x.handleFastVolumeDblClick(c)}"
                       ${ref('fastVolumeButtons')}
@@ -415,8 +417,7 @@ export const orderWidgetTemplate = html`
                           >
                             ${when(
                               (x) => x.isInMoney,
-                              html`
-                                <div class="coin-icon"></div> `
+                              html` <div class="coin-icon"></div> `
                             )}
                             ${(x) => x.text}
                           </ppp-widget-box-radio>
@@ -443,19 +444,19 @@ export const orderWidgetTemplate = html`
                         x.orderTypeTabs.activeid === 'market'
                           ? 'по факту сделки'
                           : formatAmount(
-                            x.totalAmount,
-                            x.instrument?.currency,
-                            x.instrument
-                          )}
+                              x.totalAmount,
+                              x.instrument?.currency,
+                              x.instrument
+                            )}
                     </span>
                   </div>
                   <div class="widget-summary-line">
                     <span>Комиссия</span>
                     <span
-                    >${(x) =>
-                      x.orderTypeTabs.activeid === 'market'
-                        ? 'по факту сделки'
-                        : formatCommission(x.commission, x.instrument)}</span
+                      >${(x) =>
+                        x.orderTypeTabs.activeid === 'market'
+                          ? 'по факту сделки'
+                          : formatCommission(x.commission, x.instrument)}</span
                     >
                   </div>
                 </div>
@@ -1065,6 +1066,10 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   handleFastVolumeDblClick({ event }) {
+    if (this.document.doNotLockFastVolume) {
+      return;
+    }
+
     const radio = event
       .composedPath()
       .find((n) => n.tagName?.toLowerCase?.() === 'ppp-widget-box-radio');
@@ -1597,6 +1602,7 @@ export class OrderWidget extends WidgetWithInstrument {
         buyShortcut: this.container.buyShortcut.value.trim(),
         sellShortcut: this.container.sellShortcut.value.trim(),
         fastVolumes: this.container.fastVolumes.value.trim(),
+        doNotLockFastVolume: this.container.doNotLockFastVolume.checked,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
         changePriceQuantityViaMouseWheel:
           this.container.changePriceQuantityViaMouseWheel.checked,
@@ -2004,6 +2010,13 @@ export async function widgetDefinition() {
             ${ref('fastVolumes')}
           ></ppp-text-field>
         </div>
+        <div class="spacing1"></div>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.doNotLockFastVolume ?? false}"
+          ${ref('doNotLockFastVolume')}
+        >
+          Не фиксировать объём двойным нажатием на кнопки
+        </ppp-checkbox>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

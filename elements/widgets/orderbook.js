@@ -541,8 +541,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
     const price = parseFloat(
       event
         .composedPath()
-        .find((n) => n?.hasAttribute('price'))
-        ?.getAttribute('price')
+        .find((n) => n?.hasAttribute?.('price'))
+        ?.getAttribute?.('price')
     );
 
     if (!isNaN(price)) {

@@ -26,7 +26,6 @@ export const widgetSelectorModalPageTemplate = html`
       <ppp-banner
         class="inline"
         appearance="warning"
-        style="margin-bottom: 1rem"
       >
         <div
           style="display: ${(x) =>
@@ -73,6 +72,7 @@ export const widgetSelectorModalPageTemplate = html`
           >.
         </div>
       </ppp-banner>
+      <div class="spacing2"></div>
       <div class="selectors">
         <div class="selector-holder">
           <ppp-side-nav
