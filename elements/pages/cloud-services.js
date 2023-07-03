@@ -48,7 +48,7 @@ export const cloudServicesPageTemplate = html`
           )}</span>
         </ppp-button>
         <ppp-button
-          disabled
+          ?disabled="${() => !ppp.keyVault.ok()}"
           slot="controls"
           @click="${(x) => x.restoreMongoDB(!shouldUseAlternativeMongo)}"
         >
@@ -629,11 +629,12 @@ async function createCloudCredentialsEndpoint({
   );
 
   // Conflict is OK
-  if (rNewEndpoint.status !== 409)
+  if (rNewEndpoint.status !== 409) {
     await maybeFetchError(
       rNewEndpoint,
       'Не удалось создать конечную точку компактного представления ключей.'
     );
+  }
 }
 
 export class CloudServicesPage extends Page {
@@ -658,7 +659,27 @@ export class CloudServicesPage extends Page {
     }
   }
 
-  async restoreMongoDB(isCloud) {}
+  async restoreMongoDB(isCloud) {
+    this.beginOperation();
+
+    try {
+      const page = await ppp.app.mountPage('restore-mongodb-modal', {
+        title: isCloud
+          ? 'Восстановить облачную базу'
+          : 'Восстановить альтернативную базу',
+        size: 'large',
+        autoRead: true
+      });
+
+      if (isCloud) {
+        page.setAttribute('cloud', '');
+      }
+    } catch (e) {
+      this.failOperation(e, 'Восстановление резервной копии');
+    } finally {
+      this.endOperation();
+    }
+  }
 
   generateCloudCredentialsString() {
     if (!ppp.keyVault.getKey('mongo-location-url'))

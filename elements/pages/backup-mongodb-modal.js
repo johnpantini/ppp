@@ -13,7 +13,6 @@ import '../../vendor/spark-md5.min.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
-import '../text-field.js';
 
 export const backupMongodbModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">

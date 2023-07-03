@@ -81,6 +81,7 @@ export const extensionsPageTemplate = html`
                   <div class="control-line">
                     <ppp-button
                       class="xsmall"
+                      appearance="primary"
                       @click="${() => {
                         ppp.app.extension = datum._id;
 

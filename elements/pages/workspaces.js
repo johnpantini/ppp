@@ -66,6 +66,7 @@ export const workspacesPageTemplate = html`
                   <div class="control-line">
                     <ppp-button
                       class="xsmall"
+                      appearance="primary"
                       @click="${() => {
                         ppp.app.navigate({
                           page: 'workspace',
