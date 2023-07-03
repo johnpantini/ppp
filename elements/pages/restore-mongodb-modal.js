@@ -203,7 +203,9 @@ export class RestoreMongodbModalPage extends Page {
           if (collections.indexOf(collection) > -1) {
             const parsed = JSON.parse(
               await entry.getData(new zip.TextWriter())
-            );
+            ).filter((d) => {
+              return !(collection === 'app' && d?._id === 'settings');
+            });
 
             if (Array.isArray(parsed) && parsed.length) {
               await ppp.user.functions.deleteMany({ collection }, {});

@@ -120,7 +120,13 @@ export class BackupMongodbModalPage extends Page {
 
         await this.zipWriter.add(
           `${collection}.json`,
-          new zip.TextReader(JSON.stringify(documents))
+          new zip.TextReader(
+            JSON.stringify(
+              documents.filter((d) => {
+                return !(collection === 'app' && d?._id === 'settings');
+              })
+            )
+          )
         );
       }
 
