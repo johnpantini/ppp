@@ -523,8 +523,8 @@ export async function widgetDefinition() {
         <div class="widget-settings-input-group">
           <ppp-text-field
             type="number"
-            placeholder="20"
-            value="${(x) => x.document.depth ?? 20}"
+            placeholder="100"
+            value="${(x) => x.document.depth ?? 100}"
             ${ref('depth')}
           ></ppp-text-field>
         </div>

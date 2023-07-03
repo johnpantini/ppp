@@ -184,6 +184,10 @@ export class TimelineWidget extends WidgetWithInstrument {
       });
     }
 
+    if (!this.document.depth) {
+      this.document.depth = 100;
+    }
+
     try {
       this.timelineTrader = await ppp.getOrCreateTrader(
         this.document.timelineTrader
@@ -457,6 +461,7 @@ export class TimelineWidget extends WidgetWithInstrument {
   getTimelineArray() {
     this.empty = this.isEmpty();
 
+    let cardCount = 0;
     const timeline = [];
     const topLevelKeys = Array.from(this.timelineMap.keys()).sort(
       (a, b) => new Date(b) - new Date(a)
@@ -472,7 +477,12 @@ export class TimelineWidget extends WidgetWithInstrument {
       }
 
       for (const card of cards) {
+        if (cardCount >= this.document.depth) {
+          continue;
+        }
+
         timeline.push(card);
+        cardCount++;
       }
     }
 
@@ -496,12 +506,18 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   async validate() {
     await validate(this.container.timelineTraderId);
+    await validate(this.container.depth);
+    await validate(this.container.depth, {
+      hook: async (value) => +value > 0 && +value <= 100,
+      errorMessage: 'Введите значение в диапазоне от 1 до 100'
+    });
   }
 
   async submit() {
     return {
       $set: {
         timelineTraderId: this.container.timelineTraderId.value,
+        depth: Math.abs(this.container.depth.value),
         highlightTrades: this.container.highlightTrades.checked
       }
     };
@@ -567,6 +583,22 @@ export async function widgetDefinition() {
           >
             +
           </ppp-button>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Количество операций для отображения</h5>
+          <p class="description">
+            Максимальное количество операций, отображаемое в ленте.
+          </p>
+        </div>
+        <div class="widget-settings-input-group">
+          <ppp-text-field
+            type="number"
+            placeholder="100"
+            value="${(x) => x.document.depth ?? 100}"
+            ${ref('depth')}
+          ></ppp-text-field>
         </div>
       </div>
       <div class="widget-settings-section">
