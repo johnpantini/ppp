@@ -744,7 +744,13 @@ export class App extends PPPElement {
 
       mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
 
-      await import(`${ppp.rootUrl}/elements/pages/${page}.js`);
+      let importPath = `${ppp.rootUrl}/elements/pages/${page}.js`;
+
+      if (options.importPath) {
+        importPath = options.importPath;
+      }
+
+      await import(importPath);
 
       const pageElement = document.createElement(`ppp-${page}-page`);
 

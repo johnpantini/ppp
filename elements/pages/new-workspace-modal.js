@@ -20,7 +20,7 @@ export const newWorkspaceModalPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <section class="last">
+      <section>
         <div class="label-group full">
           <h5>Комментарий</h5>
           <ppp-text-field

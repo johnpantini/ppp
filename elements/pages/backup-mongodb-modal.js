@@ -18,7 +18,7 @@ export const backupMongodbModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <section class="last">
+      <section>
         <div class="label-group full">
           <h5>Прокси MongoDB Realm</h5>
           <p class="description">
@@ -101,6 +101,7 @@ export class BackupMongodbModalPage extends Page {
         'app',
         'bots',
         'brokers',
+        'chats',
         'extensions',
         'instruments',
         'psina',

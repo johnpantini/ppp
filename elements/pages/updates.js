@@ -57,7 +57,7 @@ export const updatesPageTemplate = html`
               </p>
             </div>
           </section>
-          <section class="last">
+          <section>
             <div class="footer-actions">
               <ppp-button
                 type="submit"

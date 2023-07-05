@@ -39,7 +39,7 @@ export const newDomainModalPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <section class="last">
+      <section>
         <div class="label-group full">
           <h5>Домены</h5>
           <p class="description">

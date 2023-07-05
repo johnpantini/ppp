@@ -221,6 +221,7 @@ export const emptyState = () => css`
   .empty-state h3 {
     font-weight: bold;
     margin-bottom: 20px;
+    text-align: center;
   }
 
   .empty-state p {

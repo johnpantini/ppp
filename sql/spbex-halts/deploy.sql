@@ -48,21 +48,11 @@ returns json as
 $$
 try {
   plv8.execute("select http_set_curlopt('CURLOPT_TIMEOUT_MS', '3000')");
+  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
+  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
 
-  let content;
-
-  if ('[%#ctx.document.proxyURL%]'.trim()) {
-    content = plv8.execute(`select content from http_post('[%#ctx.document.proxyURL%]', '{"url":"https://spbexchange.ru/ru/about/news.aspx?sectionrss=30","headers":[%#await ctx.proxyHeadersToJSONString()%]}', 'application/json')`)[0].content;
-  } else {
-    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
-    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
-
-    const fetch = plv8.find_function('ppp_fetch');
-
-    content = fetch('https://spbexchange.ru/ru/about/news.aspx?sectionrss=30', {
-      headers: [%#await ctx.proxyHeadersToJSONString()%]
-    }).responseText;
-  }
+  const fetch = plv8.find_function('ppp_fetch');
+  const content = fetch('%#ctx.document.rssURL%]').responseText;
 
   return content
     .match(

@@ -168,6 +168,36 @@ export const servicePageTemplate = html`
           <img
             slot="logo"
             draggable="false"
+            alt="Торговые паузы SPBEX"
+            style="height: 30px"
+            src="${() => ppp.brandSvg('spbex')}"
+          />
+          <span slot="title">Торговые паузы СПБ Биржи</span>
+          <span slot="description">
+            Оповещение о торговых паузах СПБ Биржи в Telegram.
+            <a
+              class="link"
+              target="_blank"
+              rel="noopener"
+              href="https://spbexchange.ru/ru/about/news.aspx?sectionrss=30"
+              >RSS-лента пауз</a
+            >.
+          </span>
+          <ppp-button
+            disabled
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `service-${SERVICES.SPBEX_HALTS}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
             alt="Парсер (Supabase)"
             style="height: 40px"
             src="${() => ppp.brandSvg('supabase')}"

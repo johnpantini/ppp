@@ -42,7 +42,7 @@ export const newExtensionModalPageTemplate = html`
           </ppp-select>
         </div>
       </section>
-      <section class="last">
+      <section>
         <div class="label-group full">
           <h5>Название</h5>
           <p class="description">

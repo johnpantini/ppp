@@ -59,52 +59,58 @@ export const restoreMongodbModalPageTemplate = html`
           }
         ]}"
         :rows="${(x) =>
-          x.documents?.map((datum) => {
-            return {
-              datum,
-              cells: [
-                html`
-                  <a
-                    class="link"
-                    href="${datum.url}"
-                    target="_blank"
-                    rel="noopener"
-                    >${/backup-of-cloud-mongodb/i.test(datum.url)
-                      ? 'Облачная'
-                      : 'Альтернативная'}</a
-                  >
-                `,
-                formatDateWithOptions(datum.last_modified * 1000, {
-                  year: 'numeric',
-                  month: 'numeric',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                  second: 'numeric',
-                  hour12: false
-                }),
-                formatFileSize(datum.size),
-                html`
-                  <div class="control-line">
-                    <ppp-button
-                      appearance="primary"
-                      class="xsmall"
-                      @click="${() => x.restoreFromBackup(datum)}"
+          x.documents
+            ?.sort(
+              (a, b) =>
+                new Date(b.last_modified * 1000) -
+                new Date(a.last_modified * 1000)
+            )
+            ?.map((datum) => {
+              return {
+                datum,
+                cells: [
+                  html`
+                    <a
+                      class="link"
+                      href="${datum.url}"
+                      target="_blank"
+                      rel="noopener"
+                      >${/backup-of-cloud-mongodb/i.test(datum.url)
+                        ? 'Облачная'
+                        : 'Альтернативная'}</a
                     >
-                      Восстановить
-                    </ppp-button>
-                    <ppp-button
-                      appearance="danger"
-                      class="xsmall"
-                      @click="${() => x.deleteBackup(datum)}"
-                    >
-                      Удалить
-                    </ppp-button>
-                  </div>
-                `
-              ]
-            };
-          })}"
+                  `,
+                  formatDateWithOptions(datum.last_modified * 1000, {
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    second: 'numeric',
+                    hour12: false
+                  }),
+                  formatFileSize(datum.size),
+                  html`
+                    <div class="control-line">
+                      <ppp-button
+                        appearance="primary"
+                        class="xsmall"
+                        @click="${() => x.restoreFromBackup(datum)}"
+                      >
+                        Восстановить
+                      </ppp-button>
+                      <ppp-button
+                        appearance="danger"
+                        class="xsmall"
+                        @click="${() => x.deleteBackup(datum)}"
+                      >
+                        Удалить
+                      </ppp-button>
+                    </div>
+                  `
+                ]
+              };
+            })}"
       >
       </ppp-table>
     </form>
@@ -187,6 +193,7 @@ export class RestoreMongodbModalPage extends Page {
           'app',
           'bots',
           'brokers',
+          'chats',
           'extensions',
           'instruments',
           'psina',
