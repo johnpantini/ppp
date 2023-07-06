@@ -84,8 +84,8 @@ export class NewWorkspaceModalPage extends Page {
 
   failOperation(e) {
     if (e instanceof ConflictError) {
-      invalidate(ppp.app.toast, {
-        errorMessage: 'Рабочее пространство с таким названием уже существует.'
+      invalidate(this.name, {
+        errorMessage: 'Рабочее пространство с таким названием уже существует'
       });
     } else {
       super.failOperation(e);
