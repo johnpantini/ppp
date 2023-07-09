@@ -242,7 +242,6 @@ export async function extension({ ppp, baseExtensionUrl, extension }) {
 
   // noinspection JSUnusedGlobalSymbols
   // export default
-
   return LiquidEquitiesPage.compose({
     name: `ppp-liquid-equities-${extension._id}-page`,
     template: liquidEquitiesPageTemplate,
