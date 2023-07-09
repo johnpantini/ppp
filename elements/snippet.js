@@ -8,6 +8,7 @@ import {
   html,
   observable,
   ref,
+  slotted,
   when
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
@@ -67,7 +68,7 @@ export function escapeHtml(string) {
 }
 
 export const snippetTemplate = html`
-  <template class="${(x) => (x.readOnly ? 'readonly' : '')}">
+  <template>
     <label part="label" for="control" class="label">
       <slot name="label"></slot>
     </label>
@@ -78,6 +79,7 @@ export const snippetTemplate = html`
       <div class="root-container">
         <textarea
           ?disabled="${(x) => x.disabled}"
+          ?readonly="${(x) => x.readOnly}"
           spellcheck="false"
           autocapitalize="off"
           autocomplete="off"
@@ -89,6 +91,7 @@ export const snippetTemplate = html`
           @scroll="${(x, c) => x.onScroll(c)}"
           ${ref('control')}
         ></textarea>
+        <slot ${slotted('defaultSlottedContent')}></slot>
         <pre tabindex="-1" ${ref('pre')} class="pre language-js"><code ${ref(
           'codeHolder'
         )} class="code language-js"></code></pre>
@@ -232,8 +235,8 @@ export const snippetStyles = css`
 
   .panel button span svg {
     width: 16px;
-    height: 16px;
     color: ${themeConditional(paletteGrayBase, paletteGrayLight2)};
+    height: 16px;
   }
 
   :host([copied]) .panel button.copy span svg {
@@ -421,6 +424,9 @@ export class Snippet extends PPPAppearanceElement {
   @observable
   code;
 
+  @observable
+  defaultSlottedContent;
+
   get value() {
     return this.code;
   }
@@ -443,6 +449,17 @@ export class Snippet extends PPPAppearanceElement {
 
   @attr({ mode: 'boolean' })
   wizard;
+
+  defaultSlottedContentChanged(oldValue, newValue) {
+    if (Array.isArray(newValue) && newValue.length) {
+      this.updateCode(newValue[0].textContent);
+    }
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.updateCode(this.code);
+  }
 
   async copy() {
     await navigator.clipboard.writeText(this.value);
@@ -490,12 +507,6 @@ export class Snippet extends PPPAppearanceElement {
     Prism.highlightElement(this.codeHolder, false);
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-
-    this.updateCode(this.code);
-  }
-
   codeChanged(oldValue, newValue = '') {
     if (this.$fastController.isConnected) {
       this.updateCode(newValue);
@@ -505,5 +516,8 @@ export class Snippet extends PPPAppearanceElement {
 
 export default Snippet.compose({
   template: snippetTemplate,
-  styles: snippetStyles
+  styles: snippetStyles,
+  shadowOptions: {
+    delegatesFocus: true
+  }
 }).define();

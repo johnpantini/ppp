@@ -343,6 +343,10 @@ export const pageStyles = css`
     align-items: center;
   }
 
+  .control-line.space-between {
+    justify-content: space-between;
+  }
+
   .control-stack {
     display: flex;
     flex-direction: column;
