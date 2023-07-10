@@ -12,11 +12,8 @@ import {
   servicePageFooterExtraControls,
   servicePageHeaderExtraControls
 } from './service.js';
-import { validate } from '../../lib/ppp-errors.js';
-import { Tmpl } from '../../lib/tmpl.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
-import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
-import { uuidv4 } from '../../lib/ppp-crypto.js';
+import { APIS,  SERVICES } from '../../lib/const.js';
 import '../badge.js';
 import '../button.js';
 import '../query-select.js';
@@ -119,11 +116,13 @@ export const serviceSpbexHaltsPageTemplate = html`
       <section>
         <div class="label-group">
           <h5>Базовый URL</h5>
-          <p class="description">Ссылка на сайт биржи.</p>
+          <p class="description">
+            Ссылка на базовый ресурс биржи. Это может быть адрес прокси-сервера.
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="https://spbexchange.ru/"
+            placeholder="https://spbexchange.ru"
             value="${(x) => x.document.proxyURL}"
             ${ref('proxyURL')}
           ></ppp-text-field>
@@ -308,6 +307,7 @@ export const serviceSpbexHaltsPageStyles = css`
   }
 `;
 
+// TODO - implement this class
 export class ServiceSpbexHaltsPage extends Page {
   collection = 'services';
 

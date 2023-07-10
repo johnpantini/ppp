@@ -45,6 +45,7 @@ import { display } from '../vendor/fast-utilities.js';
 
 export const selectTemplate = html`
   <template
+    variant="${(x) => x.variant ?? 'regular'}"
     class="${(x) => (x.open ? 'open' : '')} ${(x) =>
       x.appearance ?? 'default'} ${(x) => (x.disabled ? 'disabled' : '')} ${(
       x
@@ -57,10 +58,15 @@ export const selectTemplate = html`
     @focusout="${(x, c) => x.focusoutHandler(c.event)}"
     @keydown="${(x, c) => x.keydownHandler(c.event)}"
   >
-    <label part="label" for="control" class="label">
+    <label
+      ?hidden="${(x) => x.standalone}"
+      part="label"
+      for="control"
+      class="label"
+    >
       <slot name="label"></slot>
     </label>
-    <p class="description">
+    <p ?hidden="${(x) => x.standalone}" class="description">
       <slot name="description"></slot>
     </p>
     <div class="root" part="root">
@@ -192,6 +198,10 @@ export const selectStyles = css`
     cursor: pointer;
   }
 
+  :host([variant="compact"]) .control {
+    min-width: 150px;
+  }
+
   :host(:hover:not([disabled])) .control:hover {
     border-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }
@@ -224,6 +234,9 @@ export const selectStyles = css`
     overflow-y: auto;
     width: 100%;
     z-index: 1;
+  }
+
+  :host([variant="compact"]) .listbox {
   }
 
   .listbox[hidden] {
@@ -308,6 +321,12 @@ export let SelectRole;
 export class Select extends ListboxElement {
   @attr({ mode: 'boolean' })
   open;
+
+  @attr({ mode: 'boolean' })
+  standalone;
+
+  @attr
+  variant;
 
   @observable
   errorMessage;

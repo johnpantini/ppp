@@ -42,7 +42,6 @@ import { RadioGroup, radioGroupTemplate } from '../radio-group.js';
 import { Radio } from '../radio.js';
 import {
   activeOrdersWidget,
-  arrowLeft,
   customWidget,
   instrumentsWidget,
   lightChartWidget,
@@ -60,6 +59,7 @@ import '../badge.js';
 import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
+import '../draggable-stack.js';
 import '../select.js';
 import '../text-field.js';
 import '../top-loader.js';
@@ -113,7 +113,7 @@ export const widgetTypeRadioStyles = css`
 
   .control {
     width: 100%;
-    padding: 15px;
+    padding: 10px 15px;
     cursor: pointer;
     border-width: 1px;
     border-style: solid;
@@ -191,7 +191,7 @@ export const widgetPageTemplate = html`
             <div class="widget-settings">
               <form novalidate>
                 <div>
-                  <div class="drawer">
+                  <div class="drawer" ?hidden="${(x) => x.document._id}">
                     <div class="drawer-header">
                       <div class="drawer-header-inner">
                         <h3>Тип виджета</h3>
@@ -300,7 +300,7 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'instruments'}"
                             value="instruments"
                           >
-                            <span slot="text">Инструменты</span>
+                            <span slot="text">Список инструментов</span>
                             <span slot="icon">
                               ${html.partial(instrumentsWidget)}
                             </span>
@@ -653,7 +653,6 @@ export const widgetPageStyles = css`
   .right-pane-inner {
     position: sticky;
     top: 15px;
-    padding-bottom: 150px;
   }
 
   :host([mounted]) .right-pane-inner {

@@ -23,8 +23,8 @@ import {
   spacing1,
   spacing2,
   spacing4,
-  spacing3
-} from '../design/design-tokens.js';
+  spacing3, paletteGrayBase, paletteGrayLight1
+} from '../design/design-tokens.js'
 import {
   PAGE_STATUS,
   SERVER_TYPES,
@@ -212,8 +212,8 @@ export const pageStyles = css`
     flex-flow: row nowrap;
     align-items: center;
     padding: 25px;
-    border-bottom: 1px solid
-      ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+    border-bottom: 1px solid ${themeConditional(paletteGrayLight2,
+            paletteGrayDark2)};
   }
 
   footer {
@@ -336,6 +336,7 @@ export const pageStyles = css`
   .control-line {
     display: flex;
     flex-direction: row;
+    align-items: center;
     gap: 8px;
   }
 
@@ -376,6 +377,18 @@ export const pageStyles = css`
 
   .implementation-area ppp-banner .label-group {
     padding-bottom: 8px;
+  }
+
+  .drag-handle {
+    width: 16px;
+    height: 16px;
+    cursor: grab;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  .dragging .draggable,
+  .dragging .drag-handle {
+    cursor: grabbing;
   }
 `;
 

@@ -52,7 +52,7 @@ try {
   plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
 
   const fetch = plv8.find_function('ppp_fetch');
-  const content = fetch('%#ctx.document.rssURL%]').responseText;
+  const content = fetch('[%#ctx.document.proxyURL%]/ru/about/news.aspx?sectionrss=30').responseText;
 
   return content
     .match(
@@ -88,22 +88,11 @@ returns json as
 $$
 try {
   plv8.execute("select http_set_curlopt('CURLOPT_TIMEOUT_MS', '3000')");
+  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
+  plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
 
-  let pageHtml;
-
-  if ('[%#ctx.document.proxyURL%]'.trim()) {
-    pageHtml = plv8.execute(`select content from http_post('[%#ctx.document.proxyURL%]', '{"url":"${url}","headers":[%#await ctx.proxyHeadersToJSONString()%]}', 'application/json')`)[0].content;
-  } else {
-    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYHOST', '0')");
-    plv8.execute("select http_set_curlopt('CURLOPT_SSL_VERIFYPEER', '0')");
-
-    const fetch = plv8.find_function('ppp_fetch');
-
-    pageHtml = fetch(url, {
-      headers: [%#await ctx.proxyHeadersToJSONString()%]
-    }).responseText;
-  }
-
+  const fetch = plv8.find_function('ppp_fetch');
+  const pageHtml = fetch(url.replace('https://spbexchange.ru', '[%#ctx.document.proxyURL%]').responseText;
   const name = pageHtml.match(
     /приостановке организованных торгов ценными бумагами (.*?)<\/h1>/i
   )[1];

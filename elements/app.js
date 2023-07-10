@@ -37,6 +37,7 @@ import {
   warning
 } from '../static/svg/sprite.js';
 import './button.js';
+import './draggable-stack.js';
 import './modal.js';
 import './pages/not-found.js';
 import './side-nav.js';
@@ -85,36 +86,42 @@ export const appTemplate = html`
                 <span slot="title">
                   ${() => ppp.t('$collection.workspaces')}
                 </span>
-                ${repeat(
-                  () => ppp.workspaces,
-                  html`
-                    <a
-                      href="${(x) => `?page=workspace&document=${x._id}`}"
-                      @click="${(x, c) => {
-                        if (
-                          c.event.target
-                            ?.closest('ppp-side-nav-item')
-                            ?.hasAttribute('active')
-                        )
-                          return false;
+                <ppp-draggable-stack ${ref('workspaceDragList')}>
+                  ${repeat(
+                    () =>
+                      ppp.workspaces.sort(
+                        (a, b) => (a.order ?? 0) - (b.order ?? 0)
+                      ),
+                    html`
+                      <a
+                        class="draggable drag-handle"
+                        href="${(x) => `?page=workspace&document=${x._id}`}"
+                        @click="${(x, c) => {
+                          if (
+                            c.event.target
+                              ?.closest('ppp-side-nav-item')
+                              ?.hasAttribute('active')
+                          )
+                            return false;
 
-                        c.parent.navigate({
-                          page: 'workspace',
-                          document: x._id
-                        });
-                      }}"
-                    >
-                      <ppp-side-nav-item
-                        ?active="${(x, c) =>
-                          c.parent.page === 'workspace' &&
-                          c.parent.workspace === x._id}"
-                        id="${(x) => x._id}"
+                          c.parent.navigate({
+                            page: 'workspace',
+                            document: x._id
+                          });
+                        }}"
                       >
-                        <span>${(x) => x.name}</span>
-                      </ppp-side-nav-item>
-                    </a>
-                  `
-                )}
+                        <ppp-side-nav-item
+                          ?active="${(x, c) =>
+                            c.parent.page === 'workspace' &&
+                            c.parent.workspace === x._id}"
+                          id="${(x) => x._id}"
+                        >
+                          <span>${(x) => x.name}</span>
+                        </ppp-side-nav-item>
+                      </a>
+                    `
+                  )}
+                </ppp-draggable-stack>
               </ppp-side-nav-group>
             `
           )}
@@ -689,6 +696,7 @@ export class App extends PPPElement {
   constructor() {
     super();
 
+    this.onDragEnd = this.onDragEnd.bind(this);
     this.#checkForAvailableUpdatesLoop();
 
     document.addEventListener('keydown', (e) => {
@@ -701,8 +709,38 @@ export class App extends PPPElement {
     window.addEventListener('popstate', this.#onPopState.bind(this));
   }
 
+  async onDragEnd() {
+    const nodes = this.workspaceDragList.nodes();
+
+    await ppp.user.functions.bulkWrite(
+      {
+        collection: 'workspaces'
+      },
+      nodes.map((n, index) => {
+        return {
+          updateOne: {
+            filter: {
+              _id: n.querySelector('[id]').getAttribute('id')
+            },
+            update: {
+              $set: {
+                order: index + 1
+              }
+            },
+            upsert: true
+          }
+        };
+      }),
+      {
+        ordered: true
+      }
+    );
+  }
+
   connectedCallback() {
     super.connectedCallback();
+
+    this.addEventListener('dragend', this.onDragEnd);
 
     const that = this;
 
@@ -734,6 +772,11 @@ export class App extends PPPElement {
         replace: true
       }
     );
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('dragend', this.onDragEnd);
   }
 
   async mountPage(page, options = {}) {

@@ -384,6 +384,7 @@ export class Trader {
         for (const { field, datum } of sub.get(source)) {
           source[field] = this.valueForEmptyDatum?.(datum) ?? '—';
 
+          // Skip sub/unsub cycle for instrument-agnostic datum.
           if (this.getDatumGlobalReferenceName(datum)) continue;
 
           if (oldValue) {

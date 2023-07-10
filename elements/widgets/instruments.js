@@ -57,10 +57,10 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.INSTRUMENTS,
     collection: 'PPP',
-    title: html`Инструменты`,
-    description: html`Виджет <span class="positive">Инструменты</span> позволяет
-      настраивать списки торговых инструментов, группируя их для различных
-      целей.`,
+    title: html`Список инструментов`,
+    description: html`Виджет
+      <span class="positive">Список инструментов</span> позволяет настраивать
+      списки торговых инструментов с различными данными.`,
     customElement: InstrumentsWidget.compose({
       template: instrumentsWidgetTemplate,
       styles: instrumentsWidgetStyles

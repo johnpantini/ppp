@@ -22,10 +22,6 @@ import {
 } from '../../lib/intl.js';
 import { ellipsis, normalize } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
-import '../button.js';
-import '../checkbox.js';
-import '../query-select.js';
-import '../text-field.js';
 import {
   darken,
   fontSizeWidget,
@@ -41,6 +37,12 @@ import {
   paletteGrayLight3,
   themeConditional
 } from '../../design/design-tokens.js';
+import { drag } from '../../static/svg/sprite.js';
+import '../button.js';
+import '../checkbox.js';
+import '../draggable-stack.js';
+import '../query-select.js';
+import '../text-field.js';
 
 const portfolioSection = ({ title, section }) =>
   html`
@@ -538,9 +540,9 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер портфеля</h5>
+          <h5>Трейдер позиций портфеля</h5>
           <p class="description">
-            Трейдер, который будет источником портфельных данных.
+            Трейдер, который будет источником позиций в портфеле.
           </p>
         </div>
         <div class="control-line">
