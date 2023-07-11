@@ -231,7 +231,10 @@ class PPP {
 
           const workspaces = db
             .collection('workspaces')
-            .find({ removed: { $not: { $eq: true } } }, { _id: 1, name: 1 });
+            .find(
+              { removed: { $not: { $eq: true } } },
+              { _id: 1, name: 1, order: 1 }
+            );
 
           const settings = db.collection('app').findOne({ _id: '@settings' });
 
