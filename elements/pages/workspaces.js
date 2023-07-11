@@ -112,7 +112,7 @@ export class WorkspacesPage extends Page {
         .find({
           removed: { $ne: true }
         })
-        .sort({ updatedAt: -1 });
+        .sort({ order: 1 });
     };
   }
 }
