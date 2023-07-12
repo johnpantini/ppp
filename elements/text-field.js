@@ -50,10 +50,15 @@ import { applyMixins, display } from '../vendor/fast-utilities.js';
 
 export const textFieldTemplate = html`
   <template>
-    <label part="label" for="control" class="label">
+    <label
+      ?hidden="${(x) => x.standalone}"
+      part="label"
+      for="control"
+      class="label"
+    >
       <slot name="label"></slot>
     </label>
-    <p class="description">
+    <p ?hidden="${(x) => x.standalone}" class="description">
       <slot name="description"></slot>
     </p>
     <div class="root" part="root">
@@ -348,6 +353,9 @@ export const textFieldStyles = css`
 export class TextField extends PPPAppearanceElement {
   @attr
   value;
+
+  @attr({ mode: 'boolean' })
+  standalone;
 
   @attr({ mode: 'boolean' })
   disabled;

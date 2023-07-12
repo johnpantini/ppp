@@ -199,7 +199,7 @@ export const selectStyles = css`
   }
 
   :host([variant="compact"]) .control {
-    min-width: 150px;
+    min-width: 155px;
   }
 
   :host(:hover:not([disabled])) .control:hover {

@@ -38,6 +38,8 @@ ListboxOption.compose({
 export const querySelectTemplate = html`
   <template>
     <ppp-select
+      variant="${(x) => x.variant}"
+      ?standalone="${(x) => x.standalone}"
       ?deselectable="${(x) => x.deselectable}"
       ${ref('control')}
       ?disabled="${(x) => x.disabled}"
@@ -116,6 +118,9 @@ export const querySelectStyles = css`
 export class QuerySelect extends PPPAppearanceElement {
   #code;
 
+  @attr({ mode: 'boolean' })
+  standalone;
+
   @observable
   errorMessage;
 
@@ -127,6 +132,9 @@ export class QuerySelect extends PPPAppearanceElement {
 
   @attr({ mode: 'boolean' })
   deselectable;
+
+  @attr
+  variant;
 
   @observable
   preloaded;

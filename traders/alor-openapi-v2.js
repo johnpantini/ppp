@@ -133,7 +133,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
   getSymbol(instrument = {}) {
     if (instrument.type === 'future')
-      return instrument.fullName.split(/\s+/)[0];
+      return instrument.fullName.split(/\s+/)[0].toUpperCase();
 
     if (
       instrument?.currency === 'USD' &&
@@ -363,7 +363,7 @@ class AlorOpenAPIV2Trader extends Trader {
           let orderInstrument;
 
           if (this.document.portfolioType === 'futures') {
-            orderInstrument = this.#futures.get(o.symbol);
+            orderInstrument = this.#futures.get(o.symbol.toUpperCase());
           } else {
             orderInstrument = this.instruments.get(o.symbol);
           }
@@ -1130,7 +1130,9 @@ class AlorOpenAPIV2Trader extends Trader {
               source[field] = payload;
             } else {
               if (this.document.portfolioType === 'futures') {
-                payload.instrument = this.#futures.get(data.symbol);
+                payload.instrument = this.#futures.get(
+                  data.symbol.toUpperCase()
+                );
               } else {
                 payload.instrument = this.instruments.get(data.symbol);
               }
@@ -1190,7 +1192,7 @@ class AlorOpenAPIV2Trader extends Trader {
             };
 
             if (this.document.portfolioType === 'futures') {
-              payload.instrument = this.#futures.get(data.symbol);
+              payload.instrument = this.#futures.get(data.symbol.toUpperCase());
             } else {
               payload.instrument = this.instruments.get(data.symbol);
             }
@@ -1233,7 +1235,7 @@ class AlorOpenAPIV2Trader extends Trader {
             };
 
             if (this.document.portfolioType === 'futures') {
-              payload.instrument = this.#futures.get(data.symbol);
+              payload.instrument = this.#futures.get(data.symbol.toUpperCase());
             } else {
               payload.instrument = this.instruments.get(data.symbol);
             }

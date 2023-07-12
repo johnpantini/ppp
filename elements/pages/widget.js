@@ -487,9 +487,13 @@ export const widgetPageTemplate = html`
         <div class="right-pane">
           <div class="right-pane-inner">
             <div class="widget-holder">
-              <div class="preview-header">
+              <div class="drawer">
                 <div class="control-stack">
-                  <h5>Предварительный просмотр</h5>
+                  <div class="drawer-header">
+                    <div class="drawer-header-inner">
+                      <h3>Предварительный просмотр</h3>
+                    </div>
+                  </div>
                   <ppp-checkbox
                     ${ref('autoApplyWidgetModifications')}
                     @change="${(x) =>
@@ -502,14 +506,16 @@ export const widgetPageTemplate = html`
                   >
                     Применять настройки по мере редактирования
                   </ppp-checkbox>
+                  <ppp-button
+                    appearance="primary"
+                    class="xsmall"
+                    @click="${(x) => x.applyModifications()}"
+                  >
+                    Применить текущие настройки
+                  </ppp-button>
                 </div>
-                <ppp-button
-                  appearance="primary"
-                  @click="${(x) => x.applyModifications()}"
-                >
-                  Применить настройки
-                </ppp-button>
               </div>
+              <div class="spacing3"></div>
               <h2 class="widget-name">
                 ${when(
                   (x) => x.widgetDefinition.title,
@@ -629,18 +635,14 @@ export const widgetPageStyles = css`
     border-left: 1px solid transparent;
   }
 
-  :host([mounted]) nav {
-    width: unset;
-  }
-
   .nav-inner {
-    max-width: 470px;
+    max-width: 600px;
     margin: 32px auto 0;
   }
 
   :host([mounted]) .nav-inner {
-    max-width: 450px;
-    margin: 32px 20px;
+    margin: 0 13px;
+    max-width: unset;
   }
 
   .right-pane {
@@ -696,6 +698,7 @@ export const widgetPageStyles = css`
 
   .drawer-header {
     position: relative;
+    width: 100%;
     border-bottom: 2px solid
       ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }

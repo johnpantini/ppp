@@ -740,7 +740,7 @@ export class App extends PPPElement {
   connectedCallback() {
     super.connectedCallback();
 
-    this.addEventListener('dragend', this.onDragEnd);
+    this.addEventListener('pppdragend', this.onDragEnd);
 
     const that = this;
 
@@ -776,7 +776,7 @@ export class App extends PPPElement {
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    this.removeEventListener('dragend', this.onDragEnd);
+    this.removeEventListener('pppdragend', this.onDragEnd);
   }
 
   async mountPage(page, options = {}) {

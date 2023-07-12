@@ -38,6 +38,7 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 import { drag } from '../../static/svg/sprite.js';
+import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
 import '../draggable-stack.js';
