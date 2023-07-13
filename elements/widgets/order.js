@@ -1218,18 +1218,60 @@ export class OrderWidget extends WidgetWithInstrument {
     }
   }
 
-  async handlePriceOrQuantityKeydown({ event, type }) {
+  async handlePriceOrQuantityKeydown({ event }) {
     if (this.document.buyShortcut !== this.document.sellShortcut) {
       if (
         this.document.buyShortcut &&
         event.code === this.document.buyShortcut
       ) {
-        await this.buyOrSell('buy');
+        return await this.buyOrSell('buy');
       } else if (
         this.document.sellShortcut &&
         event.code === this.document.sellShortcut
       ) {
-        await this.buyOrSell('sell');
+        return await this.buyOrSell('sell');
+      }
+    }
+
+    if (
+      this.document.searchShortcut &&
+      event.code === this.document.searchShortcut
+    ) {
+      this.dispatchEvent(new CustomEvent('pointerdown'));
+
+      this.searchControl.open = true;
+
+      Updates.enqueue(() => this.searchControl.suggestInput.focus());
+    }
+
+    if (
+      this.document.cancelAllOrdersShortcut &&
+      event.code === this.document.cancelAllOrdersShortcut
+    ) {
+      if (typeof this.ordersTrader?.cancelAllLimitOrders !== 'function') {
+        return this.notificationsArea.error({
+          text: 'Трейдер не поддерживает отмену всех заявок.'
+        });
+      }
+
+      this.topLoader.start();
+
+      try {
+        await this.ordersTrader?.cancelAllLimitOrders?.({
+          instrument: this.instrument
+        });
+
+        this.notificationsArea.success({
+          title: 'Заявки отменены'
+        });
+      } catch (e) {
+        console.log(e);
+
+        this.notificationsArea.error({
+          text: 'Не удалось отменить заявки.'
+        });
+      } finally {
+        this.topLoader.stop();
       }
     }
   }
@@ -1585,7 +1627,7 @@ export class OrderWidget extends WidgetWithInstrument {
         hook: async () =>
           this.container.buyShortcut.value !==
           this.container.sellShortcut.value,
-        errorMessage: 'Горячие клавиши должны различаться'
+        errorMessage: 'Горячие клавиши Buy/Sell должны различаться'
       });
     }
   }
@@ -1601,6 +1643,9 @@ export class OrderWidget extends WidgetWithInstrument {
         pusherApiId: this.container.pusherApiId.value,
         buyShortcut: this.container.buyShortcut.value.trim(),
         sellShortcut: this.container.sellShortcut.value.trim(),
+        searchShortcut: this.container.searchShortcut.value.trim(),
+        cancelAllOrdersShortcut:
+          this.container.cancelAllOrdersShortcut.value.trim(),
         fastVolumes: this.container.fastVolumes.value.trim(),
         doNotLockFastVolume: this.container.doNotLockFastVolume.checked,
         displaySizeInUnits: this.container.displaySizeInUnits.checked,
@@ -1987,6 +2032,76 @@ export async function widgetDefinition() {
               return false;
             }}"
             ${ref('sellShortcut')}
+          ></ppp-text-field>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Горячая клавиша для поиска инструментов</h5>
+          <p class="description">
+            Если фокус ввода будет находиться в поле цены или количества, то
+            откроется окно поиска инструмента. Нажмите Esc, чтобы отменить эту
+            функцию.
+          </p>
+        </div>
+        <div class="widget-settings-input-group">
+          <ppp-text-field
+            optional
+            placeholder="Не задана"
+            value="${(x) => x.document.searchShortcut}"
+            @keydown="${(x, { event }) => {
+              if (
+                +event.key === parseInt(event.key) ||
+                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                  event.code
+                )
+              )
+                return false;
+
+              if (event.key === 'Escape') {
+                x.searchShortcut.value = '';
+              } else {
+                x.searchShortcut.value = event.code;
+              }
+
+              return false;
+            }}"
+            ${ref('searchShortcut')}
+          ></ppp-text-field>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Горячая клавиша для отмены всех активных заявок</h5>
+          <p class="description">
+            Если фокус ввода будет находиться в поле цены или количества, то
+            будут отменены активные заявки по текущему инструменту виджета.
+            Нажмите Esc, чтобы отменить эту функцию.
+          </p>
+        </div>
+        <div class="widget-settings-input-group">
+          <ppp-text-field
+            optional
+            placeholder="Не задана"
+            value="${(x) => x.document.cancelAllOrdersShortcut}"
+            @keydown="${(x, { event }) => {
+              if (
+                +event.key === parseInt(event.key) ||
+                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                  event.code
+                )
+              )
+                return false;
+
+              if (event.key === 'Escape') {
+                x.cancelAllOrdersShortcut.value = '';
+              } else {
+                x.cancelAllOrdersShortcut.value = event.code;
+              }
+
+              return false;
+            }}"
+            ${ref('cancelAllOrdersShortcut')}
           ></ppp-text-field>
         </div>
       </div>

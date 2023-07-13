@@ -93,6 +93,7 @@ export const workspacePageStyles = css`
   }
 
   .widget {
+    contain: layout;
     position: absolute;
     overflow: hidden;
   }

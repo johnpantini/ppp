@@ -179,10 +179,129 @@ export const widgetEmptyState = () => css`
   }
 `;
 
+export const widgetTable = () => css`
+  .widget-table {
+    contain: layout;
+    table-layout: fixed;
+    min-width: 140px;
+    width: 100%;
+    padding: 0;
+    user-select: none;
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+  .widget-table th {
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 50%;
+    height: 26px;
+    padding: 1px 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  .widget-table th:hover {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  .widget-table th > div {
+    text-align: left;
+    overflow: hidden;
+    font-weight: 500;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    ${ellipsis()};
+  }
+
+  .widget-table th:first-of-type {
+    text-align: left;
+  }
+
+  .widget-table .cell {
+    text-align: right;
+    max-width: 134px;
+    padding: 4px 8px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    white-space: nowrap;
+    position: relative;
+    vertical-align: middle;
+  }
+
+  .widget-table .cell ppp-button {
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    top: 3px;
+  }
+
+  .widget-table .cell:first-of-type {
+    text-align: left;
+  }
+
+  .widget-table .cell.capitalize {
+    text-transform: capitalize;
+  }
+
+  .portfolio-row:nth-of-type(2n) {
+    background-color: ${themeConditional(
+      lighten(paletteGrayLight3, 1),
+      paletteGrayDark2
+    )};
+  }
+
+  .portfolio-row:hover {
+    background-color: ${themeConditional(
+      lighten(paletteGrayLight2, 5),
+      darken(paletteGrayDark1, 10)
+    )};
+  }
+
+  .portfolio-row-logo-with-name {
+    word-wrap: break-word;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    font-weight: ${fontWeightWidget};
+    display: flex;
+    align-items: center;
+    width: 100%;
+    letter-spacing: 0;
+  }
+
+  .portfolio-row-logo {
+    min-width: 20px;
+    min-height: 20px;
+    height: 20px;
+    width: 20px;
+    padding: 2px;
+    border-radius: 50%;
+    background-size: 100%;
+    margin-right: 10px;
+    color: ${themeConditional(paletteGrayLight1, paletteBlack)};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
+  }
+
+  .portfolio-row-name {
+    opacity: 1;
+    width: 100%;
+    text-align: left;
+    ${ellipsis()};
+  }
+`;
+
 export const widget = () => css`
   ${display('inline-flex')}
   ${scrollbars('.widget-body')}
   ${widgetEmptyState()}
+  ${widgetTable()}
   .widget-root {
     position: relative;
     background: ${themeConditional(paletteWhite, paletteBlack)};
@@ -1866,6 +1985,14 @@ export class WidgetSearchControl extends PPPOffClickElement {
     if (this.widget.preview) {
       this.widget.style.position = 'relative';
       this.widget.container.widgetArea.style.height = null;
+    }
+
+    if (
+      !newValue &&
+      this.widget.instrument &&
+      this.widget.document?.type === 'order'
+    ) {
+      Updates.enqueue(() => this.widget.price.focus());
     }
   }
 
