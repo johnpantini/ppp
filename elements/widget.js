@@ -11,7 +11,8 @@ import {
   repeat,
   when,
   slotted,
-  Updates
+  Updates,
+  listener
 } from '../vendor/fast-element.min.js';
 import {
   display,
@@ -198,11 +199,16 @@ export const widgetTable = () => css`
     z-index: 100;
     width: 50%;
     height: 26px;
-    padding: 1px 8px;
+    padding: 2px 8px;
     white-space: nowrap;
     cursor: pointer;
     background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  .widget-table th + th {
+    border-left: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 
   .widget-table th:hover {
@@ -1906,6 +1912,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
   constructor() {
     super();
 
+    this.open = false;
     this.stocks = [];
     this.bonds = [];
     this.etfs = [];
@@ -1979,20 +1986,22 @@ export class WidgetSearchControl extends PPPOffClickElement {
   }
 
   openChanged(oldValue, newValue) {
-    if (newValue) this.widget.style.overflow = 'visible';
-    else this.widget.style.overflow = 'hidden';
+    if (this.$fastController.isConnected) {
+      if (newValue) this.widget.style.overflow = 'visible';
+      else this.widget.style.overflow = 'hidden';
 
-    if (this.widget.preview) {
-      this.widget.style.position = 'relative';
-      this.widget.container.widgetArea.style.height = null;
-    }
+      if (this.widget.preview) {
+        this.widget.style.position = 'relative';
+        this.widget.container.widgetArea.style.height = null;
+      }
 
-    if (
-      !newValue &&
-      this.widget.instrument &&
-      this.widget.document?.type === 'order'
-    ) {
-      Updates.enqueue(() => this.widget.price.focus());
+      if (
+        !newValue &&
+        this.widget.instrument &&
+        this.widget.document?.type === 'order'
+      ) {
+        Updates.enqueue(() => this.widget.price.focus());
+      }
     }
   }
 
@@ -2625,6 +2634,16 @@ export class WidgetHeaderButtons extends PPPElement {
 
       const originalSubmitDocument = page.submitDocument;
       const that = this;
+
+      const listener = (event) => {
+        if (event.detail?.element) {
+          event.detail.element.instrument = that.widget?.instrument;
+        }
+
+        page.removeEventListener('widgetpreviewchange', listener);
+      };
+
+      page.addEventListener('widgetpreviewchange', listener);
 
       page.submitDocument = async function () {
         await originalSubmitDocument.call(page);

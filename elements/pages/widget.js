@@ -1484,6 +1484,9 @@ class WidgetPreview extends PPPElement {
         this.container.widgetElement = element;
 
         this.shadowRoot.appendChild(element);
+        this.$emit('widgetpreviewchange', {
+          element
+        });
       }
     }
   }
