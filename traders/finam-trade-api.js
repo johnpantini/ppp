@@ -8,7 +8,6 @@ import {
 import { Trader } from './common-trader.js';
 import { AuthorizationError, TradingError } from '../lib/ppp-errors.js';
 import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
-import { generateTraceId } from './utex-margin-stocks.js';
 
 // noinspection JSUnusedGlobalSymbols
 /**
@@ -187,7 +186,7 @@ class FinamTradeApiTrader extends Trader {
       property: 'PutInQueue'
     };
 
-    if (price > 0) {
+    if (price !== 0) {
       payload.price = +this.fixPrice(instrument, price);
     }
 
