@@ -51,6 +51,9 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
               Tinkoff
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
+              Finam
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -112,6 +115,52 @@ export const instrumentsImportPageTemplate = html`
                 appearance="primary"
               >
                 Добавить профиль Tinkoff
+              </ppp-button>
+            </div>
+          </section>
+        `
+      )}
+      ${when(
+        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.FINAM,
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Брокерский профиль Finam</h5>
+              <p class="description">Необходим для формирования словаря.</p>
+            </div>
+            <div class="input-group">
+              <ppp-query-select
+                ${ref('finamBrokerId')}
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('brokers')
+                      .find({
+                        $and: [
+                          {
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.FINAM%]`
+                          },
+                          { removed: { $ne: true } }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <div class="spacing2"></div>
+              <ppp-button
+                @click="${() =>
+                  ppp.app.mountPage('broker-finam', {
+                    size: 'xlarge',
+                    adoptHeader: true
+                  })}"
+                appearance="primary"
+              >
+                Добавить профиль Finam
               </ppp-button>
             </div>
           </section>
@@ -552,6 +601,111 @@ export class InstrumentsImportPage extends Page {
     return instruments;
   }
 
+  async #finamSecurities(token) {
+    try {
+      return (
+        await (
+          await fetch(
+            new URL(
+              'fetch',
+              ppp.keyVault.getKey('service-machine-url')
+            ).toString(),
+            {
+              cache: 'no-cache',
+              method: 'POST',
+              body: JSON.stringify({
+                method: 'GET',
+                url: `https://trade-api.finam.ru/public/api/v1/securities`,
+                headers: {
+                  'X-Api-Key': token
+                }
+              })
+            }
+          )
+        ).json()
+      ).data.securities;
+    } catch (e) {
+      console.error(e);
+
+      return [];
+    }
+  }
+
+  async [INSTRUMENT_DICTIONARY.FINAM]() {
+    await validate(this.finamBrokerId);
+
+    const instruments =
+      (await this.#finamSecurities(this.finamBrokerId.datum().token)) ?? [];
+
+    // US only.
+    const mmaStocks = instruments.filter((i) => {
+      return (
+        !/\s/.test(i.code) &&
+        i.board === 'MCT' &&
+        i.currency === 'USD' &&
+        i.market?.toUpperCase?.() === 'MMA' &&
+        (+i.decimals === 2 || +i.decimals === 4) &&
+        +i.lotSize === 1 &&
+        (+i.minStep === 1 || +i.minStep === 100)
+      );
+    });
+
+    const result = [];
+    const alorSpbexSecurities = await this[INSTRUMENT_DICTIONARY.ALOR_SPBX]();
+    const alorMoexSecurities = await this[
+      INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES
+    ]();
+
+    for (const s of alorSpbexSecurities) {
+      if (/@/.test(s.symbol)) {
+        continue;
+      }
+
+      s.broker = BROKERS.FINAM;
+      s.classCode = 'SPFEQ';
+
+      result.push(s);
+    }
+
+    for (const s of alorMoexSecurities) {
+      if (/@/.test(s.symbol)) {
+        continue;
+      }
+
+      if (s.type === 'stock') {
+        s.broker = BROKERS.FINAM;
+
+        // Collision with "Five Below Inc".
+        if (s.symbol === 'FIVE') {
+          s.symbol = 'FIVE~MOEX';
+        }
+
+        result.push(s);
+      }
+    }
+
+    for (const s of mmaStocks) {
+      result.push({
+        symbol: s.code.replace('.', ' ') + '~US',
+        exchange: EXCHANGE.US,
+        broker: BROKERS.FINAM,
+        fullName: s.shortName,
+        minPriceIncrement: s.decimals === 2 ? 0.01 : 0.0001,
+        type:
+          s.shortName.toUpperCase().endsWith(' ETF') ||
+          /Invesco|ProShares|iShares/i.test(s.fullName)
+            ? 'etf'
+            : 'stock',
+        currency: 'USD',
+        forQualInvestorFlag: true,
+        lot: s.lotSize,
+        classCode: s.board
+      });
+    }
+
+    return result;
+  }
+
   async submitDocument() {
     this.beginOperation();
 
@@ -651,6 +805,14 @@ export class InstrumentsImportPage extends Page {
             $in: [EXCHANGE.SPBX, EXCHANGE.MOEX]
           };
           broker = BROKERS.TINKOFF;
+
+          break;
+        case INSTRUMENT_DICTIONARY.FINAM:
+          exchange = EXCHANGE.CUSTOM;
+          exchangeForDBRequest = {
+            $in: [EXCHANGE.SPBX, EXCHANGE.MOEX, EXCHANGE.US]
+          };
+          broker = BROKERS.FINAM;
 
           break;
       }

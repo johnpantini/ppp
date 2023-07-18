@@ -454,7 +454,7 @@ export class Trader {
     const regexFullNameMatches = [];
     const text = searchText
       .trim()
-      .replaceAll(/[^a-z0-9\u0400-\u04FF]/gi, '')
+      .replaceAll(/[^a-z0-9\s\u0400-\u04FF]/gi, '')
       .toUpperCase();
     const latin = cyrillicToLatin(text);
     const cyrillic = latinToCyrillic(text);
@@ -463,13 +463,17 @@ export class Trader {
       for (let [symbol, instrument] of this.instruments) {
         if (instrument.removed) continue;
 
-        symbol = symbol
-          .replaceAll(/[^a-z0-9\u0400-\u04FF]/gi, '')
+        symbol = instrument.symbol
+          .replaceAll(/[^a-z0-9\s\u0400-\u04FF]/gi, '')
           .toUpperCase();
 
+        const symbolWithoutExchange = this.getSymbol(instrument);
         const fullName = instrument.fullName.toUpperCase();
 
-        if (symbol === text && exactSymbolMatch === null) {
+        if (
+          (symbol === text || symbolWithoutExchange === text) &&
+          exactSymbolMatch === null
+        ) {
           exactSymbolMatch = instrument;
         }
 

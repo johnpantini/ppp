@@ -9,8 +9,8 @@ import {
   SERVER_STATE,
   TRADER_CAPS,
   VERSIONING_STATUS,
-  EXCHANGE
-} from '../../../lib/const.js';
+  EXCHANGE, COLUMN_SOURCE
+} from '../../../lib/const.js'
 
 export default function (i18n) {
   i18n.extend({
@@ -31,11 +31,27 @@ export default function (i18n) {
       broker: {
         [BROKERS.ALOR]: 'Alor',
         [BROKERS.TINKOFF]: 'Tinkoff',
+        [BROKERS.FINAM]: 'Finam',
         [BROKERS.UTEX]: 'UTEX',
         [BROKERS.PSINA]: 'Psina',
         [BROKERS.BINANCE]: 'Binance',
         [BROKERS.HUOBI]: 'Huobi',
         [BROKERS.BYBIT]: 'Bybit'
+      },
+      columnSource: {
+        [COLUMN_SOURCE.BEST_BID]: 'Bid',
+        [COLUMN_SOURCE.BEST_ASK]: 'Ask',
+        [COLUMN_SOURCE.LAST_PRICE]: 'Цена',
+        [COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены',
+        [COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены, %',
+        [COLUMN_SOURCE.PL_ABSOLUTE]: 'Доход',
+        [COLUMN_SOURCE.PL_RELATIVE]: 'Доход, %',
+        [COLUMN_SOURCE.PL_DAY_ABSOLUTE]: 'За день',
+        [COLUMN_SOURCE.PL_DAY_RELATIVE]: 'За день, %',
+        [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
+        [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
+        [COLUMN_SOURCE.URL]: 'URL',
+        [COLUMN_SOURCE.WORKER]: 'Worker'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
@@ -51,6 +67,7 @@ export default function (i18n) {
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',
         [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
+        [TRADERS.FINAM_TRADE_API]: 'Finam Trade API',
         [TRADERS.CUSTOM]: 'По ссылке'
       },
       traderCaps: {

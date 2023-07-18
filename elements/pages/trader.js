@@ -238,6 +238,51 @@ export const traderPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
+            alt="Finam"
+            style="height: 44px"
+            src="${() => ppp.brandSvg('finam')}"
+          />
+          <div slot="title">Finam Trade API</div>
+          <span slot="description">
+            Торговля через брокерский профиль Finam.
+          </span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.FINAM_TRADE_API}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
             alt="Binance"
             style="height: 32px"
             src="${() => ppp.brandSvg('binance')}"

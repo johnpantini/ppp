@@ -540,6 +540,10 @@ export const appStyles = css`
     flex-direction: row;
     padding: 24px 35px 35px;
   }
+
+  ppp-draggable-stack a {
+    text-decoration: none;
+  }
 `;
 
 export class App extends PPPElement {

@@ -474,6 +474,7 @@ class PPP {
           [TRADERS.ALPACA_V2_PLUS]: `${this.rootUrl}/traders/alpaca-v2-plus.js`,
           [TRADERS.BINANCE_V3]: `${this.rootUrl}/traders/binance-v3.js`,
           [TRADERS.UTEX_MARGIN_STOCKS]: `${this.rootUrl}/traders/utex-margin-stocks.js`,
+          [TRADERS.FINAM_TRADE_API]: `${this.rootUrl}/traders/finam-trade-api.js`,
           [TRADERS.PSINA_ALOR_OPENAPI_V2]: document.url,
           [TRADERS.CUSTOM]: document.url
         }[document.type]

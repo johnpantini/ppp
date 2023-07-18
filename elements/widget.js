@@ -193,7 +193,7 @@ export const widgetTable = () => css`
   }
 
   .widget-table th {
-    text-align: left;
+    text-align: right;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -206,17 +206,18 @@ export const widgetTable = () => css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
 
-  .widget-table th + th {
-    border-left: 1px solid
-      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  .widget-table th.empty {
+    width: 3px;
+    padding: 0;
+    min-width: 3px;
   }
 
-  .widget-table th:hover {
-    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  .widget-table th:first-of-type {
+    text-align: left;
   }
 
   .widget-table th > div {
-    text-align: left;
+    text-align: right;
     overflow: hidden;
     font-weight: 500;
     font-size: ${fontSizeWidget};
@@ -224,8 +225,41 @@ export const widgetTable = () => css`
     ${ellipsis()};
   }
 
-  .widget-table th:first-of-type {
+  .widget-table th:first-of-type > div {
     text-align: left;
+  }
+
+  .widget-table th .resize-handle {
+    position: absolute;
+    width: 18px;
+    height: 100%;
+    left: -9px;
+    top: 0;
+    opacity: 0;
+    cursor: col-resize;
+    z-index: 10;
+  }
+
+  .widget-table th .resize-handle::before {
+    position: absolute;
+    content: '';
+    background: ${paletteBlueLight1};
+    width: 3px;
+    height: 26px;
+    left: 8px;
+  }
+
+  .widget-table th .resize-handle:hover {
+    opacity: 1;
+  }
+
+  .widget-table th + th {
+    border-left: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  .widget-table th:hover {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
   }
 
   .widget-table .cell {
@@ -1399,7 +1433,12 @@ export const widgetSearchControlTemplate = html`
                     ${(x) => x.ticker?.fullName[0]}
                   </div>
                 </div>
-                <div class="menu-item-text">${(x) => x.ticker?.fullName}</div>
+                <div
+                  title="${(x) => x.ticker?.fullName}"
+                  class="menu-item-text"
+                >
+                  ${(x) => x.ticker?.fullName}
+                </div>
                 <div class="menu-item-tag">
                   <span>${(x) => x.ticker?.symbol}</span>
                 </div>
@@ -1429,7 +1468,9 @@ export const widgetSearchControlTemplate = html`
                         ${(x) => x.fullName[0]}
                       </div>
                     </div>
-                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div title="${(x) => x.fullName}" class="menu-item-text">
+                      ${(x) => x.fullName}
+                    </div>
                     <div class="menu-item-tag">
                       <span>${(x) => x.symbol}</span>
                     </div>
@@ -1461,7 +1502,9 @@ export const widgetSearchControlTemplate = html`
                         ${(x) => x.fullName[0]}
                       </div>
                     </div>
-                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div title="${(x) => x.fullName}" class="menu-item-text">
+                      ${(x) => x.fullName}
+                    </div>
                     <div class="menu-item-tag">
                       <span>${(x) => x.symbol}</span>
                     </div>
@@ -1493,7 +1536,9 @@ export const widgetSearchControlTemplate = html`
                         ${(x) => x.fullName[0]}
                       </div>
                     </div>
-                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div title="${(x) => x.fullName}" class="menu-item-text">
+                      ${(x) => x.fullName}
+                    </div>
                     <div class="menu-item-tag">
                       <span>${(x) => x.symbol}</span>
                     </div>
@@ -1525,7 +1570,9 @@ export const widgetSearchControlTemplate = html`
                         ${(x) => x.fullName[0]}
                       </div>
                     </div>
-                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div title="${(x) => x.fullName}" class="menu-item-text">
+                      ${(x) => x.fullName}
+                    </div>
                     <div class="menu-item-tag">
                       <span>${(x) => x.symbol}</span>
                     </div>
@@ -3207,6 +3254,19 @@ export class WidgetCard extends PPPElement {
     }
   }
 }
+
+class WidgetColumns {
+  #widget;
+
+  #columns = [];
+
+  constructor({ widget, columns = [] } = {}) {
+    this.#widget = widget;
+    this.#columns = columns;
+  }
+}
+
+export { WidgetColumns };
 
 export default {
   WidgetGroupControlComposition: WidgetGroupControl.compose({

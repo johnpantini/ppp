@@ -78,6 +78,7 @@ export const instrumentsManagePageTemplate = html`
             <ppp-option value="${() => BROKERS.UTEX}">UTEX</ppp-option>
             <ppp-option value="${() => BROKERS.TINKOFF}">Tinkoff</ppp-option>
             <ppp-option value="${() => BROKERS.ALOR}">Alor</ppp-option>
+            <ppp-option value="${() => BROKERS.FINAM}">Finam</ppp-option>
             <ppp-option value="${() => BROKERS.BINANCE}">Binance</ppp-option>
             <ppp-option value="${() => BROKERS.PSINA}">Psina</ppp-option>
           </ppp-select>
