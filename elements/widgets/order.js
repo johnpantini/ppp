@@ -422,7 +422,7 @@ export const orderWidgetTemplate = html`
                             ${(x) => x.text}
                           </ppp-widget-box-radio>
                         `,
-                        { positioning: true, recycle: false }
+                        { positioning: true }
                       )}
                     </ppp-widget-box-radio-group>
                   </div>

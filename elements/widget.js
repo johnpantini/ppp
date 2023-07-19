@@ -779,8 +779,6 @@ export class Widget extends PPPElement {
       }
     }
 
-    Observable.notify(this, 'document');
-
     return ppp.user.functions.updateOne(
       {
         collection: 'workspaces'
