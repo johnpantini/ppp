@@ -24,7 +24,7 @@ import {
   themeConditional
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
-import { hotkey, normalize } from '../design/styles.js';
+import { hotkey, normalize, scrollbars } from '../design/styles.js'
 import {
   workspaces,
   trading,

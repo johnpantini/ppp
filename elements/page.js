@@ -23,8 +23,10 @@ import {
   spacing1,
   spacing2,
   spacing4,
-  spacing3, paletteGrayBase, paletteGrayLight1
-} from '../design/design-tokens.js'
+  spacing3,
+  paletteGrayBase,
+  paletteGrayLight1
+} from '../design/design-tokens.js';
 import {
   PAGE_STATUS,
   SERVER_TYPES,
@@ -129,7 +131,7 @@ export const documentPageHeaderPartial = ({
           <ppp-badge
             ?hidden="${(x) => !x.document.removed}"
             slot="controls"
-            appearance="lightgray"
+            appearance="red"
           >
             Документ удалён
           </ppp-badge>
@@ -212,8 +214,8 @@ export const pageStyles = css`
     flex-flow: row nowrap;
     align-items: center;
     padding: 25px;
-    border-bottom: 1px solid ${themeConditional(paletteGrayLight2,
-            paletteGrayDark2)};
+    border-bottom: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
 
   footer {

@@ -15,7 +15,7 @@ export default function (i18n) {
       settings: 'Параметры',
       bots: 'Боты',
       traders: 'Трейдеры',
-      widgets: 'Виджеты',
+      widgets: 'Шаблоны виджетов',
       workspaces: 'Терминалы'
     },
     $sideNav: {

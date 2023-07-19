@@ -23,17 +23,14 @@ export const widgetSelectorModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-banner
-        class="inline"
-        appearance="warning"
-      >
+      <ppp-banner class="inline" appearance="warning">
         <div
           style="display: ${(x) =>
             !x.isPredefinedWidgetType(x.activeItem) || x.documents.length
               ? 'initial'
               : 'none'}"
         >
-          Найдите виджет в меню сбоку и нажмите на строку в таблице, чтобы
+          Найдите шаблон виджета в списке и нажмите на строку в таблице, чтобы
           разместить в терминале, или
           <a
             class="link"

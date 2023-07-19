@@ -170,6 +170,12 @@ export class QuerySelect extends PPPAppearanceElement {
     return this.options.find((o) => o.value === this.value)?.datum;
   }
 
+  valueChanged(oldValue, newValue) {
+    if (this.$fastController.isConnected) {
+      this.control.value = newValue;
+    }
+  }
+
   #formatter() {
     return (
       this.formatter ??

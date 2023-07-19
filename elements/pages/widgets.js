@@ -13,7 +13,7 @@ export const widgetsPageTemplate = html`
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список виджетов
+        Список шаблонов виджетов
         <ppp-button
           appearance="primary"
           slot="controls"
@@ -22,7 +22,7 @@ export const widgetsPageTemplate = html`
               page: 'widget'
             })}"
         >
-          Добавить виджет
+          Добавить шаблон виджета
         </ppp-button>
       </ppp-page-header>
       <ppp-table

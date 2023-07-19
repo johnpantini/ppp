@@ -14,7 +14,7 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { documentPageHeaderPartial, Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
-import { debounce } from '../../lib/ppp-decorators.js';
+import { debounce, later } from '../../lib/ppp-decorators.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   bodyFont,
@@ -34,6 +34,7 @@ import {
   paletteWhite,
   positive,
   spacing1,
+  spacing2,
   spacing5,
   themeConditional
 } from '../../design/design-tokens.js';
@@ -274,8 +275,8 @@ export const widgetPageTemplate = html`
                             <div slot="text">
                               Лента всех сделок
                               <div class="widget-type-tags">
-                                <ppp-badge appearance="lightgray"
-                                  >Лента обезличенных сделок
+                                <ppp-badge appearance="lightgray">
+                                  Лента обезличенных сделок
                                 </ppp-badge>
                               </div>
                             </div>
@@ -339,7 +340,21 @@ export const widgetPageTemplate = html`
                   <div class="drawer">
                     <div class="drawer-header">
                       <div class="drawer-header-inner">
-                        <h3>Настройки</h3>
+                        <div
+                          class="control-line"
+                          style="justify-content: space-between;"
+                        >
+                          <h3>Настройки</h3>
+                          <ppp-button
+                            style="margin-bottom: 6px;"
+                            ?hidden="${(x) => !x.mounted}"
+                            appearance="primary"
+                            class="xsmall"
+                            @click="${(x) => x.loadTemplateSettings()}"
+                          >
+                            Подставить настройки из шаблона
+                          </ppp-button>
+                        </div>
                       </div>
                     </div>
                     <div class="drawer-body">
@@ -453,6 +468,18 @@ export const widgetPageTemplate = html`
               </form>
             </div>
             <div class="cta-holder">
+              ${when(
+                (x) => x.document.removed,
+                html`
+                  <ppp-badge
+                    style="margin-right: auto"
+                    slot="controls"
+                    appearance="red"
+                  >
+                    Виджет удалён
+                  </ppp-badge>
+                `
+              )}
               <div class="control-line">
                 <ppp-button
                   appearance="primary"
@@ -502,7 +529,8 @@ export const widgetPageTemplate = html`
                         x.autoApplyWidgetModifications.checked
                       )}"
                     ?checked="${() =>
-                      ppp.settings.get('autoApplyWidgetModifications') ?? true}"
+                      ppp.settings.get('autoApplyWidgetModifications') ??
+                      false}"
                   >
                     Применять настройки по мере редактирования
                   </ppp-checkbox>
@@ -528,7 +556,7 @@ export const widgetPageTemplate = html`
                 ${when(
                   (x) => !x.widgetDefinition.title,
                   html`
-                    <span class="positive"> Идёт загрузка, подождите... </span>
+                    <span class="positive">Идёт загрузка, подождите...</span>
                   `
                 )}
               </h2>
@@ -606,7 +634,7 @@ export const widgetPageStyles = css`
   }
 
   h3 {
-    margin-bottom: 10px;
+    margin-bottom: ${spacing2};
   }
 
   .preview-header {
@@ -687,6 +715,7 @@ export const widgetPageStyles = css`
   .cta-holder {
     display: flex;
     width: 100%;
+    align-items: center;
     justify-content: right;
     padding: 24px 0;
   }
@@ -701,10 +730,6 @@ export const widgetPageStyles = css`
     width: 100%;
     border-bottom: 2px solid
       ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
-  }
-
-  .drawer-header-inner {
-    padding-right: 40px;
   }
 
   .drawer-header-inner h3 {
@@ -806,6 +831,9 @@ export class WidgetPage extends Page {
 
   @attr({ mode: 'boolean' })
   resizing;
+
+  @attr({ mode: 'boolean' })
+  mounted;
 
   @observable
   widgetDefinition;
@@ -1035,8 +1063,19 @@ export class WidgetPage extends Page {
 
   async transform() {
     this.denormalization.fillRefs(this.document);
+    this.templateDocument = await this.denormalization.denormalize(
+      this.document
+    );
 
-    return await this.denormalization.denormalize(this.document);
+    if (this.mounted) {
+      return Object.assign(
+        {},
+        this.templateDocument,
+        await this.denormalization.denormalize(this.parentNode.widget.document)
+      );
+    } else {
+      return this.templateDocument;
+    }
   }
 
   async find() {
@@ -1446,6 +1485,8 @@ export class WidgetPage extends Page {
       const name = this.name.value.trim();
 
       this.document.type = event.target.value;
+
+      await later(100);
 
       ppp.app.setURLSearchParams({
         type: this.document.type

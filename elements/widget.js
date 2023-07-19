@@ -11,8 +11,7 @@ import {
   repeat,
   when,
   slotted,
-  Updates,
-  listener
+  Updates
 } from '../vendor/fast-element.min.js';
 import {
   display,
@@ -769,6 +768,18 @@ export class Widget extends PPPElement {
 
   async updateDocumentFragment(widgetUpdateFragment = {}) {
     if (this.preview) return;
+
+    if (widgetUpdateFragment.$set) {
+      for (const key in widgetUpdateFragment.$set) {
+        const prop = key.split('widgets.$.')?.[1];
+
+        if (prop) {
+          this.document[prop] = widgetUpdateFragment.$set[key];
+        }
+      }
+    }
+
+    Observable.notify(this, 'document');
 
     return ppp.user.functions.updateOne(
       {
@@ -2672,6 +2683,8 @@ export class WidgetHeaderButtons extends PPPElement {
 
   async showWidgetSettings() {
     if (!this.widget.preview) {
+      ppp.app.mountPoint.widget = this.widget;
+
       const page = await ppp.app.mountPage('widget', {
         title: `Виджет - ${this.widget.document.name}`,
         size: 'xxlarge',
@@ -2679,8 +2692,24 @@ export class WidgetHeaderButtons extends PPPElement {
         autoRead: true
       });
 
-      const originalSubmitDocument = page.submitDocument;
+      page.setAttribute('origin', 'workspace');
+
       const that = this;
+
+      page.loadTemplateSettings = async () => {
+        if (
+          await ppp.app.confirm(
+            'Подставить настройки из шаблона',
+            'Текущие настройки виджета будут заменены на те, которые были указаны в родительском шаблоне. Подтвердите действие.'
+          )
+        ) {
+          page.document = Object.assign(
+            {},
+            page.document,
+            page.templateDocument
+          );
+        }
+      };
 
       const listener = (event) => {
         if (event.detail?.element) {
@@ -2693,25 +2722,37 @@ export class WidgetHeaderButtons extends PPPElement {
       page.addEventListener('widgetpreviewchange', listener);
 
       page.submitDocument = async function () {
-        await originalSubmitDocument.call(page);
+        page.beginOperation();
 
-        const newWidgetDocument = Object.assign(
-          {},
-          that.widget.document,
-          page.document,
-          {
-            x: parseInt(that.widget.style.left),
-            y: parseInt(that.widget.style.top),
-            width: parseInt(that.widget.style.width),
-            height: parseInt(that.widget.style.height),
-            symbol: that.widget?.instrument?.symbol
+        try {
+          // Implicit validation here. See applyModifications()
+          const { $set } = await page.submit();
+          const newWidgetDocument = Object.assign(
+            {},
+            that.widget.document,
+            page.document
+          );
+          const container = that.widget.container;
+          const updateFragment = {};
+
+          for (const key in $set) {
+            updateFragment[`widgets.$.${key}`] = $set[key];
           }
-        );
 
-        that.widget.remove();
-        that.widget.container.document.widgets.push(newWidgetDocument);
+          await that.widget.updateDocumentFragment({
+            $set: updateFragment
+          });
 
-        return that.widget.container.placeWidget(newWidgetDocument);
+          that.widget.remove();
+          container.document.widgets.push(newWidgetDocument);
+          await container.placeWidget(newWidgetDocument);
+
+          page.showSuccessNotification('Виджет сохранён.');
+        } catch (e) {
+          page.failOperation(e, 'Сохранение виджета');
+        } finally {
+          page.endOperation();
+        }
       };
     }
   }

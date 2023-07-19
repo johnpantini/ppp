@@ -302,6 +302,10 @@ export const toastStyles = css`
     padding-right: 4px;
   }
 
+  .title + div {
+    word-break: break-word;
+  }
+
   .close-icon {
     display: flex;
     position: absolute;

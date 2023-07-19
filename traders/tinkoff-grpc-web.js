@@ -22,7 +22,6 @@ import {
   OrderDirection,
   OrderExecutionReportStatus,
   OrdersServiceDefinition,
-  OrdersStreamServiceDefinition,
   OrderType,
   PriceType
 } from '../vendor/tinkoff/definitions/orders.js';
@@ -30,13 +29,11 @@ import { isAbortError } from '../vendor/abort-controller-x.js';
 import { TradingError } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
 import {
-  InstrumentType,
   OperationsServiceDefinition,
   OperationsStreamServiceDefinition,
   OperationState,
   OperationType
 } from '../vendor/tinkoff/definitions/operations.js';
-import { InstrumentsServiceDefinition } from '../vendor/tinkoff/definitions/instruments.js';
 import { getInstrumentPrecision } from '../lib/intl.js';
 
 // noinspection JSUnusedGlobalSymbols
@@ -348,7 +345,9 @@ class TinkoffGrpcWebTrader extends Trader {
                     toNumber(o.initialSecurityPrice),
                     orderInstrument
                   )
-                : toNumber(o.initialSecurityPrice)) +
+                : +toNumber(o.initialSecurityPrice).toFixed(
+                    getInstrumentPrecision(orderInstrument)
+                  )) +
                 orderInstrument.minPriceIncrement * value
             );
 
@@ -864,7 +863,9 @@ class TinkoffGrpcWebTrader extends Trader {
                   type: item.type,
                   exchange: instrument.exchange,
                   quantity: trade.quantity / instrument.lot,
-                  price: toNumber(trade.price),
+                  price: +toNumber(trade.price).toFixed(
+                    getInstrumentPrecision(instrument)
+                  ),
                   createdAt: trade.date.toISOString(),
                   parentCreatedAt: item.date.toISOString()
                 };
@@ -888,10 +889,10 @@ class TinkoffGrpcWebTrader extends Trader {
             for (const { field, datum } of fields) {
               switch (datum) {
                 case TRADER_DATUM.ORDERBOOK:
-                  let limitDownPrice = toNumber(orderbook.limitDown).toFixed(
+                  let limitDownPrice = +toNumber(orderbook.limitDown).toFixed(
                     getInstrumentPrecision(instrument)
                   );
-                  let limitUpPrice = toNumber(orderbook.limitUp).toFixed(
+                  let limitUpPrice = +toNumber(orderbook.limitUp).toFixed(
                     getInstrumentPrecision(instrument)
                   );
 
@@ -909,7 +910,7 @@ class TinkoffGrpcWebTrader extends Trader {
                   source[field] = {
                     bids: (
                       orderbook?.bids?.map?.((b) => {
-                        const p = toNumber(b.price).toFixed(
+                        const p = +toNumber(b.price).toFixed(
                           getInstrumentPrecision(instrument)
                         );
 
@@ -934,7 +935,7 @@ class TinkoffGrpcWebTrader extends Trader {
                       .sort((a, b) => b.price - a.price),
                     asks: (
                       orderbook?.asks?.map?.((a) => {
-                        const p = toNumber(a.price).toFixed(
+                        const p = +toNumber(a.price).toFixed(
                           getInstrumentPrecision(instrument)
                         );
 
@@ -990,7 +991,9 @@ class TinkoffGrpcWebTrader extends Trader {
           const price =
             instrument.type === 'bond'
               ? this.relativeBondPriceToPrice(toNumber(trade.price), instrument)
-              : toNumber(trade.price);
+              : +toNumber(trade.price).toFixed(
+                  getInstrumentPrecision(instrument)
+                );
 
           return {
             orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
@@ -1035,10 +1038,10 @@ class TinkoffGrpcWebTrader extends Trader {
         }
 
         return {
-          open: toNumber(c.open),
-          high: toNumber(c.high),
-          low: toNumber(c.low),
-          close: toNumber(c.close),
+          open: +toNumber(c.open).toFixed(getInstrumentPrecision(instrument)),
+          high: +toNumber(c.high).toFixed(getInstrumentPrecision(instrument)),
+          low: +toNumber(c.low).toFixed(getInstrumentPrecision(instrument)),
+          close: +toNumber(c.close).toFixed(getInstrumentPrecision(instrument)),
           time: c.time.toISOString(),
           volume: c.volume
         };
@@ -1062,7 +1065,9 @@ class TinkoffGrpcWebTrader extends Trader {
                         toNumber(trade.price),
                         instrument
                       )
-                    : toNumber(trade.price);
+                    : +toNumber(trade.price).toFixed(
+                        getInstrumentPrecision(instrument)
+                      );
 
                 source[field] = {
                   orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
@@ -1117,10 +1122,18 @@ class TinkoffGrpcWebTrader extends Trader {
                   };
                 } else {
                   source[field] = {
-                    open: toNumber(candle.open),
-                    high: toNumber(candle.high),
-                    low: toNumber(candle.low),
-                    close: toNumber(candle.close),
+                    open: +toNumber(candle.open).toFixed(
+                      getInstrumentPrecision(instrument)
+                    ),
+                    high: +toNumber(candle.high).toFixed(
+                      getInstrumentPrecision(instrument)
+                    ),
+                    low: +toNumber(candle.low).toFixed(
+                      getInstrumentPrecision(instrument)
+                    ),
+                    close: +toNumber(candle.close).toFixed(
+                      getInstrumentPrecision(instrument)
+                    ),
                     time: candle.time.toISOString(),
                     volume: candle.volume
                   };
@@ -1171,7 +1184,9 @@ class TinkoffGrpcWebTrader extends Trader {
                   isCurrency: false,
                   isBalance: false,
                   averagePrice: portfolioPosition
-                    ? toNumber(portfolioPosition.averagePositionPrice)
+                    ? +toNumber(portfolioPosition.averagePositionPrice).toFixed(
+                        getInstrumentPrecision(instrument)
+                      )
                     : void 0,
                   size: (security.balance + security.blocked) / instrument.lot,
                   accountId: this.document.account
@@ -1193,7 +1208,9 @@ class TinkoffGrpcWebTrader extends Trader {
                 isCurrency: false,
                 isBalance: false,
                 averagePrice: portfolioPosition
-                  ? toNumber(portfolioPosition.averagePositionPrice)
+                  ? +toNumber(portfolioPosition.averagePositionPrice).toFixed(
+                      getInstrumentPrecision(instrument)
+                    )
                   : void 0,
                 size: (future.balance + future.blocked) / instrument.lot,
                 accountId: this.document.account
@@ -1234,8 +1251,10 @@ class TinkoffGrpcWebTrader extends Trader {
                     this.portfolio.positionsMap.get(sourceFigi);
 
                   if (portfolioPosition) {
-                    source[field] = toNumber(
-                      portfolioPosition.averagePositionPrice
+                    source[field] = +toNumber(
+                      portfolioPosition.averagePositionPrice.toFixed(
+                        getInstrumentPrecision(source.instrument)
+                      )
                     );
                   } else {
                     source[field] = 0;
@@ -1462,7 +1481,9 @@ class TinkoffGrpcWebTrader extends Trader {
                       toNumber(order.initialSecurityPrice),
                       instrument
                     )
-                  : toNumber(order.initialSecurityPrice)
+                  : +toNumber(order.initialSecurityPrice).toFixed(
+                      getInstrumentPrecision(instrument)
+                    )
             };
           }
         }

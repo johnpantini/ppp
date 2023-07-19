@@ -561,14 +561,14 @@ export class WorkspacePage extends Page {
       widgets.push(
         Object.assign(
           {},
-          // Denormalize widget itself
-          await this.denormalization.denormalize(w),
-          // Denormalize everything else.
+          // Denormalize widget template.
           await this.denormalization.denormalize(
             this.document.denormalizedWidgets.find(
               (widget) => widget._id === w._id
             )
-          )
+          ),
+          // Denormalize widget workspace data.
+          await this.denormalization.denormalize(w),
         )
       );
     }
