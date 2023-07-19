@@ -1,8 +1,15 @@
 import ppp from '../../ppp.js';
-import { html, css, Observable, ref } from '../../vendor/fast-element.min.js';
+import {
+  html,
+  css,
+  Observable,
+  ref,
+  Updates
+} from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { ConflictError, validate, invalidate } from '../../lib/ppp-errors.js';
 import '../button.js';
+import '../query-select.js';
 import '../text-field.js';
 
 export const newWorkspaceModalPageTemplate = html`
@@ -18,6 +25,30 @@ export const newWorkspaceModalPageTemplate = html`
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
+          <p class="description">
+            Можно выбрать существующий терминал - из него будут скопированы все
+            виджеты:
+          </p>
+          <ppp-query-select
+            ${ref('workspaceId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
+            value="${(x) => x.document.workspaceId}"
+            :context="${(x) => x}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('workspaces')
+                  .find({
+                    removed: { $ne: true }
+                  })
+                  .sort({ order: 1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
         </div>
       </section>
       <section>
@@ -71,8 +102,13 @@ export class NewWorkspaceModalPage extends Page {
       Observable.notify(ppp, 'workspaces');
 
       this.document = {
-        name: next.name
+        name: next.name,
+        workspaceId: this.workspaceId.value
       };
+
+      Updates.enqueue(() => {
+        location.reload();
+      });
     }
   }
 
@@ -104,10 +140,14 @@ export class NewWorkspaceModalPage extends Page {
   }
 
   async submit() {
+    const workspaceToClone = this.workspaceId.datum();
+
     return {
       $set: {
         name: this.name.value.trim(),
         comment: this.comment.value.trim(),
+        widgets: workspaceToClone ? workspaceToClone.widgets : [],
+        order: ppp.workspaces.length + 1,
         updatedAt: new Date()
       },
       $setOnInsert: {
