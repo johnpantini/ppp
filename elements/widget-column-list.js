@@ -7,7 +7,6 @@ import {
   repeat,
   observable,
   ref,
-  Observable,
   Updates
 } from '../vendor/fast-element.min.js';
 import { drag, plus, trash } from '../static/svg/sprite.js';
@@ -177,6 +176,7 @@ export const widgetColumnListTemplate = html`
             </span>
             <span
               class="line-control-icon remove"
+              ?hidden="${(x, c) => c.parent.columns?.length <= 1}"
               @click="${(column, c) => {
                 const cp = c.event.composedPath();
                 const controlLine = cp[0].closest('.control-line');
