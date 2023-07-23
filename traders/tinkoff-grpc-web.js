@@ -1252,10 +1252,8 @@ class TinkoffGrpcWebTrader extends Trader {
 
                   if (portfolioPosition) {
                     source[field] = +toNumber(
-                      portfolioPosition.averagePositionPrice.toFixed(
-                        getInstrumentPrecision(source.instrument)
-                      )
-                    );
+                      portfolioPosition.averagePositionPrice
+                    ).toFixed(getInstrumentPrecision(source.instrument));
                   } else {
                     source[field] = 0;
                   }

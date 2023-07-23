@@ -69,6 +69,9 @@ class SettingsMap extends Map {
   }
 }
 
+/**
+ * @typedef {Object} PPP
+ */
 class PPP {
   @observable
   workspaces;
@@ -627,6 +630,7 @@ class PPP {
   }
 }
 
+/** @global */
 globalThis.ppp = new PPP(document.documentElement.getAttribute('ppp-app-type'));
 
 export default globalThis.ppp;

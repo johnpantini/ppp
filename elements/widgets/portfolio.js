@@ -1,10 +1,12 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widget,
   widgetEmptyStateTemplate,
   WidgetWithInstrument
 } from '../widget.js';
+import { WidgetColumns } from '../widget-columns.js';
 import {
   html,
   css,
@@ -13,37 +15,49 @@ import {
   observable,
   repeat
 } from '../../vendor/fast-element.min.js';
-import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
-import {
-  currencyName,
-  formatAmount,
-  formatPrice,
-  formatQuantity
-} from '../../lib/intl.js';
-import { ellipsis, normalize } from '../../design/styles.js';
+import { COLUMN_SOURCE, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import { normalize } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
-  darken,
   fontSizeWidget,
   fontWeightWidget,
-  lighten,
-  lineHeightWidget,
-  paletteBlack,
-  paletteGrayBase,
-  paletteGrayDark1,
-  paletteGrayDark2,
-  paletteGrayLight1,
-  paletteGrayLight2,
-  paletteGrayLight3,
-  themeConditional
+  lineHeightWidget
 } from '../../design/design-tokens.js';
-import { drag } from '../../static/svg/sprite.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
 import '../draggable-stack.js';
 import '../query-select.js';
 import '../text-field.js';
+import '../widget-column-list.js';
+
+const DEFAULT_COLUMNS = [
+  {
+    source: COLUMN_SOURCE.INSTRUMENT
+  },
+  {
+    source: COLUMN_SOURCE.SYMBOL
+  },
+  {
+    source: COLUMN_SOURCE.POSITION_AVAILABLE
+  },
+  {
+    source: COLUMN_SOURCE.POSITION_AVERAGE
+  },
+  {
+    source: COLUMN_SOURCE.LAST_PRICE
+  },
+  {
+    source: COLUMN_SOURCE.PL_ABSOLUTE
+  },
+  {
+    source: COLUMN_SOURCE.PL_RELATIVE
+  }
+].map((column) => {
+  column.name = ppp.t(`$const.columnSource.${column.source}`);
+
+  return column;
+});
 
 const portfolioSection = ({ title, section }) =>
   html`
@@ -58,26 +72,18 @@ const portfolioSection = ({ title, section }) =>
           symbol="${(cell) => cell.instrument.symbol}"
           type="${(cell) => cell.instrument.type}"
         >
-          <td class="cell capitalize">
-            <div class="portfolio-row-logo-with-name">
-              <div
-                class="portfolio-row-logo"
-                style="${(cell, c) =>
-                  `background-image:url(${c.parent.searchControl.getInstrumentIconUrl(
-                    cell.instrument
-                  )})`}"
-              ></div>
-              <div class="portfolio-row-name">
-                ${(cell) => cell.instrument.fullName ?? cell.instrument.symbol}
-              </div>
-            </div>
-          </td>
-          <td class="cell">
-            ${(cell) => formatQuantity(cell.size * cell.lot)}
-          </td>
-          <td class="cell">
-            ${(cell) => formatPrice(cell.averagePrice, cell.instrument)}
-          </td>
+          ${repeat(
+            (instrument, c) => c.parent.columns?.array,
+            html`
+              <td
+                class="cell"
+                :datum="${(x, c) => c.parent}"
+                :column="${(x) => x}"
+              >
+                ${(x, c) => c.parentContext.parent.columns.columnElement(x)}
+              </td>
+            `
+          )}
         </tr>
       `
     )}
@@ -108,12 +114,22 @@ export const portfolioWidgetTemplate = html`
             </div>
           </div>
         </div>
-        <table class="portfolio-table">
+        <table class="widget-table">
           <thead>
             <tr>
-              <th>Инструмент</th>
-              <th>Доступно</th>
-              <th>Средняя</th>
+              ${repeat(
+                (x) => x.columns?.array,
+                html`
+                  <th source="${(x) => x.source}">
+                    <div class="resize-handle"></div>
+                    <div>${(x) => x.name}</div>
+                  </th>
+                `
+              )}
+              <th class="empty">
+                <div class="resize-handle"></div>
+                <div></div>
+              </th>
             </tr>
           </thead>
           <tbody @click="${(x, c) => x.handleBalancesTableClick(c)}">
@@ -121,38 +137,23 @@ export const portfolioWidgetTemplate = html`
               <td colspan="1">Валютные балансы</td>
             </tr>
             ${repeat(
-              (x) => x?.balances,
+              (x) => x?.balances ?? [],
               html`
-                <tr class="portfolio-row">
-                  <td class="cell capitalize">
-                    <div class="portfolio-row-logo-with-name">
-                      <div
-                        class="portfolio-row-logo"
-                        style="${(cell) =>
-                          `background-image:url(${
-                            'static/currency/' + cell.symbol + '.svg'
-                          })`}"
-                      ></div>
-                      <div class="portfolio-row-name">
-                        ${(cell) => currencyName(cell.symbol)}
-                      </div>
-                    </div>
-                  </td>
-                  <td class="cell">
-                    <ppp-button
-                      class="xsmall"
-                      ?hidden="${(x, c) => !c.parent.document.hideBalances}"
-                    >
-                      Скрыто
-                    </ppp-button>
-                    <span
-                      class="balance-cell"
-                      ?hidden="${(x, c) => c.parent.document.hideBalances}"
-                    >
-                      ${(cell) => formatAmount(cell.size, cell.symbol)}
-                    </span>
-                  </td>
-                  <td class="cell"></td>
+                <tr class="portfolio-row balance-row">
+                  ${repeat(
+                    (instrument, c) => c.parent.columns?.array,
+                    html`
+                      <td
+                        class="cell"
+                        :datum="${(x, c) => c.parent}"
+                        :column="${(x) => x}"
+                        balance
+                      >
+                        ${(x, c) =>
+                          c.parentContext.parent.columns.columnElement(x)}
+                      </td>
+                    `
+                  )}
                 </tr>
               `
             )}
@@ -224,111 +225,18 @@ export const portfolioWidgetStyles = css`
     justify-content: center;
   }
 
-  .portfolio-table {
-    text-align: left;
-    min-width: 140px;
-    width: 100%;
-    padding: 0;
-    user-select: none;
-    border-collapse: collapse;
-  }
-
-  .portfolio-table th {
-    text-align: right;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    width: 50%;
-    height: 28px;
-    padding: 4px 8px;
-    font-weight: 500;
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    white-space: nowrap;
-    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
-    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-  }
-
-  .portfolio-table th:first-of-type {
-    text-align: left;
-  }
-
-  .portfolio-table .cell {
-    text-align: right;
-    max-width: 134px;
-    padding: 4px 8px;
-    font-variant-numeric: tabular-nums;
-    cursor: pointer;
-    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    white-space: nowrap;
-    position: relative;
-    vertical-align: middle;
-  }
-
-  .portfolio-table .cell ppp-button {
-    position: absolute;
-    z-index: 10;
-    right: 0;
-    top: 3px;
-  }
-
-  .portfolio-table .cell:first-of-type {
-    text-align: left;
-  }
-
-  .portfolio-table .cell.capitalize {
-    text-transform: capitalize;
-  }
-
-  .portfolio-row:nth-of-type(2n) {
-    background-color: ${themeConditional(
-      lighten(paletteGrayLight3, 1),
-      paletteGrayDark2
-    )};
-  }
-
-  .portfolio-row:hover {
-    background-color: ${themeConditional(
-      lighten(paletteGrayLight2, 5),
-      darken(paletteGrayDark1, 10)
-    )};
-  }
-
-  .portfolio-row-logo-with-name {
-    word-wrap: break-word;
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    font-weight: ${fontWeightWidget};
-    display: flex;
-    align-items: center;
-    width: 100%;
-    letter-spacing: 0;
-  }
-
-  .portfolio-row-logo {
-    min-width: 20px;
-    min-height: 20px;
-    height: 20px;
-    width: 20px;
-    padding: 2px;
-    border-radius: 50%;
-    background-size: 100%;
-    margin-right: 10px;
-    color: ${themeConditional(paletteGrayLight1, paletteBlack)};
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
-  }
-
-  .portfolio-row-name {
-    opacity: 1;
-    width: 100%;
-    text-align: left;
-    ${ellipsis()};
+  .balance-row .cell {
+    cursor: default;
   }
 `;
 
 export class PortfolioWidget extends WidgetWithInstrument {
+  /**
+   * @type {WidgetColumns}
+   */
+  @observable
+  columns;
+
   @observable
   portfolioTrader;
 
@@ -374,6 +282,10 @@ export class PortfolioWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    if (!Array.isArray(this.document.columns)) {
+      this.document.columns = DEFAULT_COLUMNS;
+    }
+
     if (!this.document.portfolioTrader) {
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер портфеля.',
@@ -394,6 +306,12 @@ export class PortfolioWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.portfolioTrader;
 
+      this.columns = new WidgetColumns({
+        widget: this,
+        columns: this.document.columns
+      });
+
+      await this.columns.registerColumns();
       this.selectInstrument(this.document.symbol, { isolate: true });
 
       this.portfolioTrader.onError = this.onTraderError.bind(this);
@@ -512,13 +430,15 @@ export class PortfolioWidget extends WidgetWithInstrument {
 
   async validate() {
     await validate(this.container.portfolioTraderId);
+    await this.container.columnList.validate();
   }
 
   async submit() {
     return {
       $set: {
         portfolioTraderId: this.container.portfolioTraderId.value,
-        hideBalances: this.container.hideBalances.checked
+        hideBalances: this.container.hideBalances.checked,
+        columns: this.container.columnList.value
       }
     };
   }
@@ -594,6 +514,17 @@ export async function widgetDefinition() {
         >
           Скрывать валютные балансы
         </ppp-checkbox>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Столбцы таблицы портфеля</h5>
+        </div>
+        <div class="spacing2"></div>
+        <ppp-widget-column-list
+          ${ref('columnList')}
+          :columns="${(x) => x.document.columns?.slice(0) ?? DEFAULT_COLUMNS}"
+          :traders="${(x) => x.document.traders}"
+        ></ppp-widget-column-list>
       </div>
     `
   };

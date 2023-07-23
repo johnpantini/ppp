@@ -36,7 +36,9 @@ import {
   paletteWhite,
   paletteGrayDark3,
   toColorComponents,
-  paletteGrayLight3
+  paletteGrayLight3,
+  positive,
+  negative
 } from './design-tokens.js';
 
 export const normalize = () => css`
@@ -234,6 +236,20 @@ export const emptyState = () => css`
 
   .empty-state ppp-button.large {
     margin: 24px 0;
+  }
+`;
+
+export const widgetColumns = () => css`
+  .positive {
+    color: ${positive};
+  }
+
+  .negative {
+    color: ${negative};
+  }
+
+  .capitalize {
+    text-transform: capitalize;
   }
 `;
 

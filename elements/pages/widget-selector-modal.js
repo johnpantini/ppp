@@ -331,7 +331,8 @@ export class WidgetSelectorModalPage extends Page {
       // Fix for undefined workspace ref (hidden behind "when()" when there are no widgets)
       Updates.enqueue(async () => {
         try {
-          await workspacePage.placeWidget(widget);
+          const widgetElement = await workspacePage.placeWidget(widget);
+
           await ppp.user.functions.updateOne(
             {
               collection: 'workspaces'
@@ -353,6 +354,7 @@ export class WidgetSelectorModalPage extends Page {
           );
 
           this.mountPointModal.setAttribute('hidden', '');
+          widgetElement.setAttribute('dragging', '');
         } finally {
           workspacePage.locked = false;
         }

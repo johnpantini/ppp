@@ -65,7 +65,7 @@ export const listboxOptionStyles = css`
     height: 36px;
     outline: none;
     overflow-wrap: anywhere;
-    padding: 10px 12px;
+    padding: 0 12px;
     user-select: none;
     white-space: nowrap;
   }

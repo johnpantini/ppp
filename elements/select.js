@@ -199,7 +199,7 @@ export const selectStyles = css`
   }
 
   :host([variant="compact"]) .control {
-    min-width: 155px;
+    min-width: 200px;
   }
 
   :host(:hover:not([disabled])) .control:hover {
@@ -234,9 +234,6 @@ export const selectStyles = css`
     overflow-y: auto;
     width: 100%;
     z-index: 1;
-  }
-
-  :host([variant="compact"]) .listbox {
   }
 
   .listbox[hidden] {

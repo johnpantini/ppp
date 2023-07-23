@@ -43,7 +43,7 @@ export const querySelectTemplate = html`
       ?deselectable="${(x) => x.deselectable}"
       ${ref('control')}
       ?disabled="${(x) => x.disabled}"
-      placeholder="${(x) => x.placeholder ?? 'Нажмите, чтобы выбрать'}"
+      placeholder="${(x) => x.placeholder ?? 'Нажмите для выбора'}"
     >
       <div class="indicator" slot="indicator">
         ${when(
@@ -60,7 +60,7 @@ export const querySelectTemplate = html`
         )}
       </div>
       <ppp-loading-option :value="${() => void 0}">
-        ${(x) => x.placeholder ?? 'Нажмите, чтобы выбрать'}
+        ${(x) => x.placeholder ?? 'Нажмите для выбора'}
       </ppp-loading-option>
       ${repeat(
         (x) => x.options,
@@ -247,8 +247,10 @@ export class QuerySelect extends PPPAppearanceElement {
   }
 
   appearanceChanged(prev, next) {
-    this.control.appearance = next;
-    this.control.errorMessage = this.errorMessage;
+    if (this.$fastController.isConnected) {
+      this.control.appearance = next;
+      this.control.errorMessage = this.errorMessage;
+    }
   }
 
   preloadedChanged(prev, next) {

@@ -484,14 +484,7 @@ export const widgetPageTemplate = html`
                 <ppp-button
                   appearance="primary"
                   class="save-widget"
-                  @click="${async (x) => {
-                    try {
-                      await x.applyModifications();
-                      Updates.enqueue(() => x.submitDocument());
-                    } catch (e) {
-                      x.failOperation(e);
-                    }
-                  }}"
+                  @click="${(x) => x.submitDocument()}"
                 >
                   ${(x) =>
                     x.document.type === 'custom' &&
@@ -500,7 +493,7 @@ export const widgetPageTemplate = html`
                       : 'Сохранить виджет'}
                 </ppp-button>
                 <ppp-button
-                  ?hidden="${(x) => !x.document._id}"
+                  ?hidden="${(x) => !x.document._id || x.mounted}"
                   ?disabled="${(x) => !x.isSteady() || x.document.removed}"
                   appearance="danger"
                   @click="${(x) => x.cleanupAndRemoveDocument()}"
@@ -780,6 +773,12 @@ export const widgetPageStyles = css`
     margin-top: 8px;
   }
 
+  /* prettier-ignore */
+
+  .widget-settings-section .control-line ppp-query-select[appearance="error"] + ppp-button {
+    margin-top: -16px;
+  }
+
   .divider {
     border: none;
     margin: 20px 0;
@@ -925,6 +924,12 @@ export class WidgetPage extends Page {
       await validate(this.name);
     }
 
+    if (this.document.type === 'custom' && !this.widgetDefinition.loaded) {
+      await this.loadWidget();
+
+      return;
+    }
+
     if (typeof this.widgetDefinition?.customElement !== 'object') {
       invalidate(this.url, {
         errorMessage: 'Этот виджет не может быть загружен.',
@@ -950,8 +955,9 @@ export class WidgetPage extends Page {
       }
     }
 
-    if (typeof this.widgetElement?.validate === 'function')
+    if (typeof this.widgetElement?.validate === 'function') {
       return this.widgetElement.validate();
+    }
   }
 
   async read() {
@@ -1088,6 +1094,23 @@ export class WidgetPage extends Page {
   canSubmit(event) {
     // Disable submission from widget
     return !this.shadowRoot.activeElement?.closest?.('.widget-area');
+  }
+
+  async submitDocument(options = {}) {
+    try {
+      await this.validate();
+      await this.applyModifications();
+    } catch (e) {
+      this.failOperation(e);
+
+      // Skip second validation.
+      return;
+    } finally {
+      this.endOperation();
+    }
+
+    await later(100);
+    await super.submitDocument(options);
   }
 
   async submit() {
@@ -1234,7 +1257,6 @@ export class WidgetPage extends Page {
 
   async applyModifications() {
     this.beginOperation();
-
     await this.onChangeDelayedAsync();
   }
 
@@ -1256,13 +1278,13 @@ export class WidgetPage extends Page {
       }
 
       if (typeof this.widgetElement?.submit === 'function') {
-        const updates = await this.widgetElement?.submit({ preview: true });
+        const { $set } = await this.widgetElement?.submit({ preview: true });
 
         documentAfterChanges = await this.denormalization.denormalize(
           Object.assign(
             {},
             this.document,
-            updates.$set ?? {},
+            $set ?? {},
             {
               name: this.name.value
             },
@@ -1285,16 +1307,7 @@ export class WidgetPage extends Page {
       this.document = Object.assign({}, documentAfterChanges ?? {});
 
       if (!this.document._id) {
-        this.document = await this.denormalizePartialDocument();
-      }
-
-      if (
-        !(
-          this.document.type === 'custom' &&
-          /migration/i.test(this.document.url)
-        )
-      ) {
-        await validate(this.name);
+        this.document = await this.#denormalizePartialDocument();
       }
 
       if (this.url?.isConnected && this.document.type === 'custom') {
@@ -1317,10 +1330,6 @@ export class WidgetPage extends Page {
 
       if (this.document.type === 'custom' && !this.widgetDefinition.loaded) {
         await this.loadWidget();
-        // Do not validate here, just continue
-      } else {
-        if (typeof this.widgetElement?.validate === 'function')
-          await this.widgetElement.validate();
       }
     } finally {
       this.widgetPreview?.shadowRoot.firstChild &&
@@ -1337,10 +1346,10 @@ export class WidgetPage extends Page {
   onChangeDelayed(event) {
     this.beginOperation();
 
-    return void this.onChangeDelayedAsync(event);
+    return this.onChangeDelayedAsync(event);
   }
 
-  async denormalizePartialDocument() {
+  async #denormalizePartialDocument() {
     const lines = ((context) => {
       return context.services
         .get('mongodb-atlas')

@@ -60,7 +60,7 @@ import '../text-field.js';
 
 const decSeparator = decimalSeparator();
 
-const level1TraderCondition = function ({ instrument }) {
+export const level1TraderCondition = function ({ instrument }) {
   if (instrument?.currency === 'USD' || instrument?.currency === 'USDT') {
     const exchanges = [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS];
 

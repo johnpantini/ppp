@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import { PPPElement, PPPOffClickElement } from '../lib/ppp-element.js';
 import {
   attr,
@@ -96,9 +97,9 @@ import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
-import ppp from '../ppp.js';
+import { later } from '../lib/ppp-decorators.js'
 
-export const importInstrumentsSuggestion = (e) => html`
+export const importInstrumentsSuggestionTemplate = (e) => html`
   <span>
     <a
       class="link"
@@ -126,7 +127,7 @@ export const importInstrumentsSuggestion = (e) => html`
   </span>
 `;
 
-export const staleInstrumentCacheSuggestion = (e) => html`
+export const staleInstrumentCacheSuggestionTemplate = (e) => html`
   <span>
     Локальные инструменты устарели, необходима
     <a
@@ -263,7 +264,6 @@ export const widgetTable = () => css`
 
   .widget-table .cell {
     text-align: right;
-    max-width: 134px;
     padding: 4px 8px;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
@@ -286,10 +286,6 @@ export const widgetTable = () => css`
     text-align: left;
   }
 
-  .widget-table .cell.capitalize {
-    text-transform: capitalize;
-  }
-
   .portfolio-row:nth-of-type(2n) {
     background-color: ${themeConditional(
       lighten(paletteGrayLight3, 1),
@@ -302,37 +298,6 @@ export const widgetTable = () => css`
       lighten(paletteGrayLight2, 5),
       darken(paletteGrayDark1, 10)
     )};
-  }
-
-  .portfolio-row-logo-with-name {
-    word-wrap: break-word;
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    font-weight: ${fontWeightWidget};
-    display: flex;
-    align-items: center;
-    width: 100%;
-    letter-spacing: 0;
-  }
-
-  .portfolio-row-logo {
-    min-width: 20px;
-    min-height: 20px;
-    height: 20px;
-    width: 20px;
-    padding: 2px;
-    border-radius: 50%;
-    background-size: 100%;
-    margin-right: 10px;
-    color: ${themeConditional(paletteGrayLight1, paletteBlack)};
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
-  }
-
-  .portfolio-row-name {
-    opacity: 1;
-    width: 100%;
-    text-align: left;
-    ${ellipsis()};
   }
 `;
 
@@ -717,7 +682,7 @@ export class Widget extends PPPElement {
         }px`;
       }
 
-      this.style.maxHeight = `1024px`;
+      this.style.maxHeight = `445px`;
       this.style.minHeight = `${this.widgetDefinition.minHeight ?? 120}px`;
 
       if (this.container.savedHeight > 0)
@@ -737,13 +702,13 @@ export class Widget extends PPPElement {
     if (e instanceof NoInstrumentsError) {
       return this.notificationsArea.note({
         title,
-        text: importInstrumentsSuggestion(e),
+        text: importInstrumentsSuggestionTemplate(e),
         keep: true
       });
     } else if (e instanceof StaleInstrumentCacheError) {
       return this.notificationsArea.note({
         title,
-        text: staleInstrumentCacheSuggestion(e),
+        text: staleInstrumentCacheSuggestionTemplate(e),
         keep: true
       });
     } else {
@@ -2723,7 +2688,19 @@ export class WidgetHeaderButtons extends PPPElement {
         page.beginOperation();
 
         try {
-          // Implicit validation here. See applyModifications()
+          try {
+            await page.validate();
+            await later(100);
+            await page.applyModifications();
+          } catch (e) {
+            this.failOperation(e);
+
+            // Skip second validation.
+            return;
+          } finally {
+            this.endOperation();
+          }
+
           const { $set } = await page.submit();
           const newWidgetDocument = Object.assign(
             {},
@@ -3293,19 +3270,6 @@ export class WidgetCard extends PPPElement {
     }
   }
 }
-
-class WidgetColumns {
-  #widget;
-
-  #columns = [];
-
-  constructor({ widget, columns = [] } = {}) {
-    this.#widget = widget;
-    this.#columns = columns;
-  }
-}
-
-export { WidgetColumns };
 
 export default {
   WidgetGroupControlComposition: WidgetGroupControl.compose({

@@ -649,7 +649,7 @@ export class WorkspacePage extends Page {
         widgetDocument.widgetElement = this.workspace.appendChild(domElement);
       });
 
-      resolve();
+      resolve(domElement);
     });
   }
 }

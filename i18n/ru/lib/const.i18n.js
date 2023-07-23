@@ -39,6 +39,8 @@ export default function (i18n) {
         [BROKERS.BYBIT]: 'Bybit'
       },
       columnSource: {
+        [COLUMN_SOURCE.INSTRUMENT]: 'Инструмент',
+        [COLUMN_SOURCE.SYMBOL]: 'Тикер',
         [COLUMN_SOURCE.BEST_BID]: 'Bid',
         [COLUMN_SOURCE.BEST_ASK]: 'Ask',
         [COLUMN_SOURCE.LAST_PRICE]: 'Цена',
@@ -46,12 +48,8 @@ export default function (i18n) {
         [COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены, %',
         [COLUMN_SOURCE.PL_ABSOLUTE]: 'Доход',
         [COLUMN_SOURCE.PL_RELATIVE]: 'Доход, %',
-        [COLUMN_SOURCE.PL_DAY_ABSOLUTE]: 'За день',
-        [COLUMN_SOURCE.PL_DAY_RELATIVE]: 'За день, %',
         [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
         [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
-        [COLUMN_SOURCE.URL]: 'URL',
-        [COLUMN_SOURCE.WORKER]: 'Worker'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

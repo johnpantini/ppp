@@ -380,18 +380,6 @@ export const pageStyles = css`
   .implementation-area ppp-banner .label-group {
     padding-bottom: 8px;
   }
-
-  .drag-handle {
-    width: 16px;
-    height: 16px;
-    cursor: grab;
-    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-  }
-
-  .dragging .draggable,
-  .dragging .drag-handle {
-    cursor: grabbing;
-  }
 `;
 
 class ScratchMap extends Map {
