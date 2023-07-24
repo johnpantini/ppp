@@ -218,7 +218,7 @@ export class Radio extends PPPElement {
 
   checkedChanged(prev) {
     if (prev !== undefined) {
-      this.$emit('change');
+      this.$emit('change', this);
     }
   }
 }

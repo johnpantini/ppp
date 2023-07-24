@@ -174,7 +174,7 @@ export class Checkbox extends PPPElement {
   }
 
   checkedChanged() {
-    this.$emit('change');
+    this.$emit('change', this);
   }
 }
 

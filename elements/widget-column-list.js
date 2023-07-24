@@ -238,7 +238,6 @@ export const widgetColumnListStyles = css`
   .control-stack {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 16px;
   }
 

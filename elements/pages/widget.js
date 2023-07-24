@@ -523,7 +523,7 @@ export const widgetPageTemplate = html`
                       )}"
                     ?checked="${() =>
                       ppp.settings.get('autoApplyWidgetModifications') ??
-                      false}"
+                      true}"
                   >
                     Применять настройки по мере редактирования
                   </ppp-checkbox>
@@ -1240,16 +1240,19 @@ export class WidgetPage extends Page {
   }
 
   onChange(event) {
+    const cp = event.composedPath();
+    const isTextFiled = cp.find((n) =>
+      /ppp-text|ppp-snippet/i.test(n.tagName?.toLowerCase())
+    );
+
+    if (!event.detail && !isTextFiled) {
+      return;
+    }
+
     if (!this.autoApplyWidgetModifications.checked) return true;
 
-    const cp = event.composedPath();
-
     // Discard input onChange
-    if (
-      event.type === 'change' &&
-      cp.find((n) => n.tagName?.toLowerCase()?.startsWith('ppp-text'))
-    )
-      return true;
+    if (event.type === 'change' && isTextFiled) return true;
 
     if (cp.find((n) => n.classList?.contains('widget-area'))) return true;
 
