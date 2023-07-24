@@ -519,7 +519,7 @@ export async function widgetDefinition() {
         <div class="spacing2"></div>
         <ppp-widget-column-list
           ${ref('columnList')}
-          :columns="${(x) => x.document.columns.slice(0) ?? DEFAULT_COLUMNS}"
+          :columns="${(x) => x.document.columns?.slice(0) ?? DEFAULT_COLUMNS}"
           :traders="${(x) => x.document.traders}"
         ></ppp-widget-column-list>
       </div>
