@@ -35,7 +35,8 @@ import {
   sell,
   themeConditional,
   toColorComponents,
-  lighten
+  lighten,
+  lineHeightWidget
 } from '../../design/design-tokens.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { AsyncFunction } from '../../vendor/fast-utilities.js';
@@ -240,6 +241,7 @@ export const timeAndSalesWidgetStyles = css`
     background: transparent;
     cursor: pointer;
     font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
     ${ellipsis()};
   }
 
@@ -304,7 +306,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     return this.broadcastPrice(price);
   }
 
-  async getThreshold() {
+  async getThreshold(print) {
     const threshold = +this.document.threshold.toString().replace(',', '.');
 
     if (!isNaN(threshold) && typeof threshold === 'number') {
@@ -312,8 +314,9 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     } else {
       const evaluated = await new AsyncFunction(
         'widget',
+        'print',
         await new Tmpl().render(this, this.document.threshold, {})
-      )(this);
+      )(this, print);
 
       if (isNaN(evaluated) || typeof evaluated !== 'number') {
         return 0;
@@ -324,7 +327,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async printChanged(oldValue, newValue) {
-    const threshold = await this.getThreshold();
+    const threshold = await this.getThreshold(newValue);
 
     if (newValue?.price) {
       if (typeof threshold === 'number' && newValue?.volume < threshold) {
@@ -366,18 +369,20 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         this.instrumentTrader.supportsInstrument(this.instrument)
       ) {
         try {
-          const threshold = await this.getThreshold();
+          const trades = [];
 
-          this.trades = (
-            await this.tradesTrader.allTrades({
-              instrument: this.instrument,
-              depth: this.document.depth
-            })
-          )?.filter((t) => {
-            if (typeof threshold === 'number') {
-              return t.volume >= threshold;
-            } else return true;
-          });
+          for (const print of (await this.tradesTrader.allTrades({
+            instrument: this.instrument,
+            depth: this.document.depth
+          })) ?? []) {
+            const threshold = await this.getThreshold(print);
+
+            if (typeof threshold === 'number' && print.volume >= threshold) {
+              trades.push(print);
+            }
+          }
+
+          this.trades = trades;
         } catch (e) {
           console.error(e);
 

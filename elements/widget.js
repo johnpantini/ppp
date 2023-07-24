@@ -97,7 +97,7 @@ import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
-import { later } from '../lib/ppp-decorators.js'
+import { later } from '../lib/ppp-decorators.js';
 
 export const importInstrumentsSuggestionTemplate = (e) => html`
   <span>
@@ -2676,7 +2676,9 @@ export class WidgetHeaderButtons extends PPPElement {
 
       const listener = (event) => {
         if (event.detail?.element) {
-          event.detail.element.instrument = that.widget?.instrument;
+          setTimeout(() => {
+            event.detail.element.instrument = that.widget?.instrument;
+          }, 100);
         }
 
         page.removeEventListener('widgetpreviewchange', listener);

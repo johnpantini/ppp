@@ -29,7 +29,7 @@ import { ellipsis, normalize, spacing } from '../../design/styles.js';
 import {
   buy,
   fontSizeWidget,
-  lighten,
+  lighten, lineHeightWidget,
   negative,
   paletteBlack,
   paletteBlueBase,
@@ -43,7 +43,7 @@ import {
   sell,
   themeConditional,
   toColorComponents
-} from '../../design/design-tokens.js';
+} from '../../design/design-tokens.js'
 import { validate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
@@ -297,6 +297,7 @@ export const orderbookWidgetStyles = css`
     background: transparent;
     cursor: pointer;
     font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
     ${ellipsis()};
   }
 
