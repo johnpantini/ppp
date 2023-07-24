@@ -198,7 +198,7 @@ export const selectStyles = css`
     cursor: pointer;
   }
 
-  :host([variant="compact"]) .control {
+  :host([variant='compact']) .control {
     min-width: 200px;
   }
 
@@ -402,10 +402,13 @@ export class Select extends ListboxElement {
     if (this.$fastController.isConnected && this.options) {
       this.update();
 
-      this.$emit('change', this, {
-        bubbles: true,
-        composed: undefined
-      });
+      if (/query-select/i.test(this.getRootNode().host?.tagName)) {
+        this.$emit('change', this, {
+          composed: void 0
+        });
+      } else {
+        this.$emit('change', this);
+      }
     }
   }
 

@@ -23,7 +23,7 @@ export const widgetColumnListTemplate = html`
   <template>
     <ppp-draggable-stack class="control-stack" ${ref('dragList')}>
       ${repeat(
-        (x) => x.columns?.filter?.(Boolean) ?? [],
+        (x) => x.columns ?? [],
         html`
           <div class="control-line draggable">
             <div class="control-stack">
@@ -169,6 +169,11 @@ export const widgetColumnListTemplate = html`
 
                 Updates.enqueue(() => {
                   c.parent.columns = value;
+
+                  c.parent.$emit('columnadd', {
+                    source: c.parent,
+                    index
+                  });
                 });
               }}"
             >
@@ -198,13 +203,18 @@ export const widgetColumnListTemplate = html`
                     icon.removeAttribute('hidden');
                   }
                 });
+
+                c.parent.$emit('columnremove', {
+                  source: c.parent,
+                  index
+                });
               }}"
             >
               ${html.partial(trash)}
             </span>
           </div>
         `,
-        { recycle: false }
+        { recycle: true }
       )}
     </ppp-draggable-stack>
   </template>

@@ -859,6 +859,8 @@ export class WidgetPage extends Page {
   disconnectedCallback() {
     this.removeEventListener('change', this.onChange);
     this.removeEventListener('input', this.onChange);
+    this.removeEventListener('columnadd', this.onChange);
+    this.removeEventListener('columnremove', this.onChange);
     document.removeEventListener('pointerdown', this.onPointerDown);
     document.removeEventListener('pointerup', this.onPointerUp);
     document.removeEventListener('pointermove', this.onPointerMove);
@@ -1342,7 +1344,7 @@ export class WidgetPage extends Page {
     }
   }
 
-  @debounce(1000)
+  @debounce(100)
   onChangeDelayed(event) {
     this.beginOperation();
 
@@ -1475,11 +1477,10 @@ export class WidgetPage extends Page {
         }
 
         Observable.notify(this, 'document');
-
-        Updates.enqueue(() => {
-          this.addEventListener('change', this.onChange);
-          this.addEventListener('input', this.onChange);
-        });
+        this.addEventListener('change', this.onChange);
+        this.addEventListener('input', this.onChange);
+        this.addEventListener('columnadd', this.onChange);
+        this.addEventListener('columnremove', this.onChange);
       }
     }
   }

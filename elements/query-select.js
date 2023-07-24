@@ -163,7 +163,7 @@ export class QuerySelect extends PPPAppearanceElement {
 
     if (this.value) this.appearance = 'default';
 
-    this.$emit('change');
+    this.$emit('change', this);
   }
 
   datum() {
