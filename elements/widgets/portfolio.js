@@ -372,53 +372,50 @@ export class PortfolioWidget extends WidgetWithInstrument {
     );
   }
 
+  #arePositionsEqual(p1 = {}, p2 = {}) {
+    return (
+      p1.accountId === p2.accountId &&
+      p1.averagePrice === p2.averagePrice &&
+      p1.exchange === p2.exchange &&
+      p1.isBalance === p2.isBalance &&
+      p1.isCurrency === p2.isCurrency &&
+      p1.size === p2.size &&
+      p1.lot === p2.lot &&
+      p1.symbol === p2.symbol
+    );
+  }
+
   positionChanged(oldValue, newValue) {
     if (newValue) {
       if (newValue.isBalance) {
-        if (newValue.size !== 0)
-          this.balancesMap.set(newValue.symbol, newValue);
-        else this.balancesMap.delete(newValue.symbol);
+        const existing = this.balancesMap.get(newValue.symbol);
 
-        this.balances = this.portfolioMapToArray(this.balancesMap);
+        if (!this.#arePositionsEqual(existing, newValue)) {
+          if (newValue.size !== 0)
+            this.balancesMap.set(newValue.symbol, newValue);
+          else this.balancesMap.delete(newValue.symbol);
+
+          this.balances = this.portfolioMapToArray(this.balancesMap);
+        }
       } else if (!newValue.instrument?.type) {
-        if (newValue.size !== 0) this.zombiesMap.set(newValue.symbol, newValue);
-        else this.zombiesMap.delete(newValue.symbol);
+        const existing = this.zombiesMap.get(newValue.symbol);
 
-        this.zombies = this.portfolioMapToArray(this.zombiesMap);
+        if (!this.#arePositionsEqual(existing, newValue)) {
+          if (newValue.size !== 0)
+            this.zombiesMap.set(newValue.symbol, newValue);
+          else this.zombiesMap.delete(newValue.symbol);
+
+          this.zombies = this.portfolioMapToArray(this.zombiesMap);
+        }
       } else {
-        switch (newValue.instrument.type) {
-          case 'stock':
-            if (newValue.size !== 0)
-              this.stocksMap.set(newValue.symbol, newValue);
-            else this.stocksMap.delete(newValue.symbol);
+        const map = this[`${newValue.instrument.type}sMap`];
+        const existing = map.get(newValue.symbol);
 
-            this.stocks = this.portfolioMapToArray(this.stocksMap);
+        if (!this.#arePositionsEqual(existing, newValue)) {
+          if (newValue.size !== 0) map.set(newValue.symbol, newValue);
+          else map.delete(newValue.symbol);
 
-            break;
-          case 'etf':
-            if (newValue.size !== 0)
-              this.etfsMap.set(newValue.symbol, newValue);
-            else this.etfsMap.delete(newValue.symbol);
-
-            this.etfs = this.portfolioMapToArray(this.etfsMap);
-
-            break;
-          case 'bond':
-            if (newValue.size !== 0)
-              this.bondsMap.set(newValue.symbol, newValue);
-            else this.bondsMap.delete(newValue.symbol);
-
-            this.bonds = this.portfolioMapToArray(this.bondsMap);
-
-            break;
-          case 'future':
-            if (newValue.size !== 0)
-              this.futuresMap.set(newValue.symbol, newValue);
-            else this.futuresMap.delete(newValue.symbol);
-
-            this.futures = this.portfolioMapToArray(this.futuresMap);
-
-            break;
+          this[`${newValue.instrument.type}s`] = this.portfolioMapToArray(map);
         }
       }
     }
