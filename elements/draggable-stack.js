@@ -134,7 +134,7 @@ export class DraggableStack extends PPPElement {
       this.dragging = true;
       this.#makeDragItem(dragHandle.closest('.draggable'));
       this.onMove(e);
-      this.$emit('dragstart');
+      this.$emit('pppdragstart', this);
     }
   }
 
@@ -145,7 +145,7 @@ export class DraggableStack extends PPPElement {
     this.#trashDragItem();
 
     if (wasDragging) {
-      this.$emit('pppdragend');
+      this.$emit('pppdragend', this);
     }
   }
 

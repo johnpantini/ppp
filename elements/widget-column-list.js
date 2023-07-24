@@ -7,7 +7,8 @@ import {
   repeat,
   observable,
   ref,
-  Updates
+  Updates,
+  Observable
 } from '../vendor/fast-element.min.js';
 import { drag, plus, trash } from '../static/svg/sprite.js';
 import { COLUMN_SOURCE } from '../lib/const.js';
@@ -21,9 +22,23 @@ import './draggable-stack.js';
 
 export const widgetColumnListTemplate = html`
   <template>
-    <ppp-draggable-stack class="control-stack" ${ref('dragList')}>
+    <ppp-draggable-stack
+      class="control-stack"
+      @pppdragend="${(x) => {
+        const value = structuredClone(x.value);
+
+        x.columns = [];
+
+        Updates.enqueue(() => {
+          x.columns = value;
+        });
+      }}"
+      ${ref('dragList')}
+    >
       ${repeat(
-        (x) => x.columns ?? [],
+        (x) => {
+          return x.columns;
+        },
         html`
           <div class="control-line draggable">
             <div class="control-stack">
@@ -213,8 +228,7 @@ export const widgetColumnListTemplate = html`
               ${html.partial(trash)}
             </span>
           </div>
-        `,
-        { recycle: true }
+        `
       )}
     </ppp-draggable-stack>
   </template>

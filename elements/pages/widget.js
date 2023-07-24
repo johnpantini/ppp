@@ -861,6 +861,7 @@ export class WidgetPage extends Page {
     this.removeEventListener('input', this.onChange);
     this.removeEventListener('columnadd', this.onChange);
     this.removeEventListener('columnremove', this.onChange);
+    this.removeEventListener('pppdragend', this.onChange);
     document.removeEventListener('pointerdown', this.onPointerDown);
     document.removeEventListener('pointerup', this.onPointerUp);
     document.removeEventListener('pointermove', this.onPointerMove);
@@ -1481,6 +1482,7 @@ export class WidgetPage extends Page {
         this.addEventListener('input', this.onChange);
         this.addEventListener('columnadd', this.onChange);
         this.addEventListener('columnremove', this.onChange);
+        this.addEventListener('pppdragend', this.onChange);
       }
     }
   }
