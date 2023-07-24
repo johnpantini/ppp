@@ -725,6 +725,20 @@ class AlorOpenAPIV2Trader extends Trader {
 
     // Broadcast data for instrument-agnostic global datum subscriptions.
     switch (datum) {
+      case TRADER_DATUM.BEST_BID:
+      case TRADER_DATUM.BEST_ASK:
+      case TRADER_DATUM.LAST_PRICE:
+      case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
+      case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE: {
+        for (const [_, { lastQuotesData }] of this.refs.quotes) {
+          this.onQuotesMessage({
+            data: lastQuotesData
+          });
+        }
+
+        break;
+      }
+
       case TRADER_DATUM.POSITION:
       case TRADER_DATUM.POSITION_SIZE:
       case TRADER_DATUM.POSITION_AVERAGE: {

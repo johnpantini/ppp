@@ -15,7 +15,7 @@ export const columnTemplate = html`
         <span
           class="${(x) => (x.pl > 0 ? 'positive' : x.pl < 0 ? 'negative' : '')}"
         >
-          ${(cell) => formatRelativeChange(cell.pl, cell.datum?.instrument)}
+          ${(cell) => formatRelativeChange(cell.pl)}
         </span>
       `
     )}
