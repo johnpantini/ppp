@@ -94,6 +94,7 @@ import { Button, buttonStyles, buttonTemplate } from './button.js';
 import { RadioGroup, radioGroupTemplate } from './radio-group.js';
 import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
 import {
+  AuthorizationError,
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
@@ -711,6 +712,12 @@ export class Widget extends PPPElement {
         text: staleInstrumentCacheSuggestionTemplate(e),
         keep: true
       });
+    } else if (e instanceof AuthorizationError) {
+      return this.notificationsArea.error({
+        title,
+        text: 'Ошибка авторизации, проверьте ключи и пароли.',
+        keep: true
+      });
     } else {
       console.error(e);
 
@@ -749,6 +756,7 @@ export class Widget extends PPPElement {
         collection: 'workspaces'
       },
       {
+        _id: ppp.app.params().document,
         'widgets.uniqueID': this.document.uniqueID
       },
       widgetUpdateFragment,
@@ -841,10 +849,16 @@ export class WidgetWithInstrument extends Widget {
     return adoptedInstrument;
   }
 
-  instrumentChanged() {
+  instrumentChanged(oldValue, newValue) {
     if (this.searchControl) {
       Observable.notify(this.searchControl, 'widget');
     }
+
+    this.$emit('instrumentchange', {
+      source: this,
+      oldValue,
+      newValue
+    });
 
     if (this.preview) return;
 
@@ -874,6 +888,7 @@ export class WidgetWithInstrument extends Widget {
                 bulkWritePayload.push({
                   updateOne: {
                     filter: {
+                      _id: ppp.app.params().document,
                       'widgets.uniqueID': w.document.uniqueID
                     },
                     update: {
@@ -895,6 +910,7 @@ export class WidgetWithInstrument extends Widget {
       bulkWritePayload.push({
         updateOne: {
           filter: {
+            _id: ppp.app.params().document,
             'widgets.uniqueID': this.document.uniqueID
           },
           update: {
@@ -906,7 +922,7 @@ export class WidgetWithInstrument extends Widget {
         }
       });
 
-      void ppp.user.functions.bulkWrite(
+      return ppp.user.functions.bulkWrite(
         {
           collection: 'workspaces'
         },

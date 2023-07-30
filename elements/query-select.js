@@ -59,7 +59,13 @@ export const querySelectTemplate = html`
           html`<span class="error-icon">${html.partial(warning)}</span>`
         )}
       </div>
-      <ppp-loading-option :value="${() => void 0}">
+      <ppp-loading-option
+        :value="${() => void 0}"
+        :pppContent="${(x) =>
+          html`<span class="placeholder"
+            >${() => x.placeholder ?? 'Нажмите для выбора'}</span
+          >`}"
+      >
         ${(x) => x.placeholder ?? 'Нажмите для выбора'}
       </ppp-loading-option>
       ${repeat(

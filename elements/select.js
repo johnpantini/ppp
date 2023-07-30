@@ -20,6 +20,7 @@ import { startSlotTemplate } from '../vendor/fast-patterns.js';
 import { caretDown, warning } from '../static/svg/sprite.js';
 import {
   bodyFont,
+  darken,
   fontSizeBody1,
   fontWeightBody1,
   lineHeightBody1,
@@ -85,7 +86,7 @@ export const selectTemplate = html`
           ${startSlotTemplate()}
           <slot name="button-container">
             <div class="selected-value" part="selected-value">
-              <slot name="selected-value">${(x) => x.displayValue}</slot>
+              <slot name="selected-value">${(x) => x?.displayValue}</slot>
             </div>
             ${when(
               (x) => x.appearance === 'error' && x.errorMessage,
@@ -302,6 +303,13 @@ export const selectStyles = css`
     border-color: ${themeConditional(paletteRedBase, paletteRedLight1)};
     padding-right: 10px;
   }
+
+  span.placeholder {
+    color: ${themeConditional(
+      paletteGrayLight1,
+      darken(paletteGrayLight1, 60)
+    )};
+  }
 `;
 
 export let SelectPosition;
@@ -393,7 +401,9 @@ export class Select extends ListboxElement {
       this.setSelectedOptions();
 
       this.displayValue = this.firstSelectedOption
-        ? this.firstSelectedOption.textContent ?? this.firstSelectedOption.value
+        ? this.firstSelectedOption.pppContent ??
+          this.firstSelectedOption.textContent ??
+          this.firstSelectedOption.value
         : this.placeholder;
     }
   }

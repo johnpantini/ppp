@@ -11,6 +11,7 @@ import { ConflictError, validate, invalidate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
+import { uuidv4 } from '../../lib/ppp-crypto.js';
 
 export const newWorkspaceModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -146,7 +147,13 @@ export class NewWorkspaceModalPage extends Page {
       $set: {
         name: this.name.value.trim(),
         comment: this.comment.value.trim(),
-        widgets: workspaceToClone ? workspaceToClone.widgets : [],
+        widgets: workspaceToClone
+          ? workspaceToClone.widgets?.map((w) => {
+              w.uniqueID = uuidv4();
+
+              return w;
+            })
+          : [],
         order: ppp.workspaces.length + 1,
         updatedAt: new Date()
       },

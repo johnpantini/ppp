@@ -25,8 +25,8 @@ export const backupMongodbModalPageTemplate = html`
             Сервис Cloudflare Worker, который будет использован для загрузки
             файлов на хостинг MongoDB Realm.
           </p>
+          <div class="spacing2"></div>
           <ppp-checkbox
-            style="margin-top:6px;"
             checked
             ${ref('downloadBackupFile')}
           >
