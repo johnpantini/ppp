@@ -5,7 +5,6 @@ import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatPrice } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
 import { TRADER_DATUM } from '../../../lib/const.js';
-import { level1TraderCondition } from '../order.js';
 
 export const columnTemplate = html`
   <template>
@@ -33,8 +32,7 @@ export class BestBidColumn extends Column {
         source: this,
         fieldDatumPairs: {
           bestBid: TRADER_DATUM.BEST_BID
-        },
-        condition: level1TraderCondition
+        }
       });
     }
 
@@ -43,8 +41,7 @@ export class BestBidColumn extends Column {
         source: this,
         fieldDatumPairs: {
           bestBid: TRADER_DATUM.BEST_BID
-        },
-        condition: level1TraderCondition
+        }
       });
     }
   }
@@ -68,7 +65,7 @@ export class BestBidColumn extends Column {
       });
     }
 
-    super.disconnectedCallback();
+    return super.disconnectedCallback();
   }
 }
 

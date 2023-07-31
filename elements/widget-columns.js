@@ -51,12 +51,18 @@ class WidgetColumns {
     }
   }
 
-  columnElement(column) {
+  columnElement(column, balanceSymbol) {
+    let balanceAttr = '';
+
+    if (balanceSymbol) {
+      balanceAttr = `balance=${balanceSymbol}`;
+    }
+
     if (typeof column?.content === 'string') {
       return html`${staticallyCompose(column.content)}`;
     } else {
       return html`${staticallyCompose(
-        `<${column.definition.name}></${column.definition.name}>`
+        `<${column.definition.name} ${balanceAttr}></${column.definition.name}>`
       )}`;
     }
   }

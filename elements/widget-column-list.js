@@ -57,13 +57,15 @@ export const widgetColumnListTemplate = html`
                 value="${(column) => column.name}"
               ></ppp-text-field>
               <ppp-query-select
-                ?hidden="${(x) =>
-                  [
-                    COLUMN_SOURCE.INSTRUMENT,
-                    COLUMN_SOURCE.SYMBOL,
-                    COLUMN_SOURCE.POSITION_AVAILABLE,
-                    COLUMN_SOURCE.POSITION_AVERAGE
-                  ].indexOf(x.source) !== -1}"
+                ?hidden="${(x, c) =>
+                  (
+                    c.parent.mainTraderColumns ?? [
+                      COLUMN_SOURCE.INSTRUMENT,
+                      COLUMN_SOURCE.SYMBOL,
+                      COLUMN_SOURCE.POSITION_AVAILABLE,
+                      COLUMN_SOURCE.POSITION_AVERAGE
+                    ]
+                  ).indexOf(x.source) !== -1}"
                 column-trader
                 deselectable
                 standalone
@@ -71,7 +73,7 @@ export const widgetColumnListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
                 }}"
-                placeholder="Выберите трейдера"
+                placeholder="Трейдер #1"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -97,12 +99,14 @@ export const widgetColumnListTemplate = html`
                 placeholder="Выберите столбец"
                 @change="${async (x, c) => {
                   const hidden =
-                    [
-                      COLUMN_SOURCE.INSTRUMENT,
-                      COLUMN_SOURCE.SYMBOL,
-                      COLUMN_SOURCE.POSITION_AVAILABLE,
-                      COLUMN_SOURCE.POSITION_AVERAGE
-                    ].indexOf(c.event.detail.value) !== -1;
+                    (
+                      c.parent.mainTraderColumns ?? [
+                        COLUMN_SOURCE.INSTRUMENT,
+                        COLUMN_SOURCE.SYMBOL,
+                        COLUMN_SOURCE.POSITION_AVAILABLE,
+                        COLUMN_SOURCE.POSITION_AVERAGE
+                      ]
+                    ).indexOf(c.event.detail.value) !== -1;
 
                   if (hidden) {
                     c.event.detail.nextElementSibling.setAttribute(
@@ -123,7 +127,8 @@ export const widgetColumnListTemplate = html`
                 value="${(x, c) => c.source?.source}"
               >
                 ${repeat(
-                  () => Object.keys(COLUMN_SOURCE),
+                  (x, c) =>
+                    c.parent.availableColumns ?? Object.keys(COLUMN_SOURCE),
                   html`
                     <ppp-option value="${(x) => COLUMN_SOURCE[x]}">
                       ${(x) => ppp.t(`$const.columnSource.${COLUMN_SOURCE[x]}`)}
@@ -132,13 +137,15 @@ export const widgetColumnListTemplate = html`
                 )}
               </ppp-select>
               <ppp-query-select
-                ?hidden="${(x) =>
-                  [
-                    COLUMN_SOURCE.INSTRUMENT,
-                    COLUMN_SOURCE.SYMBOL,
-                    COLUMN_SOURCE.POSITION_AVAILABLE,
-                    COLUMN_SOURCE.POSITION_AVERAGE
-                  ].indexOf(x.source) !== -1}"
+                ?hidden="${(x, c) =>
+                  (
+                    c.parent.mainTraderColumns ?? [
+                      COLUMN_SOURCE.INSTRUMENT,
+                      COLUMN_SOURCE.SYMBOL,
+                      COLUMN_SOURCE.POSITION_AVAILABLE,
+                      COLUMN_SOURCE.POSITION_AVERAGE
+                    ]
+                  ).indexOf(x.source) !== -1}"
                 column-extra-trader
                 deselectable
                 standalone
@@ -148,7 +155,7 @@ export const widgetColumnListTemplate = html`
                     (t) => t._id === x.extraTraderId
                   );
                 }}"
-                placeholder="Выберите трейдера"
+                placeholder="Трейдер #2"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -285,6 +292,12 @@ export const widgetColumnListStyles = css`
 
 export class WidgetColumnList extends PPPElement {
   @observable
+  availableColumns;
+
+  @observable
+  mainTraderColumns;
+
+  @observable
   columns;
 
   @observable
@@ -293,6 +306,13 @@ export class WidgetColumnList extends PPPElement {
   constructor() {
     super();
 
+    this.mainTraderColumns = [
+      COLUMN_SOURCE.INSTRUMENT,
+      COLUMN_SOURCE.SYMBOL,
+      COLUMN_SOURCE.POSITION_AVAILABLE,
+      COLUMN_SOURCE.POSITION_AVERAGE
+    ];
+    this.availableColumns = Object.keys(COLUMN_SOURCE);
     this.columns = [];
     this.traders = [];
   }
@@ -317,13 +337,15 @@ export class WidgetColumnList extends PPPElement {
         hidden: !line.querySelector('[column-visible]').checked
       };
 
-      const traderSelect = line.querySelector('[column-trader]');
+      const traderSelect = line.querySelector('[column-trader]:not([hidden])');
 
       if (traderSelect) {
         column.traderId = traderSelect.value;
       }
 
-      const extraTraderSelect = line.querySelector('[column-extra-trader]');
+      const extraTraderSelect = line.querySelector(
+        '[column-extra-trader]:not([hidden])'
+      );
 
       if (extraTraderSelect) {
         column.extraTraderId = extraTraderSelect.value;

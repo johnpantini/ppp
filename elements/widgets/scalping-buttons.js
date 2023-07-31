@@ -295,7 +295,11 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
 
             this.notificationsArea.error({
               title: 'Скальперские кнопки',
-              text: 'Не удалось переставить заявки.'
+              text: await this.ordersTrader?.formatError?.(
+                this.instrument,
+                e,
+                'Не удалось переставить заявки.'
+              )
             });
           } finally {
             if (coolDown > 0) {
@@ -316,8 +320,6 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.ordersTraderId);
-
     if (this.container.coolDown.value) {
       await validate(this.container.coolDown, {
         hook: async (value) => +value >= 0 && +value <= 5000,
@@ -370,6 +372,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('ordersTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.ordersTrader ?? ''}"

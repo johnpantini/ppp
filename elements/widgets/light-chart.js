@@ -15,7 +15,6 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
-import { validate } from '../../lib/ppp-errors.js';
 import { createChart, CrosshairMode, LineStyle } from '../../lib/ppp-charts.js';
 import '../button.js';
 import '../query-select.js';
@@ -400,7 +399,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   async traderEventChanged(oldValue, newValue) {
-    if (newValue?.event === 'reconnect') {
+    if (typeof newValue === 'object' && newValue?.event === 'reconnect') {
       await this.loadHistory();
     }
   }
@@ -565,15 +564,14 @@ export class LightChartWidget extends WidgetWithInstrument {
                 ).$value.createCSS()}, 0.56)`
         });
       } catch (e) {
-        // Supress TV errors
+        // Suppress TV errors
         void 0;
       }
     }
   }
 
   async validate() {
-    await validate(this.container.chartTraderId);
-    await validate(this.container.tradesTraderId);
+    // No-op.
   }
 
   async submit() {
@@ -612,6 +610,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('chartTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.chartTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.chartTrader ?? ''}"
@@ -658,6 +658,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('tradesTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.tradesTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.tradesTrader ?? ''}"

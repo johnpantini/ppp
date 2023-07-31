@@ -7,6 +7,7 @@ import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
 import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import { toNumber } from '../../traders/tinkoff-grpc-web.js';
 import '../button.js';
+import '../checkbox.js';
 import '../query-select.js';
 import '../select.js';
 
@@ -55,6 +56,10 @@ export const instrumentsImportPageTemplate = html`
               Finam
             </ppp-option>
           </ppp-select>
+          <div class="spacing2"></div>
+          <ppp-checkbox ${ref('clearBeforeImport')}>
+            Удалить инструменты словаря перед импортом
+          </ppp-checkbox>
         </div>
       </section>
       ${when(
@@ -710,50 +715,6 @@ export class InstrumentsImportPage extends Page {
     this.beginOperation();
 
     try {
-      const instruments = await this[this.dictionary.value].call(this);
-
-      if (!instruments.length) {
-        invalidate(ppp.app.toast, {
-          errorMessage: 'Список инструментов для импорта пуст.',
-          raiseException: true
-        });
-      }
-
-      // Fix execution timeout errors
-      const chunks = [];
-
-      for (let i = 0; i < instruments.length; i += 2000) {
-        chunks.push(instruments.slice(i, i + 2000));
-      }
-
-      for (const chunk of chunks) {
-        await ppp.user.functions.bulkWrite(
-          {
-            collection: 'instruments'
-          },
-          chunk.map((i) => {
-            const updateClause = {
-              $set: i
-            };
-
-            return {
-              updateOne: {
-                filter: {
-                  symbol: i.symbol.toUpperCase(),
-                  exchange: i.exchange,
-                  broker: i.broker
-                },
-                update: updateClause,
-                upsert: true
-              }
-            };
-          }),
-          {
-            ordered: false
-          }
-        );
-      }
-
       let exchange;
       let exchangeForDBRequest;
       let broker;
@@ -817,9 +778,27 @@ export class InstrumentsImportPage extends Page {
           break;
       }
 
+      let existingInstruments;
+
       if (exchange && broker && exchangeForDBRequest) {
         // Use this to preserve user field values
-        const existingInstruments = await ppp.user.functions.find(
+        existingInstruments = await ppp.user.functions.find(
+          {
+            collection: 'instruments'
+          },
+          {
+            exchange: exchangeForDBRequest,
+            broker
+          },
+          {
+            symbol: 1,
+            removed: 1
+          }
+        );
+      }
+
+      if (this.clearBeforeImport.checked) {
+        await ppp.user.functions.deleteMany(
           {
             collection: 'instruments'
           },
@@ -829,38 +808,18 @@ export class InstrumentsImportPage extends Page {
           }
         );
 
-        const nextCacheVersion = await ppp.nextInstrumentCacheVersion({
-          exchange,
-          broker
-        });
         const cache = await ppp.openInstrumentCache({
           exchange,
           broker
         });
 
         try {
+          const storeName = `${exchange}:${broker}`;
+          const tx = cache.transaction(storeName, 'readwrite');
+          const instrumentsStore = tx.objectStore(storeName);
+
           await new Promise((resolve, reject) => {
-            const storeName = `${exchange}:${broker}`;
-            const tx = cache.transaction(storeName, 'readwrite');
-            const instrumentsStore = tx.objectStore(storeName);
-
-            instrumentsStore.put({
-              symbol: '@version',
-              version: nextCacheVersion
-            });
-
-            instruments.forEach((i) => {
-              const existingInstrument = existingInstruments.find(
-                (ei) => ei.symbol === i.symbol
-              );
-
-              if (existingInstrument?.removed) {
-                // User flags
-                i.removed = true;
-              }
-
-              instrumentsStore.put(i);
-            });
+            instrumentsStore.clear();
 
             tx.oncomplete = () => {
               resolve();
@@ -873,6 +832,97 @@ export class InstrumentsImportPage extends Page {
         } finally {
           cache.close();
         }
+      }
+
+      const instruments = await this[this.dictionary.value].call(this);
+
+      if (!instruments.length) {
+        invalidate(ppp.app.toast, {
+          errorMessage: 'Список инструментов для импорта пуст.',
+          raiseException: true
+        });
+      }
+
+      // Fix execution timeout errors
+      const chunks = [];
+
+      for (let i = 0; i < instruments.length; i += 2000) {
+        chunks.push(instruments.slice(i, i + 2000));
+      }
+
+      for (const chunk of chunks) {
+        await ppp.user.functions.bulkWrite(
+          {
+            collection: 'instruments'
+          },
+          chunk.map((i) => {
+            const updateClause = {
+              $set: i
+            };
+
+            return {
+              updateOne: {
+                filter: {
+                  symbol: i.symbol.toUpperCase(),
+                  exchange: i.exchange,
+                  broker: i.broker
+                },
+                update: updateClause,
+                upsert: true
+              }
+            };
+          }),
+          {
+            ordered: false
+          }
+        );
+      }
+
+      const nextCacheVersion = await ppp.nextInstrumentCacheVersion({
+        exchange,
+        broker
+      });
+      const cache = await ppp.openInstrumentCache({
+        exchange,
+        broker
+      });
+
+      try {
+        await new Promise((resolve, reject) => {
+          const storeName = `${exchange}:${broker}`;
+          const tx = cache.transaction(storeName, 'readwrite');
+          const instrumentsStore = tx.objectStore(storeName);
+
+          instrumentsStore.put({
+            symbol: '@version',
+            version: nextCacheVersion
+          });
+
+          instruments.forEach((i) => {
+            if (existingInstruments) {
+              const existingInstrument = existingInstruments.find(
+                (ei) => ei.symbol === i.symbol
+              );
+
+              if (existingInstrument?.removed) {
+                // User flags
+                i.removed = true;
+              }
+            }
+
+            instrumentsStore.put(i);
+          });
+
+          tx.oncomplete = () => {
+            resolve();
+          };
+
+          tx.onerror = (event) => {
+            reject(event.target.error);
+          };
+        });
+      } finally {
+        cache.close();
       }
 
       this.showSuccessNotification(

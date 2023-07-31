@@ -5,35 +5,154 @@ import {
   TRADER_DATUM
 } from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
-import { Trader } from './common-trader.js';
+import { Trader, TraderDatum } from './common-trader.js';
+
+class BinanceTraderDatum extends TraderDatum {
+  filter(data, instrument, source) {
+    return [EXCHANGE.BINANCE].indexOf(source?.instrument?.exchange) !== -1;
+  }
+
+  async subscribe(source, field, datum) {
+    await this.trader.establishWebSocketConnection();
+
+    return super.subscribe(source, field, datum);
+  }
+}
+
+class OrderbookDatum extends BinanceTraderDatum {
+  async firstReferenceAdded(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          method: 'SUBSCRIBE',
+          params: [
+            `${symbol.toLowerCase()}@depth20@${
+              this.trader.document.orderbookUpdateInterval
+            }`
+          ],
+          id: ++this.trader.idCounter
+        })
+      );
+    }
+  }
+
+  async lastReferenceRemoved(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          method: 'UNSUBSCRIBE',
+          params: [
+            `${symbol.toLowerCase()}@depth20@${
+              this.trader.document.orderbookUpdateInterval
+            }`
+          ],
+          id: ++this.trader.idCounter
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.ORDERBOOK](data) {
+    return {
+      bids: data.bids.map((b) => {
+        if (b.processed) {
+          return b;
+        }
+
+        return {
+          price: parseFloat(b[0]),
+          volume: parseFloat(b[1]),
+          processed: true
+        };
+      }),
+      asks: data.asks.map((a) => {
+        if (a.processed) {
+          return a;
+        }
+
+        return {
+          price: parseFloat(a[0]),
+          volume: parseFloat(a[1]),
+          processed: true
+        };
+      })
+    };
+  }
+}
+
+class AllTradesDatum extends BinanceTraderDatum {
+  doNotSaveValue = true;
+
+  async firstReferenceAdded(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      const subType = this.trader.document.showAggTrades ? 'aggTrade' : 'trade';
+
+      this.trader.connection.send(
+        JSON.stringify({
+          method: 'SUBSCRIBE',
+          params: [`${symbol.toLowerCase()}@${subType}`],
+          id: ++this.trader.idCounter
+        })
+      );
+    }
+  }
+
+  async lastReferenceRemoved(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      const subType = this.trader.document.showAggTrades ? 'aggTrade' : 'trade';
+
+      this.trader.connection.send(
+        JSON.stringify({
+          method: 'UNSUBSCRIBE',
+          params: [`${symbol.toLowerCase()}@${subType}`],
+          id: ++this.trader.idCounter
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.MARKET_PRINT](data, instrument) {
+    return {
+      orderId: data.a,
+      side: data.m ? 'sell' : 'buy',
+      timestamp: data.E,
+      symbol: this.trader.getSymbol(instrument.symbol),
+      price: parseFloat(data.p),
+      volume: parseFloat(data.q)
+    };
+  }
+}
 
 // noinspection JSUnusedGlobalSymbols
 /**
  * @typedef {Object} BinanceTrader
  */
-
 class BinanceTrader extends Trader {
-  #idCounter = 0;
-
   #pendingConnection;
-
-  // Key: widget instance; Value: [{ field, datum }] array
-  subs = {
-    orderbook: new Map(),
-    allTrades: new Map()
-  };
-
-  // Key: instrument symbol; Value: { instrument, refCount }
-  // Value contains lastOrderbook for orderbook
-  refs = {
-    orderbook: new Map(),
-    allTrades: new Map()
-  };
 
   connection;
 
-  async #connectWebSocket(reconnect) {
-    if (this.#pendingConnection) {
+  idCounter = 0;
+
+  constructor(document) {
+    super(document, [
+      {
+        type: OrderbookDatum,
+        datums: [TRADER_DATUM.ORDERBOOK]
+      },
+      {
+        type: AllTradesDatum,
+        datums: [TRADER_DATUM.MARKET_PRINT]
+      }
+    ]);
+  }
+
+  async establishWebSocketConnection(reconnect) {
+    if (this.connection?.readyState === WebSocket.OPEN) {
+      this.#pendingConnection = void 0;
+
+      return this.connection;
+    } else if (this.#pendingConnection) {
       return this.#pendingConnection;
     } else {
       return (this.#pendingConnection = new Promise((resolve) => {
@@ -44,41 +163,12 @@ class BinanceTrader extends Trader {
             new URL(`stream`, this.document.wsUrl).toString()
           );
 
-          this.connection.onopen = () => {
-            const params = [];
-
-            // 1. Orderbook
-            for (const [, { instrument, refCount }] of this.refs.orderbook) {
-              if (refCount > 0) {
-                params.push(
-                  `${this.getSymbol(instrument).toLowerCase()}@depth20@${
-                    this.document.orderbookUpdateInterval
-                  }`
-                );
-              }
+          this.connection.onopen = async () => {
+            if (reconnect) {
+              await this.resubscribe();
             }
 
-            const subType = this.document.showAggTrades ? 'aggTrade' : 'trade';
-
-            // 2. All trades
-            for (const [, { instrument, refCount }] of this.refs.allTrades) {
-              if (refCount > 0) {
-                params.push(
-                  `${this.getSymbol(instrument).toLowerCase()}@${subType}`
-                );
-              }
-            }
-
-            if (params.length > 0) {
-              this.connection.send(
-                JSON.stringify({
-                  method: 'SUBSCRIBE',
-                  params,
-                  id: ++this.#idCounter
-                })
-              );
-            }
-
+            // Restore subscriptions.
             resolve(this.connection);
           };
 
@@ -87,7 +177,7 @@ class BinanceTrader extends Trader {
 
             this.#pendingConnection = null;
 
-            await this.#connectWebSocket(true);
+            await this.establishWebSocketConnection(true);
           };
 
           this.connection.onerror = () => this.connection.close();
@@ -96,173 +186,19 @@ class BinanceTrader extends Trader {
             const payload = JSON.parse(data);
 
             if (/depth20/i.test(payload?.stream)) {
-              this.onOrderbookMessage({
-                orderbook: payload.data,
-                instrument: this.instruments.get(
-                  payload.stream.split('@')[0].toUpperCase()
-                )
-              });
+              this.datums[TRADER_DATUM.ORDERBOOK].dataArrived(
+                payload.data,
+                this.instruments.get(payload.stream.split('@')[0].toUpperCase())
+              );
             } else if (/@trade|@aggTrade/i.test(payload?.stream)) {
-              this.onTradeMessage({
-                trade: payload.data,
-                instrument: this.instruments.get(
-                  payload.stream.split('@')[0].toUpperCase()
-                )
-              });
+              this.datums[TRADER_DATUM.MARKET_PRINT].dataArrived(
+                payload.data,
+                this.instruments.get(payload.stream.split('@')[0].toUpperCase())
+              );
             }
           };
         }
       }));
-    }
-  }
-
-  onTradeMessage({ trade, instrument }) {
-    if (trade && instrument) {
-      for (const [source, fields] of this.subs.allTrades) {
-        if (this.instrumentsAreEqual(instrument, source.instrument)) {
-          for (const { field, datum } of fields) {
-            switch (datum) {
-              case TRADER_DATUM.MARKET_PRINT:
-                source[field] = {
-                  orderId: trade.a,
-                  side: trade.m ? 'sell' : 'buy',
-                  timestamp: trade.E,
-                  symbol: instrument.symbol,
-                  price: parseFloat(trade.p),
-                  volume: parseFloat(trade.q)
-                };
-
-                break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onOrderbookMessage({ orderbook, instrument }) {
-    if (orderbook && instrument) {
-      for (const [source, fields] of this.subs.orderbook) {
-        if (this.instrumentsAreEqual(instrument, source.instrument)) {
-          const ref = this.refs.orderbook.get(source.instrument.symbol);
-
-          if (ref) {
-            const lastOrderbook = (ref.lastOrderbook = {
-              bids: orderbook.bids.map((b) => {
-                return {
-                  price: parseFloat(b[0]),
-                  volume: parseFloat(b[1])
-                };
-              }),
-              asks: orderbook.asks.map((a) => {
-                return {
-                  price: parseFloat(a[0]),
-                  volume: parseFloat(a[1])
-                };
-              })
-            });
-
-            for (const { field, datum } of fields) {
-              switch (datum) {
-                case TRADER_DATUM.ORDERBOOK:
-                  source[field] = lastOrderbook;
-
-                  break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  subsAndRefs(datum) {
-    return {
-      [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
-      [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades]
-    }[datum];
-  }
-
-  async subscribeField({ source, field, datum }) {
-    await this.#connectWebSocket();
-    await super.subscribeField({ source, field, datum });
-  }
-
-  async addFirstRef(instrument, refs) {
-    if (this.connection.readyState === WebSocket.OPEN) {
-      if (refs === this.refs.allTrades) {
-        const subType = this.document.showAggTrades ? 'aggTrade' : 'trade';
-
-        this.connection.send(
-          JSON.stringify({
-            method: 'SUBSCRIBE',
-            params: [`${this.getSymbol(instrument).toLowerCase()}@${subType}`],
-            id: ++this.#idCounter
-          })
-        );
-      } else if (refs === this.refs.orderbook) {
-        this.connection.send(
-          JSON.stringify({
-            method: 'SUBSCRIBE',
-            params: [
-              `${this.getSymbol(instrument).toLowerCase()}@depth20@${
-                this.document.orderbookUpdateInterval
-              }`
-            ],
-            id: ++this.#idCounter
-          })
-        );
-      }
-    }
-  }
-
-  async removeLastRef(instrument, refs) {
-    if (this.connection.readyState === WebSocket.OPEN) {
-      if (refs === this.refs.allTrades) {
-        const subType = this.document.showAggTrades ? 'aggTrade' : 'trade';
-
-        this.connection.send(
-          JSON.stringify({
-            method: 'UNSUBSCRIBE',
-            params: [`${this.getSymbol(instrument).toLowerCase()}@${subType}`],
-            id: ++this.#idCounter
-          })
-        );
-      } else if (refs === this.refs.orderbook) {
-        this.connection.send(
-          JSON.stringify({
-            method: 'UNSUBSCRIBE',
-            params: [
-              `${this.getSymbol(instrument).toLowerCase()}@depth20@${
-                this.document.orderbookUpdateInterval
-              }`
-            ],
-            id: ++this.#idCounter
-          })
-        );
-      }
-    }
-  }
-
-  async instrumentChanged(source, oldValue, newValue) {
-    await super.instrumentChanged(source, oldValue, newValue);
-
-    if (newValue?.symbol) {
-      // Handle no real subscription case for orderbook, just broadcast.
-      for (const [source, fields] of this.subs.orderbook) {
-        if (this.instrumentsAreEqual(newValue, source.instrument)) {
-          for (const { field, datum } of fields) {
-            switch (datum) {
-              case TRADER_DATUM.ORDERBOOK:
-                source[field] = this.refs.orderbook.get(
-                  newValue.symbol
-                )?.lastOrderbook;
-
-                break;
-            }
-          }
-        }
-      }
     }
   }
 

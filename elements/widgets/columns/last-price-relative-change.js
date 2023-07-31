@@ -5,7 +5,6 @@ import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatRelativeChange } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
 import { TRADER_DATUM } from '../../../lib/const.js';
-import { level1TraderCondition } from '../order.js';
 
 export const columnTemplate = html`
   <template>
@@ -40,8 +39,7 @@ export class LastPriceRelativeChangeColumn extends Column {
         source: this,
         fieldDatumPairs: {
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE
-        },
-        condition: level1TraderCondition
+        }
       });
     }
 
@@ -50,8 +48,7 @@ export class LastPriceRelativeChangeColumn extends Column {
         source: this,
         fieldDatumPairs: {
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE
-        },
-        condition: level1TraderCondition
+        }
       });
     }
   }
@@ -75,7 +72,7 @@ export class LastPriceRelativeChangeColumn extends Column {
       });
     }
 
-    super.disconnectedCallback();
+    return super.disconnectedCallback();
   }
 }
 

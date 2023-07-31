@@ -6,7 +6,12 @@ import {
   INSTRUMENT_DICTIONARY,
   TRADER_DATUM
 } from '../lib/const.js';
-import { Trader } from './common-trader.js';
+import {
+  GlobalTraderDatum,
+  Trader,
+  TraderDatum,
+  TraderEventDatum
+} from './common-trader.js';
 import { debounce } from '../lib/ppp-decorators.js';
 import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../vendor/nice-grpc-web/client/channel.js';
@@ -35,11 +40,6 @@ import {
   OperationType
 } from '../vendor/tinkoff/definitions/operations.js';
 import { getInstrumentPrecision } from '../lib/intl.js';
-
-// noinspection JSUnusedGlobalSymbols
-/**
- * @typedef {Object} TinkoffGrpcWebTrader
- */
 
 export function toQuotation(value) {
   const sign = value < 0 ? -1 : 1;
@@ -73,6 +73,623 @@ const TINKOFF_CURRENCIES = {
   RUB000UTSTOM: 'RUB'
 };
 
+class OrderbookDatum extends TraderDatum {
+  async firstReferenceAdded(source) {
+    const instrument = source.instrument;
+
+    this.dataArrived(
+      await this.trader
+        .getOrCreateClient(MarketDataServiceDefinition)
+        .getOrderBook({
+          instrumentId: instrument.tinkoffFigi,
+          depth: 50
+        }),
+      instrument
+    );
+
+    return this.trader.resubscribeToMarketDataStream();
+  }
+
+  async lastReferenceRemoved() {
+    return this.trader.resubscribeToMarketDataStream();
+  }
+
+  [TRADER_DATUM.ORDERBOOK](data, instrument) {
+    let limitDownPrice = +toNumber(data.limitDown).toFixed(
+      getInstrumentPrecision(instrument)
+    );
+    let limitUpPrice = +toNumber(data.limitUp).toFixed(
+      getInstrumentPrecision(instrument)
+    );
+
+    if (instrument.type === 'bond') {
+      limitDownPrice = this.trader.relativeBondPriceToPrice(
+        limitDownPrice,
+        instrument
+      );
+      limitUpPrice = this.trader.relativeBondPriceToPrice(
+        limitUpPrice,
+        instrument
+      );
+    }
+
+    return {
+      bids: (
+        data?.bids?.map?.((b) => {
+          if (b.processed) {
+            return b;
+          }
+
+          const p = +toNumber(b.price).toFixed(
+            getInstrumentPrecision(instrument)
+          );
+
+          return {
+            price:
+              instrument.type === 'bond' && !b.processed
+                ? this.relativeBondPriceToPrice(p, instrument)
+                : p,
+            volume: b.quantity,
+            processed: true
+          };
+        }) ?? []
+      )
+        .concat([
+          {
+            price: limitDownPrice,
+            pool: 'LD',
+            volume: 0,
+            processed: true
+          }
+        ])
+        .sort((a, b) => b.price - a.price),
+      asks: (
+        data?.asks?.map?.((a) => {
+          if (a.processed) {
+            return a;
+          }
+
+          const p = +toNumber(a.price).toFixed(
+            getInstrumentPrecision(instrument)
+          );
+
+          return {
+            price:
+              instrument.type === 'bond' && !a.processed
+                ? this.relativeBondPriceToPrice(p, instrument)
+                : p,
+            volume: a.quantity,
+            processed: true
+          };
+        }) ?? []
+      )
+        .concat({
+          price: limitUpPrice,
+          pool: 'LU',
+          volume: 0,
+          processed: true
+        })
+        .sort((a, b) => a.price - b.price)
+    };
+  }
+}
+
+class AllTradesDatum extends TraderDatum {
+  async firstReferenceAdded() {
+    return this.trader.resubscribeToMarketDataStream();
+  }
+
+  async lastReferenceRemoved() {
+    return this.trader.resubscribeToMarketDataStream();
+  }
+
+  [TRADER_DATUM.MARKET_PRINT](print, instrument) {
+    const timestamp = print.time.valueOf();
+    const price =
+      instrument.type === 'bond'
+        ? this.trader.relativeBondPriceToPrice(
+            toNumber(print.price),
+            instrument
+          )
+        : +toNumber(print.price).toFixed(getInstrumentPrecision(instrument));
+
+    return {
+      orderId: `${instrument.symbol}|${print.direction}|${price}|${print.quantity}|${timestamp}`,
+      side:
+        print.direction === TradeDirection.TRADE_DIRECTION_BUY
+          ? 'buy'
+          : print.direction === TradeDirection.TRADE_DIRECTION_SELL
+          ? 'sell'
+          : '',
+      time: print.time.toISOString(),
+      timestamp,
+      symbol: instrument.symbol,
+      price,
+      volume: print.quantity
+    };
+  }
+}
+
+class CandleDatum extends TraderDatum {
+  async firstReferenceAdded() {
+    return this.trader.resubscribeToMarketDataStream();
+  }
+
+  async lastReferenceRemoved() {
+    return this.trader.resubscribeToMarketDataStream();
+  }
+
+  [TRADER_DATUM.CANDLE](candle, instrument) {
+    if (instrument.type === 'bond') {
+      return {
+        open: this.trader.relativeBondPriceToPrice(
+          toNumber(candle.open),
+          instrument
+        ),
+        high: this.trader.relativeBondPriceToPrice(
+          toNumber(candle.high),
+          instrument
+        ),
+        low: this.trader.relativeBondPriceToPrice(
+          toNumber(candle.low),
+          instrument
+        ),
+        close: this.trader.relativeBondPriceToPrice(
+          toNumber(candle.close),
+          instrument
+        ),
+        time: candle.time.toISOString(),
+        volume: candle.volume
+      };
+    } else {
+      return {
+        open: +toNumber(candle.open).toFixed(
+          getInstrumentPrecision(instrument)
+        ),
+        high: +toNumber(candle.high).toFixed(
+          getInstrumentPrecision(instrument)
+        ),
+        low: +toNumber(candle.low).toFixed(getInstrumentPrecision(instrument)),
+        close: +toNumber(candle.close).toFixed(
+          getInstrumentPrecision(instrument)
+        ),
+        time: candle.time.toISOString(),
+        volume: candle.volume
+      };
+    }
+  }
+}
+
+class PositionsDatum extends GlobalTraderDatum {
+  portfolio;
+
+  positions = {
+    money: new Map(),
+    blockedMoney: new Map(),
+    securities: new Map(),
+    futures: new Map(),
+    options: new Map()
+  };
+
+  onPortfolio(portfolio) {
+    if (portfolio) {
+      this.portfolio = portfolio;
+      this.portfolio.positionsMap = new Map();
+
+      this.portfolio.positions.forEach((position) =>
+        this.portfolio.positionsMap.set(position.figi, position)
+      );
+
+      this.broadcastPortfolio();
+    }
+  }
+
+  onPositions(position) {
+    if (position) {
+      const { money, blocked, securities, futures, options } = position;
+
+      for (const m of money) {
+        this.positions.money.set(m.currency.toUpperCase(), toNumber(m));
+      }
+
+      for (const b of blocked) {
+        this.positions.blockedMoney.set(b.currency.toUpperCase(), toNumber(b));
+      }
+
+      for (const s of securities) {
+        if (s.instrumentType === 'share' || s.instrumentType === 'bond') {
+          this.positions.securities.set(s.figi, s);
+        }
+      }
+
+      for (const f of futures) {
+        this.positions.futures.set(f.figi, f);
+      }
+    }
+
+    this.broadcastPortfolio();
+  }
+
+  @debounce(100)
+  broadcastPortfolio() {
+    if (typeof this.portfolio === 'undefined') {
+      return;
+    }
+
+    for (const [currency, size] of this.positions.money) {
+      this.dataArrived({
+        symbol: currency,
+        isCurrency: true,
+        isBalance: true,
+        lot: 1,
+        size,
+        accountId: this.trader.document.account
+      });
+    }
+
+    for (const [figi, security] of this.positions.securities) {
+      const instrument = this.trader.figis.get(figi);
+      const portfolioPosition = this.portfolio.positionsMap.get(figi);
+
+      if (instrument) {
+        if (
+          security.instrumentType === 'share' ||
+          security.instrumentType === 'bond'
+        ) {
+          this.dataArrived({
+            figi,
+            instrument,
+            lot: instrument.lot,
+            symbol: instrument.symbol,
+            exchange: instrument.exchange,
+            isCurrency: false,
+            isBalance: false,
+            averagePrice: portfolioPosition
+              ? +toNumber(portfolioPosition.averagePositionPrice).toFixed(
+                  getInstrumentPrecision(instrument)
+                )
+              : void 0,
+            size: (security.balance + security.blocked) / instrument.lot,
+            accountId: this.trader.document.account
+          });
+        }
+      }
+    }
+
+    for (const [figi, future] of this.positions.futures) {
+      const instrument = this.trader.figis.get(figi);
+      const portfolioPosition = this.portfolio.positionsMap.get(figi);
+
+      if (instrument) {
+        this.dataArrived({
+          figi,
+          instrument,
+          lot: instrument.lot,
+          symbol: instrument.symbol,
+          exchange: instrument.exchange,
+          isCurrency: false,
+          isBalance: false,
+          averagePrice: portfolioPosition
+            ? +toNumber(portfolioPosition.averagePositionPrice).toFixed(
+                getInstrumentPrecision(instrument)
+              )
+            : void 0,
+          size: (future.balance + future.blocked) / instrument.lot,
+          accountId: this.trader.document.account
+        });
+      }
+    }
+  }
+
+  valueKeyForData(data) {
+    return data?.figi ?? data?.symbol;
+  }
+
+  filter(data, source, key, datum) {
+    if (datum !== TRADER_DATUM.POSITION) {
+      if (data.isBalance) {
+        return data.symbol === source.getAttribute('balance');
+      }
+
+      return data.figi === source.instrument?.tinkoffFigi;
+    } else {
+      return true;
+    }
+  }
+
+  async firstReferenceAdded() {
+    this.portfolio = await this.trader
+      .getOrCreateClient(OperationsServiceDefinition)
+      .getPortfolio({
+        accountId: this.trader.document.account
+      });
+
+    // No direct assignment - it's a map collection!
+    this.onPositions(
+      await this.trader
+        .getOrCreateClient(OperationsServiceDefinition)
+        .getPositions({
+          accountId: this.trader.document.account
+        })
+    );
+
+    this.onPortfolio(this.portfolio);
+    await this.trader.resubscribeToPortfolioStream();
+
+    return this.trader.resubscribeToPositionsStream();
+  }
+
+  async lastReferenceRemoved() {
+    await this.trader.resubscribeToPortfolioStream();
+
+    return this.trader.resubscribeToPositionsStream();
+  }
+
+  [TRADER_DATUM.POSITION](data) {
+    return data;
+  }
+
+  #getPositionByFigi(data) {
+    switch (data.instrument.type) {
+      case 'stock':
+      case 'bond':
+        return this.positions.securities.get(data.figi);
+      case 'future':
+        return this.positions.futures.get(data.figi);
+    }
+  }
+
+  [TRADER_DATUM.POSITION_SIZE](data) {
+    if (data.isBalance) {
+      return data.size;
+    } else if (data.instrument) {
+      const position = this.#getPositionByFigi(data);
+
+      if (!position || +(position?.balance + position?.blocked) === 0) {
+        return 0;
+      } else {
+        return (position.balance + position.blocked) / data.instrument.lot;
+      }
+    }
+  }
+
+  [TRADER_DATUM.POSITION_AVERAGE](data) {
+    if (!data.isBalance) {
+      if (data.instrument) {
+        const position = this.#getPositionByFigi(data);
+
+        if (!position || +(position?.balance + position?.blocked) === 0) {
+          return 0;
+        } else {
+          const portfolioPosition = this.portfolio.positionsMap.get(data.figi);
+
+          if (portfolioPosition) {
+            return +toNumber(portfolioPosition.averagePositionPrice).toFixed(
+              getInstrumentPrecision(data.instrument)
+            );
+          } else {
+            return 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+class TimelineDatum extends GlobalTraderDatum {
+  // Timeline data needs special handling.
+  // Trades are arrays inside actual data items.
+  manualAssignment = true;
+
+  // Need internal history for diffing.
+  #timelineHistory = [];
+
+  #timer;
+
+  #shouldLoop = false;
+
+  async #fetchTimelineLoop() {
+    if (this.#shouldLoop) {
+      try {
+        if (!this.#timelineHistory.length) {
+          this.#timelineHistory = (
+            await this.trader.timelineHistory({
+              cursor: ''
+            })
+          ).items;
+
+          for (const item of this.#timelineHistory) {
+            this.dataArrived(item, this.trader.figis.get(item.figi));
+          }
+        } else {
+          const history = await this.trader.timelineHistory({
+            cursor: '',
+            limit: 10
+          });
+          const newItems = [];
+
+          for (const i of history.items) {
+            if (i.id && i.id !== this.#timelineHistory[0]?.id) {
+              newItems.push(i);
+            } else {
+              break;
+            }
+          }
+
+          this.#timelineHistory.unshift(...newItems);
+
+          for (const item of newItems) {
+            this.dataArrived(item, this.trader.figis.get(item.figi));
+          }
+        }
+
+        this.#timer = setTimeout(() => {
+          this.#fetchTimelineLoop();
+        }, 750);
+      } catch (e) {
+        console.error(e);
+
+        this.#timer = setTimeout(() => {
+          this.#fetchTimelineLoop();
+        }, 750);
+      }
+    }
+  }
+
+  firstReferenceAdded() {
+    this.#timelineHistory = [];
+
+    clearTimeout(this.#timer);
+
+    this.#shouldLoop = true;
+
+    return this.#fetchTimelineLoop();
+  }
+
+  lastReferenceRemoved() {
+    this.#timelineHistory = [];
+
+    clearTimeout(this.#timer);
+
+    this.#shouldLoop = false;
+  }
+
+  valueKeyForData(data) {
+    return data.id;
+  }
+
+  [TRADER_DATUM.TIMELINE_ITEM](data, source, key, field) {
+    const instrument = this.trader.figis.get(data.figi);
+
+    if (instrument && Array.isArray(data.tradesInfo?.trades)) {
+      for (const trade of data.tradesInfo.trades) {
+        source[field] = {
+          instrument,
+          operationId: trade.num,
+          accruedInterest: toNumber(data.accruedInt),
+          commission: toNumber(data.commission),
+          parentId: data.id,
+          symbol: instrument.symbol,
+          cursor: data.cursor,
+          type: data.type,
+          exchange: instrument.exchange,
+          quantity: trade.quantity / instrument.lot,
+          price: +toNumber(trade.price).toFixed(
+            getInstrumentPrecision(instrument)
+          ),
+          createdAt: trade.date.toISOString(),
+          parentCreatedAt: data.date.toISOString()
+        };
+      }
+    }
+  }
+}
+
+class ActiveOrderDatum extends GlobalTraderDatum {
+  #timer;
+
+  #shouldLoop = false;
+
+  orders = new Map();
+
+  async #fetchOrdersLoop() {
+    if (this.#shouldLoop) {
+      try {
+        const client = this.trader.getOrCreateClient(OrdersServiceDefinition);
+        const { orders } = await this.trader.getOrders(client);
+        const newOrders = new Set();
+
+        for (const o of orders) {
+          newOrders.add(o.orderId);
+
+          if (!this.orders.has(o.orderId)) {
+            this.orders.set(o.orderId, o);
+            this.dataArrived(o, this.trader.figis.get(o.figi));
+          }
+        }
+
+        for (const [orderId, order] of this.orders) {
+          if (!newOrders.has(orderId)) {
+            order.executionReportStatus =
+              OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_UNSPECIFIED;
+
+            this.dataArrived(order, this.trader.figis.get(order.figi));
+            this.orders.delete(orderId);
+          }
+        }
+
+        this.#timer = setTimeout(() => {
+          this.#fetchOrdersLoop();
+        }, 750);
+      } catch (e) {
+        console.error(e);
+
+        this.#timer = setTimeout(() => {
+          this.#fetchOrdersLoop();
+        }, 750);
+      }
+    }
+  }
+
+  firstReferenceAdded() {
+    this.orders.clear();
+
+    clearTimeout(this.#timer);
+
+    this.#shouldLoop = true;
+
+    return this.#fetchOrdersLoop();
+  }
+
+  lastReferenceRemoved() {
+    this.orders.clear();
+    clearTimeout(this.#timer);
+
+    this.#shouldLoop = false;
+  }
+
+  valueKeyForData(data) {
+    return data.orderId;
+  }
+
+  [TRADER_DATUM.ACTIVE_ORDER](order) {
+    const instrument = this.trader.figis.get(order.figi);
+
+    if (instrument) {
+      return {
+        instrument,
+        orderId: order.orderId,
+        symbol: order.figi,
+        exchange: 0,
+        orderType:
+          order.orderType === OrderType.ORDER_TYPE_LIMIT ? 'limit' : 'market',
+        side:
+          order.direction === OrderDirection.ORDER_DIRECTION_BUY
+            ? 'buy'
+            : 'sell',
+        status: this.trader.getOrderStatus(order),
+        placedAt: order.orderDate.toISOString(),
+        endsAt: null,
+        quantity: order.lotsRequested,
+        filled: order.lotsExecuted,
+        price:
+          instrument.type === 'bond'
+            ? this.trader.relativeBondPriceToPrice(
+                toNumber(order.initialSecurityPrice),
+                instrument
+              )
+            : +toNumber(order.initialSecurityPrice).toFixed(
+                getInstrumentPrecision(instrument)
+              )
+      };
+    }
+  }
+}
+
+// noinspection JSUnusedGlobalSymbols
+/**
+ * @typedef {Object} TinkoffGrpcWebTrader
+ */
 class TinkoffGrpcWebTrader extends Trader {
   #clients = new Map();
 
@@ -84,53 +701,51 @@ class TinkoffGrpcWebTrader extends Trader {
 
   #positionsAbortController;
 
-  #timelineHistory = [];
-
   // Key: figi ; Value: instrument object
   #figis = new Map();
+
+  get figis() {
+    return this.#figis;
+  }
 
   // Key: ticker ; Value: minPriceIncrementAmount
   #futureMinPriceIncrementAmount = new Map();
 
-  orders = new Map();
-
-  portfolio;
-
-  positions = {
-    money: new Map(),
-    blockedMoney: new Map(),
-    securities: new Map(),
-    futures: new Map(),
-    options: new Map()
-  };
-
-  #pendingPortfolioRequest;
-
-  // Key: widget instance; Value: [{ field, datum }] array
-  subs = {
-    orderbook: new Map(),
-    allTrades: new Map(),
-    orders: new Map(),
-    candles: new Map(),
-    portfolio: new Map(),
-    trader: new Map(),
-    timeline: new Map()
-  };
-
-  // Key: instrumentId; Value: { instrument, refCount }
-  // Value contains lastOrderbook for orderbook
-  refs = {
-    orderbook: new Map(),
-    allTrades: new Map(),
-    orders: new Map(),
-    candles: new Map(),
-    portfolio: new Map(),
-    trader: new Map(),
-    timeline: new Map()
-  };
-
   constructor(document) {
-    super(document);
+    super(document, [
+      {
+        type: OrderbookDatum,
+        datums: [TRADER_DATUM.ORDERBOOK]
+      },
+      {
+        type: AllTradesDatum,
+        datums: [TRADER_DATUM.MARKET_PRINT]
+      },
+      {
+        type: CandleDatum,
+        datums: [TRADER_DATUM.CANDLE]
+      },
+      {
+        type: PositionsDatum,
+        datums: [
+          TRADER_DATUM.POSITION,
+          TRADER_DATUM.POSITION_SIZE,
+          TRADER_DATUM.POSITION_AVERAGE
+        ]
+      },
+      {
+        type: ActiveOrderDatum,
+        datums: [TRADER_DATUM.ACTIVE_ORDER]
+      },
+      {
+        type: TimelineDatum,
+        datums: [TRADER_DATUM.TIMELINE_ITEM]
+      },
+      {
+        type: TraderEventDatum,
+        datums: [TRADER_DATUM.TRADER]
+      }
+    ]);
 
     this.#metadata = new Metadata({
       Authorization: `Bearer ${this.document.broker.apiToken}`,
@@ -151,7 +766,7 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  onCacheInstrument(instrument) {
+  instrumentCacheCallback(instrument) {
     if (instrument.tinkoffFigi) {
       this.#figis.set(instrument.tinkoffFigi, instrument);
     }
@@ -174,6 +789,428 @@ class TinkoffGrpcWebTrader extends Trader {
     }
 
     return this.#clients.get(service);
+  }
+
+  @debounce(100)
+  resubscribeToMarketDataStream() {
+    return this.#resubscribeToMarketDataStream();
+  }
+
+  @debounce(100)
+  resubscribeToPortfolioStream() {
+    return this.#resubscribeToPortfolioStream();
+  }
+
+  @debounce(100)
+  resubscribeToPositionsStream() {
+    return this.#resubscribeToPositionsStream();
+  }
+
+  async #resubscribeToMarketDataStream() {
+    if (
+      !this.datums[TRADER_DATUM.ORDERBOOK].refs.size &&
+      !this.datums[TRADER_DATUM.MARKET_PRINT].refs.size &&
+      !this.datums[TRADER_DATUM.CANDLE].refs.size
+    ) {
+      return;
+    }
+
+    const marketDataServerSideStreamRequest = {};
+    const orderbookSymbolsArray = [];
+    const allTradesSymbolsArray = [];
+    const candleSymbolsArray = [];
+
+    for (const [symbol, refCount] of this.datums[TRADER_DATUM.ORDERBOOK].refs) {
+      if (refCount > 0) {
+        orderbookSymbolsArray.push(symbol);
+      }
+    }
+
+    for (const [symbol, refCount] of this.datums[TRADER_DATUM.MARKET_PRINT]
+      .refs) {
+      if (refCount > 0) {
+        allTradesSymbolsArray.push(symbol);
+      }
+    }
+
+    for (const [symbol, refCount] of this.datums[TRADER_DATUM.CANDLE].refs) {
+      if (refCount > 0) {
+        candleSymbolsArray.push(symbol);
+      }
+    }
+
+    if (orderbookSymbolsArray.length) {
+      marketDataServerSideStreamRequest.subscribeOrderBookRequest = {
+        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
+        instruments: []
+      };
+
+      orderbookSymbolsArray.forEach((symbol) => {
+        const instrument = this.instruments.get(symbol);
+
+        if (instrument) {
+          marketDataServerSideStreamRequest.subscribeOrderBookRequest.instruments.push(
+            {
+              instrumentId: instrument.tinkoffFigi,
+              depth: 50
+            }
+          );
+        }
+      });
+    }
+
+    if (allTradesSymbolsArray.length) {
+      marketDataServerSideStreamRequest.subscribeTradesRequest = {
+        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
+        instruments: []
+      };
+
+      allTradesSymbolsArray.forEach((symbol) => {
+        const instrument = this.instruments.get(symbol);
+
+        if (instrument) {
+          marketDataServerSideStreamRequest.subscribeTradesRequest.instruments.push(
+            {
+              instrumentId: instrument.tinkoffFigi
+            }
+          );
+        }
+      });
+    }
+
+    if (candleSymbolsArray.length) {
+      marketDataServerSideStreamRequest.subscribeCandlesRequest = {
+        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
+        instruments: [],
+        waitingClose: false
+      };
+
+      candleSymbolsArray.forEach((symbol) => {
+        const instrument = this.instruments.get(symbol);
+
+        if (instrument) {
+          marketDataServerSideStreamRequest.subscribeCandlesRequest.instruments.push(
+            {
+              instrumentId: instrument.tinkoffFigi,
+              interval: SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
+            }
+          );
+        }
+      });
+    }
+
+    const client = createClient(
+      MarketDataStreamServiceDefinition,
+      createChannel('https://invest-public-api.tinkoff.ru:443'),
+      {
+        '*': {
+          metadata: this.#metadata
+        }
+      }
+    );
+
+    this.#marketDataAbortController?.abort?.();
+
+    this.#marketDataAbortController = new AbortController();
+
+    const stream = client.marketDataServerSideStream(
+      marketDataServerSideStreamRequest,
+      {
+        signal: this.#marketDataAbortController?.signal
+      }
+    );
+
+    try {
+      for await (const data of stream) {
+        if (data.orderbook) {
+          this.datums[TRADER_DATUM.ORDERBOOK].dataArrived(
+            data.orderbook,
+            this.#figis.get(data.orderbook.figi)
+          );
+        } else if (data.trade) {
+          this.datums[TRADER_DATUM.MARKET_PRINT].dataArrived(
+            data.trade,
+            this.#figis.get(data.trade.figi)
+          );
+        } else if (data.candle) {
+          this.datums[TRADER_DATUM.CANDLE].dataArrived(
+            data.candle,
+            this.#figis.get(data.candle.figi)
+          );
+        }
+      }
+
+      await this.resubscribe(
+        (source, field, datum) => [TRADER_DATUM.ORDERBOOK].indexOf(datum) !== -1
+      );
+      this.resubscribeToMarketDataStream();
+      this.trader.traderEvent({ event: 'reconnect' });
+    } catch (e) {
+      if (!isAbortError(e)) {
+        console.error(e);
+
+        setTimeout(async () => {
+          await this.resubscribe(
+            (source, field, datum) =>
+              [TRADER_DATUM.ORDERBOOK].indexOf(datum) !== -1
+          );
+          this.resubscribeToMarketDataStream();
+          this.trader.traderEvent({ event: 'reconnect' });
+        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+      }
+    }
+  }
+
+  async #resubscribeToPortfolioStream() {
+    if (this.datums[TRADER_DATUM.POSITION].refCount < 1) {
+      return;
+    }
+
+    const client = createClient(
+      OperationsStreamServiceDefinition,
+      createChannel('https://invest-public-api.tinkoff.ru:443'),
+      {
+        '*': {
+          metadata: this.#metadata
+        }
+      }
+    );
+
+    this.#portfolioAbortController?.abort?.();
+
+    this.#portfolioAbortController = new AbortController();
+
+    const stream = client.portfolioStream(
+      {
+        accounts: [this.document.account]
+      },
+      {
+        signal: this.#portfolioAbortController?.signal
+      }
+    );
+
+    try {
+      for await (const data of stream) {
+        if (data.portfolio) {
+          this.datums[TRADER_DATUM.POSITION].onPortfolio(data.portfolio);
+        }
+      }
+
+      this.resubscribeToPortfolioStream();
+    } catch (e) {
+      if (!isAbortError(e)) {
+        console.error(e);
+
+        setTimeout(() => {
+          this.resubscribeToPortfolioStream();
+        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+      }
+    }
+  }
+
+  async #resubscribeToPositionsStream() {
+    if (this.datums[TRADER_DATUM.POSITION].refCount < 1) {
+      return;
+    }
+
+    const client = createClient(
+      OperationsStreamServiceDefinition,
+      createChannel('https://invest-public-api.tinkoff.ru:443'),
+      {
+        '*': {
+          metadata: this.#metadata
+        }
+      }
+    );
+
+    this.#positionsAbortController?.abort?.();
+
+    this.#positionsAbortController = new AbortController();
+
+    const stream = client.positionsStream(
+      {
+        accounts: [this.document.account]
+      },
+      {
+        signal: this.#positionsAbortController?.signal
+      }
+    );
+
+    try {
+      for await (const data of stream) {
+        if (data.position) {
+          const money = [];
+          const blocked = [];
+
+          (data.position.money ?? []).forEach((m) => {
+            money.push(m.availableValue);
+            blocked.push(m.blockedValue);
+          });
+
+          this.datums[TRADER_DATUM.POSITION].onPositions({
+            money,
+            blocked,
+            securities: data.position.securities,
+            futures: data.position.futures,
+            options: data.position.options
+          });
+        }
+      }
+
+      this.resubscribeToPositionsStream();
+    } catch (e) {
+      if (!isAbortError(e)) {
+        console.error(e);
+
+        setTimeout(() => {
+          this.resubscribeToPositionsStream();
+        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+      }
+    }
+  }
+
+  async timelineHistory({ cursor, from, to, limit = 100 }) {
+    return this.getOrCreateClient(
+      OperationsServiceDefinition
+    ).getOperationsByCursor({
+      accountId: this.document.account,
+      instrumentId: '',
+      from,
+      to,
+      // Inclusive
+      cursor,
+      limit,
+      operationTypes: [
+        OperationType.OPERATION_TYPE_BUY,
+        OperationType.OPERATION_TYPE_SELL,
+        OperationType.OPERATION_TYPE_BUY_CARD,
+        OperationType.OPERATION_TYPE_BUY_MARGIN,
+        OperationType.OPERATION_TYPE_SELL_MARGIN
+      ],
+      state: OperationState.OPERATION_STATE_EXECUTED,
+      withoutCommissions: true
+    });
+  }
+
+  async allTrades({ instrument, depth }) {
+    if (instrument) {
+      const to = new Date();
+      const from = new Date();
+
+      to.setUTCHours(to.getUTCHours() + 1);
+      from.setUTCHours(from.getUTCHours() - 1);
+
+      const { trades } = await this.getOrCreateClient(
+        MarketDataServiceDefinition
+      ).getLastTrades({
+        instrumentId: instrument.tinkoffFigi,
+        from,
+        to
+      });
+
+      return trades
+        .slice(-depth)
+        .reverse()
+        .map((trade) => {
+          const timestamp = trade.time.valueOf();
+          const price =
+            instrument.type === 'bond'
+              ? this.relativeBondPriceToPrice(toNumber(trade.price), instrument)
+              : +toNumber(trade.price).toFixed(
+                  getInstrumentPrecision(instrument)
+                );
+
+          return {
+            orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
+            side:
+              trade.direction === TradeDirection.TRADE_DIRECTION_BUY
+                ? 'buy'
+                : trade.direction === TradeDirection.TRADE_DIRECTION_SELL
+                ? 'sell'
+                : '',
+            timestamp,
+            symbol: instrument.symbol,
+            price,
+            volume: trade.quantity
+          };
+        });
+    }
+
+    return [];
+  }
+
+  async historicalCandles({ instrument, interval, from, to }) {
+    if (instrument?.tinkoffFigi) {
+      const { candles } = await this.getOrCreateClient(
+        MarketDataServiceDefinition
+      ).getCandles({
+        instrumentId: instrument.tinkoffFigi,
+        interval,
+        from,
+        to
+      });
+
+      return candles.map((c) => {
+        if (instrument.type === 'bond') {
+          return {
+            open: this.relativeBondPriceToPrice(toNumber(c.open), instrument),
+            high: this.relativeBondPriceToPrice(toNumber(c.high), instrument),
+            low: this.relativeBondPriceToPrice(toNumber(c.low), instrument),
+            close: this.relativeBondPriceToPrice(toNumber(c.close), instrument),
+            time: c.time.toISOString(),
+            volume: c.volume
+          };
+        }
+
+        return {
+          open: +toNumber(c.open).toFixed(getInstrumentPrecision(instrument)),
+          high: +toNumber(c.high).toFixed(getInstrumentPrecision(instrument)),
+          low: +toNumber(c.low).toFixed(getInstrumentPrecision(instrument)),
+          close: +toNumber(c.close).toFixed(getInstrumentPrecision(instrument)),
+          time: c.time.toISOString(),
+          volume: c.volume
+        };
+      });
+    }
+
+    return [];
+  }
+
+  async getOrders(client) {
+    const orders = [];
+
+    for (const o of (
+      await client.getOrders({
+        accountId: this.document.account
+      })
+    ).orders) {
+      const instrument = this.#figis.get(o.figi);
+
+      if (instrument?.type === 'future') {
+        const minPriceIncrementAmount = this.#futureMinPriceIncrementAmount.get(
+          instrument.symbol
+        );
+
+        const { initialSecurityPrice } = o;
+        const value = toNumber(initialSecurityPrice);
+        let ptValue =
+          (value * instrument.minPriceIncrement) / minPriceIncrementAmount;
+        const precision = getInstrumentPrecision(instrument, ptValue);
+
+        ptValue = parseFloat(ptValue.toFixed(precision));
+
+        const money = toQuotation(ptValue);
+
+        o.initialSecurityPrice.units = money.units;
+        o.initialSecurityPrice.nano = money.nano;
+
+        orders.push(o);
+      } else {
+        orders.push(o);
+      }
+    }
+
+    return { orders };
   }
 
   #orderId() {
@@ -277,10 +1314,10 @@ class TinkoffGrpcWebTrader extends Trader {
         }
       );
 
-      const { orders } = await this.#getOrders(client);
+      const { orders } = await this.getOrders(client);
 
       for (const o of orders) {
-        const status = this.#getOrderStatus(o);
+        const status = this.getOrderStatus(o);
 
         if (status === 'working') {
           if (instrument && o.figi !== instrument.tinkoffFigi) continue;
@@ -325,10 +1362,10 @@ class TinkoffGrpcWebTrader extends Trader {
         }
       );
 
-      const { orders } = await this.#getOrders(client);
+      const { orders } = await this.getOrders(client);
 
       for (const o of orders) {
-        const status = this.#getOrderStatus(o);
+        const status = this.getOrderStatus(o);
         const orderSide =
           o.direction === OrderDirection.ORDER_DIRECTION_BUY ? 'buy' : 'sell';
 
@@ -391,1046 +1428,7 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  @debounce(100)
-  resubscribeToMarketDataStream(reconnect = false) {
-    return this.#resubscribeToMarketDataStream(reconnect);
-  }
-
-  @debounce(100)
-  resubscribeToPortfolioStream(reconnect = false) {
-    return this.#resubscribeToPortfolioStream(reconnect);
-  }
-
-  @debounce(100)
-  resubscribeToPositionsStream(reconnect = false) {
-    return this.#resubscribeToPositionsStream(reconnect);
-  }
-
-  async #resubscribeToMarketDataStream(reconnect = false) {
-    if (
-      !this.refs.orderbook.size &&
-      !this.refs.allTrades.size &&
-      !this.refs.candles.size
-    ) {
-      return;
-    }
-
-    const marketDataServerSideStreamRequest = {};
-    const orderbookRefsArray = [...this.refs.orderbook.values()];
-    const allTradesRefsArray = [...this.refs.allTrades.values()];
-    const candlesRefsArray = [...this.refs.candles.values()];
-
-    if (orderbookRefsArray.length) {
-      marketDataServerSideStreamRequest.subscribeOrderBookRequest = {
-        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
-        instruments: []
-      };
-
-      [...this.refs.orderbook.values()].forEach(({ instrument }) => {
-        marketDataServerSideStreamRequest.subscribeOrderBookRequest.instruments.push(
-          {
-            instrumentId: instrument.tinkoffFigi,
-            depth: 50
-          }
-        );
-      });
-    }
-
-    if (allTradesRefsArray.length) {
-      marketDataServerSideStreamRequest.subscribeTradesRequest = {
-        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
-        instruments: []
-      };
-
-      [...this.refs.allTrades.values()].forEach(({ instrument }) => {
-        marketDataServerSideStreamRequest.subscribeTradesRequest.instruments.push(
-          {
-            instrumentId: instrument.tinkoffFigi
-          }
-        );
-      });
-    }
-
-    if (candlesRefsArray.length) {
-      marketDataServerSideStreamRequest.subscribeCandlesRequest = {
-        subscriptionAction: SubscriptionAction.SUBSCRIPTION_ACTION_SUBSCRIBE,
-        instruments: [],
-        waitingClose: false
-      };
-
-      [...this.refs.candles.values()].forEach(({ instrument }) => {
-        marketDataServerSideStreamRequest.subscribeCandlesRequest.instruments.push(
-          {
-            instrumentId: instrument.tinkoffFigi,
-            interval: SubscriptionInterval.SUBSCRIPTION_INTERVAL_ONE_MINUTE
-          }
-        );
-      });
-    }
-
-    const client = createClient(
-      MarketDataStreamServiceDefinition,
-      createChannel('https://invest-public-api.tinkoff.ru:443'),
-      {
-        '*': {
-          metadata: this.#metadata
-        }
-      }
-    );
-
-    this.#marketDataAbortController?.abort?.();
-
-    this.#marketDataAbortController = new AbortController();
-
-    const stream = client.marketDataServerSideStream(
-      marketDataServerSideStreamRequest,
-      {
-        signal: this.#marketDataAbortController?.signal
-      }
-    );
-
-    try {
-      if (reconnect) {
-        await Promise.all(
-          [...this.refs.orderbook.values()].map(({ instrument }) => {
-            return (async () => {
-              this.onOrderbookMessage({
-                orderbook: await this.getOrCreateClient(
-                  MarketDataServiceDefinition
-                ).getOrderBook({
-                  instrumentId: instrument.tinkoffFigi,
-                  depth: 50
-                }),
-                instrument
-              });
-            })();
-          })
-        );
-
-        for (const [source, fields] of this.subs.trader) {
-          for (const { field, datum } of fields) {
-            if (datum === TRADER_DATUM.TRADER) {
-              source[field] = {
-                event: 'reconnect',
-                timestamp: Date.now(),
-                trader: this
-              };
-            }
-          }
-        }
-      }
-
-      for await (const data of stream) {
-        if (data.orderbook) {
-          this.onOrderbookMessage({
-            orderbook: data.orderbook,
-            instrument: this.#figis.get(data.orderbook.figi)
-          });
-        } else if (data.trade) {
-          this.onTradeMessage({
-            trade: data.trade,
-            instrument: this.#figis.get(data.trade.figi)
-          });
-        } else if (data.candle) {
-          this.onCandleMessage({
-            candle: data.candle,
-            instrument: this.#figis.get(data.candle.figi)
-          });
-        }
-      }
-
-      this.resubscribeToMarketDataStream(true);
-    } catch (e) {
-      if (!isAbortError(e)) {
-        console.error(e);
-
-        setTimeout(() => {
-          this.resubscribeToMarketDataStream(true);
-        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-      }
-    }
-  }
-
-  async #resubscribeToPortfolioStream(reconnect = false) {
-    if (!this.refs.portfolio.size) {
-      return;
-    }
-
-    const client = createClient(
-      OperationsStreamServiceDefinition,
-      createChannel('https://invest-public-api.tinkoff.ru:443'),
-      {
-        '*': {
-          metadata: this.#metadata
-        }
-      }
-    );
-
-    this.#portfolioAbortController?.abort?.();
-
-    this.#portfolioAbortController = new AbortController();
-
-    const stream = client.portfolioStream(
-      {
-        accounts: [this.document.account]
-      },
-      {
-        signal: this.#portfolioAbortController?.signal
-      }
-    );
-
-    try {
-      if (reconnect) {
-        this.onPortfolioMessage(
-          await this.getOrCreateClient(
-            OperationsServiceDefinition
-          ).getPortfolio({
-            accountId: this.document.account
-          })
-        );
-
-        this.onPositionsMessage(
-          await this.getOrCreateClient(
-            OperationsServiceDefinition
-          ).getPositions({
-            accountId: this.document.account
-          })
-        );
-      }
-
-      for await (const data of stream) {
-        if (data.portfolio) {
-          this.onPortfolioMessage(data.portfolio);
-        }
-      }
-
-      this.resubscribeToPortfolioStream(true);
-    } catch (e) {
-      if (!isAbortError(e)) {
-        console.error(e);
-
-        setTimeout(() => {
-          this.resubscribeToPortfolioStream(true);
-        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-      }
-    }
-  }
-
-  async #resubscribeToPositionsStream(reconnect = false) {
-    if (!this.refs.portfolio.size) {
-      return;
-    }
-
-    const client = createClient(
-      OperationsStreamServiceDefinition,
-      createChannel('https://invest-public-api.tinkoff.ru:443'),
-      {
-        '*': {
-          metadata: this.#metadata
-        }
-      }
-    );
-
-    this.#positionsAbortController?.abort?.();
-
-    this.#positionsAbortController = new AbortController();
-
-    const stream = client.positionsStream(
-      {
-        accounts: [this.document.account]
-      },
-      {
-        signal: this.#positionsAbortController?.signal
-      }
-    );
-
-    try {
-      if (reconnect) {
-        this.onPositionsMessage(
-          await this.getOrCreateClient(
-            OperationsServiceDefinition
-          ).getPositions({
-            accountId: this.document.account
-          })
-        );
-      }
-
-      for await (const data of stream) {
-        if (data.position) {
-          const money = [];
-          const blocked = [];
-
-          (data.position.money ?? []).forEach((m) => {
-            money.push(m.availableValue);
-            blocked.push(m.blockedValue);
-          });
-
-          this.onPositionsMessage({
-            money,
-            blocked,
-            securities: data.position.securities,
-            futures: data.position.futures,
-            options: data.position.options
-          });
-        }
-      }
-
-      this.resubscribeToPositionsStream(true);
-    } catch (e) {
-      if (!isAbortError(e)) {
-        console.error(e);
-
-        setTimeout(() => {
-          this.resubscribeToPositionsStream(true);
-        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-      }
-    }
-  }
-
-  subsAndRefs(datum) {
-    return {
-      [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
-      [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades],
-      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders],
-      [TRADER_DATUM.CANDLE]: [this.subs.candles, this.refs.candles],
-      [TRADER_DATUM.TRADER]: [this.subs.trader, this.refs.trader],
-      [TRADER_DATUM.POSITION]: [this.subs.portfolio, this.refs.portfolio],
-      [TRADER_DATUM.POSITION_SIZE]: [this.subs.portfolio, this.refs.portfolio],
-      [TRADER_DATUM.POSITION_AVERAGE]: [
-        this.subs.portfolio,
-        this.refs.portfolio
-      ],
-      [TRADER_DATUM.TIMELINE_ITEM]: [this.subs.timeline, this.refs.timeline]
-    }[datum];
-  }
-
-  async subscribeField({ source, field, datum }) {
-    await super.subscribeField({ source, field, datum });
-
-    switch (datum) {
-      case TRADER_DATUM.POSITION:
-      case TRADER_DATUM.POSITION_SIZE:
-      case TRADER_DATUM.POSITION_AVERAGE: {
-        if (typeof this.portfolio === 'undefined') {
-          if (this.#pendingPortfolioRequest) {
-            await this.#pendingPortfolioRequest;
-          } else {
-            this.#pendingPortfolioRequest = this.getOrCreateClient(
-              OperationsServiceDefinition
-            ).getPortfolio({
-              accountId: this.document.account
-            });
-
-            this.onPositionsMessage(
-              await this.getOrCreateClient(
-                OperationsServiceDefinition
-              ).getPositions({
-                accountId: this.document.account
-              })
-            );
-          }
-
-          this.portfolio = await this.#pendingPortfolioRequest;
-        }
-
-        this.onPortfolioMessage(this.portfolio);
-
-        break;
-      }
-      case TRADER_DATUM.CURRENT_ORDER: {
-        for (const [_, order] of this.orders) {
-          this.onOrdersMessage({
-            order
-          });
-        }
-
-        break;
-      }
-      case TRADER_DATUM.TIMELINE_ITEM: {
-        if (!this.#timelineHistory.length) {
-          this.#timelineHistory = (
-            await this.timelineHistory({
-              cursor: ''
-            })
-          ).items;
-        }
-
-        this.onTimelineMessage({
-          items: this.#timelineHistory
-        });
-
-        break;
-      }
-    }
-  }
-
-  async addFirstRef(instrument, refs) {
-    if (instrument.tinkoffFigi && !this.#figis.has(instrument.tinkoffFigi)) {
-      this.#figis.set(instrument.tinkoffFigi, instrument);
-    }
-
-    if (refs === this.refs.orderbook) {
-      this.onOrderbookMessage({
-        orderbook: await this.getOrCreateClient(
-          MarketDataServiceDefinition
-        ).getOrderBook({
-          instrumentId: instrument.tinkoffFigi,
-          depth: 50
-        }),
-        instrument
-      });
-    }
-
-    if (
-      refs === this.refs.orderbook ||
-      refs === this.refs.allTrades ||
-      refs === this.refs.candles
-    ) {
-      this.resubscribeToMarketDataStream();
-    }
-
-    if (refs === this.refs.portfolio) {
-      this.resubscribeToPortfolioStream();
-      this.resubscribeToPositionsStream();
-    }
-
-    if (refs === this.refs.timeline) {
-      void this.#fetchTimelineLoop();
-    }
-
-    if (refs === this.refs.orders) {
-      void this.#fetchOrdersLoop();
-    }
-  }
-
-  async removeLastRef(instrument, refs) {
-    if (refs === this.refs.orders) {
-      this.orders.clear();
-    }
-
-    // Abort streams if refs are empty.
-    if (!this.refs.orderbook.size && !this.refs.allTrades.size) {
-      this.#marketDataAbortController?.abort?.();
-    }
-
-    if (!this.refs.portfolio.size) {
-      this.#portfolioAbortController?.abort?.();
-      this.#positionsAbortController?.abort?.();
-    }
-  }
-
-  async timelineHistory({ cursor, from, to, limit = 100 }) {
-    return this.getOrCreateClient(
-      OperationsServiceDefinition
-    ).getOperationsByCursor({
-      accountId: this.document.account,
-      instrumentId: '',
-      from,
-      to,
-      // Inclusive
-      cursor,
-      limit,
-      operationTypes: [
-        OperationType.OPERATION_TYPE_BUY,
-        OperationType.OPERATION_TYPE_SELL,
-        OperationType.OPERATION_TYPE_BUY_CARD,
-        OperationType.OPERATION_TYPE_BUY_MARGIN,
-        OperationType.OPERATION_TYPE_SELL_MARGIN
-      ],
-      state: OperationState.OPERATION_STATE_EXECUTED,
-      withoutCommissions: true
-    });
-  }
-
-  onTimelineMessage({ items }) {
-    for (const [source, fields] of this.subs.timeline) {
-      for (const { field, datum } of fields) {
-        if (datum === TRADER_DATUM.TIMELINE_ITEM) {
-          for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            const instrument = this.#figis.get(item.figi);
-
-            if (instrument && Array.isArray(item.tradesInfo?.trades)) {
-              for (const trade of item.tradesInfo.trades) {
-                source[field] = {
-                  instrument,
-                  operationId: trade.num,
-                  accruedInterest: toNumber(item.accruedInt),
-                  commission: toNumber(item.commission),
-                  parentId: item.id,
-                  symbol: instrument.symbol,
-                  cursor: item.cursor,
-                  type: item.type,
-                  exchange: instrument.exchange,
-                  quantity: trade.quantity / instrument.lot,
-                  price: +toNumber(trade.price).toFixed(
-                    getInstrumentPrecision(instrument)
-                  ),
-                  createdAt: trade.date.toISOString(),
-                  parentCreatedAt: item.date.toISOString()
-                };
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onOrderbookMessage({ orderbook, instrument }) {
-    if (orderbook && instrument) {
-      for (const [source, fields] of this.subs.orderbook) {
-        if (this.instrumentsAreEqual(instrument, source.instrument)) {
-          const ref = this.refs.orderbook.get(source.instrument.symbol);
-
-          if (ref) {
-            ref.lastOrderbook = orderbook;
-
-            for (const { field, datum } of fields) {
-              switch (datum) {
-                case TRADER_DATUM.ORDERBOOK:
-                  let limitDownPrice = +toNumber(orderbook.limitDown).toFixed(
-                    getInstrumentPrecision(instrument)
-                  );
-                  let limitUpPrice = +toNumber(orderbook.limitUp).toFixed(
-                    getInstrumentPrecision(instrument)
-                  );
-
-                  if (instrument.type === 'bond') {
-                    limitDownPrice = this.relativeBondPriceToPrice(
-                      limitDownPrice,
-                      instrument
-                    );
-                    limitUpPrice = this.relativeBondPriceToPrice(
-                      limitUpPrice,
-                      instrument
-                    );
-                  }
-
-                  source[field] = {
-                    bids: (
-                      orderbook?.bids?.map?.((b) => {
-                        const p = +toNumber(b.price).toFixed(
-                          getInstrumentPrecision(instrument)
-                        );
-
-                        return {
-                          price:
-                            instrument.type === 'bond' && !b.processed
-                              ? this.relativeBondPriceToPrice(p, instrument)
-                              : p,
-                          volume: b.quantity,
-                          processed: true
-                        };
-                      }) ?? []
-                    )
-                      .concat([
-                        {
-                          price: limitDownPrice,
-                          pool: 'LD',
-                          volume: 0,
-                          processed: true
-                        }
-                      ])
-                      .sort((a, b) => b.price - a.price),
-                    asks: (
-                      orderbook?.asks?.map?.((a) => {
-                        const p = +toNumber(a.price).toFixed(
-                          getInstrumentPrecision(instrument)
-                        );
-
-                        return {
-                          price:
-                            instrument.type === 'bond' && !a.processed
-                              ? this.relativeBondPriceToPrice(p, instrument)
-                              : p,
-                          volume: a.quantity,
-                          processed: true
-                        };
-                      }) ?? []
-                    )
-                      .concat({
-                        price: limitUpPrice,
-                        pool: 'LU',
-                        volume: 0,
-                        processed: true
-                      })
-                      .sort((a, b) => a.price - b.price)
-                  };
-
-                  break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  async allTrades({ instrument, depth }) {
-    if (instrument) {
-      const to = new Date();
-      const from = new Date();
-
-      to.setUTCHours(to.getUTCHours() + 1);
-      from.setUTCHours(from.getUTCHours() - 1);
-
-      const { trades } = await this.getOrCreateClient(
-        MarketDataServiceDefinition
-      ).getLastTrades({
-        instrumentId: instrument.tinkoffFigi,
-        from,
-        to
-      });
-
-      return trades
-        .slice(-depth)
-        .reverse()
-        .map((trade) => {
-          const timestamp = trade.time.valueOf();
-          const price =
-            instrument.type === 'bond'
-              ? this.relativeBondPriceToPrice(toNumber(trade.price), instrument)
-              : +toNumber(trade.price).toFixed(
-                  getInstrumentPrecision(instrument)
-                );
-
-          return {
-            orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
-            side:
-              trade.direction === TradeDirection.TRADE_DIRECTION_BUY
-                ? 'buy'
-                : trade.direction === TradeDirection.TRADE_DIRECTION_SELL
-                ? 'sell'
-                : '',
-            timestamp,
-            symbol: instrument.symbol,
-            price,
-            volume: trade.quantity
-          };
-        });
-    }
-
-    return [];
-  }
-
-  async historicalCandles({ instrument, interval, from, to }) {
-    if (instrument?.tinkoffFigi) {
-      const { candles } = await this.getOrCreateClient(
-        MarketDataServiceDefinition
-      ).getCandles({
-        instrumentId: instrument.tinkoffFigi,
-        interval,
-        from,
-        to
-      });
-
-      return candles.map((c) => {
-        if (instrument.type === 'bond') {
-          return {
-            open: this.relativeBondPriceToPrice(toNumber(c.open), instrument),
-            high: this.relativeBondPriceToPrice(toNumber(c.high), instrument),
-            low: this.relativeBondPriceToPrice(toNumber(c.low), instrument),
-            close: this.relativeBondPriceToPrice(toNumber(c.close), instrument),
-            time: c.time.toISOString(),
-            volume: c.volume
-          };
-        }
-
-        return {
-          open: +toNumber(c.open).toFixed(getInstrumentPrecision(instrument)),
-          high: +toNumber(c.high).toFixed(getInstrumentPrecision(instrument)),
-          low: +toNumber(c.low).toFixed(getInstrumentPrecision(instrument)),
-          close: +toNumber(c.close).toFixed(getInstrumentPrecision(instrument)),
-          time: c.time.toISOString(),
-          volume: c.volume
-        };
-      });
-    }
-
-    return [];
-  }
-
-  onTradeMessage({ trade, instrument }) {
-    if (trade && instrument) {
-      for (const [source, fields] of this.subs.allTrades) {
-        if (this.instrumentsAreEqual(instrument, source.instrument)) {
-          for (const { field, datum } of fields) {
-            switch (datum) {
-              case TRADER_DATUM.MARKET_PRINT:
-                const timestamp = trade.time.valueOf();
-                const price =
-                  instrument.type === 'bond'
-                    ? this.relativeBondPriceToPrice(
-                        toNumber(trade.price),
-                        instrument
-                      )
-                    : +toNumber(trade.price).toFixed(
-                        getInstrumentPrecision(instrument)
-                      );
-
-                source[field] = {
-                  orderId: `${instrument.symbol}|${trade.direction}|${price}|${trade.quantity}|${timestamp}`,
-                  side:
-                    trade.direction === TradeDirection.TRADE_DIRECTION_BUY
-                      ? 'buy'
-                      : trade.direction === TradeDirection.TRADE_DIRECTION_SELL
-                      ? 'sell'
-                      : '',
-                  time: trade.time.toISOString(),
-                  timestamp,
-                  symbol: instrument.symbol,
-                  price,
-                  volume: trade.quantity
-                };
-
-                break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onCandleMessage({ candle, instrument }) {
-    if (candle && instrument) {
-      for (const [source, fields] of this.subs.candles) {
-        if (this.instrumentsAreEqual(instrument, source.instrument)) {
-          for (const { field, datum } of fields) {
-            switch (datum) {
-              case TRADER_DATUM.CANDLE:
-                if (instrument.type === 'bond') {
-                  source[field] = {
-                    open: this.relativeBondPriceToPrice(
-                      toNumber(candle.open),
-                      instrument
-                    ),
-                    high: this.relativeBondPriceToPrice(
-                      toNumber(candle.high),
-                      instrument
-                    ),
-                    low: this.relativeBondPriceToPrice(
-                      toNumber(candle.low),
-                      instrument
-                    ),
-                    close: this.relativeBondPriceToPrice(
-                      toNumber(candle.close),
-                      instrument
-                    ),
-                    time: candle.time.toISOString(),
-                    volume: candle.volume
-                  };
-                } else {
-                  source[field] = {
-                    open: +toNumber(candle.open).toFixed(
-                      getInstrumentPrecision(instrument)
-                    ),
-                    high: +toNumber(candle.high).toFixed(
-                      getInstrumentPrecision(instrument)
-                    ),
-                    low: +toNumber(candle.low).toFixed(
-                      getInstrumentPrecision(instrument)
-                    ),
-                    close: +toNumber(candle.close).toFixed(
-                      getInstrumentPrecision(instrument)
-                    ),
-                    time: candle.time.toISOString(),
-                    volume: candle.volume
-                  };
-                }
-
-                break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  @debounce(100)
-  broadcastPortfolio() {
-    if (typeof this.portfolio === 'undefined') {
-      return;
-    }
-
-    for (const [source, fields] of this.subs.portfolio) {
-      for (const { field, datum } of fields) {
-        if (datum === TRADER_DATUM.POSITION) {
-          for (const [currency, size] of this.positions.money) {
-            source[field] = {
-              symbol: currency,
-              isCurrency: true,
-              isBalance: true,
-              lot: 1,
-              size,
-              accountId: this.document.account
-            };
-          }
-
-          for (const [figi, security] of this.positions.securities) {
-            const instrument = this.#figis.get(figi);
-            const portfolioPosition = this.portfolio.positionsMap.get(figi);
-
-            if (instrument) {
-              if (
-                security.instrumentType === 'share' ||
-                security.instrumentType === 'bond'
-              ) {
-                source[field] = {
-                  instrument,
-                  lot: instrument.lot,
-                  symbol: instrument.symbol,
-                  exchange: instrument.exchange,
-                  isCurrency: false,
-                  isBalance: false,
-                  averagePrice: portfolioPosition
-                    ? +toNumber(portfolioPosition.averagePositionPrice).toFixed(
-                        getInstrumentPrecision(instrument)
-                      )
-                    : void 0,
-                  size: (security.balance + security.blocked) / instrument.lot,
-                  accountId: this.document.account
-                };
-              }
-            }
-          }
-
-          for (const [figi, future] of this.positions.futures) {
-            const instrument = this.#figis.get(figi);
-            const portfolioPosition = this.portfolio.positionsMap.get(figi);
-
-            if (instrument) {
-              source[field] = {
-                instrument,
-                lot: instrument.lot,
-                symbol: instrument.symbol,
-                exchange: instrument.exchange,
-                isCurrency: false,
-                isBalance: false,
-                averagePrice: portfolioPosition
-                  ? +toNumber(portfolioPosition.averagePositionPrice).toFixed(
-                      getInstrumentPrecision(instrument)
-                    )
-                  : void 0,
-                size: (future.balance + future.blocked) / instrument.lot,
-                accountId: this.document.account
-              };
-            }
-          }
-        } else {
-          const sourceFigi = source.instrument?.tinkoffFigi;
-
-          if (sourceFigi) {
-            let position;
-
-            switch (source.instrument?.type) {
-              case 'stock':
-              case 'bond':
-                position = this.positions.securities.get(sourceFigi);
-
-                break;
-
-              case 'future':
-                position = this.positions.futures.get(sourceFigi);
-
-                break;
-            }
-
-            if (!position || +(position?.balance + position?.blocked) === 0) {
-              source[field] = 0;
-            } else {
-              switch (datum) {
-                case TRADER_DATUM.POSITION_SIZE:
-                  source[field] =
-                    (position.balance + position.blocked) /
-                    source.instrument.lot;
-
-                  break;
-                case TRADER_DATUM.POSITION_AVERAGE:
-                  const portfolioPosition =
-                    this.portfolio.positionsMap.get(sourceFigi);
-
-                  if (portfolioPosition) {
-                    source[field] = +toNumber(
-                      portfolioPosition.averagePositionPrice
-                    ).toFixed(getInstrumentPrecision(source.instrument));
-                  } else {
-                    source[field] = 0;
-                  }
-
-                  break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onPortfolioMessage(portfolio) {
-    if (portfolio) {
-      this.portfolio = portfolio;
-      this.portfolio.positionsMap = new Map();
-
-      this.portfolio.positions.forEach((position) =>
-        this.portfolio.positionsMap.set(position.figi, position)
-      );
-
-      this.broadcastPortfolio();
-    }
-  }
-
-  onPositionsMessage(position) {
-    if (position) {
-      const { money, blocked, securities, futures, options } = position;
-
-      for (const m of money) {
-        this.positions.money.set(m.currency.toUpperCase(), toNumber(m));
-      }
-
-      for (const b of blocked) {
-        this.positions.blockedMoney.set(b.currency.toUpperCase(), toNumber(b));
-      }
-
-      for (const s of securities) {
-        if (s.instrumentType === 'share' || s.instrumentType === 'bond') {
-          this.positions.securities.set(s.figi, s);
-        }
-      }
-
-      for (const f of futures) {
-        this.positions.futures.set(f.figi, f);
-      }
-    }
-
-    this.broadcastPortfolio();
-  }
-
-  async #getOrders(client) {
-    const orders = [];
-
-    for (const o of (
-      await client.getOrders({
-        accountId: this.document.account
-      })
-    ).orders) {
-      const instrument = this.#figis.get(o.figi);
-
-      if (instrument?.type === 'future') {
-        const minPriceIncrementAmount = this.#futureMinPriceIncrementAmount.get(
-          instrument.symbol
-        );
-
-        const { initialSecurityPrice } = o;
-        const value = toNumber(initialSecurityPrice);
-        let ptValue =
-          (value * instrument.minPriceIncrement) / minPriceIncrementAmount;
-        const precision = getInstrumentPrecision(instrument, ptValue);
-
-        ptValue = parseFloat(ptValue.toFixed(precision));
-
-        const money = toQuotation(ptValue);
-
-        o.initialSecurityPrice.units = money.units;
-        o.initialSecurityPrice.nano = money.nano;
-
-        orders.push(o);
-      } else {
-        orders.push(o);
-      }
-    }
-
-    return { orders };
-  }
-
-  async #fetchTimelineLoop() {
-    if (this.refs.timeline.size) {
-      try {
-        if (!this.#timelineHistory.length) {
-          this.#timelineHistory = (
-            await this.timelineHistory({
-              cursor: ''
-            })
-          ).items;
-
-          this.onTimelineMessage({
-            items: this.#timelineHistory
-          });
-        } else {
-          const history = await this.timelineHistory({
-            cursor: '',
-            limit: 10
-          });
-          const newItems = [];
-
-          for (const i of history.items) {
-            if (i.id !== this.#timelineHistory[0].id) {
-              newItems.push(i);
-            } else {
-              break;
-            }
-          }
-
-          this.#timelineHistory.unshift(...newItems);
-
-          this.onTimelineMessage({
-            items: newItems
-          });
-        }
-
-        setTimeout(() => {
-          this.#fetchTimelineLoop();
-        }, 750);
-      } catch (e) {
-        console.error(e);
-
-        setTimeout(() => {
-          this.#fetchTimelineLoop();
-        }, 750);
-      }
-    }
-  }
-
-  async #fetchOrdersLoop() {
-    if (this.refs.orders.size) {
-      try {
-        const client = this.getOrCreateClient(OrdersServiceDefinition);
-        const { orders } = await this.#getOrders(client);
-        const newOrders = new Set();
-
-        for (const o of orders) {
-          newOrders.add(o.orderId);
-
-          if (!this.orders.has(o.orderId)) {
-            this.orders.set(o.orderId, o);
-            this.onOrdersMessage({ order: o });
-          }
-        }
-
-        for (const [orderId, order] of this.orders) {
-          if (!newOrders.has(orderId)) {
-            order.executionReportStatus =
-              OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_UNSPECIFIED;
-
-            this.onOrdersMessage({ order });
-            this.orders.delete(orderId);
-          }
-        }
-
-        setTimeout(() => {
-          this.#fetchOrdersLoop();
-        }, 750);
-      } catch (e) {
-        console.error(e);
-
-        setTimeout(() => {
-          this.#fetchOrdersLoop();
-        }, 750);
-      }
-    }
-  }
-
-  #getOrderStatus(o = {}) {
+  getOrderStatus(o = {}) {
     switch (o.executionReportStatus) {
       case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_CANCELLED:
         return 'canceled';
@@ -1443,66 +1441,6 @@ class TinkoffGrpcWebTrader extends Trader {
         return 'working';
       case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_UNSPECIFIED:
         return 'unspecified';
-    }
-  }
-
-  onOrdersMessage({ order }) {
-    if (order) {
-      for (const [source, fields] of this.subs.orders) {
-        for (const { field, datum } of fields) {
-          if (datum === TRADER_DATUM.CURRENT_ORDER) {
-            const instrument = this.#figis.get(order.figi);
-
-            if (!instrument) continue;
-
-            source[field] = {
-              instrument,
-              orderId: order.orderId,
-              symbol: order.figi,
-              exchange: 0,
-              orderType:
-                order.orderType === OrderType.ORDER_TYPE_LIMIT
-                  ? 'limit'
-                  : 'market',
-              side:
-                order.direction === OrderDirection.ORDER_DIRECTION_BUY
-                  ? 'buy'
-                  : 'sell',
-              status: this.#getOrderStatus(order),
-              placedAt: order.orderDate.toISOString(),
-              endsAt: null,
-              quantity: order.lotsRequested,
-              filled: order.lotsExecuted,
-              price:
-                instrument.type === 'bond'
-                  ? this.relativeBondPriceToPrice(
-                      toNumber(order.initialSecurityPrice),
-                      instrument
-                    )
-                  : +toNumber(order.initialSecurityPrice).toFixed(
-                      getInstrumentPrecision(instrument)
-                    )
-            };
-          }
-        }
-      }
-    }
-  }
-
-  async instrumentChanged(source, oldValue, newValue) {
-    await super.instrumentChanged(source, oldValue, newValue);
-
-    if (newValue?.symbol) {
-      // Handle no real subscription case for orderbook, just broadcast.
-      this.onOrderbookMessage({
-        orderbook: this.refs.orderbook.get(newValue.symbol)?.lastOrderbook,
-        instrument: newValue
-      });
-    }
-
-    // Broadcast portfolio for order widgets (at least).
-    if (this.subs.portfolio.has(source)) {
-      this.onPortfolioMessage(this.portfolio);
     }
   }
 
@@ -1522,38 +1460,6 @@ class TinkoffGrpcWebTrader extends Trader {
 
   getBroker() {
     return BROKERS.TINKOFF;
-  }
-
-  getInstrumentIconUrl(instrument) {
-    if (!instrument) {
-      return 'static/instruments/unknown.svg';
-    }
-
-    let symbol = instrument?.symbol;
-
-    if (typeof symbol === 'string') {
-      symbol = symbol.split('@')[0];
-    }
-
-    if (instrument?.currency === 'HKD') {
-      return `static/instruments/stocks/hk/${symbol.replace(' ', '-')}.svg`;
-    }
-
-    if (
-      instrument?.exchange === EXCHANGE.MOEX ||
-      instrument?.currency === 'RUB'
-    ) {
-      return `static/instruments/${instrument.type}s/rus/${symbol.replace(
-        ' ',
-        '-'
-      )}.svg`;
-    }
-
-    if (instrument?.exchange === EXCHANGE.SPBX && symbol !== 'TCS') {
-      return `static/instruments/stocks/us/${symbol.replace(' ', '-')}.svg`;
-    }
-
-    return super.getInstrumentIconUrl(instrument);
   }
 
   supportsInstrument(instrument) {

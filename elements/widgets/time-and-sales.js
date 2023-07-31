@@ -398,7 +398,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.tradesTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 500,
@@ -483,6 +482,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('tradesTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.tradesTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.tradesTrader ?? ''}"

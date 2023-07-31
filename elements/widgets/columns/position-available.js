@@ -1,7 +1,10 @@
-import { html, when } from '../../../vendor/fast-element.min.js';
+/** @decorator */
+
+import { html, observable, when } from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatAmount, formatQuantity } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
+import { TRADER_DATUM } from '../../../lib/const.js';
 import '../../button.js';
 
 export const columnTemplate = html`
@@ -19,7 +22,7 @@ export const columnTemplate = html`
           class="balance-cell"
           ?hidden="${(x) => x.widget.document.hideBalances}"
         >
-          ${(cell) => formatAmount(cell.datum?.size, cell.datum?.symbol)}
+          ${(cell) => formatAmount(cell.size, cell.datum?.symbol)}
         </span>
       `
     )}
@@ -27,18 +30,47 @@ export const columnTemplate = html`
       (x) => !x.isBalance,
       html`
         <span>
-          ${(cell) => formatQuantity(cell.datum?.size * cell.datum?.lot)}
+          ${(cell) => formatQuantity(cell.size * cell.instrument?.lot)}
         </span>
       `
     )}
   </template>
 `;
 
+export class PositionAvailableColumn extends Column {
+  @observable
+  size;
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (this.defaultTrader) {
+      await this.defaultTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          size: TRADER_DATUM.POSITION_SIZE
+        }
+      });
+    }
+  }
+
+  async disconnectedCallback() {
+    if (this.defaultTrader) {
+      await this.defaultTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          size: TRADER_DATUM.POSITION_SIZE
+        }
+      });
+    }
+
+    return super.disconnectedCallback();
+  }
+}
+
 // noinspection JSVoidFunctionReturnValueUsed
-export default (class extends Column {}
-  .compose({
-    name: `ppp-${uuidv4()}`,
-    template: columnTemplate,
-    styles: columnStyles
-  })
-  .define());
+export default PositionAvailableColumn.compose({
+  name: `ppp-${uuidv4()}`,
+  template: columnTemplate,
+  styles: columnStyles
+}).define();

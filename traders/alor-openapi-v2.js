@@ -1,5 +1,7 @@
+/** @decorator */
+
 import { isJWTTokenExpired, uuidv4 } from '../lib/ppp-crypto.js';
-import { TradingError } from '../lib/ppp-errors.js';
+import { AuthorizationError, TradingError } from '../lib/ppp-errors.js';
 import {
   TRADER_DATUM,
   EXCHANGE,
@@ -7,19 +9,452 @@ import {
   INSTRUMENT_DICTIONARY
 } from '../lib/const.js';
 import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
-import { later } from '../lib/ppp-decorators.js';
-import { Trader } from './common-trader.js';
+import { debounce, later } from '../lib/ppp-decorators.js';
+import {
+  GlobalTraderDatum,
+  Trader,
+  TraderDatum,
+  TraderEventDatum
+} from './common-trader.js';
 import { formatPrice } from '../lib/intl.js';
+
+class AlorTraderDatum extends TraderDatum {
+  guids = new Map();
+
+  filter(data, instrument, source) {
+    if (
+      this.trader.document.exchange === EXCHANGE.SPBX &&
+      [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].indexOf(
+        source?.instrument?.exchange
+      ) === -1
+    ) {
+      return false;
+    }
+
+    // noinspection RedundantIfStatementJS
+    if (
+      this.trader.document.exchange === EXCHANGE.MOEX &&
+      source?.instrument?.exchange !== EXCHANGE.MOEX
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  async subscribe(source, field, datum) {
+    await this.trader.establishWebSocketConnection();
+
+    return super.subscribe(source, field, datum);
+  }
+
+  async firstReferenceAdded(source, symbol) {
+    const guid = this.trader.generateRequestId(symbol);
+
+    this.guids.set(symbol, guid);
+    this.trader.guidToDatum.set(guid, this);
+
+    return guid;
+  }
+
+  async lastReferenceRemoved(source, symbol) {
+    const guid = this.guids.get(symbol);
+
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'unsubscribe',
+          token: this.trader.accessToken,
+          guid
+        })
+      );
+    }
+
+    this.guids.delete(symbol);
+    this.trader.guidToDatum.delete(guid);
+  }
+}
+
+class QuotesDatum extends AlorTraderDatum {
+  async firstReferenceAdded(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'QuotesSubscribe',
+          code: symbol,
+          exchange: this.trader.document.exchange,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: await super.firstReferenceAdded(source, symbol)
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.LAST_PRICE](data, instrument, source) {
+    if (instrument.type === 'bond') {
+      return this.trader.relativeBondPriceToPrice(data.last_price, instrument);
+    } else {
+      return data.last_price;
+    }
+  }
+
+  [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE](data) {
+    return data.change_percent;
+  }
+
+  [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE](data, instrument) {
+    if (instrument.type === 'bond') {
+      return this.trader.relativeBondPriceToPrice(data.change, instrument);
+    } else {
+      return data.change;
+    }
+  }
+
+  [TRADER_DATUM.BEST_BID](data, instrument) {
+    if (instrument.type === 'bond') {
+      return this.trader.relativeBondPriceToPrice(data.bid, instrument);
+    } else {
+      return data.bid;
+    }
+  }
+
+  [TRADER_DATUM.BEST_ASK](data, instrument) {
+    if (instrument.type === 'bond') {
+      return this.trader.relativeBondPriceToPrice(data.ask, instrument);
+    } else {
+      return data.ask;
+    }
+  }
+}
+
+class AllTradesDatum extends AlorTraderDatum {
+  doNotSaveValue = true;
+
+  async firstReferenceAdded(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'AllTradesGetAndSubscribe',
+          code: symbol,
+          exchange: this.trader.document.exchange,
+          depth: 0,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: await super.firstReferenceAdded(source, symbol)
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.MARKET_PRINT](data, instrument) {
+    return {
+      orderId: data.id,
+      side: data.side,
+      timestamp: data.timestamp,
+      symbol: data.symbol,
+      price:
+        instrument.type === 'bond'
+          ? this.relativeBondPriceToPrice(data.price, instrument)
+          : data.price,
+      volume: data.qty
+    };
+  }
+}
+
+class OrderbookDatum extends AlorTraderDatum {
+  async firstReferenceAdded(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'OrderBookGetAndSubscribe',
+          code: symbol,
+          exchange: this.trader.document.exchange,
+          depth: 20,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: await super.firstReferenceAdded(source, symbol)
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.ORDERBOOK](data, instrument) {
+    if (instrument.type === 'bond') {
+      data.bids = data.bids.map((b) => {
+        if (b.processed) {
+          return b;
+        }
+
+        return {
+          price: this.trader.relativeBondPriceToPrice(b.price, instrument),
+          volume: b.volume,
+          processed: true
+        };
+      });
+
+      data.asks = data.asks.map((a) => {
+        if (a.processed) {
+          return a;
+        }
+
+        return {
+          price: this.trader.relativeBondPriceToPrice(a.price, instrument),
+          volume: a.volume,
+          processed: true
+        };
+      });
+    }
+
+    return {
+      bids: data.bids,
+      asks: data.asks
+    };
+  }
+}
+
+class AlorTraderGlobalDatum extends GlobalTraderDatum {
+  guid;
+
+  async subscribe(source, field, datum) {
+    await this.trader.establishWebSocketConnection();
+
+    return super.subscribe(source, field, datum);
+  }
+
+  async firstReferenceAdded() {
+    this.guid = this.trader.generateRequestId();
+
+    this.trader.guidToDatum.set(this.guid, this);
+
+    return this.guid;
+  }
+
+  async lastReferenceRemoved() {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'unsubscribe',
+          token: this.trader.accessToken,
+          guid: this.guid
+        })
+      );
+    }
+
+    this.trader.guidToDatum.delete(this.guid);
+
+    this.guid = null;
+  }
+}
+
+class PositionsDatum extends AlorTraderGlobalDatum {
+  @debounce(1000)
+  dispatchDelayedEstimateEvent() {
+    this.trader.traderEvent({ event: 'estimate' });
+  }
+
+  filter(data, source, key, datum) {
+    if (datum !== TRADER_DATUM.POSITION) {
+      const isBalance =
+        data.isCurrency && this.trader.document.portfolioType !== 'currency';
+
+      if (isBalance) {
+        return data.symbol === source.getAttribute('balance');
+      }
+
+      return data.symbol === this.trader.getSymbol(source.instrument);
+    } else {
+      return true;
+    }
+  }
+
+  async firstReferenceAdded() {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'PositionsGetAndSubscribeV2',
+          portfolio: this.trader.document.portfolio,
+          exchange: this.trader.document.exchange,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: await super.firstReferenceAdded()
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.POSITION](data) {
+    const isBalance =
+      data.isCurrency && this.trader.document.portfolioType !== 'currency';
+
+    const result = {
+      symbol: data.symbol,
+      lot: data.lotSize,
+      exchange: data.exchange,
+      averagePrice: data.avgPrice,
+      isCurrency: data.isCurrency,
+      isBalance,
+      size: data.qty,
+      accountId: data.portfolio
+    };
+
+    if (isBalance) {
+      this.dispatchDelayedEstimateEvent();
+
+      return result;
+    } else {
+      if (this.trader.document.portfolioType === 'futures') {
+        result.instrument = this.trader.futures.get(data.symbol.toUpperCase());
+      } else {
+        result.instrument = this.trader.instruments.get(data.symbol);
+      }
+
+      if (result.instrument?.type === 'bond') {
+        result.averagePrice = this.trader.relativeBondPriceToPrice(
+          result.averagePrice,
+          result.instrument
+        );
+      }
+
+      return result;
+    }
+  }
+
+  [TRADER_DATUM.POSITION_SIZE](data) {
+    return data.qty;
+  }
+
+  [TRADER_DATUM.POSITION_AVERAGE](data, source) {
+    const isBalance =
+      data.isCurrency && this.trader.document.portfolioType !== 'currency';
+
+    if (isBalance) {
+      return;
+    }
+
+    if (source.instrument?.type === 'bond') {
+      return this.trader.relativeBondPriceToPrice(
+        data.avgPrice,
+        source.instrument
+      );
+    } else return data.avgPrice;
+  }
+}
+
+class TimelineDatum extends AlorTraderGlobalDatum {
+  async firstReferenceAdded() {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'TradesGetAndSubscribeV2',
+          portfolio: this.trader.document.portfolio,
+          exchange: this.trader.document.exchange,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: await super.firstReferenceAdded()
+        })
+      );
+    }
+  }
+
+  valueKeyForData(data) {
+    return data?.id;
+  }
+
+  [TRADER_DATUM.TIMELINE_ITEM](data) {
+    const result = {
+      operationId: data.id,
+      accruedInterest: data.accruedInt ?? 0,
+      commission: data.commission,
+      parentId: data.orderno,
+      symbol: data.symbol,
+      type:
+        data.side === 'buy'
+          ? OperationType.OPERATION_TYPE_BUY
+          : OperationType.OPERATION_TYPE_SELL,
+      exchange: data.exchange,
+      quantity: data.qty,
+      price: data.price,
+      createdAt: data.date
+    };
+
+    if (this.trader.document.portfolioType === 'futures') {
+      result.instrument = this.trader.futures.get(data.symbol.toUpperCase());
+    } else {
+      result.instrument = this.trader.instruments.get(data.symbol);
+    }
+
+    if (result.instrument?.type === 'bond') {
+      result.price = this.trader.relativeBondPriceToPrice(
+        result.price,
+        result.instrument
+      );
+    }
+
+    return result;
+  }
+}
+
+class ActiveOrderDatum extends AlorTraderGlobalDatum {
+  async firstReferenceAdded() {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'OrdersGetAndSubscribeV2',
+          portfolio: this.trader.document.portfolio,
+          exchange: this.trader.document.exchange,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: await super.firstReferenceAdded()
+        })
+      );
+    }
+  }
+
+  valueKeyForData(data) {
+    return data?.id;
+  }
+
+  [TRADER_DATUM.ACTIVE_ORDER](data) {
+    const result = {
+      orderId: data.id,
+      symbol: data.symbol,
+      exchange: [data.exchange],
+      orderType: data.type,
+      side: data.side,
+      status: data.status,
+      placedAt: data.transTime,
+      endsAt: data.endTime,
+      quantity: data.qty,
+      filled: data.filled,
+      price: data.price
+    };
+
+    if (this.trader.document.portfolioType === 'futures') {
+      result.instrument = this.trader.futures.get(data.symbol.toUpperCase());
+    } else {
+      result.instrument = this.trader.instruments.get(data.symbol);
+    }
+
+    if (result.instrument?.type === 'bond') {
+      result.price = this.trader.relativeBondPriceToPrice(
+        result.price,
+        result.instrument
+      );
+    }
+
+    return result;
+  }
+}
 
 // noinspection JSUnusedGlobalSymbols
 /**
  * @typedef {Object} AlorOpenAPIV2Trader
  */
-
 class AlorOpenAPIV2Trader extends Trader {
-  #jwt;
+  #pendingAccessTokenRequest;
 
-  #pendingJWTRequest;
+  accessToken;
 
   #pendingConnection;
 
@@ -31,104 +466,251 @@ class AlorOpenAPIV2Trader extends Trader {
 
   #futures = new Map();
 
-  positions = new Map();
+  get futures() {
+    return this.#futures;
+  }
 
-  orders = new Map();
-
-  timeline = new Map();
-
-  // Key: widget instance; Value: [{ field, datum }] array
-  subs = {
-    quotes: new Map(),
-    orders: new Map(),
-    positions: new Map(),
-    orderbook: new Map(),
-    timeline: new Map(),
-    allTrades: new Map()
-  };
-
-  // Key: instrument symbol; Value: { instrument, refCount, guid }
-  // Value contains lastQuotesData for quotes & lastOrderbook for orderbook
-  refs = {
-    quotes: new Map(),
-    orders: new Map(),
-    positions: new Map(),
-    orderbook: new Map(),
-    timeline: new Map(),
-    allTrades: new Map()
-  };
-
-  // Key: Alor subscription guid; Value: {instrument, reference map}
-  #guids = new Map();
+  guidToDatum = new Map();
 
   constructor(document) {
-    super(document);
+    super(document, [
+      {
+        type: QuotesDatum,
+        datums: [
+          TRADER_DATUM.LAST_PRICE,
+          TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+          TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          TRADER_DATUM.BEST_BID,
+          TRADER_DATUM.BEST_ASK
+        ]
+      },
+      {
+        type: AllTradesDatum,
+        datums: [TRADER_DATUM.MARKET_PRINT]
+      },
+      {
+        type: OrderbookDatum,
+        datums: [TRADER_DATUM.ORDERBOOK]
+      },
+      {
+        type: PositionsDatum,
+        datums: [
+          TRADER_DATUM.POSITION,
+          TRADER_DATUM.POSITION_SIZE,
+          TRADER_DATUM.POSITION_AVERAGE
+        ]
+      },
+      {
+        type: TimelineDatum,
+        datums: [TRADER_DATUM.TIMELINE_ITEM]
+      },
+      {
+        type: TraderEventDatum,
+        datums: [TRADER_DATUM.TRADER]
+      },
+      {
+        type: ActiveOrderDatum,
+        datums: [TRADER_DATUM.ACTIVE_ORDER]
+      }
+    ]);
 
     if (!this.document.portfolioType) {
       this.document.portfolioType = 'stock';
     }
   }
 
-  onCacheInstrument(instrument) {
+  instrumentCacheCallback(instrument) {
     this.#futures.set(
       instrument.fullName.split(/\s+/)[0].toUpperCase(),
       instrument
     );
   }
 
+  getDictionary() {
+    if (this.document.exchange === EXCHANGE.SPBX)
+      return INSTRUMENT_DICTIONARY.ALOR_SPBX;
+
+    // MOEX
+    switch (this.document.portfolioType) {
+      case 'stock':
+        return INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES;
+      case 'futures':
+        return INSTRUMENT_DICTIONARY.ALOR_FORTS;
+      case 'currency':
+        return null;
+    }
+  }
+
+  getExchange() {
+    if (this.document.exchange === EXCHANGE.SPBX) return EXCHANGE.SPBX;
+
+    // MOEX
+    switch (this.document.portfolioType) {
+      case 'stock':
+        return EXCHANGE.MOEX_SECURITIES;
+      case 'futures':
+        return EXCHANGE.MOEX_FORTS;
+      case 'currency':
+        return EXCHANGE.MOEX_CURRENCY;
+    }
+  }
+
+  getExchangeForDBRequest() {
+    return this.document.exchange;
+  }
+
+  getBroker() {
+    return BROKERS.ALOR;
+  }
+
   async ensureAccessTokenIsOk() {
+    const timeout = Math.max(this.document.reconnectTimeout ?? 1000, 1000);
+
     try {
-      if (isJWTTokenExpired(this.#jwt)) this.#jwt = void 0;
+      if (isJWTTokenExpired(this.accessToken)) this.accessToken = void 0;
 
-      if (this.#jwt) return;
+      if (typeof this.accessToken === 'string') return;
 
-      if (this.#pendingJWTRequest) {
-        await this.#pendingJWTRequest;
+      if (this.#pendingAccessTokenRequest) {
+        await this.#pendingAccessTokenRequest;
       } else {
-        this.#pendingJWTRequest = fetch(
+        this.#pendingAccessTokenRequest = fetch(
           `https://oauth.alor.ru/refresh?token=${this.document.broker.refreshToken}`,
           {
             method: 'POST'
           }
         )
           .then((request) => request.json())
-          .then(({ AccessToken }) => {
-            this.#jwt = AccessToken;
-            this.#pendingJWTRequest = void 0;
+          .then(({ AccessToken, message }) => {
+            if (!AccessToken && /token/i.test(message)) {
+              this.accessToken = null;
+
+              throw new AuthorizationError({ details: message });
+            }
+
+            this.accessToken = AccessToken;
+            this.#pendingAccessTokenRequest = void 0;
           })
           .catch((e) => {
             console.error(e);
 
-            this.#pendingJWTRequest = void 0;
+            if (e instanceof AuthorizationError) {
+              throw e;
+            }
+
+            this.#pendingAccessTokenRequest = void 0;
 
             return new Promise((resolve) => {
               setTimeout(async () => {
                 await this.ensureAccessTokenIsOk();
-
                 resolve();
-              }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+              }, timeout);
             });
           });
 
-        await this.#pendingJWTRequest;
+        await this.#pendingAccessTokenRequest;
       }
     } catch (e) {
       console.error(e);
 
-      this.#pendingJWTRequest = void 0;
+      if (e instanceof AuthorizationError) {
+        throw e;
+      }
+
+      this.#pendingAccessTokenRequest = void 0;
 
       return new Promise((resolve) => {
         setTimeout(async () => {
           await this.ensureAccessTokenIsOk();
 
           resolve();
-        }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+        }, timeout);
       });
     }
   }
 
-  #reqId() {
-    return `${this.document.portfolio};${this.#slug}-${++this.#counter}`;
+  async establishWebSocketConnection(reconnect) {
+    await this.ensureAccessTokenIsOk();
+
+    if (this.connection?.readyState === WebSocket.OPEN) {
+      this.#pendingConnection = void 0;
+
+      return this.connection;
+    } else if (this.#pendingConnection) {
+      return this.#pendingConnection;
+    } else {
+      return (this.#pendingConnection = new Promise((resolve) => {
+        if (!reconnect && this.connection) {
+          resolve(this.connection);
+        } else {
+          this.connection = new WebSocket('wss://api.alor.ru/ws');
+          this.connection.onopen = async () => {
+            if (reconnect) {
+              await this.resubscribe();
+            }
+
+            // Restore subscriptions.
+            resolve(this.connection);
+          };
+
+          this.connection.onclose = async () => {
+            await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
+
+            this.#pendingConnection = void 0;
+
+            return this.establishWebSocketConnection(true);
+          };
+
+          this.connection.onerror = () => this.connection.close();
+
+          this.connection.onmessage = ({ data }) => {
+            const payload = JSON.parse(data);
+
+            if (payload.data && payload.guid) {
+              const datumInstance = this.guidToDatum.get(payload.guid);
+
+              if (
+                datumInstance instanceof QuotesDatum ||
+                datumInstance instanceof AllTradesDatum
+              ) {
+                let instrument = this.instruments.get(payload.data.symbol);
+
+                if (this.document.portfolioType === 'futures') {
+                  instrument = this.#futures.get(
+                    payload.data.symbol.toUpperCase()
+                  );
+                }
+
+                this.guidToDatum
+                  .get(payload.guid)
+                  ?.dataArrived?.(payload.data, instrument);
+              } else if (datumInstance instanceof OrderbookDatum) {
+                const [symbol] = payload.guid.split(':');
+
+                this.guidToDatum
+                  .get(payload.guid)
+                  ?.dataArrived?.(payload.data, this.instruments.get(symbol));
+              } else if (
+                datumInstance instanceof PositionsDatum ||
+                datumInstance instanceof TimelineDatum ||
+                datumInstance instanceof ActiveOrderDatum
+              ) {
+                this.guidToDatum.get(payload.guid)?.dataArrived?.(payload.data);
+              }
+            }
+          };
+        }
+      }));
+    }
+  }
+
+  generateRequestId(symbol) {
+    if (!symbol) {
+      return `${this.document.portfolio};${this.#slug}-${++this.#counter}`;
+    } else {
+      return `${symbol}:${this.document.portfolio};${this.#slug}-${++this
+        .#counter}`;
+    }
   }
 
   getSymbol(instrument = {}) {
@@ -165,13 +747,14 @@ class AlorOpenAPIV2Trader extends Trader {
   async placeMarketOrder({ instrument, quantity, direction }) {
     await this.ensureAccessTokenIsOk();
 
+    const symbol = this.getSymbol(instrument);
     const orderRequest = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/market',
       {
         method: 'POST',
         body: JSON.stringify({
           instrument: {
-            symbol: this.getSymbol(instrument),
+            symbol,
             exchange: this.document.exchange
           },
           side: direction.toLowerCase(),
@@ -183,8 +766,8 @@ class AlorOpenAPIV2Trader extends Trader {
         }),
         headers: {
           'Content-Type': 'application/json',
-          'X-ALOR-REQID': this.#reqId(),
-          Authorization: `Bearer ${this.#jwt}`
+          'X-ALOR-REQID': this.generateRequestId(symbol),
+          Authorization: `Bearer ${this.accessToken}`
         }
       }
     );
@@ -201,23 +784,17 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  /**
-   *
-   * @param instrument
-   * @param price
-   * @param quantity
-   * @param direction
-   */
   async placeLimitOrder({ instrument, price, quantity, direction }) {
     await this.ensureAccessTokenIsOk();
 
+    const symbol = this.getSymbol(instrument);
     const orderRequest = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit',
       {
         method: 'POST',
         body: JSON.stringify({
           instrument: {
-            symbol: this.getSymbol(instrument),
+            symbol,
             exchange: this.document.exchange
           },
           side: direction.toLowerCase(),
@@ -236,8 +813,8 @@ class AlorOpenAPIV2Trader extends Trader {
         }),
         headers: {
           'Content-Type': 'application/json',
-          'X-ALOR-REQID': this.#reqId(),
-          Authorization: `Bearer ${this.#jwt}`
+          'X-ALOR-REQID': this.generateRequestId(symbol),
+          Authorization: `Bearer ${this.accessToken}`
         }
       }
     );
@@ -265,7 +842,7 @@ class AlorOpenAPIV2Trader extends Trader {
       {
         cache: 'no-cache',
         headers: {
-          Authorization: `Bearer ${this.#jwt}`
+          Authorization: `Bearer ${this.accessToken}`
         }
       }
     );
@@ -304,7 +881,7 @@ class AlorOpenAPIV2Trader extends Trader {
         cache: 'no-cache',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.#jwt}`
+          Authorization: `Bearer ${this.accessToken}`
         },
         body: JSON.stringify({
           portfolio: this.document.portfolio,
@@ -348,7 +925,7 @@ class AlorOpenAPIV2Trader extends Trader {
       `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
       {
         headers: {
-          Authorization: `Bearer ${this.#jwt}`
+          Authorization: `Bearer ${this.accessToken}`
         }
       }
     );
@@ -378,13 +955,14 @@ class AlorOpenAPIV2Trader extends Trader {
               price = +(o.price + 0.01 * value).toFixed(2);
             }
 
+            const symbol = this.getSymbol(orderInstrument);
             const modifyOrderRequest = await fetch(
               `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit/${o.id}`,
               {
                 method: 'PUT',
                 body: JSON.stringify({
                   instrument: {
-                    symbol: this.getSymbol(orderInstrument),
+                    symbol,
                     exchange: this.document.exchange
                   },
                   side: o.side,
@@ -397,8 +975,8 @@ class AlorOpenAPIV2Trader extends Trader {
                 }),
                 headers: {
                   'Content-Type': 'application/json',
-                  'X-ALOR-REQID': this.#reqId(),
-                  Authorization: `Bearer ${this.#jwt}`
+                  'X-ALOR-REQID': this.generateRequestId(symbol),
+                  Authorization: `Bearer ${this.accessToken}`
                 }
               }
             );
@@ -429,7 +1007,7 @@ class AlorOpenAPIV2Trader extends Trader {
           method: 'DELETE',
           cache: 'no-cache',
           headers: {
-            Authorization: `Bearer ${this.#jwt}`
+            Authorization: `Bearer ${this.accessToken}`
           }
         }
       );
@@ -453,7 +1031,7 @@ class AlorOpenAPIV2Trader extends Trader {
       `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
       {
         headers: {
-          Authorization: `Bearer ${this.#jwt}`
+          Authorization: `Bearer ${this.accessToken}`
         }
       }
     );
@@ -486,424 +1064,6 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  async #connectWebSocket(reconnect) {
-    if (this.#pendingConnection) {
-      return this.#pendingConnection;
-    } else {
-      return (this.#pendingConnection = new Promise((resolve) => {
-        if (!reconnect && this.connection) {
-          resolve(this.connection);
-        } else {
-          this.connection = new WebSocket('wss://api.alor.ru/ws');
-
-          this.connection.onopen = () => {
-            // 1. Quotes
-            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
-              .quotes) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.quotes.get(instrumentSymbol).guid = guid;
-                this.#guids.set(guid, {
-                  instrument,
-                  refs: this.refs.quotes
-                });
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'QuotesSubscribe',
-                    code: this.getSymbol(instrument),
-                    exchange: this.document.exchange,
-                    format: 'Simple',
-                    guid,
-                    token: this.#jwt
-                  })
-                );
-              }
-            }
-
-            // 2. Orderbook
-            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
-              .orderbook) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.orderbook.get(instrumentSymbol).guid = guid;
-                this.#guids.set(guid, {
-                  instrument,
-                  refs: this.refs.orderbook
-                });
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'OrderBookGetAndSubscribe',
-                    code: this.getSymbol(instrument),
-                    exchange: this.document.exchange,
-                    depth: 20,
-                    format: 'Simple',
-                    token: this.#jwt,
-                    guid
-                  })
-                );
-              }
-            }
-
-            // 3. All trades
-            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
-              .allTrades) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.allTrades.get(instrumentSymbol).guid = guid;
-                this.#guids.set(guid, {
-                  instrument,
-                  refs: this.refs.allTrades
-                });
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'AllTradesGetAndSubscribe',
-                    code: this.getSymbol(instrument),
-                    exchange: this.document.exchange,
-                    depth: 0,
-                    format: 'Simple',
-                    token: this.#jwt,
-                    guid
-                  })
-                );
-              }
-            }
-
-            // 4. Positions
-            this.positions.clear();
-
-            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
-              .positions) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.positions.get(instrumentSymbol).guid = guid;
-                this.#guids.set(guid, {
-                  instrument,
-                  refs: this.refs.positions
-                });
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'PositionsGetAndSubscribeV2',
-                    portfolio: this.document.portfolio,
-                    exchange: this.document.exchange,
-                    format: 'Simple',
-                    token: this.#jwt,
-                    guid
-                  })
-                );
-              }
-            }
-
-            // 5. Current orders
-            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
-              .orders) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.orders.get(instrumentSymbol).guid = guid;
-                this.#guids.set(guid, {
-                  instrument,
-                  refs: this.refs.orders
-                });
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'OrdersGetAndSubscribeV2',
-                    portfolio: this.document.portfolio,
-                    exchange: this.document.exchange,
-                    format: 'Simple',
-                    token: this.#jwt,
-                    guid
-                  })
-                );
-              }
-            }
-
-            // 6. Timeline
-            for (const [instrumentSymbol, { instrument, refCount }] of this.refs
-              .timeline) {
-              if (refCount > 0) {
-                const guid = this.#reqId();
-
-                this.refs.timeline.get(instrumentSymbol).guid = guid;
-                this.#guids.set(guid, {
-                  instrument,
-                  refs: this.refs.timeline
-                });
-
-                this.connection.send(
-                  JSON.stringify({
-                    opcode: 'TradesGetAndSubscribeV2',
-                    portfolio: this.document.portfolio,
-                    exchange: this.document.exchange,
-                    format: 'Simple',
-                    token: this.#jwt,
-                    guid
-                  })
-                );
-              }
-            }
-
-            resolve(this.connection);
-          };
-
-          this.connection.onclose = async () => {
-            await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
-            await this.ensureAccessTokenIsOk();
-
-            this.#pendingConnection = void 0;
-
-            await this.#connectWebSocket(true);
-          };
-
-          this.connection.onerror = () => this.connection.close();
-
-          this.connection.onmessage = ({ data }) => {
-            const payload = JSON.parse(data);
-            const refs = this.#guids.get(payload.guid)?.refs;
-
-            if (payload.data) {
-              payload.data.guid = payload.guid;
-            }
-
-            if (payload.data && refs === this.refs.quotes) {
-              return this.onQuotesMessage({ data: payload.data });
-            } else if (payload.data && refs === this.refs.orderbook) {
-              return this.onOrderbookMessage({ data: payload.data });
-            } else if (payload.data && refs === this.refs.allTrades) {
-              return this.onAllTradesMessage({ data: payload.data });
-            } else if (payload.data && refs === this.refs.positions) {
-              return this.onPositionsMessage({ data: payload.data });
-            } else if (payload.data && refs === this.refs.orders) {
-              return this.onOrdersMessage({ data: payload.data });
-            } else if (payload.data && refs === this.refs.timeline) {
-              return this.onTimelineMessage({ data: payload.data });
-            }
-          };
-        }
-      }));
-    }
-  }
-
-  subsAndRefs(datum) {
-    return {
-      [TRADER_DATUM.LAST_PRICE]: [this.subs.quotes, this.refs.quotes],
-      [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: [
-        this.subs.quotes,
-        this.refs.quotes
-      ],
-      [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: [
-        this.subs.quotes,
-        this.refs.quotes
-      ],
-      [TRADER_DATUM.BEST_BID]: [this.subs.quotes, this.refs.quotes],
-      [TRADER_DATUM.BEST_ASK]: [this.subs.quotes, this.refs.quotes],
-      [TRADER_DATUM.ORDERBOOK]: [this.subs.orderbook, this.refs.orderbook],
-      [TRADER_DATUM.MARKET_PRINT]: [this.subs.allTrades, this.refs.allTrades],
-      [TRADER_DATUM.POSITION]: [this.subs.positions, this.refs.positions],
-      [TRADER_DATUM.POSITION_SIZE]: [this.subs.positions, this.refs.positions],
-      [TRADER_DATUM.POSITION_AVERAGE]: [
-        this.subs.positions,
-        this.refs.positions
-      ],
-      [TRADER_DATUM.CURRENT_ORDER]: [this.subs.orders, this.refs.orders],
-      [TRADER_DATUM.TIMELINE_ITEM]: [this.subs.timeline, this.refs.timeline]
-    }[datum];
-  }
-
-  async subscribeField({ source, field, datum, condition }) {
-    await this.ensureAccessTokenIsOk();
-    await this.#connectWebSocket();
-    await super.subscribeField({ source, field, datum, condition });
-
-    // Broadcast data for instrument-agnostic global datum subscriptions.
-    switch (datum) {
-      case TRADER_DATUM.BEST_BID:
-      case TRADER_DATUM.BEST_ASK:
-      case TRADER_DATUM.LAST_PRICE:
-      case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
-      case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE: {
-        for (const [_, { lastQuotesData }] of this.refs.quotes) {
-          this.onQuotesMessage({
-            data: lastQuotesData
-          });
-        }
-
-        break;
-      }
-
-      case TRADER_DATUM.POSITION:
-      case TRADER_DATUM.POSITION_SIZE:
-      case TRADER_DATUM.POSITION_AVERAGE: {
-        for (const [_, data] of this.positions) {
-          await this.onPositionsMessage({
-            data,
-            fromCache: true
-          });
-        }
-
-        break;
-      }
-      case TRADER_DATUM.CURRENT_ORDER: {
-        for (const [_, data] of this.orders) {
-          this.onOrdersMessage({
-            data,
-            fromCache: true
-          });
-        }
-
-        break;
-      }
-      case TRADER_DATUM.TIMELINE_ITEM: {
-        for (const [_, data] of this.timeline) {
-          this.onTimelineMessage({
-            data,
-            fromCache: true
-          });
-        }
-
-        break;
-      }
-    }
-  }
-
-  async unsubscribeField({ source, field, datum }) {
-    await this.ensureAccessTokenIsOk();
-
-    return super.unsubscribeField({ source, field, datum });
-  }
-
-  async addFirstRef(instrument, refs) {
-    if (this.connection.readyState === WebSocket.OPEN) {
-      const guid = this.#reqId();
-
-      this.#guids.set(guid, {
-        instrument,
-        refs
-      });
-
-      refs.get(instrument.symbol).guid = guid;
-
-      if (refs === this.refs.quotes) {
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'QuotesSubscribe',
-            code: this.getSymbol(instrument),
-            exchange: this.document.exchange,
-            format: 'Simple',
-            token: this.#jwt,
-            guid
-          })
-        );
-      } else if (refs === this.refs.orderbook) {
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'OrderBookGetAndSubscribe',
-            code: this.getSymbol(instrument),
-            exchange: this.document.exchange,
-            depth: 20,
-            format: 'Simple',
-            token: this.#jwt,
-            guid
-          })
-        );
-      } else if (refs === this.refs.allTrades) {
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'AllTradesGetAndSubscribe',
-            code: this.getSymbol(instrument),
-            exchange: this.document.exchange,
-            depth: 0,
-            format: 'Simple',
-            token: this.#jwt,
-            guid
-          })
-        );
-      } else if (refs === this.refs.positions) {
-        this.positions.clear();
-
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'PositionsGetAndSubscribeV2',
-            portfolio: this.document.portfolio,
-            exchange: this.document.exchange,
-            format: 'Simple',
-            token: this.#jwt,
-            guid
-          })
-        );
-      } else if (refs === this.refs.orders) {
-        this.orders.clear();
-
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'OrdersGetAndSubscribeV2',
-            portfolio: this.document.portfolio,
-            exchange: this.document.exchange,
-            format: 'Simple',
-            token: this.#jwt,
-            guid
-          })
-        );
-      } else if (refs === this.refs.timeline) {
-        this.timeline.clear();
-
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'TradesGetAndSubscribeV2',
-            portfolio: this.document.portfolio,
-            exchange: this.document.exchange,
-            format: 'Simple',
-            token: this.#jwt,
-            guid
-          })
-        );
-      }
-    }
-  }
-
-  async removeLastRef(instrument, refs, ref) {
-    if (this.connection.readyState === WebSocket.OPEN) {
-      this.#guids.delete(ref.guid);
-
-      if (
-        refs === this.refs.quotes ||
-        refs === this.refs.orderbook ||
-        refs === this.refs.allTrades ||
-        refs === this.refs.positions ||
-        refs === this.refs.orders ||
-        refs === this.refs.timeline
-      ) {
-        this.connection.send(
-          JSON.stringify({
-            opcode: 'unsubscribe',
-            token: this.#jwt,
-            guid: ref.guid
-          })
-        );
-      }
-
-      if (refs === this.refs.positions) {
-        this.positions.clear();
-      }
-
-      if (refs === this.refs.orders) {
-        this.orders.clear();
-      }
-
-      if (refs === this.refs.timeline) {
-        this.timeline.clear();
-      }
-    }
-  }
-
   supportsInstrument(instrument) {
     if (
       instrument?.symbol === 'SPB' &&
@@ -928,436 +1088,15 @@ class AlorOpenAPIV2Trader extends Trader {
     return super.adoptInstrument(instrument);
   }
 
-  async instrumentChanged(source, oldValue, newValue) {
-    await this.ensureAccessTokenIsOk();
-    await super.instrumentChanged(source, oldValue, newValue);
-
-    if (newValue?.symbol) {
-      // Handle no real subscription case for quotes and orderbook.
-      // Use saved snapshot data for new widgets.
-      // Time and sales uses allTrades REST API call,
-      // so no special handling needed.
-      this.onQuotesMessage({
-        data: this.refs.quotes.get(newValue.symbol)?.lastQuotesData
-      });
-
-      this.onOrderbookMessage({
-        data: this.refs.orderbook.get(newValue.symbol)?.lastOrderbook
-      });
-    }
-
-    // Broadcast positions for order widgets (at least).
-    if (this.subs.positions.has(source)) {
-      for (const [, data] of this.positions) {
-        await this.onPositionsMessage({
-          data,
-          fromCache: true
-        });
-      }
-    }
-  }
-
-  onOrderbookMessage({ data }) {
-    if (data) {
-      const instrument = this.#guids.get(data.guid)?.instrument;
-
-      if (instrument) {
-        if (instrument.type === 'bond') {
-          data.bids = data.bids.map((b) => {
-            if (b.processed) return b;
-
-            return {
-              price: this.relativeBondPriceToPrice(b.price, instrument),
-              volume: b.volume,
-              processed: true
-            };
-          });
-
-          data.asks = data.asks.map((a) => {
-            if (a.processed) return a;
-
-            return {
-              price: this.relativeBondPriceToPrice(a.price, instrument),
-              volume: a.volume,
-              processed: true
-            };
-          });
-        }
-
-        for (const [source, fields] of this.subs.orderbook) {
-          if (this.instrumentsAreEqual(instrument, source.instrument)) {
-            const ref = this.refs.orderbook.get(source.instrument?.symbol);
-
-            if (ref) {
-              ref.lastOrderbook = data;
-
-              for (const { field, datum } of fields) {
-                switch (datum) {
-                  case TRADER_DATUM.ORDERBOOK:
-                    source[field] = {
-                      bids: data.bids,
-                      asks: data.asks
-                    };
-
-                    break;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onQuotesMessage({ data }) {
-    if (data) {
-      const instrument = this.#guids.get(data.guid)?.instrument;
-
-      if (instrument) {
-        for (const [source, fields] of this.subs.quotes) {
-          if (this.instrumentsAreEqual(instrument, source.instrument)) {
-            const ref = this.refs.quotes.get(source.instrument?.symbol);
-
-            if (ref) ref.lastQuotesData = data;
-
-            for (const { field, datum, condition } of fields) {
-              if (typeof condition === 'function') {
-                const conditionResult = condition.call(this, {
-                  source,
-                  instrument,
-                  ref
-                });
-
-                if (!conditionResult) continue;
-              }
-
-              switch (datum) {
-                case TRADER_DATUM.LAST_PRICE:
-                  source[field] = data.last_price;
-
-                  if (instrument.type === 'bond') {
-                    source[field] = this.relativeBondPriceToPrice(
-                      data.last_price,
-                      instrument
-                    );
-                  }
-
-                  break;
-                case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
-                  source[field] = data.change;
-
-                  if (instrument.type === 'bond') {
-                    source[field] = this.relativeBondPriceToPrice(
-                      data.change,
-                      instrument
-                    );
-                  }
-
-                  break;
-                case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE:
-                  source[field] = data.change_percent;
-
-                  break;
-                case TRADER_DATUM.BEST_BID:
-                  source[field] = data.bid;
-
-                  if (instrument.type === 'bond') {
-                    source[field] = this.relativeBondPriceToPrice(
-                      data.bid,
-                      instrument
-                    );
-                  }
-
-                  break;
-                case TRADER_DATUM.BEST_ASK:
-                  source[field] = data.ask;
-
-                  if (instrument.type === 'bond') {
-                    source[field] = this.relativeBondPriceToPrice(
-                      data.ask,
-                      instrument
-                    );
-                  }
-
-                  break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onAllTradesMessage({ data }) {
-    if (data) {
-      const instrument = this.#guids.get(data.guid)?.instrument;
-
-      if (instrument) {
-        for (const [source, fields] of this.subs.allTrades) {
-          if (this.instrumentsAreEqual(instrument, source.instrument)) {
-            for (const { field, datum } of fields) {
-              switch (datum) {
-                case TRADER_DATUM.MARKET_PRINT:
-                  source[field] = {
-                    orderId: data.id,
-                    side: data.side,
-                    timestamp: data.timestamp,
-                    symbol: data.symbol,
-                    price:
-                      instrument.type === 'bond'
-                        ? this.relativeBondPriceToPrice(data.price, instrument)
-                        : data.price,
-                    volume: data.qty
-                  };
-
-                  break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onPositionsMessage({ data, fromCache }) {
-    if (data) {
-      if (!fromCache) this.positions.set(data.symbol, data);
-
-      for (const [source, fields] of this.subs.positions) {
-        for (const { field, datum } of fields) {
-          if (datum === TRADER_DATUM.POSITION) {
-            const isBalance =
-              data.isCurrency && this.document.portfolioType !== 'currency';
-
-            const payload = {
-              symbol: data.symbol,
-              lot: data.lotSize,
-              exchange: data.exchange,
-              averagePrice: data.avgPrice,
-              isCurrency: data.isCurrency,
-              isBalance,
-              size: data.qty,
-              accountId: data.portfolio
-            };
-
-            if (isBalance) {
-              source[field] = payload;
-            } else {
-              if (this.document.portfolioType === 'futures') {
-                payload.instrument = this.#futures.get(
-                  data.symbol.toUpperCase()
-                );
-              } else {
-                payload.instrument = this.instruments.get(data.symbol);
-              }
-
-              if (payload.instrument?.type === 'bond') {
-                payload.averagePrice = this.relativeBondPriceToPrice(
-                  payload.averagePrice,
-                  payload.instrument
-                );
-              }
-
-              source[field] = payload;
-            }
-          } else if (data.symbol === this.getSymbol(source.instrument)) {
-            switch (datum) {
-              case TRADER_DATUM.POSITION_SIZE:
-                source[field] = data.qty;
-
-                break;
-              case TRADER_DATUM.POSITION_AVERAGE:
-                source[field] = data.avgPrice;
-
-                if (source.instrument.type === 'bond') {
-                  source[field] = this.relativeBondPriceToPrice(
-                    data.avgPrice,
-                    source.instrument
-                  );
-                }
-
-                break;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  onOrdersMessage({ data, fromCache }) {
-    if (data) {
-      if (!fromCache) this.orders.set(data.id, data);
-
-      for (const [source, fields] of this.subs.orders) {
-        for (const { field, datum } of fields) {
-          if (datum === TRADER_DATUM.CURRENT_ORDER) {
-            const payload = {
-              orderId: data.id,
-              symbol: data.symbol,
-              exchange: [data.exchange],
-              orderType: data.type,
-              side: data.side,
-              status: data.status,
-              placedAt: data.transTime,
-              endsAt: data.endTime,
-              quantity: data.qty,
-              filled: data.filled,
-              price: data.price
-            };
-
-            if (this.document.portfolioType === 'futures') {
-              payload.instrument = this.#futures.get(data.symbol.toUpperCase());
-            } else {
-              payload.instrument = this.instruments.get(data.symbol);
-            }
-
-            if (payload.instrument?.type === 'bond') {
-              payload.price = this.relativeBondPriceToPrice(
-                payload.price,
-                payload.instrument
-              );
-            }
-
-            source[field] = payload;
-          }
-        }
-      }
-    }
-  }
-
-  onTimelineMessage({ data, fromCache }) {
-    if (data) {
-      if (!fromCache) this.timeline.set(data.id, data);
-
-      for (const [source, fields] of this.subs.timeline) {
-        for (const { field, datum } of fields) {
-          if (datum === TRADER_DATUM.TIMELINE_ITEM) {
-            const payload = {
-              operationId: data.id,
-              accruedInterest: data.accruedInt ?? 0,
-              commission: data.commission,
-              parentId: data.orderno,
-              symbol: data.symbol,
-              type:
-                data.side === 'buy'
-                  ? OperationType.OPERATION_TYPE_BUY
-                  : OperationType.OPERATION_TYPE_SELL,
-              exchange: data.exchange,
-              quantity: data.qty,
-              price: data.price,
-              createdAt: data.date
-            };
-
-            if (this.document.portfolioType === 'futures') {
-              payload.instrument = this.#futures.get(data.symbol.toUpperCase());
-            } else {
-              payload.instrument = this.instruments.get(data.symbol);
-            }
-
-            if (payload.instrument?.type === 'bond') {
-              payload.price = this.relativeBondPriceToPrice(
-                payload.price,
-                payload.instrument
-              );
-            }
-
-            source[field] = payload;
-          }
-        }
-      }
-    }
-  }
-
-  getDictionary() {
-    if (this.document.exchange === EXCHANGE.SPBX)
-      return INSTRUMENT_DICTIONARY.ALOR_SPBX;
-
-    // MOEX
-    switch (this.document.portfolioType) {
-      case 'stock':
-        return INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES;
-      case 'futures':
-        return INSTRUMENT_DICTIONARY.ALOR_FORTS;
-      case 'currency':
-        return null;
-    }
-  }
-
-  getExchange() {
-    if (this.document.exchange === EXCHANGE.SPBX) return EXCHANGE.SPBX;
-
-    // MOEX
-    switch (this.document.portfolioType) {
-      case 'stock':
-        return EXCHANGE.MOEX_SECURITIES;
-      case 'futures':
-        return EXCHANGE.MOEX_FORTS;
-      case 'currency':
-        return EXCHANGE.MOEX_CURRENCY;
-    }
-  }
-
-  getExchangeForDBRequest() {
-    return this.document.exchange;
-  }
-
-  getBroker() {
-    return BROKERS.ALOR;
-  }
-
-  getInstrumentIconUrl(instrument) {
-    if (!instrument) {
-      return 'static/instruments/unknown.svg';
-    }
-
-    let symbol = instrument?.symbol;
-
-    if (typeof symbol === 'string') {
-      symbol = symbol.split('/')[0].split('-')[0].split('-RM')[0];
-
-      if (
-        symbol.endsWith('@GS') ||
-        symbol.endsWith('@DE') ||
-        symbol.endsWith('@GR') ||
-        symbol.endsWith('@UR') ||
-        symbol.endsWith('@KT')
-      ) {
-        return 'static/instruments/unknown.svg';
-      }
-
-      symbol = symbol.split('@US')[0];
-    }
-
-    if (instrument?.currency === 'HKD') {
-      return `static/instruments/stocks/hk/${symbol.replace(' ', '-')}.svg`;
-    }
-
-    const isRM = instrument?.symbol.endsWith('-RM');
-
-    if (!isRM) {
-      if (
-        instrument?.exchange === EXCHANGE.MOEX ||
-        instrument?.currency === 'RUB'
-      ) {
-        return `static/instruments/${instrument?.type}s/rus/${symbol.replace(
-          ' ',
-          '-'
-        )}.svg`;
-      }
-    }
-
-    if ((instrument?.exchange === EXCHANGE.SPBX || isRM) && symbol !== 'TCS') {
-      return `static/instruments/stocks/us/${symbol.replace(' ', '-')}.svg`;
-    }
-
-    return super.getInstrumentIconUrl(instrument);
-  }
-
-  async formatError(instrument, error) {
+  async formatError(instrument, error, defaultErrorMessage) {
     const message = error.message;
 
     if (/Invalid quantity/i.test(message) || /BAD_AMOUNT/i.test(message))
       return 'Указано неверное количество.';
+
+    if (/Price may not be 0 for a limit order/i.test(message)) {
+      return 'Недопустимая цена заявки.';
+    }
 
     if (
       /(HALT_INSTRUMENT|INSTR_NOTRADE)/i.test(message) ||
@@ -1418,7 +1157,12 @@ class AlorOpenAPIV2Trader extends Trader {
     if (/Сейчас эта сессия не идет/i.test(message))
       return 'Сейчас эта сессия не идет.';
 
-    return 'Неизвестная ошибка, смотрите консоль браузера.';
+    if (/Цена сделки вне лимита/i.test(message))
+      return 'Цена сделки вне лимита.';
+
+    return (
+      defaultErrorMessage ?? 'Неизвестная ошибка, смотрите консоль браузера.'
+    );
   }
 }
 

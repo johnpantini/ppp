@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widget,
   widgetEmptyStateTemplate,
@@ -15,7 +16,6 @@ import {
   attr
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
-import { validate } from '../../lib/ppp-errors.js';
 import { normalize, spacing } from '../../design/styles.js';
 import { cancelOrders, refresh, trash } from '../../static/svg/sprite.js';
 import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
@@ -39,7 +39,6 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
-import { later } from '../../lib/ppp-decorators.js';
 
 const showAllTabHidden = (x) =>
   typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
@@ -312,7 +311,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   ordersTrader;
 
   @observable
-  currentOrder;
+  activeOrder;
 
   @observable
   orders;
@@ -349,7 +348,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       await this.ordersTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
+          activeOrder: TRADER_DATUM.ACTIVE_ORDER
         }
       });
     } catch (e) {
@@ -362,7 +361,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
+          activeOrder: TRADER_DATUM.ACTIVE_ORDER
         }
       });
     }
@@ -370,7 +369,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
-  currentOrderChanged(oldValue, newValue) {
+  activeOrderChanged(oldValue, newValue) {
     if (newValue?.orderId) {
       if (newValue.orderType === 'limit') {
         if (
@@ -526,7 +525,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.ordersTraderId);
+    // No-op.
   }
 
   async submit() {
@@ -574,6 +573,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('ordersTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.ordersTrader ?? ''}"

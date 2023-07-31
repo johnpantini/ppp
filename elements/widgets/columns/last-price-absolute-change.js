@@ -5,7 +5,6 @@ import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatAbsoluteChange } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
 import { TRADER_DATUM } from '../../../lib/const.js';
-import { level1TraderCondition } from '../order.js';
 
 export const columnTemplate = html`
   <template>
@@ -44,8 +43,7 @@ export class LastPriceAbsoluteChangeColumn extends Column {
         source: this,
         fieldDatumPairs: {
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE
-        },
-        condition: level1TraderCondition
+        }
       });
     }
 
@@ -54,8 +52,7 @@ export class LastPriceAbsoluteChangeColumn extends Column {
         source: this,
         fieldDatumPairs: {
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE
-        },
-        condition: level1TraderCondition
+        }
       });
     }
   }
@@ -79,7 +76,7 @@ export class LastPriceAbsoluteChangeColumn extends Column {
       });
     }
 
-    super.disconnectedCallback();
+    return super.disconnectedCallback();
   }
 }
 

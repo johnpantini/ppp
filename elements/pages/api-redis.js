@@ -61,9 +61,8 @@ export const apiRedisPageTemplate = html`
             value="${(x) => x.document.host}"
             ${ref('host')}
           ></ppp-text-field>
+          <div class="spacing2"></div>
           <ppp-checkbox
-            style="margin-top:6px;"
-            name="tls"
             ?checked="${(x) => x.document.tls ?? true}"
             ${ref('tls')}
           >

@@ -76,7 +76,8 @@ import {
   paletteGreenDark2,
   paletteGreenLight2,
   palettePurpleDark2,
-  palettePurpleLight2
+  palettePurpleLight2,
+  paletteGreenDark1
 } from '../design/design-tokens.js';
 import {
   circleNotch,
@@ -287,18 +288,39 @@ export const widgetTable = () => css`
     text-align: left;
   }
 
-  .portfolio-row:nth-of-type(2n) {
+  .widget-table .row:nth-of-type(2n) {
     background-color: ${themeConditional(
       lighten(paletteGrayLight3, 1),
       paletteGrayDark2
     )};
   }
 
-  .portfolio-row:hover {
+  .widget-table .row {
+    position: relative;
+  }
+
+  .widget-table .row:hover {
     background-color: ${themeConditional(
       lighten(paletteGrayLight2, 5),
       darken(paletteGrayDark1, 10)
     )};
+  }
+
+  .widget-table .row td:first-child::before {
+    content: '';
+    position: absolute;
+    background-color: transparent;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    transform: scaleY(0);
+    pointer-events: none;
+  }
+
+  .widget-table .row[active] td:first-child::before {
+    transform: scaleY(1);
+    background-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }
 `;
 

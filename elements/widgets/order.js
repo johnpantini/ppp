@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widget,
   widgetEmptyStateTemplate,
@@ -15,12 +16,7 @@ import {
   repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import {
-  WIDGET_TYPES,
-  TRADER_DATUM,
-  EXCHANGE,
-  TRADERS
-} from '../../lib/const.js';
+import { WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
 import {
   formatRelativeChange,
   formatAbsoluteChange,
@@ -59,24 +55,6 @@ import '../query-select.js';
 import '../text-field.js';
 
 const decSeparator = decimalSeparator();
-
-export const level1TraderCondition = function ({ instrument }) {
-  if (instrument?.currency === 'USD' || instrument?.currency === 'USDT') {
-    const exchanges = [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS];
-
-    if (
-      exchanges.indexOf(instrument.exchange) > -1 &&
-      exchanges.indexOf(this.document.exchange) > -1
-    ) {
-      return true;
-    }
-  }
-
-  return !(
-    this.document.type === TRADERS.ALOR_OPENAPI_V2 &&
-    instrument?.exchange !== this.document.exchange
-  );
-};
 
 const showLastPriceInHeaderHidden = (x) =>
   typeof x.document.showLastPriceInHeader === 'undefined'
@@ -754,6 +732,9 @@ export const orderWidgetStyles = css`
 `;
 
 export class OrderWidget extends WidgetWithInstrument {
+  /** @type {WidgetNotificationsArea} */
+  notificationsArea;
+
   @observable
   ordersTrader;
 
@@ -832,6 +813,9 @@ export class OrderWidget extends WidgetWithInstrument {
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
+      this.instrumentTrader = this.ordersTrader;
+
+      this.selectInstrument(this.document.symbol, { isolate: true });
 
       if (typeof this.ordersTrader?.estimate === 'function') {
         setTimeout(() => {
@@ -842,13 +826,10 @@ export class OrderWidget extends WidgetWithInstrument {
       await this.ordersTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
+          // For estimate().
           traderEvent: TRADER_DATUM.TRADER
         }
       });
-
-      this.instrumentTrader = this.ordersTrader;
-
-      this.selectInstrument(this.document.symbol, { isolate: true });
 
       this.level1Trader = await ppp.getOrCreateTrader(
         this.document.level1Trader
@@ -878,8 +859,7 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
-        },
-        condition: level1TraderCondition
+        }
       });
 
       if (this.extraLevel1Trader) {
@@ -891,8 +871,7 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
-          },
-          condition: level1TraderCondition
+          }
         });
       }
 
@@ -905,8 +884,7 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
-          },
-          condition: level1TraderCondition
+          }
         });
       }
 
@@ -920,9 +898,9 @@ export class OrderWidget extends WidgetWithInstrument {
         });
       }
 
-      this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
-
       if (this.document.pusherApi) {
+        this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
+
         const connection = await ppp.getOrCreatePusherConnection(
           this.document.pusherApi
         );
@@ -1020,7 +998,7 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   traderEventChanged(oldValue, newValue) {
-    if (typeof newValue === 'object' && newValue.event === 'estimate') {
+    if (typeof newValue === 'object' && newValue?.event === 'estimate') {
       this.calculateEstimate();
     }
   }
@@ -1028,12 +1006,7 @@ export class OrderWidget extends WidgetWithInstrument {
   instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
 
-    this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
-    this.level1Trader?.instrumentChanged?.(this, oldValue, newValue);
-    this.extraLevel1Trader?.instrumentChanged?.(this, oldValue, newValue);
-    this.extraLevel1Trader2?.instrumentChanged?.(this, oldValue, newValue);
-    this.positionTrader?.instrumentChanged?.(this, oldValue, newValue);
-
+    // Clear price after instrument changes.
     if (
       this.price &&
       (!this.ordersTrader.instrumentsAreEqual(oldValue, newValue) || !oldValue)
@@ -1042,11 +1015,11 @@ export class OrderWidget extends WidgetWithInstrument {
         this.price.value = '';
         this.price.focus();
 
-        void this.saveLastPriceValue();
-      }, 25);
+        return this.saveLastPriceValue();
+      }, 100);
     }
 
-    this.calculateEstimate();
+    Updates.enqueue(() => this.calculateEstimate());
   }
 
   getActiveWidgetTab() {
@@ -1618,10 +1591,6 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.ordersTraderId);
-    await validate(this.container.level1TraderId);
-    await validate(this.container.positionTraderId);
-
     if (this.container.buyShortcut.value && this.container.sellShortcut.value) {
       await validate(this.container.sellShortcut, {
         hook: async () =>
@@ -1691,6 +1660,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('ordersTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.ordersTrader ?? ''}"
@@ -1742,6 +1713,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('positionTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.positionTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.positionTrader ?? ''}"
@@ -1787,6 +1760,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('level1TraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.level1TraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.level1Trader ?? ''}"
@@ -1832,6 +1807,7 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('extraLevel1TraderId')}
+            deselectable
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.extraLevel1TraderId}"
             :context="${(x) => x}"
@@ -1880,6 +1856,7 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('extraLevel1Trader2Id')}
+            deselectable
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.extraLevel1Trader2Id}"
             :context="${(x) => x}"

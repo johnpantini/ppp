@@ -17,7 +17,6 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
-import { validate } from '../../lib/ppp-errors.js';
 import {
   fontSizeWidget,
   fontWeightWidget,
@@ -68,7 +67,9 @@ const portfolioSection = ({ title, section }) =>
       (x) => x?.[section],
       html`
         <tr
-          class="portfolio-row"
+          class="row"
+          ?active="${(cell, c) =>
+            cell.instrument.symbol === c.parent.instrument?.symbol}"
           symbol="${(cell) => cell.instrument.symbol}"
           type="${(cell) => cell.instrument.type}"
         >
@@ -139,7 +140,7 @@ export const portfolioWidgetTemplate = html`
             ${repeat(
               (x) => x?.balances ?? [],
               html`
-                <tr class="portfolio-row balance-row">
+                <tr class="row balance-row">
                   ${repeat(
                     (instrument, c) => c.parent.columns?.array,
                     html`
@@ -147,10 +148,12 @@ export const portfolioWidgetTemplate = html`
                         class="cell"
                         :datum="${(x, c) => c.parent}"
                         :column="${(x) => x}"
-                        balance
                       >
                         ${(x, c) =>
-                          c.parentContext.parent.columns.columnElement(x)}
+                          c.parentContext.parent.columns.columnElement(
+                            x,
+                            c.parent.symbol
+                          )}
                       </td>
                     `
                   )}
@@ -426,7 +429,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.portfolioTraderId);
     await this.container.columnList.validate();
   }
 
@@ -466,6 +468,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('portfolioTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.portfolioTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
@@ -509,7 +513,7 @@ export async function widgetDefinition() {
           ?checked="${(x) => x.document.hideBalances}"
           ${ref('hideBalances')}
         >
-          Скрывать валютные балансы
+          Скрывать суммы валютных балансов
         </ppp-checkbox>
       </div>
       <div class="widget-settings-section">
@@ -519,6 +523,12 @@ export async function widgetDefinition() {
         <div class="spacing2"></div>
         <ppp-widget-column-list
           ${ref('columnList')}
+          :mainTraderColumns="${() => [
+            COLUMN_SOURCE.INSTRUMENT,
+            COLUMN_SOURCE.SYMBOL,
+            COLUMN_SOURCE.POSITION_AVAILABLE,
+            COLUMN_SOURCE.POSITION_AVERAGE
+          ]}"
           :columns="${(x) => x.document.columns?.slice(0) ?? DEFAULT_COLUMNS}"
           :traders="${(x) => x.document.traders}"
         ></ppp-widget-column-list>

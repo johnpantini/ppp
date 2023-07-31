@@ -23,6 +23,7 @@ class Column extends PPPElement {
   @observable
   widget;
 
+  // Instrument and symbol
   @observable
   datum;
 
@@ -33,6 +34,9 @@ class Column extends PPPElement {
   trader;
 
   @observable
+  defaultTrader;
+
+  @observable
   extraTrader;
 
   async connectedCallback() {
@@ -41,7 +45,8 @@ class Column extends PPPElement {
     this.widget = this.getRootNode().host;
     this.datum = this.parentNode.datum;
     this.column = this.parentNode.column;
-    this.isBalance = this.parentNode.hasAttribute('balance');
+    this.isBalance = this.hasAttribute('balance');
+    this.defaultTrader = this.widget.instrumentTrader;
 
     if (this.datum?.instrument) {
       this.instrument = this.datum.instrument;
@@ -54,7 +59,7 @@ class Column extends PPPElement {
       this.trader = await ppp.getOrCreateTrader(trader);
       this.extraTrader = await ppp.getOrCreateTrader(extraTrader);
     } else {
-      this.trader = this.widget.instrumentTrader;
+      this.trader = this.defaultTrader;
     }
   }
 }

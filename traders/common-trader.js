@@ -4,25 +4,426 @@ import {
   latinToCyrillic,
   cyrillicToLatin
 } from '../lib/intl.js';
-import { TRADER_DATUM } from '../lib/const.js';
+import { EXCHANGE, TRADER_DATUM } from '../lib/const.js';
 import {
   NoInstrumentsError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
+import { Column } from '../elements/widgets/columns/column.js';
 
-export class Trader {
-  #instruments = new Map();
+class TraderDatum {
+  // Maps for every possible subdatum (source => field).
+  sources = {};
+
+  refs = new Map();
+
+  values = new Map();
+
+  // "instrumentchange" event listeners.
+  #listeners = new Map();
+
+  trader;
+
+  constructor(trader) {
+    this.trader = trader;
+  }
+
+  filter(data, instrument, source, datum) {
+    return true;
+  }
+
+  hasSource(source) {
+    for (const key in this.sources) {
+      if (this.sources[key].has(source)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  dataArrived(data, instrument) {
+    if (!instrument) {
+      return;
+    }
+
+    if (this.doNotSaveValue !== true) {
+      this.values.set(instrument.symbol, data);
+    }
+
+    for (const datum in this.sources) {
+      for (const [source, field] of this.sources[datum]) {
+        if (
+          this.trader.instrumentsAreEqual(source.instrument, instrument) &&
+          this.filter(data, instrument, source, datum)
+        ) {
+          source[field] =
+            this?.[datum]?.(data, instrument, source) ??
+            this.emptyValue(datum) ??
+            '—';
+        }
+      }
+    }
+  }
+
+  emptyValue(datum) {
+    switch (datum) {
+      case TRADER_DATUM.CANDLE:
+      case TRADER_DATUM.MARKET_PRINT:
+      case TRADER_DATUM.ORDERBOOK:
+        return {};
+    }
+
+    return '—';
+  }
+
+  async subscribe(source, field, datum) {
+    // Columns do not change instruments.
+    if (!this.#listeners.has(source) && !(source instanceof Column)) {
+      const listener = async ({ detail }) => {
+        const { source, oldValue } = detail;
+
+        // Unsub/sub for every subdatum.
+        for (const d of Object.keys(this.sources)) {
+          if (this.sources[d].has(source)) {
+            const f = this.sources[d].get(source);
+
+            source[f] = this.emptyValue(d);
+
+            if (oldValue) {
+              await this.unsubscribe(source, oldValue);
+            }
+
+            await this.subscribe(source, f, d);
+          }
+        }
+      };
+
+      source.addEventListener('instrumentchange', listener);
+      this.#listeners.set(source, listener);
+    }
+
+    if (!source.instrument) {
+      return;
+    }
+
+    const symbol = source.instrument.symbol;
+    const refCount = this.refs.get(symbol) ?? 0;
+
+    if (refCount === 0) {
+      this.refs.set(symbol, 1);
+
+      return this.firstReferenceAdded?.(source, symbol);
+    } else {
+      this.refs.set(symbol, refCount + 1);
+
+      const value = this.values.get(symbol);
+
+      // The source needs our saved data here. Please, set it!
+      if (this.filter(value, source.instrument, source, datum)) {
+        if (source.instrument && typeof value !== 'undefined') {
+          source[field] =
+            this?.[datum]?.(value, source.instrument, source) ??
+            this.emptyValue(datum) ??
+            '—';
+        } else {
+          source[field] = this.emptyValue(datum) ?? '—';
+        }
+      }
+    }
+  }
+
+  async unsubscribe(source, oldInstrument) {
+    if (!this.hasSource(source) && !(source instanceof Column)) {
+      const listener = this.#listeners.get(source);
+
+      if (listener) {
+        source.removeEventListener('instrumentchange', listener);
+        this.#listeners.delete(source);
+      }
+    }
+
+    if (!oldInstrument && !source.instrument) {
+      return;
+    }
+
+    const symbol = oldInstrument?.symbol ?? source.instrument.symbol;
+    const refCount = this.refs.get(symbol) ?? 0;
+
+    if (refCount === 1) {
+      this.refs.delete(symbol);
+
+      if (this.doNotClearValue !== true) {
+        this.values.delete(symbol);
+      }
+
+      return this.lastReferenceRemoved?.(source, symbol);
+    } else if (refCount > 1) {
+      this.refs.set(symbol, Math.max(0, refCount - 1));
+    }
+  }
+}
+
+// Positions (portfolio), orders, timeline, trader events.
+class GlobalTraderDatum {
+  // Maps for every possible subdatum (source => field).
+  sources = {};
+
+  refCount = 0;
+
+  trader;
+
+  value = new Map();
+
+  // "instrumentchange" event listeners.
+  #listeners = new Map();
+
+  constructor(trader) {
+    this.trader = trader;
+  }
+
+  filter(data, source, key, datum) {
+    return true;
+  }
+
+  dataArrived(data) {
+    const key = this.valueKeyForData(data);
+
+    if (typeof key !== 'undefined') {
+      this.value.set(key, data);
+
+      for (const datum in this.sources) {
+        for (const [source, field] of this.sources[datum]) {
+          if (this.filter(data, source, key, datum)) {
+            if (this.manualAssignment !== true) {
+              source[field] =
+                this?.[datum]?.(data, source, key, field) ??
+                this.emptyValue(datum) ??
+                '—';
+            } else {
+              // The datum method will take care of any assignments.
+              this?.[datum]?.(data, source, key, field);
+            }
+          }
+        }
+      }
+    } else {
+      console.log('No key for data: ', data);
+    }
+  }
+
+  emptyValue(datum) {
+    switch (datum) {
+      case TRADER_DATUM.POSITION_SIZE:
+        return 0;
+      case TRADER_DATUM.POSITION_AVERAGE:
+        return 0;
+      case TRADER_DATUM.POSITION:
+      case TRADER_DATUM.ACTIVE_ORDER:
+      case TRADER_DATUM.TIMELINE_ITEM:
+      case TRADER_DATUM.TRADER:
+        return {};
+    }
+
+    return '—';
+  }
+
+  valueKeyForData(data) {
+    return data?.symbol;
+  }
+
+  async subscribe(source, field, datum) {
+    // Columns do not change instruments.
+    if (!this.#listeners.has(source) && !(source instanceof Column)) {
+      const listener = async ({ detail }) => {
+        const { source } = detail;
+
+        for (const d of Object.keys(this.sources)) {
+          if (this.sources[d].has(source)) {
+            const f = this.sources[d].get(source);
+
+            // Cleanup should be done only once per field:datum pair.
+            source[f] = this.emptyValue(d);
+
+            // Propagate keyed data in an array-like style.
+            for (const [key, data] of this.value) {
+              if (this.filter(data, source, key, d)) {
+                if (this.manualAssignment !== true) {
+                  source[f] =
+                    this?.[d]?.(data, source, key, f) ??
+                    this.emptyValue(d) ??
+                    '—';
+                } else {
+                  this?.[d]?.(data, source, key, f);
+                }
+              }
+            }
+          }
+        }
+      };
+
+      source.addEventListener('instrumentchange', listener);
+      this.#listeners.set(source, listener);
+    }
+
+    if (this.refCount === 0) {
+      this.refCount = 1;
+
+      return this.firstReferenceAdded?.(source, field, datum);
+    } else {
+      this.refCount++;
+
+      // The source needs our saved data here. Please, set it!
+      for (const [key, data] of this.value) {
+        if (this.filter(data, source, key, datum)) {
+          if (this.manualAssignment !== true) {
+            source[field] =
+              this?.[datum]?.(data, source, key, field) ??
+              this.emptyValue(datum) ??
+              '—';
+          } else {
+            this?.[datum]?.(data, source, key, field);
+          }
+        }
+      }
+    }
+  }
+
+  async unsubscribe(source, field, datum) {
+    if (!this.hasSource(source) && !(source instanceof Column)) {
+      const listener = this.#listeners.get(source);
+
+      if (listener) {
+        source.removeEventListener('instrumentchange', listener);
+        this.#listeners.delete(source);
+      }
+    }
+
+    if (this.refCount === 1) {
+      this.refCount = 0;
+
+      if (this.doNotClearValue !== true) {
+        this.value.clear();
+      }
+
+      return this.lastReferenceRemoved?.(source, field, datum);
+    } else if (this.refCount > 1) {
+      this.refCount--;
+    }
+  }
+}
+
+class TraderEventDatum extends GlobalTraderDatum {}
+
+GlobalTraderDatum.prototype.hasSource = TraderDatum.prototype.hasSource;
+
+class Trader {
+  datums = {};
+
+  document = {};
 
   #pendingInstrumentCachePromise;
+
+  #instruments = new Map();
+
+  #instances = [];
 
   get instruments() {
     return this.#instruments;
   }
 
-  document = {};
-
-  constructor(document) {
+  constructor(document, typeWithDatums = []) {
     this.document = document;
+
+    typeWithDatums.forEach(({ type, datums }) => {
+      const instance = new type(this);
+
+      datums.forEach((datum) => {
+        instance.sources[datum] = new Map();
+
+        this.datums[datum] = instance;
+      });
+
+      this.#instances.push(instance);
+    });
+  }
+
+  traderEvent(event = {}) {
+    for (const [source, field] of this.datums[TRADER_DATUM.TRADER].sources[
+      TRADER_DATUM.TRADER
+    ]) {
+      source[field] = event;
+    }
+  }
+
+  async subscribeField({ source, field, datum }) {
+    const traderDatum = this.datums[datum];
+
+    if (typeof traderDatum !== 'undefined') {
+      if (!traderDatum.sources[datum].has(source)) {
+        traderDatum.sources[datum].set(source, field);
+
+        return traderDatum.subscribe(source, field, datum);
+      }
+    }
+  }
+
+  async subscribeFields({ source, fieldDatumPairs = {} }) {
+    for (const [field, datum] of Object.entries(fieldDatumPairs)) {
+      if (typeof datum === 'string') {
+        await this.subscribeField({ source, field, datum });
+      } else if (typeof datum === 'object') {
+        await this.subscribeField({
+          source,
+          field,
+          datum: datum.datum
+        });
+      }
+    }
+  }
+
+  async unsubscribeField({ source, field, datum }) {
+    const traderDatum = this.datums[datum];
+
+    if (typeof traderDatum !== 'undefined') {
+      if (traderDatum.sources[datum].has(source)) {
+        traderDatum.sources[datum].delete(source);
+
+        return traderDatum.unsubscribe(source);
+      }
+    }
+  }
+
+  async unsubscribeFields({ source, fieldDatumPairs = {} }) {
+    for (const [field, datum] of Object.entries(fieldDatumPairs)) {
+      await this.unsubscribeField({ source, field, datum });
+    }
+  }
+
+  async resubscribe(predicate = () => true) {
+    const sfd = [];
+
+    if (typeof predicate !== 'function') {
+      predicate = () => true;
+    }
+
+    for (const i of this.#instances) {
+      for (const sd of Object.keys(i.sources)) {
+        for (const [source, field] of i.sources[sd]) {
+          if (predicate(source, field, sd)) {
+            sfd.push({ source, field, datum: sd });
+          }
+        }
+      }
+    }
+
+    for (const { source, field, datum } of sfd) {
+      await this.unsubscribeField({ source, field, datum });
+    }
+
+    for (const { source, field, datum } of sfd) {
+      await this.subscribeField({ source, field, datum });
+    }
   }
 
   async syncInstrumentCache({ lastCacheVersion }) {
@@ -130,8 +531,8 @@ export class Trader {
                   } else {
                     this.#instruments.set(instrument.symbol, instrument);
 
-                    if (typeof this.onCacheInstrument === 'function') {
-                      this.onCacheInstrument(instrument);
+                    if (typeof this.instrumentCacheCallback === 'function') {
+                      this.instrumentCacheCallback(instrument);
                     }
                   }
                 }
@@ -204,34 +605,6 @@ export class Trader {
     else return false;
   }
 
-  valueForEmptyDatum(datum) {
-    switch (datum) {
-      case TRADER_DATUM.POSITION_SIZE:
-        return 0;
-      case TRADER_DATUM.POSITION_AVERAGE:
-        return 0;
-      case TRADER_DATUM.CANDLE:
-        return {};
-    }
-
-    return '—';
-  }
-
-  getDatumGlobalReferenceName(datum) {
-    switch (datum) {
-      case TRADER_DATUM.POSITION:
-      case TRADER_DATUM.POSITION_SIZE:
-      case TRADER_DATUM.POSITION_AVERAGE:
-        return '@@POSITIONS';
-      case TRADER_DATUM.CURRENT_ORDER:
-        return '@@ORDERS';
-      case TRADER_DATUM.TIMELINE_ITEM:
-        return '@@TIMELINE';
-      case TRADER_DATUM.TRADER:
-        return '@@TRADER';
-    }
-  }
-
   fixPrice(instrument, price) {
     const precision = getInstrumentPrecision(instrument, price);
 
@@ -240,163 +613,6 @@ export class Trader {
     if (!price || isNaN(price)) price = 0;
 
     return price.toFixed(precision).toString();
-  }
-
-  async subscribeField({ source, field, datum, condition, options }) {
-    const [subs, refs] = this.subsAndRefs?.(datum) ?? [];
-
-    if (subs) {
-      const array = subs.get(source);
-
-      if (Array.isArray(array)) {
-        if (!array.find((e) => e.field === field)) {
-          array.push({ field, datum, condition, options });
-        } else return;
-      } else {
-        subs.set(source, [{ field, datum, condition, options }]);
-      }
-
-      const globalRefName = this.getDatumGlobalReferenceName(datum);
-
-      if (globalRefName) {
-        // This reference is instrument-agnostic.
-        await this.addRef(
-          {
-            symbol: globalRefName
-          },
-          refs
-        );
-      } else {
-        await this.addRef(source?.instrument, refs);
-      }
-    }
-  }
-
-  async subscribeFields({ source, fieldDatumPairs = {}, condition, options }) {
-    for (const [field, datum] of Object.entries(fieldDatumPairs)) {
-      if (typeof datum === 'string') {
-        await this.subscribeField({ source, field, datum, condition, options });
-      } else if (typeof datum === 'object') {
-        await this.subscribeField({
-          source,
-          field,
-          datum: datum.datum,
-          condition: datum.condition ?? condition,
-          option: datum.options ?? options
-        });
-      }
-    }
-  }
-
-  async unsubscribeField({ source, field, datum }) {
-    const [subs, refs] = this.subsAndRefs?.(datum) ?? [];
-
-    if (subs) {
-      const array = subs.get(source);
-      const index = array?.findIndex?.(
-        (e) => e.field === field && e.datum === datum
-      );
-
-      if (index > -1) {
-        array.splice(index, 1);
-
-        if (!array.length) {
-          subs.delete(source);
-        }
-
-        const globalRefName = this.getDatumGlobalReferenceName(datum);
-
-        if (globalRefName) {
-          await this.removeRef(
-            {
-              symbol: globalRefName
-            },
-            refs
-          );
-        } else {
-          await this.removeRef(source?.instrument, refs);
-        }
-      }
-    }
-  }
-
-  async unsubscribeFields({ source, fieldDatumPairs = {} }) {
-    for (const [field, datum] of Object.entries(fieldDatumPairs)) {
-      await this.unsubscribeField({ source, field, datum });
-    }
-  }
-
-  async addRef(instrument, refs) {
-    const isGlobal = instrument?.symbol?.startsWith?.('@@');
-
-    if (!isGlobal) {
-      instrument = this.adoptInstrument(instrument);
-    }
-
-    if (typeof instrument?.symbol === 'string' && refs) {
-      const ref = refs.get(instrument.symbol);
-
-      if (
-        typeof ref === 'undefined' &&
-        // Global instrument-agnostic datum
-        (isGlobal || this.supportsInstrument(instrument))
-      ) {
-        refs.set(instrument.symbol, {
-          refCount: 1,
-          instrument
-        });
-
-        await this.addFirstRef?.(instrument, refs);
-      } else if (ref) {
-        ref.refCount++;
-      }
-    }
-  }
-
-  async removeRef(instrument, refs, key) {
-    const isGlobal = instrument?.symbol?.startsWith?.('@@');
-
-    if (!isGlobal) {
-      instrument = this.adoptInstrument(instrument);
-    }
-
-    if (instrument?.symbol && refs) {
-      const ref = refs.get(instrument.symbol);
-
-      if (typeof ref !== 'undefined') {
-        if (ref.refCount > 0) {
-          ref.refCount--;
-        }
-
-        if (ref.refCount === 0) {
-          refs.delete(instrument.symbol);
-          await this.removeLastRef?.(instrument, refs, ref, key);
-        }
-      }
-    }
-  }
-
-  async instrumentChanged(source, oldValue, newValue) {
-    for (const key of Object.keys(this.subs)) {
-      const sub = this.subs[key];
-
-      if (sub.has(source)) {
-        for (const { field, datum } of sub.get(source)) {
-          source[field] = this.valueForEmptyDatum?.(datum) ?? '—';
-
-          // Skip sub/unsub cycle for instrument-agnostic datum.
-          if (this.getDatumGlobalReferenceName(datum)) continue;
-
-          if (oldValue) {
-            await this.removeRef(oldValue, this.refs[key], key);
-          }
-
-          if (newValue && this.supportsInstrument(newValue)) {
-            await this.addRef(newValue, this.refs[key], key);
-          }
-        }
-      }
-    }
   }
 
   instrumentsAreEqual(i1, i2) {
@@ -442,7 +658,51 @@ export class Trader {
     return null;
   }
 
-  getInstrumentIconUrl() {
+  getInstrumentIconUrl(instrument) {
+    if (!instrument || instrument?.symbol === 'PRN') {
+      return 'static/instruments/unknown.svg';
+    }
+
+    let symbol = instrument?.symbol;
+
+    if (typeof symbol === 'string') {
+      symbol = symbol.split('/')[0].split('-')[0].split('-RM')[0];
+
+      if (
+        symbol.endsWith('@GS') ||
+        symbol.endsWith('@DE') ||
+        symbol.endsWith('@GR') ||
+        symbol.endsWith('@UR') ||
+        symbol.endsWith('@KT')
+      ) {
+        return 'static/instruments/unknown.svg';
+      }
+
+      symbol = symbol.split('@US')[0];
+    }
+
+    if (instrument?.currency === 'HKD') {
+      return `static/instruments/stocks/hk/${symbol.replace(' ', '-')}.svg`;
+    }
+
+    const isRM = instrument?.symbol.endsWith('-RM');
+
+    if (!isRM) {
+      if (
+        instrument?.exchange === EXCHANGE.MOEX ||
+        instrument?.currency === 'RUB'
+      ) {
+        return `static/instruments/${instrument?.type}s/rus/${symbol.replace(
+          ' ',
+          '-'
+        )}.svg`;
+      }
+    }
+
+    if ((instrument?.exchange === EXCHANGE.SPBX || isRM) && symbol !== 'TCS') {
+      return `static/instruments/stocks/us/${symbol.replace(' ', '-')}.svg`;
+    }
+
     return 'static/instruments/unknown.svg';
   }
 
@@ -533,3 +793,5 @@ export class Trader {
     };
   }
 }
+
+export { Trader, TraderDatum, GlobalTraderDatum, TraderEventDatum };

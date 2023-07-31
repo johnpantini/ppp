@@ -5,6 +5,7 @@ import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatAbsoluteChange } from '../../../lib/intl.js';
 import { columnStyles } from './column.js';
 import { LastPriceColumn } from './last-price.js';
+import { TRADER_DATUM } from '../../../lib/const.js';
 
 export const columnTemplate = html`
   <template>
@@ -22,17 +23,63 @@ export const columnTemplate = html`
   </template>
 `;
 
-class PLAbsoluteColumn extends LastPriceColumn {
+export class PLAbsoluteColumn extends LastPriceColumn {
   @observable
   pl;
 
-  lastPriceChanged(oldValue, lastPrice) {
-    this.pl =
-      (lastPrice - this.datum.averagePrice) * this.datum.lot * this.datum.size;
+  @observable
+  size;
+
+  @observable
+  averagePrice;
+
+  recalculate() {
+    if (this.datum.instrument) {
+      this.pl =
+        (this.lastPrice - this.averagePrice) *
+        this.size *
+        this.datum.instrument.lot;
+    }
   }
 
-  datumChanged(oldValue, datum) {
-    this.pl = (this.lastPrice - datum.averagePrice) * datum.lot * datum.size;
+  lastPriceChanged() {
+    this.recalculate();
+  }
+
+  sizeChanged() {
+    this.recalculate();
+  }
+
+  averagePriceChanged() {
+    this.recalculate();
+  }
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (this.defaultTrader && !this.isBalance) {
+      await this.defaultTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          averagePrice: TRADER_DATUM.POSITION_AVERAGE,
+          size: TRADER_DATUM.POSITION_SIZE
+        }
+      });
+    }
+  }
+
+  async disconnectedCallback() {
+    if (this.defaultTrader && !this.isBalance) {
+      await this.defaultTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          averagePrice: TRADER_DATUM.POSITION_AVERAGE,
+          size: TRADER_DATUM.POSITION_SIZE
+        }
+      });
+    }
+
+    return super.disconnectedCallback();
   }
 }
 

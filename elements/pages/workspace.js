@@ -558,6 +558,13 @@ export class WorkspacePage extends Page {
     this.denormalization.fillRefs(this.document);
 
     for (const [, w] of this.document.widgets?.entries?.() ?? []) {
+      // Prevent denormalized field
+      for (const key in w) {
+        if (w[key] === null && key.endsWith('Id')) {
+          w[key.split('Id')[0]] = null;
+        }
+      }
+
       widgets.push(
         Object.assign(
           {},
@@ -568,7 +575,7 @@ export class WorkspacePage extends Page {
             )
           ),
           // Denormalize widget workspace data.
-          await this.denormalization.denormalize(w),
+          await this.denormalization.denormalize(w)
         )
       );
     }

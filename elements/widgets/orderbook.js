@@ -29,7 +29,8 @@ import { ellipsis, normalize, spacing } from '../../design/styles.js';
 import {
   buy,
   fontSizeWidget,
-  lighten, lineHeightWidget,
+  lighten,
+  lineHeightWidget,
   negative,
   paletteBlack,
   paletteBlueBase,
@@ -43,7 +44,7 @@ import {
   sell,
   themeConditional,
   toColorComponents
-} from '../../design/design-tokens.js'
+} from '../../design/design-tokens.js';
 import { validate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
@@ -466,7 +467,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
         await this.ordersTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            currentOrder: TRADER_DATUM.CURRENT_ORDER
+            currentOrder: TRADER_DATUM.ACTIVE_ORDER
           }
         });
       }
@@ -496,7 +497,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.CURRENT_ORDER
+          currentOrder: TRADER_DATUM.ACTIVE_ORDER
         }
       });
     }
@@ -919,7 +920,6 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.bookTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 5000,
@@ -966,6 +966,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('bookTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.bookTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.bookTrader ?? ''}"
@@ -1012,6 +1014,7 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('ordersTraderId')}
+            deselectable
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"

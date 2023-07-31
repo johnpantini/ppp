@@ -1,10 +1,8 @@
-/** @decorator */
-
-import { html, observable, when } from '../../../vendor/fast-element.min.js';
+import { html, when } from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatRelativeChange } from '../../../lib/intl.js';
 import { columnStyles } from './column.js';
-import { LastPriceColumn } from './last-price.js';
+import { PLAbsoluteColumn } from './pl-absolute.js';
 
 export const columnTemplate = html`
   <template>
@@ -22,18 +20,11 @@ export const columnTemplate = html`
   </template>
 `;
 
-class PLRelativeColumn extends LastPriceColumn {
-  @observable
-  pl;
-
-  lastPriceChanged(oldValue, lastPrice) {
+export class PLRelativeColumn extends PLAbsoluteColumn {
+  recalculate() {
     this.pl =
-      ((lastPrice - this.datum.averagePrice) / this.datum.averagePrice);
-  }
-
-  datumChanged(oldValue, datum) {
-    this.pl =
-      ((this.lastPrice - datum.averagePrice) / datum.averagePrice);
+      ((this.lastPrice - this.averagePrice) / this.averagePrice) *
+      Math.sign(this.size);
   }
 }
 

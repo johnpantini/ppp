@@ -16,7 +16,6 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { TRADER_CAPS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
-import { validate } from '../../lib/ppp-errors.js';
 
 export const instrumentsWidgetTemplate = html`
   <template>

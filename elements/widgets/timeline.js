@@ -406,6 +406,10 @@ export class TimelineWidget extends WidgetWithInstrument {
   }
 
   timelineItemChanged(oldValue, newValue) {
+    if (typeof newValue.operationId === 'undefined') {
+      return;
+    }
+
     const date = new Date(newValue.createdAt);
     const topLevelKey = `${date.getFullYear()}-${this.#padTo2Digits(
       date.getMonth() + 1
@@ -505,7 +509,6 @@ export class TimelineWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await validate(this.container.timelineTraderId);
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 100,
@@ -550,6 +553,8 @@ export async function widgetDefinition() {
         <div class="control-line">
           <ppp-query-select
             ${ref('timelineTraderId')}
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.timelineTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.timelineTrader ?? ''}"
