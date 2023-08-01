@@ -433,7 +433,7 @@ export class UtexConnection extends EventEmitter {
     const printsHistoryRequestMessage = this.#makeProtoMessage(
       'PrintsHistoryRequest',
       {
-        Symbol: 'TSLA~US',
+        Symbol: ticker,
         RequestId: reqId
       }
     );

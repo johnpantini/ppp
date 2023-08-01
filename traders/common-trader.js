@@ -685,6 +685,13 @@ class Trader {
       return `static/instruments/stocks/hk/${symbol.replace(' ', '-')}.svg`;
     }
 
+    if (instrument?.currency === 'CNY') {
+      return `static/instruments/${instrument?.type}s/cny/${symbol.replace(
+        ' ',
+        '-'
+      )}.svg`;
+    }
+
     const isRM = instrument?.symbol.endsWith('-RM');
 
     if (!isRM) {

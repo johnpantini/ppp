@@ -127,7 +127,7 @@ class OrderbookDatum extends TraderDatum {
           return {
             price:
               instrument.type === 'bond' && !b.processed
-                ? this.relativeBondPriceToPrice(p, instrument)
+                ? this.trader.relativeBondPriceToPrice(p, instrument)
                 : p,
             volume: b.quantity,
             processed: true
@@ -156,7 +156,7 @@ class OrderbookDatum extends TraderDatum {
           return {
             price:
               instrument.type === 'bond' && !a.processed
-                ? this.relativeBondPriceToPrice(p, instrument)
+                ? this.trader.relativeBondPriceToPrice(p, instrument)
                 : p,
             volume: a.quantity,
             processed: true

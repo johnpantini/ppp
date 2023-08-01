@@ -155,7 +155,7 @@ class AllTradesDatum extends AlorTraderDatum {
       symbol: data.symbol,
       price:
         instrument.type === 'bond'
-          ? this.relativeBondPriceToPrice(data.price, instrument)
+          ? this.trader.relativeBondPriceToPrice(data.price, instrument)
           : data.price,
       volume: data.qty
     };

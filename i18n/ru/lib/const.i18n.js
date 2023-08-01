@@ -32,6 +32,7 @@ export default function (i18n) {
         [BROKERS.ALOR]: 'Alor',
         [BROKERS.TINKOFF]: 'Tinkoff',
         [BROKERS.FINAM]: 'Finam',
+        [BROKERS.IB]: 'Interactive Brokers',
         [BROKERS.UTEX]: 'UTEX',
         [BROKERS.PSINA]: 'Psina',
         [BROKERS.BINANCE]: 'Binance',

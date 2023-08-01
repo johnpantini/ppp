@@ -168,6 +168,7 @@ export const instrumentsManagePageTemplate = html`
                     <ppp-option value="USDT">USDT</ppp-option>
                     <ppp-option value="RUB">RUB</ppp-option>
                     <ppp-option value="HKD">HKD</ppp-option>
+                    <ppp-option value="CNY">CNY</ppp-option>
                   </ppp-select>
                 </div>
               </section>

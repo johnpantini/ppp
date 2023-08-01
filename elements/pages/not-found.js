@@ -16,7 +16,7 @@ export const notFoundPageTemplate = html`
   <template>
     <main>
       <div class="content">
-        <img src="static/404.png" draggable="false" alt="404" />
+        <img src="static/svg/404.svg" draggable="false" alt="404" />
         <div class="details">
           <p class="headline">Что-то пошло не так.</p>
           <p class="text">

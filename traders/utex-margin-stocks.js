@@ -464,7 +464,11 @@ class UtexMarginStocksTrader extends Trader {
         } else {
           this.connection = new WebSocket('wss://ususdt-api-margin.utex.io/ws');
 
-          this.connection.onopen = () => {
+          this.connection.onopen = async () => {
+            if (reconnect) {
+              await this.resubscribe();
+            }
+
             this.connection.send('{"t":0,"d":{}}');
 
             clearInterval(this.#heartbeatInterval);
