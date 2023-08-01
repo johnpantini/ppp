@@ -850,7 +850,8 @@ export class WidgetWithInstrument extends Widget {
 
     const instrument = this.instrumentTrader.instruments.get(symbol) ?? {
       symbol,
-      fullName: 'Инструмент не поддерживается'
+      fullName: 'Инструмент не поддерживается',
+      notSupported: true
     };
 
     const adoptedInstrument = this.instrumentTrader.adoptInstrument(instrument);

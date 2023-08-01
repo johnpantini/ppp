@@ -10,7 +10,13 @@ import {
   repeat,
   when
 } from '../../vendor/fast-element.min.js';
-import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
+import {
+  DocumentNotFoundError,
+  FetchError,
+  invalidate,
+  maybeFetchError,
+  validate
+} from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -88,6 +94,18 @@ uWS
       {
         url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/utex-connection.mjs',
         path: 'lib/utex-connection.mjs'
+      }
+    ]
+  },
+  ibGateway: {
+    env: `{}`,
+    envSecret: '{}',
+    url: '/salt/states/ppp/lib/aspirant-worker/ib-gateway/ib-gateway.mjs',
+    enableHttp: true,
+    fileList: [
+      {
+        url: '/salt/states/ppp/lib/aspirant-worker/ib-gateway/lib/ib.min.js',
+        path: 'lib/ib.min.js'
       }
     ]
   }
@@ -419,6 +437,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 <ppp-option value="utexAlpaca">
                   Alpaca-совместимый API UTEX
                 </ppp-option>
+                <ppp-option value="ibGateway"> Шлюз TWS API</ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
               <ppp-button
@@ -509,7 +528,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
       if ((await fetch(`${aspirantUrl}/nomad/health`)).ok) {
         if (this.document.enableHttp) {
-          this.url = `${aspirantUrl}/workers/${this.document._id}`;
+          this.url = `${aspirantUrl}/workers/${this.document._id}/`;
         }
 
         this.frameUrl = `${aspirantUrl}/ui/jobs/worker-${this.document._id}@default`;
@@ -907,14 +926,51 @@ export class ServicePppAspirantWorkerPage extends Page {
         )
       );
 
-      const redisApi = await ppp.decrypt(
-        await ppp.user.functions.findOne(
-          { collection: 'apis' },
-          {
-            _id: aspirantDocument.redisApiId
-          }
-        )
-      );
+      let redisApi;
+
+      if (aspirantDocument.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
+        let aspirantUrl = aspirantDocument.url;
+
+        if (!aspirantUrl.endsWith('/')) {
+          aspirantUrl = `${aspirantUrl}/`;
+        }
+
+        const envRequest = await fetch(`${aspirantUrl}nginx/env`, {
+          cache: 'reload'
+        });
+
+        await maybeFetchError(
+          envRequest,
+          'Не удалось запросить переменные окружения.'
+        );
+
+        const env = await envRequest.json();
+
+        redisApi = {
+          host: env.REDIS_HOST,
+          port: env.REDIS_PORT,
+          tls: env.REDIS_TLS,
+          username: env.REDIS_USERNAME,
+          db: env.REDIS_DATABASE,
+          password: env.REDIS_PASSWORD
+        };
+      } else if (!aspirantDocument.redisApiId) {
+        throw new FetchError({
+          message:
+            'Aspirant не предоставил информацию о подключении к хранилищу.',
+          status: 404
+        });
+      } else {
+        redisApi = await ppp.decrypt(
+          await ppp.user.functions.findOne(
+            { collection: 'apis' },
+            {
+              _id: aspirantDocument.redisApiId,
+              type: APIS.REDIS
+            }
+          )
+        );
+      }
 
       const artifactUrl = `https://${ppp.keyVault.getKey(
         'mongo-app-client-id'

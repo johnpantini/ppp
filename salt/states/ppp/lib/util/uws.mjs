@@ -22,7 +22,6 @@ function readJSONPayload(res, cb) {
         try {
           json = JSON.parse(chunk.toString());
         } catch (e) {
-          console.error(e);
           res.close();
 
           return;
@@ -38,7 +37,7 @@ function readJSONPayload(res, cb) {
   });
 
   res.onAborted(() => {
-    console.error('Invalid JSON or no data.');
+    console.error('readJSONPayload() failed: invalid JSON or no data.');
   });
 }
 

@@ -77,15 +77,17 @@ class OrderbookDatum extends TraderDatum {
   async firstReferenceAdded(source) {
     const instrument = source.instrument;
 
-    this.dataArrived(
-      await this.trader
-        .getOrCreateClient(MarketDataServiceDefinition)
-        .getOrderBook({
-          instrumentId: instrument.tinkoffFigi,
-          depth: 50
-        }),
-      instrument
-    );
+    if (instrument && !instrument?.notSupported) {
+      this.dataArrived(
+        await this.trader
+          .getOrCreateClient(MarketDataServiceDefinition)
+          .getOrderBook({
+            instrumentId: instrument.tinkoffFigi,
+            depth: 50
+          }),
+        instrument
+      );
+    }
 
     return this.trader.resubscribeToMarketDataStream();
   }

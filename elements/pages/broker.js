@@ -164,7 +164,6 @@ export const brokerPageTemplate = html`
           <span slot="title">Interactive Brokers</span>
           <span slot="description">Торговля через Interactive Brokers.</span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
