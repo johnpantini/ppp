@@ -190,6 +190,13 @@ export const activeOrdersWidgetTemplate = html`
                         ${(o) => (o.side === 'buy' ? 'Покупка' : 'Продажа')}
                       </span>
                       <div style="display: flex" slot="subtitle-right">
+                        ${when(
+                          (o) => typeof o.destination === 'string',
+                          html`
+                            ${(o) => o.destination.toUpperCase()}
+                            <span class="dot-divider">•</span>
+                          `
+                        )}
                         ${(o, c) => c.parent.formatRestQuantity(o)}
                         <span class="dot-divider">•</span>
                         ${(o) => formatPrice(o.price, o.instrument)}

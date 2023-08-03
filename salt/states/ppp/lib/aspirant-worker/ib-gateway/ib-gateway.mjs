@@ -17,16 +17,28 @@ class IBGatewayError extends Error {
   }
 }
 
-class IBGateway extends EventEmitter {
-  #app = uWS.App({});
+class TwsConnection {
+  #app;
 
   #api;
 
-  #state = ConnectionState.Disconnected;
+  #key;
+
+  #connectionStateSubscription;
+
+  #connectionState = ConnectionState.Disconnected;
+
+  get connectionState() {
+    return this.#connectionState;
+  }
+
+  #positionsSubscription;
 
   #positions = [];
 
-  #summary;
+  #summarySubscription;
+
+  #summary = {};
 
   #positionsObservable = {
     next({ all }) {
@@ -37,7 +49,7 @@ class IBGateway extends EventEmitter {
       }
 
       this.#app.publish(
-        'ppp',
+        this.#key,
         JSON.stringify({
           message: 'positions',
           payload: this.#positions
@@ -60,7 +72,7 @@ class IBGateway extends EventEmitter {
       }
 
       this.#app.publish(
-        'ppp',
+        this.#key,
         JSON.stringify({
           message: 'summary',
           payload: this.#summary
@@ -71,75 +83,52 @@ class IBGateway extends EventEmitter {
 
   #connectionStateObservable = {
     next(state) {
-      this.#state = state;
+      this.#connectionState = state;
 
       if (state === ConnectionState.Connected) {
         this.#positionsObservable.next =
           this.#positionsObservable.next.bind(this);
         this.#summaryObservable.next = this.#summaryObservable.next.bind(this);
 
-        this.#api.getPositions().subscribe(this.#positionsObservable);
-        this.#api
+        this.#positionsSubscription = this.#api
+          .getPositions()
+          .subscribe(this.#positionsObservable);
+        this.#summarySubscription = this.#api
           .getAccountSummary(
             'All',
             'NetLiquidation,TotalCashValue,SettledCash,AccruedCash,BuyingPower,AvailableFunds,ExcessLiquidity'
           )
           .subscribe(this.#summaryObservable);
+      } else {
+        if (state === ConnectionState.Disconnected) {
+          if (this.#positionsSubscription) {
+            this.#positionsSubscription.unsubscribe();
+          }
+
+          if (this.#summarySubscription) {
+            this.#summarySubscription.unsubscribe();
+          }
+        }
       }
 
       this.#app.publish(
-        'ppp',
+        this.#key,
         JSON.stringify({
           message: 'connection',
           payload: {
-            state: this.#state
+            state: this.#connectionState
           }
         })
       );
     }
   };
 
-  constructor() {
-    super();
-
-    process.on('uncaughtException', (error) => {
-      this.emit('exception', error);
-    });
+  constructor(app, key) {
+    this.#app = app;
+    this.#key = key;
 
     this.#connectionStateObservable.next =
       this.#connectionStateObservable.next.bind(this);
-  }
-
-  #errorOut(res, error) {
-    res.cork(() => {
-      // noinspection JSVoidFunctionReturnValueUsed
-      res
-        .writeStatus('400 Bad Request')
-        .writeHeader('Content-Type', 'application/json;charset=UTF-8')
-        .end(
-          JSON.stringify({
-            ok: false,
-            error: {
-              name: error.name,
-              message: error.message
-            }
-          })
-        );
-    });
-  }
-
-  json(res, json = {}) {
-    res.cork(() => {
-      res
-        .writeStatus('200 OK')
-        .writeHeader('Content-Type', 'application/json;charset=UTF-8')
-        .end(
-          JSON.stringify({
-            ok: true,
-            result: json
-          })
-        );
-    });
   }
 
   cancelOrder(body = {}) {
@@ -159,34 +148,71 @@ class IBGateway extends EventEmitter {
   }
 
   async connect(body = {}) {
-    this.#api = new IBApiNext({
-      host: body.host ?? 'localhost',
-      port: body.port ?? 7496,
-      connectionWatchdogInterval: body.connectionWatchdogInterval ?? 5,
-      reconnectInterval: body.reconnectInterval ?? 1000
-    });
+    if (!this.#api) {
+      this.#api = new IBApiNext({
+        host: body.host ?? 'localhost',
+        port: body.port ?? 7496,
+        connectionWatchdogInterval: 0,
+        reconnectInterval: 0
+      });
 
-    this.#api.logLevel = LogLevel.DETAIL;
+      this.#api.logLevel = LogLevel.DETAIL;
+    }
 
-    this.#api.connectionState.subscribe(this.#connectionStateObservable);
-    this.#api.connect();
+    if (this.#connectionState === ConnectionState.Disconnected) {
+      this.#connectionStateSubscription = this.#api.connectionState.subscribe(
+        this.#connectionStateObservable
+      );
+
+      this.#api.connect();
+    } else if (this.#connectionState === ConnectionState.Connected) {
+      this.#app.publish(
+        this.#key,
+        JSON.stringify({
+          message: 'positions',
+          payload: this.#positions
+        })
+      );
+
+      this.#app.publish(
+        this.#key,
+        JSON.stringify({
+          message: 'summary',
+          payload: this.#summary
+        })
+      );
+
+      this.#app.publish(
+        this.#key,
+        JSON.stringify({
+          message: 'connection',
+          payload: {
+            state: this.#connectionState
+          }
+        })
+      );
+    }
 
     return {
-      connectionState: ConnectionState[this.#state]
+      connectionState: ConnectionState[this.#connectionState]
     };
   }
 
   disconnect() {
     this.#api?.disconnect?.();
 
+    if (this.#connectionStateSubscription) {
+      this.#connectionStateSubscription.unsubscribe();
+    }
+
     return {
-      connectionState: ConnectionState[this.#state]
+      connectionState: ConnectionState[this.#connectionState]
     };
   }
 
-  connectionState() {
+  getConnectionState() {
     return {
-      connectionState: ConnectionState[this.#state]
+      connectionState: ConnectionState[this.#connectionState]
     };
   }
 
@@ -233,23 +259,100 @@ class IBGateway extends EventEmitter {
       body.order ?? {}
     );
   }
+}
+
+class IBGateway extends EventEmitter {
+  #app = uWS.App({});
+
+  #connections = new Map();
+
+  constructor() {
+    super();
+
+    process.on('uncaughtException', (error) => {
+      this.emit('exception', error);
+    });
+  }
+
+  #errorOut(res, error) {
+    res.cork(() => {
+      // noinspection JSVoidFunctionReturnValueUsed
+      res
+        .writeStatus('400 Bad Request')
+        .writeHeader('Content-Type', 'application/json;charset=UTF-8');
+
+      if (typeof process.env.NOMAD_PORT_HTTP === 'undefined') {
+        res.writeHeader('Access-Control-Allow-Origin', '*');
+      }
+
+      res.end(
+        JSON.stringify({
+          ok: false,
+          error: {
+            name: error.name,
+            message: error.message
+          }
+        })
+      );
+    });
+  }
+
+  json(res, json = {}) {
+    res.cork(() => {
+      res
+        .writeStatus('200 OK')
+        .writeHeader('Content-Type', 'application/json;charset=UTF-8');
+
+      if (typeof process.env.NOMAD_PORT_HTTP === 'undefined') {
+        res.writeHeader('Access-Control-Allow-Origin', '*');
+      }
+
+      res.end(
+        JSON.stringify({
+          ok: true,
+          result: json
+        })
+      );
+    });
+  }
 
   main() {
     this.#app
       .ws('/*', {
         maxBackpressure: 128 * 1024 * 1024,
-        open: (ws) => {
-          ws.subscribe('ppp');
-        },
         close: (ws) => {
-          ws.unsubscribe('ppp');
+          if (ws.key) {
+            ws.unsubscribe(ws.key);
+          }
+        },
+        message(ws, message) {
+          const key = Buffer.from(message).toString();
+
+          if (key) {
+            ws.key = key;
+
+            ws.subscribe(key);
+            ws.send(
+              JSON.stringify({
+                message: 'subscription',
+                payload: {
+                  subscribed: true
+                }
+              })
+            );
+          }
         }
       })
       .get('/ping', (res) => {
         res
           .writeStatus('200 OK')
-          .writeHeader('Content-Type', 'text/plain;charset=UTF-8')
-          .end('pong');
+          .writeHeader('Content-Type', 'text/plain;charset=UTF-8');
+
+        if (typeof process.env.NOMAD_PORT_HTTP === 'undefined') {
+          res.writeHeader('Access-Control-Allow-Origin', '*');
+        }
+
+        res.end('pong');
       })
       .post('/call', (res) => {
         readJSONPayload(res, async (payload = {}) => {
@@ -257,7 +360,7 @@ class IBGateway extends EventEmitter {
             const allowedMethods = [
               'connect',
               'disconnect',
-              'connectionState',
+              'getConnectionState',
               'cancelOrder',
               'cancelAllOrders',
               'getAllOpenOrders',
@@ -271,28 +374,51 @@ class IBGateway extends EventEmitter {
               'positions'
             ];
             const method = payload.method;
+            const key = payload.key;
+
+            if (!key) {
+              // noinspection ExceptionCaughtLocallyJS
+              throw new IBGatewayError('E_INVALID_KEY');
+            }
 
             if (allowedMethods.indexOf(method) === -1) {
               // noinspection ExceptionCaughtLocallyJS
               throw new IBGatewayError('E_UNKNOWN_METHOD');
             }
 
-            if (
-              [
-                'connect',
-                'disconnect',
-                'connectionState',
-                'summary',
-                'positions'
-              ].indexOf(method) === -1
-            ) {
-              if (this.#state !== ConnectionState.Connected) {
+            const connection = this.#connections.get(key);
+
+            if (!connection) {
+              if (method === 'connect') {
+                this.#connections.set(
+                  key,
+                  new TwsConnection(this.#app, payload.key)
+                );
+
+                return this.json(
+                  res,
+                  await this.#connections.get(key).connect(payload.body)
+                );
+              } else {
+                // noinspection ExceptionCaughtLocallyJS
+                throw new IBGatewayError('E_CONNECT_TO_TWS_FIRST');
+              }
+            } else {
+              // Connection exists.
+              if (connection.connectionState !== ConnectionState.Connected) {
+                if (
+                  method === 'connect' &&
+                  connection.connectionState === ConnectionState.Disconnected
+                ) {
+                  return this.json(res, await connection.connect(payload.body));
+                }
+
                 // noinspection ExceptionCaughtLocallyJS
                 throw new IBGatewayError('E_NO_TWS_CONNECTION');
+              } else {
+                return this.json(res, await connection[method](payload.body));
               }
             }
-
-            return this.json(res, await this[method](payload.body));
           } catch (e) {
             console.error(e);
             this.#errorOut(res, e);

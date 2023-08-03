@@ -140,7 +140,8 @@ export class BrokerUtexPage extends Page {
   async find() {
     return {
       type: BROKERS.UTEX,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

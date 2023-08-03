@@ -33,7 +33,7 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option
               value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
             >
-              UTEX Margin (акции)
+              UTEX Margin (акции и ETF)
             </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
               Акции US (Psina)
@@ -54,6 +54,9 @@ export const instrumentsImportPageTemplate = html`
             </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
               Finam
+            </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
+              Interactive Brokers (акции и ETF)
             </ppp-option>
           </ppp-select>
           <div class="spacing2"></div>
@@ -230,6 +233,50 @@ export class InstrumentsImportPage extends Page {
           forQualInvestorFlag: false,
           utexSymbolID: s.id,
           lot: s.qtyStep
+        };
+      });
+  }
+
+  async [INSTRUMENT_DICTIONARY.IB]() {
+    const rUtexSymbols = await fetch(
+      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'POST',
+          url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
+          body: JSON.stringify({})
+        })
+      }
+    );
+
+    await maybeFetchError(
+      rUtexSymbols,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const symbols = await rUtexSymbols.json();
+    const { symbolsInfo } = symbols;
+
+    return symbolsInfo
+      .filter((s) => {
+        return (
+          s.tagetCurrencyInfo?.description &&
+          s.baseCurrencyInfo?.code === 'M_USDT'
+        );
+      })
+      .map((s) => {
+        return {
+          symbol: s.tagetCurrencyInfo.code.split('M_')[1].replace('/', ' '),
+          exchange: EXCHANGE.US,
+          broker: BROKERS.IB,
+          fullName: s.tagetCurrencyInfo.description,
+          minPriceIncrement: s.priceStep / 1e8,
+          type: 'stock',
+          currency: 'USD',
+          forQualInvestorFlag: false,
+          lot: 1
         };
       });
   }
@@ -730,6 +777,12 @@ export class InstrumentsImportPage extends Page {
           exchange = EXCHANGE.UTEX_MARGIN_STOCKS;
           exchangeForDBRequest = EXCHANGE.UTEX_MARGIN_STOCKS;
           broker = BROKERS.UTEX;
+
+          break;
+        case INSTRUMENT_DICTIONARY.IB:
+          exchange = EXCHANGE.CUSTOM;
+          exchangeForDBRequest = EXCHANGE.US;
+          broker = BROKERS.IB;
 
           break;
         case INSTRUMENT_DICTIONARY.PSINA_US_STOCKS:

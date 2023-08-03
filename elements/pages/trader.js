@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { TRADERS, TRADER_CAPS } from '../../lib/const.js';
@@ -121,6 +122,63 @@ export const traderPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.ALPACA_V2_PLUS}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Interactive Brokers"
+            style="height: 32px"
+            src="${() => ppp.brandSvg('ib')}"
+          />
+          <div slot="title">Interactive Brokers</div>
+          <span slot="description"> Торговля через Interactive Brokers. </span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${(x) =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(
+                    `$const.traderCaps.${TRADER_CAPS.CAPS_ORDER_DESTINATION}`
+                  )}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ORDER_TIF}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.IB}`
               })}"
           >
             Продолжить

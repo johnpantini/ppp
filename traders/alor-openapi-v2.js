@@ -91,7 +91,7 @@ class QuotesDatum extends AlorTraderDatum {
     }
   }
 
-  [TRADER_DATUM.LAST_PRICE](data, instrument, source) {
+  [TRADER_DATUM.LAST_PRICE](data, instrument) {
     if (instrument.type === 'bond') {
       return this.trader.relativeBondPriceToPrice(data.last_price, instrument);
     } else {
@@ -419,7 +419,7 @@ class ActiveOrderDatum extends AlorTraderGlobalDatum {
     const result = {
       orderId: data.id,
       symbol: data.symbol,
-      exchange: [data.exchange],
+      exchange: data.exchange,
       orderType: data.type,
       side: data.side,
       status: data.status,
@@ -649,7 +649,6 @@ class AlorOpenAPIV2Trader extends Trader {
               await this.resubscribe();
             }
 
-            // Restore subscriptions.
             resolve(this.connection);
           };
 

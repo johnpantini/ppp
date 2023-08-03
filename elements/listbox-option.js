@@ -95,6 +95,8 @@ export const listboxOptionStyles = css`
     justify-content: space-between;
     width: 100%;
     text-overflow: ellipsis;
+    height: 100%;
+    align-items: center;
   }
 
   .checked-indicator {

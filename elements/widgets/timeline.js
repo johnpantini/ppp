@@ -15,7 +15,7 @@ import {
   repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import { BROKERS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import {
   formatAmount,
   formatDateWithOptions,
@@ -360,7 +360,9 @@ export class TimelineWidget extends WidgetWithInstrument {
             totalAmount / totalQuantity,
             firstOperation.instrument,
             {
-              minimumFractionDigits: 0
+              minimumFractionDigits: 0,
+              maximumFractionDigits:
+                firstOperation.instrument?.broker === BROKERS.IB ? 3 : void 0
             }
           )
         });

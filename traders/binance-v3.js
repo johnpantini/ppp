@@ -168,7 +168,6 @@ class BinanceTrader extends Trader {
               await this.resubscribe();
             }
 
-            // Restore subscriptions.
             resolve(this.connection);
           };
 

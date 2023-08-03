@@ -9,8 +9,9 @@ import {
   SERVER_STATE,
   TRADER_CAPS,
   VERSIONING_STATUS,
-  EXCHANGE, COLUMN_SOURCE
-} from '../../../lib/const.js'
+  EXCHANGE,
+  COLUMN_SOURCE
+} from '../../../lib/const.js';
 
 export default function (i18n) {
   i18n.extend({
@@ -50,7 +51,7 @@ export default function (i18n) {
         [COLUMN_SOURCE.PL_ABSOLUTE]: 'Доход',
         [COLUMN_SOURCE.PL_RELATIVE]: 'Доход, %',
         [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
-        [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
+        [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
@@ -67,6 +68,7 @@ export default function (i18n) {
         [TRADERS.BINANCE_V3]: 'Binance API V3',
         [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
         [TRADERS.FINAM_TRADE_API]: 'Finam Trade API',
+        [TRADERS.IB]: 'Interactive Brokers',
         [TRADERS.CUSTOM]: 'По ссылке'
       },
       traderCaps: {
@@ -81,7 +83,9 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_TIMELINE]: 'Лента операций',
         [TRADER_CAPS.CAPS_LEVEL1]: 'Данные L1',
         [TRADER_CAPS.CAPS_CHARTS]: 'Графики котировок',
-        [TRADER_CAPS.CAPS_MIC]: 'Пулы ликвидности'
+        [TRADER_CAPS.CAPS_MIC]: 'Пулы ликвидности',
+        [TRADER_CAPS.CAPS_ORDER_DESTINATION]: 'Выбор назначения заявки',
+        [TRADER_CAPS.CAPS_ORDER_TIF]: 'Параметр заявки Time in Force'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',

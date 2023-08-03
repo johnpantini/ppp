@@ -89,17 +89,23 @@ import {
   emptyWidgetState,
   notificationNote
 } from '../static/svg/sprite.js';
+import { later } from '../lib/ppp-decorators.js';
 import { Tab, Tabs, tabsTemplate, tabTemplate } from './tabs.js';
 import { TextField, textFieldStyles, textFieldTemplate } from './text-field.js';
+import { Select, selectStyles, selectTemplate } from './select.js';
 import { Button, buttonStyles, buttonTemplate } from './button.js';
 import { RadioGroup, radioGroupTemplate } from './radio-group.js';
 import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
 import {
-  AuthorizationError,
+  AuthorizationError, ConnectionError,
   NoInstrumentsError,
   StaleInstrumentCacheError
-} from '../lib/ppp-errors.js';
-import { later } from '../lib/ppp-decorators.js';
+} from '../lib/ppp-errors.js'
+import {
+  ListboxOption,
+  listboxOptionStyles,
+  listboxOptionTemplate
+} from './listbox-option.js';
 
 export const importInstrumentsSuggestionTemplate = (e) => html`
   <span>
@@ -738,6 +744,12 @@ export class Widget extends PPPElement {
       return this.notificationsArea.error({
         title,
         text: 'Ошибка авторизации, проверьте ключи и пароли.',
+        keep: true
+      });
+    } else if (e instanceof ConnectionError) {
+      return this.notificationsArea.error({
+        title,
+        text: 'Ошибка соединения с источником данных.',
         keep: true
       });
     } else {
@@ -2926,6 +2938,57 @@ export const widgetTextFieldStyles = css`
 
 export class WidgetTextField extends TextField {}
 
+export const widgetOptionStyles = css`
+  ${listboxOptionStyles}
+  :host {
+    height: 32px;
+    padding: 1px 12px;
+  }
+`;
+
+export class WidgetOption extends ListboxOption {}
+
+export const widgetSelectStyles = css`
+  ${selectStyles}
+  :host {
+    width: 100%;
+  }
+
+  .control {
+    height: 32px;
+    min-width: unset;
+    font-family: ${bodyFont};
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    line-height: ${lineHeightWidget};
+    border-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  :host(:hover:not([disabled])) .control:hover {
+    border-color: ${themeConditional(paletteGrayLight1, paletteGrayBase)};
+  }
+
+  .label,
+  .description {
+    display: none;
+  }
+
+  .listbox {
+    min-height: 32px;
+    max-height: 100px;
+  }
+
+  :host([open][position='above']) .listbox {
+    bottom: 36px;
+  }
+
+  :host([open][position='below']) .listbox {
+    top: 36px;
+  }
+`;
+
+export class WidgetSelect extends Select {}
+
 export const widgetButtonStyles = css`
   ${buttonStyles}
   .control {
@@ -3347,6 +3410,14 @@ export default {
     shadowOptions: {
       delegatesFocus: true
     }
+  }).define(),
+  WidgetOptionComposition: WidgetOption.compose({
+    template: listboxOptionTemplate,
+    styles: widgetOptionStyles
+  }).define(),
+  WidgetSelectComposition: WidgetSelect.compose({
+    template: selectTemplate,
+    styles: widgetSelectStyles
   }).define(),
   WidgetButtonComposition: WidgetButton.compose({
     template: buttonTemplate,

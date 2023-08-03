@@ -16,7 +16,7 @@ import {
   repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
+import { WIDGET_TYPES, TRADER_DATUM, TRADER_CAPS } from '../../lib/const.js';
 import {
   formatRelativeChange,
   formatAbsoluteChange,
@@ -367,6 +367,150 @@ export const orderWidgetTemplate = html`
                   </div>
                 </div>
               </div>
+              ${when(
+                (x) =>
+                  x.instrument &&
+                  x.ordersTrader &&
+                  (x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_DESTINATION) ||
+                    x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF)),
+                html`
+                  <div class="widget-section">
+                    <div class="widget-margin-spacer"></div>
+                    <div class="widget-subsection">
+                      ${when(
+                        (x) =>
+                          x.ordersTrader.hasCap(
+                            TRADER_CAPS.CAPS_ORDER_DESTINATION
+                          ),
+                        html`
+                          <div class="widget-subsection-item">
+                            <div class="widget-text-label">Назначение</div>
+                            <div class="widget-flex-line">
+                              <ppp-widget-select
+                                ${ref('destination')}
+                                position="above"
+                                @change="${(x) => {
+                                  return x.updateDocumentFragment({
+                                    $set: {
+                                      'widgets.$.lastDestination':
+                                        x.destination.value
+                                    }
+                                  });
+                                }}"
+                                value="${(x) =>
+                                  x.document.lastDestination ?? 'SMART'}"
+                              >
+                                <ppp-widget-option value="SMART">
+                                  SMART
+                                </ppp-widget-option>
+                                <ppp-widget-option value="AMEX">
+                                  AMEX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="ARCA">
+                                  ARCA
+                                </ppp-widget-option>
+                                <ppp-widget-option value="BATS">
+                                  BATS
+                                </ppp-widget-option>
+                                <ppp-widget-option value="BEX">
+                                  BEX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="BYX">
+                                  BYX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="CBOE">
+                                  CBOE
+                                </ppp-widget-option>
+                                <ppp-widget-option value="CHX">
+                                  CHX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="DRCTEDGE">
+                                  DRCTEDGE
+                                </ppp-widget-option>
+                                <ppp-widget-option value="EDGEA">
+                                  EDGEA
+                                </ppp-widget-option>
+                                <ppp-widget-option value="EDGX">
+                                  EDGX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="IBKRATS">
+                                  IBKRATS
+                                </ppp-widget-option>
+                                <ppp-widget-option value="IEX">
+                                  IEX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="ISE">
+                                  ISE
+                                </ppp-widget-option>
+                                <ppp-widget-option value="ISLAND">
+                                  ISLAND
+                                </ppp-widget-option>
+                                <ppp-widget-option value="LTSE">
+                                  LTSE
+                                </ppp-widget-option>
+                                <ppp-widget-option value="MEMX">
+                                  MEMX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="NYSE">
+                                  NYSE
+                                </ppp-widget-option>
+                                <ppp-widget-option value="NYSENAT">
+                                  NYSENAT
+                                </ppp-widget-option>
+                                <ppp-widget-option value="PEARL">
+                                  PEARL
+                                </ppp-widget-option>
+                                <ppp-widget-option value="PHLX">
+                                  PHLX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="PSX">
+                                  PSX
+                                </ppp-widget-option>
+                                <ppp-widget-option value="TPLUS1">
+                                  TPLUS1
+                                </ppp-widget-option>
+                              </ppp-widget-select>
+                            </div>
+                          </div>
+                        `
+                      )}
+                      ${when(
+                        (x) =>
+                          x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF),
+                        html`
+                          <div class="widget-subsection-item">
+                            <div class="widget-text-label">TIF</div>
+                            <div class="widget-flex-line">
+                              <ppp-widget-select
+                                ${ref('tif')}
+                                position="above"
+                                @change="${(x) => {
+                                  return x.updateDocumentFragment({
+                                    $set: {
+                                      'widgets.$.lastTif': x.tif.value
+                                    }
+                                  });
+                                }}"
+                                value="${(x) => x.document.lastTif ?? 'DAY'}"
+                              >
+                                <ppp-widget-option value="DAY">
+                                  DAY
+                                </ppp-widget-option>
+                                <ppp-widget-option value="GTC">
+                                  GTC
+                                </ppp-widget-option>
+                                <ppp-widget-option value="IOC">
+                                  IOC
+                                </ppp-widget-option>
+                              </ppp-widget-select>
+                            </div>
+                          </div>
+                        `
+                      )}
+                    </div>
+                  </div>
+                `
+              )}
               <div class="widget-margin-spacer"></div>
               ${when(
                 (x) => x.document.fastVolumes,
@@ -1558,7 +1702,9 @@ export class OrderWidget extends WidgetWithInstrument {
           instrument: this.instrument,
           price: this.price.value,
           quantity: this.quantity.value,
-          direction
+          direction,
+          destination: this.destination?.value,
+          tif: this.tif?.value
         });
       } else if (this.orderTypeTabs.activeid === 'market') {
         if (typeof this.ordersTrader.placeMarketOrder !== 'function') {
@@ -1571,7 +1717,9 @@ export class OrderWidget extends WidgetWithInstrument {
         await this.ordersTrader.placeMarketOrder({
           instrument: this.instrument,
           quantity: this.quantity.value,
-          direction
+          direction,
+          destination: this.destination?.value,
+          tif: this.tif?.value
         });
       }
 

@@ -162,13 +162,18 @@ export class BrokerIbPage extends Page {
       gatewayUrl = `${gatewayUrl}/`;
     }
 
+    const host = this.twsHost.value.trim();
+    const port = Math.abs(+this.twsPort.value);
+    const key = `${host}:${port}`;
+
     const connectionRequest = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'connect',
+        key,
         body: {
-          host: this.twsHost.value.trim(),
-          port: Math.abs(+this.twsPort.value)
+          host,
+          port
         }
       })
     });
@@ -179,6 +184,7 @@ export class BrokerIbPage extends Page {
     const timeRequest = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
+        key,
         method: 'getCurrentTime'
       })
     });
@@ -193,6 +199,14 @@ export class BrokerIbPage extends Page {
         raiseException: true
       });
     }
+
+    return fetch(`${gatewayUrl}call`, {
+      method: 'POST',
+      body: JSON.stringify({
+        key,
+        method: 'disconnect'
+      })
+    });
   }
 
   async read() {
@@ -211,7 +225,8 @@ export class BrokerIbPage extends Page {
   async find() {
     return {
       type: BROKERS.IB,
-      name: this.name.value.trim()
+      name: this.name.value.trim(),
+      removed: { $ne: true }
     };
   }
 

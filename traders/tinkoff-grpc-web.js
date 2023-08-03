@@ -501,7 +501,7 @@ class TimelineDatum extends GlobalTraderDatum {
           ).items;
 
           for (const item of this.#timelineHistory) {
-            this.dataArrived(item, this.trader.figis.get(item.figi));
+            this.dataArrived(item);
           }
         } else {
           const history = await this.trader.timelineHistory({
@@ -521,7 +521,7 @@ class TimelineDatum extends GlobalTraderDatum {
           this.#timelineHistory.unshift(...newItems);
 
           for (const item of newItems) {
-            this.dataArrived(item, this.trader.figis.get(item.figi));
+            this.dataArrived(item);
           }
         }
 
@@ -602,20 +602,31 @@ class ActiveOrderDatum extends GlobalTraderDatum {
         const newOrders = new Set();
 
         for (const o of orders) {
-          newOrders.add(o.orderId);
+          newOrders.add(
+            `${o.orderId}|${toNumber(o.initialSecurityPrice)}|${
+              o.lotsExecuted
+            }|${o.lotsRequested}`
+          );
 
           if (!this.orders.has(o.orderId)) {
             this.orders.set(o.orderId, o);
-            this.dataArrived(o, this.trader.figis.get(o.figi));
+            this.dataArrived(o);
           }
         }
 
         for (const [orderId, order] of this.orders) {
-          if (!newOrders.has(orderId)) {
+          if (
+            !newOrders.has(
+              `${orderId}|${toNumber(order.initialSecurityPrice)}|${
+                order.lotsExecuted
+              }|${order.lotsRequested}`
+            )
+          ) {
+            // Order is absent, hide it from listing.
             order.executionReportStatus =
               OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_UNSPECIFIED;
 
-            this.dataArrived(order, this.trader.figis.get(order.figi));
+            this.dataArrived(order);
             this.orders.delete(orderId);
           }
         }
@@ -662,7 +673,7 @@ class ActiveOrderDatum extends GlobalTraderDatum {
         instrument,
         orderId: order.orderId,
         symbol: order.figi,
-        exchange: 0,
+        exchange: instrument.exchange,
         orderType:
           order.orderType === OrderType.ORDER_TYPE_LIMIT ? 'limit' : 'market',
         side:
