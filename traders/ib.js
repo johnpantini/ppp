@@ -124,7 +124,22 @@ class IbTraderGlobalDatum extends GlobalTraderDatum {
 }
 
 class PositionDatum extends IbTraderGlobalDatum {
+  // Do not clear.
+  // The trader sends everything right after connection establishment.
+  // These datums have no explicit on-demand subscriptions.
+  // We have to explicitly feed the first subscribed source with the saved value.
   doNotClearValue = true;
+
+  firstReferenceAdded(source, field, datum) {
+    if (this.value.size) {
+      for (const [key, data] of this.value) {
+        if (this.filter(data, source, key, datum)) {
+          source[field] =
+            this[datum](data, source, key) ?? this.emptyValue(datum) ?? '—';
+        }
+      }
+    }
+  }
 
   filter(data, source, key, datum) {
     if (datum !== TRADER_DATUM.POSITION) {
@@ -454,10 +469,6 @@ class IbTrader extends Trader {
     urlObject.protocol = urlObject.protocol === 'http:' ? 'ws:' : 'wss:';
 
     this.wsUrl = urlObject.toString();
-  }
-
-  async oneTimeInitializationCallback() {
-    return this.ensureTwsIsConnected();
   }
 
   async establishWebSocketConnection(reconnect) {
