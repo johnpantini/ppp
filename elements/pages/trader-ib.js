@@ -115,6 +115,7 @@ export class TraderIbPage extends Page {
     await validate(this.account);
 
     const { ibGatewayUrl, twsHost, twsPort } = this.brokerId.datum();
+    const key = `${twsHost}:${twsPort}`;
 
     let gatewayUrl = ibGatewayUrl;
 
@@ -126,6 +127,7 @@ export class TraderIbPage extends Page {
       method: 'POST',
       body: JSON.stringify({
         method: 'connect',
+        key,
         body: {
           host: twsHost,
           port: twsPort
@@ -139,7 +141,8 @@ export class TraderIbPage extends Page {
     const summaryRequest = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
-        method: 'summary'
+        method: 'summary',
+        key
       })
     });
 
