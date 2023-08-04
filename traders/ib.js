@@ -413,7 +413,7 @@ class TimelineDatum extends IbTraderGlobalDatum {
       operationId: data.execution.execId,
       accruedInterest: 0,
       commission: 0,
-      parentId: data.execution.orderId,
+      parentId: data.execution.execId,
       destination: data.execution.exchange,
       symbol: data.contract.symbol,
       type:
