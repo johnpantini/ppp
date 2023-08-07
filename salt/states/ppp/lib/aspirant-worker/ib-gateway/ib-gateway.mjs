@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 1
+// @version 2
 // ==/PPPScript==
 
 import { EventEmitter } from 'node:events';
@@ -39,6 +39,22 @@ class TwsConnection {
   #summarySubscription;
 
   #summary = {};
+
+  #connectionStateObservable = {
+    next(state) {
+      this.#connectionState = state;
+
+      this.#app.publish(
+        this.#key,
+        JSON.stringify({
+          message: 'connection',
+          payload: {
+            state: this.#connectionState
+          }
+        })
+      );
+    }
+  };
 
   #positionsObservable = {
     next({ all }) {
@@ -81,54 +97,14 @@ class TwsConnection {
     }
   };
 
-  #connectionStateObservable = {
-    next(state) {
-      this.#connectionState = state;
-
-      if (state === ConnectionState.Connected) {
-        this.#positionsObservable.next =
-          this.#positionsObservable.next.bind(this);
-        this.#summaryObservable.next = this.#summaryObservable.next.bind(this);
-
-        this.#positionsSubscription = this.#api
-          .getPositions()
-          .subscribe(this.#positionsObservable);
-        this.#summarySubscription = this.#api
-          .getAccountSummary(
-            'All',
-            'NetLiquidation,TotalCashValue,SettledCash,AccruedCash,BuyingPower,AvailableFunds,ExcessLiquidity'
-          )
-          .subscribe(this.#summaryObservable);
-      } else {
-        if (state === ConnectionState.Disconnected) {
-          if (this.#positionsSubscription) {
-            this.#positionsSubscription.unsubscribe();
-          }
-
-          if (this.#summarySubscription) {
-            this.#summarySubscription.unsubscribe();
-          }
-        }
-      }
-
-      this.#app.publish(
-        this.#key,
-        JSON.stringify({
-          message: 'connection',
-          payload: {
-            state: this.#connectionState
-          }
-        })
-      );
-    }
-  };
-
   constructor(app, key) {
     this.#app = app;
     this.#key = key;
 
     this.#connectionStateObservable.next =
       this.#connectionStateObservable.next.bind(this);
+    this.#positionsObservable.next = this.#positionsObservable.next.bind(this);
+    this.#summaryObservable.next = this.#summaryObservable.next.bind(this);
   }
 
   cancelOrder(body = {}) {
@@ -155,14 +131,33 @@ class TwsConnection {
         connectionWatchdogInterval: 0,
         reconnectInterval: 0
       });
-
-      this.#api.logLevel = LogLevel.DETAIL;
     }
 
     if (this.#connectionState === ConnectionState.Disconnected) {
+      if (this.#connectionStateSubscription) {
+        this.#connectionStateSubscription.unsubscribe();
+      }
+
+      if (this.#positionsSubscription) {
+        this.#positionsSubscription.unsubscribe();
+      }
+
+      if (this.#summarySubscription) {
+        this.#summarySubscription.unsubscribe();
+      }
+
       this.#connectionStateSubscription = this.#api.connectionState.subscribe(
         this.#connectionStateObservable
       );
+      this.#positionsSubscription = this.#api
+        .getPositions()
+        .subscribe(this.#positionsObservable);
+      this.#summarySubscription = this.#api
+        .getAccountSummary(
+          'All',
+          'NetLiquidation,TotalCashValue,SettledCash,AccruedCash,BuyingPower,AvailableFunds,ExcessLiquidity'
+        )
+        .subscribe(this.#summaryObservable);
 
       this.#api.connect();
     } else if (this.#connectionState === ConnectionState.Connected) {
@@ -200,10 +195,6 @@ class TwsConnection {
 
   disconnect() {
     this.#api?.disconnect?.();
-
-    if (this.#connectionStateSubscription) {
-      this.#connectionStateSubscription.unsubscribe();
-    }
 
     return {
       connectionState: ConnectionState[this.#connectionState]

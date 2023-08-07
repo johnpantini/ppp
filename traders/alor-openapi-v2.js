@@ -1114,6 +1114,8 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (/PROHIBITION_CH/i.test(message)) return 'Заявка заблокирована биржей.';
 
+    if (/BAD_INSTRUMENT/i.test(message)) return 'Инструмент не поддерживается.';
+
     if (/Order was canceled before it was posted/i.test(message))
       return 'Заявка была отменена биржей.';
 

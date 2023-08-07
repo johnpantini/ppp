@@ -636,7 +636,7 @@ class IbTrader extends Trader {
 
     const ordersResponse = await ordersRequest.json();
 
-    return ordersResponse.result.reverse() ?? [];
+    return ordersResponse.result?.reverse() ?? [];
   }
 
   async modifyLimitOrders({ instrument, side, value }) {
