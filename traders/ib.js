@@ -413,7 +413,7 @@ class TimelineDatum extends IbTraderGlobalDatum {
       operationId: data.execution.execId,
       accruedInterest: 0,
       commission: 0,
-      parentId: data.execution.execId,
+      parentId: data.execution.permId,
       destination: data.execution.exchange,
       symbol: data.contract.symbol,
       type:
@@ -421,7 +421,7 @@ class TimelineDatum extends IbTraderGlobalDatum {
           ? OperationType.OPERATION_TYPE_BUY
           : OperationType.OPERATION_TYPE_SELL,
       exchange: data.execution.exchange,
-      quantity: data.execution.cumQty,
+      quantity: data.execution.shares,
       price: data.execution.price,
       createdAt: this.#formatExecutionTime(data.execution.time)
     };
@@ -554,7 +554,7 @@ class IbTrader extends Trader {
                 }
               }
             } else if (message === 'positions') {
-              const positions = payload[this.document.account];
+              const positions = payload[this.document.account] ?? [];
 
               for (const position of positions) {
                 this.datums[TRADER_DATUM.POSITION].dataArrived({

@@ -413,6 +413,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     }
 
     const date = new Date(newValue.createdAt);
+    // Timeline item date (bucket)
     const topLevelKey = `${date.getFullYear()}-${this.#padTo2Digits(
       date.getMonth() + 1
     )}-${this.#padTo2Digits(date.getDate())}`;
