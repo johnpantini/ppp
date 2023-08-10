@@ -1,13 +1,60 @@
 import ppp from '../ppp.js';
-import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../lib/const.js';
-import { Trader } from './common-trader.js';
+import {
+  BROKERS,
+  EXCHANGE,
+  INSTRUMENT_DICTIONARY,
+  TRADER_DATUM
+} from '../lib/const.js';
+import { GlobalTraderDatum, Trader } from './common-trader.js';
 import { TradingError } from '../lib/ppp-errors.js';
+
+class ActiveOrderDatum extends GlobalTraderDatum {
+  #timer;
+
+  #shouldLoop = false;
+
+  orders = new Map();
+
+  firstReferenceAdded() {
+    this.orders.clear();
+
+    clearTimeout(this.#timer);
+
+    this.#shouldLoop = true;
+
+    return this.#fetchOrdersLoop();
+  }
+
+  lastReferenceRemoved() {
+    this.orders.clear();
+    clearTimeout(this.#timer);
+
+    this.#shouldLoop = false;
+  }
+
+  valueKeyForData(data) {
+    return data.transactionId;
+  }
+
+  async #fetchOrdersLoop() {}
+
+  [TRADER_DATUM.ACTIVE_ORDER](order) {}
+}
 
 // noinspection JSUnusedGlobalSymbols
 /**
  * @typedef {Object} FinamTradeApiTrader
  */
 class FinamTradeApiTrader extends Trader {
+  constructor(document) {
+    super(document, [
+      {
+        type: ActiveOrderDatum,
+        datums: [TRADER_DATUM.ACTIVE_ORDER]
+      }
+    ]);
+  }
+
   getExchange() {
     return EXCHANGE.CUSTOM;
   }
@@ -24,6 +71,31 @@ class FinamTradeApiTrader extends Trader {
 
   getBroker() {
     return BROKERS.FINAM;
+  }
+
+  async getAllOpenOrders() {
+    const ordersRequest = await fetch(
+      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      {
+        cache: 'reload',
+        method: 'POST',
+        body: JSON.stringify({
+          method: 'GET',
+          url: `https://trade-api.finam.ru/public/api/v1/orders?ClientId=${this.document.account}&IncludeMatched=false&IncludeCanceled=false&IncludeActive=true`,
+          headers: {
+            'X-Api-Key': this.document.broker.token
+          }
+        })
+      }
+    );
+
+    const { data } = await ordersRequest.json();
+
+    if (ordersRequest.ok) {
+      return data.orders ?? [];
+    } else {
+      return [];
+    }
   }
 
   async modifyLimitOrders({ instrument, side, value }) {}

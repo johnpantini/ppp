@@ -253,12 +253,24 @@ class PositionsDatum extends AlorTraderGlobalDatum {
     this.trader.traderEvent({ event: 'estimate' });
   }
 
+  valueKeyForData(data) {
+    if (typeof data.balanceMoney !== 'undefined') {
+      return data.balanceMoney;
+    }
+
+    return super.valueKeyForData(data);
+  }
+
   filter(data, source, key, datum) {
     if (datum !== TRADER_DATUM.POSITION) {
       const isBalance =
         data.isCurrency && this.trader.document.portfolioType !== 'currency';
 
       if (isBalance) {
+        if (this.trader.document.portfolioType === 'futures') {
+          return false;
+        }
+
         return data.symbol === source.getAttribute('balance');
       }
 
@@ -269,6 +281,21 @@ class PositionsDatum extends AlorTraderGlobalDatum {
   }
 
   async firstReferenceAdded() {
+    const guid = await super.firstReferenceAdded();
+
+    if (this.trader.document.portfolioType === 'futures') {
+      this.trader.connection.send(
+        JSON.stringify({
+          opcode: 'SpectraRisksGetAndSubscribe',
+          portfolio: this.trader.document.portfolio,
+          exchange: this.trader.document.exchange,
+          format: 'Simple',
+          token: this.trader.accessToken,
+          guid: `${guid};FORTS`
+        })
+      );
+    }
+
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.trader.connection.send(
         JSON.stringify({
@@ -277,13 +304,42 @@ class PositionsDatum extends AlorTraderGlobalDatum {
           exchange: this.trader.document.exchange,
           format: 'Simple',
           token: this.trader.accessToken,
-          guid: await super.firstReferenceAdded()
+          guid
         })
       );
     }
   }
 
+  async lastReferenceRemoved() {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      if (this.trader.document.portfolioType === 'futures') {
+        this.trader.connection.send(
+          JSON.stringify({
+            opcode: 'unsubscribe',
+            token: this.trader.accessToken,
+            guid: `${this.guid};FORTS`
+          })
+        );
+      }
+    }
+
+    return super.lastReferenceRemoved();
+  }
+
   [TRADER_DATUM.POSITION](data) {
+    if (typeof data.balanceMoney !== 'undefined') {
+      return {
+        symbol: 'RUB',
+        lot: 1,
+        exchange: EXCHANGE.MOEX,
+        averagePrice: null,
+        isCurrency: true,
+        isBalance: true,
+        size: data.balanceMoney,
+        accountId: this.trader.document.portfolio
+      };
+    }
+
     const isBalance =
       data.isCurrency && this.trader.document.portfolioType !== 'currency';
 
@@ -321,10 +377,18 @@ class PositionsDatum extends AlorTraderGlobalDatum {
   }
 
   [TRADER_DATUM.POSITION_SIZE](data) {
+    if (typeof data.balanceMoney !== 'undefined') {
+      return data.balanceMoney;
+    }
+
     return data.qty;
   }
 
   [TRADER_DATUM.POSITION_AVERAGE](data, source) {
+    if (typeof data.balanceMoney !== 'undefined') {
+      return;
+    }
+
     const isBalance =
       data.isCurrency && this.trader.document.portfolioType !== 'currency';
 
@@ -695,6 +759,8 @@ class AlorOpenAPIV2Trader extends Trader {
                 datumInstance instanceof ActiveOrderDatum
               ) {
                 this.guidToDatum.get(payload.guid)?.dataArrived?.(payload.data);
+              } else if (payload.guid?.endsWith(';FORTS')) {
+                this.datums[TRADER_DATUM.POSITION].dataArrived?.(payload.data);
               }
             }
           };

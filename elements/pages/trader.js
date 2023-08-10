@@ -292,7 +292,7 @@ export const traderPageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
-        <ppp-generic-card>
+        <ppp-generic-card hidden>
           <img
             slot="logo"
             draggable="false"
