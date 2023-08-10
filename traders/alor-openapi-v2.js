@@ -255,7 +255,7 @@ class PositionsDatum extends AlorTraderGlobalDatum {
 
   valueKeyForData(data) {
     if (typeof data.balanceMoney !== 'undefined') {
-      return data.balanceMoney;
+      return data.portfolio;
     }
 
     return super.valueKeyForData(data);
@@ -276,6 +276,10 @@ class PositionsDatum extends AlorTraderGlobalDatum {
 
       return data.symbol === this.trader.getSymbol(source.instrument);
     } else {
+      if (this.trader.document.portfolioType === 'futures' && data.isCurrency) {
+        return false;
+      }
+
       return true;
     }
   }
