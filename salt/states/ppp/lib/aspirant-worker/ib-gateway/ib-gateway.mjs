@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 2
+// @version 3
 // ==/PPPScript==
 
 import { EventEmitter } from 'node:events';
@@ -7,7 +7,7 @@ import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
 import { readJSONPayload } from '/salt/states/ppp/lib/util/uws.mjs';
 import IB from './lib/ib.min.js';
 
-const { IBApiNext, LogLevel, ConnectionState } = IB;
+const { IBApiNext, ConnectionState } = IB;
 
 class IBGatewayError extends Error {
   constructor(message) {
@@ -39,6 +39,8 @@ class TwsConnection {
   #summarySubscription;
 
   #summary = {};
+
+  #watchdogTimer;
 
   #connectionStateObservable = {
     next(state) {
@@ -123,6 +125,47 @@ class TwsConnection {
     return this.#api.getAllOpenOrders();
   }
 
+  #reconnectObservables() {
+    if (this.#connectionStateSubscription) {
+      this.#connectionStateSubscription.unsubscribe();
+    }
+
+    if (this.#positionsSubscription) {
+      this.#positionsSubscription.unsubscribe();
+    }
+
+    if (this.#summarySubscription) {
+      this.#summarySubscription.unsubscribe();
+    }
+
+    this.#connectionStateSubscription = this.#api.connectionState.subscribe(
+      this.#connectionStateObservable
+    );
+    this.#positionsSubscription = this.#api
+      .getPositions()
+      .subscribe(this.#positionsObservable);
+    this.#summarySubscription = this.#api
+      .getAccountSummary(
+        'All',
+        'NetLiquidation,TotalCashValue,SettledCash,AccruedCash,BuyingPower,AvailableFunds,ExcessLiquidity'
+      )
+      .subscribe(this.#summaryObservable);
+  }
+
+  #watchdogLoop() {
+    if (this.#connectionState === ConnectionState.Connected) {
+      this.#reconnectObservables();
+
+      setTimeout(() => {
+        this.#watchdogLoop();
+      }, 10000);
+    } else {
+      setTimeout(() => {
+        this.#watchdogLoop();
+      }, 1000);
+    }
+  }
+
   async connect(body = {}) {
     if (!this.#api) {
       this.#api = new IBApiNext({
@@ -131,61 +174,15 @@ class TwsConnection {
         connectionWatchdogInterval: 0,
         reconnectInterval: 0
       });
+
+      this.#watchdogLoop();
     }
 
     if (this.#connectionState === ConnectionState.Disconnected) {
-      if (this.#connectionStateSubscription) {
-        this.#connectionStateSubscription.unsubscribe();
-      }
-
-      if (this.#positionsSubscription) {
-        this.#positionsSubscription.unsubscribe();
-      }
-
-      if (this.#summarySubscription) {
-        this.#summarySubscription.unsubscribe();
-      }
-
-      this.#connectionStateSubscription = this.#api.connectionState.subscribe(
-        this.#connectionStateObservable
-      );
-      this.#positionsSubscription = this.#api
-        .getPositions()
-        .subscribe(this.#positionsObservable);
-      this.#summarySubscription = this.#api
-        .getAccountSummary(
-          'All',
-          'NetLiquidation,TotalCashValue,SettledCash,AccruedCash,BuyingPower,AvailableFunds,ExcessLiquidity'
-        )
-        .subscribe(this.#summaryObservable);
-
+      this.#reconnectObservables();
       this.#api.connect();
     } else if (this.#connectionState === ConnectionState.Connected) {
-      this.#app.publish(
-        this.#key,
-        JSON.stringify({
-          message: 'positions',
-          payload: this.#positions
-        })
-      );
-
-      this.#app.publish(
-        this.#key,
-        JSON.stringify({
-          message: 'summary',
-          payload: this.#summary
-        })
-      );
-
-      this.#app.publish(
-        this.#key,
-        JSON.stringify({
-          message: 'connection',
-          payload: {
-            state: this.#connectionState
-          }
-        })
-      );
+      this.#reconnectObservables();
     }
 
     return {

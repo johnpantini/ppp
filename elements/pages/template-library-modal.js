@@ -10,10 +10,16 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
+import '../badge.js';
 import '../button.js';
 import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
+
+const HINTS = {
+  formatter: 'Форматирование сообщений',
+  history: 'Загрузка исторических данных'
+};
 
 export const templateLibraryModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -21,33 +27,22 @@ export const templateLibraryModalPageTemplate = html`
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Категория</h5>
-          <p class="description">Выберите категорию шаблона.</p>
+          <h5>Шаблон</h5>
+          <div class="spacing2"></div>
+          <ppp-badge appearance="yellow">${(x) => HINTS[x.hint]}</ppp-badge>
         </div>
         <div class="input-group">
           <ppp-select
             value="${(x) => x.template ?? 'thefly/formatter'}"
             ${ref('templateSelector')}
           >
-            <ppp-option value="thefly/formatter">
-              The Fly - форматирование
-            </ppp-option>
-            <ppp-option value="thefly/history">
-              The Fly - загрузка истории
-            </ppp-option>
-            <ppp-option value="nyse-nsdq-halts/formatter">
-              Паузы NYSE/NASDAQ - форматирование
-            </ppp-option>
-            <ppp-option value="nyse-nsdq-halts/history">
-              Паузы NYSE/NASDAQ - загрузка истории
-            </ppp-option>
+            <ppp-option value="thefly">The Fly</ppp-option>
+            <ppp-option value="nyse-nsdq-halts"> Паузы NYSE/NASDAQ</ppp-option>
           </ppp-select>
         </div>
       </section>
       ${when(
-        (x) =>
-          x.templateSelector.value === 'thefly/formatter' ||
-          x.templateSelector.value === 'thefly/history',
+        (x) => x.templateSelector.value === 'thefly',
         html`
           <section>
             <div class="label-group">
@@ -84,9 +79,7 @@ export const templateLibraryModalPageTemplate = html`
         `
       )}
       ${when(
-        (x) =>
-          x.templateSelector.value === 'nyse-nsdq-halts/formatter' ||
-          x.templateSelector.value === 'nyse-nsdq-halts/history',
+        (x) => x.templateSelector.value === 'nyse-nsdq-halts',
         html`
           <section>
             <div class="label-group">
@@ -141,17 +134,29 @@ export const templateLibraryModalPageStyles = css`
 
 export class TemplateLibraryModalPage extends Page {
   @observable
+  hint;
+
+  @observable
   template;
 
   baseUrl;
 
   destination;
 
+  constructor() {
+    super();
+
+    this.hint = 'formatter';
+  }
+
   async loadTemplate() {
     return await (
-      await fetch(`${this.baseUrl}/templates/${this.template}.js`, {
-        cache: 'reload'
-      })
+      await fetch(
+        `${this.baseUrl}/templates/${this.template}/${this.hint}.js`,
+        {
+          cache: 'reload'
+        }
+      )
     ).text();
   }
 
@@ -162,14 +167,12 @@ export class TemplateLibraryModalPage extends Page {
       this.template = this.templateSelector.value;
 
       switch (this.template) {
-        case 'thefly/formatter':
-        case 'thefly/history':
+        case 'thefly':
           await validate(this.theflyServiceId);
 
           break;
 
-        case 'nyse-nsdq-halts/formatter':
-        case 'nyse-nsdq-halts/history':
+        case 'nyse-nsdq-halts':
           await validate(this.nyseNsdqHaltsServiceId);
 
           break;
@@ -178,14 +181,12 @@ export class TemplateLibraryModalPage extends Page {
       let code = await this.loadTemplate();
 
       switch (this.template) {
-        case 'thefly/formatter':
-        case 'thefly/history':
+        case 'thefly':
           code = code.replace('@@SERVICE_ID', this.theflyServiceId.datum()._id);
 
           break;
 
-        case 'nyse-nsdq-halts/formatter':
-        case 'nyse-nsdq-halts/history':
+        case 'nyse-nsdq-halts':
           code = code.replace(
             '@@SERVICE_ID',
             this.nyseNsdqHaltsServiceId.datum()._id

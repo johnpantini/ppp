@@ -834,6 +834,65 @@ export class ServicePppAspirantWorkerPage extends Page {
     };
   }
 
+  async #getRedisApi() {
+    const aspirantDocument = await ppp.decrypt(
+      await ppp.user.functions.findOne(
+        {
+          collection: 'services'
+        },
+        {
+          _id: this.aspirantServiceId.datum()._id
+        }
+      )
+    );
+
+    let redisApi;
+
+    if (aspirantDocument.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
+      const aspirantUrl = await getAspirantBaseUrl(
+        this.aspirantServiceId.datum()
+      );
+
+      const envRequest = await fetch(`${aspirantUrl}/nginx/env`, {
+        cache: 'reload'
+      });
+
+      await maybeFetchError(
+        envRequest,
+        'Не удалось запросить переменные окружения.'
+      );
+
+      const env = await envRequest.json();
+
+      redisApi = {
+        host: env.REDIS_HOST,
+        port: env.REDIS_PORT,
+        tls: env.REDIS_TLS,
+        username: env.REDIS_USERNAME,
+        db: env.REDIS_DATABASE,
+        password: env.REDIS_PASSWORD
+      };
+    } else if (!aspirantDocument.redisApiId) {
+      throw new FetchError({
+        message:
+          'Aspirant не предоставил информацию о подключении к хранилищу.',
+        status: 404
+      });
+    } else {
+      redisApi = await ppp.decrypt(
+        await ppp.user.functions.findOne(
+          { collection: 'apis' },
+          {
+            _id: aspirantDocument.redisApiId,
+            type: APIS.REDIS
+          }
+        )
+      );
+    }
+
+    return redisApi;
+  }
+
   async #deployAspirantWorker() {
     if (this.zipBlob) {
       const groupId = ppp.keyVault.getKey('mongo-group-id');
@@ -914,64 +973,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       const aspirantUrl = await getAspirantBaseUrl(
         this.aspirantServiceId.datum()
       );
-
-      const aspirantDocument = await ppp.decrypt(
-        await ppp.user.functions.findOne(
-          {
-            collection: 'services'
-          },
-          {
-            _id: this.aspirantServiceId.datum()._id
-          }
-        )
-      );
-
-      let redisApi;
-
-      if (aspirantDocument.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
-        let aspirantUrl = aspirantDocument.url;
-
-        if (!aspirantUrl.endsWith('/')) {
-          aspirantUrl = `${aspirantUrl}/`;
-        }
-
-        const envRequest = await fetch(`${aspirantUrl}nginx/env`, {
-          cache: 'reload'
-        });
-
-        await maybeFetchError(
-          envRequest,
-          'Не удалось запросить переменные окружения.'
-        );
-
-        const env = await envRequest.json();
-
-        redisApi = {
-          host: env.REDIS_HOST,
-          port: env.REDIS_PORT,
-          tls: env.REDIS_TLS,
-          username: env.REDIS_USERNAME,
-          db: env.REDIS_DATABASE,
-          password: env.REDIS_PASSWORD
-        };
-      } else if (!aspirantDocument.redisApiId) {
-        throw new FetchError({
-          message:
-            'Aspirant не предоставил информацию о подключении к хранилищу.',
-          status: 404
-        });
-      } else {
-        redisApi = await ppp.decrypt(
-          await ppp.user.functions.findOne(
-            { collection: 'apis' },
-            {
-              _id: aspirantDocument.redisApiId,
-              type: APIS.REDIS
-            }
-          )
-        );
-      }
-
+      const redisApi = await this.#getRedisApi();
       const artifactUrl = `https://${ppp.keyVault.getKey(
         'mongo-app-client-id'
       )}.mongodbstitch.com${artifactRelativeUrl}`;
@@ -1148,14 +1150,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       'Не удалось остановить сервис.'
     );
 
-    const api = await ppp.decrypt(
-      await ppp.user.functions.findOne(
-        { collection: 'apis' },
-        {
-          _id: this.aspirantServiceId.datum().redisApiId
-        }
-      )
-    );
+    const redisApi = await this.#getRedisApi();
 
     await maybeFetchError(
       await fetch(
@@ -1168,16 +1163,16 @@ export class ServicePppAspirantWorkerPage extends Page {
           },
           body: JSON.stringify({
             options: {
-              host: api.host,
-              port: api.port,
-              tls: api.tls
+              host: redisApi.host,
+              port: redisApi.port,
+              tls: redisApi.tls
                 ? {
-                    servername: api.host
+                    servername: redisApi.host
                   }
                 : void 0,
-              username: api.username,
-              db: api.database,
-              password: api.password
+              username: redisApi.username,
+              db: redisApi.database,
+              password: redisApi.password
             },
             command: 'hdel',
             args: [

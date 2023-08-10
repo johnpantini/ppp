@@ -356,13 +356,13 @@ class TimelineDatum extends IbTraderGlobalDatum {
 
         this.#timer = setTimeout(() => {
           this.#fetchTimelineLoop();
-        }, 1000);
+        }, 500);
       } catch (e) {
         console.error(e);
 
         this.#timer = setTimeout(() => {
           this.#fetchTimelineLoop();
-        }, 1000);
+        }, 500);
       }
     }
   }
@@ -626,7 +626,7 @@ class IbTrader extends Trader {
   }
 
   async getExecutions() {
-    const ordersRequest = await fetch(`${this.gatewayUrl}call`, {
+    const executionsRequest = await fetch(`${this.gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'getExecutionDetails',
@@ -634,9 +634,9 @@ class IbTrader extends Trader {
       })
     });
 
-    const ordersResponse = await ordersRequest.json();
+    const executionsResponse = await executionsRequest.json();
 
-    return ordersResponse.result?.reverse() ?? [];
+    return executionsResponse.result?.reverse() ?? [];
   }
 
   async modifyLimitOrders({ instrument, side, value }) {
