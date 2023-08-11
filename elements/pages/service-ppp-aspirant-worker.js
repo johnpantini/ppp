@@ -11,7 +11,6 @@ import {
   when
 } from '../../vendor/fast-element.min.js';
 import {
-  DocumentNotFoundError,
   FetchError,
   invalidate,
   maybeFetchError,
@@ -28,7 +27,7 @@ import {
   servicePageFooterExtraControls,
   servicePageHeaderExtraControls
 } from './service.js';
-import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
+import { APIS, BROKERS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import {
   enableMongoDBRealmHosting,
@@ -108,6 +107,30 @@ uWS
         path: 'lib/ib.min.js'
       }
     ]
+  },
+  psinaUsNews: {
+    enableHttp: false,
+    url: '/salt/states/ppp/lib/aspirant-worker/psina/us-news.mjs',
+    env: (pusherApi, astraDbApi) => {
+      return {
+        US_NEWS_FEED_URL: 'wss://johnpantini.com:38083',
+        PUSHER_APPID: pusherApi.appid,
+        PUSHER_KEY: pusherApi.key,
+        PUSHER_CLUSTER: pusherApi.cluster,
+        ASTRA_DB_ID: astraDbApi.dbID,
+        ASTRA_DB_REGION: astraDbApi.dbRegion,
+        ASTRA_DB_KEYSPACE: astraDbApi.dbKeyspace
+      };
+    },
+    envSecret: (pusherApi, astraDbApi, psinaBroker) => {
+      return {
+        PUSHER_SECRET: pusherApi.secret,
+        ASTRA_DB_APPLICATION_TOKEN: astraDbApi.dbToken,
+        KEY: psinaBroker.login,
+        SECRET: psinaBroker.password
+      };
+    },
+    fileList: []
   }
 };
 
@@ -437,8 +460,133 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 <ppp-option value="utexAlpaca">
                   Alpaca-совместимый API UTEX
                 </ppp-option>
-                <ppp-option value="ibGateway"> Шлюз TWS API</ppp-option>
+                <ppp-option value="ibGateway">Шлюз TWS API</ppp-option>
+                <ppp-option value="psinaUsNews">
+                  Новостной источник (Psina, US)
+                </ppp-option>
               </ppp-select>
+              ${when(
+                (x) => x.workerPredefinedTemplate.value === 'psinaUsNews',
+                html`
+                  <div class="spacing2"></div>
+                  <div class="control-line baseline">
+                    <ppp-query-select
+                      ${ref('psinaUsNewsBrokerId')}
+                      standalone
+                      placeholder="Выберите профиль Psina"
+                      :context="${(x) => x}"
+                      :query="${() => {
+                        return (context) => {
+                          return context.services
+                            .get('mongodb-atlas')
+                            .db('ppp')
+                            .collection('brokers')
+                            .find({
+                              $and: [
+                                {
+                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.PSINA%]`
+                                },
+                                {
+                                  removed: { $ne: true }
+                                }
+                              ]
+                            })
+                            .sort({ updatedAt: -1 });
+                        };
+                      }}"
+                      :transform="${() => ppp.decryptDocumentsTransformation()}"
+                    ></ppp-query-select>
+                    <ppp-button
+                      appearance="default"
+                      @click="${() =>
+                        ppp.app.mountPage(`broker-${BROKERS.PSINA}`, {
+                          size: 'xlarge',
+                          adoptHeader: true
+                        })}"
+                    >
+                      +
+                    </ppp-button>
+                  </div>
+                  <div class="spacing2"></div>
+                  <div class="control-line baseline">
+                    <ppp-query-select
+                      ${ref('psinaUsNewsPusherApiId')}
+                      standalone
+                      placeholder="Выберите профиль API Pusher"
+                      :context="${(x) => x}"
+                      :query="${() => {
+                        return (context) => {
+                          return context.services
+                            .get('mongodb-atlas')
+                            .db('ppp')
+                            .collection('apis')
+                            .find({
+                              $and: [
+                                {
+                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
+                                },
+                                {
+                                  removed: { $ne: true }
+                                }
+                              ]
+                            })
+                            .sort({ updatedAt: -1 });
+                        };
+                      }}"
+                      :transform="${() => ppp.decryptDocumentsTransformation()}"
+                    ></ppp-query-select>
+                    <ppp-button
+                      appearance="default"
+                      @click="${() =>
+                        ppp.app.mountPage(`api-${APIS.PUSHER}`, {
+                          size: 'xlarge',
+                          adoptHeader: true
+                        })}"
+                    >
+                      +
+                    </ppp-button>
+                  </div>
+                  <div class="spacing2"></div>
+                  <div class="control-line baseline">
+                    <ppp-query-select
+                      ${ref('psinaUsNewsAstraDbApiId')}
+                      standalone
+                      placeholder="Выберите профиль API AstraDB"
+                      :context="${(x) => x}"
+                      :query="${() => {
+                        return (context) => {
+                          return context.services
+                            .get('mongodb-atlas')
+                            .db('ppp')
+                            .collection('apis')
+                            .find({
+                              $and: [
+                                {
+                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.ASTRADB%]`
+                                },
+                                {
+                                  removed: { $ne: true }
+                                }
+                              ]
+                            })
+                            .sort({ updatedAt: -1 });
+                        };
+                      }}"
+                      :transform="${() => ppp.decryptDocumentsTransformation()}"
+                    ></ppp-query-select>
+                    <ppp-button
+                      appearance="default"
+                      @click="${() =>
+                        ppp.app.mountPage(`api-${APIS.ASTRADB}`, {
+                          size: 'xlarge',
+                          adoptHeader: true
+                        })}"
+                    >
+                      +
+                    </ppp-button>
+                  </div>
+                `
+              )}
               <div class="spacing2"></div>
               <ppp-button
                 @click="${(x) => x.fillOutFormsWithTemplate()}"
@@ -563,6 +711,12 @@ export class ServicePppAspirantWorkerPage extends Page {
     this.beginOperation();
 
     try {
+      if (this.workerPredefinedTemplate.value === 'psinaUsNews') {
+        await validate(this.psinaUsNewsBrokerId);
+        await validate(this.psinaUsNewsPusherApiId);
+        await validate(this.psinaUsNewsAstraDbApiId);
+      }
+
       let data;
 
       if (this.workerPredefinedTemplate.value === 'custom') {
@@ -600,8 +754,31 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.document.fileList = structuredClone(data.fileList ?? []);
 
         this.sourceCode.updateCode(code);
-        this.environmentCode.updateCode(data.env ?? '{}');
-        this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
+
+        if (this.workerPredefinedTemplate.value === 'psinaUsNews') {
+          const pusherApi = this.psinaUsNewsPusherApiId.datum();
+          const psinaBroker = this.psinaUsNewsBrokerId.datum();
+          const astraDbApi = this.psinaUsNewsAstraDbApiId.datum();
+
+          this.environmentCode.updateCode(
+            JSON.stringify(
+              data.env(pusherApi, astraDbApi, psinaBroker),
+              null,
+              2
+            )
+          );
+          this.environmentCodeSecret.updateCode(
+            JSON.stringify(
+              data.envSecret(pusherApi, astraDbApi, psinaBroker),
+              null,
+              2
+            )
+          );
+        } else {
+          this.environmentCode.updateCode(data.env ?? '{}');
+          this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
+        }
+
         this.enableHttp.checked = !!data.enableHttp;
         this.command.value = data.command;
         this.args.value = data.args;
@@ -665,100 +842,89 @@ export class ServicePppAspirantWorkerPage extends Page {
 
     this.zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 
-    try {
-      if (this.document.fileList?.length > 0) {
-        for (const [e, index] of Array.from(
-          this.shadowRoot.querySelectorAll('.file-entry')
-        ).map((item, index) => [item, index])) {
-          const [urlField, pathField] = Array.from(
-            e.querySelectorAll('ppp-text-field')
-          );
+    if (this.document.fileList?.length > 0) {
+      for (const [e, index] of Array.from(
+        this.shadowRoot.querySelectorAll('.file-entry')
+      ).map((item, index) => [item, index])) {
+        const [urlField, pathField] = Array.from(
+          e.querySelectorAll('ppp-text-field')
+        );
 
-          await validate(urlField);
-          await validate(pathField);
+        await validate(urlField);
+        await validate(pathField);
 
-          let url;
+        let url;
 
-          try {
-            url = ppp.getWorkerTemplateFullUrl(urlField.value).toString();
-          } catch (e) {
-            invalidate(urlField, {
-              errorMessage: 'Неверный URL',
-              raiseException: true
-            });
-          }
-
-          const path = pathField.value.trim();
-
-          await caches.delete('offline');
-
-          try {
-            await this.zipWriter.add(
-              path,
-              new zip.HttpReader(url, {
-                preventHeadRequest: true
-              })
-            );
-          } catch (e) {
-            console.error(e);
-
-            invalidate(urlField, {
-              errorMessage: 'Не удалось загрузить файл',
-              raiseException: true
-            });
-          }
-
-          this.document.fileList[index] = {
-            url: urlField.value.trim(),
-            path
-          };
+        try {
+          url = ppp.getWorkerTemplateFullUrl(urlField.value).toString();
+        } catch (e) {
+          invalidate(urlField, {
+            errorMessage: 'Неверный URL',
+            raiseException: true
+          });
         }
-      }
 
-      await validate(this.environmentCode);
-      await validate(this.environmentCodeSecret);
+        const path = pathField.value.trim();
 
-      try {
-        new Function(
-          `return ${await new Tmpl().render(
-            this,
-            this.environmentCode.value,
-            {}
-          )}`
-        )();
-      } catch (e) {
-        invalidate(this.environmentCode, {
-          errorMessage: 'Код содержит ошибки',
-          raiseException: true
-        });
-      }
+        await caches.delete('offline');
 
-      try {
-        new Function(
-          `return ${await new Tmpl().render(
-            this,
-            this.environmentCodeSecret.value,
-            {}
-          )}`
-        )();
-      } catch (e) {
-        invalidate(this.environmentCodeSecret, {
-          errorMessage: 'Код содержит ошибки',
-          raiseException: true
-        });
-      }
+        try {
+          await this.zipWriter.add(
+            path,
+            new zip.HttpReader(url, {
+              preventHeadRequest: true
+            })
+          );
+        } catch (e) {
+          console.error(e);
 
-      await this.zipWriter.add(
-        `${this.document._id}.mjs`,
-        new zip.TextReader(this.sourceCode.value)
-      );
-    } finally {
-      this.zipBlob = null;
+          invalidate(urlField, {
+            errorMessage: 'Не удалось загрузить файл',
+            raiseException: true
+          });
+        }
 
-      if (typeof this.zipWriter !== 'undefined') {
-        this.zipBlob = await this.zipWriter.close();
+        this.document.fileList[index] = {
+          url: urlField.value.trim(),
+          path
+        };
       }
     }
+
+    await validate(this.environmentCode);
+    await validate(this.environmentCodeSecret);
+
+    try {
+      new Function(
+        `return ${await new Tmpl().render(
+          this,
+          this.environmentCode.value,
+          {}
+        )}`
+      )();
+    } catch (e) {
+      invalidate(this.environmentCode, {
+        errorMessage: 'Код содержит ошибки',
+        raiseException: true
+      });
+    }
+
+    try {
+      new Function(
+        `return ${await new Tmpl().render(
+          this,
+          this.environmentCodeSecret.value,
+          {}
+        )}`
+      )();
+    } catch (e) {
+      invalidate(this.environmentCodeSecret, {
+        errorMessage: 'Код содержит ошибки',
+        raiseException: true
+      });
+    }
+
+    // We need document _id here. Continue to the deployment phase.
   }
 
   async read() {
@@ -894,6 +1060,17 @@ export class ServicePppAspirantWorkerPage extends Page {
   }
 
   async #deployAspirantWorker() {
+    await this.zipWriter.add(
+      `${this.document._id}.mjs`,
+      new zip.TextReader(this.sourceCode.value)
+    );
+
+    this.zipBlob = null;
+
+    if (typeof this.zipWriter !== 'undefined') {
+      this.zipBlob = await this.zipWriter.close();
+    }
+
     if (this.zipBlob) {
       const groupId = ppp.keyVault.getKey('mongo-group-id');
       const appId = ppp.keyVault.getKey('mongo-app-id');

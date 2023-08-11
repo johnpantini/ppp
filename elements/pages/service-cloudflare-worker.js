@@ -13,6 +13,7 @@ import { APIS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { createWorkerUploadForm } from '../../lib/cloudflare.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
+import { parsePPPScript } from '../../lib/ppp-script.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -22,7 +23,6 @@ import '../query-select.js';
 import '../select.js';
 import '../snippet.js';
 import '../text-field.js';
-import { parsePPPScript } from '../../lib/ppp-script.js';
 
 export const predefinedWorkerData = {
   default: {
@@ -232,9 +232,11 @@ export const serviceCloudflareWorkerPageTemplate = html`
               ${when(
                 (x) => x.workerPredefinedTemplate.value === 'psinaPusher',
                 html`
-                  <div class="control-line">
+                  <div class="spacing2"></div>
+                  <div class="control-line baseline">
                     <ppp-query-select
                       ${ref('psinaPusherApiId')}
+                      standalone
                       placeholder="Выберите профиль API Pusher"
                       :context="${(x) => x}"
                       :query="${() => {
@@ -259,7 +261,6 @@ export const serviceCloudflareWorkerPageTemplate = html`
                       :transform="${() => ppp.decryptDocumentsTransformation()}"
                     ></ppp-query-select>
                     <ppp-button
-                      style="margin-top: 8px;"
                       appearance="default"
                       @click="${() =>
                         ppp.app.mountPage(`api-${APIS.PUSHER}`, {

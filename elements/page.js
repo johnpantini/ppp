@@ -61,8 +61,8 @@ await ppp.i18n(import.meta.url);
     styles: css`
       ${display('flex')}
       ${normalize()}
-    ${typography()}
-    :host {
+      ${typography()}
+      :host {
         position: relative;
         align-items: center;
         border-bottom: 3px solid
@@ -340,6 +340,10 @@ export const pageStyles = css`
     flex-direction: row;
     align-items: center;
     gap: 8px;
+  }
+
+  .control-line.baseline {
+    align-items: baseline;
   }
 
   .control-line.centered {
