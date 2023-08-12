@@ -1,5 +1,13 @@
+/** @decorator */
+
 import ppp from '../../ppp.js';
-import { html, css, ref } from '../../vendor/fast-element.min.js';
+import {
+  html,
+  css,
+  ref,
+  when,
+  observable
+} from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
   Page,
@@ -17,6 +25,7 @@ import {
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
+import '../table.js';
 import '../text-field.js';
 
 export const apiAstraDbPageTemplate = html`
@@ -113,6 +122,46 @@ export const apiAstraDbPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      ${when(
+        (x) => x.collections,
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Список коллекций</h5>
+              <p class="description">
+                Коллекции в AstraDB.
+              </p>
+            </div>
+            <div class="input-group">
+              <ppp-table
+                :columns="${() => [
+                  {
+                    label: 'Коллекция'
+                  },
+                  {
+                    label: 'Действия'
+                  }
+                ]}"
+                :rows="${(x) =>
+                  x.collections.map((datum) => {
+                    return {
+                      datum,
+                      cells: [
+                        datum,
+                        html` <ppp-button
+                          class="xsmall"
+                          @click="${() => x.removeCollection(datum)}"
+                        >
+                          Удалить
+                        </ppp-button>`
+                      ]
+                    };
+                  })}"
+              >
+              </ppp-table>
+          </section>
+        `
+      )}
       ${documentPageFooterPartial({
         extraControls: html`
           <ppp-banner appearance="warning">
@@ -132,7 +181,88 @@ export const apiAstraDbPageStyles = css`
 `;
 
 export class ApiAstraDbPage extends Page {
+  @observable
+  collections;
+
   collection = 'apis';
+
+  async removeCollection(collection) {
+    if (
+      await ppp.app.confirm(
+        'Удаление коллекции',
+        `Коллекция «${collection}» будет удалена. Подтвердите действие.`
+      )
+    ) {
+      this.beginOperation();
+
+      try {
+        await maybeFetchError(
+          await fetch(
+            new URL(
+              'fetch',
+              ppp.keyVault.getKey('service-machine-url')
+            ).toString(),
+            {
+              cache: 'no-cache',
+              method: 'POST',
+              body: JSON.stringify({
+                method: 'DELETE',
+                url: new URL(
+                  `/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections/${collection}`,
+                  `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
+                ).toString(),
+                headers: {
+                  'X-Cassandra-Token': this.document.dbToken
+                }
+              })
+            }
+          )
+        );
+
+        this.showSuccessNotification(
+          `Коллекция «${collection}» успешно удалена.`
+        );
+
+        this.collections = this.collections.filter((c) => c !== collection);
+      } catch (e) {
+        this.failOperation(e, 'Удаление коллекции');
+      } finally {
+        this.endOperation();
+      }
+    }
+  }
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (this.document._id) {
+      this.collections =
+        (
+          await (
+            await fetch(
+              new URL(
+                'fetch',
+                ppp.keyVault.getKey('service-machine-url')
+              ).toString(),
+              {
+                cache: 'no-cache',
+                method: 'POST',
+                body: JSON.stringify({
+                  method: 'GET',
+                  url: new URL(
+                    `/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections`,
+                    `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
+                  ).toString(),
+                  headers: {
+                    'X-Cassandra-Token': this.document.dbToken
+                  }
+                })
+              }
+            )
+          ).json()
+        )?.data?.map?.((d) => d.name) ?? [];
+    }
+  }
 
   async validate() {
     await validate(this.name);

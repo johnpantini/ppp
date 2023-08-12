@@ -97,10 +97,11 @@ import { Button, buttonStyles, buttonTemplate } from './button.js';
 import { RadioGroup, radioGroupTemplate } from './radio-group.js';
 import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
 import {
-  AuthorizationError, ConnectionError,
+  AuthorizationError,
+  ConnectionError,
   NoInstrumentsError,
   StaleInstrumentCacheError
-} from '../lib/ppp-errors.js'
+} from '../lib/ppp-errors.js';
 import {
   ListboxOption,
   listboxOptionStyles,
@@ -3108,7 +3109,7 @@ export const widgetCardTemplate = html`
           </div>
           <div class="text-line second">
             <div class="text-line-inner">
-              <div>
+              <div class="subtitle-left-holder">
                 <slot name="subtitle-left"></slot>
               </div>
             </div>
@@ -3184,6 +3185,13 @@ export const widgetCardStyles = css`
     padding-bottom: 8px;
   }
 
+  .subtitle-left-holder {
+    overflow-y: hidden;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  ${scrollbars('.subtitle-left-holder')}
   slot[name='indicator']::slotted(div) {
     height: 100%;
     border-radius: 8px 0 0 8px;
