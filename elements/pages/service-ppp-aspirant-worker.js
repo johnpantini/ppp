@@ -33,6 +33,7 @@ import {
   enableMongoDBRealmHosting,
   getMongoDBRealmAccessToken
 } from '../../lib/realm.js';
+import { later } from '../../lib/ppp-decorators.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import { trash } from '../../static/svg/sprite.js';
@@ -83,16 +84,40 @@ uWS
     enableHttp: true,
     fileList: [
       {
-        url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/message-type.mjs',
-        path: 'lib/message-type.mjs'
+        url: '/salt/states/ppp/lib/utex/utex-connection.mjs',
+        path: 'utex/utex-connection.mjs'
       },
       {
-        url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/utex.proto',
-        path: 'lib/utex.proto'
+        url: '/salt/states/ppp/lib/utex/message-type.mjs',
+        path: 'utex/message-type.mjs'
       },
       {
-        url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/lib/utex-connection.mjs',
-        path: 'lib/utex-connection.mjs'
+        url: '/salt/states/ppp/lib/utex/utex.proto',
+        path: 'utex/utex.proto'
+      },
+      {
+        url: '/salt/states/ppp/lib/vendor/protobuf.min.js',
+        path: 'vendor/protobuf.min.js'
+      },
+      {
+        url: '/salt/states/ppp/lib/vendor/lzma/index.js',
+        path: 'vendor/lzma/index.js'
+      },
+      {
+        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma.js',
+        path: 'vendor/lzma/src/lzma.js'
+      },
+      {
+        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma-c.js',
+        path: 'vendor/lzma/src/lzma-c.js'
+      },
+      {
+        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma-d.js',
+        path: 'vendor/lzma/src/lzma-d.js'
+      },
+      {
+        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma_worker.js',
+        path: 'vendor/lzma/src/lzma_worker.js'
       }
     ]
   },
@@ -103,8 +128,12 @@ uWS
     enableHttp: true,
     fileList: [
       {
-        url: '/salt/states/ppp/lib/aspirant-worker/ib-gateway/lib/ib.min.js',
-        path: 'lib/ib.min.js'
+        url: '/salt/states/ppp/lib/vendor/ib.min.js',
+        path: 'vendor/ib.min.js'
+      },
+      {
+        url: '/salt/states/ppp/lib/utils.mjs',
+        path: 'utils.mjs'
       }
     ]
   },
@@ -365,7 +394,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
               <p class="description">
                 Если включить сетевой доступ, родительский сервис Aspirant
                 обеспечит проксирование трафика к текущему сервису по
-                относительной ссылке <code>/workers/{serviceID}</code>.
+                относительной ссылке <code>/workers/{serviceID}/</code>.
               </p>
               <ppp-checkbox
                 ?checked="${(x) =>
@@ -382,23 +411,25 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 Ссылки на дополнительные файлы, которые будут размещены в
                 файловой системе сервиса относительно файла точки входа.
               </p>
+              <div class="spacing2"></div>
               ${repeat(
                 (x) => x.document.fileList ?? [],
                 html`
-                  <div class="control-line file-entry">
+                  <div class="control-line file-entry flex-start">
                     <ppp-text-field
+                      standalone
                       style="width: 320px;"
                       placeholder="URL"
                       value="${(x) => x.url}"
                     ></ppp-text-field>
                     <ppp-text-field
+                      standalone
                       style="width: 256px;"
                       placeholder="Относительный путь"
                       value="${(x) => x.path}"
                     >
                     </ppp-text-field>
                     <ppp-button
-                      style="margin-top: 8px;"
                       appearance="default"
                       @click="${(x, c) =>
                         c.parent.removeFileFromFileList(c.index)}"
@@ -407,6 +438,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                       <span slot="start">${html.partial(trash)}</span>
                     </ppp-button>
                   </div>
+                  <div class="spacing2"></div>
                 `,
                 { positioning: true }
               )}
@@ -469,7 +501,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 (x) => x.workerPredefinedTemplate.value === 'psinaUsNews',
                 html`
                   <div class="spacing2"></div>
-                  <div class="control-line baseline">
+                  <div class="control-line flex-start">
                     <ppp-query-select
                       ${ref('psinaUsNewsBrokerId')}
                       standalone
@@ -508,7 +540,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                     </ppp-button>
                   </div>
                   <div class="spacing2"></div>
-                  <div class="control-line baseline">
+                  <div class="control-line flex-start">
                     <ppp-query-select
                       ${ref('psinaUsNewsPusherApiId')}
                       standalone
@@ -547,7 +579,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                     </ppp-button>
                   </div>
                   <div class="spacing2"></div>
-                  <div class="control-line baseline">
+                  <div class="control-line flex-start">
                     <ppp-query-select
                       ${ref('psinaUsNewsAstraDbApiId')}
                       standalone
@@ -641,14 +673,12 @@ export const servicePppAspirantWorkerPageStyles = css`
     background: transparent;
     margin-top: 15px;
     border-radius: 4px;
-    border: 1px ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
 `;
 
 export class ServicePppAspirantWorkerPage extends Page {
   collection = 'services';
-
-  fileList = [];
 
   zipWriter;
 
@@ -841,6 +871,9 @@ export class ServicePppAspirantWorkerPage extends Page {
     const zip = globalThis.zip;
 
     this.zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
+
+    // Update text fields
+    await later(1000);
 
     if (this.document.fileList?.length > 0) {
       for (const [e, index] of Array.from(
@@ -1306,6 +1339,28 @@ export class ServicePppAspirantWorkerPage extends Page {
     this.sourceCode.updateCode(code);
 
     this.document.fileList = structuredClone(data.fileList ?? []);
+    this.enableHttp.checked = !!data.enableHttp;
+    this.command.value = data.command;
+    this.args.value = data.args;
+    this.versioningUrl.value = data.url;
+    this.useVersioning.checked = true;
+
+    this.document.name = this.name.value;
+    this.document.aspirantServiceId = this.aspirantServiceId.value;
+    this.document.mongodbRealmProxyServiceId =
+      this.mongodbRealmProxyServiceId.value;
+    this.document.sourceCode = this.sourceCode.value;
+    this.document.environmentCode = this.environmentCode.value;
+    this.document.environmentCodeSecret = this.environmentCodeSecret.value;
+    this.document.enableHttp = !!data.enableHttp;
+    this.document.command = data.command;
+    this.document.args = data.args;
+    this.document.workerPredefinedTemplate =
+      this.workerPredefinedTemplate.value;
+    this.document.versioningUrl = data.url;
+    this.document.useVersioning = true;
+
+    Observable.notify(this, 'document');
   }
 
   async stop() {

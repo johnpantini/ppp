@@ -1,4 +1,4 @@
-import Long from '../../long.js';
+import Long from '../../../salt/states/ppp/lib/vendor/long.min.js';
 import protobuf from '../../protobuf/minimal.js';
 import {
   Quotation,

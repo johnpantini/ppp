@@ -1,9 +1,11 @@
 // ==PPPScript==
-// @version 2
+// @version 3
 // ==/PPPScript==
 
 import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
-import { UtexConnection } from './lib/utex-connection.mjs';
+
+const PPP_LIB_DIR = process.env.PPP_LIB_DIR ?? '.';
+const { UtexConnection } = await import(`${PPP_LIB_DIR}/utex/utex-connection.mjs`);
 
 const tickerToUTEXTicker = (ticker) => {
   if (/@/i.test(ticker)) ticker = ticker.split('@')[0];

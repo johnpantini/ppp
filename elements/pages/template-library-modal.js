@@ -37,7 +37,10 @@ export const templateLibraryModalPageTemplate = html`
             ${ref('templateSelector')}
           >
             <ppp-option value="thefly">The Fly</ppp-option>
-            <ppp-option value="nyse-nsdq-halts"> Паузы NYSE/NASDAQ</ppp-option>
+            <ppp-option value="nyse-nsdq-halts">
+              Паузы NYSE/NASDAQ (Supabase)
+            </ppp-option>
+            <ppp-option value="psina-us-news">Новости (Psina, US)</ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -115,6 +118,102 @@ export const templateLibraryModalPageTemplate = html`
           </section>
         `
       )}
+      ${when(
+        (x) => x.templateSelector.value === 'psina-us-news',
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Сервис-источник</h5>
+              <p class="description">Выберите сервис источника новостей.</p>
+            </div>
+            <div class="input-group">
+              <ppp-query-select
+                ${ref('psinaUsNewsServiceId')}
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('services')
+                      .find({
+                        $and: [
+                          {
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                          },
+                          { workerPredefinedTemplate: 'psinaUsNews' },
+                          {
+                            removed: { $ne: true }
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+            </div>
+          </section>
+          ${when(
+            (x) => x.hint === 'formatter',
+            html`
+              <section>
+                <div class="label-group">
+                  <h5>Сервис извлечения содержимого новостей</h5>
+                  <p class="description">
+                    Создайте Cloudflare Worker по шаблону. Понадобится, если
+                    нужен GPT-пересказ сообщений.
+                  </p>
+                </div>
+                <div class="input-group">
+                  <ppp-query-select
+                    ${ref('psinaUsNewsBodyExtractionServiceId')}
+                    :context="${(x) => x}"
+                    :query="${() => {
+                      return (context) => {
+                        return context.services
+                          .get('mongodb-atlas')
+                          .db('ppp')
+                          .collection('services')
+                          .find({
+                            $and: [
+                              {
+                                type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
+                              },
+                              {
+                                workerPredefinedTemplate:
+                                  'psinaUsNewsBodyExtraction'
+                              },
+                              { removed: { $ne: true } }
+                            ]
+                          })
+                          .sort({ updatedAt: -1 });
+                      };
+                    }}"
+                    :transform="${() => ppp.decryptDocumentsTransformation()}"
+                  ></ppp-query-select>
+                </div>
+              </section>
+              <section>
+                <div class="label-group">
+                  <h5>Токен Yandex OAuth</h5>
+                  <p class="description">
+                    Понадобится, если нужен GPT-пересказ сообщений.
+                  </p>
+                </div>
+                <div class="input-group">
+                  <ppp-text-field
+                    type="password"
+                    optional
+                    placeholder="Токен Yandex OAuth"
+                    ${ref('yandexToken')}
+                  ></ppp-text-field>
+                </div>
+              </section>
+            `
+          )}
+        `
+      )}
       <footer>
         <ppp-button
           type="submit"
@@ -176,6 +275,11 @@ export class TemplateLibraryModalPage extends Page {
           await validate(this.nyseNsdqHaltsServiceId);
 
           break;
+
+        case 'psina-us-news':
+          await validate(this.psinaUsNewsServiceId);
+
+          break;
       }
 
       let code = await this.loadTemplate();
@@ -191,6 +295,27 @@ export class TemplateLibraryModalPage extends Page {
             '@@SERVICE_ID',
             this.nyseNsdqHaltsServiceId.datum()._id
           );
+
+          break;
+
+        case 'psina-us-news':
+          code = code.replace(
+            '@@SERVICE_ID',
+            this.psinaUsNewsServiceId.datum()._id
+          );
+
+          if (this.hint === 'formatter') {
+            let extractionEndpoint = '';
+            const datum = this.psinaUsNewsBodyExtractionServiceId.datum();
+
+            if (datum) {
+              extractionEndpoint = `https://ppp-${datum._id}.${datum.subdomain}.workers.dev/`;
+            }
+
+            code = code
+              .replace('@@YANDEX_TOKEN', this.yandexToken.value)
+              .replace('@@EXTRACTION_ENDPOINT', extractionEndpoint);
+          }
 
           break;
       }

@@ -3,13 +3,12 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { inspect } from 'util';
 import { EventEmitter } from 'events';
-import lzma from '/salt/states/ppp/lib/vendor/lzma/index.js';
-import protobuf from '/salt/states/ppp/lib/vendor/protobuf.min.js';
 import { MessageType } from './message-type.mjs';
+import lzma from '../vendor/lzma/index.js';
+import protobuf from '../vendor/protobuf.min.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const messages = protobuf.loadSync(path.join(__dirname, 'utex.proto'));
 
 function isJWTTokenExpired(jwtToken) {
@@ -333,7 +332,11 @@ export class UtexConnection extends EventEmitter {
   async connect(reconnect) {
     this.debug(`Connecting to ${this.#host}:${this.#port}...`);
 
-    if (this.#pendingConnection) {
+    if (this.#socket?.pppConnected) {
+      this.#pendingConnection = void 0;
+
+      return this.#socket;
+    } else if (this.#pendingConnection) {
       return this.#pendingConnection;
     } else {
       return (this.#pendingConnection = new Promise((resolve) => {
@@ -364,10 +367,13 @@ export class UtexConnection extends EventEmitter {
               this.#socket.destroy();
             }
 
+            this.#socket.pppConnected = true;
+
             resolve(this.#socket);
           });
 
           this.#socket.on('end', () => {
+            this.#socket.pppConnected = false;
             this.#pendingConnection = void 0;
             this.authenticated = false;
 
@@ -381,6 +387,7 @@ export class UtexConnection extends EventEmitter {
           });
 
           this.#socket.on('close', () => {
+            this.#socket.pppConnected = false;
             this.#pendingConnection = void 0;
             this.authenticated = false;
 
@@ -402,6 +409,9 @@ export class UtexConnection extends EventEmitter {
 
             this.debug(`${this.#host}:${this.#port} connection error.`);
             this.emit('error', e);
+
+            this.#socket.pppConnected = false;
+
             this.#socket.destroy();
           });
 

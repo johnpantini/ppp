@@ -255,7 +255,7 @@ export const pageStyles = css`
     flex-grow: 0;
     flex-shrink: 1;
     min-width: 50%;
-    align-self: baseline;
+    align-self: flex-start;
     max-width: 960px;
   }
 
@@ -342,8 +342,8 @@ export const pageStyles = css`
     gap: 8px;
   }
 
-  .control-line.baseline {
-    align-items: baseline;
+  .control-line.flex-start {
+    align-items: flex-start;
   }
 
   .control-line.centered {

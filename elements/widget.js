@@ -3109,12 +3109,18 @@ export const widgetCardTemplate = html`
           </div>
           <div class="text-line second">
             <div class="text-line-inner">
-              <div class="subtitle-left-holder">
-                <slot name="subtitle-left"></slot>
-              </div>
+              <slot name="subtitle-left"></slot>
             </div>
             <span>
               <slot name="subtitle-right"></slot>
+            </span>
+          </div>
+          <div class="text-line third">
+            <div class="text-line-inner">
+              <slot name="subtitle-left-extra"></slot>
+            </div>
+            <span>
+              <slot name="subtitle-right-extra"></slot>
             </span>
           </div>
         </div>
@@ -3185,13 +3191,6 @@ export const widgetCardStyles = css`
     padding-bottom: 8px;
   }
 
-  .subtitle-left-holder {
-    overflow-y: hidden;
-    overflow-x: auto;
-    padding-bottom: 2px;
-  }
-
-  ${scrollbars('.subtitle-left-holder')}
   slot[name='indicator']::slotted(div) {
     height: 100%;
     border-radius: 8px 0 0 8px;
@@ -3333,6 +3332,10 @@ export const widgetCardStyles = css`
     margin-top: 4px;
   }
 
+  .text-line.second + .text-line.third {
+    margin-top: 6px;
+  }
+
   .text-line-inner {
     display: flex;
     align-items: center;
@@ -3353,7 +3356,8 @@ export const widgetCardStyles = css`
     ${ellipsis()};
   }
 
-  .text-line.second {
+  .text-line.second,
+  .text-line.third {
     font-weight: ${fontWeightWidget};
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }

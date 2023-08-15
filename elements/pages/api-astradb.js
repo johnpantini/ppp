@@ -123,34 +123,34 @@ export const apiAstraDbPageTemplate = html`
         </div>
       </section>
       ${when(
-        (x) => x.collections,
+        (x) => x.tables,
         html`
           <section>
             <div class="label-group">
-              <h5>Список коллекций</h5>
+              <h5>Список таблиц</h5>
               <p class="description">
-                Коллекции в AstraDB.
+                Таблицы в AstraDB в пространстве ключей текущего профиля.
               </p>
             </div>
             <div class="input-group">
               <ppp-table
                 :columns="${() => [
                   {
-                    label: 'Коллекция'
+                    label: 'Таблица'
                   },
                   {
                     label: 'Действия'
                   }
                 ]}"
                 :rows="${(x) =>
-                  x.collections.map((datum) => {
+                  x.tables.map((datum) => {
                     return {
                       datum,
                       cells: [
                         datum,
                         html` <ppp-button
                           class="xsmall"
-                          @click="${() => x.removeCollection(datum)}"
+                          @click="${() => x.removeTable(datum)}"
                         >
                           Удалить
                         </ppp-button>`
@@ -182,15 +182,15 @@ export const apiAstraDbPageStyles = css`
 
 export class ApiAstraDbPage extends Page {
   @observable
-  collections;
+  tables;
 
   collection = 'apis';
 
-  async removeCollection(collection) {
+  async removeTable(table) {
     if (
       await ppp.app.confirm(
-        'Удаление коллекции',
-        `Коллекция «${collection}» будет удалена. Подтвердите действие.`
+        'Удаление таблицы',
+        `Таблица «${table}» будет удалена. Подтвердите действие.`
       )
     ) {
       this.beginOperation();
@@ -208,7 +208,7 @@ export class ApiAstraDbPage extends Page {
               body: JSON.stringify({
                 method: 'DELETE',
                 url: new URL(
-                  `/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections/${collection}`,
+                  `/api/rest/v2/schemas/keyspaces/${this.document.dbKeyspace}/tables/${table}`,
                   `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
                 ).toString(),
                 headers: {
@@ -219,11 +219,9 @@ export class ApiAstraDbPage extends Page {
           )
         );
 
-        this.showSuccessNotification(
-          `Коллекция «${collection}» успешно удалена.`
-        );
+        this.showSuccessNotification(`Таблица «${table}» успешно удалена.`);
 
-        this.collections = this.collections.filter((c) => c !== collection);
+        this.tables = this.tables.filter((t) => t !== table);
       } catch (e) {
         this.failOperation(e, 'Удаление коллекции');
       } finally {
@@ -236,7 +234,7 @@ export class ApiAstraDbPage extends Page {
     await super.connectedCallback();
 
     if (this.document._id) {
-      this.collections =
+      this.tables =
         (
           await (
             await fetch(
@@ -250,7 +248,7 @@ export class ApiAstraDbPage extends Page {
                 body: JSON.stringify({
                   method: 'GET',
                   url: new URL(
-                    `/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections`,
+                    `/api/rest/v2/schemas/keyspaces/${this.document.dbKeyspace}/tables`,
                     `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
                   ).toString(),
                   headers: {

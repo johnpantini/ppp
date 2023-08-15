@@ -48,16 +48,14 @@ WORKDIR /salt/states/ppp/lib
 COPY ./aspirant/http-shell.py ./http-shell.py
 COPY ./aspirant/start.sh ./aspirant/start.sh
 
-COPY ./uWebSockets.js/ ./uWebSockets.js/
 COPY ./canvas/ ./canvas/
 COPY ./canvas-table/ ./canvas-table/
 COPY ./fonts/ ./fonts/
-COPY ./pg/ ./pg/
 COPY ./pdfjs/ ./pdfjs/
+COPY ./pg/ ./pg/
 COPY ./ssh2/ ./ssh2/
+COPY ./uWebSockets.js/ ./uWebSockets.js/
 COPY ./websocket/ ./websocket/
-COPY ./vendor/ ./vendor/
-COPY ./util/ ./util/
 
 COPY ./aspirant/etc/consul/server.json /etc/consul/server.json
 COPY ./aspirant/etc/nomad.d/server.hcl /etc/nomad.d/server.hcl

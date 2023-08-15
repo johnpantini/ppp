@@ -1,4 +1,4 @@
-import Long from '../../long.js';
+import Long from '../../../salt/states/ppp/lib/vendor/long.min.js';
 import protobuf from '../../protobuf/minimal.js';
 import { MoneyValue, Quotation } from './common.js';
 import { Timestamp } from './google/protobuf/timestamp.js';

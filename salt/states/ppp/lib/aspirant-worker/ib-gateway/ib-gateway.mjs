@@ -1,11 +1,13 @@
 // ==PPPScript==
-// @version 3
+// @version 4
 // ==/PPPScript==
 
 import { EventEmitter } from 'node:events';
 import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
-import { readJSONPayload } from '/salt/states/ppp/lib/util/uws.mjs';
-import IB from './lib/ib.min.js';
+
+const PPP_LIB_DIR = process.env.PPP_LIB_DIR ?? '.';
+const { readJSONPayload } = await import(`${PPP_LIB_DIR}/utils.mjs`);
+const { default: IB } = await import(`${PPP_LIB_DIR}/vendor/ib.min.js`);
 
 const { IBApiNext, ConnectionState } = IB;
 
@@ -39,8 +41,6 @@ class TwsConnection {
   #summarySubscription;
 
   #summary = {};
-
-  #watchdogTimer;
 
   #connectionStateObservable = {
     next(state) {
@@ -263,6 +263,10 @@ class IBGateway extends EventEmitter {
   }
 
   #errorOut(res, error) {
+    if (res.aborted) {
+      return;
+    }
+
     res.cork(() => {
       // noinspection JSVoidFunctionReturnValueUsed
       res
@@ -286,6 +290,10 @@ class IBGateway extends EventEmitter {
   }
 
   json(res, json = {}) {
+    if (res.aborted) {
+      return;
+    }
+
     res.cork(() => {
       res
         .writeStatus('200 OK')

@@ -71,6 +71,22 @@ export default {
       };
     },
     url: '/lib/cloudflare-workers/psina-pusher.js'
+  },
+  psinaUsNewsBodyExtraction: {
+    url: '/lib/cloudflare-workers/psina-us-news-body-extraction.js',
+    env: (astraDbApi) => {
+      return {
+        SERVICE_MACHINE_URL: "[%#ppp.keyVault.getKey('service-machine-url')%]",
+        ASTRA_DB_ID: astraDbApi.dbID,
+        ASTRA_DB_REGION: astraDbApi.dbRegion,
+        ASTRA_DB_KEYSPACE: astraDbApi.dbKeyspace
+      };
+    },
+    envSecret: (astraDbApi) => {
+      return {
+        ASTRA_DB_APPLICATION_TOKEN: astraDbApi.dbToken
+      };
+    }
   }
 };
 
@@ -228,12 +244,15 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 <ppp-option value="psinaPusher">
                   Интеграция Pusher и Psina
                 </ppp-option>
+                <ppp-option value="psinaUsNewsBodyExtraction">
+                  Новости (Psina, US) - содержимое из AstraDB
+                </ppp-option>
               </ppp-select>
               ${when(
                 (x) => x.workerPredefinedTemplate.value === 'psinaPusher',
                 html`
                   <div class="spacing2"></div>
-                  <div class="control-line baseline">
+                  <div class="control-line flex-start">
                     <ppp-query-select
                       ${ref('psinaPusherApiId')}
                       standalone
@@ -264,6 +283,52 @@ export const serviceCloudflareWorkerPageTemplate = html`
                       appearance="default"
                       @click="${() =>
                         ppp.app.mountPage(`api-${APIS.PUSHER}`, {
+                          size: 'xlarge',
+                          adoptHeader: true
+                        })}"
+                    >
+                      +
+                    </ppp-button>
+                  </div>
+                `
+              )}
+              ${when(
+                (x) =>
+                  x.workerPredefinedTemplate.value ===
+                  'psinaUsNewsBodyExtraction',
+                html`
+                  <div class="spacing2"></div>
+                  <div class="control-line flex-start">
+                    <ppp-query-select
+                      ${ref('psinaUsNewsAstraDbApiId')}
+                      standalone
+                      placeholder="Выберите профиль API AstraDB"
+                      :context="${(x) => x}"
+                      :query="${() => {
+                        return (context) => {
+                          return context.services
+                            .get('mongodb-atlas')
+                            .db('ppp')
+                            .collection('apis')
+                            .find({
+                              $and: [
+                                {
+                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.ASTRADB%]`
+                                },
+                                {
+                                  removed: { $ne: true }
+                                }
+                              ]
+                            })
+                            .sort({ updatedAt: -1 });
+                        };
+                      }}"
+                      :transform="${() => ppp.decryptDocumentsTransformation()}"
+                    ></ppp-query-select>
+                    <ppp-button
+                      appearance="default"
+                      @click="${() =>
+                        ppp.app.mountPage(`api-${APIS.ASTRADB}`, {
                           size: 'xlarge',
                           adoptHeader: true
                         })}"
@@ -335,6 +400,10 @@ export class ServiceCloudflareWorkerPage extends Page {
         await validate(this.psinaPusherApiId);
       }
 
+      if (this.workerPredefinedTemplate.value === 'psinaUsNewsBodyExtraction') {
+        await validate(this.psinaUsNewsAstraDbApiId);
+      }
+
       let data;
 
       if (this.workerPredefinedTemplate.value === 'custom') {
@@ -379,6 +448,17 @@ export class ServiceCloudflareWorkerPage extends Page {
           );
           this.environmentCodeSecret.updateCode(
             JSON.stringify(data.envSecret(pusherApi), null, 2)
+          );
+        } else if (
+          this.workerPredefinedTemplate.value === 'psinaUsNewsBodyExtraction'
+        ) {
+          const astraDbApi = this.psinaUsNewsAstraDbApiId.datum();
+
+          this.environmentCode.updateCode(
+            JSON.stringify(data.env(astraDbApi), null, 2)
+          );
+          this.environmentCodeSecret.updateCode(
+            JSON.stringify(data.envSecret(astraDbApi), null, 2)
           );
         } else {
           this.environmentCode.updateCode(data.env ?? '{}');

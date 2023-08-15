@@ -728,7 +728,7 @@ export const serviceSupabaseParserPageStyles = css`
     background: transparent;
     margin-top: 15px;
     border-radius: 4px;
-    border: 1px ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
 `;
 

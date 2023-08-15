@@ -24,9 +24,5 @@ PPP Salt directory:
     - group: ppp
     - replace: True
 
-/salt/states/ppp/lib/http-shell.py:
-  file.managed:
-    - source: salt://ppp/lib/aspirant/http-shell.py
-
 rm -rf /var/cache/salt:
   cmd.run: []

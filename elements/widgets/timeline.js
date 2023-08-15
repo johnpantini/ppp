@@ -21,7 +21,7 @@ import {
   formatDateWithOptions,
   formatPrice
 } from '../../lib/intl.js';
-import { normalize } from '../../design/styles.js';
+import { normalize, scrollbars } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
   fontSizeWidget,
@@ -102,7 +102,7 @@ export const timelineWidgetTemplate = html`
                               ${(x, c) => c.parent.formatCardAmount(x)}
                             </span>
                           </span>
-                          <span slot="subtitle-left">
+                          <span slot="subtitle-left" class="x-scroll">
                             ${(x, c) => c.parent.formatCardDescription(x)}
                           </span>
                           <div slot="subtitle-right">
@@ -150,6 +150,14 @@ export const timelineWidgetStyles = css`
   .timeline-item-headline:has(+ .timeline-item-headline) {
     display: none;
   }
+
+  .x-scroll {
+    overflow-y: hidden;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  ${scrollbars('.x-scroll')}
 `;
 
 export class TimelineWidget extends WidgetWithInstrument {

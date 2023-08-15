@@ -4,6 +4,10 @@
 /bin/chmod +x /usr/sbin/start-aspirant.sh:
   cmd.run: []
 
+/salt/states/ppp/lib/http-shell.py:
+  file.managed:
+    - source: salt://ppp/lib/aspirant/http-shell.py
+
 {% if pillar['serviceName'] is defined %}
 /etc/systemd/system/{{ pillar['serviceName'] }}.service:
   file.managed:
