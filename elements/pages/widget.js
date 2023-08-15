@@ -1076,7 +1076,7 @@ export class WidgetPage extends Page {
       this.document
     );
 
-    if (this.mounted) {
+    if (this.mounted && this.parentNode.widget) {
       return Object.assign(
         {},
         this.templateDocument,

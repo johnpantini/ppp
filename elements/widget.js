@@ -3127,7 +3127,7 @@ export const widgetCardTemplate = html`
       </div>
       <div
         class="actions"
-        style="display: ${(x) => (x.slottedActions.length ? 'flex' : 'none')}"
+        style="display: ${(x) => (x?.slottedActions.length ? 'flex' : 'none')}"
       >
         <slot name="actions" ${slotted('slottedActions')}></slot>
       </div>
@@ -3272,7 +3272,7 @@ export const widgetCardStyles = css`
 
   .payload {
     width: 100%;
-    padding: 8px 0;
+    padding: 6px 0;
     display: flex;
     align-items: center;
   }
@@ -3309,6 +3309,9 @@ export const widgetCardStyles = css`
   }
 
   .text-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
     overflow: hidden;
     flex: 1;
   }
@@ -3317,7 +3320,6 @@ export const widgetCardStyles = css`
     display: flex;
     white-space: nowrap;
     justify-content: space-between;
-    align-items: center;
     word-wrap: break-word;
     font-size: ${fontSizeWidget};
     letter-spacing: 0;
@@ -3326,14 +3328,6 @@ export const widgetCardStyles = css`
   .text-line.first {
     font-weight: 500;
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
-  }
-
-  .text-line.first + .text-line.second {
-    margin-top: 4px;
-  }
-
-  .text-line.second + .text-line.third {
-    margin-top: 6px;
   }
 
   .text-line-inner {

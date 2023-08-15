@@ -42,7 +42,7 @@ return [%#JSON.stringify((await(await fetch(
   {
     cache: 'reload'
   }
-  )).json()).filter(i => i.symbol !== 'TCS').map(i => i.symbol))%];`;
+  )).json()).filter((i) => ['TCS', 'MNK', 'CHK'].indexOf(i.symbol) == -1).map(i => i.symbol))%];`;
 
 const exampleFormatterCode = `/**
  * Функция форматирования сообщения о торговой паузе.

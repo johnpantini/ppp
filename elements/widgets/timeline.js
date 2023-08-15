@@ -154,9 +154,7 @@ export const timelineWidgetStyles = css`
   .x-scroll {
     overflow-y: hidden;
     overflow-x: auto;
-    padding-bottom: 2px;
   }
-
   ${scrollbars('.x-scroll')}
 `;
 

@@ -30,7 +30,7 @@ returns json as
 $$
 try {
   const response = plv8.execute(`select content::json->'result' as result from http(('POST', 'https://www.nasdaqtrader.com/RPCHandler.axd', array[http_header('Referer', 'https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts'), http_header('User-Agent', '[%#navigator.userAgent%]')], 'application/json', '{"id":2,"method":"BL_TradeHalt.GetTradeHalts","params":"[]","version":"1.1"}')::http_request)`)[0];
-  const lines = response.result.split(/\r?\n/);
+  const lines = response.result.split(/\r\n/);
   const halts = [];
   const parseLine = (l) => l.replace(/<[^>]*>/gi, '').trim();
 
