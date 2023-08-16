@@ -245,7 +245,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
                   Интеграция Pusher и Psina
                 </ppp-option>
                 <ppp-option value="psinaUsNewsBodyExtraction">
-                  Новости (Psina, US) - содержимое из AstraDB
+                  Новости (Psina) - содержимое из AstraDB
                 </ppp-option>
               </ppp-select>
               ${when(

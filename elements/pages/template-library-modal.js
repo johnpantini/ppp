@@ -168,6 +168,8 @@ export const templateLibraryModalPageTemplate = html`
                 <div class="input-group">
                   <ppp-query-select
                     ${ref('psinaUsNewsBodyExtractionServiceId')}
+                    deselectable
+                    placeholder="Опционально, нажмите для выбора"
                     :context="${(x) => x}"
                     :query="${() => {
                       return (context) => {

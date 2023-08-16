@@ -301,8 +301,8 @@ export class ApiRedisPage extends Page {
                     db: 0,
                     password: '${this.password.value.trim()}'
                   },
-                  command: 'ping',
-                  args: []
+                  command: 'set',
+                  args: ['ppp:${this.document._id}', new Date().toISOString()]
               })
             })
             .then((response) => response.body.text())
