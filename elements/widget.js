@@ -3376,7 +3376,7 @@ export class WidgetCard extends PPPElement {
     ) {
       setTimeout(() => {
         this.classList.remove('new');
-      }, 3000);
+      }, 5000);
     }
   }
 }
