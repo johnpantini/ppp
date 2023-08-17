@@ -41,6 +41,9 @@ export const templateLibraryModalPageTemplate = html`
               Паузы NYSE/NASDAQ (Supabase)
             </ppp-option>
             <ppp-option value="psina-us-news">Новости (Psina, US)</ppp-option>
+            <ppp-option value="psina-us-statuses">
+              Торговые статусы (Psina, US)
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -216,6 +219,44 @@ export const templateLibraryModalPageTemplate = html`
           )}
         `
       )}
+      ${when(
+        (x) => x.templateSelector.value === 'psina-us-statuses',
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Сервис-источник</h5>
+              <p class="description">Выберите сервис источника статусов.</p>
+            </div>
+            <div class="input-group">
+              <ppp-query-select
+                ${ref('psinaUsStatusesServiceId')}
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('services')
+                      .find({
+                        $and: [
+                          {
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                          },
+                          { workerPredefinedTemplate: 'psinaUsNews' },
+                          {
+                            removed: { $ne: true }
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+            </div>
+          </section>
+        `
+      )}
       <footer>
         <ppp-button
           type="submit"
@@ -282,6 +323,11 @@ export class TemplateLibraryModalPage extends Page {
           await validate(this.psinaUsNewsServiceId);
 
           break;
+
+        case 'psina-us-statuses':
+          await validate(this.psinaUsStatusesServiceId);
+
+          break;
       }
 
       let code = await this.loadTemplate();
@@ -318,6 +364,14 @@ export class TemplateLibraryModalPage extends Page {
               .replace('@@YANDEX_TOKEN', this.yandexToken.value)
               .replace('@@EXTRACTION_ENDPOINT', extractionEndpoint);
           }
+
+          break;
+
+        case 'psina-us-statuses':
+          code = code.replace(
+            '@@SERVICE_ID',
+            this.psinaUsStatusesServiceId.datum()._id
+          );
 
           break;
       }

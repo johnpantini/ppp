@@ -712,7 +712,7 @@ export class Widget extends PPPElement {
         }px`;
       }
 
-      this.style.maxHeight = `445px`;
+      this.style.maxHeight = `512px`;
       this.style.minHeight = `${this.widgetDefinition.minHeight ?? 120}px`;
 
       if (this.container.savedHeight > 0)

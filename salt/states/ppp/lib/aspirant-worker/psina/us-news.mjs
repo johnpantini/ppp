@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 3
+// @version 4
 // ==/PPPScript==
 
 import { WebSocket } from '/salt/states/ppp/lib/websocket/websocket.mjs';
@@ -187,9 +187,9 @@ export class PsinaUSNews {
       }
 
       this.#connection.close();
-    } else if (firstMessage?.T === 'n') {
+    } else if (firstMessage?.T === 'n' || firstMessage?.T === 's') {
       const newsBody = JSON.stringify({
-        T: 'n',
+        T: firstMessage.T,
         i: firstMessage.i,
         S: firstMessage.S,
         c: firstMessage.c,
