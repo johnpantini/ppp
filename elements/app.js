@@ -679,6 +679,8 @@ export class App extends PPPElement {
   @attr
   extension;
 
+  widgetClipboard;
+
   #onPopState() {
     this.extension = this.params()?.extension;
 

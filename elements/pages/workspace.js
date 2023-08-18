@@ -8,7 +8,8 @@ import {
   when,
   observable,
   Updates,
-  attr
+  attr,
+  Observable
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
@@ -27,6 +28,7 @@ import {
 import { dragAndDrop } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../top-loader.js';
+import { uuidv4 } from '../../lib/ppp-crypto.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -132,6 +134,99 @@ export class WorkspacePage extends Page {
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onDblClick = this.onDblClick.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+  }
+
+  async onKeyDown(event) {
+    if (event.shiftKey) {
+      if (event.code === 'KeyC' && this.workspace) {
+        const selectedWidget = this.workspace.querySelector(
+          ':is(.widget[dragging], .widget[resizing])'
+        );
+
+        if (selectedWidget) {
+          this.topLoader.start();
+
+          try {
+            const { widgets } = await ppp.user.functions.findOne(
+              { collection: 'workspaces' },
+              {
+                _id: this.document._id
+              }
+            );
+
+            if (Array.isArray(widgets)) {
+              ppp.app.widgetClipboard = {
+                // From MongoDB
+                savedDocument: widgets?.find(
+                  (w) => w.uniqueID === selectedWidget.document.uniqueID
+                ),
+                // Denormalized one, used for placement
+                liveDocument: Object.assign({}, selectedWidget.document)
+              };
+
+              if (ppp.app.widgetClipboard.savedDocument) {
+                ppp.app.widgetClipboard.savedDocument.uniqueID = uuidv4();
+                ppp.app.widgetClipboard.liveDocument.uniqueID =
+                  ppp.app.widgetClipboard.savedDocument.uniqueID;
+
+                this.showSuccessNotification(
+                  `Виджет «${selectedWidget.document.name}» скопирован в буфер обмена.`
+                );
+              }
+            }
+          } catch (e) {
+            console.error(e);
+          } finally {
+            this.topLoader.stop();
+          }
+        }
+      } else if (event.code === 'KeyV' && ppp.app.widgetClipboard) {
+        const { savedDocument, liveDocument } = ppp.app.widgetClipboard;
+
+        savedDocument.x = void 0;
+        savedDocument.y = void 0;
+        liveDocument.x = void 0;
+        liveDocument.y = void 0;
+
+        this.document.widgets.push(liveDocument);
+        this.document.widgets[this.document.widgets.length - 1].zIndex =
+          this.zIndex + 1;
+
+        Observable.notify(this, 'document');
+
+        this.locked = true;
+        ppp.app.widgetClipboard = null;
+
+        Updates.enqueue(async () => {
+          try {
+            const widgetElement = await this.placeWidget(liveDocument);
+
+            await ppp.user.functions.updateOne(
+              {
+                collection: 'workspaces'
+              },
+              {
+                _id: this.document._id
+              },
+              {
+                $push: {
+                  widgets: Object.assign(savedDocument, {
+                    x: liveDocument.x,
+                    y: liveDocument.y,
+                    zIndex: liveDocument.zIndex
+                  })
+                }
+              }
+            );
+
+            widgetElement.setAttribute('dragging', '');
+          } finally {
+            this.locked = false;
+          }
+        });
+      }
+    }
   }
 
   async submitDocument() {
@@ -385,6 +480,7 @@ export class WorkspacePage extends Page {
     document.addEventListener('pointerup', this.onPointerUp);
     document.addEventListener('pointermove', this.onPointerMove);
     document.addEventListener('pointercancel', this.onPointerUp);
+    document.addEventListener('keydown', this.onKeyDown);
   }
 
   disconnectedCallback() {
@@ -393,6 +489,7 @@ export class WorkspacePage extends Page {
     document.removeEventListener('pointerup', this.onPointerUp);
     document.removeEventListener('pointermove', this.onPointerMove);
     document.removeEventListener('pointercancel', this.onPointerUp);
+    document.removeEventListener('keydown', this.onKeyDown);
 
     super.disconnectedCallback();
   }
