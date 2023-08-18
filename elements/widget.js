@@ -356,7 +356,8 @@ export const widget = () => css`
   }
 
   :host([dragging]) .widget-root,
-  :host([resizing]) .widget-root {
+  :host([resizing]) .widget-root,
+  :host([placed]) .widget-root {
     border: 1px solid ${paletteBlueLight1};
   }
 
@@ -687,6 +688,8 @@ export class Widget extends PPPElement {
 
     if (!this.preview) {
       this.addEventListener('pointerdown', () => {
+        this.removeAttribute('placed');
+
         // Check if not topmost
         if (this.style.zIndex < this.container.zIndex) {
           this.style.zIndex = ++this.container.zIndex;

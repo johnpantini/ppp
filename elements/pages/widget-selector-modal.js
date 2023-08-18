@@ -354,7 +354,7 @@ export class WidgetSelectorModalPage extends Page {
           );
 
           this.mountPointModal.setAttribute('hidden', '');
-          widgetElement.setAttribute('dragging', '');
+          widgetElement.setAttribute('placed', '');
         } finally {
           workspacePage.locked = false;
         }

@@ -220,7 +220,7 @@ export class WorkspacePage extends Page {
               }
             );
 
-            widgetElement.setAttribute('dragging', '');
+            widgetElement.setAttribute('placed', '');
           } finally {
             this.locked = false;
           }
