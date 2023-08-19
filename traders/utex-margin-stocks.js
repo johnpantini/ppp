@@ -47,6 +47,80 @@ class UtexMarginStocksTraderDatum extends TraderDatum {
   }
 }
 
+class QuotesDatum extends UtexMarginStocksTraderDatum {
+  // UTEX d.i from payload
+  i = 5;
+
+  iToInstrument = new Map();
+
+  instrumentToI = new Map();
+
+  async firstReferenceAdded(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      const instrument = this.trader.instruments.get(symbol);
+
+      if (instrument) {
+        this.i++;
+
+        this.iToInstrument.set(this.i, symbol);
+        this.instrumentToI.set(symbol, this.i);
+
+        this.trader.connection.send(
+          JSON.stringify({
+            t: 1,
+            d: {
+              topic:
+                'com.unitedtraders.luna.utex.protocol.mobile.MobileLevel2Service.subscribeLevel2Updates',
+              i: this.i,
+              metadata: {
+                traceId: generateTraceId(),
+                spanId: generateTraceId(),
+                'ut-window-duration': 500
+              },
+              parameters: {
+                symbolId: instrument.utexSymbolID
+              }
+            }
+          })
+        );
+      }
+    }
+  }
+
+  async lastReferenceRemoved(source, symbol) {
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      const i = this.instrumentToI.get(symbol);
+
+      if (typeof i !== 'undefined') {
+        this.trader.connection.send(
+          JSON.stringify({
+            t: 2,
+            d: { i }
+          })
+        );
+      }
+    }
+  }
+
+  filter(data, instrument, source, datum) {
+    const shouldPass = super.filter(data, instrument, source, datum);
+
+    if (shouldPass) {
+      return datum === TRADER_DATUM.BEST_BID || datum === TRADER_DATUM.BEST_ASK;
+    } else {
+      return false;
+    }
+  }
+
+  [TRADER_DATUM.BEST_BID](data) {
+    return data.bestBid;
+  }
+
+  [TRADER_DATUM.BEST_ASK](data) {
+    return data.bestAsk;
+  }
+}
+
 class UtexMarginStocksTraderGlobalDatum extends GlobalTraderDatum {
   // Do not clear.
   // The trader sends everything right after connection establishment.
@@ -263,6 +337,10 @@ class UtexMarginStocksTrader extends Trader {
   constructor(document) {
     super(document, [
       {
+        type: QuotesDatum,
+        datums: [TRADER_DATUM.BEST_BID, TRADER_DATUM.BEST_ASK]
+      },
+      {
         type: TimelineDatum,
         datums: [TRADER_DATUM.TIMELINE_ITEM]
       },
@@ -469,12 +547,14 @@ class UtexMarginStocksTrader extends Trader {
               await this.resubscribe();
             }
 
+            // 0 - OPEN
             this.connection.send('{"t":0,"d":{}}');
 
             clearInterval(this.#heartbeatInterval);
 
             this.#heartbeatInterval = setInterval(() => {
               if (this.connection.readyState === WebSocket.OPEN) {
+                // 8 - PING
                 this.connection.send('{"t":8,"d":{}}');
               }
             }, 2000);
@@ -503,6 +583,7 @@ class UtexMarginStocksTrader extends Trader {
             const payload = JSON.parse(data);
 
             if (payload.t === 12) {
+              // 12 - OPEN_ACK
               await this.ensureAccessTokenIsOk();
 
               this.connection.send(
@@ -593,28 +674,46 @@ class UtexMarginStocksTrader extends Trader {
                   }
                 })
               );
-
-              // Liquidation threshold
-              // this.connection.send(
-              //   JSON.stringify({
-              //     t: 1,
-              //     d: {
-              //       topic:
-              //         'com.unitedtraders.luna.utex.protocol.mobile.MobileMarginalTradingBalanceService.subscribeMaintenanceBalanceWithSnapshot',
-              //       i: 6,
-              //       accessToken: this.accessToken,
-              //       metadata: {
-              //         traceId: generateTraceId(),
-              //         spanId: generateTraceId()
-              //       },
-              //       parameters: {
-              //         market: 'UsEquitiesUsdt'
-              //       }
-              //     }
-              //   })
-              // );
             } else if (payload.t === 7) {
+              // 7 - EVENT
               const d = payload.d?.d;
+
+              // Orderbook
+              if (Array.isArray(d.list)) {
+                const instrument = this.instruments.get(
+                  this.datums[TRADER_DATUM.BEST_BID].iToInstrument.get(
+                    payload.d?.i
+                  )
+                );
+
+                if (instrument) {
+                  let bestBid;
+                  let bestAsk;
+
+                  for (const item of d.list) {
+                    const price = +item.price / 1e8;
+
+                    if (item.side === 'BUY') {
+                      if (typeof bestBid === 'undefined') {
+                        bestBid = price;
+                      }
+
+                      bestBid = Math.max(bestBid, price);
+                    } else if (item.side === 'SELL') {
+                      if (typeof bestAsk === 'undefined') {
+                        bestAsk = price;
+                      }
+
+                      bestAsk = Math.min(bestAsk, price);
+                    }
+                  }
+
+                  this.datums[TRADER_DATUM.BEST_BID].dataArrived(
+                    { bestBid, bestAsk },
+                    instrument
+                  );
+                }
+              }
 
               if (Array.isArray(d?.orders)) {
                 for (const order of d.orders) {

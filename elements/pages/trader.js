@@ -199,6 +199,9 @@ export const traderPageTemplate = html`
           <div slot="description" class="caps-list">
             <ul>
               <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+              </li>
+              <li>
                 ${() =>
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
               </li>

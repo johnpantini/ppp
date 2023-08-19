@@ -203,6 +203,7 @@ export class TraderUtexMarginStocksPage extends Page {
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
         caps: [
+          TRADER_CAPS.CAPS_LEVEL1,
           TRADER_CAPS.CAPS_LIMIT_ORDERS,
           TRADER_CAPS.CAPS_MARKET_ORDERS,
           TRADER_CAPS.CAPS_ACTIVE_ORDERS,
