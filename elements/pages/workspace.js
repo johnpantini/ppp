@@ -188,6 +188,8 @@ export class WorkspacePage extends Page {
         savedDocument.y = void 0;
         liveDocument.x = void 0;
         liveDocument.y = void 0;
+        liveDocument.symbol = savedDocument.symbol;
+
 
         this.document.widgets.push(liveDocument);
         this.document.widgets[this.document.widgets.length - 1].zIndex =
