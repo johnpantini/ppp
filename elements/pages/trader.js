@@ -54,10 +54,6 @@ export const traderPageTemplate = html`
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
               </li>
               <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
-              </li>
-              <li>
                 ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
               </li>
               <li>
@@ -150,10 +146,6 @@ export const traderPageTemplate = html`
               <li>
                 ${() =>
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
-              </li>
-              <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
               </li>
               <li>
                 ${() =>
@@ -257,10 +249,6 @@ export const traderPageTemplate = html`
               <li>
                 ${() =>
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
-              </li>
-              <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_STOP_ORDERS}`)}
               </li>
               <li>
                 ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}

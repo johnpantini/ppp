@@ -46,10 +46,10 @@ const showLimitTabHidden = (x) =>
   typeof x.document.showLimitTab === 'undefined'
     ? false
     : !x.document.showLimitTab;
-const showStopTabHidden = (x) =>
-  typeof x.document.showStopTab === 'undefined'
+const showConditionalTabHidden = (x) =>
+  typeof x.document.showConditionalTab === 'undefined'
     ? false
-    : !x.document.showStopTab;
+    : !x.document.showConditionalTab;
 
 export const activeOrdersWidgetTemplate = html`
   <template>
@@ -71,7 +71,7 @@ export const activeOrdersWidgetTemplate = html`
               ?hidden="${(x) =>
                 showAllTabHidden(x) &&
                 showLimitTabHidden(x) &&
-                showStopTabHidden(x)}"
+                showConditionalTabHidden(x)}"
               class="order-type-selector"
               @change="${(x) => x.handleOrderTypeChange()}"
               value="${(x) => x.document.activeTab ?? 'all'}"
@@ -90,11 +90,11 @@ export const activeOrdersWidgetTemplate = html`
                 Лимитные
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
-                ?hidden="${(x) => showStopTabHidden(x)}"
-                value="stop"
+                ?hidden="${(x) => showConditionalTabHidden(x)}"
+                value="conditional"
                 disabled
               >
-                Отложенные
+                Условные
               </ppp-widget-box-radio>
             </ppp-widget-box-radio-group>
           </div>
@@ -541,7 +541,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         ordersTraderId: this.container.ordersTraderId.value,
         showAllTab: this.container.showAllTab.checked,
         showLimitTab: this.container.showLimitTab.checked,
-        showStopTab: this.container.showStopTab.checked,
+        showConditionalTab: this.container.showConditionalTab.checked,
         showRefreshOrdersButton: this.container.showRefreshOrdersButton.checked,
         showCancelAllOrdersButton:
           this.container.showCancelAllOrdersButton.checked,
@@ -561,7 +561,7 @@ export async function widgetDefinition() {
     title: html`Активные заявки`,
     description: html`Виджет
       <span class="positive">Активные заявки</span> отображает текущие лимитные
-      и отложенные заявки, которые ещё не исполнены и не отменены.`,
+      и условные заявки, которые ещё не исполнены и не отменены.`,
     customElement: ActiveOrdersWidget.compose({
       template: activeOrdersWidgetTemplate,
       styles: activeOrdersWidgetStyles
@@ -634,10 +634,10 @@ export async function widgetDefinition() {
           Показывать вкладку «Лимитные»
         </ppp-checkbox>
         <ppp-checkbox
-          ?checked="${(x) => x.document.showStopTab ?? true}"
-          ${ref('showStopTab')}
+          ?checked="${(x) => x.document.showConditionalTab ?? true}"
+          ${ref('showConditionalTab')}
         >
-          Показывать вкладку «Отложенные»
+          Показывать вкладку «Условные»
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.showRefreshOrdersButton ?? true}"

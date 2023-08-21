@@ -52,6 +52,7 @@ import { validate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
+import '../tabs.js';
 import '../text-field.js';
 
 const decSeparator = decimalSeparator();
@@ -164,10 +165,12 @@ export const orderWidgetTemplate = html`
             >
               <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
               <ppp-widget-tab id="limit">Лимитная</ppp-widget-tab>
-              <ppp-widget-tab id="stop" disabled>Отложенная</ppp-widget-tab>
+              <ppp-widget-tab id="conditional" disabled>
+                Условная
+              </ppp-widget-tab>
               <ppp-tab-panel id="market-panel"></ppp-tab-panel>
               <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
-              <ppp-tab-panel id="stop-panel"></ppp-tab-panel>
+              <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
             </ppp-widget-tabs>
             <div style="height: 100%">
               <div class="company-card">
@@ -892,9 +895,6 @@ export class OrderWidget extends WidgetWithInstrument {
   extraLevel1Trader2;
 
   @observable
-  positionTrader;
-
-  @observable
   traderEvent;
 
   @observable
@@ -971,7 +971,9 @@ export class OrderWidget extends WidgetWithInstrument {
         source: this,
         fieldDatumPairs: {
           // For estimate().
-          traderEvent: TRADER_DATUM.TRADER
+          traderEvent: TRADER_DATUM.TRADER,
+          positionSize: TRADER_DATUM.POSITION_SIZE,
+          positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
 
@@ -990,10 +992,6 @@ export class OrderWidget extends WidgetWithInstrument {
           this.document.extraLevel1Trader2
         );
       }
-
-      this.positionTrader = await ppp.getOrCreateTrader(
-        this.document.positionTrader
-      );
 
       await this.level1Trader.subscribeFields?.({
         source: this,
@@ -1032,16 +1030,6 @@ export class OrderWidget extends WidgetWithInstrument {
         });
       }
 
-      if (this.positionTrader) {
-        await this.positionTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            positionSize: TRADER_DATUM.POSITION_SIZE,
-            positionAverage: TRADER_DATUM.POSITION_AVERAGE
-          }
-        });
-      }
-
       if (this.document.pusherApi) {
         this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);
 
@@ -1066,7 +1054,9 @@ export class OrderWidget extends WidgetWithInstrument {
     await this.ordersTrader?.unsubscribeFields?.({
       source: this,
       fieldDatumPairs: {
-        traderEvent: TRADER_DATUM.TRADER
+        traderEvent: TRADER_DATUM.TRADER,
+        positionSize: TRADER_DATUM.POSITION_SIZE,
+        positionAverage: TRADER_DATUM.POSITION_AVERAGE
       }
     });
 
@@ -1105,16 +1095,6 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
-        }
-      });
-    }
-
-    if (this.positionTrader) {
-      await this.positionTrader.unsubscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          positionSize: TRADER_DATUM.POSITION_SIZE,
-          positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
     }
@@ -1167,7 +1147,7 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   getActiveWidgetTab() {
-    if (/market|limit/i.test(this.document.activeTab))
+    if (/market|limit|conditional/i.test(this.document.activeTab))
       return this.document.activeTab;
     else return 'limit';
   }
@@ -1756,7 +1736,6 @@ export class OrderWidget extends WidgetWithInstrument {
         level1TraderId: this.container.level1TraderId.value,
         extraLevel1TraderId: this.container.extraLevel1TraderId.value,
         extraLevel1Trader2Id: this.container.extraLevel1Trader2Id.value,
-        positionTraderId: this.container.positionTraderId.value,
         pusherApiId: this.container.pusherApiId.value,
         buyShortcut: this.container.buyShortcut.value.trim(),
         sellShortcut: this.container.sellShortcut.value.trim(),
@@ -1788,7 +1767,7 @@ export async function widgetDefinition() {
     collection: 'PPP',
     title: html`Заявка`,
     description: html`Виджет <span class="positive">Заявка</span> используется,
-      чтобы выставлять рыночные, лимитные и отложенные биржевые заявки.`,
+      чтобы выставлять рыночные, лимитные и условные биржевые заявки.`,
     customElement: OrderWidget.compose({
       template: orderWidgetTemplate,
       styles: orderWidgetStyles
@@ -1797,527 +1776,496 @@ export async function widgetDefinition() {
     minHeight: 120,
     defaultWidth: 290,
     settings: html`
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер лимитных и рыночных заявок</h5>
-          <p class="description">
-            Трейдер, который будет выставлять лимитные и рыночные заявки, а
-            также фильтровать инструменты в поиске.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('ordersTraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.ordersTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.ordersTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: {
-                          $all: [
-                            `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
-                            `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
-                          ]
-                        }
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.ordersTraderId ?? ''%]` }
-                        ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер позиций</h5>
-          <p class="description">
-            Трейдер, ответственный за отображение средней цены и размера позиции
-            в виджете.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('positionTraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.positionTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.positionTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.positionTraderId ?? ''%]` }
-                        ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер L1</h5>
-          <p class="description">
-            Трейдер, выступающий источником L1-данных виджета.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('level1TraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.level1TraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.level1Trader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.level1TraderId ?? ''%]` }
-                        ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Дополнительный трейдер L1 #1</h5>
-          <p class="description">
-            Трейдер, выступающий дополнительным источником L1-данных виджета.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('extraLevel1TraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.extraLevel1TraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
+      <ppp-tabs activeid="traders">
+        <ppp-tab id="traders">Подключения</ppp-tab>
+        <ppp-tab id="content">Наполнение</ppp-tab>
+        <ppp-tab id="hotkeys">Горячие клавиши</ppp-tab>
+        <ppp-tab-panel id="traders-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер инструментов и заявок</h5>
+              <p class="description">
+                Трейдер, который будет выставлять заявки, а также фильтровать
+                инструменты в поиске.
+              </p>
+            </div>
+            <div class="control-line">
+              <ppp-query-select
+                ${ref('ordersTraderId')}
+                deselectable
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.ordersTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
                           {
-                            _id: `[%#this.document.extraLevel1TraderId ?? ''%]`
+                            caps: {
+                              $all: [
+                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
+                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
+                              ]
+                            }
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                            ]
                           }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Дополнительный трейдер L1 #2</h5>
-          <p class="description">
-            Трейдер, выступающий дополнительным источником L1-данных виджета.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('extraLevel1Trader2Id')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.extraLevel1Trader2Id}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер L1</h5>
+              <p class="description">
+                Трейдер, выступающий источником L1-данных виджета.
+              </p>
+            </div>
+            <div class="control-line">
+              <ppp-query-select
+                ${ref('level1TraderId')}
+                deselectable
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.level1TraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.level1Trader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
                           {
-                            _id: `[%#this.document.extraLevel1Trader2Id ?? ''%]`
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.level1TraderId ?? ''%]` }
+                            ]
                           }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Интеграция с Pusher</h5>
-          <p class="description">Для управления виджетом из внешних систем.</p>
-        </div>
-        <div class="widget-settings-input-group">
-          <div class="control-line">
-            <ppp-query-select
-              ${ref('pusherApiId')}
-              placeholder="Опционально, нажмите для выбора"
-              value="${(x) => x.document.pusherApiId}"
-              :context="${(x) => x}"
-              :preloaded="${(x) => x.document.pusherApi ?? ''}"
-              :query="${() => {
-                return (context) => {
-                  return context.services
-                    .get('mongodb-atlas')
-                    .db('ppp')
-                    .collection('apis')
-                    .find({
-                      $and: [
-                        {
-                          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
-                        },
-                        {
-                          $or: [
-                            { removed: { $ne: true } },
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Дополнительный трейдер L1 #1</h5>
+              <p class="description">
+                Трейдер, выступающий дополнительным источником L1-данных
+                виджета.
+              </p>
+            </div>
+            <div class="control-line">
+              <ppp-query-select
+                ${ref('extraLevel1TraderId')}
+                deselectable
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.extraLevel1TraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.extraLevel1TraderId ?? ''%]`
+                              }
+                            ]
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Дополнительный трейдер L1 #2</h5>
+              <p class="description">
+                Трейдер, выступающий дополнительным источником L1-данных
+                виджета.
+              </p>
+            </div>
+            <div class="control-line">
+              <ppp-query-select
+                ${ref('extraLevel1Trader2Id')}
+                deselectable
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.extraLevel1Trader2Id}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.extraLevel1Trader2Id ?? ''%]`
+                              }
+                            ]
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интеграция с Pusher</h5>
+              <p class="description">
+                Для управления виджетом из внешних систем.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <div class="control-line">
+                <ppp-query-select
+                  ${ref('pusherApiId')}
+                  deselectable
+                  placeholder="Опционально, нажмите для выбора"
+                  value="${(x) => x.document.pusherApiId}"
+                  :context="${(x) => x}"
+                  :preloaded="${(x) => x.document.pusherApi ?? ''}"
+                  :query="${() => {
+                    return (context) => {
+                      return context.services
+                        .get('mongodb-atlas')
+                        .db('ppp')
+                        .collection('apis')
+                        .find({
+                          $and: [
                             {
-                              _id: `[%#this.document.pusherApiId ?? ''%]`
+                              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
+                            },
+                            {
+                              $or: [
+                                { removed: { $ne: true } },
+                                {
+                                  _id: `[%#this.document.pusherApiId ?? ''%]`
+                                }
+                              ]
                             }
                           ]
-                        }
-                      ]
-                    })
-                    .sort({ updatedAt: -1 });
-                };
-              }}"
-              :transform="${() => ppp.decryptDocumentsTransformation(['key'])}"
-            ></ppp-query-select>
-            <ppp-button
-              appearance="default"
-              @click="${() =>
-                window.open('?page=api-pusher', '_blank').focus()}"
-            >
-              +
-            </ppp-button>
+                        })
+                        .sort({ updatedAt: -1 });
+                    };
+                  }}"
+                  :transform="${() =>
+                    ppp.decryptDocumentsTransformation(['key'])}"
+                ></ppp-query-select>
+                <ppp-button
+                  appearance="default"
+                  @click="${() =>
+                    window.open('?page=api-pusher', '_blank').focus()}"
+                >
+                  +
+                </ppp-button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Горячая клавиша для покупки</h5>
-          <p class="description">
-            Покупка сработает, если фокус ввода будет находиться в поле цены или
-            количества. Нажмите Esc, чтобы отменить эту функцию.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            optional
-            placeholder="Не задана"
-            value="${(x) => x.document.buyShortcut}"
-            @keydown="${(x, { event }) => {
-              if (
-                +event.key === parseInt(event.key) ||
-                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
-                  event.code
-                )
-              )
-                return false;
+        </ppp-tab-panel>
+        <ppp-tab-panel id="content-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Кнопки быстрого объёма</h5>
+              <p class="description">
+                Перечислите значения через точку с запятой. Нажатие на кнопку
+                подставляет номинал в поле количества. Поставьте ~ перед
+                значением, чтобы указать объём в единицах валюты.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                optional
+                placeholder="1;10;100;1k;~100;~500;~1k"
+                value="${(x) => x.document.fastVolumes}"
+                @beforeinput="${(x, { event }) => {
+                  return event.data === null || /[0-9.,;~kmM]/.test(event.data);
+                }}"
+                ${ref('fastVolumes')}
+              ></ppp-text-field>
+            </div>
+            <div class="spacing1"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.doNotLockFastVolume ?? false}"
+              ${ref('doNotLockFastVolume')}
+            >
+              Не фиксировать объём двойным нажатием на кнопки
+            </ppp-checkbox>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Параметры отображения и работы</h5>
+            </div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.displaySizeInUnits}"
+              ${ref('displaySizeInUnits')}
+            >
+              Показывать количество инструмента в портфеле в штуках
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.changePriceQuantityViaMouseWheel}"
+              ${ref('changePriceQuantityViaMouseWheel')}
+            >
+              Изменять цену и количество колесом мыши
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showLastPriceInHeader ?? true}"
+              ${ref('showLastPriceInHeader')}
+            >
+              Показывать последнюю цену в заголовке
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showAbsoluteChangeInHeader ?? true}"
+              ${ref('showAbsoluteChangeInHeader')}
+            >
+              Показывать абсолютное изменение цены в заголовке
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showRelativeChangeInHeader ?? true}"
+              ${ref('showRelativeChangeInHeader')}
+            >
+              Показывать относительное изменение цены в заголовке
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showOrderTypeTabs ?? true}"
+              ${ref('showOrderTypeTabs')}
+            >
+              Показывать вкладки с типом заявки
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showBestBidAndAsk ?? true}"
+              ${ref('showBestBidAndAsk')}
+            >
+              Показывать лучшие цены <span class="positive">bid</span> и
+              <span class="negative">ask</span>
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showAmountSection ?? true}"
+              ${ref('showAmountSection')}
+            >
+              Показывать секцию с комиссией и стоимостью
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showEstimateSection ?? true}"
+              ${ref('showEstimateSection')}
+            >
+              Показывать секцию «Доступно/С плечом»
+            </ppp-checkbox>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="hotkeys-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Горячая клавиша для покупки</h5>
+              <p class="description">
+                Покупка сработает, если фокус ввода будет находиться в поле цены
+                или количества. Нажмите Esc, чтобы отменить эту функцию.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                optional
+                placeholder="Не задана"
+                value="${(x) => x.document.buyShortcut}"
+                @keydown="${(x, { event }) => {
+                  if (
+                    +event.key === parseInt(event.key) ||
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                      event.code
+                    )
+                  )
+                    return false;
 
-              if (event.key === 'Escape') {
-                x.buyShortcut.value = '';
-              } else {
-                x.buyShortcut.value = event.code;
-              }
+                  if (event.key === 'Escape') {
+                    x.buyShortcut.value = '';
+                  } else {
+                    x.buyShortcut.value = event.code;
+                  }
 
-              return false;
-            }}"
-            ${ref('buyShortcut')}
-          ></ppp-text-field>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Горячая клавиша для продажи</h5>
-          <p class="description">
-            Продажа сработает, если фокус ввода будет находиться в поле цены или
-            количества. Нажмите Esc, чтобы отменить эту функцию.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            optional
-            placeholder="Не задана"
-            value="${(x) => x.document.sellShortcut}"
-            @keydown="${(x, { event }) => {
-              if (
-                +event.key === parseInt(event.key) ||
-                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
-                  event.code
-                )
-              )
-                return false;
+                  return false;
+                }}"
+                ${ref('buyShortcut')}
+              ></ppp-text-field>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Горячая клавиша для продажи</h5>
+              <p class="description">
+                Продажа сработает, если фокус ввода будет находиться в поле цены
+                или количества. Нажмите Esc, чтобы отменить эту функцию.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                optional
+                placeholder="Не задана"
+                value="${(x) => x.document.sellShortcut}"
+                @keydown="${(x, { event }) => {
+                  if (
+                    +event.key === parseInt(event.key) ||
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                      event.code
+                    )
+                  )
+                    return false;
 
-              if (event.key === 'Escape') {
-                x.sellShortcut.value = '';
-              } else {
-                x.sellShortcut.value = event.code;
-              }
+                  if (event.key === 'Escape') {
+                    x.sellShortcut.value = '';
+                  } else {
+                    x.sellShortcut.value = event.code;
+                  }
 
-              return false;
-            }}"
-            ${ref('sellShortcut')}
-          ></ppp-text-field>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Горячая клавиша для поиска инструментов</h5>
-          <p class="description">
-            Если фокус ввода будет находиться в поле цены или количества, то
-            откроется окно поиска инструмента. Нажмите Esc, чтобы отменить эту
-            функцию.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            optional
-            placeholder="Не задана"
-            value="${(x) => x.document.searchShortcut}"
-            @keydown="${(x, { event }) => {
-              if (
-                +event.key === parseInt(event.key) ||
-                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
-                  event.code
-                )
-              )
-                return false;
+                  return false;
+                }}"
+                ${ref('sellShortcut')}
+              ></ppp-text-field>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Горячая клавиша для поиска инструментов</h5>
+              <p class="description">
+                Если фокус ввода будет находиться в поле цены или количества, то
+                откроется окно поиска инструмента. Нажмите Esc, чтобы отменить
+                эту функцию.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                optional
+                placeholder="Не задана"
+                value="${(x) => x.document.searchShortcut}"
+                @keydown="${(x, { event }) => {
+                  if (
+                    +event.key === parseInt(event.key) ||
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                      event.code
+                    )
+                  )
+                    return false;
 
-              if (event.key === 'Escape') {
-                x.searchShortcut.value = '';
-              } else {
-                x.searchShortcut.value = event.code;
-              }
+                  if (event.key === 'Escape') {
+                    x.searchShortcut.value = '';
+                  } else {
+                    x.searchShortcut.value = event.code;
+                  }
 
-              return false;
-            }}"
-            ${ref('searchShortcut')}
-          ></ppp-text-field>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Горячая клавиша для отмены всех активных заявок</h5>
-          <p class="description">
-            Если фокус ввода будет находиться в поле цены или количества, то
-            будут отменены активные заявки по текущему инструменту виджета.
-            Нажмите Esc, чтобы отменить эту функцию.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            optional
-            placeholder="Не задана"
-            value="${(x) => x.document.cancelAllOrdersShortcut}"
-            @keydown="${(x, { event }) => {
-              if (
-                +event.key === parseInt(event.key) ||
-                /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
-                  event.code
-                )
-              )
-                return false;
+                  return false;
+                }}"
+                ${ref('searchShortcut')}
+              ></ppp-text-field>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Горячая клавиша для отмены всех активных заявок</h5>
+              <p class="description">
+                Если фокус ввода будет находиться в поле цены или количества, то
+                будут отменены активные заявки по текущему инструменту виджета.
+                Нажмите Esc, чтобы отменить эту функцию.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                optional
+                placeholder="Не задана"
+                value="${(x) => x.document.cancelAllOrdersShortcut}"
+                @keydown="${(x, { event }) => {
+                  if (
+                    +event.key === parseInt(event.key) ||
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                      event.code
+                    )
+                  )
+                    return false;
 
-              if (event.key === 'Escape') {
-                x.cancelAllOrdersShortcut.value = '';
-              } else {
-                x.cancelAllOrdersShortcut.value = event.code;
-              }
+                  if (event.key === 'Escape') {
+                    x.cancelAllOrdersShortcut.value = '';
+                  } else {
+                    x.cancelAllOrdersShortcut.value = event.code;
+                  }
 
-              return false;
-            }}"
-            ${ref('cancelAllOrdersShortcut')}
-          ></ppp-text-field>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Кнопки быстрого объёма</h5>
-          <p class="description">
-            Перечислите значения через точку с запятой. Нажатие на кнопку
-            подставляет номинал в поле количества. Поставьте ~ перед значением,
-            чтобы указать объём в единицах валюты.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            optional
-            placeholder="1;10;100;1k;~100;~500;~1k"
-            value="${(x) => x.document.fastVolumes}"
-            @beforeinput="${(x, { event }) => {
-              return event.data === null || /[0-9.,;~kmM]/.test(event.data);
-            }}"
-            ${ref('fastVolumes')}
-          ></ppp-text-field>
-        </div>
-        <div class="spacing1"></div>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.doNotLockFastVolume ?? false}"
-          ${ref('doNotLockFastVolume')}
-        >
-          Не фиксировать объём двойным нажатием на кнопки
-        </ppp-checkbox>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Параметры отображения и работы</h5>
-        </div>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.displaySizeInUnits}"
-          ${ref('displaySizeInUnits')}
-        >
-          Показывать количество инструмента в портфеле в штуках
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.changePriceQuantityViaMouseWheel}"
-          ${ref('changePriceQuantityViaMouseWheel')}
-        >
-          Изменять цену и количество колесом мыши
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showLastPriceInHeader ?? true}"
-          ${ref('showLastPriceInHeader')}
-        >
-          Показывать последнюю цену в заголовке
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showAbsoluteChangeInHeader ?? true}"
-          ${ref('showAbsoluteChangeInHeader')}
-        >
-          Показывать абсолютное изменение цены в заголовке
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showRelativeChangeInHeader ?? true}"
-          ${ref('showRelativeChangeInHeader')}
-        >
-          Показывать относительное изменение цены в заголовке
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showOrderTypeTabs ?? true}"
-          ${ref('showOrderTypeTabs')}
-        >
-          Показывать вкладки с типом заявки
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showBestBidAndAsk ?? true}"
-          ${ref('showBestBidAndAsk')}
-        >
-          Показывать лучшие цены <span class="positive">bid</span> и
-          <span class="negative">ask</span>
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showAmountSection ?? true}"
-          ${ref('showAmountSection')}
-        >
-          Показывать секцию с комиссией и стоимостью
-        </ppp-checkbox>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.showEstimateSection ?? true}"
-          ${ref('showEstimateSection')}
-        >
-          Показывать секцию «Доступно/С плечом»
-        </ppp-checkbox>
-      </div>
+                  return false;
+                }}"
+                ${ref('cancelAllOrdersShortcut')}
+              ></ppp-text-field>
+            </div>
+          </div>
+        </ppp-tab-panel>
+      </ppp-tabs>
     `
   };
 }

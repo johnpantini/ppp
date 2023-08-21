@@ -34,10 +34,10 @@ import {
   paletteWhite,
   positive,
   spacing1,
-  spacing2,
+  spacing2, spacing3,
   spacing5,
   themeConditional
-} from '../../design/design-tokens.js';
+} from '../../design/design-tokens.js'
 import { display } from '../../vendor/fast-utilities.js';
 import { RadioGroup, radioGroupTemplate } from '../radio-group.js';
 import { Radio } from '../radio.js';
@@ -735,6 +735,17 @@ export const widgetPageStyles = css`
 
   .drawer-body-inner {
     padding: 25px 4px;
+  }
+
+  .drawer-body ppp-tab-panel {
+    display: flex;
+    flex-direction: column;
+    margin-top: ${spacing2};
+    margin-bottom: ${spacing3};
+  }
+
+  .drawer-body ppp-tabs {
+    margin-top: 20px;
   }
 
   .widget-settings-section {

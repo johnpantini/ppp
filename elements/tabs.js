@@ -67,10 +67,9 @@ export const tabsStyles = css`
   ${normalize()}
   ${display('grid')}
   :host {
+    position: relative;
     grid-template-columns: auto 1fr auto;
     grid-template-rows: auto 1fr;
-    border-bottom: 1px solid
-      ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
 
   .tablist {
@@ -80,6 +79,16 @@ export const tabsStyles = css`
     grid-template-columns: auto;
     width: max-content;
     align-self: end;
+  }
+
+  :host::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 41px;
+    width: 100%;
+    border-bottom: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
 
   .tabpanel {
