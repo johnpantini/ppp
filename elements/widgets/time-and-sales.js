@@ -329,19 +329,21 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async printChanged(oldValue, newValue) {
     const threshold = await this.getThreshold(newValue);
 
-    if (newValue?.price) {
-      if (typeof threshold === 'number' && newValue?.volume < threshold) {
-        return;
+    requestAnimationFrame(() => {
+      if (newValue?.price) {
+        if (typeof threshold === 'number' && newValue?.volume < threshold) {
+          return;
+        }
+
+        this.trades.unshift(newValue);
+
+        while (this.trades.length > this.document.depth) {
+          this.trades.pop();
+        }
+
+        Observable.notify(this, 'trades');
       }
-
-      this.trades.unshift(newValue);
-
-      while (this.trades.length > this.document.depth) {
-        this.trades.pop();
-      }
-
-      Observable.notify(this, 'trades');
-    }
+    });
   }
 
   async disconnectedCallback() {

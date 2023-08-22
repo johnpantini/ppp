@@ -174,7 +174,7 @@ class BinanceTrader extends Trader {
           this.connection.onclose = async () => {
             await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
 
-            this.#pendingConnection = null;
+            this.#pendingConnection = void 0;
 
             await this.establishWebSocketConnection(true);
           };

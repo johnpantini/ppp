@@ -510,12 +510,6 @@ export class UtexConnection extends EventEmitter {
       }
     });
 
-    // for (const ticker of L1List) {
-    //   const prints = await this.printsHistoryRequest(ticker);
-    //
-    //   prints.forEach((print) => this.emit('MarketPrint', print));
-    // }
-
     const batchDataSubscriptionRequestMessage = this.#makeProtoMessage(
       'BatchDataSubscriptionRequest',
       {

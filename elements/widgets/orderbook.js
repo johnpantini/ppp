@@ -650,59 +650,76 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   orderbookChanged(oldValue, newValue) {
-    if (newValue === '—') {
-      newValue = {
-        bids: [],
-        asks: []
-      };
-    }
-
-    if (oldValue !== null && newValue)
-      this.#lastOrderBookValue = this.cloneOrderbook(newValue);
-
-    const orderbook = this.cloneOrderbook(newValue);
-
-    if (orderbook && this.instrument) {
-      if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
-
-      if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
-
-      if (!orderbook.bids.length && !orderbook.asks.length) {
-        this.quoteLines = [];
-
-        return;
+    requestAnimationFrame(() => {
+      if (newValue === '—') {
+        newValue = {
+          bids: [],
+          asks: []
+        };
       }
 
-      const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
-        this.#getMyOrdersPricesAndSizes();
+      if (oldValue !== null && newValue)
+        this.#lastOrderBookValue = this.cloneOrderbook(newValue);
 
-      // 1. Buy orders, descending
-      for (const [price, volume] of buyOrdersPricesAndSizes) {
-        let insertAtTheEnd = true;
+      const orderbook = this.cloneOrderbook(newValue);
 
-        for (let i = 0; i < orderbook.bids?.length; i++) {
-          const bookPriceAtThisLevel = orderbook.bids[i].price;
+      if (orderbook && this.instrument) {
+        if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
 
-          if (price === bookPriceAtThisLevel) {
-            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+        if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
+
+        if (!orderbook.bids.length && !orderbook.asks.length) {
+          this.quoteLines = [];
+
+          return;
+        }
+
+        const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
+          this.#getMyOrdersPricesAndSizes();
+
+        // 1. Buy orders, descending
+        for (const [price, volume] of buyOrdersPricesAndSizes) {
+          let insertAtTheEnd = true;
+
+          for (let i = 0; i < orderbook.bids?.length; i++) {
+            const bookPriceAtThisLevel = orderbook.bids[i].price;
+
+            if (price === bookPriceAtThisLevel) {
+              if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+                orderbook.bids.splice(i, 0, {
+                  price,
+                  volume,
+                  my: volume,
+                  pool: this.#getMyOrderPool()
+                });
+              } else {
+                orderbook.bids[i].my = volume;
+
+                if (orderbook.bids[i].volume < volume)
+                  orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+              }
+
+              insertAtTheEnd = false;
+
+              break;
+            } else if (price > bookPriceAtThisLevel) {
               orderbook.bids.splice(i, 0, {
                 price,
                 volume,
                 my: volume,
-                pool: this.#getMyOrderPool()
+                pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+                  ? this.#getMyOrderPool()
+                  : void 0
               });
-            } else {
-              orderbook.bids[i].my = volume;
 
-              if (orderbook.bids[i].volume < volume)
-                orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+              insertAtTheEnd = false;
+
+              break;
             }
+          }
 
-            insertAtTheEnd = false;
-
-            break;
-          } else if (price > bookPriceAtThisLevel) {
-            orderbook.bids.splice(i, 0, {
+          if (insertAtTheEnd) {
+            orderbook.bids.push({
               price,
               volume,
               my: volume,
@@ -710,53 +727,53 @@ export class OrderbookWidget extends WidgetWithInstrument {
                 ? this.#getMyOrderPool()
                 : void 0
             });
-
-            insertAtTheEnd = false;
-
-            break;
           }
         }
 
-        if (insertAtTheEnd) {
-          orderbook.bids.push({
-            price,
-            volume,
-            my: volume,
-            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-              ? this.#getMyOrderPool()
-              : void 0
-          });
-        }
-      }
+        // 2. Sell orders, ascending
+        for (const [price, volume] of sellOrdersPricesAndSizes) {
+          let insertAtTheEnd = true;
 
-      // 2. Sell orders, ascending
-      for (const [price, volume] of sellOrdersPricesAndSizes) {
-        let insertAtTheEnd = true;
+          for (let i = 0; i < orderbook.asks?.length; i++) {
+            const bookPriceAtThisLevel = orderbook.asks[i].price;
 
-        for (let i = 0; i < orderbook.asks?.length; i++) {
-          const bookPriceAtThisLevel = orderbook.asks[i].price;
+            if (price === bookPriceAtThisLevel) {
+              // Always display fake pool
+              if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+                orderbook.asks.splice(i, 0, {
+                  price,
+                  volume,
+                  my: volume,
+                  pool: this.#getMyOrderPool()
+                });
+              } else {
+                orderbook.asks[i].my = volume;
 
-          if (price === bookPriceAtThisLevel) {
-            // Always display fake pool
-            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+                if (orderbook.asks[i].volume < volume)
+                  orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+              }
+
+              insertAtTheEnd = false;
+
+              break;
+            } else if (price < bookPriceAtThisLevel) {
               orderbook.asks.splice(i, 0, {
                 price,
                 volume,
                 my: volume,
-                pool: this.#getMyOrderPool()
+                pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+                  ? this.#getMyOrderPool()
+                  : void 0
               });
-            } else {
-              orderbook.asks[i].my = volume;
 
-              if (orderbook.asks[i].volume < volume)
-                orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+              insertAtTheEnd = false;
+
+              break;
             }
+          }
 
-            insertAtTheEnd = false;
-
-            break;
-          } else if (price < bookPriceAtThisLevel) {
-            orderbook.asks.splice(i, 0, {
+          if (insertAtTheEnd) {
+            orderbook.asks.push({
               price,
               volume,
               my: volume,
@@ -764,67 +781,52 @@ export class OrderbookWidget extends WidgetWithInstrument {
                 ? this.#getMyOrderPool()
                 : void 0
             });
-
-            insertAtTheEnd = false;
-
-            break;
           }
         }
 
-        if (insertAtTheEnd) {
-          orderbook.asks.push({
-            price,
-            volume,
-            my: volume,
-            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-              ? this.#getMyOrderPool()
-              : void 0
+        if (orderbook.bids?.length && orderbook.asks?.length) {
+          const bestBid = orderbook.bids[0]?.price;
+          const bestAsk = orderbook.asks[0]?.price;
+
+          this.spreadString = `${formatPriceWithoutCurrency(
+            bestAsk - bestBid,
+            this.instrument
+          )} (${formatPercentage((bestAsk - bestBid) / bestBid)})`;
+        }
+
+        let max = Math.max(
+          orderbook.bids?.length ?? 0,
+          orderbook.asks?.length ?? 0
+        );
+
+        if (max > this.document.depth) max = this.document.depth;
+
+        this.quoteLines = [];
+        this.maxSeenVolume = 0;
+
+        for (let i = 0; i < max; i++) {
+          const bid = orderbook.bids[i] ?? null;
+          const ask = orderbook.asks[i] ?? null;
+
+          if (bid) {
+            bid.pool = this.normalizePool(bid.pool, 'bid');
+
+            this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
+          }
+
+          if (ask) {
+            ask.pool = this.normalizePool(ask.pool, 'ask');
+
+            this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
+          }
+
+          this.quoteLines.push({
+            bid,
+            ask
           });
         }
-      }
-
-      if (orderbook.bids?.length && orderbook.asks?.length) {
-        const bestBid = orderbook.bids[0]?.price;
-        const bestAsk = orderbook.asks[0]?.price;
-
-        this.spreadString = `${formatPriceWithoutCurrency(
-          bestAsk - bestBid,
-          this.instrument
-        )} (${formatPercentage((bestAsk - bestBid) / bestBid)})`;
-      }
-
-      let max = Math.max(
-        orderbook.bids?.length ?? 0,
-        orderbook.asks?.length ?? 0
-      );
-
-      if (max > this.document.depth) max = this.document.depth;
-
-      this.quoteLines = [];
-      this.maxSeenVolume = 0;
-
-      for (let i = 0; i < max; i++) {
-        const bid = orderbook.bids[i] ?? null;
-        const ask = orderbook.asks[i] ?? null;
-
-        if (bid) {
-          bid.pool = this.normalizePool(bid.pool, 'bid');
-
-          this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
-        }
-
-        if (ask) {
-          ask.pool = this.normalizePool(ask.pool, 'ask');
-
-          this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
-        }
-
-        this.quoteLines.push({
-          bid,
-          ask
-        });
-      }
-    } else this.spreadString = '—';
+      } else this.spreadString = '—';
+    });
   }
 
   normalizePool(pool, type) {

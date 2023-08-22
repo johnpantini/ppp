@@ -389,39 +389,42 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   positionChanged(oldValue, newValue) {
-    if (newValue) {
-      if (newValue.isBalance) {
-        const existing = this.balancesMap.get(newValue.symbol);
+    requestAnimationFrame(() => {
+      if (newValue) {
+        if (newValue.isBalance) {
+          const existing = this.balancesMap.get(newValue.symbol);
 
-        if (!this.#arePositionsEqual(existing, newValue)) {
-          if (newValue.size !== 0)
-            this.balancesMap.set(newValue.symbol, newValue);
-          else this.balancesMap.delete(newValue.symbol);
+          if (!this.#arePositionsEqual(existing, newValue)) {
+            if (newValue.size !== 0)
+              this.balancesMap.set(newValue.symbol, newValue);
+            else this.balancesMap.delete(newValue.symbol);
 
-          this.balances = this.portfolioMapToArray(this.balancesMap);
-        }
-      } else if (!newValue.instrument?.type) {
-        const existing = this.zombiesMap.get(newValue.symbol);
+            this.balances = this.portfolioMapToArray(this.balancesMap);
+          }
+        } else if (!newValue.instrument?.type) {
+          const existing = this.zombiesMap.get(newValue.symbol);
 
-        if (!this.#arePositionsEqual(existing, newValue)) {
-          if (newValue.size !== 0)
-            this.zombiesMap.set(newValue.symbol, newValue);
-          else this.zombiesMap.delete(newValue.symbol);
+          if (!this.#arePositionsEqual(existing, newValue)) {
+            if (newValue.size !== 0)
+              this.zombiesMap.set(newValue.symbol, newValue);
+            else this.zombiesMap.delete(newValue.symbol);
 
-          this.zombies = this.portfolioMapToArray(this.zombiesMap);
-        }
-      } else {
-        const map = this[`${newValue.instrument.type}sMap`];
-        const existing = map.get(newValue.symbol);
+            this.zombies = this.portfolioMapToArray(this.zombiesMap);
+          }
+        } else {
+          const map = this[`${newValue.instrument.type}sMap`];
+          const existing = map.get(newValue.symbol);
 
-        if (!this.#arePositionsEqual(existing, newValue)) {
-          if (newValue.size !== 0) map.set(newValue.symbol, newValue);
-          else map.delete(newValue.symbol);
+          if (!this.#arePositionsEqual(existing, newValue)) {
+            if (newValue.size !== 0) map.set(newValue.symbol, newValue);
+            else map.delete(newValue.symbol);
 
-          this[`${newValue.instrument.type}s`] = this.portfolioMapToArray(map);
+            this[`${newValue.instrument.type}s`] =
+              this.portfolioMapToArray(map);
+          }
         }
       }
-    }
+    });
   }
 
   getPortfolioName() {

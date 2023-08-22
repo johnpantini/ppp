@@ -75,9 +75,9 @@ const TINKOFF_CURRENCIES = {
 
 class OrderbookDatum extends TraderDatum {
   async firstReferenceAdded(source) {
-    const instrument = source.instrument;
+    const instrument = this.trader.adoptInstrument(source.instrument);
 
-    if (instrument && !instrument?.notSupported) {
+    if (instrument && !instrument.notSupported && instrument.tinkoffFigi) {
       this.dataArrived(
         await this.trader
           .getOrCreateClient(MarketDataServiceDefinition)

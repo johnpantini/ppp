@@ -377,20 +377,22 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   activeOrderChanged(oldValue, newValue) {
-    if (newValue?.orderId) {
-      if (newValue.orderType === 'limit') {
-        if (
-          newValue.quantity === newValue.filled ||
-          newValue.status !== 'working'
-        )
-          this.ordersMap.delete(newValue.orderId);
-        else if (newValue.status === 'working') {
-          this.ordersMap.set(newValue.orderId, newValue);
-        }
+    requestAnimationFrame(() => {
+      if (newValue?.orderId) {
+        if (newValue.orderType === 'limit') {
+          if (
+            newValue.quantity === newValue.filled ||
+            newValue.status !== 'working'
+          )
+            this.ordersMap.delete(newValue.orderId);
+          else if (newValue.status === 'working') {
+            this.ordersMap.set(newValue.orderId, newValue);
+          }
 
-        this.orders = this.getOrdersArray();
+          this.orders = this.getOrdersArray();
+        }
       }
-    }
+    });
   }
 
   async instrumentChanged(oldValue, newValue) {
