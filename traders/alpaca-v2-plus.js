@@ -195,6 +195,22 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
 }
 
 class NoiiDatum extends AlpacaV2PlusTraderDatum {
+  filter(data, instrument, source) {
+    if (!data.h) {
+      const nowHours = new Date().getUTCHours();
+
+      if (source.noiiClose && nowHours < 19) {
+        return false;
+      }
+
+      if (!source.noiiClose && nowHours > 14) {
+        return false;
+      }
+    }
+
+    return super.filter(data, instrument, source);
+  }
+
   async firstReferenceAdded(source, symbol) {
     if (!this.trader.supportsInstrument(source?.instrument)) {
       return;
