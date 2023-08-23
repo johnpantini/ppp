@@ -1093,15 +1093,16 @@ export const widgetGroupControlStyles = css`
   }
 
   .toggle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: calc(${fontSizeWidget} - 2px);
-    line-height: calc(${fontSizeWidget} - 2px);
     cursor: pointer;
     position: relative;
     background: ${paletteGrayLight1};
     color: ${paletteBlack};
     width: 12px;
     height: 12px;
-    text-align: center;
   }
 
   :host(:not([selection])) .toggle::before {
@@ -1687,7 +1688,7 @@ export const widgetSearchControlStyles = css`
 
   .popup-trigger {
     cursor: pointer;
-    padding: 0 10px 2px 10px;
+    padding: 0 10px;
     font-family: ${bodyFont};
     font-size: ${fontSizeWidget};
     font-weight: ${fontWeightWidget};
@@ -2917,8 +2918,9 @@ export const widgetTextFieldStyles = css`
   input {
     height: 32px;
     font-size: ${fontSizeWidget};
+    line-height: 32px;
     border-radius: 4px 0 0 4px;
-    padding: 0 0 1px 8px;
+    padding: 0 0 0 8px;
     border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 

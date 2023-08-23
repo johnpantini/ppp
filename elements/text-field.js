@@ -268,6 +268,7 @@ export const textFieldStyles = css`
     border-radius: 4px;
     width: 100%;
     height: 36px;
+    line-height: 36px;
     padding: 0 12px;
     z-index: 1;
     outline: none;
@@ -278,7 +279,6 @@ export const textFieldStyles = css`
     font-family: inherit;
     font-size: inherit;
     font-weight: inherit;
-    line-height: inherit;
   }
 
   input::placeholder {
