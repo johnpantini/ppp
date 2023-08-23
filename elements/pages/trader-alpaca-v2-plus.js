@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -6,7 +7,7 @@ import {
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
-import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import { BROKERS, TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import { getAspirantBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../button.js';
@@ -159,24 +160,6 @@ export const traderAlpacaV2PlusTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>URL для подключения к потоку ленты сделок</h5>
-          <p class="description">
-            Введите адрес, если лента всех сделок передаётся по отдельному
-            каналу.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            optional
-            disabled
-            placeholder="В настоящий момент не реализовано"
-            value="${(x) => x.document.wsUrlForTimeAndSales}"
-            ${ref('wsUrlForTimeAndSales')}
-          ></ppp-text-field>
-        </div>
-      </section>
-      <section>
-        <div class="label-group">
           <h5>Тайм-аут восстановления соединения</h5>
           <p class="description">
             Время, по истечении которого будет предпринята очередная попытка
@@ -313,10 +296,6 @@ export class TraderAlpacaV2PlusPage extends Page {
 
     await checkConnection(this.wsUrl, login, password);
 
-    if (this.wsUrlForTimeAndSales.value.trim()) {
-      await checkConnection(this.wsUrlForTimeAndSales, login, password);
-    }
-
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
@@ -366,21 +345,36 @@ export class TraderAlpacaV2PlusPage extends Page {
       ppp.traders.delete(this.document._id);
     }
 
+    const caps = [TRADER_CAPS.CAPS_MIC];
+    const brokerType = this.brokerId.datum().type;
+
+    if (brokerType === BROKERS.PSINA) {
+      const port = parseInt(new URL(this.wsUrl.value).port);
+
+      if (port === 38744) {
+        caps.push(TRADER_CAPS.CAPS_US_NBBO);
+        caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
+      } else if (port === 38643) {
+        caps.push(TRADER_CAPS.CAPS_NSDQ_TOTALVIEW);
+        caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
+      } else if (port === 38943) {
+        caps.push(TRADER_CAPS.CAPS_NOII);
+      }
+    } else if (brokerType === BROKERS.UTEX) {
+      caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
+      caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);
+    }
+
     return {
       $set: {
         name: this.name.value.trim(),
         brokerId: this.brokerId.value,
         wsUrl: this.wsUrl.value.trim(),
-        wsUrlForTimeAndSales: this.wsUrlForTimeAndSales.value.trim(),
         reconnectTimeout: this.reconnectTimeout.value
           ? Math.abs(this.reconnectTimeout.value)
           : void 0,
         useLots: this.useLots.checked,
-        caps: [
-          TRADER_CAPS.CAPS_ORDERBOOK,
-          TRADER_CAPS.CAPS_TIME_AND_SALES,
-          TRADER_CAPS.CAPS_MIC
-        ],
+        caps,
         version: 1,
         type: TRADERS.ALPACA_V2_PLUS,
         updatedAt: new Date()

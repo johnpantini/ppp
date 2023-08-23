@@ -95,9 +95,7 @@ export const portfolioWidgetTemplate = html`
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
-          <ppp-widget-group-control
-            selection="${(x) => x.document?.group}"
-          ></ppp-widget-group-control>
+          <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control></ppp-widget-search-control>
           <span class="widget-title">
             <span class="title">${(x) => x.document?.name ?? ''}</span>

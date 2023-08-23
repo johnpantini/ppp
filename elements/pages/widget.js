@@ -34,10 +34,11 @@ import {
   paletteWhite,
   positive,
   spacing1,
-  spacing2, spacing3,
+  spacing2,
+  spacing3,
   spacing5,
   themeConditional
-} from '../../design/design-tokens.js'
+} from '../../design/design-tokens.js';
 import { display } from '../../vendor/fast-utilities.js';
 import { RadioGroup, radioGroupTemplate } from '../radio-group.js';
 import { Radio } from '../radio.js';
@@ -430,17 +431,17 @@ export const widgetPageTemplate = html`
                                             x.name.value = 'Сообщения Pusher';
 
                                             break;
-                                          case 'psina':
+                                          case 'noii':
                                             x.url.value =
-                                              'https://psina.pages.dev/widgets/psina.js';
-                                            x.name.value = 'Psina';
+                                              'https://psina.pages.dev/widgets/noii.js';
+                                            x.name.value = 'Индикатор NOII';
 
                                             break;
                                         }
                                       }}"
                                     >
-                                      <ppp-option value="psina">
-                                        Psina
+                                      <ppp-option value="noii">
+                                        Индикатор NOII
                                       </ppp-option>
                                       <ppp-option value="simple-frame-widget">
                                         Фрейм
@@ -522,8 +523,7 @@ export const widgetPageTemplate = html`
                         x.autoApplyWidgetModifications.checked
                       )}"
                     ?checked="${() =>
-                      ppp.settings.get('autoApplyWidgetModifications') ??
-                      true}"
+                      ppp.settings.get('autoApplyWidgetModifications') ?? true}"
                   >
                     Применять настройки по мере редактирования
                   </ppp-checkbox>

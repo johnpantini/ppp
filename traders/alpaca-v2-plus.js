@@ -64,10 +64,10 @@ class AllTradesDatum extends AlpacaV2PlusTraderDatum {
 
     return {
       orderId: `${data.S}|${side}|${data.p}|${data.s}|${pool}|${timestamp}`,
+      symbol: data.S,
       side,
       condition: data.c?.join?.(' '),
       timestamp,
-      symbol: data.S,
       price: data.p,
       volume: data.s,
       pool
@@ -194,6 +194,55 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
   }
 }
 
+class NoiiDatum extends AlpacaV2PlusTraderDatum {
+  async firstReferenceAdded(source, symbol) {
+    if (!this.trader.supportsInstrument(source?.instrument)) {
+      return;
+    }
+
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          action: 'subscribe',
+          noii: [symbol],
+          // Opening cross by default.
+          close: source.noiiClose ?? false
+        })
+      );
+    }
+  }
+
+  async lastReferenceRemoved(source, symbol) {
+    if (!this.trader.supportsInstrument(source?.instrument)) {
+      return;
+    }
+
+    if (this.trader.connection.readyState === WebSocket.OPEN) {
+      this.trader.connection.send(
+        JSON.stringify({
+          action: 'unsubscribe',
+          noii: [symbol]
+        })
+      );
+    }
+  }
+
+  [TRADER_DATUM.NOII](data) {
+    return {
+      symbol: data.S,
+      timestamp: new Date(data.t).valueOf(),
+      pairedShares: data.psh,
+      imbShares: data.ish,
+      side: data.is,
+      imbRefPrice: data.irp,
+      imbNearPrice: data.inp,
+      imbFarPrice: data.ifp,
+      imbVarIndicator: data.ivi,
+      imbActTp: data.iatp
+    };
+  }
+}
+
 /**
  * @typedef {Object} AlpacaV2PlusTrader
  * @extends Trader
@@ -213,6 +262,10 @@ class AlpacaV2PlusTrader extends Trader {
       {
         type: OrderbookDatum,
         datums: [TRADER_DATUM.ORDERBOOK]
+      },
+      {
+        type: NoiiDatum,
+        datums: [TRADER_DATUM.NOII]
       }
     ]);
   }
@@ -316,6 +369,11 @@ class AlpacaV2PlusTrader extends Trader {
                 );
               } else if (payload.T === 'q') {
                 this.datums[TRADER_DATUM.ORDERBOOK].dataArrived(
+                  payload,
+                  this.instruments.get(payload.S)
+                );
+              } else if (payload.T === 'noii') {
+                this.datums[TRADER_DATUM.NOII].dataArrived(
                   payload,
                   this.instruments.get(payload.S)
                 );

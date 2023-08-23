@@ -71,6 +71,7 @@ class TraderDatum {
       case TRADER_DATUM.CANDLE:
       case TRADER_DATUM.MARKET_PRINT:
       case TRADER_DATUM.ORDERBOOK:
+      case TRADER_DATUM.NOII:
         return {};
     }
 

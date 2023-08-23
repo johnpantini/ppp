@@ -84,7 +84,10 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_CHARTS]: 'Графики котировок',
         [TRADER_CAPS.CAPS_MIC]: 'Пулы ликвидности',
         [TRADER_CAPS.CAPS_ORDER_DESTINATION]: 'Выбор назначения заявки',
-        [TRADER_CAPS.CAPS_ORDER_TIF]: 'Параметр заявки Time in Force'
+        [TRADER_CAPS.CAPS_ORDER_TIF]: 'Параметр заявки Time in Force',
+        [TRADER_CAPS.CAPS_NOII]: 'Индикатор NOII',
+        [TRADER_CAPS.CAPS_US_NBBO]: 'NBBO (США)',
+        [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW]: 'Nasdaq TotalView'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',

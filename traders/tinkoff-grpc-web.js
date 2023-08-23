@@ -957,7 +957,7 @@ class TinkoffGrpcWebTrader extends Trader {
         (source, field, datum) => [TRADER_DATUM.ORDERBOOK].indexOf(datum) !== -1
       );
       this.resubscribeToMarketDataStream();
-      this.trader.traderEvent({ event: 'reconnect' });
+      this.traderEvent({ event: 'reconnect' });
     } catch (e) {
       if (!isAbortError(e)) {
         console.error(e);
@@ -968,7 +968,7 @@ class TinkoffGrpcWebTrader extends Trader {
               [TRADER_DATUM.ORDERBOOK].indexOf(datum) !== -1
           );
           this.resubscribeToMarketDataStream();
-          this.trader.traderEvent({ event: 'reconnect' });
+          this.traderEvent({ event: 'reconnect' });
         }, Math.max(this.document.reconnectTimeout ?? 1000, 1000));
       }
     }

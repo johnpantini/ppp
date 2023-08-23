@@ -101,6 +101,9 @@ export const traderPageTemplate = html`
           <div slot="description" class="caps-list">
             <ul>
               <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+              </li>
+              <li>
                 ${() =>
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ORDERBOOK}`)}
               </li>
@@ -110,6 +113,16 @@ export const traderPageTemplate = html`
               </li>
               <li>
                 ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MIC}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_US_NBBO}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_NSDQ_TOTALVIEW}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_NOII}`)}
               </li>
             </ul>
           </div>
