@@ -424,7 +424,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
         commands: `sudo systemctl stop aspirant@${this.document._id}.service &&`
       }))
     ) {
-      throw new Error('Не удалось отсановить сервис Aspirant.');
+      throw new Error('Не удалось остановить сервис Aspirant.');
     }
   }
 
@@ -441,7 +441,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
         ].join(' ')
       }))
     ) {
-      throw new Error('Не удалось отсановить сервис Aspirant.');
+      throw new Error('Не удалось остановить сервис Aspirant.');
     }
   }
 }

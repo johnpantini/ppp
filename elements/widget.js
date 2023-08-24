@@ -3371,19 +3371,6 @@ export class WidgetCard extends PPPElement {
 
     this.slottedActions = [];
   }
-
-  connectedCallback() {
-    super.connectedCallback();
-
-    if (
-      this.classList.contains('new') &&
-      document.visibilityState === 'visible'
-    ) {
-      setTimeout(() => {
-        this.classList.remove('new');
-      }, 5000);
-    }
-  }
 }
 
 export default {
