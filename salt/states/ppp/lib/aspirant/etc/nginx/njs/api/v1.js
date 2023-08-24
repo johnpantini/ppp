@@ -129,7 +129,7 @@ async function startDeployedWorker(
       },
       DestPath: 'local/workers.conf',
       EmbeddedTmpl: `
-        {{ range nomadServices }}
+        {{ range nomadService "${workerId}" }}
           location /workers/{{ .Name | toLower }}/ {
             default_type application/json;
 
@@ -140,8 +140,7 @@ async function startDeployedWorker(
               return 200 '{}';
             }
 
-            {{- range nomadService .Name }}
-            proxy_pass http://{{ .Address }}:{{ .Port }}/;{{- end }}
+            proxy_pass http://{{ .Address }}:{{ .Port }}/;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
@@ -149,7 +148,7 @@ async function startDeployedWorker(
             proxy_set_header Origin "\${scheme}://\${proxy_host}";
             proxy_buffering off;
           }
-        {{ end -}}
+        {{ end }}
       `
     });
   }
@@ -338,7 +337,7 @@ async function resurrect(r) {
       fs.writeFileSync('/etc/nginx/env.json', JSON.stringify(env));
 
       const serviceMachineUrl = env.SERVICE_MACHINE_URL.endsWith('/')
-        ? r.uri.slice(0, -1)
+        ? env.SERVICE_MACHINE_URL.slice(0, -1)
         : env.SERVICE_MACHINE_URL;
       const headers = new Headers();
 
