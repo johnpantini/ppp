@@ -2,7 +2,7 @@
 
 import ppp from '../../ppp.js';
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
   WidgetWithInstrument
 } from '../widget.js';
@@ -54,6 +54,7 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../tabs.js';
 import '../text-field.js';
+import '../widget-controls.js';
 
 const decSeparator = decimalSeparator();
 
@@ -683,7 +684,7 @@ export const orderWidgetTemplate = html`
 
 export const orderWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   ${spacing()}
   :host ppp-widget-notifications-area {
     bottom: 55px;

@@ -1,9 +1,10 @@
 /** @decorator */
 
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate
 } from '../widget.js';
 import {
   html,
@@ -16,9 +17,6 @@ import {
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
 import { createChart, CrosshairMode, LineStyle } from '../../lib/ppp-charts.js';
-import '../button.js';
-import '../query-select.js';
-import '../text-field.js';
 import {
   bodyFont,
   chartBorderDownColor,
@@ -46,20 +44,15 @@ import {
 } from '../../design/design-tokens.js';
 import { formatPriceWithoutCurrency } from '../../lib/intl.js';
 import { CandleInterval } from '../../vendor/tinkoff/definitions/market-data.js';
+import '../button.js';
+import '../query-select.js';
+import '../text-field.js';
+import '../widget-controls.js';
 
 export const lightChartWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      <div class="widget-header">
-        <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
-          </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
-        </div>
-      </div>
+      ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${when(
           (x) => !x.instrument,
@@ -98,7 +91,7 @@ export const lightChartWidgetTemplate = html`
 
 export const lightChartWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   ${spacing()}
   .chart-holder {
     display: flex;

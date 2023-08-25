@@ -2,9 +2,10 @@
 
 import ppp from '../../ppp.js';
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate
 } from '../widget.js';
 import {
   html,
@@ -39,6 +40,7 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
+import '../widget-controls.js';
 
 const showAllTabHidden = (x) =>
   typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
@@ -54,16 +56,7 @@ const showConditionalTabHidden = (x) =>
 export const activeOrdersWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      <div class="widget-header">
-        <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
-          </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
-        </div>
-      </div>
+      ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         <div class="controls">
           <div class="tabs">
@@ -223,7 +216,7 @@ export const activeOrdersWidgetTemplate = html`
 
 export const activeOrdersWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   ${spacing()}
   .controls {
     z-index: 1;

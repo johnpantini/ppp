@@ -2,9 +2,10 @@
 
 import ppp from '../../ppp.js';
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate
 } from '../widget.js';
 import { WidgetColumns } from '../widget-columns.js';
 import {
@@ -29,6 +30,7 @@ import '../draggable-stack.js';
 import '../query-select.js';
 import '../text-field.js';
 import '../widget-column-list.js';
+import '../widget-controls.js';
 
 const DEFAULT_COLUMNS = [
   {
@@ -93,16 +95,7 @@ const portfolioSection = ({ title, section }) =>
 export const portfolioWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      <div class="widget-header">
-        <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
-          </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
-        </div>
-      </div>
+      ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         <div class="portfolio-header">
           <div class="portfolio-name-section">
@@ -186,7 +179,7 @@ export const portfolioWidgetTemplate = html`
 
 export const portfolioWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   .portfolio-header {
     display: none;
     flex-shrink: 0;

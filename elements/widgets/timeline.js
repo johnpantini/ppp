@@ -1,9 +1,10 @@
 /** @decorator */
 
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate
 } from '../widget.js';
 import {
   html,
@@ -35,22 +36,14 @@ import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
+import '../widget-controls.js';
 
 await ppp.i18n(import.meta.url);
 
 export const timelineWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      <div class="widget-header">
-        <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
-          </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
-        </div>
-      </div>
+      ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         <div class="widget-card-list">
           ${when(
@@ -134,7 +127,7 @@ export const timelineWidgetTemplate = html`
 
 export const timelineWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   .timeline-item-headline {
     width: 100%;
     margin: 0 8px;
@@ -155,6 +148,7 @@ export const timelineWidgetStyles = css`
     overflow-y: hidden;
     overflow-x: auto;
   }
+
   ${scrollbars('.x-scroll')}
 `;
 

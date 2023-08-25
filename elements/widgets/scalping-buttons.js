@@ -1,10 +1,10 @@
 /** @decorator */
 
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument
-} from '../widget.js';
+  WidgetWithInstrument, widgetDefaultHeaderTemplate
+} from '../widget.js'
 import {
   html,
   css,
@@ -22,6 +22,7 @@ import '../button.js';
 import '../query-select.js';
 import '../snippet.js';
 import '../text-field.js';
+import '../widget-controls.js';
 
 const defaultBuySideButtonsTemplate = `+1,+2,+5,+10
 -1,-2,-5,-10`;
@@ -42,16 +43,7 @@ const showConditionalTabHidden = (x) =>
 export const scalpingButtonsWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      <div class="widget-header">
-        <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
-          </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
-        </div>
-      </div>
+      ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${when(
           (x) =>
@@ -180,7 +172,7 @@ export const scalpingButtonsWidgetTemplate = html`
 
 export const scalpingButtonsWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   ${spacing()}
   ${scrollbars('.holder')}
   .controls {

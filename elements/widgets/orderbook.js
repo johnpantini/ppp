@@ -1,9 +1,10 @@
 /** @decorator */
 
 import {
-  widget,
+  widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate
 } from '../widget.js';
 import {
   html,
@@ -51,20 +52,12 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
+import '../widget-controls.js';
 
 export const orderbookWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      <div class="widget-header">
-        <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
-          <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
-          </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
-        </div>
-      </div>
+      ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${when(
           (x) => !x.instrument,
@@ -216,7 +209,7 @@ export const orderbookWidgetTemplate = html`
 
 export const orderbookWidgetStyles = css`
   ${normalize()}
-  ${widget()}
+  ${widgetStyles()}
   ${spacing()}
   .orderbook-table {
     min-width: 140px;
