@@ -144,19 +144,21 @@ class PaletteItem extends PPPElement {
   dt;
 
   dtChanged(oldValue, newValue) {
-    if (newValue) {
-      Updates.enqueue(() => {
-        const page = this.closest('form').getRootNode().host;
-        const propName = newValue.replace(/-./g, (x) => x[1].toUpperCase());
-        const themePropName = `theme${
-          propName[0].toUpperCase() + propName.slice(1)
-        }`;
+    if (this.$fastController.isConnected) {
+      if (newValue) {
+        Updates.enqueue(() => {
+          const page = this.closest('form').getRootNode().host;
+          const propName = newValue.replace(/-./g, (x) => x[1].toUpperCase());
+          const themePropName = `theme${
+            propName[0].toUpperCase() + propName.slice(1)
+          }`;
 
-        this.control.placeholder = defaultTheme[propName];
-        this.control.value =
-          page.document[themePropName] ?? designTokens.get(newValue).default;
-        this.updateExampleColor();
-      });
+          this.control.placeholder = defaultTheme[propName];
+          this.control.value =
+            page.document[themePropName] ?? designTokens.get(newValue).default;
+          this.updateExampleColor();
+        });
+      }
     }
   }
 
@@ -170,6 +172,12 @@ class PaletteItem extends PPPElement {
     } else {
       this.example.setAttribute('hidden', '');
     }
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.dtChanged(void 0, this.dt);
   }
 }
 
@@ -536,7 +544,6 @@ export const settingsAppearancePageTemplate = html`
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
-          ${ref('submitControl')}
         >
           Сохранить параметры
         </ppp-button>
@@ -570,6 +577,34 @@ export class SettingsAppearancePage extends Page {
 
   async connectedCallback() {
     await super.connectedCallback();
+
+    PaletteItem.compose({
+      template: html`
+        <template>
+          <ppp-text-field
+            slotted
+            @input="${(x) => x.updateExampleColor()}}"
+            ${ref('control')}
+          >
+      <span slot="label">
+        <slot></slot>
+      </span>
+            <span slot="end">
+        <span ${ref('example')} class="example"
+              style="background-color: ${(x) => x.color}"</span>
+            </span>
+          </ppp-text-field>
+        </template>
+      `,
+      styles: css`
+        .example {
+          width: 14px;
+          height: 14px;
+          border: 1px solid ${paletteGrayBase};
+          border-radius: 50%;
+        }
+      `
+    }).define();
 
     if (sessionStorage.getItem('ppp-show-success-notification') === '1') {
       sessionStorage.removeItem('ppp-show-success-notification');
@@ -862,30 +897,4 @@ export class SettingsAppearancePage extends Page {
 export default SettingsAppearancePage.compose({
   template: settingsAppearancePageTemplate,
   styles: settingsAppearancePageStyles
-}).define();
-
-PaletteItem.compose({
-  template: html`
-    <ppp-text-field
-      slotted
-      @input="${(x) => x.updateExampleColor()}}"
-      ${ref('control')}
-    >
-      <span slot="label">
-        <slot></slot>
-      </span>
-      <span slot="end">
-        <span ${ref('example')} class="example"
-              style="background-color: ${(x) => x.color}"</span>
-      </span>
-    </ppp-text-field>
-  `,
-  styles: css`
-    .example {
-      width: 14px;
-      height: 14px;
-      border: 1px solid ${paletteGrayBase};
-      border-radius: 50%;
-    }
-  `
 }).define();

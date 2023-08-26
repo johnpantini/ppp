@@ -543,7 +543,6 @@ export const instrumentsManagePageTemplate = html`
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
-          ${ref('submitControl')}
         >
           Сохранить инструмент
         </ppp-button>

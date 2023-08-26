@@ -1,11 +1,9 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { validate } from '../../lib/ppp-errors.js';
-import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
-import '../radio-group.js';
-import '../select.js';
 import '../text-field.js';
 
 export const settingsWorkspacePageTemplate = html`
@@ -70,7 +68,6 @@ export const settingsWorkspacePageTemplate = html`
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
-          ${ref('submitControl')}
         >
           Сохранить параметры
         </ppp-button>

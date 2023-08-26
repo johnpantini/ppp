@@ -2,6 +2,7 @@ import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import '../tabs.js';
 import './settings-appearance.js';
+import './settings-connections.js';
 import './settings-workspace.js';
 
 export const settingsPageTemplate = html`
@@ -19,8 +20,10 @@ export const settingsPageTemplate = html`
     >
       <ppp-tab id="appearance">Внешний вид</ppp-tab>
       <ppp-tab id="workspace">Терминал</ppp-tab>
+      <ppp-tab id="connections">Подключения</ppp-tab>
       <ppp-tab-panel id="appearance-panel"></ppp-tab-panel>
       <ppp-tab-panel id="workspace-panel"></ppp-tab-panel>
+      <ppp-tab-panel id="connections-panel"></ppp-tab-panel>
     </ppp-tabs>
     ${when(
       (x) => x.tabs.activeid === 'appearance',
@@ -29,6 +32,10 @@ export const settingsPageTemplate = html`
     ${when(
       (x) => x.tabs.activeid === 'workspace',
       html` <ppp-settings-workspace-page></ppp-settings-workspace-page>`
+    )}
+    ${when(
+      (x) => x.tabs.activeid === 'connections',
+      html` <ppp-settings-connections-page></ppp-settings-connections-page>`
     )}
   </template>
 `;
@@ -41,7 +48,7 @@ export class SettingsPage extends Page {
   getActiveTab() {
     const params = ppp.app.params();
 
-    if (/appearance|workspace/i.test(params.tab)) return params.tab;
+    if (/appearance|workspace|connections/i.test(params.tab)) return params.tab;
     else return 'appearance';
   }
 }

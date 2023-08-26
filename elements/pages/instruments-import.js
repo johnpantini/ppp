@@ -179,7 +179,6 @@ export const instrumentsImportPageTemplate = html`
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
-          ${ref('submitControl')}
         >
           Импортировать инструменты
         </ppp-button>

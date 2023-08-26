@@ -629,6 +629,34 @@ class PPP {
 
     return url;
   }
+
+  async fetch(url, options = {}) {
+    const globalProxy = this.settings.get('globalProxyUrl');
+
+    if (globalProxy) {
+      const urlObject = new URL(url);
+
+      if (typeof options.headers === 'undefined') {
+        options.headers = {};
+      }
+
+      options.headers['X-Host'] = urlObject.hostname;
+      urlObject.hostname = new URL(globalProxy).hostname;
+
+      return fetch(urlObject.toString(), options);
+    } else {
+      const serviceMachineUrl = this.keyVault.getKey('service-machine-url');
+
+      return fetch(new URL('fetch', serviceMachineUrl).toString(), {
+        method: 'POST',
+        body: JSON.stringify({
+          method: options.method ?? 'GET',
+          url,
+          headers: options.headers ?? {}
+        })
+      });
+    }
+  }
 }
 
 /** @global */
