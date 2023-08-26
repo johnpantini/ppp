@@ -3,8 +3,8 @@
 import ppp from '../../ppp.js';
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
-  WidgetWithInstrument
+  WidgetWithInstrument,
+  widgetWithInstrumentBodyTemplate
 } from '../widget.js';
 import { debounce } from '../../lib/ppp-decorators.js';
 import {
@@ -28,8 +28,18 @@ import {
   decimalSeparator,
   getInstrumentQuantityPrecision
 } from '../../lib/intl.js';
-import { ellipsis, normalize, spacing } from '../../design/styles.js';
-import { close, decrement, increment } from '../../static/svg/sprite.js';
+import {
+  ellipsis,
+  normalize,
+  spacing,
+  typography
+} from '../../design/styles.js';
+import {
+  close,
+  decrement,
+  emptyWidgetState,
+  increment
+} from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteBlack,
@@ -48,6 +58,7 @@ import {
   negative,
   spacing2
 } from '../../design/design-tokens.js';
+import { staticallyCompose } from '../../vendor/fast-utilities.js';
 import { validate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
@@ -58,41 +69,62 @@ import '../widget-controls.js';
 
 const decSeparator = decimalSeparator();
 
-const showLastPriceInHeaderHidden = (x) =>
+const isLastPriceInHeaderHidden = (x) =>
   typeof x.document.showLastPriceInHeader === 'undefined'
     ? false
     : !x.document.showLastPriceInHeader;
-const showAbsoluteChangeInHeaderHidden = (x) =>
+const isAbsoluteChangeInHeaderHidden = (x) =>
   typeof x.document.showAbsoluteChangeInHeader === 'undefined'
     ? false
     : !x.document.showAbsoluteChangeInHeader;
-const showRelativeChangeInHeaderHidden = (x) =>
+const isRelativeChangeInHeaderHidden = (x) =>
   typeof x.document.showRelativeChangeInHeader === 'undefined'
     ? false
     : !x.document.showRelativeChangeInHeader;
-const showBestBidAndAskHidden = (x) =>
+const isBestBidAndAskHidden = (x) =>
   typeof x.document.showBestBidAndAsk === 'undefined'
     ? false
     : !x.document.showBestBidAndAsk;
-const showEstimateSectionHidden = (x) =>
-  typeof x.document.showEstimateSection === 'undefined'
+const isEstimateSectionHidden = (x) => {
+  if (x.orderTypeTabs.activeid === 'conditional' && !x.conditionalOrders) {
+    return true;
+  }
+
+  return typeof x.document.showEstimateSection === 'undefined'
     ? false
     : !x.document.showEstimateSection;
+};
+const isAmountSectionHidden = (x) => {
+  if (x.orderTypeTabs.activeid === 'conditional' && !x.conditionalOrders) {
+    return true;
+  }
+
+  return typeof x.document.showAmountSection === 'undefined'
+    ? false
+    : !x.document.showAmountSection;
+};
+const isPriceAndQuantityHidden = (x) => {
+  return x.orderTypeTabs.activeid === 'conditional' && !x.conditionalOrders;
+};
 
 export const orderWidgetTemplate = html`
   <template>
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
-          <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control></ppp-widget-search-control>
+          <ppp-widget-group-control
+            ?hidden="${(x) => !x.instrumentTrader}"
+          ></ppp-widget-group-control>
+          <ppp-widget-search-control
+            ?hidden="${(x) => !x.instrumentTrader}"
+          ></ppp-widget-search-control>
           <span class="widget-title">
             <span
               ?hidden="${(x) =>
                 !(
-                  showLastPriceInHeaderHidden(x) &&
-                  showAbsoluteChangeInHeaderHidden(x) &&
-                  showRelativeChangeInHeaderHidden(x)
+                  isLastPriceInHeaderHidden(x) &&
+                  isAbsoluteChangeInHeaderHidden(x) &&
+                  isRelativeChangeInHeaderHidden(x)
                 )}"
               class="title"
             >
@@ -102,14 +134,14 @@ export const orderWidgetTemplate = html`
               (x) => x.instrument,
               html`
                 <span
-                  ?hidden="${(x) => showLastPriceInHeaderHidden(x)}"
+                  ?hidden="${(x) => isLastPriceInHeaderHidden(x)}"
                   class="price ${(x) =>
                     x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
                 >
                   ${(x) => x.formatPrice(x.lastPrice)}
                 </span>
                 <span
-                  ?hidden="${(x) => showAbsoluteChangeInHeaderHidden(x)}"
+                  ?hidden="${(x) => isAbsoluteChangeInHeaderHidden(x)}"
                   class="${(x) =>
                     x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
                 >
@@ -120,7 +152,7 @@ export const orderWidgetTemplate = html`
                     )}
                 </span>
                 <span
-                  ?hidden="${(x) => showRelativeChangeInHeaderHidden(x)}"
+                  ?hidden="${(x) => isRelativeChangeInHeaderHidden(x)}"
                   class="${(x) =>
                     x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
                 >
@@ -130,122 +162,125 @@ export const orderWidgetTemplate = html`
               `
             )}
           </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
+          <ppp-widget-header-buttons
+            ${ref('headerButtons')}
+          ></ppp-widget-header-buttons>
         </div>
       </div>
       <div class="widget-body">
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
-        )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.ordersTrader &&
-            !x.ordersTrader.supportsInstrument(x.instrument),
-          html`${html.partial(
-            widgetEmptyStateTemplate('Инструмент не поддерживается.')
-          )}`
-        )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.ordersTrader &&
-            x.ordersTrader.supportsInstrument(x.instrument),
-          html`
-            <ppp-widget-tabs
-              ?hidden="${(x) =>
-                typeof x.document.showOrderTypeTabs === 'undefined'
-                  ? false
-                  : !x.document.showOrderTypeTabs}"
-              activeid="${(x) => x.getActiveWidgetTab()}"
-              @change="${(x, c) => x.handleWidgetTabChange(c)}"
-              ${ref('orderTypeTabs')}
-            >
-              <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
-              <ppp-widget-tab id="limit">Лимитная</ppp-widget-tab>
-              <ppp-widget-tab id="conditional" disabled>
-                Условная
-              </ppp-widget-tab>
-              <ppp-tab-panel id="market-panel"></ppp-tab-panel>
-              <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
-              <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
-            </ppp-widget-tabs>
-            <div style="height: 100%">
-              <div class="company-card">
-                <div class="company-card-item">
-                  <span
-                    title="${(x) => x.instrument?.fullName}"
-                    class="company-name"
-                  >
-                    ${(x) => x.instrument?.fullName}
-                  </span>
-                  <span
-                    @click="${(x) => x.setPrice(x.lastPrice)}"
-                    class="company-last-price ${(x) =>
-                      x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
-                  >
-                    ${(x) => x.formatPrice(x.lastPrice)}
-                  </span>
-                </div>
-                <div class="company-card-item">
-                  <span
-                    style="cursor: pointer"
-                    @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
-                  >
-                    В портфеле: ${(x) => x.formatPositionSize()}
-                  </span>
-                  <span
-                    style="cursor: pointer"
-                    @click="${(x) => x.setPrice(x.positionAverage ?? 0)}"
-                  >
-                    Средняя: ${(x) => x.formatPrice(x.positionAverage ?? 0)}
-                  </span>
+        ${widgetWithInstrumentBodyTemplate(html`
+          <ppp-widget-tabs
+            ?hidden="${(x) =>
+              typeof x.document.showOrderTypeTabs === 'undefined'
+                ? false
+                : !x.document.showOrderTypeTabs}"
+            activeid="${(x) => x.getActiveWidgetTab()}"
+            @change="${(x, c) => x.handleWidgetTabChange(c)}"
+            ${ref('orderTypeTabs')}
+          >
+            <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
+            <ppp-widget-tab id="limit">Лимитная</ppp-widget-tab>
+            <ppp-widget-tab id="conditional"> Условная</ppp-widget-tab>
+            <ppp-tab-panel id="market-panel"></ppp-tab-panel>
+            <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
+            <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
+          </ppp-widget-tabs>
+          <div class="widget-body-inner">
+            <div class="company-card">
+              <div class="company-card-item">
+                <span
+                  title="${(x) => x.instrument?.fullName}"
+                  class="company-name"
+                >
+                  ${(x) => x.instrument?.fullName}
+                </span>
+                <span
+                  @click="${(x) => x.setPrice(x.lastPrice)}"
+                  class="company-last-price ${(x) =>
+                    x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
+                >
+                  ${(x) => x.formatPrice(x.lastPrice)}
+                </span>
+              </div>
+              <div class="company-card-item">
+                <span
+                  style="cursor: pointer"
+                  @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
+                >
+                  В портфеле: ${(x) => x.formatPositionSize()}
+                </span>
+                <span
+                  style="cursor: pointer"
+                  @click="${(x) => x.setPrice(x.positionAverage ?? 0)}"
+                >
+                  Средняя: ${(x) => x.formatPrice(x.positionAverage ?? 0)}
+                </span>
+              </div>
+            </div>
+            <div ?hidden="${(x) => isBestBidAndAskHidden(x)}" class="nbbo-line">
+              <div
+                class="nbbo-line-bid"
+                @click="${(x) => x.setPrice(x.bestBid)}"
+              >
+                Bid ${(x) => x.formatPrice(x.bestBid)}
+                <div
+                  @click="${(x, { event }) => event.stopPropagation()}"
+                  class="nbbo-line-icon-holder"
+                >
+                  <div class="nbbo-line-icon-fallback">
+                    <div
+                      class="nbbo-line-icon-logo"
+                      style="${(x) =>
+                        `background-image:url(${x.searchControl.getInstrumentIconUrl(
+                          x.instrument
+                        )})`}"
+                    ></div>
+                    ${(x) => x.instrument?.fullName[0]}
+                  </div>
                 </div>
               </div>
               <div
-                ?hidden="${(x) => showBestBidAndAskHidden(x)}"
-                class="nbbo-line"
+                class="nbbo-line-ask"
+                @click="${(x) => x.setPrice(x.bestAsk)}"
               >
-                <div
-                  class="nbbo-line-bid"
-                  @click="${(x) => x.setPrice(x.bestBid)}"
-                >
-                  Bid ${(x) => x.formatPrice(x.bestBid)}
-                  <div
-                    @click="${(x, { event }) => event.stopPropagation()}"
-                    class="nbbo-line-icon-holder"
-                  >
-                    <div class="nbbo-line-icon-fallback">
-                      <div
-                        class="nbbo-line-icon-logo"
-                        style="${(x) =>
-                          `background-image:url(${x.searchControl.getInstrumentIconUrl(
-                            x.instrument
-                          )})`}"
-                      ></div>
-                      ${(x) => x.instrument?.fullName[0]}
-                    </div>
-                  </div>
-                </div>
-                <div
-                  class="nbbo-line-ask"
-                  @click="${(x) => x.setPrice(x.bestAsk)}"
-                >
-                  Ask ${(x) => x.formatPrice(x.bestAsk)}
-                </div>
+                Ask ${(x) => x.formatPrice(x.bestAsk)}
               </div>
-              ${when(
-                (x) => showBestBidAndAskHidden(x),
-                html` <div class="widget-margin-spacer"></div>`
-              )}
+            </div>
+            ${when(
+              (x) => isBestBidAndAskHidden(x),
+              html` <div class="widget-margin-spacer"></div>`
+            )}
+            ${when(
+              (x) =>
+                x.orderTypeTabs.activeid === 'conditional' &&
+                !x.conditionalOrders,
+              html`
+                <div class="widget-empty-state-holder">
+                  ${staticallyCompose(emptyWidgetState)}
+                  <span>
+                    <div class="no-conditional-orders-holder">
+                      <span>Условные заявки не настроены.</span>
+                      <a
+                        class="link"
+                        href="javascript:void(0);"
+                        @click="${(x) => x.headerButtons.showWidgetSettings()}"
+                      >
+                        Открыть параметры.
+                      </a>
+                    </div>
+                  </span>
+                </div>
+              `
+            )}
+            <div
+              class="widget-price-quantity"
+              ?hidden="${(x) => isPriceAndQuantityHidden(x)}"
+            >
               <div class="widget-section">
                 <div class="widget-subsection">
                   <div class="widget-subsection-item">
                     <div
-                      ?hidden="${(x) => showBestBidAndAskHidden(x)}"
+                      ?hidden="${(x) => isBestBidAndAskHidden(x)}"
                       class="widget-text-label"
                     >
                       Цена исполнения
@@ -318,7 +353,7 @@ export const orderWidgetTemplate = html`
                   </div>
                   <div class="widget-subsection-item">
                     <div
-                      ?hidden="${(x) => showBestBidAndAskHidden(x)}"
+                      ?hidden="${(x) => isBestBidAndAskHidden(x)}"
                       class="widget-text-label"
                     >
                       Количество
@@ -556,10 +591,7 @@ export const orderWidgetTemplate = html`
                 `
               )}
               <div
-                ?hidden="${(x) =>
-                  typeof x.document.showAmountSection === 'undefined'
-                    ? false
-                    : !x.document.showAmountSection}"
+                ?hidden="${(x) => isAmountSectionHidden(x)}"
                 class="widget-section"
               >
                 <div class="widget-summary">
@@ -578,103 +610,123 @@ export const orderWidgetTemplate = html`
                   </div>
                   <div class="widget-summary-line">
                     <span>Комиссия</span>
-                    <span
-                      >${(x) =>
+                    <span>
+                      ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
                           ? 'по факту сделки'
-                          : formatCommission(x.commission, x.instrument)}</span
-                    >
+                          : formatCommission(x.commission, x.instrument)}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="widget-footer">
-              <div
-                ?hidden="${(x) => showEstimateSectionHidden(x)}"
-                class="widget-section"
-              >
-                <div class="widget-subsection">
-                  <div class="widget-summary">
-                    <div
-                      class="widget-summary-line"
-                      style="cursor:pointer;"
-                      @click="${(x) =>
-                        x.setQuantity(x.buyingPowerQuantity ?? 0, {
-                          force: true
-                        })}"
-                    >
-                      <span>Доступно</span>
-                      <span class="positive">
-                        ${(x) => x.buyingPowerQuantity ?? '—'}
-                      </span>
-                    </div>
-                    <div
-                      class="widget-summary-line"
-                      style="cursor:pointer;"
-                      @click="${(x) =>
-                        x.setQuantity(x.marginBuyingPowerQuantity ?? 0, {
-                          force: true
-                        })}"
-                    >
-                      <span>С плечом</span>
-                      <span class="positive">
-                        ${(x) => x.marginBuyingPowerQuantity ?? '—'}
-                      </span>
-                    </div>
+          </div>
+          <div class="widget-footer">
+            <div
+              ?hidden="${(x) => isEstimateSectionHidden(x)}"
+              class="widget-section"
+            >
+              <div class="widget-subsection">
+                <div class="widget-summary">
+                  <div
+                    class="widget-summary-line"
+                    style="cursor:pointer;"
+                    @click="${(x) =>
+                      x.setQuantity(x.buyingPowerQuantity ?? 0, {
+                        force: true
+                      })}"
+                  >
+                    <span>Доступно</span>
+                    <span class="positive">
+                      ${(x) => x.buyingPowerQuantity ?? '—'}
+                    </span>
                   </div>
-                  <div class="widget-summary">
-                    <div
-                      class="widget-summary-line"
-                      style="cursor:pointer;"
-                      @click="${(x) =>
-                        x.setQuantity(x.sellingPowerQuantity ?? 0, {
-                          force: true
-                        })}"
-                    >
-                      <span>Доступно</span>
-                      <span class="negative">
-                        ${(x) => x.sellingPowerQuantity ?? '—'}
-                      </span>
-                    </div>
-                    <div
-                      class="widget-summary-line"
-                      style="cursor:pointer;"
-                      @click="${(x) =>
-                        x.setQuantity(x.marginSellingPowerQuantity ?? 0, {
-                          force: true
-                        })}"
-                    >
-                      <span>С плечом</span>
-                      <span class="negative">
-                        ${(x) => x.marginSellingPowerQuantity ?? '—'}
-                      </span>
-                    </div>
+                  <div
+                    class="widget-summary-line"
+                    style="cursor:pointer;"
+                    @click="${(x) =>
+                      x.setQuantity(x.marginBuyingPowerQuantity ?? 0, {
+                        force: true
+                      })}"
+                  >
+                    <span>С плечом</span>
+                    <span class="positive">
+                      ${(x) => x.marginBuyingPowerQuantity ?? '—'}
+                    </span>
                   </div>
                 </div>
-              </div>
-              <div
-                ?hidden="${(x) => showEstimateSectionHidden(x)}"
-                class="widget-section-spacer"
-              ></div>
-              <div class="widget-section">
-                <div class="widget-subsection">
-                  <ppp-widget-button
-                    appearance="primary"
-                    @click="${(x) => x.buyOrSell('buy')}"
+                <div class="widget-summary">
+                  <div
+                    class="widget-summary-line"
+                    style="cursor:pointer;"
+                    @click="${(x) =>
+                      x.setQuantity(x.sellingPowerQuantity ?? 0, {
+                        force: true
+                      })}"
                   >
-                    Покупка
-                  </ppp-widget-button>
-                  <ppp-widget-button
-                    appearance="danger"
-                    @click="${(x) => x.buyOrSell('sell')}"
+                    <span>Доступно</span>
+                    <span class="negative">
+                      ${(x) => x.sellingPowerQuantity ?? '—'}
+                    </span>
+                  </div>
+                  <div
+                    class="widget-summary-line"
+                    style="cursor:pointer;"
+                    @click="${(x) =>
+                      x.setQuantity(x.marginSellingPowerQuantity ?? 0, {
+                        force: true
+                      })}"
                   >
-                    Продажа
-                  </ppp-widget-button>
+                    <span>С плечом</span>
+                    <span class="negative">
+                      ${(x) => x.marginSellingPowerQuantity ?? '—'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-          `
-        )}
+            <div
+              ?hidden="${(x) => isEstimateSectionHidden(x)}"
+              class="widget-section-spacer"
+            ></div>
+            <div class="widget-section">
+              <div class="widget-subsection">
+                <ppp-widget-button
+                  appearance="primary"
+                  ?disabled="${(x) => {
+                    if (
+                      !x.conditionalOrder &&
+                      x.orderTypeTabs.activeid === 'conditional'
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  @click="${(x) => x.buyOrSell('buy')}"
+                >
+                  Покупка
+                </ppp-widget-button>
+                <ppp-widget-button
+                  appearance="danger"
+                  ?disabled="${(x) => {
+                    if (
+                      !x.conditionalOrder &&
+                      x.orderTypeTabs.activeid === 'conditional'
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  @click="${(x) => x.buyOrSell('sell')}"
+                >
+                  Продажа
+                </ppp-widget-button>
+              </div>
+            </div>
+          </div>
+        `)}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -685,9 +737,24 @@ export const orderWidgetTemplate = html`
 export const orderWidgetStyles = css`
   ${normalize()}
   ${widgetStyles()}
+  ${typography()}
   ${spacing()}
   :host ppp-widget-notifications-area {
     bottom: 55px;
+  }
+
+  .widget-body-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .no-conditional-orders-holder {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    margin-bottom: ${spacing2};
+    overflow: hidden;
   }
 
   div.widget-empty-state-holder + ppp-widget-notifications-area {
@@ -936,6 +1003,12 @@ export class OrderWidget extends WidgetWithInstrument {
 
   @observable
   positionAverage;
+
+  @observable
+  conditionalOrder;
+
+  @observable
+  conditionalOrders;
 
   async connectedCallback() {
     super.connectedCallback();
@@ -1702,6 +1775,8 @@ export class OrderWidget extends WidgetWithInstrument {
           destination: this.destination?.value,
           tif: this.tif?.value
         });
+      } else if (this.orderTypeTabs.activeid === 'conditional') {
+        console.log(this.orderTypeTabs.activeid);
       }
 
       return this.notificationsArea.success({
@@ -1781,6 +1856,7 @@ export async function widgetDefinition() {
         <ppp-tab id="traders">Подключения</ppp-tab>
         <ppp-tab id="content">Наполнение</ppp-tab>
         <ppp-tab id="hotkeys">Горячие клавиши</ppp-tab>
+        <ppp-tab id="conditionals" disabled>Заявки</ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
@@ -2265,6 +2341,12 @@ export async function widgetDefinition() {
               ></ppp-text-field>
             </div>
           </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="conditionals-panel">
+          <ppp-banner class="inline" appearance="warning">
+            В этом разделе настраиваются условные заявки, которые будут доступны
+            на соответствующей вкладке виджета.
+          </ppp-banner>
         </ppp-tab-panel>
       </ppp-tabs>
     `

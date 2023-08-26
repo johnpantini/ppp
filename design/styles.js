@@ -87,12 +87,12 @@ export const normalize = () => css`
     position: relative;
   }
 
-  .link:after {
+  .link::after {
     content: '';
     position: absolute;
     width: 100%;
     height: 2px;
-    bottom: -4px;
+    bottom: 0;
     left: 0;
     border-radius: 2px;
   }
@@ -320,12 +320,13 @@ export const typography = () => css`
   }
 
   .link {
+    width: fit-content;
+    position: relative;
     font-family: ${bodyFont};
     display: inline-flex;
     align-items: center;
     text-decoration: none;
     cursor: pointer;
-    line-height: 13px;
     color: ${linkColor};
     font-weight: ${fontWeightBody1};
   }

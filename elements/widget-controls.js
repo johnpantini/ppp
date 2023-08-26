@@ -1889,6 +1889,8 @@ export class WidgetHeaderButtons extends PPPElement {
           page.endOperation();
         }
       };
+
+      return page;
     }
   }
 

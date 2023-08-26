@@ -3,8 +3,10 @@
 import {
   widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument, widgetDefaultHeaderTemplate
-} from '../widget.js'
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate,
+  widgetWithInstrumentBodyTemplate
+} from '../widget.js';
 import {
   html,
   css,
@@ -52,100 +54,77 @@ export const timeAndSalesWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
-        )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.tradesTrader &&
-            !x.tradesTrader.supportsInstrument(x.instrument),
-          html`${html.partial(
-            widgetEmptyStateTemplate('Инструмент не поддерживается.')
-          )}`
-        )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.tradesTrader &&
-            x.tradesTrader.supportsInstrument(x.instrument),
-          html`
-            <table class="trades-table">
-              <thead>
-                <tr>
-                  <th>
-                    ${(x) =>
-                      x.instrument && x.document.displayCurrency
-                        ? 'Цена, ' + priceCurrencySymbol(x.instrument)
-                        : 'Цена'}
-                  </th>
-                  <th>Лоты</th>
-                  <th>Время</th>
-                  <th
-                    style="display: ${(x) =>
-                      x.tradesTrader &&
-                      x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
-                        ? 'table-cell'
-                        : 'none'}"
+        ${widgetWithInstrumentBodyTemplate(html`
+          <table class="trades-table">
+            <thead>
+              <tr>
+                <th>
+                  ${(x) =>
+                    x.instrument && x.document.displayCurrency
+                      ? 'Цена, ' + priceCurrencySymbol(x.instrument)
+                      : 'Цена'}
+                </th>
+                <th>Лоты</th>
+                <th>Время</th>
+                <th
+                  style="display: ${(x) =>
+                    x.tradesTrader &&
+                    x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                      ? 'table-cell'
+                      : 'none'}"
+                >
+                  MM
+                </th>
+              </tr>
+            </thead>
+            <tbody @click="${(x, c) => x.handleTableClick(c)}">
+              ${repeat(
+                (x) => x.trades ?? [],
+                html`
+                  <tr
+                    class="price-line"
+                    side="${(x) => x.side}"
+                    price="${(x) => x.price}"
                   >
-                    MM
-                  </th>
-                </tr>
-              </thead>
-              <tbody @click="${(x, c) => x.handleTableClick(c)}">
-                ${repeat(
-                  (x) => x.trades ?? [],
-                  html`
-                    <tr
-                      class="price-line"
-                      side="${(x) => x.side}"
-                      price="${(x) => x.price}"
+                    <td>
+                      <div class="cell">
+                        ${(x, c) =>
+                          formatPriceWithoutCurrency(
+                            x.price,
+                            c.parent.instrument
+                          )}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        ${(x, c) =>
+                          formatQuantity(x.volume ?? 0, c.parent.instrument)}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">${(x) => formatDate(x.timestamp)}</div>
+                    </td>
+                    <td
+                      style="display: ${(x, c) =>
+                        c.parent.tradesTrader &&
+                        c.parent.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
+                          ? 'table-cell'
+                          : 'none'}"
                     >
-                      <td>
-                        <div class="cell">
-                          ${(x, c) =>
-                            formatPriceWithoutCurrency(
-                              x.price,
-                              c.parent.instrument
-                            )}
-                        </div>
-                      </td>
-                      <td>
-                        <div class="cell">
-                          ${(x, c) =>
-                            formatQuantity(x.volume ?? 0, c.parent.instrument)}
-                        </div>
-                      </td>
-                      <td>
-                        <div class="cell">
-                          ${(x) => formatDate(x.timestamp)}
-                        </div>
-                      </td>
-                      <td
-                        style="display: ${(x, c) =>
-                          c.parent.tradesTrader &&
-                          c.parent.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
-                            ? 'table-cell'
-                            : 'none'}"
-                      >
-                        <div class="cell">${(x) => x.pool}</div>
-                      </td>
-                    </tr>
-                  `
-                )}
-              </tbody>
-            </table>
-            ${when(
-              (x) => !x.trades?.length,
-              html`${html.partial(
-                widgetEmptyStateTemplate('Лента сделок пуста.')
-              )}`
-            )}
-          `
-        )}
+                      <div class="cell">${(x) => x.pool}</div>
+                    </td>
+                  </tr>
+                `
+              )}
+            </tbody>
+          </table>
+          ${when(
+            (x) => !x.trades?.length,
+            html`${html.partial(
+              widgetEmptyStateTemplate('Лента сделок пуста.')
+            )}`
+          )}
+        `)}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>

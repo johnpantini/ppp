@@ -190,7 +190,7 @@ export const widgetPageTemplate = html`
       <div class="content">
         <nav>
           <div class="nav-inner">
-            <div class="widget-settings">
+            <div class="widget-settings" ${ref('widgetSettings')}>
               <form novalidate>
                 <div>
                   <div class="drawer" ?hidden="${(x) => x.document._id}">
@@ -1252,6 +1252,11 @@ export class WidgetPage extends Page {
 
   onChange(event) {
     const cp = event.composedPath();
+
+    if (cp?.[0].tagName?.toLowerCase() === 'ppp-tabs') {
+      return;
+    }
+
     const isTextFiled = cp.find((n) =>
       /ppp-text|ppp-snippet/i.test(n.tagName?.toLowerCase())
     );

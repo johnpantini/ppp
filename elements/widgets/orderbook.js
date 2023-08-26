@@ -4,7 +4,8 @@ import {
   widgetStyles,
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
-  widgetDefaultHeaderTemplate
+  widgetDefaultHeaderTemplate,
+  widgetWithInstrumentBodyTemplate
 } from '../widget.js';
 import {
   html,
@@ -59,147 +60,122 @@ export const orderbookWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
-        ${when(
-          (x) => !x.instrument,
-          html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
-          )}`
-        )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.bookTrader &&
-            !x.bookTrader.supportsInstrument(x.instrument),
-          html`${html.partial(
-            widgetEmptyStateTemplate('Инструмент не поддерживается.')
-          )}`
-        )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.bookTrader &&
-            x.bookTrader.supportsInstrument(x.instrument),
-          html`
-            <table class="orderbook-table">
-              <thead>
-                <tr>
-                  <th colspan="2">
-                    <div class="bid-title">
-                      ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
-                    </div>
-                    <div class="spread">${(x) => x.spreadString}</div>
-                    <div class="ask-title">
-                      ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
-                    </div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody @click="${(x, c) => x.handleTableClick(c)}">
-                ${repeat(
-                  (x) => x.quoteLines,
-                  html`
-                    <tr>
-                      <td
+        ${widgetWithInstrumentBodyTemplate(html`
+          <table class="orderbook-table">
+            <thead>
+              <tr>
+                <th colspan="2">
+                  <div class="bid-title">
+                    ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
+                  </div>
+                  <div class="spread">${(x) => x.spreadString}</div>
+                  <div class="ask-title">
+                    ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody @click="${(x, c) => x.handleTableClick(c)}">
+              ${repeat(
+                (x) => x.quoteLines,
+                html`
+                  <tr>
+                    <td
+                      price="${(x) => x.bid?.price}"
+                      style="${(x, c) =>
+                        `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
+                          x.bid?.volume
+                        )}%, transparent ${c.parent.calcGradientPercentage(
+                          x.bid?.volume
+                        )}%, transparent 100% )`}"
+                    >
+                      <div
+                        class="quote-line bid-line"
                         price="${(x) => x.bid?.price}"
-                        style="${(x, c) =>
-                          `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
-                            x.bid?.volume
-                          )}%, transparent ${c.parent.calcGradientPercentage(
-                            x.bid?.volume
-                          )}%, transparent 100% )`}"
+                        pool="${(x) => x.bid?.pool || 'none'}"
                       >
-                        <div
-                          class="quote-line bid-line"
-                          price="${(x) => x.bid?.price}"
-                          pool="${(x) => x.bid?.pool || 'none'}"
-                        >
-                          <div class="volume">
-                            ${when(
-                              (x) => x.bid?.my > 0,
-                              html`
-                                <div class="my-order">
-                                  <span>
-                                    <span>${(x) => x.bid.my}</span>
-                                  </span>
-                                </div>
-                              `
-                            )}
-                            ${(x) =>
-                              x.bid?.pool === 'LD' ? '⬇️' : x.bid?.volume}
-                          </div>
-                          <div class="spacer"></div>
-                          <div class="price">
-                            ${(x, c) =>
-                              formatPriceWithoutCurrency(
-                                x.bid?.price,
-                                c.parent.instrument
-                              )}
-                          </div>
+                        <div class="volume">
                           ${when(
-                            (x) => x.bid?.pool,
+                            (x) => x.bid?.my > 0,
                             html`
-                              <div class="pool">${(x) => x.bid?.pool}</div>
+                              <div class="my-order">
+                                <span>
+                                  <span>${(x) => x.bid.my}</span>
+                                </span>
+                              </div>
                             `
                           )}
+                          ${(x) =>
+                            x.bid?.pool === 'LD' ? '⬇️' : x.bid?.volume}
                         </div>
-                      </td>
-                      <td
+                        <div class="spacer"></div>
+                        <div class="price">
+                          ${(x, c) =>
+                            formatPriceWithoutCurrency(
+                              x.bid?.price,
+                              c.parent.instrument
+                            )}
+                        </div>
+                        ${when(
+                          (x) => x.bid?.pool,
+                          html` <div class="pool">${(x) => x.bid?.pool}</div> `
+                        )}
+                      </div>
+                    </td>
+                    <td
+                      price="${(x) => x.ask?.price}"
+                      style="${(x, c) =>
+                        `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
+                          x.ask?.volume
+                        )}%, transparent ${c.parent.calcGradientPercentage(
+                          x.ask?.volume
+                        )}%, transparent 100% )`}"
+                    >
+                      <div
+                        class="quote-line ask-line"
                         price="${(x) => x.ask?.price}"
-                        style="${(x, c) =>
-                          `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
-                            x.ask?.volume
-                          )}%, transparent ${c.parent.calcGradientPercentage(
-                            x.ask?.volume
-                          )}%, transparent 100% )`}"
+                        pool="${(x) => x.ask?.pool || 'none'}"
                       >
-                        <div
-                          class="quote-line ask-line"
-                          price="${(x) => x.ask?.price}"
-                          pool="${(x) => x.ask?.pool || 'none'}"
-                        >
-                          <div class="volume">
-                            ${(x) =>
-                              x.ask?.pool === 'LU' ? '⬆️' : x.ask?.volume}
-                            ${when(
-                              (x) => x.ask?.my > 0,
-                              html`
-                                <div class="my-order">
-                                  <span>
-                                    <span>${(x) => x.ask.my}</span>
-                                  </span>
-                                </div>
-                              `
-                            )}
-                          </div>
-                          <div class="spacer"></div>
-                          <div class="price">
-                            ${(x, c) =>
-                              formatPriceWithoutCurrency(
-                                x.ask?.price,
-                                c.parent.instrument
-                              )}
-                          </div>
+                        <div class="volume">
+                          ${(x) =>
+                            x.ask?.pool === 'LU' ? '⬆️' : x.ask?.volume}
                           ${when(
-                            (x) => x.ask?.pool,
+                            (x) => x.ask?.my > 0,
                             html`
-                              <div class="pool">${(x) => x.ask?.pool}</div>
+                              <div class="my-order">
+                                <span>
+                                  <span>${(x) => x.ask.my}</span>
+                                </span>
+                              </div>
                             `
                           )}
                         </div>
-                      </td>
-                    </tr>
-                  `
-                )}
-              </tbody>
-            </table>
-            ${when(
-              (x) => !x.quoteLines.length,
-              html`${html.partial(
-                widgetEmptyStateTemplate('Книга заявок пуста.')
-              )}`
-            )}
-          `
-        )}
+                        <div class="spacer"></div>
+                        <div class="price">
+                          ${(x, c) =>
+                            formatPriceWithoutCurrency(
+                              x.ask?.price,
+                              c.parent.instrument
+                            )}
+                        </div>
+                        ${when(
+                          (x) => x.ask?.pool,
+                          html` <div class="pool">${(x) => x.ask?.pool}</div> `
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                `
+              )}
+            </tbody>
+          </table>
+          ${when(
+            (x) => !x.quoteLines.length,
+            html`${html.partial(
+              widgetEmptyStateTemplate('Книга заявок пуста.')
+            )}`
+          )}
+        `)}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -834,7 +810,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       DA: 'EDGA',
       DX: 'EDGX',
       SPBX: 'SPBX',
-      BT: 'BZX',
+      BT: 'BYX',
       LULD: type === 'bid' ? 'LD' : 'LU',
       // M
       MW: 'CHX',

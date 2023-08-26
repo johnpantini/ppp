@@ -98,6 +98,33 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
   </span>
 `;
 
+export const widgetUnsupportedInstrumentTemplate = () => html`
+  ${when(
+    (x) =>
+      x.instrument &&
+      x.instrumentTrader &&
+      !x.instrumentTrader.supportsInstrument(x.instrument),
+    html`${html.partial(
+      widgetEmptyStateTemplate('Инструмент не поддерживается.')
+    )}`
+  )}
+`;
+
+export const widgetWithInstrumentBodyTemplate = (widgetBodyLayout) => html`
+  ${when(
+    (x) => !x.instrument,
+    html`${html.partial(widgetEmptyStateTemplate('Выберите инструмент.'))}`
+  )}
+  ${widgetUnsupportedInstrumentTemplate()}
+  ${when(
+    (x) =>
+      x.instrument &&
+      x.instrumentTrader &&
+      x.instrumentTrader.supportsInstrument(x.instrument),
+    widgetBodyLayout
+  )}
+`;
+
 export const widgetDefaultHeaderTemplate = () => html`
   <div class="widget-header">
     <div class="widget-header-inner">
@@ -619,6 +646,10 @@ export const widgetStyles = () => css`
       palettePurpleDark2,
       palettePurpleLight2
     )};
+  }
+
+  .link {
+    padding-bottom: 2px;
   }
 `;
 

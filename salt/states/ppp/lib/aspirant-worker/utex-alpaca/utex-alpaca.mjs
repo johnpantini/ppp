@@ -53,7 +53,7 @@ const UTEXExchangeToAlpacaExchange = (exchangeId) => {
       return 'A';
     // BT
     case 14:
-      return 'Y';
+      return 'Z';
     // MW
     case 87:
       return 'M';

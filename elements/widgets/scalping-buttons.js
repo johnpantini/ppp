@@ -3,8 +3,10 @@
 import {
   widgetStyles,
   widgetEmptyStateTemplate,
-  WidgetWithInstrument, widgetDefaultHeaderTemplate
-} from '../widget.js'
+  WidgetWithInstrument,
+  widgetDefaultHeaderTemplate,
+  widgetUnsupportedInstrumentTemplate
+} from '../widget.js';
 import {
   html,
   css,
@@ -45,21 +47,13 @@ export const scalpingButtonsWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.ordersTrader &&
-            !x.ordersTrader.supportsInstrument(x.instrument),
-          html`${html.partial(
-            widgetEmptyStateTemplate('Инструмент не поддерживается.')
-          )}`
-        )}
+        ${widgetUnsupportedInstrumentTemplate()}
         ${when(
           (x) =>
             !x.instrument ||
             (x.instrument &&
-              x.ordersTrader &&
-              x.ordersTrader.supportsInstrument(x.instrument)),
+              x.instrumentTrader &&
+              x.instrumentTrader.supportsInstrument(x.instrument)),
           html`
             <div class="controls">
               <div

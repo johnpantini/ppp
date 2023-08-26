@@ -4,7 +4,8 @@ import {
   widgetStyles,
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
-  widgetDefaultHeaderTemplate
+  widgetDefaultHeaderTemplate,
+  widgetUnsupportedInstrumentTemplate
 } from '../widget.js';
 import {
   html,
@@ -60,22 +61,14 @@ export const lightChartWidgetTemplate = html`
             widgetEmptyStateTemplate('Выберите инструмент.')
           )}`
         )}
-        ${when(
-          (x) =>
-            x.instrument &&
-            x.chartTrader &&
-            !x.chartTrader.supportsInstrument(x.instrument),
-          html`${html.partial(
-            widgetEmptyStateTemplate('Инструмент не поддерживается.')
-          )}`
-        )}
+        ${widgetUnsupportedInstrumentTemplate()}
         <div
           class="chart-holder"
           ?hidden="${(x) =>
             !x.instrument ||
             (x.instrument &&
-              x.chartTrader &&
-              !x.chartTrader.supportsInstrument(x.instrument))}"
+              x.instrumentTrader &&
+              !x.instrumentTrader.supportsInstrument(x.instrument))}"
         >
           <div class="chart-holder-inner">
             <div class="toolbar"></div>
