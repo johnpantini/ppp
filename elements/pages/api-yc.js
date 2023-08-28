@@ -142,19 +142,14 @@ export class ApiYcPage extends Page {
       });
     }
 
-    const iamTokenRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const iamTokenRequest = await ppp.fetch(
+      'https://iam.api.cloud.yandex.net/iam/v1/tokens',
       {
-        cache: 'reload',
         method: 'POST',
-        body: JSON.stringify({
-          method: 'POST',
-          url: 'https://iam.api.cloud.yandex.net/iam/v1/tokens',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ jwt })
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ jwt })
       }
     );
 

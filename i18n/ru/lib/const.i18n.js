@@ -135,7 +135,7 @@ export default function (i18n) {
         [WIDGET_TYPES.RATINGS]: 'Рейтинги',
         [WIDGET_TYPES.INSIDER_TRADES]: 'Сделки инсайдеров',
         [WIDGET_TYPES.OPTIONS]: 'Опционы',
-        [WIDGET_TYPES.INSTRUMENTS]: 'Инструменты',
+        [WIDGET_TYPES.LIST]: 'Список/таблица',
         [WIDGET_TYPES.SCANNER]: 'Сканер',
         [WIDGET_TYPES.SCREENER]: 'Скринер',
         [WIDGET_TYPES.PARSER]: 'Парсер',

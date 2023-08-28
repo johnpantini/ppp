@@ -97,13 +97,7 @@ export const apiPusherPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkPusherCredentials({
-  serviceMachineUrl,
-  appid,
-  key,
-  secret,
-  cluster
-}) {
+export async function checkPusherCredentials({ appid, key, secret, cluster }) {
   const timestamp = Math.floor(Date.now() / 1000);
   const hmacKey = await window.crypto.subtle.importKey(
     'raw',
@@ -133,17 +127,12 @@ export async function checkPusherCredentials({
 
   const params = `auth_key=${key}&auth_timestamp=${timestamp}&auth_version=1.0&auth_signature=${signature}`;
 
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: new URL(
-        `/apps/${appid}/channels?${params}`,
-        `https://api-${cluster}.pusher.com`
-      ).toString()
-    })
-  });
+  return ppp.fetch(
+    new URL(
+      `/apps/${appid}/channels?${params}`,
+      `https://api-${cluster}.pusher.com`
+    ).toString()
+  );
 }
 
 export class ApiPusherPage extends Page {
@@ -162,8 +151,7 @@ export class ApiPusherPage extends Page {
           appid: this.appid.value.trim(),
           key: this.key.value.trim(),
           secret: this.secret.value.trim(),
-          cluster: this.cluster.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+          cluster: this.cluster.value.trim()
         })
       ).ok
     ) {

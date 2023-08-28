@@ -649,6 +649,7 @@ class PPP {
 
       return fetch(new URL('fetch', serviceMachineUrl).toString(), {
         method: 'POST',
+        cache: 'reload',
         body: JSON.stringify({
           method: options.method ?? 'GET',
           url,

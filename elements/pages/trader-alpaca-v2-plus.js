@@ -359,6 +359,8 @@ export class TraderAlpacaV2PlusPage extends Page {
         caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
       } else if (port === 38943) {
         caps.push(TRADER_CAPS.CAPS_NOII);
+      } else if (port === 38844) {
+        caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);
       }
     } else if (brokerType === BROKERS.UTEX) {
       caps.push(TRADER_CAPS.CAPS_ORDERBOOK);

@@ -60,17 +60,11 @@ export const apiNorthflankPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkNorthflankCredentials({ token, serviceMachineUrl }) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: 'https://api.northflank.com/v1/projects',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+export async function checkNorthflankCredentials({ token }) {
+  return ppp.fetch('https://api.northflank.com/v1/projects', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   });
 }
 
@@ -84,8 +78,7 @@ export class ApiNorthflankPage extends Page {
     if (
       !(
         await checkNorthflankCredentials({
-          token: this.token.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+          token: this.token.value.trim()
         })
       ).ok
     ) {

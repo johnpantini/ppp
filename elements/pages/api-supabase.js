@@ -138,22 +138,13 @@ export const apiSupabasePageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkSupabaseCredentials({
-  url,
-  key,
-  serviceMachineUrl
-}) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
+export async function checkSupabaseCredentials({ url, key }) {
+  return ppp.fetch(new URL('rest/v1/rpc/get_size_by_bucket', url).toString(), {
     method: 'POST',
-    body: JSON.stringify({
-      method: 'POST',
-      url: new URL('rest/v1/rpc/get_size_by_bucket', url).toString(),
-      headers: {
-        apiKey: key,
-        'Content-Profile': 'storage'
-      }
-    })
+    headers: {
+      apiKey: key,
+      'Content-Profile': 'storage'
+    }
   });
 }
 
@@ -187,8 +178,7 @@ export class ApiSupabasePage extends Page {
       !(
         await checkSupabaseCredentials({
           url: this.url.value.trim(),
-          key: this.key.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+          key: this.key.value.trim()
         })
       ).ok
     ) {

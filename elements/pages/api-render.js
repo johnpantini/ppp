@@ -68,18 +68,12 @@ export const apiRenderPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkRenderCredentials({ token, serviceMachineUrl }) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: 'https://api.render.com/v1/owners?limit=20',
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${token}`
-      }
-    })
+export async function checkRenderCredentials({ token }) {
+  return ppp.fetch('https://api.render.com/v1/owners?limit=20', {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
   });
 }
 
@@ -93,8 +87,7 @@ export class ApiRenderPage extends Page {
     if (
       !(
         await checkRenderCredentials({
-          token: this.token.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+          token: this.token.value.trim()
         })
       ).ok
     ) {

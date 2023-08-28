@@ -220,7 +220,7 @@ export const portfolioWidget = `<svg viewBox="0 0 16 16" fill="none" xmlns="http
         fill="currentColor"></path>
 </svg>`;
 
-export const instrumentsWidget = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+export const listWidget = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path fill-rule="evenodd" clip-rule="evenodd"
         d="M3 3C3 2.44772 3.44772 2 4 2H12C12.5523 2 13 2.44772 13 3V14.1111C13 14.9138 12.1017 15.3894 11.4378 14.9381L8.16865 11.7158C8.06686 11.6466 7.93314 11.6466 7.83134 11.7158L4.56218 14.9381C3.89827 15.3894 3 14.9138 3 14.1111V3Z"
         fill="currentColor"></path>

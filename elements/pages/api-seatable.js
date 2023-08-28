@@ -60,21 +60,15 @@ export const apiSeatablePageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkSeatableCredentials({
-  baseToken,
-  serviceMachineUrl
-}) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: 'https://cloud.seatable.io/api/v2.1/dtable/app-access-token/',
+export async function checkSeatableCredentials({ baseToken }) {
+  return ppp.fetch(
+    'https://cloud.seatable.io/api/v2.1/dtable/app-access-token/',
+    {
       headers: {
         Authorization: `Token ${baseToken}`
       }
-    })
-  });
+    }
+  );
 }
 
 export class ApiSeatablePage extends Page {
@@ -87,8 +81,7 @@ export class ApiSeatablePage extends Page {
     if (
       !(
         await checkSeatableCredentials({
-          baseToken: this.baseToken.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+          baseToken: this.baseToken.value.trim()
         })
       ).ok
     ) {

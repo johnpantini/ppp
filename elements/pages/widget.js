@@ -45,7 +45,7 @@ import { Radio } from '../radio.js';
 import {
   activeOrdersWidget,
   customWidget,
-  instrumentsWidget,
+  listWidget,
   lightChartWidget,
   orderbookWidget,
   orderWidget,
@@ -81,7 +81,7 @@ export const widgetTypeRadioGroupStyles = css`
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 8px;
   }
 `;
 
@@ -298,13 +298,12 @@ export const widgetPageTemplate = html`
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
-                              x.document._id &&
-                              x.document.type !== 'instruments'}"
-                            value="instruments"
+                              x.document._id && x.document.type !== 'list'}"
+                            value="list"
                           >
-                            <span slot="text">Список инструментов</span>
+                            <span slot="text">Список/таблица</span>
                             <span slot="icon">
-                              ${html.partial(instrumentsWidget)}
+                              ${html.partial(listWidget)}
                             </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio

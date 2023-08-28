@@ -216,7 +216,7 @@ class UtexAlpaca {
                       s: 0,
                       t: new Date().toISOString(),
                       c: [],
-                      z: '-'
+                      z: ''
                     };
                   }) ?? []
                 )
@@ -244,7 +244,7 @@ class UtexAlpaca {
                     c: print.Condition?.trim()
                       ?.replace('\u0000', '')
                       .split(/\s/),
-                    z: '-',
+                    z: '',
                     U: print.DoesUpdateLastPrice
                   }
                 ])

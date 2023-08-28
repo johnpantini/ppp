@@ -237,24 +237,15 @@ export class ApiAstraDbPage extends Page {
       this.tables =
         (
           await (
-            await fetch(
+            await ppp.fetch(
               new URL(
-                'fetch',
-                ppp.keyVault.getKey('service-machine-url')
+                `/api/rest/v2/schemas/keyspaces/${this.document.dbKeyspace}/tables`,
+                `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
               ).toString(),
               {
-                cache: 'no-cache',
-                method: 'POST',
-                body: JSON.stringify({
-                  method: 'GET',
-                  url: new URL(
-                    `/api/rest/v2/schemas/keyspaces/${this.document.dbKeyspace}/tables`,
-                    `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
-                  ).toString(),
-                  headers: {
-                    'X-Cassandra-Token': this.document.dbToken
-                  }
-                })
+                headers: {
+                  'X-Cassandra-Token': this.document.dbToken
+                }
               }
             )
           ).json()
@@ -311,18 +302,12 @@ export class ApiAstraDbPage extends Page {
     this.beginOperation();
 
     try {
-      const request = await fetch(
-        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      const request = await ppp.fetch(
+        `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections/stats`,
         {
-          cache: 'no-cache',
-          method: 'POST',
-          body: JSON.stringify({
-            method: 'GET',
-            url: `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections/stats`,
-            headers: {
-              'X-Cassandra-Token': this.document.dbToken
-            }
-          })
+          headers: {
+            'X-Cassandra-Token': this.document.dbToken
+          }
         }
       );
 

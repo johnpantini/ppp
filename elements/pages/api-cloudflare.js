@@ -12,24 +12,16 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
-export async function checkCloudflareCredentials({
-  serviceMachineUrl,
-  accountID,
-  email,
-  apiKey
-}) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: `https://api.cloudflare.com/client/v4/accounts/${accountID}`,
+export async function checkCloudflareCredentials({ accountID, email, apiKey }) {
+  return ppp.fetch(
+    `https://api.cloudflare.com/client/v4/accounts/${accountID}`,
+    {
       headers: {
         'X-Auth-Email': email,
         'X-Auth-Key': apiKey
       }
-    })
-  });
+    }
+  );
 }
 
 export const apiCloudflarePageTemplate = html`
@@ -130,7 +122,6 @@ export class ApiCloudflarePage extends Page {
     if (
       !(
         await checkCloudflareCredentials({
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
           accountID: this.accountID.value.trim(),
           email: this.email.value.trim(),
           apiKey: this.apiKey.value.trim()
