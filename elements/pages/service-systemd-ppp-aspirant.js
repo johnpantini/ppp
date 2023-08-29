@@ -392,7 +392,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
           updatedAt: new Date()
         },
         $setOnInsert: {
-          type: SERVICES.CLOUD_PPP_ASPIRANT,
+          type: SERVICES.SYSTEMD_PPP_ASPIRANT,
           createdAt: new Date()
         }
       },
