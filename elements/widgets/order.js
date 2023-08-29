@@ -1538,8 +1538,8 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   setPrice(price) {
-    if (price > 0) {
-      if (this.orderTypeTabs.activeid !== 'limit') {
+    if (this.price && price > 0) {
+      if (this.orderTypeTabs && this.orderTypeTabs.activeid !== 'limit') {
         this.orderTypeTabs.activeid = 'limit';
 
         void this.updateDocumentFragment({
@@ -1744,7 +1744,7 @@ export class OrderWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
-      if (this.orderTypeTabs.activeid === 'limit') {
+      if (this.orderTypeTabs?.activeid === 'limit') {
         if (typeof this.ordersTrader.placeLimitOrder !== 'function') {
           return this.notificationsArea.error({
             title: 'Ошибка заявки',
@@ -1760,7 +1760,7 @@ export class OrderWidget extends WidgetWithInstrument {
           destination: this.destination?.value,
           tif: this.tif?.value
         });
-      } else if (this.orderTypeTabs.activeid === 'market') {
+      } else if (this.orderTypeTabs?.activeid === 'market') {
         if (typeof this.ordersTrader.placeMarketOrder !== 'function') {
           return this.notificationsArea.error({
             title: 'Ошибка заявки',
@@ -1775,7 +1775,7 @@ export class OrderWidget extends WidgetWithInstrument {
           destination: this.destination?.value,
           tif: this.tif?.value
         });
-      } else if (this.orderTypeTabs.activeid === 'conditional') {
+      } else if (this.orderTypeTabs?.activeid === 'conditional') {
         console.log(this.orderTypeTabs.activeid);
       }
 
