@@ -87,7 +87,8 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_ORDER_TIF]: 'Параметр заявки Time in Force',
         [TRADER_CAPS.CAPS_NOII]: 'Индикатор NOII',
         [TRADER_CAPS.CAPS_US_NBBO]: 'NBBO (США)',
-        [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW]: 'Nasdaq TotalView'
+        [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW]: 'Nasdaq TotalView',
+        [TRADER_CAPS.CAPS_ARCABOOK]: 'NYSE ArcaBook'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',
