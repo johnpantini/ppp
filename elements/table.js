@@ -186,7 +186,6 @@ export const tableStyles = css`
     align-items: center;
     text-decoration: none;
     cursor: pointer;
-    line-height: 13px;
     color: ${linkColor};
     font-weight: ${fontWeightBody1};
   }

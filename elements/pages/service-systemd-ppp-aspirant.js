@@ -1,5 +1,12 @@
 import ppp from '../../ppp.js';
-import { html, css, ref, repeat } from '../../vendor/fast-element.min.js';
+import {
+  html,
+  css,
+  ref,
+  repeat,
+  Observable,
+  Updates
+} from '../../vendor/fast-element.min.js';
 import {
   validate,
   invalidate,
@@ -116,7 +123,7 @@ export const serviceSystemdPppAspirantTemplate = html`
             ?disabled="${(x) => x.document._id}"
             @change="${(x, c) => {
               // Reset domain on server change
-              x.scratch.set('server', x.serverId.datum());
+              x.scratch.set('server', x.serverId.datum() ?? x.document.server);
 
               if (x.serverId.value !== x.document.serverId) {
                 x.domain.value = void 0;
