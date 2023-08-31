@@ -14,7 +14,8 @@ import {
   ref,
   repeat,
   observable,
-  Observable
+  Observable,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES, TRADER_DATUM, TRADER_CAPS } from '../../lib/const.js';
 import {
@@ -300,7 +301,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async printChanged(oldValue, newValue) {
     const threshold = await this.getThreshold(newValue);
 
-    requestAnimationFrame(() => {
+    Updates.enqueue(() => {
       if (newValue?.price) {
         if (typeof threshold === 'number' && newValue?.volume < threshold) {
           return;

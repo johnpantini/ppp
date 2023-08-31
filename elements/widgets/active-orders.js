@@ -14,7 +14,8 @@ import {
   ref,
   observable,
   repeat,
-  attr
+  attr,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
@@ -370,7 +371,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   activeOrderChanged(oldValue, newValue) {
-    requestAnimationFrame(() => {
+    Updates.enqueue(() => {
       if (newValue?.orderId) {
         if (newValue.orderType === 'limit') {
           if (

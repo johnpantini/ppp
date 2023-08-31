@@ -14,7 +14,8 @@ import {
   when,
   ref,
   observable,
-  repeat
+  repeat,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
@@ -380,7 +381,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   positionChanged(oldValue, newValue) {
-    requestAnimationFrame(() => {
+    Updates.enqueue(() => {
       if (newValue) {
         if (newValue.isBalance) {
           const existing = this.balancesMap.get(newValue.symbol);

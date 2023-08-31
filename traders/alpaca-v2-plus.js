@@ -115,80 +115,84 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
     this.orderbooks.delete(symbol);
   }
 
-  [TRADER_DATUM.ORDERBOOK](data, instrument) {
-    const orderbookMap = this.orderbooks.get(this.trader.getSymbol(instrument));
-    const volumeCoefficient = this.trader.document.useLots ? 1 : 100;
-    let bidKey = data.bx;
-
-    if (this.trader.document.broker.type === BROKERS.PSINA) {
-      bidKey = `${data.bx}|${data.bp}|${data.bs}|${data.level}`;
-    }
-
-    orderbookMap.bids.set(bidKey, {
-      price: data.bp,
-      volume: data.bs * volumeCoefficient,
-      time: data.t,
-      condition: data.c?.join?.(' '),
-      timestamp: data.t ? new Date(data.t).valueOf() : null,
-      pool: this.trader.alpacaExchangeToUTEXExchange(data.bx)
-    });
-
-    let askKey = data.ax;
-
-    if (this.trader.document.broker.type === BROKERS.PSINA) {
-      askKey = `${data.ax}|${data.ap}|${data.as}|${data.level}`;
-    }
-
-    orderbookMap.asks.set(askKey, {
-      price: data.ap,
-      volume: data.as * volumeCoefficient,
-      time: data.t,
-      condition: data.c?.join?.(' '),
-      timestamp: data.t ? new Date(data.t).valueOf() : null,
-      pool: this.trader.alpacaExchangeToUTEXExchange(data.ax)
-    });
-
+  [TRADER_DATUM.ORDERBOOK](orderbook, instrument) {
     const montage = {
       bids: [],
       asks: []
     };
-    const nowHours = new Date().getUTCHours();
+    const iterable = Array.isArray(orderbook) ? orderbook : [orderbook];
 
-    montage.bids = [...orderbookMap.bids.values()]
-      .filter((b) => {
-        if (this.trader.document.broker.type === BROKERS.UTEX) {
-          // Fix for invalid NYSE pool data
-          if (
-            (nowHours >= (isDST() ? 20 : 21) ||
-              nowHours < (isDST() ? 10 : 11)) &&
-            b.pool === 'N'
-          )
-            return false;
-        }
+    for (const data of iterable) {
+      const orderbookMap = this.orderbooks.get(
+        this.trader.getSymbol(instrument)
+      );
+      const volumeCoefficient = this.trader.document.useLots ? 1 : 100;
+      let bidKey = data.bx;
 
-        return b.price > 0 && (b.volume > 0 || b.pool === 'LULD');
-      })
-      .sort((a, b) => {
-        return b.price - a.price || b.volume - a.volume;
+      if (this.trader.document.broker.type === BROKERS.PSINA) {
+        bidKey = `${data.bx}|${data.bp}|${data.bs}|${data.level}`;
+      }
+
+      orderbookMap.bids.set(bidKey, {
+        price: data.bp,
+        volume: data.bs * volumeCoefficient,
+        condition: data.c?.join?.(' '),
+        timestamp: data.t ? new Date(data.t).valueOf() : null,
+        pool: this.trader.alpacaExchangeToUTEXExchange(data.bx)
       });
 
-    montage.asks = [...orderbookMap.asks.values()]
-      .filter((a) => {
-        if (this.trader.document.broker.type === BROKERS.UTEX) {
-          // Fix for invalid NYSE pool data
-          if (
-            (nowHours >= (isDST() ? 20 : 21) ||
-              nowHours < (isDST() ? 10 : 11)) &&
-            a.pool === 'N'
-          )
-            return false;
-        }
+      let askKey = data.ax;
 
-        return a.price > 0 && (a.volume > 0 || a.pool === 'LULD');
-      })
-      .sort((a, b) => {
-        return a.price - b.price || b.volume - a.volume;
+      if (this.trader.document.broker.type === BROKERS.PSINA) {
+        askKey = `${data.ax}|${data.ap}|${data.as}|${data.level}`;
+      }
+
+      orderbookMap.asks.set(askKey, {
+        price: data.ap,
+        volume: data.as * volumeCoefficient,
+        condition: data.c?.join?.(' '),
+        timestamp: data.t ? new Date(data.t).valueOf() : null,
+        pool: this.trader.alpacaExchangeToUTEXExchange(data.ax)
       });
+
+      const nowHours = new Date().getUTCHours();
+
+      montage.bids = [...orderbookMap.bids.values()]
+        .filter((b) => {
+          if (this.trader.document.broker.type === BROKERS.UTEX) {
+            // Fix for invalid NYSE pool data
+            if (
+              (nowHours >= (isDST() ? 20 : 21) ||
+                nowHours < (isDST() ? 10 : 11)) &&
+              b.pool === 'N'
+            )
+              return false;
+          }
+
+          return b.price > 0 && (b.volume > 0 || b.pool === 'LULD');
+        })
+        .sort((a, b) => {
+          return b.price - a.price || b.volume - a.volume;
+        });
+
+      montage.asks = [...orderbookMap.asks.values()]
+        .filter((a) => {
+          if (this.trader.document.broker.type === BROKERS.UTEX) {
+            // Fix for invalid NYSE pool data
+            if (
+              (nowHours >= (isDST() ? 20 : 21) ||
+                nowHours < (isDST() ? 10 : 11)) &&
+              a.pool === 'N'
+            )
+              return false;
+          }
+
+          return a.price > 0 && (a.volume > 0 || a.pool === 'LULD');
+        })
+        .sort((a, b) => {
+          return a.price - b.price || b.volume - a.volume;
+        });
+    }
 
     return montage;
   }
@@ -367,6 +371,16 @@ class AlpacaV2PlusTrader extends Trader {
               }
             }
 
+            // Optimize observable mutations
+            if (this.document.broker.type === BROKERS.PSINA) {
+              if (parsed[0]?.T === 'q') {
+                this.datums[TRADER_DATUM.ORDERBOOK].dataArrived(
+                  parsed,
+                  this.instruments.get(parsed[0].S)
+                );
+              }
+            }
+
             for (const payload of parsed) {
               if (payload.msg === 'connected') {
                 this.connection.send(
@@ -387,7 +401,10 @@ class AlpacaV2PlusTrader extends Trader {
                   payload,
                   this.instruments.get(payload.S)
                 );
-              } else if (payload.T === 'q') {
+              } else if (
+                payload.T === 'q' &&
+                this.document.broker.type !== BROKERS.PSINA
+              ) {
                 this.datums[TRADER_DATUM.ORDERBOOK].dataArrived(
                   payload,
                   this.instruments.get(payload.S)

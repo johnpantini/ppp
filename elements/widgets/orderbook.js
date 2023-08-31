@@ -14,7 +14,8 @@ import {
   ref,
   repeat,
   observable,
-  Observable
+  Observable,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import {
   EXCHANGE,
@@ -619,7 +620,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   orderbookChanged(oldValue, newValue) {
-    requestAnimationFrame(() => {
+    Updates.enqueue(() => {
       if (newValue === '—') {
         newValue = {
           bids: [],
