@@ -13,9 +13,7 @@ import {
   when,
   ref,
   repeat,
-  observable,
-  Observable,
-  Updates
+  observable
 } from '../../vendor/fast-element.min.js';
 import {
   EXCHANGE,
@@ -48,13 +46,27 @@ import {
   themeConditional,
   toColorComponents
 } from '../../design/design-tokens.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { Tmpl } from '../../lib/tmpl.js';
+import { validate, invalidate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
 import '../radio-group.js';
+import '../snippet.js';
+import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
+
+export const defaultBookProcessorFunc = `/**
+* Функция обработки книг заявок, поступающих от трейдеров.
+*
+* @param {object} trader - Экземпляр трейдера PPP.
+* @param {array} prices - Массив цен (bid или ask) книги заявок.
+* @param {boolean} isBidSide - Тип массива цен, переданного на обработку.
+*/
+
+return prices;
+`;
 
 export const orderbookWidgetTemplate = html`
   <template>
@@ -119,7 +131,7 @@ export const orderbookWidgetTemplate = html`
                         </div>
                         ${when(
                           (x) => x.bid?.pool,
-                          html` <div class="pool">${(x) => x.bid?.pool}</div> `
+                          html`<div class="pool">${(x) => x.bid?.pool}</div>`
                         )}
                       </div>
                     </td>
@@ -386,10 +398,22 @@ export class OrderbookWidget extends WidgetWithInstrument {
   currentOrder;
 
   @observable
-  orderbook;
+  montage;
+
+  @observable
+  mainBook;
+
+  @observable
+  extraBook1;
+
+  @observable
+  extraBook2;
+
+  @observable
+  extraBook3;
 
   // Use this when orders change.
-  #lastOrderBookValue;
+  #lastMontageValue;
 
   @observable
   orders;
@@ -401,6 +425,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
   spreadString;
 
   maxSeenVolume;
+
+  bookProcessorFunc;
 
   constructor() {
     super();
@@ -414,9 +440,20 @@ export class OrderbookWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    this.bookProcessorFunc = new Function(
+      'trader',
+      'prices',
+      'isBidSide',
+      await new Tmpl().render(
+        this,
+        this.document.bookProcessorFunc ?? defaultBookProcessorFunc,
+        {}
+      )
+    );
+
     if (!this.document.bookTrader) {
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер книги заявок.',
+        text: 'Отсутствует основной трейдер книги заявок.',
         keep: true
       });
     }
@@ -445,9 +482,57 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.bookTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          orderbook: TRADER_DATUM.ORDERBOOK
+          mainBook: TRADER_DATUM.ORDERBOOK
         }
       });
+
+      if (
+        this.document.extraBookTrader1Enabled &&
+        this.document.extraBookTrader1
+      ) {
+        this.extraBookTrader1 = await ppp.getOrCreateTrader(
+          this.document.extraBookTrader1
+        );
+
+        await this.extraBookTrader1.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            extraBook1: TRADER_DATUM.ORDERBOOK
+          }
+        });
+      }
+
+      if (
+        this.document.extraBookTrader2Enabled &&
+        this.document.extraBookTrader2
+      ) {
+        this.extraBookTrader2 = await ppp.getOrCreateTrader(
+          this.document.extraBookTrader2
+        );
+
+        await this.extraBookTrader2.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            extraBook2: TRADER_DATUM.ORDERBOOK
+          }
+        });
+      }
+
+      if (
+        this.document.extraBookTrader3Enabled &&
+        this.document.extraBookTrader3
+      ) {
+        this.extraBookTrader3 = await ppp.getOrCreateTrader(
+          this.document.extraBookTrader3
+        );
+
+        await this.extraBookTrader3.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            extraBook3: TRADER_DATUM.ORDERBOOK
+          }
+        });
+      }
     } catch (e) {
       return this.catchException(e);
     }
@@ -458,7 +543,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.bookTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          orderbook: TRADER_DATUM.ORDERBOOK
+          mainBook: TRADER_DATUM.ORDERBOOK
         }
       });
     }
@@ -472,11 +557,414 @@ export class OrderbookWidget extends WidgetWithInstrument {
       });
     }
 
+    if (this.extraBookTrader1) {
+      await this.extraBookTrader1.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          extraBook1: TRADER_DATUM.ACTIVE_ORDER
+        }
+      });
+    }
+
+    if (this.extraBookTrader2) {
+      await this.extraBookTrader2.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          extraBook2: TRADER_DATUM.ACTIVE_ORDER
+        }
+      });
+    }
+
+    if (this.extraBookTrader3) {
+      await this.extraBookTrader3.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          extraBook3: TRADER_DATUM.ACTIVE_ORDER
+        }
+      });
+    }
+
     super.disconnectedCallback();
   }
 
+  #cloneOrderbook2Times(orderbook) {
+    const result = [
+      {
+        bids: [],
+        asks: []
+      },
+      {
+        bids: [],
+        asks: []
+      }
+    ];
+
+    const iterationLength = Math.max(
+      orderbook?.bids?.length,
+      orderbook?.asks?.length
+    );
+
+    for (let i = 0; i < iterationLength; i++) {
+      const ask = orderbook.asks[i];
+      const bid = orderbook.bids[i];
+
+      if (typeof bid !== 'undefined') {
+        result[0].bids[i] = {};
+        result[1].bids[i] = {};
+
+        if (bid.pool) {
+          result[0].bids[i].pool = bid.pool;
+          result[1].bids[i].pool = bid.pool;
+        }
+
+        if (bid.condition) {
+          result[0].bids[i].condition = bid.condition;
+          result[1].bids[i].condition = bid.condition;
+        }
+
+        if (bid.timestamp) {
+          result[0].bids[i].timestamp = bid.timestamp;
+          result[1].bids[i].timestamp = bid.timestamp;
+        }
+
+        result[0].bids[i].price = +bid.price;
+        result[1].bids[i].price = +bid.price;
+        result[0].bids[i].volume = +bid.volume;
+        result[1].bids[i].volume = +bid.volume;
+      }
+
+      if (typeof ask !== 'undefined') {
+        result[0].asks[i] = {};
+        result[1].asks[i] = {};
+
+        if (ask.pool) {
+          result[0].asks[i].pool = ask.pool;
+          result[1].asks[i].pool = ask.pool;
+        }
+
+        if (ask.condition) {
+          result[0].asks[i].condition = ask.condition;
+          result[1].asks[i].condition = ask.condition;
+        }
+
+        if (ask.timestamp) {
+          result[0].asks[i].timestamp = ask.timestamp;
+          result[1].asks[i].timestamp = ask.timestamp;
+        }
+
+        result[0].asks[i].price = +ask.price;
+        result[1].asks[i].price = +ask.price;
+        result[0].asks[i].volume = +ask.volume;
+        result[1].asks[i].volume = +ask.volume;
+      }
+    }
+
+    return result;
+  }
+
+  #rebuildMontage() {
+    const montage = {
+      bids: [],
+      asks: []
+    };
+
+    if (this.mainBook?.bids) {
+      montage.bids.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.bookTrader,
+          this.mainBook.bids,
+          true
+        )
+      );
+    }
+
+    if (this.mainBook?.asks) {
+      montage.asks.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.bookTrader,
+          this.mainBook.asks,
+          false
+        )
+      );
+    }
+
+    if (this.extraBook1?.bids) {
+      montage.bids.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.extraBookTrader1,
+          this.extraBook1.bids,
+          true
+        )
+      );
+    }
+
+    if (this.extraBook1?.asks) {
+      montage.asks.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.extraBookTrader1,
+          this.extraBook1.asks,
+          false
+        )
+      );
+    }
+
+    if (this.extraBook2?.bids) {
+      montage.bids.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.extraBookTrader2,
+          this.extraBook2.bids,
+          true
+        )
+      );
+    }
+
+    if (this.extraBook2?.asks) {
+      montage.asks.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.extraBookTrader2,
+          this.extraBook2.asks,
+          false
+        )
+      );
+    }
+
+    if (this.extraBook3?.bids) {
+      montage.bids.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.extraBookTrader3,
+          this.extraBook3.bids,
+          true
+        )
+      );
+    }
+
+    if (this.extraBook3?.asks) {
+      montage.asks.push(
+        ...this.bookProcessorFunc.call(
+          this,
+          this.extraBookTrader3,
+          this.extraBook3.asks,
+          false
+        )
+      );
+    }
+
+    this.montage = {
+      bids: montage.bids.sort((a, b) => {
+        return b.price - a.price || b.volume - a.volume;
+      }),
+      asks: montage.asks.sort((a, b) => {
+        return a.price - b.price || b.volume - a.volume;
+      })
+    };
+  }
+
+  mainBookChanged() {
+    return this.#rebuildMontage();
+  }
+
+  extraBook1Changed() {
+    return this.#rebuildMontage();
+  }
+
+  extraBook2Changed() {
+    return this.#rebuildMontage();
+  }
+
+  extraBook3Changed() {
+    return this.#rebuildMontage();
+  }
+
+  montageChanged(oldValue, newValue) {
+    if (!Array.isArray(newValue?.bids)) {
+      newValue = {
+        bids: [],
+        asks: []
+      };
+    }
+
+    const clones = this.#cloneOrderbook2Times(newValue);
+
+    if (oldValue !== null && newValue) {
+      this.#lastMontageValue = clones[1];
+    }
+
+    const orderbook = clones[0];
+
+    if (orderbook && this.instrument) {
+      if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
+
+      if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
+
+      if (!orderbook.bids.length && !orderbook.asks.length) {
+        this.quoteLines = [];
+
+        return;
+      }
+
+      const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
+        this.#getMyOrdersPricesAndSizes();
+
+      // 1. Buy orders, descending
+      for (const [price, volume] of buyOrdersPricesAndSizes) {
+        let insertAtTheEnd = true;
+
+        for (let i = 0; i < orderbook.bids?.length; i++) {
+          const bookPriceAtThisLevel = orderbook.bids[i].price;
+
+          if (price === bookPriceAtThisLevel) {
+            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+              orderbook.bids.splice(i, 0, {
+                price,
+                volume,
+                my: volume,
+                pool: this.#getMyOrderPool()
+              });
+            } else {
+              orderbook.bids[i].my = volume;
+
+              if (orderbook.bids[i].volume < volume)
+                orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+            }
+
+            insertAtTheEnd = false;
+
+            break;
+          } else if (price > bookPriceAtThisLevel) {
+            orderbook.bids.splice(i, 0, {
+              price,
+              volume,
+              my: volume,
+              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+                ? this.#getMyOrderPool()
+                : void 0
+            });
+
+            insertAtTheEnd = false;
+
+            break;
+          }
+        }
+
+        if (insertAtTheEnd) {
+          orderbook.bids.push({
+            price,
+            volume,
+            my: volume,
+            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+              ? this.#getMyOrderPool()
+              : void 0
+          });
+        }
+      }
+
+      // 2. Sell orders, ascending
+      for (const [price, volume] of sellOrdersPricesAndSizes) {
+        let insertAtTheEnd = true;
+
+        for (let i = 0; i < orderbook.asks?.length; i++) {
+          const bookPriceAtThisLevel = orderbook.asks[i].price;
+
+          if (price === bookPriceAtThisLevel) {
+            // Always display fake pool
+            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
+              orderbook.asks.splice(i, 0, {
+                price,
+                volume,
+                my: volume,
+                pool: this.#getMyOrderPool()
+              });
+            } else {
+              orderbook.asks[i].my = volume;
+
+              if (orderbook.asks[i].volume < volume)
+                orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+            }
+
+            insertAtTheEnd = false;
+
+            break;
+          } else if (price < bookPriceAtThisLevel) {
+            orderbook.asks.splice(i, 0, {
+              price,
+              volume,
+              my: volume,
+              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+                ? this.#getMyOrderPool()
+                : void 0
+            });
+
+            insertAtTheEnd = false;
+
+            break;
+          }
+        }
+
+        if (insertAtTheEnd) {
+          orderbook.asks.push({
+            price,
+            volume,
+            my: volume,
+            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
+              ? this.#getMyOrderPool()
+              : void 0
+          });
+        }
+      }
+
+      if (orderbook.bids?.length && orderbook.asks?.length) {
+        const bestBid = orderbook.bids[0]?.price;
+        const bestAsk = orderbook.asks[0]?.price;
+
+        this.spreadString = `${formatPriceWithoutCurrency(
+          bestAsk - bestBid,
+          this.instrument
+        )} (${formatPercentage((bestAsk - bestBid) / bestBid)})`;
+      }
+
+      let max = Math.max(
+        orderbook.bids?.length ?? 0,
+        orderbook.asks?.length ?? 0
+      );
+
+      if (max > this.document.depth) max = this.document.depth;
+
+      this.quoteLines = [];
+      this.maxSeenVolume = 0;
+
+      for (let i = 0; i < max; i++) {
+        const bid = orderbook.bids[i] ?? null;
+        const ask = orderbook.asks[i] ?? null;
+
+        if (bid) {
+          bid.pool = this.normalizePool(bid.pool, 'bid');
+
+          this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
+        }
+
+        if (ask) {
+          ask.pool = this.normalizePool(ask.pool, 'ask');
+
+          this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
+        }
+
+        this.quoteLines.push({
+          bid,
+          ask
+        });
+      }
+    } else this.spreadString = '—';
+  }
+
   currentOrderChanged(oldValue, newValue) {
-    let needToChangeOrderbook;
+    let needToChangeMontage;
 
     if (newValue?.orderId) {
       if (newValue.orderType === 'limit') {
@@ -487,38 +975,25 @@ export class OrderbookWidget extends WidgetWithInstrument {
           if (this.orders.has(newValue.orderId)) {
             this.orders.delete(newValue.orderId);
 
-            needToChangeOrderbook = true;
+            needToChangeMontage = true;
           }
         } else if (newValue.status === 'working') {
           this.orders.set(newValue.orderId, newValue);
 
-          needToChangeOrderbook = true;
+          needToChangeMontage = true;
         }
 
         if (
-          needToChangeOrderbook &&
+          needToChangeMontage &&
           this.instrument &&
           this.instrumentTrader.instrumentsAreEqual(
             newValue.instrument,
             this.instrument
           )
         ) {
-          this.orderbookChanged(null, this.#lastOrderBookValue);
+          this.montageChanged(null, this.#lastMontageValue);
         }
       }
-    }
-  }
-
-  handleTableClick({ event }) {
-    const price = parseFloat(
-      event
-        .composedPath()
-        .find((n) => n?.hasAttribute?.('price'))
-        ?.getAttribute?.('price')
-    );
-
-    if (!isNaN(price)) {
-      return this.broadcastPrice(price);
     }
   }
 
@@ -555,52 +1030,6 @@ export class OrderbookWidget extends WidgetWithInstrument {
     return { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes };
   }
 
-  cloneOrderbook(orderbook) {
-    const bids = [];
-    const asks = [];
-
-    for (let i = 0; i < orderbook?.bids?.length; i++) {
-      const bid = orderbook.bids[i];
-      const newBid = {};
-
-      if (bid.pool) newBid.pool = bid.pool;
-
-      if (bid.condition) newBid.condition = bid.condition;
-
-      newBid.price = +bid.price;
-      newBid.volume = +bid.volume;
-
-      if (bid.time) newBid.time = bid.time;
-
-      if (bid.timestamp) newBid.timestamp = bid.timestamp;
-
-      bids[i] = newBid;
-    }
-
-    for (let i = 0; i < orderbook?.asks?.length; i++) {
-      const ask = orderbook.asks[i];
-      const newAsk = {};
-
-      if (ask.pool) newAsk.pool = ask.pool;
-
-      if (ask.condition) newAsk.condition = ask.condition;
-
-      newAsk.price = +ask.price;
-      newAsk.volume = +ask.volume;
-
-      if (ask.time) newAsk.time = ask.time;
-
-      if (ask.timestamp) newAsk.timestamp = ask.timestamp;
-
-      asks[i] = newAsk;
-    }
-
-    return {
-      bids,
-      asks
-    };
-  }
-
   #getMyOrderPool() {
     let result = this.instrument.exchange;
 
@@ -619,187 +1048,13 @@ export class OrderbookWidget extends WidgetWithInstrument {
     return result;
   }
 
-  orderbookChanged(oldValue, newValue) {
-    Updates.enqueue(() => {
-      if (newValue === '—') {
-        newValue = {
-          bids: [],
-          asks: []
-        };
-      }
-
-      if (oldValue !== null && newValue)
-        this.#lastOrderBookValue = this.cloneOrderbook(newValue);
-
-      const orderbook = this.cloneOrderbook(newValue);
-
-      if (orderbook && this.instrument) {
-        if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
-
-        if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
-
-        if (!orderbook.bids.length && !orderbook.asks.length) {
-          this.quoteLines = [];
-
-          return;
-        }
-
-        const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
-          this.#getMyOrdersPricesAndSizes();
-
-        // 1. Buy orders, descending
-        for (const [price, volume] of buyOrdersPricesAndSizes) {
-          let insertAtTheEnd = true;
-
-          for (let i = 0; i < orderbook.bids?.length; i++) {
-            const bookPriceAtThisLevel = orderbook.bids[i].price;
-
-            if (price === bookPriceAtThisLevel) {
-              if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
-                orderbook.bids.splice(i, 0, {
-                  price,
-                  volume,
-                  my: volume,
-                  pool: this.#getMyOrderPool()
-                });
-              } else {
-                orderbook.bids[i].my = volume;
-
-                if (orderbook.bids[i].volume < volume)
-                  orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
-              }
-
-              insertAtTheEnd = false;
-
-              break;
-            } else if (price > bookPriceAtThisLevel) {
-              orderbook.bids.splice(i, 0, {
-                price,
-                volume,
-                my: volume,
-                pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                  ? this.#getMyOrderPool()
-                  : void 0
-              });
-
-              insertAtTheEnd = false;
-
-              break;
-            }
-          }
-
-          if (insertAtTheEnd) {
-            orderbook.bids.push({
-              price,
-              volume,
-              my: volume,
-              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                ? this.#getMyOrderPool()
-                : void 0
-            });
-          }
-        }
-
-        // 2. Sell orders, ascending
-        for (const [price, volume] of sellOrdersPricesAndSizes) {
-          let insertAtTheEnd = true;
-
-          for (let i = 0; i < orderbook.asks?.length; i++) {
-            const bookPriceAtThisLevel = orderbook.asks[i].price;
-
-            if (price === bookPriceAtThisLevel) {
-              // Always display fake pool
-              if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
-                orderbook.asks.splice(i, 0, {
-                  price,
-                  volume,
-                  my: volume,
-                  pool: this.#getMyOrderPool()
-                });
-              } else {
-                orderbook.asks[i].my = volume;
-
-                if (orderbook.asks[i].volume < volume)
-                  orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
-              }
-
-              insertAtTheEnd = false;
-
-              break;
-            } else if (price < bookPriceAtThisLevel) {
-              orderbook.asks.splice(i, 0, {
-                price,
-                volume,
-                my: volume,
-                pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                  ? this.#getMyOrderPool()
-                  : void 0
-              });
-
-              insertAtTheEnd = false;
-
-              break;
-            }
-          }
-
-          if (insertAtTheEnd) {
-            orderbook.asks.push({
-              price,
-              volume,
-              my: volume,
-              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                ? this.#getMyOrderPool()
-                : void 0
-            });
-          }
-        }
-
-        if (orderbook.bids?.length && orderbook.asks?.length) {
-          const bestBid = orderbook.bids[0]?.price;
-          const bestAsk = orderbook.asks[0]?.price;
-
-          this.spreadString = `${formatPriceWithoutCurrency(
-            bestAsk - bestBid,
-            this.instrument
-          )} (${formatPercentage((bestAsk - bestBid) / bestBid)})`;
-        }
-
-        let max = Math.max(
-          orderbook.bids?.length ?? 0,
-          orderbook.asks?.length ?? 0
-        );
-
-        if (max > this.document.depth) max = this.document.depth;
-
-        this.quoteLines = [];
-        this.maxSeenVolume = 0;
-
-        for (let i = 0; i < max; i++) {
-          const bid = orderbook.bids[i] ?? null;
-          const ask = orderbook.asks[i] ?? null;
-
-          if (bid) {
-            bid.pool = this.normalizePool(bid.pool, 'bid');
-
-            this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
-          }
-
-          if (ask) {
-            ask.pool = this.normalizePool(ask.pool, 'ask');
-
-            this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
-          }
-
-          this.quoteLines.push({
-            bid,
-            ask
-          });
-        }
-      } else this.spreadString = '—';
-    });
-  }
-
   normalizePool(pool, type) {
+    const isLULDPool = pool === 'LU' || pool === 'LD' || pool === 'LULD';
+
+    if (this.document.showPools === false && !isLULDPool) {
+      return void 0;
+    }
+
     if (!pool || !this.document.useMicsForPools) {
       if (pool === 'LULD') return type === 'bid' ? 'LD' : 'LU';
 
@@ -866,6 +1121,19 @@ export class OrderbookWidget extends WidgetWithInstrument {
     return mic;
   }
 
+  handleTableClick({ event }) {
+    const price = parseFloat(
+      event
+        .composedPath()
+        .find((n) => n?.hasAttribute?.('price'))
+        ?.getAttribute?.('price')
+    );
+
+    if (!isNaN(price)) {
+      return this.broadcastPrice(price);
+    }
+  }
+
   calcGradientPercentage(volume) {
     try {
       if (volume > 0 && this.maxSeenVolume > 0) {
@@ -878,25 +1146,32 @@ export class OrderbookWidget extends WidgetWithInstrument {
     return 0;
   }
 
-  async instrumentChanged(oldValue, newValue) {
-    super.instrumentChanged(oldValue, newValue);
-
-    this.orderbook = {
-      bids: [],
-      asks: []
-    };
-
-    await this.bookTrader?.instrumentChanged?.(this, oldValue, newValue);
-    await this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
-    Observable.notify(this, 'orders');
-  }
-
   async validate() {
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 5000,
       errorMessage: 'Введите значение в диапазоне от 1 до 5000'
     });
+
+    try {
+      new Function(
+        'trader',
+        'prices',
+        'isBidSide',
+        await new Tmpl().render(
+          this,
+          this.container.bookProcessorFunc.value,
+          {}
+        )
+      );
+    } catch (e) {
+      console.dir(e);
+
+      invalidate(this.container.bookProcessorFunc, {
+        errorMessage: 'Код содержит ошибки.',
+        raiseException: true
+      });
+    }
   }
 
   async submit() {
@@ -904,8 +1179,16 @@ export class OrderbookWidget extends WidgetWithInstrument {
       $set: {
         bookTraderId: this.container.bookTraderId.value,
         ordersTraderId: this.container.ordersTraderId.value,
+        extraBookTrader1Id: this.container.extraBookTrader1Id.value,
+        extraBookTrader2Id: this.container.extraBookTrader2Id.value,
+        extraBookTrader3Id: this.container.extraBookTrader3Id.value,
+        extraBookTrader1Enabled: this.container.extraBookTrader1Enabled.checked,
+        extraBookTrader2Enabled: this.container.extraBookTrader2Enabled.checked,
+        extraBookTrader3Enabled: this.container.extraBookTrader3Enabled.checked,
+        bookProcessorFunc: this.container.bookProcessorFunc.value,
         depth: Math.abs(this.container.depth.value),
         displayMode: this.container.displayMode.value,
+        showPools: this.container.showPools.checked,
         useMicsForPools: this.container.useMicsForPools.checked
       }
     };
@@ -928,143 +1211,342 @@ export async function widgetDefinition() {
     minHeight: 120,
     defaultWidth: 280,
     settings: html`
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер книги заявок</h5>
-          <p class="description">
-            Трейдер, который будет источником книги заявок.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('bookTraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.bookTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.bookTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.bookTraderId ?? ''%]` }
+      <ppp-tabs activeid="traders">
+        <ppp-tab id="traders">Подключения</ppp-tab>
+        <ppp-tab id="appearance">Отображение</ppp-tab>
+        <ppp-tab-panel id="traders-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер книги заявок</h5>
+              <p class="description">
+                Трейдер, который будет источником книги заявок.
+              </p>
+            </div>
+            <div class="control-line">
+              <ppp-query-select
+                ${ref('bookTraderId')}
+                deselectable
+                standalone
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.bookTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.bookTrader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.bookTraderId ?? ''%]` }
+                            ]
+                          }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер активных заявок</h5>
-          <p class="description">
-            Трейдер, который будет отображать собственные лимитные заявки
-            (количество) на ценовых уровнях.
-          </p>
-        </div>
-        <div class="control-line">
-          <ppp-query-select
-            ${ref('ordersTraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.ordersTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.ordersTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер активных заявок</h5>
+              <p class="description">
+                Трейдер, который будет отображать собственные лимитные заявки
+                (количество) на ценовых уровнях.
+              </p>
+            </div>
+            <div class="control-line">
+              <ppp-query-select
+                ${ref('ordersTraderId')}
+                standalone
+                deselectable
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.ordersTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.ordersTraderId ?? ''%]` }
+                            ]
+                          }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Тип отображения</h5>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-radio-group
-            orientation="vertical"
-            value="compact"
-            ${ref('displayMode')}
-          >
-            <ppp-radio value="compact">Компактный</ppp-radio>
-          </ppp-radio-group>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Глубина книги заявок</h5>
-          <p class="description">
-            Количество строк <span class="positive">bid</span> и
-            <span class="negative">ask</span> для отображения.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            type="number"
-            placeholder="20"
-            value="${(x) => x.document.depth ?? 20}"
-            ${ref('depth')}
-          ></ppp-text-field>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Параметры отображения</h5>
-        </div>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.useMicsForPools}"
-          ${ref('useMicsForPools')}
-        >
-          Отображать пулы ликвидности кодами MIC
-        </ppp-checkbox>
-      </div>
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Дополнительный трейдер книги заявок #1</h5>
+            </div>
+            <div class="control-line">
+              <ppp-checkbox
+                standalone
+                ?checked="${(x) => x.document.extraBookTrader1Enabled ?? false}"
+                ${ref('extraBookTrader1Enabled')}
+              >
+              </ppp-checkbox>
+              <ppp-query-select
+                ${ref('extraBookTrader1Id')}
+                standalone
+                deselectable
+                ?disabled=${(x) => !x.extraBookTrader1Enabled.checked}
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.extraBookTrader1Id}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.extraBookTrader1 ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.extraBookTrader1Id ?? ''%]`
+                              }
+                            ]
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Дополнительный трейдер книги заявок #2</h5>
+            </div>
+            <div class="control-line">
+              <ppp-checkbox
+                standalone
+                ?checked="${(x) => x.document.extraBookTrader2Enabled ?? false}"
+                ${ref('extraBookTrader2Enabled')}
+              >
+              </ppp-checkbox>
+              <ppp-query-select
+                ${ref('extraBookTrader2Id')}
+                standalone
+                deselectable
+                ?disabled=${(x) => !x.extraBookTrader2Enabled.checked}
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.extraBookTrader2Id}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.extraBookTrader2 ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.extraBookTrader2Id ?? ''%]`
+                              }
+                            ]
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Дополнительный трейдер книги заявок #3</h5>
+            </div>
+            <div class="control-line">
+              <ppp-checkbox
+                standalone
+                ?checked="${(x) => x.document.extraBookTrader3Enabled ?? false}"
+                ${ref('extraBookTrader3Enabled')}
+              >
+              </ppp-checkbox>
+              <ppp-query-select
+                ${ref('extraBookTrader3Id')}
+                standalone
+                deselectable
+                ?disabled=${(x) => !x.extraBookTrader3Enabled.checked}
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.extraBookTrader3Id}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.extraBookTrader3 ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.extraBookTrader3Id ?? ''%]`
+                              }
+                            ]
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Обработка книг заявок</h5>
+              <p class="description">
+                Тело функции для обработки книг заявок, поступающих от трейдеров
+                виджета.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-snippet
+                standalone
+                :code="${(x) =>
+                  x.document.bookProcessorFunc ?? defaultBookProcessorFunc}"
+                ${ref('bookProcessorFunc')}
+                revertable
+                @revert="${(x) => {
+                  x.bookProcessorFunc.updateCode(defaultBookProcessorFunc);
+                }}"
+              ></ppp-snippet>
+            </div>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="appearance-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Тип отображения</h5>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-radio-group
+                orientation="vertical"
+                value="compact"
+                ${ref('displayMode')}
+              >
+                <ppp-radio value="compact">Компактный</ppp-radio>
+              </ppp-radio-group>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Глубина книги заявок</h5>
+              <p class="description">
+                Количество строк <span class="positive">bid</span> и
+                <span class="negative">ask</span> для отображения.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                type="number"
+                placeholder="20"
+                value="${(x) => x.document.depth ?? 20}"
+                ${ref('depth')}
+              ></ppp-text-field>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Параметры отображения</h5>
+            </div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showPools ?? true}"
+              ${ref('showPools')}
+            >
+              Отображать пулы ликвидности в книге заявок
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.useMicsForPools}"
+              ${ref('useMicsForPools')}
+            >
+              Отображать пулы ликвидности кодами MIC
+            </ppp-checkbox>
+          </div>
+        </ppp-tab-panel>
+      </ppp-tabs>
     `
   };
 }

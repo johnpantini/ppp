@@ -368,6 +368,7 @@ export const widgetPageTemplate = html`
                           </div>
                           <div class="widget-settings-input-group">
                             <ppp-text-field
+                              standalone
                               placeholder="Название виджета"
                               value="${(x) => x.document.name}"
                               ${ref('name')}
@@ -761,6 +762,10 @@ export const widgetPageStyles = css`
     margin-bottom: 0;
   }
 
+  .widget-settings-label-group {
+    margin-bottom: ${spacing2};
+  }
+
   .widget-settings-label-group h5 {
     display: flex;
     line-height: 26px;
@@ -777,10 +782,6 @@ export const widgetPageStyles = css`
 
   .widget-settings-section .control-line ppp-query-select:first-child {
     width: 100%;
-  }
-
-  .widget-settings-section .control-line ppp-button:last-child {
-    margin-top: 8px;
   }
 
   /* prettier-ignore */

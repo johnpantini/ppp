@@ -14,8 +14,7 @@ import {
   ref,
   repeat,
   observable,
-  Observable,
-  Updates
+  Observable
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES, TRADER_DATUM, TRADER_CAPS } from '../../lib/const.js';
 import {
@@ -301,21 +300,19 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async printChanged(oldValue, newValue) {
     const threshold = await this.getThreshold(newValue);
 
-    Updates.enqueue(() => {
-      if (newValue?.price) {
-        if (typeof threshold === 'number' && newValue?.volume < threshold) {
-          return;
-        }
-
-        this.trades.unshift(newValue);
-
-        while (this.trades.length > this.document.depth) {
-          this.trades.pop();
-        }
-
-        Observable.notify(this, 'trades');
+    if (newValue?.price) {
+      if (typeof threshold === 'number' && newValue?.volume < threshold) {
+        return;
       }
-    });
+
+      this.trades.unshift(newValue);
+
+      while (this.trades.length > this.document.depth) {
+        this.trades.pop();
+      }
+
+      Observable.notify(this, 'trades');
+    }
   }
 
   async disconnectedCallback() {

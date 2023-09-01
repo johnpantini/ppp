@@ -69,10 +69,15 @@ export function escapeHtml(string) {
 
 export const snippetTemplate = html`
   <template>
-    <label part="label" for="control" class="label">
+    <label
+      part="label"
+      for="control"
+      class="label"
+      ?hidden="${(x) => x.standalone}"
+    >
       <slot name="label"></slot>
     </label>
-    <p class="description">
+    <p ?hidden="${(x) => x.standalone}" class="description">
       <slot name="description"></slot>
     </p>
     <div class="root" part="root">
@@ -417,6 +422,9 @@ export const snippetStyles = css`
 export class Snippet extends PPPAppearanceElement {
   @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
+
+  @attr({ mode: 'boolean' })
+  standalone;
 
   @attr({ mode: 'boolean' })
   disabled;

@@ -120,13 +120,11 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
       bids: [],
       asks: []
     };
+    const orderbookMap = this.orderbooks.get(this.trader.getSymbol(instrument));
+    const volumeCoefficient = this.trader.document.useLots ? 1 : 100;
     const iterable = Array.isArray(orderbook) ? orderbook : [orderbook];
 
     for (const data of iterable) {
-      const orderbookMap = this.orderbooks.get(
-        this.trader.getSymbol(instrument)
-      );
-      const volumeCoefficient = this.trader.document.useLots ? 1 : 100;
       let bidKey = data.bx;
 
       if (this.trader.document.broker.type === BROKERS.PSINA) {
@@ -157,41 +155,33 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
 
       const nowHours = new Date().getUTCHours();
 
-      montage.bids = [...orderbookMap.bids.values()]
-        .filter((b) => {
-          if (this.trader.document.broker.type === BROKERS.UTEX) {
-            // Fix for invalid NYSE pool data
-            if (
-              (nowHours >= (isDST() ? 20 : 21) ||
-                nowHours < (isDST() ? 10 : 11)) &&
-              b.pool === 'N'
-            )
-              return false;
-          }
+      montage.bids = [...orderbookMap.bids.values()].filter((b) => {
+        if (this.trader.document.broker.type === BROKERS.UTEX) {
+          // Fix for invalid NYSE pool data
+          if (
+            (nowHours >= (isDST() ? 20 : 21) ||
+              nowHours < (isDST() ? 10 : 11)) &&
+            b.pool === 'N'
+          )
+            return false;
+        }
 
-          return b.price > 0 && (b.volume > 0 || b.pool === 'LULD');
-        })
-        .sort((a, b) => {
-          return b.price - a.price || b.volume - a.volume;
-        });
+        return b.price > 0 && (b.volume > 0 || b.pool === 'LULD');
+      });
 
-      montage.asks = [...orderbookMap.asks.values()]
-        .filter((a) => {
-          if (this.trader.document.broker.type === BROKERS.UTEX) {
-            // Fix for invalid NYSE pool data
-            if (
-              (nowHours >= (isDST() ? 20 : 21) ||
-                nowHours < (isDST() ? 10 : 11)) &&
-              a.pool === 'N'
-            )
-              return false;
-          }
+      montage.asks = [...orderbookMap.asks.values()].filter((a) => {
+        if (this.trader.document.broker.type === BROKERS.UTEX) {
+          // Fix for invalid NYSE pool data
+          if (
+            (nowHours >= (isDST() ? 20 : 21) ||
+              nowHours < (isDST() ? 10 : 11)) &&
+            a.pool === 'N'
+          )
+            return false;
+        }
 
-          return a.price > 0 && (a.volume > 0 || a.pool === 'LULD');
-        })
-        .sort((a, b) => {
-          return a.price - b.price || b.volume - a.volume;
-        });
+        return a.price > 0 && (a.volume > 0 || a.pool === 'LULD');
+      });
     }
 
     return montage;

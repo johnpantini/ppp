@@ -180,31 +180,35 @@ class OrderbookDatum extends AlorTraderDatum {
   }
 
   [TRADER_DATUM.ORDERBOOK](data, instrument) {
-    if (instrument.type === 'bond') {
-      data.bids = data.bids.map((b) => {
-        if (b.processed) {
-          return b;
-        }
+    data.bids = data.bids.map((b) => {
+      if (b.pool) {
+        return b;
+      }
 
-        return {
-          price: this.trader.relativeBondPriceToPrice(b.price, instrument),
-          volume: b.volume,
-          processed: true
-        };
-      });
+      return {
+        price:
+          instrument.type === 'bond'
+            ? this.trader.relativeBondPriceToPrice(b.price, instrument)
+            : b.price,
+        volume: b.volume,
+        pool: this.trader.document.exchange
+      };
+    });
 
-      data.asks = data.asks.map((a) => {
-        if (a.processed) {
-          return a;
-        }
+    data.asks = data.asks.map((a) => {
+      if (a.pool) {
+        return a;
+      }
 
-        return {
-          price: this.trader.relativeBondPriceToPrice(a.price, instrument),
-          volume: a.volume,
-          processed: true
-        };
-      });
-    }
+      return {
+        price:
+          instrument.type === 'bond'
+            ? this.trader.relativeBondPriceToPrice(a.price, instrument)
+            : a.price,
+        volume: a.volume,
+        pool: this.trader.document.exchange
+      };
+    });
 
     return {
       bids: data.bids,
@@ -1224,6 +1228,9 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (/Нехватка средств по лимитам клиента/i.test(message))
       return 'Нехватка средств по лимитам клиента.';
+
+    if (/Позиции клиента не найдены/i.test(message))
+      return 'Позиции клиента не найдены.';
 
     if (/Сейчас эта сессия не идет/i.test(message))
       return 'Сейчас эта сессия не идет.';

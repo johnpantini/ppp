@@ -597,6 +597,7 @@ export async function widgetDefinition() {
           <ppp-query-select
             ${ref('chartTraderId')}
             deselectable
+            standalone
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.chartTraderId}"
             :context="${(x) => x}"
@@ -645,6 +646,7 @@ export async function widgetDefinition() {
           <ppp-query-select
             ${ref('tradesTraderId')}
             deselectable
+            standalone
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.tradesTraderId}"
             :context="${(x) => x}"

@@ -118,7 +118,7 @@ class OrderbookDatum extends TraderDatum {
     return {
       bids: (
         data?.bids?.map?.((b) => {
-          if (b.processed) {
+          if (b.pool) {
             return b;
           }
 
@@ -128,11 +128,11 @@ class OrderbookDatum extends TraderDatum {
 
           return {
             price:
-              instrument.type === 'bond' && !b.processed
+              instrument.type === 'bond'
                 ? this.trader.relativeBondPriceToPrice(p, instrument)
                 : p,
             volume: b.quantity,
-            processed: true
+            pool: instrument.exchange
           };
         }) ?? []
       )
@@ -140,14 +140,13 @@ class OrderbookDatum extends TraderDatum {
           {
             price: limitDownPrice,
             pool: 'LD',
-            volume: 0,
-            processed: true
+            volume: 0
           }
         ])
         .sort((a, b) => b.price - a.price),
       asks: (
         data?.asks?.map?.((a) => {
-          if (a.processed) {
+          if (a.pool) {
             return a;
           }
 
@@ -157,19 +156,18 @@ class OrderbookDatum extends TraderDatum {
 
           return {
             price:
-              instrument.type === 'bond' && !a.processed
+              instrument.type === 'bond'
                 ? this.trader.relativeBondPriceToPrice(p, instrument)
                 : p,
             volume: a.quantity,
-            processed: true
+            pool: instrument.exchange
           };
         }) ?? []
       )
         .concat({
           price: limitUpPrice,
           pool: 'LU',
-          volume: 0,
-          processed: true
+          volume: 0
         })
         .sort((a, b) => a.price - b.price)
     };

@@ -55,25 +55,25 @@ class OrderbookDatum extends BinanceTraderDatum {
   [TRADER_DATUM.ORDERBOOK](data) {
     return {
       bids: data.bids.map((b) => {
-        if (b.processed) {
+        if (b.pool) {
           return b;
         }
 
         return {
           price: parseFloat(b[0]),
           volume: parseFloat(b[1]),
-          processed: true
+          pool: 'BN'
         };
       }),
       asks: data.asks.map((a) => {
-        if (a.processed) {
+        if (a.pool) {
           return a;
         }
 
         return {
           price: parseFloat(a[0]),
           volume: parseFloat(a[1]),
-          processed: true
+          pool: 'BN'
         };
       })
     };

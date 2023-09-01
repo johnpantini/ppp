@@ -14,8 +14,7 @@ import {
   ref,
   observable,
   repeat,
-  attr,
-  Updates
+  attr
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
@@ -371,22 +370,20 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   activeOrderChanged(oldValue, newValue) {
-    Updates.enqueue(() => {
-      if (newValue?.orderId) {
-        if (newValue.orderType === 'limit') {
-          if (
-            newValue.quantity === newValue.filled ||
-            newValue.status !== 'working'
-          )
-            this.ordersMap.delete(newValue.orderId);
-          else if (newValue.status === 'working') {
-            this.ordersMap.set(newValue.orderId, newValue);
-          }
-
-          this.orders = this.getOrdersArray();
+    if (newValue?.orderId) {
+      if (newValue.orderType === 'limit') {
+        if (
+          newValue.quantity === newValue.filled ||
+          newValue.status !== 'working'
+        )
+          this.ordersMap.delete(newValue.orderId);
+        else if (newValue.status === 'working') {
+          this.ordersMap.set(newValue.orderId, newValue);
         }
+
+        this.orders = this.getOrdersArray();
       }
-    });
+    }
   }
 
   async instrumentChanged(oldValue, newValue) {
@@ -577,6 +574,7 @@ export async function widgetDefinition() {
           <ppp-query-select
             ${ref('ordersTraderId')}
             deselectable
+            standalone
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"

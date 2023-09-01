@@ -557,6 +557,7 @@ export async function widgetDefinition() {
           <ppp-query-select
             ${ref('timelineTraderId')}
             deselectable
+            standalone
             placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.timelineTraderId}"
             :context="${(x) => x}"

@@ -48,7 +48,7 @@ import './toast.js';
 
 await ppp.i18n(import.meta.url);
 
-(class PageHeader extends PPPElement {}
+(class PageHeader extends PPPElement {})
   .compose({
     template: html`
       <h3 class="title" ${ref('titleContent')}>
@@ -93,7 +93,7 @@ await ppp.i18n(import.meta.url);
       }
     `
   })
-  .define());
+  .define();
 
 export const documentPageHeaderPartial = ({
   pageUrl,
@@ -352,6 +352,10 @@ export const pageStyles = css`
 
   .control-line.space-between {
     justify-content: space-between;
+  }
+
+  .control-line ppp-checkbox + ppp-query-select {
+    flex: 1 0 0;
   }
 
   .control-stack {

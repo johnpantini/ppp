@@ -50,6 +50,7 @@ export const checkboxTemplate = html`
       </slot>
     </div>
     <label
+      ?hidden="${(x) => x.standalone}"
       part="label"
       class="${(x) =>
         x.defaultSlottedNodes && x.defaultSlottedNodes.length
@@ -141,6 +142,9 @@ export class Checkbox extends PPPElement {
 
   @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
+
+  @attr({ mode: 'boolean' })
+  standalone;
 
   @observable
   defaultSlottedNodes;

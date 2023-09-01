@@ -1869,6 +1869,7 @@ export async function widgetDefinition() {
             <div class="control-line">
               <ppp-query-select
                 ${ref('ordersTraderId')}
+                standalone
                 deselectable
                 placeholder="Опционально, нажмите для выбора"
                 value="${(x) => x.document.ordersTraderId}"
@@ -1921,6 +1922,7 @@ export async function widgetDefinition() {
             <div class="control-line">
               <ppp-query-select
                 ${ref('level1TraderId')}
+                standalone
                 deselectable
                 placeholder="Опционально, нажмите для выбора"
                 value="${(x) => x.document.level1TraderId}"
@@ -1969,6 +1971,7 @@ export async function widgetDefinition() {
             <div class="control-line">
               <ppp-query-select
                 ${ref('extraLevel1TraderId')}
+                standalone
                 deselectable
                 placeholder="Опционально, нажмите для выбора"
                 value="${(x) => x.document.extraLevel1TraderId}"
@@ -2019,6 +2022,7 @@ export async function widgetDefinition() {
             <div class="control-line">
               <ppp-query-select
                 ${ref('extraLevel1Trader2Id')}
+                standalone
                 deselectable
                 placeholder="Опционально, нажмите для выбора"
                 value="${(x) => x.document.extraLevel1Trader2Id}"
@@ -2069,6 +2073,7 @@ export async function widgetDefinition() {
               <div class="control-line">
                 <ppp-query-select
                   ${ref('pusherApiId')}
+                  standalone
                   deselectable
                   placeholder="Опционально, нажмите для выбора"
                   value="${(x) => x.document.pusherApiId}"
