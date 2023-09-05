@@ -69,7 +69,7 @@ export const bannerStyles = css`
     padding: 10px 12px 10px 20px;
     border-width: 1px 1px 1px 0;
     border-style: solid;
-    border-radius: 12px;
+    border-radius: 6px;
   }
 
   :host(.inline) {
@@ -83,7 +83,7 @@ export const bannerStyles = css`
     top: -1px;
     bottom: -1px;
     left: 0;
-    border-radius: 12px 0 0 12px;
+    border-radius: 6px 0 0 6px;
   }
 
   svg {

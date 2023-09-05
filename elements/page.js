@@ -13,7 +13,13 @@ import {
   when
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
-import { ellipsis, normalize, spacing, typography } from '../design/styles.js';
+import {
+  ellipsis,
+  normalize,
+  spacing,
+  typography,
+  scrollbars
+} from '../design/styles.js';
 import {
   paletteGrayDark2,
   paletteGrayLight2,
@@ -388,6 +394,42 @@ export const pageStyles = css`
   .implementation-area ppp-banner .label-group {
     padding-bottom: 8px;
   }
+
+  .page-level.control-stack {
+    height: 100%;
+  }
+
+  .table-with-selector {
+    position: relative;
+    width: 100%;
+    height: inherit;
+  }
+
+  .table-with-selector .selector-holder {
+    width: 183px;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .table-with-selector .selector-holder ppp-side-nav {
+    position: absolute;
+    height: 100%;
+  }
+
+  .table-with-selector .table-holder {
+    position: absolute;
+    width: calc(100% - 183px);
+    height: 100%;
+    left: 183px;
+    top: 0;
+    overflow: auto;
+    border-left: none;
+    border-right: none;
+    margin-left: ${spacing1};
+  }
+
+  ${scrollbars('.table-with-selector .table-holder')};
 `;
 
 class ScratchMap extends Map {

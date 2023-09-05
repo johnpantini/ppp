@@ -137,6 +137,10 @@ export const sideNavStyles = css`
     z-index: 0;
   }
 
+  :host([inline]) .nav {
+    border-radius: 4px;
+  }
+
   .nav[expanded] {
     width: calc(${sideNavExpandedWidth} * 1px);
   }
@@ -145,6 +149,10 @@ export const sideNavStyles = css`
     width: calc(${sideNavExpandedWidth} * 1px);
     border-right: 1px solid
       ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+  }
+
+  :host([inline]) .nav {
+    border-right: none;
   }
 
   .expanded-content,

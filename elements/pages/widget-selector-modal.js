@@ -11,8 +11,7 @@ import {
 import { Page, pageStyles } from '../page.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { formatDate } from '../../lib/intl.js';
-import { scrollbars } from '../../design/styles.js';
-import { search, settings } from '../../static/svg/sprite.js';
+import { settings } from '../../static/svg/sprite.js';
 import '../banner.js';
 import '../button.js';
 import '../side-nav.js';
@@ -23,189 +22,190 @@ export const widgetSelectorModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-banner class="inline" appearance="warning">
-        <div
-          style="display: ${(x) =>
-            !x.isPredefinedWidgetType(x.activeItem) || x.documents.length
-              ? 'initial'
-              : 'none'}"
-        >
-          Найдите шаблон виджета в списке и нажмите на строку в таблице, чтобы
-          разместить в терминале, или
-          <a
-            class="link"
-            style="font-weight: 700"
-            @click="${(x) => {
-              ppp.app.navigate({
-                page: 'widget',
-                type: x.isPredefinedWidgetType(x.activeItem)
-                  ? x.activeItem
-                  : 'order'
-              });
-            }}}"
-            href="javascript:void(0)"
-            >создайте новый</a
-          >.
-        </div>
-        <div
-          style="display: ${(x) =>
-            x.isPredefinedWidgetType(x.activeItem) && !x.documents.length
-              ? 'initial'
-              : 'none'}"
-        >
-          Похоже, у вас нет ни одного виджета данного типа. Добавьте и настройте
-          в
-          <a
-            class="link"
-            style="font-weight: 700"
-            @click="${(x) => {
-              ppp.app.navigate({
-                page: 'widget',
-                type: x.activeItem
-              });
-            }}}"
-            href="javascript:void(0)"
-            >соответствующем разделе</a
-          >.
-        </div>
-      </ppp-banner>
-      <div class="spacing2"></div>
-      <div class="selectors">
-        <div class="selector-holder">
-          <ppp-side-nav
-            expanded
-            static
-            inline
-            @click="${(x, c) => x.handleTypeSelectorClick(c)}"
+      <div class="control-stack">
+        <ppp-banner class="inline" appearance="warning">
+          <div
+            style="display: ${(x) =>
+              !x.isPredefinedWidgetType(x.activeItem) || x.documents.length
+                ? 'initial'
+                : 'none'}"
           >
-            <ppp-side-nav-group>
-              <span slot="title">Тип виджета</span>
-              <ppp-side-nav-item
-                slug="order"
-                ?active="${(x) => x.activeItem === 'order'}"
-              >
-                <span>Заявка</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="scalping-buttons"
-                title="Скальперские кнопки"
-                ?active="${(x) => x.activeItem === 'scalping-buttons'}"
-              >
-                <span>Скальперские кнопки</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="active-orders"
-                ?active="${(x) => x.activeItem === 'active-orders'}"
-              >
-                <span>Активные заявки</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="light-chart"
-                ?active="${(x) => x.activeItem === 'light-chart'}"
-              >
-                <span>Лёгкий график</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="orderbook"
-                ?active="${(x) => x.activeItem === 'orderbook'}"
-              >
-                <span>Книга заявок</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="time-and-sales"
-                ?active="${(x) => x.activeItem === 'time-and-sales'}"
-              >
-                <span>Лента всех сделок</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="portfolio"
-                ?active="${(x) => x.activeItem === 'portfolio'}"
-              >
-                <span>Портфель</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="instruments"
-                ?active="${(x) => x.activeItem === 'instruments'}"
-              >
-                <span>Инструменты</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="timeline"
-                ?active="${(x) => x.activeItem === 'timeline'}"
-              >
-                <span>Лента операций</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="frame"
-                ?active="${(x) => x.activeItem === 'frame'}"
-              >
-                <span>Фрейм</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="noii"
-                title="NOII"
-                ?active="${(x) => x.activeItem === 'noii'}"
-              >
-                <span>NOII</span>
-              </ppp-side-nav-item>
-              <ppp-side-nav-item
-                slug="other"
-                title="Специальный виджет"
-                ?active="${(x) => x.activeItem === 'other'}"
-              >
-                <span>Специальный виджет</span>
-              </ppp-side-nav-item>
-            </ppp-side-nav-group>
-          </ppp-side-nav>
-        </div>
-        <div class="table-holder">
-          <ppp-table
-            selectable
-            sticky
-            @click="${(x, c) => x.handleWidgetListClick(c)}"
-            :columns="${() => [
-              {
-                label: 'Название'
-              },
-              {
-                label: 'Последнее изменение'
-              },
-              {
-                label: 'Коллекция'
-              },
-              {
-                label: 'Действия'
-              }
-            ]}"
-            :rows="${(x) =>
-              x.documents?.map((datum) => {
-                return {
-                  datum,
-                  cells: [
-                    datum.name ?? '<Без имени>',
-                    formatDate(datum.updatedAt ?? datum.createdAt),
-                    datum.collection,
-                    html`
-                      <ppp-button
-                        class="xsmall"
-                        @click="${() => {
-                          ppp.app.navigate({
-                            page: 'widget',
-                            document: datum._id
-                          });
+            Найдите шаблон виджета в списке и нажмите на строку в таблице, чтобы
+            разместить в терминале, или
+            <a
+              class="link"
+              style="font-weight: 700"
+              @click="${(x) => {
+                ppp.app.navigate({
+                  page: 'widget',
+                  type: x.isPredefinedWidgetType(x.activeItem)
+                    ? x.activeItem
+                    : 'order'
+                });
+              }}}"
+              href="javascript:void(0)"
+              >создайте новый</a
+            >.
+          </div>
+          <div
+            style="display: ${(x) =>
+              x.isPredefinedWidgetType(x.activeItem) && !x.documents.length
+                ? 'initial'
+                : 'none'}"
+          >
+            Похоже, у вас нет ни одного виджета данного типа. Добавьте и
+            настройте в
+            <a
+              class="link"
+              style="font-weight: 700"
+              @click="${(x) => {
+                ppp.app.navigate({
+                  page: 'widget',
+                  type: x.activeItem
+                });
+              }}}"
+              href="javascript:void(0)"
+              >соответствующем разделе</a
+            >.
+          </div>
+        </ppp-banner>
+        <div class="table-with-selector">
+          <div class="selector-holder">
+            <ppp-side-nav
+              expanded
+              static
+              inline
+              @click="${(x, c) => x.handleTypeSelectorClick(c)}"
+            >
+              <ppp-side-nav-group>
+                <span slot="title">Тип виджета</span>
+                <ppp-side-nav-item
+                  slug="order"
+                  ?active="${(x) => x.activeItem === 'order'}"
+                >
+                  <span>Заявка</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="scalping-buttons"
+                  title="Скальперские кнопки"
+                  ?active="${(x) => x.activeItem === 'scalping-buttons'}"
+                >
+                  <span>Скальперские кнопки</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="active-orders"
+                  ?active="${(x) => x.activeItem === 'active-orders'}"
+                >
+                  <span>Активные заявки</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="light-chart"
+                  ?active="${(x) => x.activeItem === 'light-chart'}"
+                >
+                  <span>Лёгкий график</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="orderbook"
+                  ?active="${(x) => x.activeItem === 'orderbook'}"
+                >
+                  <span>Книга заявок</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="time-and-sales"
+                  ?active="${(x) => x.activeItem === 'time-and-sales'}"
+                >
+                  <span>Лента всех сделок</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="portfolio"
+                  ?active="${(x) => x.activeItem === 'portfolio'}"
+                >
+                  <span>Портфель</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="list"
+                  ?active="${(x) => x.activeItem === 'list'}"
+                >
+                  <span>Список/таблица</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="timeline"
+                  ?active="${(x) => x.activeItem === 'timeline'}"
+                >
+                  <span>Лента операций</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="frame"
+                  ?active="${(x) => x.activeItem === 'frame'}"
+                >
+                  <span>Фрейм</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="noii"
+                  title="NOII"
+                  ?active="${(x) => x.activeItem === 'noii'}"
+                >
+                  <span>NOII</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="other"
+                  title="Специальный виджет"
+                  ?active="${(x) => x.activeItem === 'other'}"
+                >
+                  <span>Специальный виджет</span>
+                </ppp-side-nav-item>
+              </ppp-side-nav-group>
+            </ppp-side-nav>
+          </div>
+          <div class="table-holder">
+            <ppp-table
+              selectable
+              sticky
+              @click="${(x, c) => x.handleWidgetListClick(c)}"
+              :columns="${() => [
+                {
+                  label: 'Название'
+                },
+                {
+                  label: 'Последнее изменение'
+                },
+                {
+                  label: 'Коллекция'
+                },
+                {
+                  label: 'Действия'
+                }
+              ]}"
+              :rows="${(x) =>
+                x.documents?.map((datum) => {
+                  return {
+                    datum,
+                    cells: [
+                      datum.name ?? '<Без имени>',
+                      formatDate(datum.updatedAt ?? datum.createdAt),
+                      datum.collection,
+                      html`
+                        <ppp-button
+                          class="xsmall"
+                          @click="${() => {
+                            ppp.app.navigate({
+                              page: 'widget',
+                              document: datum._id
+                            });
 
-                          return false;
-                        }}"
-                      >
-                        <span slot="start"> ${html.partial(settings)} </span>
-                        К настройкам
-                      </ppp-button>
-                    `
-                  ]
-                };
-              })}"
-          >
-          </ppp-table>
+                            return false;
+                          }}"
+                        >
+                          <span slot="start"> ${html.partial(settings)} </span>
+                          К настройкам
+                        </ppp-button>
+                      `
+                    ]
+                  };
+                })}"
+            >
+            </ppp-table>
+          </div>
         </div>
       </div>
     </form>
@@ -214,7 +214,6 @@ export const widgetSelectorModalPageTemplate = html`
 
 export const widgetSelectorModalPageStyles = css`
   ${pageStyles}
-  ${scrollbars('.table-holder')}
   form[novalidate] {
     padding: 0 25px 25px 25px;
   }
@@ -223,32 +222,8 @@ export const widgetSelectorModalPageStyles = css`
     width: 810px;
   }
 
-  ppp-side-nav {
-    position: absolute;
-    height: 100%;
-  }
-
-  .selectors {
-    position: relative;
-  }
-
-  .selector-holder {
-    width: 183px;
-    height: 375px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .table-holder {
-    position: absolute;
-    width: calc(100% - 183px);
-    height: 100%;
-    left: 183px;
-    top: 0;
-    overflow: auto;
-    margin-left: 8px;
-    border-left: none;
-    border-right: none;
+  .control-stack {
+    height: 500px;
   }
 `;
 
