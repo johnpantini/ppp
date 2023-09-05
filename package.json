@@ -1,6 +1,6 @@
 {
   "name": "ppp",
-  "version": "4.7.1",
+  "version": "4.7.2",
   "description": "ppp monorepo",
   "author": "johnpantini",
   "main": "ppp-dyno.mjs",

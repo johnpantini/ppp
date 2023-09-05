@@ -10,7 +10,8 @@ import {
   TRADER_CAPS,
   VERSIONING_STATUS,
   EXCHANGE,
-  COLUMN_SOURCE
+  COLUMN_SOURCE,
+  ORDERS
 } from '../../../lib/const.js';
 
 export default function (i18n) {
@@ -59,6 +60,10 @@ export default function (i18n) {
         [EXCHANGE.SPBX]: 'СПБ Биржа',
         [EXCHANGE.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
         [EXCHANGE.US]: 'Биржи США'
+      },
+      order: {
+        [ORDERS.STOP_LOSS_TAKE_PROFIT]: 'Stop Loss/Take Profit',
+        [ORDERS.CUSTOM]: 'По ссылке'
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',

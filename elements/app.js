@@ -24,7 +24,7 @@ import {
   themeConditional
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
-import { hotkey, normalize, scrollbars } from '../design/styles.js'
+import { hotkey, normalize, scrollbars } from '../design/styles.js';
 import {
   workspaces,
   trading,
@@ -140,6 +140,20 @@ export const appTemplate = html`
                 ?active="${(x) => x.page.startsWith('widget')}"
               >
                 <span>${() => ppp.t('$collection.widgets')}</span>
+              </ppp-side-nav-item>
+            </a>
+            <a
+              href="?page=orders"
+              @click="${(x) =>
+                x.navigate({
+                  page: 'orders'
+                })}"
+            >
+              <ppp-side-nav-item
+                ?disabled="${() => !ppp.keyVault.ok()}"
+                ?active="${(x) => x.page.startsWith('order')}"
+              >
+                <span>${() => ppp.t('$collection.orders')}</span>
               </ppp-side-nav-item>
             </a>
             <a

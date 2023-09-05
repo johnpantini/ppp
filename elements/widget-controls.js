@@ -1865,7 +1865,11 @@ export class WidgetHeaderButtons extends PPPElement {
           const newWidgetDocument = Object.assign(
             {},
             that.widget.document,
-            page.document
+            page.document,
+            $set,
+            {
+              symbol: that.widget?.instrument?.symbol
+            }
           );
           const container = that.widget.container;
           const updateFragment = {};

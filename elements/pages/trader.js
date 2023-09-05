@@ -427,7 +427,7 @@ export const traderPageStyles = css`
 
   .picture svg {
     position: relative;
-    height: 32px;
+    height: 34px;
   }
 `;
 
