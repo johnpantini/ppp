@@ -1884,7 +1884,8 @@ export class WidgetHeaderButtons extends PPPElement {
 
           that.widget.remove();
           container.document.widgets.push(newWidgetDocument);
-          await container.placeWidget(newWidgetDocument);
+
+          that.widget = await container.placeWidget(newWidgetDocument);
 
           page.showSuccessNotification('Виджет сохранён.');
         } catch (e) {

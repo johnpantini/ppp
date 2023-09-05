@@ -179,6 +179,11 @@ export class QuerySelect extends PPPAppearanceElement {
   valueChanged(oldValue, newValue) {
     if (this.$fastController.isConnected) {
       this.control.value = newValue;
+
+      // Apply empty select style on null value.
+      if (this.value === null) {
+        this.value = void 0;
+      }
     }
   }
 
@@ -266,7 +271,8 @@ export class QuerySelect extends PPPAppearanceElement {
       if (typeof next === 'object') {
         const formatted = this.#formatter().call(this, next);
 
-        if (typeof formatted.value === 'undefined') return;
+        if (typeof formatted.value === 'undefined' || formatted.value === null)
+          return;
 
         if (!this.options.find((o) => o.value === formatted.value)) {
           this.options.push(formatted);

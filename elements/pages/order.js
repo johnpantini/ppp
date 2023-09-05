@@ -26,9 +26,9 @@ export const orderPageTemplate = html`
             ${html.partial(buySell)}
           </div>
           <span slot="title">Stop Loss/Take Profit</span>
-          <span slot="description"
-            >Классическая отложенная заявка с настройками.</span
-          >
+          <span slot="description">
+            Классическая отложенная заявка с настройками.
+          </span>
           <ppp-button
             disabled
             slot="action"
