@@ -196,6 +196,7 @@ export class RestoreMongodbModalPage extends Page {
           'chats',
           'extensions',
           'instruments',
+          'orders',
           'psina',
           'servers',
           'services',

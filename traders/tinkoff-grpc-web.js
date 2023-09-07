@@ -461,7 +461,7 @@ class PositionsDatum extends GlobalTraderDatum {
         if (!position || +(position?.balance + position?.blocked) === 0) {
           return 0;
         } else {
-          const portfolioPosition = this.portfolio.positionsMap.get(data.figi);
+          const portfolioPosition = this.portfolio.positionsMap?.get(data.figi);
 
           if (portfolioPosition) {
             return +toNumber(portfolioPosition.averagePositionPrice).toFixed(
@@ -1386,18 +1386,26 @@ class TinkoffGrpcWebTrader extends Trader {
           const orderInstrument = this.#figis.get(o.figi);
 
           if (orderInstrument?.minPriceIncrement > 0) {
-            const price = +this.fixPrice(
-              orderInstrument,
-              (orderInstrument.type === 'bond'
-                ? this.relativeBondPriceToPrice(
-                    toNumber(o.initialSecurityPrice),
-                    orderInstrument
-                  )
-                : +toNumber(o.initialSecurityPrice).toFixed(
-                    getInstrumentPrecision(orderInstrument)
-                  )) +
-                orderInstrument.minPriceIncrement * value
-            );
+            let price;
+
+            if (orderInstrument.type === 'bond') {
+              price = +this.fixPrice(
+                orderInstrument,
+                this.relativeBondPriceToPrice(
+                  toNumber(o.initialSecurityPrice) +
+                    orderInstrument.minPriceIncrement * value,
+                  orderInstrument
+                )
+              );
+            } else {
+              price = +this.fixPrice(
+                orderInstrument,
+                +toNumber(o.initialSecurityPrice).toFixed(
+                  getInstrumentPrecision(orderInstrument)
+                ) +
+                  orderInstrument.minPriceIncrement * value
+              );
+            }
 
             if (
               o.executionReportStatus ===

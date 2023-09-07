@@ -100,6 +100,11 @@ export const workspacePageStyles = css`
     overflow: hidden;
   }
 
+  :host([frozen]) .widget {
+    pointer-events: none;
+    opacity: 0.75;
+  }
+
   .empty-state .picture svg {
     width: 110px;
   }
@@ -111,6 +116,9 @@ export class WorkspacePage extends Page {
 
   @attr({ mode: 'boolean' })
   resizing;
+
+  @attr({ mode: 'boolean' })
+  frozen;
 
   @observable
   workspace;
@@ -135,9 +143,14 @@ export class WorkspacePage extends Page {
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onDblClick = this.onDblClick.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
   }
 
   async onKeyDown(event) {
+    if (event.code === 'KeyA' && event.altKey) {
+      this.frozen = true;
+    }
+
     if (event.shiftKey) {
       if (event.code === 'KeyC' && this.workspace) {
         const selectedWidget = this.workspace.querySelector(
@@ -227,6 +240,12 @@ export class WorkspacePage extends Page {
           }
         });
       }
+    }
+  }
+
+  async onKeyUp(event) {
+    if (event.code === 'KeyA') {
+      this.frozen = false;
     }
   }
 
@@ -482,6 +501,7 @@ export class WorkspacePage extends Page {
     document.addEventListener('pointermove', this.onPointerMove);
     document.addEventListener('pointercancel', this.onPointerUp);
     document.addEventListener('keydown', this.onKeyDown);
+    document.addEventListener('keyup', this.onKeyUp);
   }
 
   disconnectedCallback() {
@@ -491,6 +511,7 @@ export class WorkspacePage extends Page {
     document.removeEventListener('pointermove', this.onPointerMove);
     document.removeEventListener('pointercancel', this.onPointerUp);
     document.removeEventListener('keydown', this.onKeyDown);
+    document.removeEventListener('keyup', this.onKeyUp);
 
     super.disconnectedCallback();
   }

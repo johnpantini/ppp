@@ -126,7 +126,7 @@ export const appTemplate = html`
             `
           )}
           <ppp-side-nav-group>
-            <span slot="start"> ${html.partial(trading)} </span>
+            <span slot="start">${html.partial(trading)}</span>
             <span slot="title">Торговля</span>
             <a
               href="?page=widgets"
@@ -220,7 +220,7 @@ export const appTemplate = html`
             `
           )}
           <ppp-side-nav-group>
-            <span slot="start"> ${html.partial(connections)} </span>
+            <span slot="start">${html.partial(connections)}</span>
             <span slot="title">Подключения</span>
             <a
               href="?page=apis"
@@ -322,7 +322,7 @@ export const appTemplate = html`
             </a>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
-            <span slot="start"> ${html.partial(settings)} </span>
+            <span slot="start">${html.partial(settings)}</span>
             <span slot="title">Конфигурация</span>
             <a
               href="?page=cloud-services"
@@ -367,7 +367,7 @@ export const appTemplate = html`
             </a>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
-            <span slot="start"> ${html.partial(cloud)} </span>
+            <span slot="start">${html.partial(cloud)}</span>
             <span slot="title">Обновление</span>
             <a
               href="?page=updates"

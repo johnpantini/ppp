@@ -593,7 +593,7 @@ export async function widgetDefinition() {
             Трейдер, который будет являться источником для отрисовки графика.
           </p>
         </div>
-        <div class="control-line">
+        <div class="control-line flex-start">
           <ppp-query-select
             ${ref('chartTraderId')}
             deselectable
@@ -642,7 +642,7 @@ export async function widgetDefinition() {
             реального времени.
           </p>
         </div>
-        <div class="control-line">
+        <div class="control-line flex-start">
           <ppp-query-select
             ${ref('tradesTraderId')}
             deselectable

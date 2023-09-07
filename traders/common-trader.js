@@ -722,7 +722,7 @@ class Trader {
     const regexFullNameMatches = [];
     const text = searchText
       .trim()
-      .replaceAll(/[^a-z0-9\s\u0400-\u04FF]/gi, '')
+      .replaceAll(/[^a-z0-9\.\s\u0400-\u04FF]/gi, '')
       .toUpperCase();
     const latin = cyrillicToLatin(text);
     const cyrillic = latinToCyrillic(text);

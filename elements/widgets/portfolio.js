@@ -456,7 +456,7 @@ export async function widgetDefinition() {
             Трейдер, который будет источником позиций в портфеле.
           </p>
         </div>
-        <div class="control-line">
+        <div class="control-line flex-start">
           <ppp-query-select
             ${ref('portfolioTraderId')}
             deselectable

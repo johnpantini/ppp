@@ -26,10 +26,7 @@ export const backupMongodbModalPageTemplate = html`
             файлов на хостинг MongoDB Realm.
           </p>
           <div class="spacing2"></div>
-          <ppp-checkbox
-            checked
-            ${ref('downloadBackupFile')}
-          >
+          <ppp-checkbox checked ${ref('downloadBackupFile')}>
             Также скачать архив с копией на диск
           </ppp-checkbox>
         </div>
@@ -104,6 +101,7 @@ export class BackupMongodbModalPage extends Page {
         'chats',
         'extensions',
         'instruments',
+        'orders',
         'psina',
         'servers',
         'services',

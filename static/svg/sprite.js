@@ -37,6 +37,9 @@ export const revert =
 export const cloud =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M12.571 8.143c0 1.775-.899 3.34-2.267 4.264l-.014.01a5.12 5.12 0 01-2.861.869H2.857a2.857 2.857 0 01-.545-5.663 5.144 5.144 0 0110.26.52zM13.821 8.143a6.38 6.38 0 01-2.358 4.96 3.429 3.429 0 102.17-6.506c.123.494.188 1.013.188 1.546z"></path></svg>';
 
+export const pin =
+  '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M10 8.5V3.3h.683a.65.65 0 1 0 0-1.3H5.317a.65.65 0 1 0 0 1.3H6v5.2L4.383 9.55a.843.843 0 0 0 .46 1.55h2.624v3.367a.533.533 0 0 0 1.066 0V11.1h2.624a.843.843 0 0 0 .46-1.55L10 8.5Z"></path></svg>';
+
 export const plus =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M7.5 2a1 1 0 00-1 1v3.5H3a1 1 0 00-1 1v1a1 1 0 001 1h3.5V13a1 1 0 001 1h1a1 1 0 001-1V9.5H13a1 1 0 001-1v-1a1 1 0 00-1-1H9.5V3a1 1 0 00-1-1h-1z"/></svg>';
 

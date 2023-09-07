@@ -355,7 +355,7 @@ export async function widgetDefinition() {
             Трейдер, который будет переставлять лимитные заявки.
           </p>
         </div>
-        <div class="control-line">
+        <div class="control-line flex-start">
           <ppp-query-select
             ${ref('ordersTraderId')}
             deselectable

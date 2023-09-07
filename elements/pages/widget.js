@@ -784,12 +784,6 @@ export const widgetPageStyles = css`
     width: 100%;
   }
 
-  /* prettier-ignore */
-
-  .widget-settings-section .control-line ppp-query-select[appearance="error"] + ppp-button {
-    margin-top: -16px;
-  }
-
   .divider {
     border: none;
     margin: 20px 0;

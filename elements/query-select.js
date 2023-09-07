@@ -233,8 +233,9 @@ export class QuerySelect extends PPPAppearanceElement {
           queryResult = await this.#code(this);
         }
 
-        if (typeof this.transform === 'function')
+        if (typeof this.transform === 'function') {
           queryResult = await this.transform.call(this.context, queryResult);
+        }
 
         this.options = this.#formatter().call(this, queryResult);
 
@@ -242,6 +243,9 @@ export class QuerySelect extends PPPAppearanceElement {
           this.control.listboxHolder.removeAttribute('hidden');
         } else {
           this.control.listboxHolder.setAttribute('hidden', '');
+
+          this.errorMessage = 'Нет вариантов для выбора';
+          this.appearance = 'error';
         }
       } catch (e) {
         console.dir(e);

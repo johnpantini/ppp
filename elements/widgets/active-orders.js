@@ -570,7 +570,7 @@ export async function widgetDefinition() {
             Трейдер, который будет источником списка активных лимитных заявок.
           </p>
         </div>
-        <div class="control-line">
+        <div class="control-line flex-start">
           <ppp-query-select
             ${ref('ordersTraderId')}
             deselectable

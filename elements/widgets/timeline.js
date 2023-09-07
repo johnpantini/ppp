@@ -553,7 +553,7 @@ export async function widgetDefinition() {
             Трейдер, который будет источником ленты операций.
           </p>
         </div>
-        <div class="control-line">
+        <div class="control-line flex-start">
           <ppp-query-select
             ${ref('timelineTraderId')}
             deselectable

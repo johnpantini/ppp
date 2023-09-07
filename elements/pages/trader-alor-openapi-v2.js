@@ -111,8 +111,8 @@ export const traderAlorOpenApiV2Template = html`
           >
             <ppp-radio value="stock">Фондовый рынок</ppp-radio>
             <ppp-radio value="futures">Срочный рынок</ppp-radio>
-            <ppp-radio value="currency"
-              >Валютный рынок и рынок драг. металлов
+            <ppp-radio value="currency">
+              Валютный рынок и рынок драг. металлов
             </ppp-radio>
           </ppp-radio-group>
         </div>

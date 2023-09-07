@@ -12,6 +12,7 @@ import { Page, pageStyles } from '../page.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { formatDate } from '../../lib/intl.js';
 import { settings } from '../../static/svg/sprite.js';
+import { isPredefinedWidgetType } from '../../lib/const.js';
 import '../banner.js';
 import '../button.js';
 import '../side-nav.js';
@@ -26,7 +27,7 @@ export const widgetSelectorModalPageTemplate = html`
         <ppp-banner class="inline" appearance="warning">
           <div
             style="display: ${(x) =>
-              !x.isPredefinedWidgetType(x.activeItem) || x.documents.length
+              !isPredefinedWidgetType(x.activeItem) || x.documents.length
                 ? 'initial'
                 : 'none'}"
           >
@@ -38,9 +39,9 @@ export const widgetSelectorModalPageTemplate = html`
               @click="${(x) => {
                 ppp.app.navigate({
                   page: 'widget',
-                  type: x.isPredefinedWidgetType(x.activeItem)
+                  type: isPredefinedWidgetType(x.activeItem)
                     ? x.activeItem
-                    : 'order'
+                    : 'custom'
                 });
               }}}"
               href="javascript:void(0)"
@@ -49,7 +50,7 @@ export const widgetSelectorModalPageTemplate = html`
           </div>
           <div
             style="display: ${(x) =>
-              x.isPredefinedWidgetType(x.activeItem) && !x.documents.length
+              isPredefinedWidgetType(x.activeItem) && !x.documents.length
                 ? 'initial'
                 : 'none'}"
           >
@@ -265,22 +266,6 @@ export class WidgetSelectorModalPage extends Page {
         await this.selectWidget(datum);
       }
     }
-  }
-
-  isPredefinedWidgetType(widgetType) {
-    return (
-      [
-        'order',
-        'scalping-buttons',
-        'active-orders',
-        'light-chart',
-        'orderbook',
-        'time-and-sales',
-        'portfolio',
-        'instruments',
-        'timeline'
-      ].indexOf(widgetType) > -1
-    );
   }
 
   async selectWidget(datum) {

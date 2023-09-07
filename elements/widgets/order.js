@@ -1866,7 +1866,7 @@ export async function widgetDefinition() {
                 инструменты в поиске.
               </p>
             </div>
-            <div class="control-line">
+            <div class="control-line flex-start">
               <ppp-query-select
                 ${ref('ordersTraderId')}
                 standalone
@@ -1919,7 +1919,7 @@ export async function widgetDefinition() {
                 Трейдер, выступающий источником L1-данных виджета.
               </p>
             </div>
-            <div class="control-line">
+            <div class="control-line flex-start">
               <ppp-query-select
                 ${ref('level1TraderId')}
                 standalone
@@ -1968,7 +1968,7 @@ export async function widgetDefinition() {
                 виджета.
               </p>
             </div>
-            <div class="control-line">
+            <div class="control-line flex-start">
               <ppp-query-select
                 ${ref('extraLevel1TraderId')}
                 standalone
@@ -2019,7 +2019,7 @@ export async function widgetDefinition() {
                 виджета.
               </p>
             </div>
-            <div class="control-line">
+            <div class="control-line flex-start">
               <ppp-query-select
                 ${ref('extraLevel1Trader2Id')}
                 standalone
@@ -2070,7 +2070,7 @@ export async function widgetDefinition() {
               </p>
             </div>
             <div class="widget-settings-input-group">
-              <div class="control-line">
+              <div class="control-line flex-start">
                 <ppp-query-select
                   ${ref('pusherApiId')}
                   standalone
