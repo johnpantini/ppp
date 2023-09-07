@@ -90,6 +90,7 @@ export const widgetsPageTemplate = html`
           </div>
           <div class="table-holder">
             <ppp-table
+              sticky
               @cleanup="${(x, c) =>
                 x.cleanupFromListing({
                   pageName: 'widget',
