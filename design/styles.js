@@ -200,6 +200,9 @@ export const hotkey = () => css`
 
 export const emptyState = () => css`
   .empty-state {
+    pointer-events: none;
+    position: relative;
+    z-index: 5;
     display: flex;
     word-wrap: break-word;
     align-items: center;
@@ -208,6 +211,12 @@ export const emptyState = () => css`
     justify-content: center;
     min-height: 260px;
     padding: 40px 0 0;
+  }
+
+  .empty-state ppp-button,
+  .empty-state .link,
+  .empty-state .hotkey {
+    pointer-events: all;
   }
 
   .empty-state img.picture,

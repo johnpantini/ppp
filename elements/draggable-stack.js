@@ -50,6 +50,10 @@ export class DraggableStack extends PPPElement {
 
   #dragItem = null;
 
+  get dragItem() {
+    return this.#dragItem;
+  }
+
   constructor() {
     super();
 
@@ -142,11 +146,12 @@ export class DraggableStack extends PPPElement {
     const wasDragging = this.dragging;
 
     this.dragging = false;
-    this.#trashDragItem();
 
     if (wasDragging) {
       this.$emit('pppdragend', this);
     }
+
+    this.#trashDragItem();
   }
 
   onMove(e) {

@@ -7,8 +7,7 @@ import {
   repeat,
   observable,
   ref,
-  Updates,
-  Observable
+  Updates
 } from '../vendor/fast-element.min.js';
 import { drag, plus, trash } from '../static/svg/sprite.js';
 import { COLUMN_SOURCE } from '../lib/const.js';
@@ -29,16 +28,17 @@ export const widgetColumnListTemplate = html`
 
         x.columns = [];
 
+        // Draggable stack changes DOM order, we do need to rebuild repeat() source.
         Updates.enqueue(() => {
           x.columns = value;
+
+          x.removeAttribute('hidden');
         });
       }}"
       ${ref('dragList')}
     >
       ${repeat(
-        (x) => {
-          return x.columns;
-        },
+        (x) => x.columns,
         html`
           <div class="control-line draggable">
             <div class="control-stack">
@@ -96,8 +96,9 @@ export const widgetColumnListTemplate = html`
                 column-source
                 variant="compact"
                 standalone
-                placeholder="Выберите столбец"
-                @change="${async (x, c) => {
+                placeholder="${(x, c) =>
+                  ppp.t(`$const.columnSource.${c.source?.source}`)}"
+                @change="${(x, c) => {
                   const hidden =
                     (
                       c.parent.mainTraderColumns ?? [
@@ -192,6 +193,7 @@ export const widgetColumnListTemplate = html`
                 Updates.enqueue(() => {
                   c.parent.columns = value;
 
+                  // Apply modifications upon this event.
                   c.parent.$emit('columnadd', {
                     source: c.parent,
                     index

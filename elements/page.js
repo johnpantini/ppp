@@ -12,7 +12,7 @@ import {
   Updates,
   when
 } from '../vendor/fast-element.min.js';
-import { display } from '../vendor/fast-utilities.js';
+import { display, staticallyCompose } from '../vendor/fast-utilities.js';
 import {
   ellipsis,
   normalize,
@@ -158,6 +158,27 @@ export const documentPageHeaderPartial = ({
     </ppp-page-header>
   `;
 };
+
+export const documentPageNameSectionPartial = ({
+  placeholder = 'Введите значение'
+} = {}) =>
+  html`
+    <section>
+      <div class="label-group">
+        <h5>Название</h5>
+        <p class="description">
+          Произвольное имя, чтобы ссылаться на этот документ, когда потребуется.
+        </p>
+      </div>
+      <div class="input-group">
+        <ppp-text-field
+          placeholder="${placeholder}"
+          value="${(x) => x.document.name}"
+          ${ref('name')}
+        ></ppp-text-field>
+      </div>
+    </section>
+  `;
 
 export const documentPageFooterPartial = ({ text, extraControls } = {}) => html`
   <footer>

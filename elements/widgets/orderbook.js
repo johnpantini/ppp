@@ -1316,7 +1316,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Дополнительный трейдер книги заявок #1</h5>
             </div>
-            <div class="control-line flex-start">
+            <div class="control-line">
               <ppp-checkbox
                 standalone
                 ?checked="${(x) => x.document.extraBookTrader1Enabled ?? false}"
@@ -1370,7 +1370,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Дополнительный трейдер книги заявок #2</h5>
             </div>
-            <div class="control-line flex-start">
+            <div class="control-line">
               <ppp-checkbox
                 standalone
                 ?checked="${(x) => x.document.extraBookTrader2Enabled ?? false}"
@@ -1424,7 +1424,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Дополнительный трейдер книги заявок #3</h5>
             </div>
-            <div class="control-line flex-start">
+            <div class="control-line">
               <ppp-checkbox
                 standalone
                 ?checked="${(x) => x.document.extraBookTrader3Enabled ?? false}"

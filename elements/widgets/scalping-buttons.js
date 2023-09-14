@@ -55,7 +55,7 @@ export const scalpingButtonsWidgetTemplate = html`
               x.instrumentTrader &&
               x.instrumentTrader.supportsInstrument(x.instrument)),
           html`
-            <div class="controls">
+            <div class="toolbar">
               <div
                 class="tabs"
                 ?hidden="${(x) =>
@@ -169,7 +169,7 @@ export const scalpingButtonsWidgetStyles = css`
   ${widgetStyles()}
   ${spacing()}
   ${scrollbars('.holder')}
-  .controls {
+  .toolbar {
     z-index: 1;
     display: flex;
     align-items: center;

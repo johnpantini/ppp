@@ -311,7 +311,10 @@ export const orderWidgetTemplate = html`
                         ${ref('price')}
                       >
                         <span class="control-line" slot="end">
-                          <span style="pointer-events: none">
+                          <span
+                            style="pointer-events: none"
+                            ?hidden=${(x) => x.price.value}
+                          >
                             ${(x) => priceCurrencySymbol(x.instrument)}
                           </span>
                           ${when(
@@ -755,6 +758,16 @@ export const orderWidgetStyles = css`
     flex-direction: column;
     margin-bottom: ${spacing2};
     overflow: hidden;
+  }
+
+  .conditional-orders-tabs {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .conditional-orders-tabs .tabs {
+    padding: 0 10px 4px;
   }
 
   div.widget-empty-state-holder + ppp-widget-notifications-area {

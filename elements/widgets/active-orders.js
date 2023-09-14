@@ -58,7 +58,7 @@ export const activeOrdersWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
-        <div class="controls">
+        <div class="toolbar">
           <div class="tabs">
             <ppp-widget-box-radio-group
               ?hidden="${(x) =>
@@ -218,7 +218,7 @@ export const activeOrdersWidgetStyles = css`
   ${normalize()}
   ${widgetStyles()}
   ${spacing()}
-  .controls {
+  .toolbar {
     z-index: 1;
     display: flex;
     align-items: center;

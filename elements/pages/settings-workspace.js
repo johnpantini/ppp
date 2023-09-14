@@ -63,6 +63,25 @@ export const settingsWorkspacePageTemplate = html`
           </ppp-checkbox>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Время удержания уведомлений виджетов</h5>
+          <p class="description">
+            Настройка распространяется только на уведомления, исчезающие со
+            временем. Задаётся в миллисекундах. Нулевое значение отключает показ
+            уведомлений.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="number"
+            min="0"
+            placeholder="3000"
+            value="${(x) => x.document.widgetNotificationTimeout ?? '3000'}"
+            ${ref('widgetNotificationTimeout')}
+          ></ppp-text-field>
+        </div>
+      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -117,16 +136,21 @@ export class SettingsWorkspacePage extends Page {
     const workspaceSnapDistance = Math.trunc(this.workspaceSnapDistance.value);
     const workspaceSnapMargin = Math.trunc(this.workspaceSnapMargin.value);
     const confirmWidgetClosing = this.confirmWidgetClosing.checked;
+    const widgetNotificationTimeout = Math.abs(
+      Math.trunc(this.widgetNotificationTimeout.value)
+    );
 
     ppp.settings.set('workspaceSnapDistance', workspaceSnapDistance);
     ppp.settings.set('workspaceSnapMargin', workspaceSnapMargin);
     ppp.settings.set('confirmWidgetClosing', confirmWidgetClosing);
+    ppp.settings.set('widgetNotificationTimeout', widgetNotificationTimeout);
 
     return {
       $set: {
         workspaceSnapDistance,
         workspaceSnapMargin,
-        confirmWidgetClosing
+        confirmWidgetClosing,
+        widgetNotificationTimeout
       }
     };
   }

@@ -1743,6 +1743,12 @@ export class WidgetNotificationsArea extends PPPElement {
   }
 
   #appearance({ status, title = 'Виджет', text, keep, timeout }) {
+    const timeoutFromSettings = ppp.settings.get('widgetNotificationTimeout');
+
+    if (timeoutFromSettings === 0 && !keep) {
+      return;
+    }
+
     this.status = status;
     this.title = title;
     this.text = text;
@@ -1754,7 +1760,7 @@ export class WidgetNotificationsArea extends PPPElement {
     if (!keep) {
       this.#timeout = setTimeout(() => {
         this.setAttribute('hidden', '');
-      }, timeout ?? 3000);
+      }, timeout ?? timeoutFromSettings ?? 3000);
     }
   }
 

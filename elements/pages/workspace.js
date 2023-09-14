@@ -26,9 +26,10 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 import { dragAndDrop } from '../../static/svg/sprite.js';
-import '../button.js';
-import '../top-loader.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
+import '../button.js';
+import '../empty-workspace-gizmo.js';
+import '../top-loader.js';
 
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -38,6 +39,7 @@ export const workspacePageTemplate = html`
       ${when(
         (x) => x.isSteady() && !x.document.widgets?.length,
         html`
+          <ppp-empty-workspace-gizmo></ppp-empty-workspace-gizmo>
           <div class="empty-state">
             <div class="picture">${html.partial(dragAndDrop)}</div>
             <h3>В этом терминале нет виджетов</h3>

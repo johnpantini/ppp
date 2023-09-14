@@ -87,7 +87,6 @@ export const modalStyles = css`
   .holder {
     position: absolute;
     min-height: 100%;
-    padding: 64px 18px;
     overflow-y: auto;
     display: flex;
     align-items: center;

@@ -521,7 +521,7 @@ export async function widgetDefinition() {
             COLUMN_SOURCE.POSITION_AVAILABLE,
             COLUMN_SOURCE.POSITION_AVERAGE
           ]}"
-          :columns="${(x) => x.document.columns?.slice(0) ?? DEFAULT_COLUMNS}"
+          :columns="${(x) => x.document.columns ?? DEFAULT_COLUMNS}"
           :traders="${(x) => x.document.traders}"
         ></ppp-widget-column-list>
       </div>
