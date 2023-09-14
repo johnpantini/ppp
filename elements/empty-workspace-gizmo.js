@@ -10,7 +10,17 @@ import {
   paletteGrayLight1,
   paletteGrayLight3,
   paletteRedDark2,
-  paletteRedLight1
+  paletteRedLight1,
+  palettePurpleLight3,
+  palettePurpleLight2,
+  palettePurpleBase,
+  paletteYellowLight3,
+  paletteYellowDark2,
+  palettePurpleDark3,
+  palettePurpleDark2,
+  paletteGreenLight2,
+  paletteGreenLight3,
+  paletteGreenBase
 } from '../design/design-tokens.js';
 import { debounce } from '../lib/ppp-decorators.js';
 import { PPPElement } from '../lib/ppp-element.js';
@@ -188,7 +198,7 @@ export class EmptyWorkspaceGizmo extends PPPElement {
         frictionAir: 0.01,
         render: {
           fillStyle: themeConditional(paletteWhite, paletteBlack).$value,
-          strokeStyle: themeConditional(paletteRedDark2, paletteRedLight1)
+          strokeStyle: themeConditional(palettePurpleDark2, paletteYellowLight3)
             .$value,
           lineWidth: 1
         }
@@ -201,8 +211,8 @@ export class EmptyWorkspaceGizmo extends PPPElement {
         friction: 0,
         frictionAir: 0,
         render: {
-          fillStyle: themeConditional(paletteWhite, paletteBlack).$value,
-          strokeStyle: themeConditional(paletteGreenDark2, paletteGreenLight1)
+          fillStyle: themeConditional(paletteGreenBase, paletteBlack).$value,
+          strokeStyle: themeConditional(paletteGrayBase, paletteGreenLight1)
             .$value,
           lineWidth: 3
         }
