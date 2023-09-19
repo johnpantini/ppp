@@ -297,7 +297,11 @@ class PositionsDatum extends GlobalTraderDatum {
       }
 
       for (const s of securities) {
-        if (s.instrumentType === 'share' || s.instrumentType === 'bond') {
+        if (
+          s.instrumentType === 'share' ||
+          s.instrumentType === 'bond' ||
+          s.instrumentType === 'etf'
+        ) {
           this.positions.securities.set(s.figi, s);
         }
       }
@@ -334,7 +338,8 @@ class PositionsDatum extends GlobalTraderDatum {
       if (instrument) {
         if (
           security.instrumentType === 'share' ||
-          security.instrumentType === 'bond'
+          security.instrumentType === 'bond' ||
+          security.instrumentType === 'etf'
         ) {
           this.dataArrived({
             figi,
@@ -432,6 +437,7 @@ class PositionsDatum extends GlobalTraderDatum {
   #getPositionByFigi(data) {
     switch (data.instrument.type) {
       case 'stock':
+      case 'etf':
       case 'bond':
         return this.positions.securities.get(data.figi);
       case 'future':
