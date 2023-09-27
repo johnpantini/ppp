@@ -1,7 +1,6 @@
 /** @decorator */
 
 import {
-  paletteGreenDark2,
   paletteGreenLight1,
   paletteWhite,
   paletteBlack,
@@ -9,17 +8,8 @@ import {
   paletteGrayBase,
   paletteGrayLight1,
   paletteGrayLight3,
-  paletteRedDark2,
-  paletteRedLight1,
-  palettePurpleLight3,
-  palettePurpleLight2,
-  palettePurpleBase,
   paletteYellowLight3,
-  paletteYellowDark2,
-  palettePurpleDark3,
   palettePurpleDark2,
-  paletteGreenLight2,
-  paletteGreenLight3,
   paletteGreenBase
 } from '../design/design-tokens.js';
 import { debounce } from '../lib/ppp-decorators.js';

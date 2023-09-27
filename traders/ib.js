@@ -659,9 +659,12 @@ class IbTrader extends Trader {
           continue;
 
         if (orderInstrument?.minPriceIncrement > 0) {
+          // US stocks only.
+          const minPriceIncrement = +o.order.lmtPrice < 1 ? 0.0001 : 0.01;
+
           const price = +this.fixPrice(
             orderInstrument,
-            +o.order.lmtPrice + orderInstrument.minPriceIncrement * value
+            +o.order.lmtPrice + minPriceIncrement * value
           );
 
           await fetch(`${this.gatewayUrl}call`, {

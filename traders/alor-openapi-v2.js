@@ -943,6 +943,8 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async estimate(instrument, price, quantity) {
+    if (!this.supportsInstrument(instrument)) return {};
+
     await this.ensureAccessTokenIsOk();
 
     if (instrument.type === 'future') return {};
@@ -961,7 +963,7 @@ class AlorOpenAPIV2Trader extends Trader {
           ticker: this.getSymbol(instrument),
           exchange: this.document.exchange,
           price,
-          lotQuantity: quantity
+          lotQuantity: quantity || 1
         })
       }
     );

@@ -2,7 +2,8 @@ import ppp from '../ppp.js';
 import {
   getInstrumentPrecision,
   latinToCyrillic,
-  cyrillicToLatin
+  cyrillicToLatin,
+  stringToFloat
 } from '../lib/intl.js';
 import { EXCHANGE, TRADER_DATUM } from '../lib/const.js';
 import {
@@ -609,7 +610,7 @@ class Trader {
   fixPrice(instrument, price) {
     const precision = getInstrumentPrecision(instrument, price);
 
-    price = parseFloat(price?.toString?.()?.replace(',', '.'));
+    price = stringToFloat(price);
 
     if (!price || isNaN(price)) price = 0;
 

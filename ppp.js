@@ -18,7 +18,7 @@ import { APIS, TRADERS } from './lib/const.js';
 
     DesignToken.registerDefaultStyleTarget(this);
   }
-}
+})
   .compose({
     template: html` <slot></slot> `,
     styles: css`
@@ -28,7 +28,7 @@ import { APIS, TRADERS } from './lib/const.js';
       }
     `
   })
-  .define());
+  .define();
 
 class SettingsMap extends Map {
   #observable;

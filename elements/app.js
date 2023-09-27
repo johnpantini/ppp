@@ -805,6 +805,9 @@ export class App extends PPPElement {
     try {
       const mountPoint = this.mountPoint;
 
+      // Widget settings modify min-height.
+      this.mountPointModal.content.style['min-height'] = 'unset';
+
       mountPoint.firstChild && mountPoint.removeChild(mountPoint.firstChild);
 
       let importPath = `${ppp.rootUrl}/elements/pages/${page}.js`;

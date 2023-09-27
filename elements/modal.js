@@ -34,7 +34,13 @@ import ppp from '../ppp.js';
 export const modalTemplate = html`
   <template>
     <div class="holder">
-      <div aria-modal="true" role="dialog" tabindex="-1" class="content">
+      <div
+        aria-modal="true"
+        role="dialog"
+        tabindex="-1"
+        class="content"
+        ${ref('content')}
+      >
         <slot name="title-icon"></slot>
         <h3 class="title">
           <slot name="title"></slot>
@@ -141,6 +147,12 @@ export const modalStyles = css`
 
   :host(.xxlarge) .content {
     width: 1200px;
+  }
+
+  :host(.custom-size-for-widget-settings) .content {
+    width: 1200px;
+    margin: 32px 0;
+    height: calc(100vh - 64px);
   }
 
   .content:focus-visible {

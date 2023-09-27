@@ -11,7 +11,8 @@ import {
   repeat,
   when,
   slotted,
-  Updates
+  Updates,
+  Observable
 } from '../vendor/fast-element.min.js';
 import {
   display,
@@ -75,11 +76,19 @@ import {
   circleNotch,
   close,
   settings,
+  increment,
+  decrement,
   search,
   notificationError,
   notificationSuccess,
   notificationNote
 } from '../static/svg/sprite.js';
+import {
+  decSeparator,
+  getInstrumentPrecision,
+  priceCurrencySymbol,
+  stringToFloat
+} from '../lib/intl.js';
 import { later } from '../lib/ppp-decorators.js';
 import { Tab, Tabs, tabsTemplate, tabTemplate } from './tabs.js';
 import { TextField, textFieldStyles, textFieldTemplate } from './text-field.js';
@@ -1814,7 +1823,7 @@ export class WidgetHeaderButtons extends PPPElement {
 
       const page = await ppp.app.mountPage('widget', {
         title: `Виджет - ${this.widget.document.name}`,
-        size: 'xxlarge',
+        size: 'custom-size-for-widget-settings',
         documentId: this.widget.document._id,
         autoRead: true
       });
@@ -2058,6 +2067,396 @@ export const widgetTextFieldStyles = css`
 `;
 
 export class WidgetTextField extends TextField {}
+
+export const widgetTrifectaFieldStyles = css`
+  ${display('flex')}
+  :host {
+    width: 100%;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  ppp-widget-text-field {
+    width: 100%;
+  }
+
+  .step-controls {
+    display: inline-flex;
+    flex-grow: 0;
+    flex-shrink: 0;
+    margin-left: 2px;
+    border-radius: 0 4px 4px 0;
+    align-items: stretch;
+    flex-direction: column;
+    vertical-align: top;
+  }
+
+  .step-controls button {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: ${fontSizeWidget};
+    justify-content: center;
+    text-align: left;
+    vertical-align: middle;
+    min-width: 24px;
+    position: relative;
+    flex: 1 1 15px;
+    min-height: 0;
+    padding: 0;
+    width: 32px;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    background-color: ${themeConditional(paletteWhite, paletteBlack)};
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+  }
+
+  .step-controls button:hover {
+    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayBase)};
+  }
+
+  .step-controls button:first-child {
+    border-radius: 0 4px 0 0;
+    margin-bottom: 2px;
+  }
+
+  .step-controls button:last-child {
+    border-radius: 0 0 4px;
+  }
+
+  .price-placeholder {
+    position: absolute;
+    z-index: 2;
+  }
+
+  .reset-input {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .reset-input svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .reset-input:hover svg {
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
+  }
+`;
+
+export const widgetTrifectaFieldTemplate = html`
+  <template>
+    <ppp-widget-text-field
+      type="text"
+      autocomplete="off"
+      min="0"
+      max="1000000000"
+      lotsize="1"
+      step="${(x) => x.getMinIncrement()}"
+      precision="${(x) => getInstrumentPrecision(x?.instrument)}"
+      ?disabled="${(x) => x.market}"
+      maxlength="${(x) => (x.kind === 'quantity' ? 8 : 12)}"
+      @wheel="${(x, c) => x.handleWheel(c)}"
+      @input="${(x) => x.handleInput()}"
+      @keydown="${(x, c) => x.handleKeydown(c)}"
+      @paste="${(x, c) => x.handlePaste(c)}"
+      @beforeinput="${(x, c) => x.handleBeforeInput(c)}"
+      value="${(x) => x.value}"
+      ${ref('input')}
+    >
+      <span class="control-line" slot="end">
+        <span style="pointer-events: none" ?hidden=${(x) => x.value}>
+          ${(x) => x.inputEndSlotContent()}
+        </span>
+        ${when(
+          (x) => x.value,
+          html`
+            <span
+              class="reset-input"
+              @click="${(x) => {
+                x.input.value = '';
+                x.input.$emit('input');
+              }}"
+            >
+              ${html.partial(close)}
+            </span>
+          `
+        )}
+      </span>
+    </ppp-widget-text-field>
+    <div class="step-controls">
+      <button @pointerdown="${(x) => x.captureStep()}">
+        ${html.partial(increment)}
+      </button>
+      <button @pointerdown="${(x) => x.captureStep(false)}">
+        ${html.partial(decrement)}
+      </button>
+    </div>
+    ${when(
+      (x) => x.kind === 'price' && x.market,
+      html`
+        <ppp-widget-text-field
+          class="price-placeholder"
+          disabled
+          placeholder="Рыночная"
+        >
+        </ppp-widget-text-field>
+      `
+    )}
+  </template>
+`;
+
+export class WidgetTrifectaField extends WidgetTextField {
+  @observable
+  instrument;
+
+  @attr({ mode: 'boolean' })
+  market;
+
+  @attr
+  kind;
+
+  @attr({ attribute: 'unit' })
+  distanceUnit;
+
+  @attr
+  value;
+
+  getMinIncrement() {
+    if (this.instrument) {
+      const isPrice =
+        this.kind === 'price' ||
+        (this.kind === 'distance' && this.distanceUnit === 'price');
+
+      if (isPrice) {
+        return (
+          this.instrument.minPriceIncrement ||
+          1 /
+            10 **
+              getInstrumentPrecision(this.instrument, stringToFloat(this.value))
+        );
+      } else if (this.kind === 'quantity') {
+        return this.instrument.minQuantityIncrement ?? 1;
+      } else if (this.kind === 'distance') {
+        switch (this.distanceUnit) {
+          case 'percent':
+            return 0.01;
+          case 'price-step':
+            return 1;
+        }
+      }
+    } else {
+      return 1;
+    }
+  }
+
+  inputEndSlotContent() {
+    if (!this.instrument) {
+      return '';
+    }
+
+    if (this.kind === 'price') {
+      return priceCurrencySymbol(this.instrument);
+    } else if (this.kind === 'quantity') {
+      return this.instrument?.lot ? '×' + this.instrument.lot : '';
+    } else {
+      switch (this.distanceUnit) {
+        case 'price':
+          return priceCurrencySymbol(this.instrument);
+        case 'percent':
+          return '%';
+        case 'price-step':
+          return 'ш. цены';
+      }
+    }
+  }
+
+  onInputValueChanged = {
+    handleChange() {
+      if (this.value !== this.input.value) {
+        this.value = this.input.value;
+      }
+    }
+  };
+
+  constructor() {
+    super();
+
+    this.onInputValueChanged.handleChange =
+      this.onInputValueChanged.handleChange.bind(this);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    Observable.getNotifier(this.input).subscribe(
+      this.onInputValueChanged,
+      'value'
+    );
+  }
+
+  disconnectedCallback() {
+    Observable.getNotifier(this.input).unsubscribe(
+      this.onInputValueChanged,
+      'value'
+    );
+
+    super.disconnectedCallback();
+  }
+
+  valueChanged(oldValue, newValue) {
+    if (this.$fastController.isConnected) {
+      this.input.value = newValue;
+    }
+  }
+
+  stepUpOrDown(up = true) {
+    if (this.instrument) {
+      const minIncrement = this.getMinIncrement();
+
+      // Prevent starting from zero.
+      if (this.value.endsWith(decSeparator)) {
+        this.value = this.value.replace(decSeparator, '');
+      }
+
+      this.value = this.input.value.replace(',', '.');
+
+      Updates.enqueue(() => {
+        this.input.control.type = 'number';
+
+        up
+          ? this.input.control.stepUp()
+          : stringToFloat(this.input.control.value) !== minIncrement &&
+            this.input.control.stepDown();
+
+        this.input.control.type = 'text';
+
+        this.input.control.focus();
+
+        const length = this.input.control.value.length;
+
+        this.input.control.setSelectionRange(length, length);
+        this.value = this.input.control.value.replace?.('.', decSeparator);
+        this.$emit('pppstep', this);
+      });
+    }
+  }
+
+  stepUp() {
+    this.stepUpOrDown(true);
+  }
+
+  stepDown() {
+    this.stepUpOrDown(false);
+  }
+
+  captureStep(up = true) {
+    if (up) {
+      this.stepUp();
+    } else {
+      this.stepDown();
+    }
+
+    let timeout;
+    let interval;
+
+    const listener = () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+
+      document.removeEventListener('pointerup', listener);
+      document.removeEventListener('pointercancel', listener);
+    };
+
+    document.addEventListener('pointerup', listener);
+    document.addEventListener('pointercancel', listener);
+
+    timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        if (up) {
+          this.stepUp();
+        } else {
+          this.stepDown();
+        }
+      }, 100);
+    }, 250);
+  }
+
+  handleWheel({ event }) {
+    if (this.changeViaMouseWheel) {
+      if (event.deltaY < 0) this.stepUp();
+      else this.stepDown();
+    }
+  }
+
+  handleKeydown({ event }) {
+    if (this.instrument) {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+
+        if (event.key === 'ArrowUp') this.stepUp();
+        else this.stepDown();
+      } else {
+        return true;
+      }
+    }
+  }
+
+  handlePaste({ event }) {
+    if (this.instrument && event.clipboardData) {
+      const data = event.clipboardData.getData('text/plain').replace(',', '.');
+      const minIncrement = this.getMinIncrement();
+      const number = parseFloat(data);
+
+      if (Number.isInteger(minIncrement) && !Number.isInteger(number)) {
+        return false;
+      }
+
+      return !/[e/-/+]/i.test(data) && +data === number;
+    }
+
+    return false;
+  }
+
+  handleInput() {
+    if (this.input.value === decSeparator || this.input.value === '.')
+      this.input.value = '';
+
+    this.input.value = this.input.value
+      .replaceAll('.', decSeparator)
+      .replaceAll(/^00/gi, '0')
+      .replace(new RegExp(decSeparator, 'g'), (val, index, str) =>
+        index === str.indexOf(decSeparator) ? val : ''
+      );
+
+    const minIncrement = this.getMinIncrement();
+
+    if (Number.isInteger(minIncrement)) {
+      this.input.value = this.input.value
+        .replaceAll(decSeparator, '')
+        .replace(/^0/, '');
+    }
+
+    return true;
+  }
+
+  handleBeforeInput({ event }) {
+    if (this.instrument && event.data) {
+      const minIncrement = this.getMinIncrement();
+
+      if (Number.isInteger(minIncrement)) {
+        return /[0-9]/.test(event.data);
+      } else {
+        return /[0-9.,]/.test(event.data);
+      }
+    }
+
+    return true;
+  }
+}
 
 export const widgetOptionStyles = css`
   ${listboxOptionStyles}
@@ -2520,6 +2919,13 @@ export default {
   WidgetTextFieldComposition: WidgetTextField.compose({
     template: textFieldTemplate,
     styles: widgetTextFieldStyles,
+    shadowOptions: {
+      delegatesFocus: true
+    }
+  }).define(),
+  WidgetTrifectaFieldComposition: WidgetTrifectaField.compose({
+    template: widgetTrifectaFieldTemplate,
+    styles: widgetTrifectaFieldStyles,
     shadowOptions: {
       delegatesFocus: true
     }

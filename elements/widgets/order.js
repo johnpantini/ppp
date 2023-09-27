@@ -22,11 +22,11 @@ import {
   formatAbsoluteChange,
   formatAmount,
   formatPrice,
+  formatPriceWithoutCurrency,
   formatCommission,
-  priceCurrencySymbol,
-  getInstrumentPrecision,
-  decimalSeparator,
-  getInstrumentQuantityPrecision
+  decSeparator,
+  getInstrumentQuantityPrecision,
+  stringToFloat
 } from '../../lib/intl.js';
 import {
   ellipsis,
@@ -34,17 +34,11 @@ import {
   spacing,
   typography
 } from '../../design/styles.js';
-import {
-  close,
-  decrement,
-  emptyWidgetState,
-  increment
-} from '../../static/svg/sprite.js';
+import { emptyWidgetState } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteBlack,
   paletteGrayBase,
-  paletteGrayDark1,
   paletteGrayLight1,
   paletteGrayLight2,
   buy,
@@ -66,8 +60,6 @@ import '../query-select.js';
 import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
-
-const decSeparator = decimalSeparator();
 
 const isLastPriceInHeaderHidden = (x) =>
   typeof x.document.showLastPriceInHeader === 'undefined'
@@ -175,7 +167,12 @@ export const orderWidgetTemplate = html`
                 ? false
                 : !x.document.showOrderTypeTabs}"
             activeid="${(x) => x.getActiveWidgetTab()}"
-            @change="${(x, c) => x.handleWidgetTabChange(c)}"
+            @change="${(x, { event }) =>
+              x.updateDocumentFragment({
+                $set: {
+                  'widgets.$.activeTab': event.detail.id
+                }
+              })}"
             ${ref('orderTypeTabs')}
           >
             <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
@@ -285,74 +282,51 @@ export const orderWidgetTemplate = html`
                     >
                       Цена исполнения
                     </div>
-                    <div class="widget-flex-line">
-                      <ppp-widget-text-field
-                        type="text"
-                        autocomplete="off"
-                        min="0"
-                        max="1000000000"
-                        step="${(x) =>
-                          x.instrument?.minPriceIncrement ?? '0.01'}"
-                        precision="${(x) =>
-                          getInstrumentPrecision(x.instrument)}"
-                        ?disabled="${(x) =>
-                          x.orderTypeTabs.activeid === 'market'}"
-                        maxlength="12"
-                        @wheel="${(x, c) => x.handlePriceWheel(c)}"
-                        @input="${(x, c) => x.handlePriceInput(c)}"
-                        @keydown="${(x, c) => x.handlePriceKeydown(c)}"
-                        @paste="${(x, c) => x.handlePricePaste(c)}"
-                        @beforeinput="${(x, c) => x.handlePriceBeforeInput(c)}"
-                        value="${(x) =>
-                          (x.document?.lastPrice ?? '').replace(
-                            '.',
-                            decSeparator
-                          )}"
-                        ${ref('price')}
-                      >
-                        <span class="control-line" slot="end">
-                          <span
-                            style="pointer-events: none"
-                            ?hidden=${(x) => x.price.value}
-                          >
-                            ${(x) => priceCurrencySymbol(x.instrument)}
-                          </span>
-                          ${when(
-                            (x) => x.price.value,
-                            html`
-                              <span
-                                class="reset-input"
-                                @click="${(x) => {
-                                  x.price.value = '';
-                                  x.price.$emit('input');
-                                }}"
-                              >
-                                ${html.partial(close)}
-                              </span>
-                            `
-                          )}
-                        </span>
-                      </ppp-widget-text-field>
-                      <div class="step-controls">
-                        <button @pointerdown="${(x) => x.stepUp(false)}">
-                          ${html.partial(increment)}
-                        </button>
-                        <button @pointerdown="${(x) => x.stepDown(false)}">
-                          ${html.partial(decrement)}
-                        </button>
-                      </div>
-                      ${when(
-                        (x) => x.orderTypeTabs.activeid === 'market',
-                        html`
-                          <ppp-widget-text-field
-                            class="price-placeholder"
-                            disabled
-                            placeholder="Рыночная"
-                          >
-                          </ppp-widget-text-field>
-                        `
-                      )}
-                    </div>
+                    <ppp-widget-trifecta-field
+                      kind="price"
+                      :instrument="${(x) => x.instrument}"
+                      :changeViaMouseWheel="${(x) =>
+                        x.document.changePriceQuantityViaMouseWheel}"
+                      ?market="${(x) => x.orderTypeTabs.activeid === 'market'}"
+                      value="${(x) =>
+                        formatPriceWithoutCurrency(x.document?.lastPrice)}"
+                      @pppstep="${(x) => {
+                        if (
+                          typeof x?.fastVolumeButtons?.value !== 'undefined'
+                        ) {
+                          const radio =
+                            x?.fastVolumeButtons.slottedRadioButtons.find(
+                              (b) => b.value === x.fastVolumeButtons.value
+                            );
+
+                          x.setQuantityFromFastButtonRadio(radio);
+                        }
+
+                        x.calculateTotalAmount();
+                        x.saveLastPriceValueDelayed();
+                      }}"
+                      @keydown=${(x, { event }) => {
+                        x.handleHotkeys(event);
+
+                        return true;
+                      }}
+                      @input=${(x) => {
+                        if (
+                          typeof x?.fastVolumeButtons?.value !== 'undefined'
+                        ) {
+                          const radio =
+                            x?.fastVolumeButtons.slottedRadioButtons.find(
+                              (b) => b.value === x.fastVolumeButtons.value
+                            );
+
+                          x.setQuantityFromFastButtonRadio(radio);
+                        }
+
+                        x.calculateTotalAmount();
+                        x.saveLastPriceValueDelayed();
+                      }}
+                      ${ref('price')}
+                    ></ppp-widget-trifecta-field>
                   </div>
                   <div class="widget-subsection-item">
                     <div
@@ -361,51 +335,27 @@ export const orderWidgetTemplate = html`
                     >
                       Количество
                     </div>
-                    <div class="widget-flex-line">
-                      <ppp-widget-text-field
-                        type="number"
-                        autocomplete="off"
-                        min="1"
-                        max="1000000000"
-                        precision="0"
-                        maxlength="8"
-                        @wheel="${(x, c) => x.handleQuantityWheel(c)}"
-                        @input="${(x, c) => x.handleQuantityInput(c)}"
-                        @paste="${(x, c) => x.handleQuantityPaste(c)}"
-                        @keydown="${(x, c) => x.handleQuantityKeydown(c)}"
-                        lotsize="${(x) =>
-                          x.instrument?.lot?.toString()?.length ?? 1}"
-                        value="${(x) => x.document?.lastQuantity ?? ''}"
-                        ${ref('quantity')}
-                      >
-                        <span class="control-line" slot="end">
-                          <span style="pointer-events: none">
-                            ${(x) =>
-                              x.instrument?.lot ? '×' + x.instrument.lot : ''}
-                          </span>
-                          ${when(
-                            (x) => x.quantity.value,
-                            html`
-                              <span
-                                class="reset-input"
-                                @click="${(x) =>
-                                  x.setQuantity(0, { force: true })}"
-                              >
-                                ${html.partial(close)}
-                              </span>
-                            `
-                          )}
-                        </span>
-                      </ppp-widget-text-field>
-                      <div class="step-controls">
-                        <button @pointerdown="${(x) => x.stepUp(true)}">
-                          ${html.partial(increment)}
-                        </button>
-                        <button @pointerdown="${(x) => x.stepDown(true)}">
-                          ${html.partial(decrement)}
-                        </button>
-                      </div>
-                    </div>
+                    <ppp-widget-trifecta-field
+                      kind="quantity"
+                      :instrument="${(x) => x.instrument}"
+                      :changeViaMouseWheel="${(x) =>
+                        x.document.changePriceQuantityViaMouseWheel}"
+                      value="${(x) => x.document?.lastQuantity || ''}"
+                      @pppstep="${(x) => {
+                        x.calculateTotalAmount(false);
+                        x.saveLastQuantityValue();
+                      }}"
+                      @keydown=${(x, { event }) => {
+                        x.handleHotkeys(event);
+
+                        return true;
+                      }}
+                      @input=${(x) => {
+                        x.calculateTotalAmount(false);
+                        x.saveLastQuantityValue();
+                      }}
+                      ${ref('quantity')}
+                    ></ppp-widget-trifecta-field>
                   </div>
                 </div>
               </div>
@@ -879,56 +829,6 @@ export const orderWidgetStyles = css`
     background-size: 100%;
   }
 
-  .step-controls {
-    display: inline-flex;
-    flex-grow: 0;
-    flex-shrink: 0;
-    margin-left: 2px;
-    border-radius: 0 4px 4px 0;
-    align-items: stretch;
-    flex-direction: column;
-    vertical-align: top;
-  }
-
-  .step-controls button {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: ${fontSizeWidget};
-    justify-content: center;
-    text-align: left;
-    vertical-align: middle;
-    min-width: 24px;
-    position: relative;
-    flex: 1 1 15px;
-    min-height: 0;
-    padding: 0;
-    width: 32px;
-    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-    background-color: ${themeConditional(paletteWhite, paletteBlack)};
-    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
-  }
-
-  .step-controls button:hover {
-    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayBase)};
-  }
-
-  .step-controls button:first-child {
-    border-radius: 0 4px 0 0;
-    margin-bottom: 2px;
-  }
-
-  .step-controls button:last-child {
-    border-radius: 0 0 4px;
-  }
-
-  .price-placeholder {
-    position: absolute;
-    z-index: 2;
-  }
-
   .coin-icon {
     background-image: url('static/svg/coin.svg');
     background-repeat: no-repeat;
@@ -940,22 +840,6 @@ export const orderWidgetStyles = css`
 
   .widget-flex-line ppp-widget-text-field {
     width: 100%;
-  }
-
-  .reset-input {
-    position: relative;
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
-  }
-
-  .reset-input svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  .reset-input:hover svg {
-    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
 `;
 
@@ -1239,6 +1123,64 @@ export class OrderWidget extends WidgetWithInstrument {
     else return 'limit';
   }
 
+  async handleHotkeys(event) {
+    if (this.document.buyShortcut !== this.document.sellShortcut) {
+      if (
+        this.document.buyShortcut &&
+        event.code === this.document.buyShortcut
+      ) {
+        return await this.buyOrSell('buy');
+      } else if (
+        this.document.sellShortcut &&
+        event.code === this.document.sellShortcut
+      ) {
+        return await this.buyOrSell('sell');
+      }
+    }
+
+    if (
+      this.document.searchShortcut &&
+      event.code === this.document.searchShortcut
+    ) {
+      this.dispatchEvent(new CustomEvent('pointerdown'));
+
+      this.searchControl.open = true;
+
+      Updates.enqueue(() => this.searchControl.suggestInput.focus());
+    }
+
+    if (
+      this.document.cancelAllOrdersShortcut &&
+      event.code === this.document.cancelAllOrdersShortcut
+    ) {
+      if (typeof this.ordersTrader?.cancelAllLimitOrders !== 'function') {
+        return this.notificationsArea.error({
+          text: 'Трейдер не поддерживает отмену всех заявок.'
+        });
+      }
+
+      this.topLoader.start();
+
+      try {
+        await this.ordersTrader?.cancelAllLimitOrders?.({
+          instrument: this.instrument
+        });
+
+        this.notificationsArea.success({
+          title: 'Заявки отменены'
+        });
+      } catch (e) {
+        console.log(e);
+
+        this.notificationsArea.error({
+          text: 'Не удалось отменить заявки.'
+        });
+      } finally {
+        this.topLoader.stop();
+      }
+    }
+  }
+
   handleFastVolumeClick({ event }) {
     if (!this.instrument) return;
 
@@ -1246,7 +1188,7 @@ export class OrderWidget extends WidgetWithInstrument {
       .composedPath()
       .find((n) => n.tagName?.toLowerCase?.() === 'ppp-widget-box-radio');
 
-    this.#setQuantityForFastButtonRadio(radio);
+    this.setQuantityFromFastButtonRadio(radio);
   }
 
   handleFastVolumeDblClick({ event }) {
@@ -1314,23 +1256,18 @@ export class OrderWidget extends WidgetWithInstrument {
     return result;
   }
 
-  handleWidgetTabChange({ event }) {
-    void this.updateDocumentFragment({
-      $set: {
-        'widgets.$.activeTab': event.detail.id
-      }
-    });
-  }
-
   @debounce(250)
   calculateCommission() {
-    if (this.instrument && typeof this.ordersTrader?.estimate === 'function') {
+    if (
+      !this.instrument?.notSupported &&
+      typeof this.ordersTrader?.estimate === 'function'
+    ) {
       this.commission = '—';
 
-      const price = parseFloat(this.price?.value.replace(',', '.'));
+      const price = stringToFloat(this.price?.value);
 
       if (!isNaN(price) && price) {
-        const quantity = parseInt(this.quantity.value || '0');
+        const quantity = stringToFloat(this.quantity?.value);
 
         this.ordersTrader
           .estimate(this.instrument, price, quantity)
@@ -1351,17 +1288,20 @@ export class OrderWidget extends WidgetWithInstrument {
 
   @debounce(250)
   calculateEstimate() {
-    if (this.instrument && typeof this.ordersTrader?.estimate === 'function') {
+    if (
+      !this.instrument?.notSupported &&
+      typeof this.ordersTrader?.estimate === 'function'
+    ) {
       this.marginBuyingPowerQuantity = '—';
       this.marginSellingPowerQuantity = '—';
       this.commission = '—';
       this.buyingPowerQuantity = '—';
       this.sellingPowerQuantity = '—';
 
-      const price = parseFloat(this.price?.value.replace(',', '.'));
+      const price = stringToFloat(this.price?.value);
 
       if (!isNaN(price) && price) {
-        const quantity = parseInt(this.quantity.value || '0');
+        const quantity = stringToFloat(this.quantity?.value);
 
         this.ordersTrader
           .estimate(this.instrument, price, quantity)
@@ -1391,8 +1331,8 @@ export class OrderWidget extends WidgetWithInstrument {
     if (this.instrument.type === 'future') return;
 
     this.totalAmount =
-      parseFloat(this.price?.value.replace(',', '.')) *
-      parseInt(this.quantity?.value) *
+      stringToFloat(this.price?.value) *
+      stringToFloat(this.quantity?.value) *
       this.instrument.lot;
 
     if (calculateEstimate) {
@@ -1402,130 +1342,13 @@ export class OrderWidget extends WidgetWithInstrument {
     }
   }
 
-  async handlePriceOrQuantityKeydown({ event }) {
-    if (this.document.buyShortcut !== this.document.sellShortcut) {
-      if (
-        this.document.buyShortcut &&
-        event.code === this.document.buyShortcut
-      ) {
-        return await this.buyOrSell('buy');
-      } else if (
-        this.document.sellShortcut &&
-        event.code === this.document.sellShortcut
-      ) {
-        return await this.buyOrSell('sell');
-      }
-    }
-
-    if (
-      this.document.searchShortcut &&
-      event.code === this.document.searchShortcut
-    ) {
-      this.dispatchEvent(new CustomEvent('pointerdown'));
-
-      this.searchControl.open = true;
-
-      Updates.enqueue(() => this.searchControl.suggestInput.focus());
-    }
-
-    if (
-      this.document.cancelAllOrdersShortcut &&
-      event.code === this.document.cancelAllOrdersShortcut
-    ) {
-      if (typeof this.ordersTrader?.cancelAllLimitOrders !== 'function') {
-        return this.notificationsArea.error({
-          text: 'Трейдер не поддерживает отмену всех заявок.'
-        });
-      }
-
-      this.topLoader.start();
-
-      try {
-        await this.ordersTrader?.cancelAllLimitOrders?.({
-          instrument: this.instrument
-        });
-
-        this.notificationsArea.success({
-          title: 'Заявки отменены'
-        });
-      } catch (e) {
-        console.log(e);
-
-        this.notificationsArea.error({
-          text: 'Не удалось отменить заявки.'
-        });
-      } finally {
-        this.topLoader.stop();
-      }
-    }
-  }
-
-  handlePricePaste({ event }) {
-    const data = event.clipboardData.getData('text/plain').replace(',', '.');
-
-    return (
-      !/[e/-/+]/i.test(data) && +data === parseFloat(data.replace(',', '.'))
-    );
-  }
-
-  handlePriceBeforeInput({ event }) {
-    if (event.data) {
-      return /[0-9.,]/.test(event.data);
-    }
-
-    return true;
-  }
-
-  handlePriceWheel({ event }) {
-    if (this.document.changePriceQuantityViaMouseWheel) {
-      if (event.deltaY < 0) this.stepUp(false);
-      else this.stepDown(false);
-    }
-  }
-
-  handlePriceInput() {
-    if (this.price.value === decSeparator || this.price.value === '.')
-      this.price.value = '';
-
-    this.price.value = this.price.value
-      .replaceAll('.', decSeparator)
-      .replaceAll(/^00/gi, '0')
-      .replace(new RegExp(decSeparator, 'g'), (val, index, str) =>
-        index === str.indexOf(decSeparator) ? val : ''
-      );
-
-    if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
-      const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
-        (b) => b.value === this.fastVolumeButtons.value
-      );
-
-      this.#setQuantityForFastButtonRadio(radio);
-    }
-
-    this.calculateTotalAmount();
-    this.saveLastPriceValue();
-  }
-
-  handlePriceKeydown({ event }) {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-      event.preventDefault();
-
-      if (event.key === 'ArrowUp') this.stepUp(false);
-      else this.stepDown(false);
-    } else {
-      void this.handlePriceOrQuantityKeydown({ event, type: 'price' });
-    }
-
-    return true;
-  }
-
   formatPrice(price) {
     return formatPrice(price, this.instrument);
   }
 
-  #setQuantityForFastButtonRadio(radio) {
+  setQuantityFromFastButtonRadio(radio) {
     if (radio) {
-      const volume = parseFloat(radio.getAttribute('volume'));
+      const volume = stringToFloat(radio.getAttribute('volume'));
       const isInMoney = radio.hasAttribute('money');
 
       if (volume > 0) {
@@ -1575,25 +1398,30 @@ export class OrderWidget extends WidgetWithInstrument {
       this.calculateTotalAmount();
       this.price.focus();
 
+      // Locked quantity mode.
       if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
         const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
           (b) => b.value === this.fastVolumeButtons.value
         );
 
-        this.#setQuantityForFastButtonRadio(radio);
+        this.setQuantityFromFastButtonRadio(radio);
       }
 
       this.saveLastPriceValue();
     }
   }
 
-  @debounce(250)
   saveLastPriceValue() {
-    void this.updateDocumentFragment({
+    return this.updateDocumentFragment({
       $set: {
-        'widgets.$.lastPrice': this.price.value.replace(',', '.')
+        'widgets.$.lastPrice': stringToFloat(this.price.value)
       }
     });
+  }
+
+  @debounce(250)
+  saveLastPriceValueDelayed() {
+    return this.saveLastPriceValue();
   }
 
   setQuantity(quantity, options = {}) {
@@ -1614,123 +1442,21 @@ export class OrderWidget extends WidgetWithInstrument {
         Math.trunc(+quantity * Math.pow(10, precision)) /
         Math.pow(10, precision);
 
-      if (+this.quantity.value === 0) {
-        this.quantity.value = '';
-      }
-
       this.calculateTotalAmount(false);
 
       if (options.focusOnQuantity !== false) this.quantity.focus();
 
-      this.saveLastQuantity();
+      this.saveLastQuantityValue();
     }
   }
 
   @debounce(250)
-  saveLastQuantity() {
-    void this.updateDocumentFragment({
+  saveLastQuantityValue() {
+    return this.updateDocumentFragment({
       $set: {
-        'widgets.$.lastQuantity': this.quantity.value
+        'widgets.$.lastQuantity': stringToFloat(this.quantity.value)
       }
     });
-  }
-
-  handleQuantityInput() {
-    if (+this.quantity.value === 0) this.quantity.value = '';
-
-    while (this.quantity.value.charAt(0) === '0') {
-      this.quantity.value = this.quantity.value.substring(1);
-    }
-
-    this.calculateTotalAmount(false);
-    this.saveLastQuantity();
-  }
-
-  handleQuantityPaste({ event }) {
-    const data = event.clipboardData.getData('text/plain');
-
-    if (+data === 0 && !this.quantity.value) return false;
-
-    return parseInt(data) === +data && data >= 0 && +data <= 1000000000;
-  }
-
-  handleQuantityKeydown({ event }) {
-    void this.handlePriceOrQuantityKeydown({ event, type: 'quantity' });
-
-    if (event.key === '0' && !this.quantity.value) return false;
-
-    switch (event.key) {
-      case 'e':
-      case '-':
-      case '+':
-      case '.':
-      case ',':
-        return false;
-    }
-
-    return true;
-  }
-
-  stepUpOrDown(quantity = true, up = true) {
-    if (quantity) {
-      up ? this.quantity.control.stepUp() : this.quantity.control.stepDown();
-
-      this.quantity.value = this.quantity.control.value;
-
-      this.quantity.control.focus();
-      this.calculateTotalAmount(false);
-      this.saveLastQuantity();
-    } else {
-      if (this.price.value.endsWith(decSeparator))
-        this.price.value = this.price.value.replace(/\.$/, '');
-
-      this.price.value = this.price.value.replace(',', '.');
-      this.price.control.type = 'number';
-
-      Updates.enqueue(() => {
-        up
-          ? this.price.control.stepUp()
-          : +this.price.value !== this.instrument.minPriceIncrement &&
-            this.price.control.stepDown();
-        this.price.control.type = 'text';
-
-        const length = this.price.control.value.length;
-
-        this.price.control.setSelectionRange(length, length);
-
-        this.price.value = this.price.control.value.replace?.(
-          '.',
-          decSeparator
-        );
-
-        if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
-          const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
-            (b) => b.value === this.fastVolumeButtons.value
-          );
-
-          this.#setQuantityForFastButtonRadio(radio);
-        }
-
-        this.price.control.focus();
-        this.calculateTotalAmount();
-        this.saveLastPriceValue();
-      });
-    }
-  }
-
-  stepUp(quantity = true) {
-    this.stepUpOrDown(quantity, true);
-  }
-
-  stepDown(quantity = true) {
-    this.stepUpOrDown(quantity, false);
-  }
-
-  handleQuantityWheel({ event }) {
-    if (this.document.changePriceQuantityViaMouseWheel) {
-      if (event.deltaY < 0) this.stepUp(true);
-      else this.stepDown(true);
-    }
   }
 
   formatPositionSize() {
@@ -1867,7 +1593,7 @@ export async function widgetDefinition() {
     settings: html`
       <ppp-tabs activeid="traders">
         <ppp-tab id="traders">Подключения</ppp-tab>
-        <ppp-tab id="content">Наполнение</ppp-tab>
+        <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab id="hotkeys">Горячие клавиши</ppp-tab>
         <ppp-tab id="conditionals" disabled>Заявки</ppp-tab>
         <ppp-tab-panel id="traders-panel">
@@ -2130,7 +1856,7 @@ export async function widgetDefinition() {
             </div>
           </div>
         </ppp-tab-panel>
-        <ppp-tab-panel id="content-panel">
+        <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Кнопки быстрого объёма</h5>
@@ -2161,7 +1887,7 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Параметры отображения и работы</h5>
+              <h5>Интерфейс</h5>
             </div>
             <ppp-checkbox
               ?checked="${(x) => x.document.displaySizeInUnits}"
@@ -2175,6 +1901,11 @@ export async function widgetDefinition() {
             >
               Изменять цену и количество колесом мыши
             </ppp-checkbox>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Наполнение</h5>
+            </div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showLastPriceInHeader ?? true}"
               ${ref('showLastPriceInHeader')}

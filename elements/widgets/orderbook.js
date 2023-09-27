@@ -1213,7 +1213,7 @@ export async function widgetDefinition() {
     settings: html`
       <ppp-tabs activeid="traders">
         <ppp-tab id="traders">Подключения</ppp-tab>
-        <ppp-tab id="appearance">Отображение</ppp-tab>
+        <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
@@ -1496,7 +1496,7 @@ export async function widgetDefinition() {
             </div>
           </div>
         </ppp-tab-panel>
-        <ppp-tab-panel id="appearance-panel">
+        <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Тип отображения</h5>
@@ -1530,7 +1530,7 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Параметры отображения</h5>
+              <h5>Интерфейс</h5>
             </div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showPools ?? true}"

@@ -829,6 +829,7 @@ export class WidgetPage extends Page {
 
   savedInstrument;
 
+  // Widget in the preview.
   savedWidth;
 
   savedHeight;
@@ -838,6 +839,8 @@ export class WidgetPage extends Page {
 
   @attr({ mode: 'boolean' })
   mounted;
+
+  resizeObserver;
 
   @observable
   widgetDefinition;
@@ -849,6 +852,7 @@ export class WidgetPage extends Page {
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
+    this.onResize = this.onResize.bind(this);
     this.widgetDefinition = {};
   }
 
@@ -859,9 +863,25 @@ export class WidgetPage extends Page {
     document.addEventListener('pointerup', this.onPointerUp);
     document.addEventListener('pointermove', this.onPointerMove);
     document.addEventListener('pointercancel', this.onPointerUp);
+
+    if (this.hasAttribute('mounted')) {
+      this.resizeObserver = new ResizeObserver(this.onResize).observe(this);
+    }
+  }
+
+  onResize() {
+    if (this.clientHeight) {
+      this.parentNode.parentNode.content.style['min-height'] = `${
+        this.clientHeight + 90
+      }px`;
+    }
   }
 
   disconnectedCallback() {
+    if (this.hasAttribute('mounted')) {
+      this.resizeObserver?.disconnect();
+    }
+
     this.removeEventListener('change', this.onChange);
     this.removeEventListener('input', this.onChange);
     this.removeEventListener('columnadd', this.onChange);
