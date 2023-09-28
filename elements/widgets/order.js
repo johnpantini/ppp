@@ -449,6 +449,9 @@ export const orderWidgetTemplate = html`
                                 <ppp-widget-option value="NYSENAT">
                                   NYSENAT
                                 </ppp-widget-option>
+                                <ppp-widget-option value="OVERNIGHT">
+                                  OVERNIGHT
+                                </ppp-widget-option>
                                 <ppp-widget-option value="PEARL">
                                   PEARL
                                 </ppp-widget-option>

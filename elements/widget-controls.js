@@ -2495,7 +2495,7 @@ export const widgetSelectStyles = css`
 
   .listbox {
     min-height: 32px;
-    max-height: 100px;
+    max-height: 164px;
   }
 
   :host([open][position='above']) .listbox {
