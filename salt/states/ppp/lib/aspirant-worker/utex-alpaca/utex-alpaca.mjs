@@ -1,11 +1,13 @@
 // ==PPPScript==
-// @version 3
+// @version 4
 // ==/PPPScript==
 
 import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
 
 const PPP_LIB_DIR = process.env.PPP_LIB_DIR ?? '.';
-const { UtexConnection } = await import(`${PPP_LIB_DIR}/utex/utex-connection.mjs`);
+const { UtexConnection } = await import(
+  `${PPP_LIB_DIR}/utex/utex-connection.mjs`
+);
 
 const tickerToUTEXTicker = (ticker) => {
   if (/@/i.test(ticker)) ticker = ticker.split('@')[0];
@@ -92,7 +94,7 @@ class UtexAlpaca {
   main() {
     this.#app
       .ws('/*', {
-        maxBackpressure: 128 * 1024 * 1024,
+        maxBackpressure: 256 * 1024 * 1024,
         drain: (ws) => {
           if (!ws.closed)
             return ws.send(
@@ -166,12 +168,14 @@ class UtexAlpaca {
           ws.connection = this.#connections.get(payload.key);
 
           if (typeof ws.connection === 'undefined') {
-            this.#connections.set(
+            const newConnection = new UtexConnection(
               payload.key,
-              new UtexConnection(payload.key, payload.secret)
+              payload.secret
             );
 
-            ws.connection = this.#connections.get(payload.key);
+            this.#connections.set(payload.key, newConnection);
+
+            ws.connection = newConnection;
           } else if (ws.connection.authenticated) {
             ws.authenticated = true;
 
@@ -256,6 +260,8 @@ class UtexAlpaca {
           ws.connection.on('AuthorizationError', ws.onAuthorizationError);
           ws.connection.on('Level2', ws.onLevel2);
           ws.connection.on('MarketPrint', ws.onMarketPrint);
+
+          ws.connection.connect();
         }
       } else if (
         payload.action === 'subscribe' ||

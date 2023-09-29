@@ -333,29 +333,24 @@ export class UtexConnection extends EventEmitter {
     this.debug(`Connecting to ${this.#host}:${this.#port}...`);
 
     if (this.#socket?.pppConnected) {
-      this.#pendingConnection = void 0;
-
       return this.#socket;
     } else if (this.#pendingConnection) {
       return this.#pendingConnection;
     } else {
-      return (this.#pendingConnection = new Promise((resolve) => {
-        if (!reconnect && this.#socket) {
-          resolve(this.#socket);
-        } else {
-          this.#socket = new net.Socket();
+      return (this.#pendingConnection = new Promise(async (resolve, reject) => {
+        try {
+          if (!reconnect && this.#socket) {
+            resolve(this.#socket);
+          } else {
+            this.#socket = new net.Socket();
 
-          this.#socket.on('connect', async () => {
-            this.debug(`${this.#host}:${this.#port} connection established.`);
-            this.#socket.setKeepAlive(
-              true,
-              Math.max(this.#keepAliveDelay ?? 0, 1000)
-            );
-            this.emit('connect');
+            this.#socket.on('connect', () => {
+              this.debug(`${this.#host}:${this.#port} connection established.`);
+              this.#socket.setKeepAlive(
+                true,
+                Math.max(this.#keepAliveDelay ?? 0, 1000)
+              );
 
-            await this.#authenticate();
-
-            if (this.#accessToken) {
               const tokenLoginMessage = this.#makeProtoMessage('TokenLogin', {
                 Mode: 1,
                 JwtToken: this.#accessToken
@@ -363,64 +358,82 @@ export class UtexConnection extends EventEmitter {
 
               this.debug('TokenLoginMessage sent.');
               this.#socket.write(tokenLoginMessage);
-            } else {
+
+              this.#socket.pppConnected = true;
+              this.#pendingConnection = void 0;
+
+              this.emit('connect');
+              resolve(this.#socket);
+            });
+
+            this.#socket.on('end', () => {
+              this.#socket.pppConnected = false;
+              this.#pendingConnection = void 0;
+              this.authenticated = false;
+
+              // Emitted when the other end of the socket signals the end of transmission,
+              // thus ending the readable side of the socket.
+              this.debug(
+                `${this.#host}:${this.#port} connection ended by the server.`
+              );
+              this.emit('end');
               this.#socket.destroy();
+            });
+
+            this.#socket.on('close', () => {
+              this.#socket.pppConnected = false;
+              this.#pendingConnection = void 0;
+              this.authenticated = false;
+
+              this.#refTrades.clear();
+              this.#refQuotes.clear();
+
+              // Emitted once the socket is fully closed.
+              this.debug(`${this.#host}:${this.#port} connection closed.`);
+              this.emit('close');
+              this.#socket.destroy();
+
+              setTimeout(() => this.connect(true), this.#reconnectTimeout);
+            });
+
+            this.#socket.on('error', (e) => {
+              console.error(e);
+
+              this.authenticated = false;
+
+              this.debug(`${this.#host}:${this.#port} connection error.`);
+              this.emit('error', e);
+
+              this.#socket.pppConnected = false;
+
+              this.#socket.destroy();
+            });
+
+            this.#socket.on('data', (data) => this.#onDataReceived(data));
+
+            this.debug('Authenticating...');
+            await this.#authenticate();
+
+            if (this.#accessToken) {
+              this.debug('Authenticated. Now connecting...');
+              this.#socket.connect({
+                host: this.#host,
+                port: this.#port
+              });
+            } else {
+              this.debug('Authentication failed.');
+
+              this.#socket.pppConnected = false;
+              this.#pendingConnection = void 0;
+              this.authenticated = false;
+
+              this.#socket.destroy();
+              setTimeout(() => this.connect(true), this.#reconnectTimeout);
             }
-
-            this.#socket.pppConnected = true;
-
-            resolve(this.#socket);
-          });
-
-          this.#socket.on('end', () => {
-            this.#socket.pppConnected = false;
-            this.#pendingConnection = void 0;
-            this.authenticated = false;
-
-            // Emitted when the other end of the socket signals the end of transmission,
-            // thus ending the readable side of the socket.
-            this.debug(
-              `${this.host}:${this.port} connection ended by the server.`
-            );
-            this.emit('end');
-            this.#socket.destroy();
-          });
-
-          this.#socket.on('close', () => {
-            this.#socket.pppConnected = false;
-            this.#pendingConnection = void 0;
-            this.authenticated = false;
-
-            this.#refTrades.clear();
-            this.#refQuotes.clear();
-
-            // Emitted once the socket is fully closed.
-            this.debug(`${this.#host}:${this.#port} connection closed.`);
-            this.emit('close');
-            this.#socket.destroy();
-
-            setTimeout(() => this.connect(true), this.#reconnectTimeout);
-          });
-
-          this.#socket.on('error', (e) => {
-            console.error(e);
-
-            this.authenticated = false;
-
-            this.debug(`${this.#host}:${this.#port} connection error.`);
-            this.emit('error', e);
-
-            this.#socket.pppConnected = false;
-
-            this.#socket.destroy();
-          });
-
-          this.#socket.on('data', (data) => this.#onDataReceived(data));
-
-          this.#socket.connect({
-            host: this.#host,
-            port: this.#port
-          });
+          }
+        } catch (e) {
+          console.error(e);
+          reject(e);
         }
       }));
     }
@@ -621,7 +634,5 @@ export class UtexConnection extends EventEmitter {
     if (isNaN(this.#keepAliveDelay)) {
       this.#keepAliveDelay = 0;
     }
-
-    process.nextTick(() => void this.connect());
   }
 }
