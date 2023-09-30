@@ -265,6 +265,8 @@ class NoiiDatum extends AlpacaV2PlusTraderDatum {
 class AlpacaV2PlusTrader extends Trader {
   #pendingConnection;
 
+  authenticated = false;
+
   connection;
 
   constructor(document) {
@@ -321,7 +323,7 @@ class AlpacaV2PlusTrader extends Trader {
   }
 
   async establishWebSocketConnection(reconnect) {
-    if (this.connection?.readyState === WebSocket.OPEN) {
+    if (this.connection?.readyState === WebSocket.OPEN && this.authenticated) {
       this.#pendingConnection = void 0;
 
       return this.connection;
@@ -332,9 +334,12 @@ class AlpacaV2PlusTrader extends Trader {
         if (!reconnect && this.connection) {
           resolve(this.connection);
         } else {
+          this.authenticated = false;
           this.connection = new WebSocket(this.document.wsUrl);
 
           this.connection.onclose = async () => {
+            this.authenticated = false;
+
             await later(Math.max(this.document.reconnectTimeout ?? 1000, 1000));
 
             this.#pendingConnection = void 0;
@@ -380,12 +385,19 @@ class AlpacaV2PlusTrader extends Trader {
                     secret: this.document.broker.password
                   })
                 );
+
+                break;
               } else if (payload.msg === 'authenticated') {
+                this.authenticated = true;
+                this.#pendingConnection = void 0;
+
                 if (reconnect) {
                   await this.resubscribe();
                 }
 
                 resolve(this.connection);
+
+                break;
               } else if (payload.T === 't') {
                 this.datums[TRADER_DATUM.MARKET_PRINT].dataArrived(
                   payload,
@@ -407,7 +419,11 @@ class AlpacaV2PlusTrader extends Trader {
               } else if (payload.T === 'error') {
                 console.error(payload);
 
+                this.authenticated = false;
+
                 reject(payload);
+
+                break;
               }
             }
           };

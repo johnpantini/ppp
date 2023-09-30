@@ -1,5 +1,5 @@
 // ==PPPScript==
-// @version 4
+// @version 5
 // ==/PPPScript==
 
 import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
@@ -261,7 +261,7 @@ class UtexAlpaca {
           ws.connection.on('Level2', ws.onLevel2);
           ws.connection.on('MarketPrint', ws.onMarketPrint);
 
-          ws.connection.connect();
+          await ws.connection.connect();
         }
       } else if (
         payload.action === 'subscribe' ||

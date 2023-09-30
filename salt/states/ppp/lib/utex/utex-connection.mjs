@@ -55,6 +55,8 @@ export class UtexConnection extends EventEmitter {
 
   #socket;
 
+  authenticated = false;
+
   #pendingConnection;
 
   #refTrades = new Map();
@@ -330,9 +332,7 @@ export class UtexConnection extends EventEmitter {
   }
 
   async connect(reconnect) {
-    this.debug(`Connecting to ${this.#host}:${this.#port}...`);
-
-    if (this.#socket?.pppConnected) {
+    if (this.authenticated) {
       return this.#socket;
     } else if (this.#pendingConnection) {
       return this.#pendingConnection;
@@ -351,23 +351,26 @@ export class UtexConnection extends EventEmitter {
                 Math.max(this.#keepAliveDelay ?? 0, 1000)
               );
 
+              this.#pendingConnection = void 0;
+              this.authenticated = false;
+
               const tokenLoginMessage = this.#makeProtoMessage('TokenLogin', {
                 Mode: 1,
                 JwtToken: this.#accessToken
               });
 
+              this.once('ConnectionPermit', () => {
+                this.#pendingConnection = void 0;
+                this.authenticated = true;
+
+                resolve(this.#socket);
+              });
+
               this.debug('TokenLoginMessage sent.');
               this.#socket.write(tokenLoginMessage);
-
-              this.#socket.pppConnected = true;
-              this.#pendingConnection = void 0;
-
-              this.emit('connect');
-              resolve(this.#socket);
             });
 
             this.#socket.on('end', () => {
-              this.#socket.pppConnected = false;
               this.#pendingConnection = void 0;
               this.authenticated = false;
 
@@ -381,7 +384,6 @@ export class UtexConnection extends EventEmitter {
             });
 
             this.#socket.on('close', () => {
-              this.#socket.pppConnected = false;
               this.#pendingConnection = void 0;
               this.authenticated = false;
 
@@ -404,8 +406,6 @@ export class UtexConnection extends EventEmitter {
               this.debug(`${this.#host}:${this.#port} connection error.`);
               this.emit('error', e);
 
-              this.#socket.pppConnected = false;
-
               this.#socket.destroy();
             });
 
@@ -415,7 +415,8 @@ export class UtexConnection extends EventEmitter {
             await this.#authenticate();
 
             if (this.#accessToken) {
-              this.debug('Authenticated. Now connecting...');
+              this.debug('Authenticated.');
+              this.debug(`Connecting to ${this.#host}:${this.#port}...`);
               this.#socket.connect({
                 host: this.#host,
                 port: this.#port
@@ -423,7 +424,6 @@ export class UtexConnection extends EventEmitter {
             } else {
               this.debug('Authentication failed.');
 
-              this.#socket.pppConnected = false;
               this.#pendingConnection = void 0;
               this.authenticated = false;
 
@@ -437,64 +437,6 @@ export class UtexConnection extends EventEmitter {
         }
       }));
     }
-  }
-
-  ConnectionPermit() {
-    this.authenticated = true;
-  }
-
-  PrintsHistoryResponse(payload) {
-    this.emit(
-      'PrintsHistoryResponse.' + payload.RequestId.toString('base64'),
-      JSON.stringify(payload)
-    );
-  }
-
-  async printsHistoryRequest(ticker) {
-    const reqId = this.#createReqId();
-    const listenerName = `PrintsHistoryResponse.${reqId.toString('base64')}`;
-    const printsHistoryRequestMessage = this.#makeProtoMessage(
-      'PrintsHistoryRequest',
-      {
-        Symbol: ticker,
-        RequestId: reqId
-      }
-    );
-
-    this.debug(`PrintsHistoryRequest sent, ticker: ${ticker}.`);
-    this.#socket.write(printsHistoryRequestMessage);
-
-    return new Promise((resolve) => {
-      try {
-        let badSituation = false;
-
-        const badSituationTimer = setTimeout(() => {
-          badSituation = true;
-
-          this.removeAllListeners(listenerName);
-
-          resolve([]);
-        }, 5000);
-
-        this.once(listenerName, (payload) => {
-          clearTimeout(badSituationTimer);
-
-          if (badSituation) {
-            return;
-          }
-
-          if (!payload) {
-            resolve([]);
-          } else {
-            resolve((JSON.parse(payload).Prints || []).reverse());
-          }
-        });
-      } catch (e) {
-        console.error(e);
-
-        resolve([]);
-      }
-    });
   }
 
   async subscribe({ trades = [], quotes = [] } = {}) {
