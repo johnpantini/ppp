@@ -82,6 +82,19 @@ export const settingsWorkspacePageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Инсталляция в пустом терминале</h5>
+        </div>
+        <div class="input-group">
+          <ppp-checkbox
+            ?checked="${(x) => x.document.hideEmptyWorkspaceGizmo ?? false}"
+            ${ref('hideEmptyWorkspaceGizmo')}
+          >
+            Не показывать
+          </ppp-checkbox>
+        </div>
+      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -136,6 +149,7 @@ export class SettingsWorkspacePage extends Page {
     const workspaceSnapDistance = Math.trunc(this.workspaceSnapDistance.value);
     const workspaceSnapMargin = Math.trunc(this.workspaceSnapMargin.value);
     const confirmWidgetClosing = this.confirmWidgetClosing.checked;
+    const hideEmptyWorkspaceGizmo = this.hideEmptyWorkspaceGizmo.checked;
     const widgetNotificationTimeout = Math.abs(
       Math.trunc(this.widgetNotificationTimeout.value)
     );
@@ -144,13 +158,15 @@ export class SettingsWorkspacePage extends Page {
     ppp.settings.set('workspaceSnapMargin', workspaceSnapMargin);
     ppp.settings.set('confirmWidgetClosing', confirmWidgetClosing);
     ppp.settings.set('widgetNotificationTimeout', widgetNotificationTimeout);
+    ppp.settings.set('hideEmptyWorkspaceGizmo', hideEmptyWorkspaceGizmo);
 
     return {
       $set: {
         workspaceSnapDistance,
         workspaceSnapMargin,
         confirmWidgetClosing,
-        widgetNotificationTimeout
+        widgetNotificationTimeout,
+        hideEmptyWorkspaceGizmo
       }
     };
   }

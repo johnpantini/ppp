@@ -200,7 +200,7 @@ export const instrumentsManagePageTemplate = html`
               </p>
             </div>
             <div class="input-group">
-              <div style="display: flex; flex-direction: column;">
+              <div class="control-stack">
                 <ppp-checkbox
                   ?checked="${(x) => x.document.forQualInvestorFlag}"
                   ${ref('forQualInvestorFlag')}
@@ -526,7 +526,7 @@ export const instrumentsManagePageTemplate = html`
               </p>
             </div>
             <div class="input-group">
-              <div style="display: flex; flex-direction: column;">
+              <div class="control-stack">
                 <ppp-checkbox
                   ?checked="${(x) => x.document.removed}"
                   ${ref('removedFlag')}

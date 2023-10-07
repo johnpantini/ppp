@@ -39,7 +39,10 @@ export const workspacePageTemplate = html`
       ${when(
         (x) => x.isSteady() && !x.document.widgets?.length,
         html`
-          <ppp-empty-workspace-gizmo></ppp-empty-workspace-gizmo>
+          ${when(
+            () => !ppp.settings.get('hideEmptyWorkspaceGizmo'),
+            html` <ppp-empty-workspace-gizmo></ppp-empty-workspace-gizmo> `
+          )}
           <div class="empty-state">
             <div class="picture">${html.partial(dragAndDrop)}</div>
             <h3>В этом терминале нет виджетов</h3>
@@ -638,6 +641,21 @@ export class WorkspacePage extends Page {
                 }
               ],
               as: 'bots'
+            }
+          },
+          {
+            $lookup: {
+              from: 'orders',
+              pipeline: [
+                {
+                  $project: {
+                    updatedAt: 0,
+                    createdAt: 0,
+                    version: 0
+                  }
+                }
+              ],
+              as: 'orders'
             }
           },
           {

@@ -35,42 +35,6 @@ export const brokerBinancePageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <section>
-        <div class="label-group">
-          <h5>Ключ API Binance</h5>
-          <p class="description">
-            Получить можно по
-            <a
-              class="link"
-              rel="noopener"
-              target="_blank"
-              href="https://www.binance.com/ru/my/settings/api-management"
-              >ссылке</a
-            >.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            type="password"
-            placeholder="Ключ API"
-            value="${(x) => x.document.apiKey}"
-            ${ref('apiKey')}
-          ></ppp-text-field>
-        </div>
-      </section>
-      <section>
-        <div class="label-group">
-          <h5>Секретный ключ API Binance</h5>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            type="password"
-            placeholder="Секрет API"
-            value="${(x) => x.document.secret}"
-            ${ref('secret')}
-          ></ppp-text-field>
-        </div>
-      </section>
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -138,23 +102,6 @@ export class BrokerBinancePage extends Page {
 
   async validate() {
     await validate(this.name);
-    await validate(this.apiKey);
-    await validate(this.secret);
-
-    const request = await checkBinanceCredentials({
-      serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
-      apiKey: this.apiKey.value.trim(),
-      secret: this.secret.value.trim()
-    });
-
-    if (!request.ok) {
-      console.error(await request.json());
-
-      invalidate(this.apiKey, {
-        errorMessage: 'Неверный ключ или секрет',
-        raiseException: true
-      });
-    }
   }
 
   async read() {
@@ -182,8 +129,6 @@ export class BrokerBinancePage extends Page {
     return {
       $set: {
         name: this.name.value.trim(),
-        apiKey: this.apiKey.value.trim(),
-        secret: this.secret.value.trim(),
         version: 1,
         type: BROKERS.BINANCE,
         updatedAt: new Date()

@@ -17,7 +17,6 @@ import {
   paletteRedBase,
   paletteRedLight1,
   paletteWhite,
-  paletteYellowBase,
   paletteYellowDark2,
   paletteYellowLight2,
   spacing2,

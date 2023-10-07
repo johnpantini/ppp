@@ -183,8 +183,7 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">Binance</span>
           <span slot="description">
-            Торговля и рыночные данные через криптовалютную биржу
-            Binance.&nbsp;<a
+            Рыночные данные через криптовалютную биржу Binance.&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
