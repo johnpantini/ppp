@@ -196,10 +196,15 @@ async function startDeployedWorker(
                   PPP_WORKER_ID: workerId
                 },
                 Env: processEnv(
-                  Object.assign(env, {
-                    PPP_WORKER_ID: workerId,
-                    NODE_OPTIONS: '--max-old-space-size=256'
-                  })
+                  Object.assign(
+                    {
+                      NODE_OPTIONS: '--max-old-space-size=256'
+                    },
+                    env,
+                    {
+                      PPP_WORKER_ID: workerId
+                    }
+                  )
                 ),
                 Driver: 'raw_exec',
                 Name: 'worker',
