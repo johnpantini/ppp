@@ -561,7 +561,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.extraBookTrader1.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          extraBook1: TRADER_DATUM.ACTIVE_ORDER
+          extraBook1: TRADER_DATUM.ORDERBOOK
         }
       });
     }
@@ -570,7 +570,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.extraBookTrader2.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          extraBook2: TRADER_DATUM.ACTIVE_ORDER
+          extraBook2: TRADER_DATUM.ORDERBOOK
         }
       });
     }
@@ -579,7 +579,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.extraBookTrader3.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          extraBook3: TRADER_DATUM.ACTIVE_ORDER
+          extraBook3: TRADER_DATUM.ORDERBOOK
         }
       });
     }
@@ -1211,10 +1211,10 @@ export async function widgetDefinition() {
     minHeight: 120,
     defaultWidth: 280,
     settings: html`
-      <ppp-tabs activeid="traders">
-        <ppp-tab id="traders">Подключения</ppp-tab>
+      <ppp-tabs activeid="main">
+        <ppp-tab id="main">Основные настройки</ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
-        <ppp-tab-panel id="traders-panel">
+        <ppp-tab-panel id="main-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Трейдер книги заявок</h5>
