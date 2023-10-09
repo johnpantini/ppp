@@ -1685,6 +1685,7 @@ export class OrderWidget extends WidgetWithInstrument {
           );
 
           orderNode.save?.();
+          orderNode.priceField.$emit('input');
 
           setTimeout(() => {
             orderNode.priceField.input.focus();
