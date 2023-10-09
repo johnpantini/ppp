@@ -16,7 +16,12 @@ import {
   repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { WIDGET_TYPES, TRADER_DATUM, TRADER_CAPS } from '../../lib/const.js';
+import {
+  WIDGET_TYPES,
+  TRADER_DATUM,
+  TRADER_CAPS,
+  ORDERS
+} from '../../lib/const.js';
 import {
   formatRelativeChange,
   formatAbsoluteChange,
@@ -60,6 +65,18 @@ import '../query-select.js';
 import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
+import '../widget-order-list.js';
+
+const DEFAULT_CONDITIONAL_ORDERS = [
+  {
+    name: 'Stop Loss',
+    hidden: true
+  },
+  {
+    name: 'Take Profit',
+    hidden: true
+  }
+];
 
 const isLastPriceInHeaderHidden = (x) =>
   typeof x.document.showLastPriceInHeader === 'undefined'
@@ -78,7 +95,10 @@ const isBestBidAndAskHidden = (x) =>
     ? false
     : !x.document.showBestBidAndAsk;
 const isEstimateSectionHidden = (x) => {
-  if (x.orderTypeTabs.activeid === 'conditional' && !x.conditionalOrders) {
+  if (
+    x.orderTypeTabs.activeid === 'conditional' &&
+    !x.conditionalOrders?.length
+  ) {
     return true;
   }
 
@@ -87,7 +107,10 @@ const isEstimateSectionHidden = (x) => {
     : !x.document.showEstimateSection;
 };
 const isAmountSectionHidden = (x) => {
-  if (x.orderTypeTabs.activeid === 'conditional' && !x.conditionalOrders) {
+  if (
+    x.orderTypeTabs.activeid === 'conditional' &&
+    !x.conditionalOrders?.length
+  ) {
     return true;
   }
 
@@ -96,7 +119,7 @@ const isAmountSectionHidden = (x) => {
     : !x.document.showAmountSection;
 };
 const isPriceAndQuantityHidden = (x) => {
-  return x.orderTypeTabs.activeid === 'conditional' && !x.conditionalOrders;
+  return x.orderTypeTabs.activeid === 'conditional';
 };
 
 export const orderWidgetTemplate = html`
@@ -167,12 +190,22 @@ export const orderWidgetTemplate = html`
                 ? false
                 : !x.document.showOrderTypeTabs}"
             activeid="${(x) => x.getActiveWidgetTab()}"
-            @change="${(x, { event }) =>
-              x.updateDocumentFragment({
+            @change="${(x, { event }) => {
+              const activeTab = event.detail.id;
+
+              if (activeTab === 'limit') {
+                setTimeout(() => {
+                  x.price.input.focus();
+                  x.price.input.control.setSelectionRange(0, 0);
+                }, 25);
+              }
+
+              return x.updateDocumentFragment({
                 $set: {
-                  'widgets.$.activeTab': event.detail.id
+                  'widgets.$.activeTab': activeTab
                 }
-              })}"
+              });
+            }}"
             ${ref('orderTypeTabs')}
           >
             <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
@@ -250,7 +283,7 @@ export const orderWidgetTemplate = html`
             ${when(
               (x) =>
                 x.orderTypeTabs.activeid === 'conditional' &&
-                !x.conditionalOrders,
+                !x.conditionalOrders?.length,
               html`
                 <div class="widget-empty-state-holder">
                   ${staticallyCompose(emptyWidgetState)}
@@ -260,10 +293,111 @@ export const orderWidgetTemplate = html`
                       <a
                         class="link"
                         href="javascript:void(0);"
-                        @click="${(x) => x.headerButtons.showWidgetSettings()}"
+                        @click="${async (x) => {
+                          let observer;
+
+                          const settingsPage =
+                            await x.headerButtons.showWidgetSettings();
+
+                          observer = new MutationObserver(() => {
+                            const tabs =
+                              settingsPage.widgetSettings.querySelector(
+                                'ppp-tabs'
+                              );
+
+                            if (tabs) {
+                              tabs.activeid = 'conditionals';
+
+                              observer.disconnect();
+                            }
+                          });
+
+                          observer.observe(settingsPage.widgetSettings, {
+                            childList: true,
+                            subtree: true
+                          });
+                        }}"
                       >
                         Открыть параметры.
                       </a>
+                    </div>
+                  </span>
+                </div>
+              `
+            )}
+            ${when(
+              (x) =>
+                x.orderTypeTabs.activeid === 'conditional' &&
+                x.conditionalOrders?.length,
+              html`
+                <div class="toolbar">
+                  <div class="tabs">
+                    <ppp-widget-box-radio-group
+                      ${ref('conditionalOrderSelector')}
+                      value=${(x) => x.document.lastConditionalOrderIndex}
+                      @change="${async (x) => {
+                        const index = parseInt(
+                          x.conditionalOrderSelector.value
+                        );
+
+                        const conditionalOrder = x.conditionalOrders[index];
+
+                        x.document.lastConditionalOrderIndex = index;
+
+                        if (conditionalOrder?.orderId) {
+                          x.conditionalOrder =
+                            await x.container.denormalization.denormalize(
+                              conditionalOrder
+                            );
+                        }
+
+                        return x.updateDocumentFragment({
+                          $set: {
+                            'widgets.$.lastConditionalOrderIndex': index
+                          }
+                        });
+                      }}"
+                      value="${(x) => x.orderTypeTabs.activeid}"
+                    >
+                      ${repeat(
+                        (x) => x.conditionalOrders,
+                        html`
+                          <ppp-widget-box-radio value="${(x, c) => c.index}">
+                            ${(x) => x.name}
+                          </ppp-widget-box-radio>
+                        `,
+                        { positioning: true }
+                      )}
+                    </ppp-widget-box-radio-group>
+                  </div>
+                </div>
+                ${when(
+                  (x) => x.conditionalOrderDefinition?.default,
+                  html`
+                    <div
+                      class="conditional-order-holder"
+                      ${ref('conditionalOrderHolder')}
+                    >
+                      ${(x) =>
+                        html`${staticallyCompose(
+                          `<${x.conditionalOrderDefinition.default.name}></${x.conditionalOrderDefinition.default.name}>`
+                        )}`}
+                    </div>
+                  `
+                )}
+              `
+            )}
+            ${when(
+              (x) =>
+                x.orderTypeTabs.activeid === 'conditional' &&
+                x.conditionalOrders?.length &&
+                !x.conditionalOrder,
+              html`
+                <div class="widget-empty-state-holder">
+                  ${staticallyCompose(emptyWidgetState)}
+                  <span>
+                    <div class="no-conditional-orders-holder">
+                      <span>Выберите условную заявку.</span>
                     </div>
                   </span>
                 </div>
@@ -532,11 +666,13 @@ export const orderWidgetTemplate = html`
                             volume="${(x) => x.volume}"
                             ?money="${(x) => x.isInMoney}"
                           >
-                            ${when(
-                              (x) => x.isInMoney,
-                              html` <div class="coin-icon"></div> `
-                            )}
-                            ${(x) => x.text}
+                            <div class="fast-button-with-coin">
+                              ${when(
+                                (x) => x.isInMoney,
+                                html` <div class="coin-icon"></div> `
+                              )}
+                              ${(x) => x.text}
+                            </div>
                           </ppp-widget-box-radio>
                         `,
                         { positioning: true }
@@ -647,38 +783,95 @@ export const orderWidgetTemplate = html`
             ></div>
             <div class="widget-section">
               <div class="widget-subsection">
-                <ppp-widget-button
-                  appearance="primary"
-                  ?disabled="${(x) => {
-                    if (
-                      !x.conditionalOrder &&
-                      x.orderTypeTabs.activeid === 'conditional'
-                    ) {
-                      return true;
-                    }
+                <div class="widget-button-line">
+                  <ppp-widget-button
+                    appearance="primary"
+                    ?hidden="${(x) => {
+                      if (
+                        x.orderTypeTabs.activeid === 'conditional' &&
+                        x.conditionalOrder &&
+                        x.conditionalOrder.order.sideAgnostic
+                      ) {
+                        return true;
+                      }
 
-                    return false;
-                  }}"
-                  @click="${(x) => x.buyOrSell('buy')}"
-                >
-                  Покупка
-                </ppp-widget-button>
-                <ppp-widget-button
-                  appearance="danger"
-                  ?disabled="${(x) => {
-                    if (
-                      !x.conditionalOrder &&
-                      x.orderTypeTabs.activeid === 'conditional'
-                    ) {
-                      return true;
-                    }
+                      return false;
+                    }}"
+                    ?disabled="${(x) => {
+                      if (
+                        x.orderTypeTabs.activeid === 'conditional' &&
+                        !x.conditionalOrder
+                      ) {
+                        return true;
+                      }
 
-                    return false;
-                  }}"
-                  @click="${(x) => x.buyOrSell('sell')}"
-                >
-                  Продажа
-                </ppp-widget-button>
+                      return false;
+                    }}"
+                    @click="${(x) => x.placeOrder('buy')}"
+                  >
+                    Покупка
+                  </ppp-widget-button>
+                  <ppp-widget-button
+                    appearance="danger"
+                    ?hidden="${(x) => {
+                      if (
+                        x.orderTypeTabs.activeid === 'conditional' &&
+                        x.conditionalOrder &&
+                        x.conditionalOrder.order.sideAgnostic
+                      ) {
+                        return true;
+                      }
+
+                      return false;
+                    }}"
+                    ?disabled="${(x) => {
+                      if (
+                        x.orderTypeTabs.activeid === 'conditional' &&
+                        !x.conditionalOrder
+                      ) {
+                        return true;
+                      }
+
+                      return false;
+                    }}"
+                    @click="${(x) => x.placeOrder('sell')}"
+                  >
+                    Продажа
+                  </ppp-widget-button>
+                  <ppp-widget-button
+                    appearance="primary"
+                    ?hidden="${(x) => {
+                      if (
+                        x.orderTypeTabs.activeid !== 'conditional' ||
+                        !x.conditionalOrder
+                      )
+                        return true;
+
+                      if (
+                        x.orderTypeTabs.activeid === 'conditional' &&
+                        x.conditionalOrder &&
+                        !x.conditionalOrder.order.sideAgnostic
+                      ) {
+                        return true;
+                      }
+
+                      return false;
+                    }}"
+                    ?disabled="${(x) => {
+                      if (
+                        x.orderTypeTabs.activeid === 'conditional' &&
+                        !x.conditionalOrder
+                      ) {
+                        return true;
+                      }
+
+                      return false;
+                    }}"
+                    @click="${(x) => x.placeOrder()}"
+                  >
+                    Разместить заявку
+                  </ppp-widget-button>
+                </div>
               </div>
             </div>
           </div>
@@ -832,6 +1025,14 @@ export const orderWidgetStyles = css`
     background-size: 100%;
   }
 
+  .fast-button-with-coin {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 2px;
+    align-items: center;
+    justify-content: center;
+  }
+
   .coin-icon {
     background-image: url('static/svg/coin.svg');
     background-repeat: no-repeat;
@@ -843,6 +1044,17 @@ export const orderWidgetStyles = css`
 
   .widget-flex-line ppp-widget-text-field {
     width: 100%;
+  }
+
+  .toolbar {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tabs {
+    padding: 0 10px 8px 10px;
   }
 `;
 
@@ -904,14 +1116,22 @@ export class OrderWidget extends WidgetWithInstrument {
   @observable
   positionAverage;
 
+  // Selected one.
   @observable
   conditionalOrder;
+
+  @observable
+  conditionalOrderDefinition;
 
   @observable
   conditionalOrders;
 
   async connectedCallback() {
     super.connectedCallback();
+
+    this.conditionalOrders = (this.document.conditionalOrders ?? []).filter(
+      (o) => !o.hidden && o.orderId
+    );
 
     if (!this.document.ordersTrader) {
       return this.notificationsArea.error({
@@ -928,6 +1148,16 @@ export class OrderWidget extends WidgetWithInstrument {
     }
 
     try {
+      if (typeof this.document.lastConditionalOrderIndex === 'number') {
+        const conditionalOrder =
+          this.conditionalOrders[this.document.lastConditionalOrderIndex];
+
+        if (conditionalOrder?.orderId) {
+          this.conditionalOrder =
+            await this.container.denormalization.denormalize(conditionalOrder);
+        }
+      }
+
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
@@ -1090,6 +1320,28 @@ export class OrderWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  async conditionalOrderChanged(_, order) {
+    const type = order?.order?.type;
+
+    // Rebuild DOM node.
+    this.conditionalOrderDefinition = void 0;
+
+    if (type === ORDERS.STOP_LOSS_TAKE_PROFIT) {
+      this.conditionalOrderDefinition = await import(
+        `${ppp.rootUrl}/lib/orders/stop-loss-take-profit/element.js`
+      );
+    } else if (
+      type === ORDERS.CUSTOM &&
+      typeof order?.order.baseUrl === 'string'
+    ) {
+      this.conditionalOrderDefinition = await import(
+        `${order.order.baseUrl}/element.js`
+      );
+    } else {
+      this.conditionalOrderDefinition = void 0;
+    }
+  }
+
   pusherTelegramHandler(data) {
     if (typeof data.t === 'string')
       return this.selectInstrument(data.t.toUpperCase().split('~')[0]);
@@ -1127,17 +1379,19 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   async handleHotkeys(event) {
+    this.lastFocusedElement = event.composedPath()[0];
+
     if (this.document.buyShortcut !== this.document.sellShortcut) {
       if (
         this.document.buyShortcut &&
         event.code === this.document.buyShortcut
       ) {
-        return await this.buyOrSell('buy');
+        return await this.placeOrder('buy');
       } else if (
         this.document.sellShortcut &&
         event.code === this.document.sellShortcut
       ) {
-        return await this.buyOrSell('sell');
+        return await this.placeOrder('sell');
       }
     }
 
@@ -1377,40 +1631,73 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   setPrice(price) {
-    if (this.price && price > 0) {
-      if (this.orderTypeTabs && this.orderTypeTabs.activeid !== 'limit') {
-        this.orderTypeTabs.activeid = 'limit';
+    const activeTab = this.orderTypeTabs?.activeid;
 
-        void this.updateDocumentFragment({
-          $set: {
-            'widgets.$.activeTab': 'limit'
-          }
-        });
+    if (price > 0) {
+      if (
+        activeTab === 'limit' ||
+        activeTab === 'market' ||
+        (activeTab !== 'limit' && this.document.setPriceShouldShowLimitTab)
+      ) {
+        if (this.price) {
+          this.orderTypeTabs.activeid = 'limit';
 
-        setTimeout(() => {
-          this.price.focus();
+          void this.updateDocumentFragment({
+            $set: {
+              'widgets.$.activeTab': 'limit'
+            }
+          });
 
-          const length = this.price.control.value.length;
+          setTimeout(() => {
+            this.price.input.focus();
 
-          this.price.control.setSelectionRange(length, length);
-        }, 25);
+            const length = this.price.value.length;
+
+            this.price.input.control.setSelectionRange(length, length);
+          }, 25);
+        }
+
+        this.price.value = formatPriceWithoutCurrency(price, this.instrument);
+
+        this.calculateTotalAmount();
+        this.price.focus();
+
+        // Locked quantity mode.
+        if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
+          const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
+            (b) => b.value === this.fastVolumeButtons.value
+          );
+
+          this.setQuantityFromFastButtonRadio(radio);
+        }
+
+        this.saveLastPriceValue();
+      } else if (
+        activeTab === 'conditional' &&
+        !this.document.setPriceShouldShowLimitTab
+      ) {
+        const orderNode = this.conditionalOrderHolder?.firstElementChild;
+
+        if (typeof orderNode?.priceField !== 'undefined') {
+          orderNode.priceField.value = formatPriceWithoutCurrency(
+            price,
+            this.instrument
+          );
+
+          orderNode.save?.();
+
+          setTimeout(() => {
+            orderNode.priceField.input.focus();
+
+            const length = orderNode.priceField.value.length;
+
+            orderNode.priceField.input.control.setSelectionRange(
+              length,
+              length
+            );
+          }, 25);
+        }
       }
-
-      this.price.value = price.toString().replace('.', decSeparator);
-
-      this.calculateTotalAmount();
-      this.price.focus();
-
-      // Locked quantity mode.
-      if (typeof this?.fastVolumeButtons?.value !== 'undefined') {
-        const radio = this?.fastVolumeButtons.slottedRadioButtons.find(
-          (b) => b.value === this.fastVolumeButtons.value
-        );
-
-        this.setQuantityFromFastButtonRadio(radio);
-      }
-
-      this.saveLastPriceValue();
     }
   }
 
@@ -1475,7 +1762,7 @@ export class OrderWidget extends WidgetWithInstrument {
     return `${size} ${suffix}`;
   }
 
-  async buyOrSell(direction) {
+  async placeOrder(direction) {
     if (!this.ordersTrader) {
       return this.notificationsArea.error({
         title: 'Ошибка заявки',
@@ -1518,7 +1805,9 @@ export class OrderWidget extends WidgetWithInstrument {
           tif: this.tif?.value
         });
       } else if (this.orderTypeTabs?.activeid === 'conditional') {
-        console.log(this.orderTypeTabs.activeid);
+        return this.notificationsArea.note({
+          text: 'Условные заявки не поддерживаются трейдером.'
+        });
       }
 
       return this.notificationsArea.success({
@@ -1545,36 +1834,60 @@ export class OrderWidget extends WidgetWithInstrument {
         errorMessage: 'Горячие клавиши Buy/Sell должны различаться'
       });
     }
+
+    if (
+      this.container.searchShortcut.value &&
+      this.container.cancelAllOrdersShortcut.value
+    ) {
+      await validate(this.container.cancelAllOrdersShortcut, {
+        hook: async () =>
+          this.container.searchShortcut.value !==
+          this.container.cancelAllOrdersShortcut.value,
+        errorMessage:
+          'Горячие клавиши отмены заявок и поиска должны различаться'
+      });
+    }
+
+    await this.container.conditionalOrderList.validate();
   }
 
   async submit() {
+    const $set = {
+      ordersTraderId: this.container.ordersTraderId.value,
+      level1TraderId: this.container.level1TraderId.value,
+      extraLevel1TraderId: this.container.extraLevel1TraderId.value,
+      extraLevel1Trader2Id: this.container.extraLevel1Trader2Id.value,
+      pusherApiId: this.container.pusherApiId.value,
+      buyShortcut: this.container.buyShortcut.value.trim(),
+      sellShortcut: this.container.sellShortcut.value.trim(),
+      searchShortcut: this.container.searchShortcut.value.trim(),
+      cancelAllOrdersShortcut:
+        this.container.cancelAllOrdersShortcut.value.trim(),
+      fastVolumes: this.container.fastVolumes.value.trim(),
+      doNotLockFastVolume: this.container.doNotLockFastVolume.checked,
+      displaySizeInUnits: this.container.displaySizeInUnits.checked,
+      changePriceQuantityViaMouseWheel:
+        this.container.changePriceQuantityViaMouseWheel.checked,
+      setPriceShouldShowLimitTab:
+        this.container.setPriceShouldShowLimitTab.checked,
+      showLastPriceInHeader: this.container.showLastPriceInHeader.checked,
+      showAbsoluteChangeInHeader:
+        this.container.showAbsoluteChangeInHeader.checked,
+      showRelativeChangeInHeader:
+        this.container.showRelativeChangeInHeader.checked,
+      showOrderTypeTabs: this.container.showOrderTypeTabs.checked,
+      showBestBidAndAsk: this.container.showBestBidAndAsk.checked,
+      showAmountSection: this.container.showAmountSection.checked,
+      showEstimateSection: this.container.showEstimateSection.checked,
+      conditionalOrders: this.container.conditionalOrderList.value
+    };
+
+    if (this.container.settingsTabs.activeid === 'conditionals') {
+      $set.lastConditionalOrderIndex = void 0;
+    }
+
     return {
-      $set: {
-        ordersTraderId: this.container.ordersTraderId.value,
-        level1TraderId: this.container.level1TraderId.value,
-        extraLevel1TraderId: this.container.extraLevel1TraderId.value,
-        extraLevel1Trader2Id: this.container.extraLevel1Trader2Id.value,
-        pusherApiId: this.container.pusherApiId.value,
-        buyShortcut: this.container.buyShortcut.value.trim(),
-        sellShortcut: this.container.sellShortcut.value.trim(),
-        searchShortcut: this.container.searchShortcut.value.trim(),
-        cancelAllOrdersShortcut:
-          this.container.cancelAllOrdersShortcut.value.trim(),
-        fastVolumes: this.container.fastVolumes.value.trim(),
-        doNotLockFastVolume: this.container.doNotLockFastVolume.checked,
-        displaySizeInUnits: this.container.displaySizeInUnits.checked,
-        changePriceQuantityViaMouseWheel:
-          this.container.changePriceQuantityViaMouseWheel.checked,
-        showLastPriceInHeader: this.container.showLastPriceInHeader.checked,
-        showAbsoluteChangeInHeader:
-          this.container.showAbsoluteChangeInHeader.checked,
-        showRelativeChangeInHeader:
-          this.container.showRelativeChangeInHeader.checked,
-        showOrderTypeTabs: this.container.showOrderTypeTabs.checked,
-        showBestBidAndAsk: this.container.showBestBidAndAsk.checked,
-        showAmountSection: this.container.showAmountSection.checked,
-        showEstimateSection: this.container.showEstimateSection.checked
-      }
+      $set
     };
   }
 }
@@ -1585,7 +1898,7 @@ export async function widgetDefinition() {
     collection: 'PPP',
     title: html`Заявка`,
     description: html`Виджет <span class="positive">Заявка</span> используется,
-      чтобы выставлять рыночные, лимитные и условные биржевые заявки.`,
+      чтобы выставлять рыночные, лимитные и условные заявки.`,
     customElement: OrderWidget.compose({
       template: orderWidgetTemplate,
       styles: orderWidgetStyles
@@ -1594,11 +1907,11 @@ export async function widgetDefinition() {
     minHeight: 120,
     defaultWidth: 290,
     settings: html`
-      <ppp-tabs activeid="traders">
+      <ppp-tabs activeid="traders" ${ref('settingsTabs')}>
         <ppp-tab id="traders">Подключения</ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab id="hotkeys">Горячие клавиши</ppp-tab>
-        <ppp-tab id="conditionals" disabled>Заявки</ppp-tab>
+        <ppp-tab id="conditionals">Заявки</ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
@@ -1904,6 +2217,12 @@ export async function widgetDefinition() {
             >
               Изменять цену и количество колесом мыши
             </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.setPriceShouldShowLimitTab}"
+              ${ref('setPriceShouldShowLimitTab')}
+            >
+              Подстановка цены извне всегда активирует вкладку «Лимитная»
+            </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
@@ -1993,8 +2312,8 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Горячая клавиша для продажи</h5>
               <p class="description">
-                Продажа сработает, если фокус ввода будет находиться в поле цены
-                или количества. Нажмите Esc, чтобы отменить эту функцию.
+                Продажа сработает, если фокус ввода будет находиться в любом
+                текстовом поле. Нажмите Esc, чтобы отменить эту функцию.
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2027,7 +2346,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Горячая клавиша для поиска инструментов</h5>
               <p class="description">
-                Если фокус ввода будет находиться в поле цены или количества, то
+                Если фокус ввода будет находиться в любом текстовом поле, то
                 откроется окно поиска инструмента. Нажмите Esc, чтобы отменить
                 эту функцию.
               </p>
@@ -2062,9 +2381,10 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Горячая клавиша для отмены всех активных заявок</h5>
               <p class="description">
-                Если фокус ввода будет находиться в поле цены или количества, то
-                будут отменены активные заявки по текущему инструменту виджета.
-                Нажмите Esc, чтобы отменить эту функцию.
+                Если фокус ввода будет находиться в любом текстовом поле, то
+                будут отменены активные заявки (лимитные или условные, в
+                зависимости от вкладки) по текущему инструменту виджета. Нажмите
+                Esc, чтобы отменить эту функцию.
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2099,6 +2419,23 @@ export async function widgetDefinition() {
             В этом разделе настраиваются условные заявки, которые будут доступны
             на соответствующей вкладке виджета.
           </ppp-banner>
+          <div class="spacing2"></div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Условные заявки</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-widget-order-list
+              ${ref('conditionalOrderList')}
+              :stencil="${() => {
+                return {};
+              }}"
+              :list="${(x) =>
+                x.document.conditionalOrders ?? DEFAULT_CONDITIONAL_ORDERS}"
+              :orders="${(x) => x.document.orders}"
+              :services="${(x) => x.document.services}"
+            ></ppp-widget-order-list>
+          </div>
         </ppp-tab-panel>
       </ppp-tabs>
     `

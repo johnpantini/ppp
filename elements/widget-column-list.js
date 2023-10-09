@@ -1,59 +1,36 @@
 /** @decorator */
 
-import { PPPElement } from '../lib/ppp-element.js';
-import {
-  html,
-  css,
-  repeat,
-  observable,
-  ref,
-  Updates
-} from '../vendor/fast-element.min.js';
-import { drag, plus, trash } from '../static/svg/sprite.js';
+import { html, repeat, observable, ref } from '../vendor/fast-element.min.js';
 import { COLUMN_SOURCE } from '../lib/const.js';
-import {
-  paletteGrayBase,
-  paletteGrayLight1,
-  themeConditional
-} from '../design/design-tokens.js';
 import { validate } from '../lib/ppp-errors.js';
+import {
+  ClonableList,
+  clonableListStyles,
+  cloneControlsTemplate,
+  defaultDragEndHandler,
+  dragHandleTemplate
+} from './clonable-list.js';
 import './draggable-stack.js';
 
 export const widgetColumnListTemplate = html`
   <template>
     <ppp-draggable-stack
       class="control-stack"
-      @pppdragend="${(x) => {
-        const value = structuredClone(x.value);
-
-        x.columns = [];
-
-        // Draggable stack changes DOM order, we do need to rebuild repeat() source.
-        Updates.enqueue(() => {
-          x.columns = value;
-
-          x.removeAttribute('hidden');
-        });
-      }}"
+      @pppdragend="${(x) => defaultDragEndHandler(x)}"
       ${ref('dragList')}
     >
       ${repeat(
-        (x) => x.columns,
+        (x) => x.list,
         html`
           <div class="control-line draggable">
-            <div class="control-stack">
-              <span class="drag-handle">${html.partial(drag)}</span>
-              <ppp-checkbox
-                column-visible
-                ?checked="${(x) => !x.hidden}"
-              ></ppp-checkbox>
-            </div>
+            ${dragHandleTemplate()}
             <div class="control-stack">
               <ppp-text-field
                 column-name
                 style="width: 200px;"
                 standalone
-                placeholder="${(column) => column.name}"
+                ?disabled="${(x) => x.hidden}"
+                placeholder="${(column) => column.name || 'Введите имя'}"
                 value="${(column) => column.name}"
               ></ppp-text-field>
               <ppp-query-select
@@ -69,6 +46,7 @@ export const widgetColumnListTemplate = html`
                 column-trader
                 deselectable
                 standalone
+                ?disabled="${(x) => x.hidden}"
                 value="${(x) => x.traderId}"
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
@@ -96,6 +74,7 @@ export const widgetColumnListTemplate = html`
                 column-source
                 variant="compact"
                 standalone
+                ?disabled="${(x) => x.hidden}"
                 placeholder="${(x, c) =>
                   ppp.t(`$const.columnSource.${c.source?.source}`)}"
                 @change="${(x, c) => {
@@ -150,6 +129,7 @@ export const widgetColumnListTemplate = html`
                 column-extra-trader
                 deselectable
                 standalone
+                ?disabled="${(x) => x.hidden}"
                 value="${(x) => x.extraTraderId}"
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find(
@@ -174,68 +154,7 @@ export const widgetColumnListTemplate = html`
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
             </div>
-            <span
-              class="line-control-icon add"
-              @click="${(x, c) => {
-                const controlLine = c.event
-                  .composedPath()[0]
-                  .closest('.control-line');
-                const index = Array.from(
-                  controlLine.parentNode.children
-                ).indexOf(controlLine);
-                const value = c.parent.value;
-
-                value.splice(index + 1, 0, {
-                  source: COLUMN_SOURCE.SYMBOL,
-                  name: ppp.t(`$const.columnSource.${COLUMN_SOURCE.SYMBOL}`)
-                });
-
-                Updates.enqueue(() => {
-                  c.parent.columns = value;
-
-                  // Apply modifications upon this event.
-                  c.parent.$emit('columnadd', {
-                    source: c.parent,
-                    index
-                  });
-                });
-              }}"
-            >
-              ${html.partial(plus)}
-            </span>
-            <span
-              class="line-control-icon remove"
-              ?hidden="${(x, c) => c.parent.columns?.length <= 1}"
-              @click="${(column, c) => {
-                const cp = c.event.composedPath();
-                const controlLine = cp[0].closest('.control-line');
-                const index = Array.from(
-                  controlLine.parentNode.children
-                ).indexOf(controlLine);
-
-                controlLine.remove();
-                c.parent.columns.splice(index, 1);
-
-                Array.from(
-                  c.parent.shadowRoot.querySelectorAll(
-                    '.line-control-icon.remove'
-                  )
-                ).forEach((icon) => {
-                  if (c.parent.columns.length <= 1) {
-                    icon.setAttribute('hidden', '');
-                  } else {
-                    icon.removeAttribute('hidden');
-                  }
-                });
-
-                c.parent.$emit('columnremove', {
-                  source: c.parent,
-                  index
-                });
-              }}"
-            >
-              ${html.partial(trash)}
-            </span>
+            ${cloneControlsTemplate()}
           </div>
         `
       )}
@@ -243,64 +162,12 @@ export const widgetColumnListTemplate = html`
   </template>
 `;
 
-export const widgetColumnListStyles = css`
-  .control-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .control-line {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .line-control-icon,
-  .drag-handle {
-    display: flex;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-  }
-
-  .drag-handle {
-    cursor: grab;
-  }
-
-  .dragging.drag-handle,
-  .dragging .drag-handle {
-    cursor: grabbing !important;
-  }
-
-  .filler {
-    height: 0;
-  }
-
-  .control-stack:has(> .error) + .control-stack {
-    gap: 40px;
-  }
-
-  .control-stack:has(> .error) + .control-stack ppp-select:has(+ [hidden]) {
-    top: -12px;
-  }
-
-  [hidden] {
-    display: none !important;
-  }
-`;
-
-export class WidgetColumnList extends PPPElement {
+export class WidgetColumnList extends ClonableList {
   @observable
   availableColumns;
 
   @observable
   mainTraderColumns;
-
-  @observable
-  columns;
 
   @observable
   traders;
@@ -315,7 +182,6 @@ export class WidgetColumnList extends PPPElement {
       COLUMN_SOURCE.POSITION_AVERAGE
     ];
     this.availableColumns = Object.keys(COLUMN_SOURCE);
-    this.columns = [];
     this.traders = [];
   }
 
@@ -336,7 +202,7 @@ export class WidgetColumnList extends PPPElement {
       const column = {
         source: line.querySelector('[column-source]').value,
         name: line.querySelector('[column-name]').value,
-        hidden: !line.querySelector('[column-visible]').checked
+        hidden: !line.querySelector('[visibility-toggle]').checked
       };
 
       const traderSelect = line.querySelector('[column-trader]:not([hidden])');
@@ -363,5 +229,5 @@ export class WidgetColumnList extends PPPElement {
 // noinspection JSVoidFunctionReturnValueUsed
 export default WidgetColumnList.compose({
   template: widgetColumnListTemplate,
-  styles: widgetColumnListStyles
+  styles: clonableListStyles
 }).define();

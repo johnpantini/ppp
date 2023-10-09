@@ -57,6 +57,8 @@ import {
 import { normalize } from '../../design/styles.js';
 import { PAGE_STATUS, WIDGET_TYPES } from '../../lib/const.js';
 import { PPPElement } from '../../lib/ppp-element.js';
+import { TextField } from '../text-field.js';
+import { Snippet } from '../snippet.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -81,7 +83,7 @@ export const widgetTypeRadioGroupStyles = css`
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: ${spacing2};
   }
 `;
 
@@ -884,8 +886,8 @@ export class WidgetPage extends Page {
 
     this.removeEventListener('change', this.onChange);
     this.removeEventListener('input', this.onChange);
-    this.removeEventListener('columnadd', this.onChange);
-    this.removeEventListener('columnremove', this.onChange);
+    this.removeEventListener('ppplistitemadd', this.onChange);
+    this.removeEventListener('ppplistitemremove', this.onChange);
     this.removeEventListener('pppdragend', this.onChange);
     document.removeEventListener('pointerdown', this.onPointerDown);
     document.removeEventListener('pointerup', this.onPointerUp);
@@ -1060,6 +1062,21 @@ export class WidgetPage extends Page {
                 }
               ],
               as: 'bots'
+            }
+          },
+          {
+            $lookup: {
+              from: 'orders',
+              pipeline: [
+                {
+                  $project: {
+                    updatedAt: 0,
+                    createdAt: 0,
+                    version: 0
+                  }
+                }
+              ],
+              as: 'orders'
             }
           },
           {
@@ -1271,8 +1288,8 @@ export class WidgetPage extends Page {
       return;
     }
 
-    const isTextFiled = cp.find((n) =>
-      /ppp-text|ppp-snippet/i.test(n.tagName?.toLowerCase())
+    const isTextFiled = cp.find(
+      (n) => n instanceof TextField || n instanceof Snippet
     );
 
     if (!event.detail && !isTextFiled) {
@@ -1461,6 +1478,21 @@ export class WidgetPage extends Page {
           },
           {
             $lookup: {
+              from: 'orders',
+              pipeline: [
+                {
+                  $project: {
+                    updatedAt: 0,
+                    createdAt: 0,
+                    version: 0
+                  }
+                }
+              ],
+              as: 'orders'
+            }
+          },
+          {
+            $lookup: {
               from: 'services',
               pipeline: [
                 {
@@ -1513,8 +1545,8 @@ export class WidgetPage extends Page {
         Observable.notify(this, 'document');
         this.addEventListener('change', this.onChange);
         this.addEventListener('input', this.onChange);
-        this.addEventListener('columnadd', this.onChange);
-        this.addEventListener('columnremove', this.onChange);
+        this.addEventListener('ppplistitemadd', this.onChange);
+        this.addEventListener('ppplistitemremove', this.onChange);
         this.addEventListener('pppdragend', this.onChange);
       }
     }

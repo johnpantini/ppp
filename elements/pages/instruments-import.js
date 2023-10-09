@@ -33,10 +33,10 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option
               value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
             >
-              UTEX Margin (акции и ETF)
+              UTEX Margin (акции и ETF, US)
             </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
-              Акции US (Psina)
+              Psina (акции и ETF, US)
             </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
               Alor (СПБ Биржа)
@@ -283,17 +283,7 @@ export class InstrumentsImportPage extends Page {
   async [INSTRUMENT_DICTIONARY.PSINA_US_STOCKS]() {
     await validate(this.dictionaryUrl);
 
-    const rStocks = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
-      {
-        cache: 'reload',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          url: this.dictionaryUrl.value
-        })
-      }
-    );
+    const rStocks = await ppp.fetch(this.dictionaryUrl.value);
 
     await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
 

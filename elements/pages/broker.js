@@ -205,35 +205,6 @@ export const brokerPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="Huobi"
-            style="height: 32px"
-            src="${() => ppp.brandSvg('huobi')}"
-          />
-          <span slot="title">Huobi</span>
-          <span slot="description">
-            Торговля и рыночные данные через криптовалютную биржу Huobi.&nbsp;<a
-              class="link"
-              target="_blank"
-              rel="noopener"
-              href="https://www.huobi.com/"
-              >Официальный ресурс</a
-            >.
-          </span>
-          <ppp-button
-            disabled
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `broker-${BROKERS.HUOBI}`
-              })}"
-          >
-            Продолжить
-          </ppp-button>
-        </ppp-generic-card>
-        <ppp-generic-card>
-          <img
-            slot="logo"
-            draggable="false"
             alt="Bybit"
             style="height: 32px"
             src="${() => ppp.brandSvg('bybit')}"

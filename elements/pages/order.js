@@ -30,7 +30,6 @@ export const orderPageTemplate = html`
             Классическая отложенная заявка с настройками.
           </span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({

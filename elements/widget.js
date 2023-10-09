@@ -47,6 +47,7 @@ import {
   AuthorizationError,
   ConnectionError,
   NoInstrumentsError,
+  SerializationError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
 
@@ -350,16 +351,20 @@ export const widgetCommonContentStyles = () => css`
   .widget-subsection {
     display: flex;
     width: 100%;
-    align-items: center;
+    align-items: end;
     justify-content: space-between;
+    gap: 10px;
   }
 
   .widget-subsection ppp-widget-button {
     width: 100%;
   }
 
-  .widget-subsection > :not(:first-child) {
-    margin-left: 10px;
+  .widget-button-line {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
   }
 
   .widget-subsection-item {
@@ -727,38 +732,36 @@ export class Widget extends PPPElement {
   }
 
   catchException(e) {
-    const title = this.document.name;
-
     if (e instanceof NoInstrumentsError) {
       return this.notificationsArea.note({
-        title,
         text: importInstrumentsSuggestionTemplate(e),
         keep: true
       });
     } else if (e instanceof StaleInstrumentCacheError) {
       return this.notificationsArea.note({
-        title,
         text: staleInstrumentCacheSuggestionTemplate(e),
         keep: true
       });
     } else if (e instanceof AuthorizationError) {
       return this.notificationsArea.error({
-        title,
         text: 'Ошибка авторизации, проверьте ключи и пароли.',
         keep: true
       });
     } else if (e instanceof ConnectionError) {
       return this.notificationsArea.error({
-        title,
         text: 'Ошибка соединения с источником данных.',
+        keep: true
+      });
+    } else if (e instanceof SerializationError) {
+      return this.notificationsArea.error({
+        text: 'Ошибка сериализации.',
         keep: true
       });
     } else {
       console.error(e);
 
       return this.notificationsArea.error({
-        title,
-        text: 'Не удалось подключиться к источнику данных.'
+        text: 'Неизвестная ошибка, подробности в консоли.'
       });
     }
   }

@@ -81,10 +81,13 @@ import {
   search,
   notificationError,
   notificationSuccess,
-  notificationNote
+  notificationNote,
+  upDown
 } from '../static/svg/sprite.js';
 import {
   decSeparator,
+  distanceToString,
+  getInstrumentMinPriceIncrement,
   getInstrumentPrecision,
   priceCurrencySymbol,
   stringToFloat
@@ -1188,7 +1191,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
         this.widget.instrument &&
         this.widget.document?.type === 'order'
       ) {
-        Updates.enqueue(() => this.widget.price.focus());
+        Updates.enqueue(() => this.widget.lastFocusedElement?.focus());
       }
     }
   }
@@ -1751,7 +1754,13 @@ export class WidgetNotificationsArea extends PPPElement {
       page.dictionary.value = trader.getDictionary();
   }
 
-  #appearance({ status, title = 'Виджет', text, keep, timeout }) {
+  #appearance({
+    status,
+    title = this.widget.document.name ?? 'Виджет',
+    text,
+    keep,
+    timeout
+  }) {
     const timeoutFromSettings = ppp.settings.get('widgetNotificationTimeout');
 
     if (timeoutFromSettings === 0 && !keep) {
@@ -2091,12 +2100,15 @@ export const widgetTrifectaFieldStyles = css`
     vertical-align: top;
   }
 
-  .step-controls button {
+  .step-controls button,
+  .unit-selector button {
+    outline: none;
     display: inline-flex;
     flex-direction: row;
     align-items: center;
     border-radius: 4px;
     cursor: pointer;
+    font-family: ${bodyFont};
     font-size: ${fontSizeWidget};
     justify-content: center;
     text-align: left;
@@ -2112,8 +2124,29 @@ export const widgetTrifectaFieldStyles = css`
     border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 
-  .step-controls button:hover {
+  .step-controls button[disabled],
+  .unit-selector button[disabled] {
+    pointer-events: none;
+    background-color: ${themeConditional(
+      paletteGrayLight2,
+      paletteGrayDark3
+    )} !important;
+    border-color: ${themeConditional(
+      paletteGrayLight1,
+      paletteGrayDark1
+    )} !important;
+    color: ${themeConditional(paletteGrayBase, paletteGrayDark1)} !important;
+  }
+
+  .step-controls button:hover,
+  .unit-selector button:hover {
     border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayBase)};
+  }
+
+  .step-controls button:focus-visible,
+  .unit-selector button:focus-visible {
+    outline: none;
+    color: ${themeConditional(paletteBlueBase, paletteBlueLight1)};
   }
 
   .step-controls button:first-child {
@@ -2145,6 +2178,23 @@ export const widgetTrifectaFieldStyles = css`
   .reset-input:hover svg {
     color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
+
+  .unit-selector {
+    margin-left: 2px;
+  }
+
+  .unit-selector button {
+    height: 32px;
+  }
+
+  .unit-selector svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  :host([disabled]) .unit-selector {
+    pointer-events: none;
+  }
 `;
 
 export const widgetTrifectaFieldTemplate = html`
@@ -2157,7 +2207,7 @@ export const widgetTrifectaFieldTemplate = html`
       lotsize="1"
       step="${(x) => x.getMinIncrement()}"
       precision="${(x) => getInstrumentPrecision(x?.instrument)}"
-      ?disabled="${(x) => x.market}"
+      ?disabled="${(x) => x.market || x.disabled}"
       maxlength="${(x) => (x.kind === 'quantity' ? 8 : 12)}"
       @wheel="${(x, c) => x.handleWheel(c)}"
       @input="${(x) => x.handleInput()}"
@@ -2165,16 +2215,21 @@ export const widgetTrifectaFieldTemplate = html`
       @paste="${(x, c) => x.handlePaste(c)}"
       @beforeinput="${(x, c) => x.handleBeforeInput(c)}"
       value="${(x) => x.value}"
+      placeholder="${(x) => x.placeholder}"
       ${ref('input')}
     >
       <span class="control-line" slot="end">
-        <span style="pointer-events: none" ?hidden=${(x) => x.value}>
+        <span
+          style="pointer-events: none"
+          ?hidden=${(x) => x.value || x.disabled}
+        >
           ${(x) => x.inputEndSlotContent()}
         </span>
         ${when(
           (x) => x.value,
           html`
             <span
+              ?hidden=${(x) => x.disabled}
               class="reset-input"
               @click="${(x) => {
                 x.input.value = '';
@@ -2187,11 +2242,41 @@ export const widgetTrifectaFieldTemplate = html`
         )}
       </span>
     </ppp-widget-text-field>
+    ${when(
+      (x) => x.kind === 'distance',
+      html`
+        <div
+          class="unit-selector"
+          title="${(x) =>
+            x.distanceUnit === '%'
+              ? 'В процентах'
+              : x.distanceUnit === '+'
+              ? 'В шагах цены'
+              : 'В валюте'}"
+          @click="${(x) => x.toggleUnit()}"
+        >
+          <button ?disabled=${(x) => x.disabled}>
+            ${(x) =>
+              x.distanceUnit === '%'
+                ? '%'
+                : x.distanceUnit === '+'
+                ? html`${html.partial(upDown)}`
+                : priceCurrencySymbol(x.instrument)}
+          </button>
+        </div>
+      `
+    )}
     <div class="step-controls">
-      <button @pointerdown="${(x) => x.captureStep()}">
+      <button
+        ?disabled=${(x) => x.disabled}
+        @pointerdown="${(x) => x.captureStep()}"
+      >
         ${html.partial(increment)}
       </button>
-      <button @pointerdown="${(x) => x.captureStep(false)}">
+      <button
+        ?disabled=${(x) => x.disabled}
+        @pointerdown="${(x) => x.captureStep(false)}"
+      >
         ${html.partial(decrement)}
       </button>
     </div>
@@ -2216,6 +2301,9 @@ export class WidgetTrifectaField extends WidgetTextField {
   @attr({ mode: 'boolean' })
   market;
 
+  @attr({ mode: 'boolean' })
+  disabled;
+
   @attr
   kind;
 
@@ -2225,32 +2313,74 @@ export class WidgetTrifectaField extends WidgetTextField {
   @attr
   value;
 
+  @attr
+  placeholder;
+
+  get distanceString() {
+    if (this.kind === 'distance') {
+      const value = stringToFloat(this.value);
+
+      if (value > 0) {
+        return distanceToString({
+          value,
+          unit: this.distanceUnit ?? ''
+        });
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
+  }
+
+  toggleUnit() {
+    if (!this.distanceUnit) {
+      this.distanceUnit = '%';
+    } else if (this.distanceUnit === '%') {
+      this.distanceUnit = '+';
+    } else {
+      this.distanceUnit = '';
+    }
+
+    // Change step.
+    this.getMinIncrement();
+
+    this.value = '';
+    this.input.focus();
+
+    this.$emit('pppunitchange', this);
+  }
+
   getMinIncrement() {
+    let result = 1;
+
     if (this.instrument) {
       const isPrice =
         this.kind === 'price' ||
-        (this.kind === 'distance' && this.distanceUnit === 'price');
+        (this.kind === 'distance' && this.distanceUnit === '');
 
       if (isPrice) {
-        return (
-          this.instrument.minPriceIncrement ||
-          1 /
-            10 **
-              getInstrumentPrecision(this.instrument, stringToFloat(this.value))
+        result = getInstrumentMinPriceIncrement(
+          this.instrument,
+          stringToFloat(this.value)
         );
       } else if (this.kind === 'quantity') {
-        return this.instrument.minQuantityIncrement ?? 1;
+        result = this.instrument.minQuantityIncrement ?? 1;
       } else if (this.kind === 'distance') {
         switch (this.distanceUnit) {
-          case 'percent':
-            return 0.01;
-          case 'price-step':
-            return 1;
+          case '%':
+            result = 0.01;
+
+            break;
+          case '+':
+            result = 1;
         }
       }
     } else {
-      return 1;
+      result = 1;
     }
+
+    return result;
   }
 
   inputEndSlotContent() {
@@ -2263,14 +2393,7 @@ export class WidgetTrifectaField extends WidgetTextField {
     } else if (this.kind === 'quantity') {
       return this.instrument?.lot ? '×' + this.instrument.lot : '';
     } else {
-      switch (this.distanceUnit) {
-        case 'price':
-          return priceCurrencySymbol(this.instrument);
-        case 'percent':
-          return '%';
-        case 'price-step':
-          return 'ш. цены';
-      }
+      return '';
     }
   }
 
@@ -2284,6 +2407,9 @@ export class WidgetTrifectaField extends WidgetTextField {
 
   constructor() {
     super();
+
+    this.kind = 'price';
+    this.distanceUnit = '';
 
     this.onInputValueChanged.handleChange =
       this.onInputValueChanged.handleChange.bind(this);
@@ -2560,6 +2686,7 @@ export const widgetBoxRadioGroupStyles = css`
   .positioning-region {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 5px;
   }
 
@@ -2573,6 +2700,7 @@ export class WidgetBoxRadioGroup extends RadioGroup {}
 export const widgetBoxRadioStyles = css`
   ${boxRadioStyles}
   .control {
+    max-width: 180px;
     height: 22px;
     font-size: ${fontSizeWidget};
     background-color: ${themeConditional(paletteWhite, paletteBlack)};

@@ -65,6 +65,7 @@ export const radioGroupStyles = css`
   .positioning-region {
     display: flex;
     flex-wrap: wrap;
+    overflow: hidden;
     gap: ${spacing2};
   }
 

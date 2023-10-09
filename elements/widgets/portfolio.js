@@ -28,6 +28,7 @@ import '../button.js';
 import '../checkbox.js';
 import '../draggable-stack.js';
 import '../query-select.js';
+import '../tabs.js';
 import '../text-field.js';
 import '../widget-column-list.js';
 import '../widget-controls.js';
@@ -449,82 +450,98 @@ export async function widgetDefinition() {
     minHeight: 120,
     defaultWidth: 620,
     settings: html`
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер позиций портфеля</h5>
-          <p class="description">
-            Трейдер, который будет источником позиций в портфеле.
-          </p>
-        </div>
-        <div class="control-line flex-start">
-          <ppp-query-select
-            ${ref('portfolioTraderId')}
-            deselectable
-            standalone
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.portfolioTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.portfolioTraderId ?? ''%]` }
+      <ppp-tabs activeid="main">
+        <ppp-tab id="main">Основные настройки</ppp-tab>
+        <ppp-tab id="columns">Столбцы таблицы</ppp-tab>
+        <ppp-tab-panel id="main-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер позиций портфеля</h5>
+              <p class="description">
+                Трейдер, который будет источником позиций в портфеле.
+              </p>
+            </div>
+            <div class="control-line flex-start">
+              <ppp-query-select
+                ${ref('portfolioTraderId')}
+                deselectable
+                standalone
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.portfolioTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_POSITIONS%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.portfolioTraderId ?? ''%]`
+                              }
+                            ]
+                          }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Параметры отображения</h5>
-        </div>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.hideBalances}"
-          ${ref('hideBalances')}
-        >
-          Скрывать суммы валютных балансов
-        </ppp-checkbox>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Столбцы таблицы портфеля</h5>
-        </div>
-        <div class="spacing2"></div>
-        <ppp-widget-column-list
-          ${ref('columnList')}
-          :mainTraderColumns="${() => [
-            COLUMN_SOURCE.INSTRUMENT,
-            COLUMN_SOURCE.SYMBOL,
-            COLUMN_SOURCE.POSITION_AVAILABLE,
-            COLUMN_SOURCE.POSITION_AVERAGE
-          ]}"
-          :columns="${(x) => x.document.columns ?? DEFAULT_COLUMNS}"
-          :traders="${(x) => x.document.traders}"
-        ></ppp-widget-column-list>
-      </div>
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интерфейс</h5>
+            </div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.hideBalances}"
+              ${ref('hideBalances')}
+            >
+              Скрывать суммы валютных балансов
+            </ppp-checkbox>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="columns-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Столбцы таблицы портфеля</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-widget-column-list
+              ${ref('columnList')}
+              :mainTraderColumns="${() => [
+                COLUMN_SOURCE.INSTRUMENT,
+                COLUMN_SOURCE.SYMBOL,
+                COLUMN_SOURCE.POSITION_AVAILABLE,
+                COLUMN_SOURCE.POSITION_AVERAGE
+              ]}"
+              :stencil="${() => {
+                return {
+                  source: COLUMN_SOURCE.SYMBOL,
+                  name: ppp.t(`$const.columnSource.${COLUMN_SOURCE.SYMBOL}`)
+                };
+              }}"
+              :list="${(x) => x.document.columns ?? DEFAULT_COLUMNS}"
+              :traders="${(x) => x.document.traders}"
+            ></ppp-widget-column-list>
+          </div>
+        </ppp-tab-panel>
+      </ppp-tabs>
     `
   };
 }

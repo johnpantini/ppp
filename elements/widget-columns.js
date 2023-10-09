@@ -4,14 +4,11 @@ import { COLUMN_SOURCE } from '../lib/const.js';
 import { staticallyCompose } from '../vendor/fast-utilities.js';
 
 class WidgetColumns {
-  #widget;
-
   #columns = [];
 
   #registeredColumns = [];
 
   constructor({ widget, columns = [] } = {}) {
-    this.#widget = widget;
     this.#columns = columns;
   }
 

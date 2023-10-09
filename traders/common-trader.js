@@ -3,7 +3,8 @@ import {
   getInstrumentPrecision,
   latinToCyrillic,
   cyrillicToLatin,
-  stringToFloat
+  stringToFloat,
+  getInstrumentMinPriceIncrement
 } from '../lib/intl.js';
 import { EXCHANGE, TRADER_DATUM } from '../lib/const.js';
 import {
@@ -615,6 +616,51 @@ class Trader {
     if (!price || isNaN(price)) price = 0;
 
     return price.toFixed(precision).toString();
+  }
+
+  calcDistantPrice(instrument, price, distance, direction = 'down') {
+    if (direction !== 'down' && direction !== 'up') {
+      direction = 'down';
+    }
+
+    if (!instrument) {
+      return 0;
+    }
+
+    price = stringToFloat(price);
+
+    if (!price || isNaN(price)) {
+      return 0;
+    }
+
+    let newPrice = 0;
+
+    if (distance.value > 0) {
+      if (distance.unit === '+') {
+        const pi =
+          getInstrumentMinPriceIncrement(instrument, price) * distance.value;
+
+        newPrice = direction === 'down' ? price - pi : price + pi;
+      } else if (distance.unit === '%') {
+        newPrice =
+          direction === 'down'
+            ? price - (price * distance.value) / 100
+            : price + (price * distance.value) / 100;
+      } else {
+        newPrice = Math.max(
+          0,
+          direction === 'down' ? price - distance.value : price + distance.value
+        );
+      }
+
+      if (newPrice > 0) {
+        return +this.fixPrice(instrument, newPrice);
+      } else {
+        return 0;
+      }
+    } else {
+      return price;
+    }
   }
 
   instrumentsAreEqual(i1, i2) {

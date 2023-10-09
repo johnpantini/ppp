@@ -448,7 +448,7 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Параметры отображения и работы</h5>
+          <h5>Наполнение</h5>
         </div>
         <ppp-checkbox
           ?checked="${(x) => x.document.showAllTab ?? true}"

@@ -524,7 +524,7 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Параметры отображения и работы</h5>
+          <h5>Интерфейс</h5>
         </div>
         <ppp-checkbox
           ?checked="${(x) => x.document.displayCurrency}"

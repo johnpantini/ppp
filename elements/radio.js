@@ -9,7 +9,7 @@ import {
   html
 } from '../vendor/fast-element.min.js';
 import { display, keySpace } from '../vendor/fast-utilities.js';
-import { normalize } from '../design/styles.js';
+import { ellipsis, normalize } from '../design/styles.js';
 import { whitespaceFilter } from '../vendor/fast-utilities.js';
 import {
   bodyFont,
@@ -234,7 +234,9 @@ export const boxRadioTemplate = html`
     @click="${(x, c) => x.clickHandler(c.event)}"
   >
     <div class="control">
-      <slot></slot>
+      <div class="text">
+        <slot></slot>
+      </div>
     </div>
   </template>
 `;
@@ -256,6 +258,10 @@ export const boxRadioStyles = css`
     padding: 16px 24px;
     border-radius: 4px;
     flex: 1 1 0;
+  }
+
+  .text {
+    ${ellipsis()};
   }
 
   :host([disabled]) .control {
