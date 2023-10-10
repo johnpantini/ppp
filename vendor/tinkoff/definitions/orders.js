@@ -1864,6 +1864,421 @@ export const ReplaceOrderRequest = {
     return obj;
   }
 };
+
+function createBaseGetMaxLotsRequest() {
+  return { accountId: '', instrumentId: '', price: undefined };
+}
+
+export const GetMaxLotsRequest = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.accountId !== '') {
+      writer.uint32(10).string(message.accountId);
+    }
+
+    if (message.instrumentId !== '') {
+      writer.uint32(18).string(message.instrumentId);
+    }
+
+    if (message.price !== undefined) {
+      Quotation.encode(message.price, writer.uint32(26).fork()).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : protobuf.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetMaxLotsRequest();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.accountId = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.instrumentId = reader.string();
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.price = Quotation.decode(reader, reader.uint32());
+          continue;
+      }
+
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+
+      reader.skipType(tag & 7);
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      accountId: isSet(object.accountId)
+        ? globalThis.String(object.accountId)
+        : '',
+      instrumentId: isSet(object.instrumentId)
+        ? globalThis.String(object.instrumentId)
+        : '',
+      price: isSet(object.price) ? Quotation.fromJSON(object.price) : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.accountId !== '') {
+      obj.accountId = message.accountId;
+    }
+
+    if (message.instrumentId !== '') {
+      obj.instrumentId = message.instrumentId;
+    }
+
+    if (message.price !== undefined) {
+      obj.price = Quotation.toJSON(message.price);
+    }
+
+    return obj;
+  }
+};
+
+function createBaseGetMaxLotsResponse() {
+  return {
+    currency: '',
+    buyLimits: undefined,
+    buyMarginLimits: undefined,
+    sellLimits: undefined,
+    sellMarginLimits: undefined
+  };
+}
+
+export const GetMaxLotsResponse = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.currency !== '') {
+      writer.uint32(10).string(message.currency);
+    }
+
+    if (message.buyLimits !== undefined) {
+      GetMaxLotsResponse_BuyLimitsView.encode(
+        message.buyLimits,
+        writer.uint32(18).fork()
+      ).ldelim();
+    }
+
+    if (message.buyMarginLimits !== undefined) {
+      GetMaxLotsResponse_BuyLimitsView.encode(
+        message.buyMarginLimits,
+        writer.uint32(26).fork()
+      ).ldelim();
+    }
+
+    if (message.sellLimits !== undefined) {
+      GetMaxLotsResponse_SellLimitsView.encode(
+        message.sellLimits,
+        writer.uint32(34).fork()
+      ).ldelim();
+    }
+
+    if (message.sellMarginLimits !== undefined) {
+      GetMaxLotsResponse_SellLimitsView.encode(
+        message.sellMarginLimits,
+        writer.uint32(42).fork()
+      ).ldelim();
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : protobuf.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetMaxLotsResponse();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.currency = reader.string();
+          continue;
+        case 2:
+          if (tag !== 18) {
+            break;
+          }
+
+          message.buyLimits = GetMaxLotsResponse_BuyLimitsView.decode(
+            reader,
+            reader.uint32()
+          );
+          continue;
+        case 3:
+          if (tag !== 26) {
+            break;
+          }
+
+          message.buyMarginLimits = GetMaxLotsResponse_BuyLimitsView.decode(
+            reader,
+            reader.uint32()
+          );
+          continue;
+        case 4:
+          if (tag !== 34) {
+            break;
+          }
+
+          message.sellLimits = GetMaxLotsResponse_SellLimitsView.decode(
+            reader,
+            reader.uint32()
+          );
+          continue;
+        case 5:
+          if (tag !== 42) {
+            break;
+          }
+
+          message.sellMarginLimits = GetMaxLotsResponse_SellLimitsView.decode(
+            reader,
+            reader.uint32()
+          );
+          continue;
+      }
+
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+
+      reader.skipType(tag & 7);
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      currency: isSet(object.currency)
+        ? globalThis.String(object.currency)
+        : '',
+      buyLimits: isSet(object.buyLimits)
+        ? GetMaxLotsResponse_BuyLimitsView.fromJSON(object.buyLimits)
+        : undefined,
+      buyMarginLimits: isSet(object.buyMarginLimits)
+        ? GetMaxLotsResponse_BuyLimitsView.fromJSON(object.buyMarginLimits)
+        : undefined,
+      sellLimits: isSet(object.sellLimits)
+        ? GetMaxLotsResponse_SellLimitsView.fromJSON(object.sellLimits)
+        : undefined,
+      sellMarginLimits: isSet(object.sellMarginLimits)
+        ? GetMaxLotsResponse_SellLimitsView.fromJSON(object.sellMarginLimits)
+        : undefined
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.currency !== '') {
+      obj.currency = message.currency;
+    }
+
+    if (message.buyLimits !== undefined) {
+      obj.buyLimits = GetMaxLotsResponse_BuyLimitsView.toJSON(
+        message.buyLimits
+      );
+    }
+
+    if (message.buyMarginLimits !== undefined) {
+      obj.buyMarginLimits = GetMaxLotsResponse_BuyLimitsView.toJSON(
+        message.buyMarginLimits
+      );
+    }
+
+    if (message.sellLimits !== undefined) {
+      obj.sellLimits = GetMaxLotsResponse_SellLimitsView.toJSON(
+        message.sellLimits
+      );
+    }
+
+    if (message.sellMarginLimits !== undefined) {
+      obj.sellMarginLimits = GetMaxLotsResponse_SellLimitsView.toJSON(
+        message.sellMarginLimits
+      );
+    }
+
+    return obj;
+  }
+};
+
+function createBaseGetMaxLotsResponse_BuyLimitsView() {
+  return { buyMoneyAmount: undefined, buyMaxLots: 0, buyMaxMarketLots: 0 };
+}
+
+export const GetMaxLotsResponse_BuyLimitsView = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.buyMoneyAmount !== undefined) {
+      Quotation.encode(
+        message.buyMoneyAmount,
+        writer.uint32(10).fork()
+      ).ldelim();
+    }
+
+    if (message.buyMaxLots !== 0) {
+      writer.uint32(16).int64(message.buyMaxLots);
+    }
+
+    if (message.buyMaxMarketLots !== 0) {
+      writer.uint32(24).int64(message.buyMaxMarketLots);
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : protobuf.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetMaxLotsResponse_BuyLimitsView();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 10) {
+            break;
+          }
+
+          message.buyMoneyAmount = Quotation.decode(reader, reader.uint32());
+          continue;
+        case 2:
+          if (tag !== 16) {
+            break;
+          }
+
+          message.buyMaxLots = longToNumber(reader.int64());
+          continue;
+        case 3:
+          if (tag !== 24) {
+            break;
+          }
+
+          message.buyMaxMarketLots = longToNumber(reader.int64());
+          continue;
+      }
+
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+
+      reader.skipType(tag & 7);
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      buyMoneyAmount: isSet(object.buyMoneyAmount)
+        ? Quotation.fromJSON(object.buyMoneyAmount)
+        : undefined,
+      buyMaxLots: isSet(object.buyMaxLots)
+        ? globalThis.Number(object.buyMaxLots)
+        : 0,
+      buyMaxMarketLots: isSet(object.buyMaxMarketLots)
+        ? globalThis.Number(object.buyMaxMarketLots)
+        : 0
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.buyMoneyAmount !== undefined) {
+      obj.buyMoneyAmount = Quotation.toJSON(message.buyMoneyAmount);
+    }
+
+    if (message.buyMaxLots !== 0) {
+      obj.buyMaxLots = Math.round(message.buyMaxLots);
+    }
+
+    if (message.buyMaxMarketLots !== 0) {
+      obj.buyMaxMarketLots = Math.round(message.buyMaxMarketLots);
+    }
+
+    return obj;
+  }
+};
+
+function createBaseGetMaxLotsResponse_SellLimitsView() {
+  return { sellMaxLots: 0 };
+}
+
+export const GetMaxLotsResponse_SellLimitsView = {
+  encode(message, writer = protobuf.Writer.create()) {
+    if (message.sellMaxLots !== 0) {
+      writer.uint32(8).int64(message.sellMaxLots);
+    }
+
+    return writer;
+  },
+  decode(input, length) {
+    const reader =
+      input instanceof protobuf.Reader ? input : protobuf.Reader.create(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseGetMaxLotsResponse_SellLimitsView();
+
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+
+      switch (tag >>> 3) {
+        case 1:
+          if (tag !== 8) {
+            break;
+          }
+
+          message.sellMaxLots = longToNumber(reader.int64());
+          continue;
+      }
+
+      if ((tag & 7) === 4 || tag === 0) {
+        break;
+      }
+
+      reader.skipType(tag & 7);
+    }
+
+    return message;
+  },
+  fromJSON(object) {
+    return {
+      sellMaxLots: isSet(object.sellMaxLots)
+        ? globalThis.Number(object.sellMaxLots)
+        : 0
+    };
+  },
+  toJSON(message) {
+    const obj = {};
+
+    if (message.sellMaxLots !== 0) {
+      obj.sellMaxLots = Math.round(message.sellMaxLots);
+    }
+
+    return obj;
+  }
+};
 export const OrdersStreamServiceDefinition = {
   name: 'OrdersStreamService',
   fullName: 'tinkoff.public.invest.api.contract.v1.OrdersStreamService',
@@ -1925,6 +2340,15 @@ export const OrdersServiceDefinition = {
       requestType: ReplaceOrderRequest,
       requestStream: false,
       responseType: PostOrderResponse,
+      responseStream: false,
+      options: {}
+    },
+    /** Расчёт количества доступных для покупки/продажи лотов */
+    getMaxLots: {
+      name: 'GetMaxLots',
+      requestType: GetMaxLotsRequest,
+      requestStream: false,
+      responseType: GetMaxLotsResponse,
       responseStream: false,
       options: {}
     }

@@ -1453,6 +1453,25 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
+  async estimate(instrument, price, quantity) {
+    if (!this.supportsInstrument(instrument)) return {};
+
+    const maxLots = await this.getOrCreateClient(
+      OrdersServiceDefinition
+    ).getMaxLots({
+      accountId: this.document.account,
+      instrumentId: instrument.tinkoffFigi,
+      price: toQuotation(price)
+    });
+
+    return {
+      marginSellingPowerQuantity: maxLots.sellMarginLimits.sellMaxLots,
+      marginBuyingPowerQuantity: maxLots.buyMarginLimits.buyMaxLots,
+      sellingPowerQuantity: maxLots.sellLimits.sellMaxLots,
+      buyingPowerQuantity: maxLots.buyLimits.buyMaxLots
+    };
+  }
+
   getOrderStatus(o = {}) {
     switch (o.executionReportStatus) {
       case OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_CANCELLED:

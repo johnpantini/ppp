@@ -200,6 +200,8 @@ export const orderWidgetTemplate = html`
                 }, 25);
               }
 
+              x.calculateEstimate();
+
               return x.updateDocumentFragment({
                 $set: {
                   'widgets.$.activeTab': activeTab
@@ -350,6 +352,8 @@ export const orderWidgetTemplate = html`
                               conditionalOrder
                             );
                         }
+
+                        x.calculateEstimate();
 
                         return x.updateDocumentFragment({
                           $set: {
@@ -1165,11 +1169,9 @@ export class OrderWidget extends WidgetWithInstrument {
 
       this.selectInstrument(this.document.symbol, { isolate: true });
 
-      if (typeof this.ordersTrader?.estimate === 'function') {
-        setTimeout(() => {
-          this.calculateEstimate();
-        }, 1000);
-      }
+      setTimeout(() => {
+        this.calculateEstimate();
+      }, 1000);
 
       await this.ordersTrader.subscribeFields?.({
         source: this,
@@ -1535,7 +1537,6 @@ export class OrderWidget extends WidgetWithInstrument {
             console.log(error);
 
             this.notificationsArea.error({
-              title: 'Ошибка заявки',
               text: 'Не удалось рассчитать комиссию.'
             });
           });
@@ -1555,13 +1556,25 @@ export class OrderWidget extends WidgetWithInstrument {
       this.buyingPowerQuantity = '—';
       this.sellingPowerQuantity = '—';
 
-      const price = stringToFloat(this.price?.value);
+      const activeTab = this.orderTypeTabs?.activeid;
+
+      let price;
+
+      if (activeTab === 'limit') {
+        price = stringToFloat(this.price?.value);
+      } else if (activeTab === 'conditional') {
+        const orderNode = this.conditionalOrderHolder?.firstElementChild;
+
+        if (typeof orderNode?.priceField !== 'undefined') {
+          price = stringToFloat(orderNode.priceField.value);
+        }
+      } else {
+        return;
+      }
 
       if (!isNaN(price) && price) {
-        const quantity = stringToFloat(this.quantity?.value);
-
         this.ordersTrader
-          .estimate(this.instrument, price, quantity)
+          .estimate(this.instrument, price, 1)
           .then((estimate) => {
             this.marginBuyingPowerQuantity = estimate.marginBuyingPowerQuantity;
             this.marginSellingPowerQuantity =
@@ -1574,8 +1587,7 @@ export class OrderWidget extends WidgetWithInstrument {
             console.log(error);
 
             this.notificationsArea.error({
-              title: 'Ошибка заявки',
-              text: 'Не удалось рассчитать комиссию.'
+              text: 'Не удалось рассчитать доступные остатки.'
             });
           });
       }
@@ -1631,6 +1643,10 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   setPrice(price) {
+    if (!this.instrument) {
+      return;
+    }
+
     const activeTab = this.orderTypeTabs?.activeid;
 
     if (price > 0) {
@@ -1702,6 +1718,69 @@ export class OrderWidget extends WidgetWithInstrument {
     }
   }
 
+  setQuantity(quantity, options = {}) {
+    if (!this.instrument) {
+      return;
+    }
+
+    const activeTab = this.orderTypeTabs?.activeid;
+    const precision = getInstrumentQuantityPrecision(this.instrument);
+
+    if (activeTab === 'conditional') {
+      const orderNode = this.conditionalOrderHolder?.firstElementChild;
+
+      if (typeof orderNode?.quantityField !== 'undefined') {
+        if (options.force && quantity === 0) {
+          orderNode.quantityField.value = '';
+
+          orderNode.save?.();
+          orderNode.quantityField.$emit('input');
+
+          // focusOnQuantity is true when using fast volume buttons.
+          if (options.focusOnQuantity !== false)
+            orderNode.quantityField.focus();
+
+          return;
+        }
+
+        if (quantity > 0 && quantity !== Infinity) {
+          orderNode.quantityField.value =
+            Math.trunc(+quantity * Math.pow(10, precision)) /
+            Math.pow(10, precision);
+
+          orderNode.save?.();
+          orderNode.quantityField.$emit('input');
+
+          if (options.focusOnQuantity !== false)
+            orderNode.quantityField.focus();
+        }
+      }
+    } else {
+      // Limit or market tab.
+      if (options.force && quantity === 0) {
+        this.quantity.value = '';
+        this.commission = 0;
+        this.totalAmount = '—';
+
+        if (options.focusOnQuantity !== false) this.quantity.focus();
+
+        return;
+      }
+
+      if (quantity > 0 && quantity !== Infinity) {
+        this.quantity.value =
+          Math.trunc(+quantity * Math.pow(10, precision)) /
+          Math.pow(10, precision);
+
+        this.calculateTotalAmount(false);
+
+        if (options.focusOnQuantity !== false) this.quantity.focus();
+
+        this.saveLastQuantityValue();
+      }
+    }
+  }
+
   saveLastPriceValue() {
     return this.updateDocumentFragment({
       $set: {
@@ -1713,32 +1792,6 @@ export class OrderWidget extends WidgetWithInstrument {
   @debounce(250)
   saveLastPriceValueDelayed() {
     return this.saveLastPriceValue();
-  }
-
-  setQuantity(quantity, options = {}) {
-    if (options.force && quantity === 0) {
-      this.quantity.value = '';
-      this.commission = 0;
-      this.totalAmount = '—';
-
-      if (options.focusOnQuantity !== false) this.quantity.focus();
-
-      return;
-    }
-
-    if (this.instrument && quantity > 0 && quantity !== Infinity) {
-      const precision = getInstrumentQuantityPrecision(this.instrument);
-
-      this.quantity.value =
-        Math.trunc(+quantity * Math.pow(10, precision)) /
-        Math.pow(10, precision);
-
-      this.calculateTotalAmount(false);
-
-      if (options.focusOnQuantity !== false) this.quantity.focus();
-
-      this.saveLastQuantityValue();
-    }
   }
 
   @debounce(250)
