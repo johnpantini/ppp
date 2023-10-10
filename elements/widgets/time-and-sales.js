@@ -16,7 +16,12 @@ import {
   observable,
   Observable
 } from '../../vendor/fast-element.min.js';
-import { WIDGET_TYPES, TRADER_DATUM, TRADER_CAPS } from '../../lib/const.js';
+import {
+  WIDGET_TYPES,
+  TRADER_DATUM,
+  TRADER_CAPS,
+  BROKERS
+} from '../../lib/const.js';
 import {
   priceCurrencySymbol,
   formatQuantity,
@@ -91,7 +96,8 @@ export const timeAndSalesWidgetTemplate = html`
                         ${(x, c) =>
                           formatPriceWithoutCurrency(
                             x.price,
-                            c.parent.instrument
+                            c.parent.instrument,
+                            c.parent.instrument.broker === BROKERS.UTEX
                           )}
                       </div>
                     </td>
