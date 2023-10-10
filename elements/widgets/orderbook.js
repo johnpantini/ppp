@@ -16,6 +16,7 @@ import {
   observable
 } from '../../vendor/fast-element.min.js';
 import {
+  BROKERS,
   EXCHANGE,
   TRADER_CAPS,
   TRADER_DATUM,
@@ -126,7 +127,8 @@ export const orderbookWidgetTemplate = html`
                           ${(x, c) =>
                             formatPriceWithoutCurrency(
                               x.bid?.price,
-                              c.parent.instrument
+                              c.parent.instrument,
+                              c.parent.instrument.broker === BROKERS.UTEX
                             )}
                         </div>
                         ${when(
@@ -168,7 +170,8 @@ export const orderbookWidgetTemplate = html`
                           ${(x, c) =>
                             formatPriceWithoutCurrency(
                               x.ask?.price,
-                              c.parent.instrument
+                              c.parent.instrument,
+                              c.parent.instrument.broker === BROKERS.UTEX
                             )}
                         </div>
                         ${when(

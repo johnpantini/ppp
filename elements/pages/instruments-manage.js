@@ -75,12 +75,14 @@ export const instrumentsManagePageTemplate = html`
             }}"
             ${ref('broker')}
           >
+            <ppp-option value="${() => BROKERS.PSINA}">Psina</ppp-option>
             <ppp-option value="${() => BROKERS.UTEX}">UTEX</ppp-option>
+            <ppp-option value="${() => BROKERS.IB}">IB</ppp-option>
             <ppp-option value="${() => BROKERS.TINKOFF}">Tinkoff</ppp-option>
             <ppp-option value="${() => BROKERS.ALOR}">Alor</ppp-option>
             <ppp-option value="${() => BROKERS.FINAM}">Finam</ppp-option>
             <ppp-option value="${() => BROKERS.BINANCE}">Binance</ppp-option>
-            <ppp-option value="${() => BROKERS.PSINA}">Psina</ppp-option>
+            <ppp-option value="${() => BROKERS.BYBIT}">Bybit</ppp-option>
           </ppp-select>
         </div>
       </section>

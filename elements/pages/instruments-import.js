@@ -56,7 +56,7 @@ export const instrumentsImportPageTemplate = html`
               Finam
             </ppp-option>
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
-              Interactive Brokers (акции и ETF)
+              Interactive Brokers (акции и ETF, US)
             </ppp-option>
           </ppp-select>
           <div class="spacing2"></div>
@@ -271,7 +271,7 @@ export class InstrumentsImportPage extends Page {
           exchange: EXCHANGE.US,
           broker: BROKERS.IB,
           fullName: s.tagetCurrencyInfo.description,
-          minPriceIncrement: s.priceStep / 1e8,
+          minPriceIncrement: 0,
           type: 'stock',
           currency: 'USD',
           forQualInvestorFlag: false,

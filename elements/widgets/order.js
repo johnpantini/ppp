@@ -261,7 +261,7 @@ export const orderWidgetTemplate = html`
                     <div
                       class="nbbo-line-icon-logo"
                       style="${(x) =>
-                        `background-image:url(${x.searchControl.getInstrumentIconUrl(
+                        `background-image:url(${x.searchControl?.getInstrumentIconUrl(
                           x.instrument
                         )})`}"
                     ></div>

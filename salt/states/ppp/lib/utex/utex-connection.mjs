@@ -419,7 +419,8 @@ export class UtexConnection extends EventEmitter {
               this.debug(`Connecting to ${this.#host}:${this.#port}...`);
               this.#socket.connect({
                 host: this.#host,
-                port: this.#port
+                port: this.#port,
+                family: 4
               });
             } else {
               this.debug('Authentication failed.');
