@@ -2214,7 +2214,7 @@ export const widgetTrifectaFieldTemplate = html`
       @keydown="${(x, c) => x.handleKeydown(c)}"
       @paste="${(x, c) => x.handlePaste(c)}"
       @beforeinput="${(x, c) => x.handleBeforeInput(c)}"
-      value="${(x) => x.value}"
+      value="${(x) => x?.value}"
       placeholder="${(x) => x.placeholder}"
       ${ref('input')}
     >

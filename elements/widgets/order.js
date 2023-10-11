@@ -234,6 +234,59 @@ export const orderWidgetTemplate = html`
                   ${(x) => x.formatPrice(x.lastPrice)}
                 </span>
               </div>
+              ${when(
+                (x) =>
+                  x.extendedLastPrice &&
+                  (x.extendedLastPriceChangeHour <= 14 ||
+                    x.extendedLastPriceChangeHour >= 21),
+                html`
+                  <div class="company-card-item extended-hours">
+                    <span>
+                      ${(x) =>
+                        x.extendedLastPriceChangeHour >= 8 &&
+                        x.extendedLastPriceChangeHour <= 14
+                          ? 'Премаркет:'
+                          : 'После закрытия:'}
+                    </span>
+                    <span class="extended-last-price-line">
+                      <span
+                        style="cursor: pointer"
+                        @click="${(x) => x.setPrice(x.extendedLastPrice ?? 0)}"
+                        class="price ${(x) =>
+                          x.extendedLastPriceAbsoluteChange < 0
+                            ? 'negative'
+                            : 'positive'}"
+                      >
+                        ${(x) => x.formatPrice(x.extendedLastPrice)}
+                      </span>
+                      <span
+                        class="${(x) =>
+                          x.extendedLastPriceAbsoluteChange < 0
+                            ? 'negative'
+                            : 'positive'}"
+                      >
+                        ${(x) =>
+                          formatAbsoluteChange(
+                            x.extendedLastPriceAbsoluteChange,
+                            x.instrument
+                          )}
+                      </span>
+                      <span
+                        class="${(x) =>
+                          x.extendedLastPriceAbsoluteChange < 0
+                            ? 'negative'
+                            : 'positive'}"
+                      >
+                        ${(x) =>
+                          formatRelativeChange(
+                            x.extendedLastPriceRelativeChange / 100
+                          )}
+                      </span>
+                    </span>
+                  </div>
+                  <div class="spacing1"></div>
+                `
+              )}
               <div class="company-card-item">
                 <span
                   style="cursor: pointer"
@@ -944,6 +997,20 @@ export const orderWidgetStyles = css`
     font-size: calc(${fontSizeWidget} + 4px);
   }
 
+  .company-card-item.extended-hours {
+    color: ${themeConditional(paletteBlack, paletteGrayLight2)};
+  }
+
+  .extended-last-price-line {
+    display: flex;
+    gap: 0px 6px;
+    align-items: center;
+    justify-content: flex-end;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
   .company-name {
     font-weight: bold;
     max-width: 70%;
@@ -1091,6 +1158,22 @@ export class OrderWidget extends WidgetWithInstrument {
   lastPriceRelativeChange;
 
   @observable
+  extendedLastPrice;
+
+  @observable
+  extendedLastPriceChangeHour;
+
+  extendedLastPriceChanged() {
+    this.extendedLastPriceChangeHour = new Date().getUTCHours();
+  }
+
+  @observable
+  extendedLastPriceAbsoluteChange;
+
+  @observable
+  extendedLastPriceRelativeChange;
+
+  @observable
   bestBid;
 
   @observable
@@ -1205,6 +1288,11 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+          extendedLastPriceRelativeChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+          extendedLastPriceAbsoluteChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
         }
@@ -1217,6 +1305,11 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPrice: TRADER_DATUM.LAST_PRICE,
             lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+            extendedLastPriceRelativeChange:
+              TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+            extendedLastPriceAbsoluteChange:
+              TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
           }
@@ -1230,6 +1323,11 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPrice: TRADER_DATUM.LAST_PRICE,
             lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+            extendedLastPriceRelativeChange:
+              TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+            extendedLastPriceAbsoluteChange:
+              TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
             bestBid: TRADER_DATUM.BEST_BID,
             bestAsk: TRADER_DATUM.BEST_ASK
           }
@@ -1273,6 +1371,11 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+          extendedLastPriceRelativeChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+          extendedLastPriceAbsoluteChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
         }
@@ -1286,6 +1389,11 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+          extendedLastPriceRelativeChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+          extendedLastPriceAbsoluteChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
         }
@@ -1299,6 +1407,11 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+          extendedLastPriceRelativeChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+          extendedLastPriceAbsoluteChange:
+            TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
           bestBid: TRADER_DATUM.BEST_BID,
           bestAsk: TRADER_DATUM.BEST_ASK
         }

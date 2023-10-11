@@ -361,6 +361,8 @@ export class TraderAlpacaV2PlusPage extends Page {
         caps.push(TRADER_CAPS.CAPS_NOII);
       } else if (port === 38844) {
         caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);
+        caps.push(TRADER_CAPS.CAPS_LEVEL1);
+        caps.push(TRADER_CAPS.CAPS_EXTENDED_LEVEL1);
       } else if (port === 38099 || port === 38199) {
         caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
         caps.push(TRADER_CAPS.CAPS_ARCABOOK);

@@ -76,7 +76,7 @@ export const textFieldTemplate = html`
           list="${(x) => x.list}"
           min="${(x) => x.min}"
           max="${(x) => x.max}"
-          precision="${(x) => x.precision}"
+          precision="${(x) => x?.precision}"
           step="${(x) => x.step}"
           maxlength="${(x) => x.maxlength}"
           minlength="${(x) => x.minlength}"

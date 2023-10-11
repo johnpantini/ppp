@@ -9,12 +9,16 @@ import { isDST } from '../lib/intl.js';
 import { Trader, TraderDatum } from './common-trader.js';
 
 class AlpacaV2PlusTraderDatum extends TraderDatum {
-  filter(data, instrument, source) {
-    return (
-      [EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS, EXCHANGE.SPBX].indexOf(
+  filter(data, instrument, source, datum) {
+    if (
+      ![EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS, EXCHANGE.SPBX].includes(
         source?.instrument?.exchange
-      ) !== -1
-    );
+      )
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   async subscribe(source, field, datum) {
@@ -24,8 +28,38 @@ class AlpacaV2PlusTraderDatum extends TraderDatum {
   }
 }
 
-class AllTradesDatum extends AlpacaV2PlusTraderDatum {
-  doNotSaveValue = true;
+class ComboDatum extends AlpacaV2PlusTraderDatum {
+  filter(data, instrument, source, datum) {
+    const sup = super.filter(data, instrument, source, datum);
+
+    if (sup) {
+      if (data) {
+        switch (data.T) {
+          case 't':
+            return datum === TRADER_DATUM.MARKET_PRINT;
+          case 'bbo':
+            return (
+              datum === TRADER_DATUM.BEST_BID || datum === TRADER_DATUM.BEST_ASK
+            );
+          case 'pr':
+            switch (datum) {
+              case TRADER_DATUM.LAST_PRICE:
+                return data.c !== null;
+              case TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE:
+                return data.ch !== null;
+              case TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE:
+                return data.chr !== null;
+              case TRADER_DATUM.EXTENDED_LAST_PRICE:
+                return data.pp !== null;
+              case TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE:
+                return data.pch !== null;
+              case TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE:
+                return data.pchr !== null;
+            }
+        }
+      }
+    }
+  }
 
   async firstReferenceAdded(source, symbol) {
     if (!this.trader.supportsInstrument(source?.instrument)) {
@@ -72,6 +106,38 @@ class AllTradesDatum extends AlpacaV2PlusTraderDatum {
       volume: data.s,
       pool
     };
+  }
+
+  [TRADER_DATUM.BEST_BID](data) {
+    return data.bp;
+  }
+
+  [TRADER_DATUM.BEST_ASK](data) {
+    return data.ap;
+  }
+
+  [TRADER_DATUM.LAST_PRICE](data) {
+    return data.c;
+  }
+
+  [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE](data) {
+    return data.ch;
+  }
+
+  [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE](data) {
+    return data.chr * 100;
+  }
+
+  [TRADER_DATUM.EXTENDED_LAST_PRICE](data) {
+    return data.pp;
+  }
+
+  [TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE](data) {
+    return data.pch;
+  }
+
+  [TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE](data) {
+    return data.pchr * 100;
   }
 }
 
@@ -272,8 +338,18 @@ class AlpacaV2PlusTrader extends Trader {
   constructor(document) {
     super(document, [
       {
-        type: AllTradesDatum,
-        datums: [TRADER_DATUM.MARKET_PRINT]
+        type: ComboDatum,
+        datums: [
+          TRADER_DATUM.MARKET_PRINT,
+          TRADER_DATUM.BEST_BID,
+          TRADER_DATUM.BEST_ASK,
+          TRADER_DATUM.LAST_PRICE,
+          TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+          TRADER_DATUM.EXTENDED_LAST_PRICE,
+          TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
+          TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE
+        ]
       },
       {
         type: OrderbookDatum,
@@ -413,6 +489,16 @@ class AlpacaV2PlusTrader extends Trader {
                 );
               } else if (payload.T === 'noii') {
                 this.datums[TRADER_DATUM.NOII].dataArrived(
+                  payload,
+                  this.instruments.get(payload.S)
+                );
+              } else if (payload.T === 'bbo') {
+                this.datums[TRADER_DATUM.BEST_BID].dataArrived(
+                  payload,
+                  this.instruments.get(payload.S)
+                );
+              } else if (payload.T === 'pr') {
+                this.datums[TRADER_DATUM.LAST_PRICE].dataArrived(
                   payload,
                   this.instruments.get(payload.S)
                 );
