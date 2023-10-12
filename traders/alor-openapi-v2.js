@@ -21,25 +21,27 @@ import { formatPrice } from '../lib/intl.js';
 class AlorTraderDatum extends TraderDatum {
   guids = new Map();
 
-  filter(data, instrument, source) {
+  filter(data, instrument, source, datum) {
     if (
-      this.trader.document.exchange === EXCHANGE.SPBX &&
-      [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].indexOf(
+      [
+        TRADER_DATUM.LAST_PRICE,
+        TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+        TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+        TRADER_DATUM.BEST_BID,
+        TRADER_DATUM.BEST_ASK,
+        TRADER_DATUM.EXTENDED_LAST_PRICE,
+        TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
+        TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE
+      ].includes(datum)
+    ) {
+      return source?.instrument?.exchange === this.trader.document.exchange;
+    } else if (this.trader.document.exchange === EXCHANGE.SPBX) {
+      return [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].includes(
         source?.instrument?.exchange
-      ) === -1
-    ) {
-      return false;
+      );
+    } else if (this.trader.document.exchange === EXCHANGE.MOEX) {
+      return source?.instrument?.exchange === EXCHANGE.MOEX;
     }
-
-    // noinspection RedundantIfStatementJS
-    if (
-      this.trader.document.exchange === EXCHANGE.MOEX &&
-      source?.instrument?.exchange !== EXCHANGE.MOEX
-    ) {
-      return false;
-    }
-
-    return true;
   }
 
   async subscribe(source, field, datum) {
@@ -1140,6 +1142,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   supportsInstrument(instrument) {
+    // SPB@US
     if (
       instrument?.symbol === 'SPB' &&
       (instrument?.currency === 'USD' || instrument?.currency === 'USDT') &&
@@ -1148,10 +1151,14 @@ class AlorOpenAPIV2Trader extends Trader {
       return true;
     }
 
-    return super.supportsInstrument(instrument);
+    return super.supportsInstrument({
+      ...instrument,
+      ...{ symbol: instrument.symbol.split('~')[0] }
+    });
   }
 
   adoptInstrument(instrument) {
+    // SPB@US
     if (
       instrument?.symbol === 'SPB' &&
       (instrument?.currency === 'USD' || instrument?.currency === 'USDT') &&
@@ -1160,7 +1167,10 @@ class AlorOpenAPIV2Trader extends Trader {
       return this.instruments.get('SPB@US');
     }
 
-    return super.adoptInstrument(instrument);
+    return super.adoptInstrument({
+      ...instrument,
+      ...{ symbol: instrument.symbol.split('~')[0] }
+    });
   }
 
   async formatError(instrument, error, defaultErrorMessage) {

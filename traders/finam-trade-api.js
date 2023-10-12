@@ -158,8 +158,23 @@ class FinamTradeApiTrader extends Trader {
     if (details.error) {
       if (/Money shortage/i.test(details.error?.message)) {
         return 'Недостаточно покупательской способности для открытия позиции.';
+      } else if (
+        /confirm your qualification level/i.test(details.error?.message)
+      ) {
+        return 'Нет необходимой квалификации для торговли инструментом.';
       }
     }
+  }
+
+  adoptInstrument(instrument) {
+    if (
+      instrument?.exchange === EXCHANGE.US &&
+      this.instruments.has(`${instrument.symbol}~US`)
+    ) {
+      return this.instruments.get(`${instrument.symbol}~US`);
+    }
+
+    return super.adoptInstrument(instrument);
   }
 }
 

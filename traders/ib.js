@@ -852,6 +852,23 @@ class IbTrader extends Trader {
     }
   }
 
+  supportsInstrument(instrument) {
+    // SPB@US
+    if (instrument?.symbol === 'SPB@US') {
+      return true;
+    }
+
+    return super.supportsInstrument(instrument);
+  }
+
+  adoptInstrument(instrument) {
+    if (instrument?.symbol === 'SPB@US') {
+      return this.instruments.get('SPB');
+    }
+
+    return super.adoptInstrument(instrument);
+  }
+
   getInstrumentIconUrl(instrument) {
     if (instrument?.symbol === 'PRN') {
       return 'static/instruments/stocks/us/PRN@US.svg';

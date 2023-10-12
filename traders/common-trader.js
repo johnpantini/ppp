@@ -110,7 +110,7 @@ class TraderDatum {
       return;
     }
 
-    const symbol = source.instrument.symbol;
+    const symbol = this.trader.getSymbol(source.instrument);
     const refCount = this.refs.get(symbol) ?? 0;
 
     if (refCount === 0) {
@@ -150,7 +150,7 @@ class TraderDatum {
       return;
     }
 
-    const symbol = oldInstrument?.symbol ?? source.instrument.symbol;
+    const symbol = this.trader.getSymbol(oldInstrument ?? source.instrument);
     const refCount = this.refs.get(symbol) ?? 0;
 
     if (refCount === 1) {
@@ -683,9 +683,12 @@ class Trader {
   }
 
   adoptInstrument(instrument) {
-    if (!instrument?.type) return instrument;
-
-    if (!this.supportsInstrument(instrument)) return instrument;
+    if (!instrument?.type || !this.supportsInstrument(instrument))
+      return {
+        symbol: instrument?.symbol ?? 'PPP',
+        fullName: 'Инструмент не поддерживается',
+        notSupported: true
+      };
 
     if (instrument) return this.instruments.get(instrument.symbol);
   }
@@ -756,6 +759,12 @@ class Trader {
 
     if ((instrument?.exchange === EXCHANGE.SPBX || isRM) && symbol !== 'TCS') {
       return `static/instruments/stocks/us/${symbol.replace(' ', '-')}.svg`;
+    }
+
+    if (instrument?.exchange === EXCHANGE.US) {
+      return `static/instruments/stocks/us/${
+        symbol.replace(' ', '-').split('~')[0]
+      }.svg`;
     }
 
     return 'static/instruments/unknown.svg';

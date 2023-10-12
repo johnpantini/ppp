@@ -9,7 +9,7 @@ import { Trader, TraderDatum } from './common-trader.js';
 
 class BinanceTraderDatum extends TraderDatum {
   filter(data, instrument, source) {
-    return [EXCHANGE.BINANCE].indexOf(source?.instrument?.exchange) !== -1;
+    return source?.instrument?.exchange === EXCHANGE.BINANCE;
   }
 
   async subscribe(source, field, datum) {

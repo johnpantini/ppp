@@ -11,14 +11,25 @@ import { Trader, TraderDatum } from './common-trader.js';
 class AlpacaV2PlusTraderDatum extends TraderDatum {
   filter(data, instrument, source, datum) {
     if (
-      ![EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS, EXCHANGE.SPBX].includes(
-        source?.instrument?.exchange
-      )
+      [
+        TRADER_DATUM.LAST_PRICE,
+        TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+        TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+        TRADER_DATUM.BEST_BID,
+        TRADER_DATUM.BEST_ASK,
+        TRADER_DATUM.EXTENDED_LAST_PRICE,
+        TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
+        TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE
+      ].includes(datum)
     ) {
-      return false;
+      return [EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].includes(
+        source?.instrument?.exchange
+      );
+    } else {
+      return [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].includes(
+        source?.instrument?.exchange
+      );
     }
-
-    return true;
   }
 
   async subscribe(source, field, datum) {
@@ -558,20 +569,24 @@ class AlpacaV2PlusTrader extends Trader {
   supportsInstrument(instrument) {
     if (!instrument) return true;
 
-    const symbol = instrument.symbol.split('@')[0];
+    const symbol = instrument.symbol.split('@')[0].split('~')[0];
 
     if (symbol === 'TCS' && instrument.exchange === EXCHANGE.SPBX) return false;
 
-    if (symbol === 'FIVE' && instrument.exchange === EXCHANGE.MOEX)
-      return false;
+    if (instrument.exchange === EXCHANGE.MOEX) return false;
 
     return this.instruments.has(symbol);
   }
 
   adoptInstrument(instrument) {
-    if (!this.supportsInstrument(instrument)) return instrument;
+    if (!this.supportsInstrument(instrument))
+      return {
+        symbol: instrument.symbol,
+        fullName: 'Инструмент не поддерживается',
+        notSupported: true
+      };
 
-    const symbol = instrument?.symbol.split('@')[0];
+    const symbol = instrument?.symbol.split('@')[0].split('~')[0];
 
     if (instrument) return this.instruments.get(symbol);
   }
