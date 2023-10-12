@@ -239,7 +239,7 @@ export const orderWidgetTemplate = html`
                 (x) =>
                   x.extendedLastPrice > 0 &&
                   (x.extendedLastPriceChangeHour <= 14 ||
-                    x.extendedLastPriceChangeHour >= 21),
+                    x.extendedLastPriceChangeHour >= 20),
                 html`
                   <div class="company-card-item extended-hours">
                     <span>
