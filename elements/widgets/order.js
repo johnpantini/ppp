@@ -31,7 +31,8 @@ import {
   formatCommission,
   decSeparator,
   getInstrumentQuantityPrecision,
-  stringToFloat
+  stringToFloat,
+  isDST
 } from '../../lib/intl.js';
 import {
   ellipsis,
@@ -243,8 +244,8 @@ export const orderWidgetTemplate = html`
                   <div class="company-card-item extended-hours">
                     <span>
                       ${(x) =>
-                        x.extendedLastPriceChangeHour >= 8 &&
-                        x.extendedLastPriceChangeHour <= 14
+                        x.extendedLastPriceChangeHour >= (isDST() ? 8 : 9) &&
+                        x.extendedLastPriceChangeHour <= (isDST() ? 14 : 15)
                           ? 'Премаркет:'
                           : 'После закрытия:'}
                     </span>
