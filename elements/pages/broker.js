@@ -77,7 +77,7 @@ export const brokerPageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
-        <ppp-generic-card hidden>
+        <ppp-generic-card>
           <img
             slot="logo"
             draggable="false"

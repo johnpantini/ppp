@@ -237,7 +237,7 @@ export const orderWidgetTemplate = html`
               </div>
               ${when(
                 (x) =>
-                  x.extendedLastPrice &&
+                  x.extendedLastPrice > 0 &&
                   (x.extendedLastPriceChangeHour <= 14 ||
                     x.extendedLastPriceChangeHour >= 21),
                 html`
