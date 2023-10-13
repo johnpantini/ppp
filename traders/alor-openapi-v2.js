@@ -1150,6 +1150,8 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   supportsInstrument(instrument) {
+    if (!instrument) return true;
+
     // SPB@US
     if (
       instrument?.symbol === 'SPB' &&
@@ -1175,7 +1177,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
     return super.supportsInstrument({
       ...instrument,
-      ...{ symbol: instrument.symbol.split('~')[0] }
+      ...{ symbol: instrument?.symbol.split('~')[0] }
     });
   }
 
@@ -1191,7 +1193,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
     return super.adoptInstrument({
       ...instrument,
-      ...{ symbol: instrument.symbol.split('~')[0] }
+      ...{ symbol: instrument?.symbol.split('~')[0] }
     });
   }
 

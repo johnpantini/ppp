@@ -1543,7 +1543,7 @@ class TinkoffGrpcWebTrader extends Trader {
 
     return super.adoptInstrument({
       ...instrument,
-      ...{ symbol: instrument.symbol.split('~')[0] }
+      ...{ symbol: instrument?.symbol.split('~')[0] }
     });
   }
 

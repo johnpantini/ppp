@@ -17,8 +17,10 @@ class TraderDatum {
   // Maps for every possible subdatum (source => field).
   sources = {};
 
+  // Keys are symbols.
   refs = new Map();
 
+  // Keys are symbols.
   values = new Map();
 
   // "instrumentchange" event listeners.
@@ -44,13 +46,23 @@ class TraderDatum {
     return false;
   }
 
-  dataArrived(data, instrument, datums = []) {
+  dataArrived(data, instrument, options = {}) {
     if (!instrument) {
       return;
     }
 
-    if (this.doNotSaveValue !== true) {
-      this.values.set(instrument.symbol, data);
+    if (this.doNotSaveValue !== true && options.doNotSaveValue !== true) {
+      if (typeof options.saveSlot === 'undefined') {
+        // One centralized data source.
+        this.values.set(instrument.symbol, data);
+      } else if (options.saveSlot >= 0) {
+        // Many concurrent sources.
+        const slots = this.values.get(instrument.symbol) ?? [];
+
+        slots[options.saveSlot] = data;
+
+        this.values.set(instrument.symbol, slots);
+      }
     }
 
     for (const datum in this.sources) {
@@ -120,17 +132,23 @@ class TraderDatum {
     } else {
       this.refs.set(symbol, refCount + 1);
 
-      const value = this.values.get(symbol);
+      let slots = this.values.get(symbol);
 
-      // The source needs our saved data here. Please, set it!
-      if (this.filter(value, source.instrument, source, datum)) {
-        if (source.instrument && typeof value !== 'undefined') {
-          source[field] =
-            this?.[datum]?.(value, source.instrument, source) ??
-            this.emptyValue(datum) ??
-            '—';
-        } else {
-          source[field] = this.emptyValue(datum) ?? '—';
+      if (!Array.isArray(slots)) {
+        slots = [slots];
+      }
+
+      for (const value of slots) {
+        // The source needs our saved data here. Please, set it!
+        if (this.filter(value, source.instrument, source, datum)) {
+          if (source.instrument && typeof value !== 'undefined') {
+            source[field] =
+              this?.[datum]?.(value, source.instrument, source) ??
+              this.emptyValue(datum) ??
+              '—';
+          } else {
+            source[field] = this.emptyValue(datum) ?? '—';
+          }
         }
       }
     }
@@ -683,14 +701,15 @@ class Trader {
   }
 
   adoptInstrument(instrument) {
-    if (!instrument?.type || !this.supportsInstrument(instrument))
-      return {
-        symbol: instrument?.symbol ?? 'PPP',
-        fullName: 'Инструмент не поддерживается',
-        notSupported: true
-      };
+    const unsupportedInstrument = {
+      symbol: instrument?.symbol ?? 'PPP',
+      fullName: 'Инструмент не поддерживается',
+      notSupported: true
+    };
 
-    if (instrument) return this.instruments.get(instrument.symbol);
+    if (!this.supportsInstrument(instrument)) return unsupportedInstrument;
+
+    return this.instruments.get(instrument?.symbol) ?? unsupportedInstrument;
   }
 
   getExchangeForDBRequest() {

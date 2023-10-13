@@ -488,7 +488,8 @@ class AlpacaV2PlusTrader extends Trader {
               } else if (payload.T === 't') {
                 this.datums[TRADER_DATUM.MARKET_PRINT].dataArrived(
                   payload,
-                  this.instruments.get(payload.S)
+                  this.instruments.get(payload.S),
+                  { doNotSaveValue: true }
                 );
               } else if (
                 payload.T === 'q' &&
@@ -507,20 +508,13 @@ class AlpacaV2PlusTrader extends Trader {
                 this.datums[TRADER_DATUM.BEST_BID].dataArrived(
                   payload,
                   this.instruments.get(payload.S),
-                  [TRADER_DATUM.BEST_BID, TRADER_DATUM.BEST_ASK]
+                  { saveSlot: 0 }
                 );
               } else if (payload.T === 'pr') {
                 this.datums[TRADER_DATUM.LAST_PRICE].dataArrived(
                   payload,
                   this.instruments.get(payload.S),
-                  [
-                    TRADER_DATUM.LAST_PRICE,
-                    TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
-                    TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
-                    TRADER_DATUM.EXTENDED_LAST_PRICE,
-                    TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
-                    TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE
-                  ]
+                  { saveSlot: 1 }
                 );
               } else if (payload.T === 'error') {
                 console.error(payload);
@@ -592,16 +586,23 @@ class AlpacaV2PlusTrader extends Trader {
   }
 
   adoptInstrument(instrument) {
-    if (!this.supportsInstrument(instrument))
+    if (!this.supportsInstrument(instrument)) {
       return {
         symbol: instrument.symbol,
         fullName: 'Инструмент не поддерживается',
         notSupported: true
       };
+    }
 
     const symbol = instrument?.symbol.split('@')[0].split('~')[0];
 
-    if (instrument) return this.instruments.get(symbol);
+    return (
+      this.instruments.get(symbol) ?? {
+        symbol: symbol,
+        fullName: 'Инструмент не поддерживается',
+        notSupported: true
+      }
+    );
   }
 }
 
