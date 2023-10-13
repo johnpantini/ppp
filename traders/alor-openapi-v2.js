@@ -1159,7 +1159,17 @@ class AlorOpenAPIV2Trader extends Trader {
       return true;
     }
 
-    if (this.document.exchange !== instrument?.exchange) {
+    if (
+      this.document.exchange === EXCHANGE.MOEX &&
+      instrument?.exchange !== EXCHANGE.MOEX
+    ) {
+      return false;
+    }
+
+    if (
+      this.document.exchange === EXCHANGE.SPBX &&
+      instrument?.exchange === EXCHANGE.MOEX
+    ) {
       return false;
     }
 
