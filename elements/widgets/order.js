@@ -213,7 +213,7 @@ export const orderWidgetTemplate = html`
           >
             <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
             <ppp-widget-tab id="limit">Лимитная</ppp-widget-tab>
-            <ppp-widget-tab id="conditional"> Условная</ppp-widget-tab>
+            <ppp-widget-tab id="conditional">Условная</ppp-widget-tab>
             <ppp-tab-panel id="market-panel"></ppp-tab-panel>
             <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
             <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>

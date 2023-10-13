@@ -524,6 +524,10 @@ export class InstrumentsImportPage extends Page {
     for (const s of stocks) {
       const realExchange = s.realExchange;
 
+      if (s.ticker === 'ASTR' && s.classCode === 'TQBR') {
+        s.ticker = 'ASTR~MOEX';
+      }
+
       if (
         realExchange === 'REAL_EXCHANGE_MOEX' ||
         realExchange === 'REAL_EXCHANGE_RTS'

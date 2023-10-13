@@ -44,7 +44,7 @@ class TraderDatum {
     return false;
   }
 
-  dataArrived(data, instrument) {
+  dataArrived(data, instrument, datums = []) {
     if (!instrument) {
       return;
     }

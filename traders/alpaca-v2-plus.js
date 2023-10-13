@@ -506,12 +506,21 @@ class AlpacaV2PlusTrader extends Trader {
               } else if (payload.T === 'bbo') {
                 this.datums[TRADER_DATUM.BEST_BID].dataArrived(
                   payload,
-                  this.instruments.get(payload.S)
+                  this.instruments.get(payload.S),
+                  [TRADER_DATUM.BEST_BID, TRADER_DATUM.BEST_ASK]
                 );
               } else if (payload.T === 'pr') {
                 this.datums[TRADER_DATUM.LAST_PRICE].dataArrived(
                   payload,
-                  this.instruments.get(payload.S)
+                  this.instruments.get(payload.S),
+                  [
+                    TRADER_DATUM.LAST_PRICE,
+                    TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+                    TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+                    TRADER_DATUM.EXTENDED_LAST_PRICE,
+                    TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
+                    TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE
+                  ]
                 );
               } else if (payload.T === 'error') {
                 console.error(payload);
@@ -568,6 +577,10 @@ class AlpacaV2PlusTrader extends Trader {
 
   supportsInstrument(instrument) {
     if (!instrument) return true;
+
+    if (instrument?.symbol.endsWith('~MOEX')) {
+      return false;
+    }
 
     const symbol = instrument.symbol.split('@')[0].split('~')[0];
 

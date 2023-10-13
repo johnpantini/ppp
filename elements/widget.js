@@ -932,7 +932,9 @@ export class WidgetWithInstrument extends Widget {
                     },
                     update: {
                       $set: {
-                        'widgets.$.symbol': adoptedInstrument?.symbol
+                        'widgets.$.symbol': adoptedInstrument.notSupported
+                          ? ''
+                          : adoptedInstrument?.symbol
                       }
                     },
                     upsert: true

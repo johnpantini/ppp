@@ -2448,7 +2448,7 @@ export class WidgetTrifectaField extends WidgetTextField {
         this.value = this.value.replace(decSeparator, '');
       }
 
-      this.value = this.input.value.replace(',', '.');
+      this.value = this.input.value.replace(',', '.').replace(/\s*/g, '');
 
       Updates.enqueue(() => {
         this.input.control.type = 'number';

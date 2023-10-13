@@ -73,7 +73,19 @@ const TINKOFF_CURRENCIES = {
   RUB000UTSTOM: 'RUB'
 };
 
-class OrderbookDatum extends TraderDatum {
+class TinkoffTraderDatum extends TraderDatum {
+  filter(data, instrument, source, datum) {
+    if (instrument.exchange === EXCHANGE.SPBX) {
+      return [EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].includes(
+        source?.instrument?.exchange
+      );
+    }
+
+    return source?.instrument?.exchange === instrument.exchange;
+  }
+}
+
+class OrderbookDatum extends TinkoffTraderDatum {
   async firstReferenceAdded(source) {
     const instrument = this.trader.adoptInstrument(source.instrument);
 
@@ -174,7 +186,7 @@ class OrderbookDatum extends TraderDatum {
   }
 }
 
-class AllTradesDatum extends TraderDatum {
+class AllTradesDatum extends TinkoffTraderDatum {
   async firstReferenceAdded() {
     return this.trader.resubscribeToMarketDataStream();
   }
@@ -210,7 +222,7 @@ class AllTradesDatum extends TraderDatum {
   }
 }
 
-class CandleDatum extends TraderDatum {
+class CandleDatum extends TinkoffTraderDatum {
   async firstReferenceAdded() {
     return this.trader.resubscribeToMarketDataStream();
   }
@@ -1506,11 +1518,33 @@ class TinkoffGrpcWebTrader extends Trader {
     return BROKERS.TINKOFF;
   }
 
+  getSymbol(instrument = {}) {
+    if (instrument.symbol === 'ASTR~MOEX') {
+      return instrument.symbol;
+    }
+
+    return super.getSymbol(instrument);
+  }
+
   supportsInstrument(instrument) {
     if (instrument?.symbol === 'FIVE' && instrument?.exchange === EXCHANGE.SPBX)
       return false;
 
     return super.supportsInstrument(instrument);
+  }
+
+  adoptInstrument(instrument) {
+    if (
+      instrument?.exchange === EXCHANGE.MOEX &&
+      (instrument.symbol === 'ASTR' || instrument.symbol === 'ASTR~MOEX')
+    ) {
+      return this.instruments.get(`ASTR~MOEX`);
+    }
+
+    return super.adoptInstrument({
+      ...instrument,
+      ...{ symbol: instrument.symbol.split('~')[0] }
+    });
   }
 
   async formatError(instrument, error) {

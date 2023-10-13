@@ -760,9 +760,17 @@ class AlorOpenAPIV2Trader extends Trader {
               } else if (datumInstance instanceof OrderbookDatum) {
                 const [symbol] = payload.guid.split(':');
 
+                let instrument;
+
+                if (this.document.portfolioType === 'futures') {
+                  instrument = this.#futures.get(symbol);
+                } else {
+                  instrument = this.instruments.get(symbol);
+                }
+
                 this.guidToDatum
                   .get(payload.guid)
-                  ?.dataArrived?.(payload.data, this.instruments.get(symbol));
+                  ?.dataArrived?.(payload.data, instrument);
               } else if (
                 datumInstance instanceof PositionsDatum ||
                 datumInstance instanceof TimelineDatum ||
@@ -1149,6 +1157,10 @@ class AlorOpenAPIV2Trader extends Trader {
       this.document.exchange === EXCHANGE.SPBX
     ) {
       return true;
+    }
+
+    if (this.document.exchange !== instrument.exchange) {
+      return false;
     }
 
     return super.supportsInstrument({
