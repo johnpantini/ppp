@@ -132,22 +132,31 @@ class TraderDatum {
     } else {
       this.refs.set(symbol, refCount + 1);
 
-      let slots = this.values.get(symbol);
+      // The source needs our saved data here. Please, set it!
+      const slots = this.values.get(symbol);
 
       if (!Array.isArray(slots)) {
-        slots = [slots];
-      }
-
-      for (const value of slots) {
-        // The source needs our saved data here. Please, set it!
-        if (this.filter(value, source.instrument, source, datum)) {
-          if (source.instrument && typeof value !== 'undefined') {
+        if (this.filter(slots, source.instrument, source, datum)) {
+          if (source.instrument && typeof slots !== 'undefined') {
             source[field] =
-              this?.[datum]?.(value, source.instrument, source) ??
+              this?.[datum]?.(slots, source.instrument, source) ??
               this.emptyValue(datum) ??
               '—';
           } else {
             source[field] = this.emptyValue(datum) ?? '—';
+          }
+        }
+      } else {
+        for (const value of slots) {
+          if (this.filter(value, source.instrument, source, datum)) {
+            if (source.instrument && typeof value !== 'undefined') {
+              source[field] =
+                this?.[datum]?.(value, source.instrument, source) ??
+                this.emptyValue(datum) ??
+                '—';
+            } else {
+              source[field] = this.emptyValue(datum) ?? '—';
+            }
           }
         }
       }

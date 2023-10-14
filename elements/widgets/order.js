@@ -32,7 +32,7 @@ import {
   decSeparator,
   getInstrumentQuantityPrecision,
   stringToFloat,
-  isDST
+  getUSMarketSession
 } from '../../lib/intl.js';
 import {
   ellipsis,
@@ -238,14 +238,12 @@ export const orderWidgetTemplate = html`
               ${when(
                 (x) =>
                   x.extendedLastPrice > 0 &&
-                  (x.extendedLastPriceChangeHour <= 14 ||
-                    x.extendedLastPriceChangeHour >= 20),
+                  x.currentUSMarketSession !== 'regular',
                 html`
                   <div class="company-card-item extended-hours">
                     <span>
                       ${(x) =>
-                        x.extendedLastPriceChangeHour >= (isDST() ? 8 : 9) &&
-                        x.extendedLastPriceChangeHour <= (isDST() ? 14 : 15)
+                        x.currentUSMarketSession === 'premarket'
                           ? 'Премаркет:'
                           : 'После закрытия:'}
                     </span>
@@ -1162,10 +1160,10 @@ export class OrderWidget extends WidgetWithInstrument {
   extendedLastPrice;
 
   @observable
-  extendedLastPriceChangeHour;
+  currentUSMarketSession;
 
   extendedLastPriceChanged() {
-    this.extendedLastPriceChangeHour = new Date().getUTCHours();
+    this.currentUSMarketSession = getUSMarketSession();
   }
 
   @observable
@@ -1217,6 +1215,7 @@ export class OrderWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    this.currentUSMarketSession = getUSMarketSession();
     this.conditionalOrders = (this.document.conditionalOrders ?? []).filter(
       (o) => !o.hidden && o.orderId
     );
