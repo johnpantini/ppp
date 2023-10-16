@@ -61,7 +61,7 @@ export const instrumentsImportPageTemplate = html`
           </ppp-select>
           <div class="spacing2"></div>
           <ppp-checkbox ${ref('clearBeforeImport')}>
-            Удалить инструменты словаря перед импортом
+            Удалить инструменты словаря перед импортом (ускоряет импорт)
           </ppp-checkbox>
         </div>
       </section>
@@ -350,7 +350,7 @@ export class InstrumentsImportPage extends Page {
   }
 
   async [INSTRUMENT_DICTIONARY.ALOR_SPBX]() {
-    const rSymbols = await fetch(
+    const rSecurities = await fetch(
       'https://api.alor.ru/md/v2/Securities?exchange=SPBX&limit=5000&offset=0',
       {
         cache: 'reload'
@@ -358,14 +358,20 @@ export class InstrumentsImportPage extends Page {
     );
 
     await maybeFetchError(
-      rSymbols,
+      rSecurities,
       'Не удалось загрузить список инструментов.'
     );
 
-    const symbols = await rSymbols.json();
+    const securities = await rSecurities.json();
 
-    return symbols
-      .filter((s) => s.symbol !== 'SPB')
+    return securities
+      .filter((s) => {
+        if (s.symbol?.endsWith('@GS')) {
+          return false;
+        }
+
+        return !['SPB', 'SBER', 'SBERP'].includes(s.symbol);
+      })
       .map((s) => {
         let type = 'stock';
 
@@ -388,7 +394,7 @@ export class InstrumentsImportPage extends Page {
   }
 
   async [INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES]() {
-    const rSymbols = await fetch(
+    const rSecurities = await fetch(
       'https://api.alor.ru/md/v2/Securities?exchange=MOEX&sector=FOND&limit=5000&offset=0',
       {
         cache: 'reload'
@@ -396,44 +402,48 @@ export class InstrumentsImportPage extends Page {
     );
 
     await maybeFetchError(
-      rSymbols,
+      rSecurities,
       'Не удалось загрузить список инструментов.'
     );
 
-    const symbols = await rSymbols.json();
+    const securities = await rSecurities.json();
 
-    return symbols.map((s) => {
-      let type = 'stock';
+    return securities
+      .filter((s) => {
+        return s.board !== 'FQBR';
+      })
+      .map((s) => {
+        let type = 'stock';
 
-      if (s.cfiCode?.startsWith?.('DB')) type = 'bond';
+        if (s.cfiCode?.startsWith?.('DB')) type = 'bond';
 
-      if (s.type === 'ETF' || s.type === 'MF') type = 'etf';
+        if (s.type === 'ETF' || s.type === 'MF') type = 'etf';
 
-      const payload = {
-        symbol: s.symbol,
-        exchange: EXCHANGE.MOEX,
-        broker: BROKERS.ALOR,
-        fullName: s.description,
-        minPriceIncrement: s.minstep,
-        type,
-        currency: s.currency,
-        forQualInvestorFlag: false,
-        classCode: s.board,
-        lot: s.lotsize,
-        isin: s.ISIN
-      };
+        const payload = {
+          symbol: s.symbol,
+          exchange: EXCHANGE.MOEX,
+          broker: BROKERS.ALOR,
+          fullName: s.description,
+          minPriceIncrement: s.minstep,
+          type,
+          currency: s.currency,
+          forQualInvestorFlag: false,
+          classCode: s.board,
+          lot: s.lotsize,
+          isin: s.ISIN
+        };
 
-      if (type === 'bond') {
-        payload.nominal = s.facevalue;
-        payload.initialNominal = s.facevalue;
+        if (type === 'bond') {
+          payload.nominal = s.facevalue;
+          payload.initialNominal = s.facevalue;
 
-        if (s.cancellation) {
-          payload.maturityDate = new Date(s.cancellation).toISOString();
+          if (s.cancellation) {
+            payload.maturityDate = new Date(s.cancellation).toISOString();
+          }
         }
-      }
 
-      return payload;
-    });
+        return payload;
+      });
   }
 
   async [INSTRUMENT_DICTIONARY.ALOR_FORTS]() {
@@ -522,7 +532,7 @@ export class InstrumentsImportPage extends Page {
       )) ?? [];
 
     for (const s of stocks) {
-      const realExchange = s.realExchange;
+      const realExchange = s.realExchange?.toUpperCase();
 
       if (s.ticker === 'ASTR' && s.classCode === 'TQBR') {
         s.ticker = 'ASTR~MOEX';
@@ -702,7 +712,7 @@ export class InstrumentsImportPage extends Page {
     ]();
 
     for (const s of alorSpbexSecurities) {
-      if (/@/.test(s.symbol)) {
+      if (/@/.test(s.symbol) && s.symbol !== 'SPB@US') {
         continue;
       }
 
@@ -723,6 +733,9 @@ export class InstrumentsImportPage extends Page {
         // Collision with "Five Below Inc".
         if (s.symbol === 'FIVE') {
           s.symbol = 'FIVE~MOEX';
+        } else if (s.symbol === 'ASTR') {
+          // ASTR
+          s.symbol = 'ASTR~MOEX';
         }
 
         result.push(s);
@@ -730,6 +743,10 @@ export class InstrumentsImportPage extends Page {
     }
 
     for (const s of mmaStocks) {
+      if (s.symbol === 'SPB') {
+        s.shortName = 'Spectrum Brands Holdings, Inc.';
+      }
+
       result.push({
         symbol: s.code.replace('.', ' ') + '~US',
         exchange: EXCHANGE.US,
@@ -896,27 +913,52 @@ export class InstrumentsImportPage extends Page {
         chunks.push(instruments.slice(i, i + 2000));
       }
 
+      const operation = this.clearBeforeImport.checked
+        ? 'insertOne'
+        : 'updateOne';
+
       for (const chunk of chunks) {
         await ppp.user.functions.bulkWrite(
           {
             collection: 'instruments'
           },
           chunk.map((i) => {
-            const updateClause = {
-              $set: i
-            };
+            if (typeof i.symbol === 'string') {
+              i.symbol = i.symbol.toUpperCase();
+            }
 
-            return {
-              updateOne: {
-                filter: {
-                  symbol: i.symbol.toUpperCase(),
-                  exchange: i.exchange,
-                  broker: i.broker
-                },
-                update: updateClause,
-                upsert: true
+            if (existingInstruments) {
+              const existingInstrument = existingInstruments.find(
+                (ei) => ei.symbol === i.symbol
+              );
+
+              if (existingInstrument?.removed) {
+                // User flags
+                i.removed = true;
               }
-            };
+            }
+
+            if (operation === 'updateOne') {
+              return {
+                updateOne: {
+                  filter: {
+                    symbol: i.symbol,
+                    exchange: i.exchange,
+                    broker: i.broker
+                  },
+                  update: {
+                    $set: i
+                  },
+                  upsert: true
+                }
+              };
+            } else {
+              return {
+                insertOne: {
+                  document: i
+                }
+              };
+            }
           }),
           {
             ordered: false
