@@ -786,7 +786,7 @@ class Trader {
       )}.svg`;
     }
 
-    const isRM = instrument?.symbol.endsWith('-RM');
+    const isRM = instrument?.symbol?.endsWith('-RM');
 
     if (!isRM) {
       if (

@@ -427,7 +427,10 @@ export class WidgetGroupControl extends PPPOffClickElement {
 
       if (
         sourceWidget?.instrument &&
-        sourceWidget.instrument?.symbol !== this.widget?.instrument?.symbol
+        sourceWidget.instrumentTrader.instrumentsAreEqual(
+          sourceWidget.instrument,
+          this.widget?.instrument
+        )
       ) {
         this.widget.isolated = true;
 
@@ -519,7 +522,7 @@ export const widgetSearchControlTemplate = html`
                         x.widget?.instrument
                       )})`}"
                   ></div>
-                  ${(x) => x.widget?.instrument.fullName[0]}
+                  ${(x) => x.widget?.instrument.fullName?.[0]}
                 </div>
               </div>
               <div class="menu-item-text">

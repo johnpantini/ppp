@@ -834,11 +834,11 @@ export class WidgetWithInstrument extends Widget {
   @observable
   instrument;
 
-  @attr({ mode: 'boolean', attribute: 'unsupported-instrument' })
-  unsupportedInstrument;
-
   @observable
   instrumentTrader;
+
+  @observable
+  unsupportedInstrument;
 
   instrumentTraderChanged(o, n) {
     if (this.searchControl) this.searchControl.trader = n;
@@ -936,7 +936,7 @@ export class WidgetWithInstrument extends Widget {
                       $set: {
                         'widgets.$.symbol': adoptedInstrument.notSupported
                           ? ''
-                          : adoptedInstrument?.symbol
+                          : adoptedInstrument.symbol
                       }
                     },
                     upsert: true
