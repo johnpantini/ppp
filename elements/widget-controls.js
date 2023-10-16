@@ -427,7 +427,7 @@ export class WidgetGroupControl extends PPPOffClickElement {
 
       if (
         sourceWidget?.instrument &&
-        sourceWidget.instrumentTrader.instrumentsAreEqual(
+        !sourceWidget.instrumentTrader.instrumentsAreEqual(
           sourceWidget.instrument,
           this.widget?.instrument
         )
