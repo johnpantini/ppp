@@ -6,7 +6,7 @@ import {
 } from '../lib/const.js';
 import { later } from '../lib/ppp-decorators.js';
 import { isDST } from '../lib/intl.js';
-import { Trader, TraderDatum } from './common-trader.js';
+import { USTrader, TraderDatum } from './common-trader.js';
 
 class AlpacaV2PlusTraderDatum extends TraderDatum {
   filter(data, instrument, source, datum) {
@@ -73,10 +73,6 @@ class ComboDatum extends AlpacaV2PlusTraderDatum {
   }
 
   async firstReferenceAdded(source, symbol) {
-    if (!this.trader.supportsInstrument(source?.instrument)) {
-      return;
-    }
-
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.trader.connection.send(
         JSON.stringify({
@@ -88,10 +84,6 @@ class ComboDatum extends AlpacaV2PlusTraderDatum {
   }
 
   async lastReferenceRemoved(source, symbol) {
-    if (!this.trader.supportsInstrument(source?.instrument)) {
-      return;
-    }
-
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.trader.connection.send(
         JSON.stringify({
@@ -156,10 +148,6 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
   orderbooks = new Map();
 
   async firstReferenceAdded(source, symbol) {
-    if (!this.trader.supportsInstrument(source?.instrument)) {
-      return;
-    }
-
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.orderbooks.set(symbol, {
         bids: new Map(),
@@ -176,10 +164,6 @@ class OrderbookDatum extends AlpacaV2PlusTraderDatum {
   }
 
   async lastReferenceRemoved(source, symbol) {
-    if (!this.trader.supportsInstrument(source?.instrument)) {
-      return;
-    }
-
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.trader.connection.send(
         JSON.stringify({
@@ -287,10 +271,6 @@ class NoiiDatum extends AlpacaV2PlusTraderDatum {
   }
 
   async firstReferenceAdded(source, symbol) {
-    if (!this.trader.supportsInstrument(source?.instrument)) {
-      return;
-    }
-
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.trader.connection.send(
         JSON.stringify({
@@ -304,10 +284,6 @@ class NoiiDatum extends AlpacaV2PlusTraderDatum {
   }
 
   async lastReferenceRemoved(source, symbol) {
-    if (!this.trader.supportsInstrument(source?.instrument)) {
-      return;
-    }
-
     if (this.trader.connection.readyState === WebSocket.OPEN) {
       this.trader.connection.send(
         JSON.stringify({
@@ -339,7 +315,7 @@ class NoiiDatum extends AlpacaV2PlusTraderDatum {
  * @extends Trader
  */
 // noinspection JSUnusedGlobalSymbols
-class AlpacaV2PlusTrader extends Trader {
+class AlpacaV2PlusTrader extends USTrader {
   #pendingConnection;
 
   authenticated = false;
@@ -554,55 +530,6 @@ class AlpacaV2PlusTrader extends Trader {
 
   getBroker() {
     return this.document.broker.type;
-  }
-
-  getInstrumentIconUrl(instrument) {
-    if (instrument?.symbol === 'PRN') {
-      return 'static/instruments/stocks/us/PRN@US.svg';
-    }
-
-    return instrument?.symbol
-      ? `static/instruments/stocks/us/${instrument.symbol.replace(
-          ' ',
-          '-'
-        )}.svg`
-      : super.getInstrumentIconUrl(instrument);
-  }
-
-  supportsInstrument(instrument) {
-    if (!instrument) return true;
-
-    if (instrument?.symbol.endsWith('~MOEX')) {
-      return false;
-    }
-
-    const symbol = instrument.symbol.split('@')[0].split('~')[0];
-
-    if (symbol === 'TCS' && instrument.exchange === EXCHANGE.SPBX) return false;
-
-    if (instrument.exchange === EXCHANGE.MOEX) return false;
-
-    return this.instruments.has(symbol);
-  }
-
-  adoptInstrument(instrument) {
-    if (!this.supportsInstrument(instrument)) {
-      return {
-        symbol: instrument.symbol,
-        fullName: 'Инструмент не поддерживается',
-        notSupported: true
-      };
-    }
-
-    const symbol = instrument?.symbol.split('@')[0].split('~')[0];
-
-    return (
-      this.instruments.get(symbol) ?? {
-        symbol: symbol,
-        fullName: 'Инструмент не поддерживается',
-        notSupported: true
-      }
-    );
   }
 }
 

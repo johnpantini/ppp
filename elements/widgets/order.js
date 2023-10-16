@@ -1631,7 +1631,7 @@ export class OrderWidget extends WidgetWithInstrument {
   @debounce(250)
   calculateCommission() {
     if (
-      !this.instrument?.notSupported &&
+      !this.unsupportedInstrument &&
       typeof this.ordersTrader?.estimate === 'function'
     ) {
       this.commission = '—';
@@ -1660,7 +1660,7 @@ export class OrderWidget extends WidgetWithInstrument {
   @debounce(250)
   calculateEstimate() {
     if (
-      !this.instrument?.notSupported &&
+      !this.unsupportedInstrument &&
       typeof this.ordersTrader?.estimate === 'function'
     ) {
       this.marginBuyingPowerQuantity = '—';

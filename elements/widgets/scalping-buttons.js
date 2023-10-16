@@ -51,9 +51,7 @@ export const scalpingButtonsWidgetTemplate = html`
         ${when(
           (x) =>
             !x.instrument ||
-            (x.instrument &&
-              x.instrumentTrader &&
-              x.instrumentTrader.supportsInstrument(x.instrument)),
+            (x.instrument && x.instrumentTrader && !x.unsupportedInstrument),
           html`
             <div class="toolbar">
               <div

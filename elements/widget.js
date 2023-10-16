@@ -43,6 +43,7 @@ import {
   paletteGreenDark1
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
+import { unsupportedInstrument } from '../traders/common-trader.js';
 import {
   AuthorizationError,
   ConnectionError,
@@ -101,10 +102,7 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
 
 export const widgetUnsupportedInstrumentTemplate = () => html`
   ${when(
-    (x) =>
-      x.instrument &&
-      x.instrumentTrader &&
-      !x.instrumentTrader.supportsInstrument(x.instrument),
+    (x) => x.instrument && x.instrumentTrader && x.unsupportedInstrument,
     html`${html.partial(
       widgetEmptyStateTemplate('Инструмент не поддерживается.')
     )}`
@@ -118,10 +116,7 @@ export const widgetWithInstrumentBodyTemplate = (widgetBodyLayout) => html`
   )}
   ${widgetUnsupportedInstrumentTemplate()}
   ${when(
-    (x) =>
-      x.instrument &&
-      x.instrumentTrader &&
-      x.instrumentTrader.supportsInstrument(x.instrument),
+    (x) => x.instrument && x.instrumentTrader && !x.unsupportedInstrument,
     widgetBodyLayout
   )}
 `;
@@ -839,6 +834,9 @@ export class WidgetWithInstrument extends Widget {
   @observable
   instrument;
 
+  @attr({ mode: 'boolean', attribute: 'unsupported-instrument' })
+  unsupportedInstrument;
+
   @observable
   instrumentTrader;
 
@@ -858,29 +856,28 @@ export class WidgetWithInstrument extends Widget {
       return this.instrument;
     }
 
-    if (!symbol) return;
+    if (!symbol || !this.instrumentTrader) return;
 
-    if (!this.instrumentTrader) {
-      return;
+    let adoptedInstrument = unsupportedInstrument(symbol);
+
+    if (this.instrumentTrader.instruments.has(symbol)) {
+      adoptedInstrument = this.instrumentTrader.adoptInstrument(
+        this.instrumentTrader.instruments.get(symbol)
+      );
+    } else {
+      const [s, exchange] = symbol.split('~');
+      const i = this.instrumentTrader.instruments.get(s);
+
+      if (i?.exchange === exchange) {
+        adoptedInstrument = this.instrumentTrader.adoptInstrument(i);
+      }
     }
-
-    const instrument = this.instrumentTrader.instruments.get(symbol) ?? {
-      symbol,
-      fullName: 'Инструмент не поддерживается',
-      notSupported: true
-    };
-
-    const adoptedInstrument = this.instrumentTrader.adoptInstrument(instrument);
 
     if (options.isolate) {
       this.isolated = true;
       this.instrument = adoptedInstrument;
       this.isolated = false;
-
-      return adoptedInstrument;
-    }
-
-    if (adoptedInstrument) {
+    } else {
       this.isolated = false;
       this.instrument = adoptedInstrument;
     }
@@ -889,6 +886,10 @@ export class WidgetWithInstrument extends Widget {
   }
 
   instrumentChanged(oldValue, newValue) {
+    this.unsupportedInstrument =
+      newValue?.notSupported &&
+      this.instrumentTrader?.adoptInstrument(newValue).notSupported;
+
     if (this.searchControl) {
       Observable.notify(this.searchControl, 'widget');
     }
@@ -923,6 +924,7 @@ export class WidgetWithInstrument extends Widget {
                 );
 
                 w.instrument = adoptedInstrument;
+                w.unsupportedInstrument = adoptedInstrument.notSupported;
 
                 bulkWritePayload.push({
                   updateOne: {

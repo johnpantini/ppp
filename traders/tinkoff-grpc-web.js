@@ -10,7 +10,8 @@ import {
   GlobalTraderDatum,
   Trader,
   TraderDatum,
-  TraderEventDatum
+  TraderEventDatum,
+  unsupportedInstrument
 } from './common-trader.js';
 import { debounce } from '../lib/ppp-decorators.js';
 import { createClient } from '../vendor/nice-grpc-web/client/ClientFactory.js';
@@ -89,7 +90,7 @@ class OrderbookDatum extends TinkoffTraderDatum {
   async firstReferenceAdded(source) {
     const instrument = this.trader.adoptInstrument(source.instrument);
 
-    if (instrument && !instrument.notSupported && instrument.tinkoffFigi) {
+    if (!instrument.notSupported && instrument.tinkoffFigi) {
       this.dataArrived(
         await this.trader
           .getOrCreateClient(MarketDataServiceDefinition)
@@ -1465,8 +1466,8 @@ class TinkoffGrpcWebTrader extends Trader {
     }
   }
 
-  async estimate(instrument, price, quantity) {
-    if (!this.supportsInstrument(instrument)) return {};
+  async estimate(instrument, price) {
+    if (this.unsupportedInstrument) return {};
 
     const maxLots = await this.getOrCreateClient(
       OrdersServiceDefinition
@@ -1526,14 +1527,16 @@ class TinkoffGrpcWebTrader extends Trader {
     return super.getSymbol(instrument);
   }
 
-  supportsInstrument(instrument) {
-    if (instrument?.symbol === 'FIVE' && instrument?.exchange === EXCHANGE.SPBX)
-      return false;
+  adoptInstrument(instrument = {}) {
+    // SPB@US
+    if (
+      instrument.symbol === 'SPB' &&
+      (instrument.currency === 'USD' || instrument.currency === 'USDT')
+    ) {
+      return this.instruments.get('SPB@US');
+    }
 
-    return super.supportsInstrument(instrument);
-  }
-
-  adoptInstrument(instrument) {
+    // ASTR
     if (
       instrument?.exchange === EXCHANGE.MOEX &&
       (instrument.symbol === 'ASTR' || instrument.symbol === 'ASTR~MOEX')
@@ -1541,10 +1544,31 @@ class TinkoffGrpcWebTrader extends Trader {
       return this.instruments.get(`ASTR~MOEX`);
     }
 
-    return super.adoptInstrument({
-      ...instrument,
-      ...{ symbol: instrument?.symbol.split('~')[0] }
+    let canAdopt = true;
+
+    // Possible collisions.
+    ['TCS', 'FIVE', 'CARM'].forEach((symbol) => {
+      if (
+        this.getSymbol(instrument) === symbol &&
+        (instrument.exchange === EXCHANGE.US ||
+          instrument.exchange === EXCHANGE.UTEX_MARGIN_STOCKS)
+      ) {
+        canAdopt = false;
+      }
     });
+
+    if (!canAdopt) {
+      return unsupportedInstrument(instrument.symbol);
+    }
+
+    if (instrument.symbol?.endsWith('~US')) {
+      return super.adoptInstrument({
+        ...instrument,
+        ...{ symbol: instrument.symbol.replace('~US', '') }
+      });
+    }
+
+    return super.adoptInstrument(instrument);
   }
 
   async formatError(instrument, error) {

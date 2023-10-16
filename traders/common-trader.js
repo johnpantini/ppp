@@ -13,6 +13,14 @@ import {
 } from '../lib/ppp-errors.js';
 import { Column } from '../elements/widgets/columns/column.js';
 
+export function unsupportedInstrument(symbol = '') {
+  return {
+    symbol,
+    fullName: 'Инструмент не поддерживается',
+    notSupported: true
+  };
+}
+
 class TraderDatum {
   // Maps for every possible subdatum (source => field).
   sources = {};
@@ -602,16 +610,6 @@ class Trader {
     }
   }
 
-  getSymbol(instrument = {}) {
-    let symbol = instrument.symbol;
-
-    if (!symbol) return '';
-
-    if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
-
-    return symbol;
-  }
-
   relativeBondPriceToPrice(relativePrice, instrument) {
     return +this.fixPrice(
       instrument,
@@ -690,35 +688,48 @@ class Trader {
     }
   }
 
-  instrumentsAreEqual(i1, i2) {
-    if (!this.supportsInstrument(i1) || !this.supportsInstrument(i2))
-      return false;
+  getSymbol(instrument = {}) {
+    let symbol = instrument.symbol;
 
-    return (
-      i1?.symbol && i2?.symbol && this.getSymbol(i1) === this.getSymbol(i2)
-    );
+    if (!symbol) return '';
+
+    if (/~/gi.test(symbol)) symbol = symbol.split('~')[0];
+
+    return symbol;
   }
 
-  supportsInstrument(instrument) {
-    if (!instrument) return true;
+  adoptInstrument(instrument = {}) {
+    const instrumentFromCache = this.#instruments.get(instrument.symbol) ?? {};
 
-    if (!instrument.type) {
-      return false;
+    let canAdopt = instrument.symbol === instrumentFromCache.symbol;
+
+    // MOEX is not compatible with other exchanges.
+    if (
+      instrument.exchange === EXCHANGE.MOEX &&
+      instrumentFromCache.exchange !== EXCHANGE.MOEX
+    ) {
+      canAdopt = false;
     }
 
-    return this.instruments.has(instrument.symbol);
+    if (
+      instrumentFromCache.exchange === EXCHANGE.MOEX &&
+      instrument.exchange !== EXCHANGE.MOEX
+    ) {
+      canAdopt = false;
+    }
+
+    if (canAdopt) {
+      return instrumentFromCache;
+    } else {
+      return unsupportedInstrument(instrument.symbol);
+    }
   }
 
-  adoptInstrument(instrument) {
-    const unsupportedInstrument = {
-      symbol: instrument?.symbol ?? 'PPP',
-      fullName: 'Инструмент не поддерживается',
-      notSupported: true
-    };
+  instrumentsAreEqual(i1, i2) {
+    const a1 = this.adoptInstrument(i1);
+    const a2 = this.adoptInstrument(i2);
 
-    if (!this.supportsInstrument(instrument)) return unsupportedInstrument;
-
-    return this.instruments.get(instrument?.symbol) ?? unsupportedInstrument;
+    return a1.symbol === a2.symbol && a1.exchange === a2.exchange;
   }
 
   getExchangeForDBRequest() {
@@ -743,6 +754,10 @@ class Trader {
     }
 
     let symbol = instrument?.symbol;
+
+    if (symbol === 'TCS' && instrument.exchange === EXCHANGE.SPBX) {
+      return 'static/instruments/stocks/rus/TCSG.svg';
+    }
 
     if (typeof symbol === 'string') {
       symbol = symbol.split('/')[0].split('-')[0].split('-RM')[0];
@@ -886,4 +901,69 @@ class Trader {
   }
 }
 
-export { Trader, TraderDatum, GlobalTraderDatum, TraderEventDatum };
+class USTrader extends Trader {
+  adoptInstrument(instrument = {}) {
+    if (
+      ![EXCHANGE.SPBX, EXCHANGE.US, EXCHANGE.UTEX_MARGIN_STOCKS].includes(
+        instrument.exchange
+      )
+    ) {
+      return unsupportedInstrument(instrument.symbol);
+    }
+
+    // SPB
+    if (instrument.symbol === 'SPB@US') {
+      return this.instruments.get('SPB');
+    }
+
+    // TCS
+    if (instrument.symbol === 'TCS' && instrument.exchange === EXCHANGE.SPBX) {
+      return unsupportedInstrument(instrument.symbol);
+    }
+
+    let canAdopt = true;
+
+    // Possible collisions.
+    ['FIVE', 'CARM', 'ASTR'].forEach((ticker) => {
+      if (
+        instrument.symbol === ticker &&
+        instrument.exchange === EXCHANGE.MOEX
+      ) {
+        canAdopt = false;
+      }
+    });
+
+    if (!canAdopt) {
+      return unsupportedInstrument(instrument.symbol);
+    }
+
+    if (instrument.symbol?.endsWith('~US')) {
+      return super.adoptInstrument({
+        ...instrument,
+        ...{ symbol: instrument.symbol.replace('~US', '') }
+      });
+    }
+
+    return super.adoptInstrument(instrument);
+  }
+
+  getInstrumentIconUrl(instrument) {
+    if (!instrument) {
+      return 'static/instruments/unknown.svg';
+    }
+
+    if (instrument.symbol === 'PRN') {
+      return 'static/instruments/stocks/us/PRN@US.svg';
+    }
+
+    if (instrument.currency === 'USD' || instrument.currency === 'USDT') {
+      return `static/instruments/stocks/us/${instrument.symbol
+        .replace(' ', '-')
+        .replace('/', '-')}.svg`;
+    }
+
+    return super.getInstrumentIconUrl(instrument);
+  }
+}
+
+export { Trader, USTrader, TraderDatum, GlobalTraderDatum, TraderEventDatum };

@@ -556,7 +556,7 @@ export class UtexConnection extends EventEmitter {
 
     const serverList =
       process.env.UTEX_US_DATA_SERVER_LIST ??
-      'us-ds-lyra.auroraplatform.com:34002';
+      'ususdt-ds-lyra.auroraplatform.com:34003';
     const servers = serverList.split(',').map((s) => {
       const [host, port] = s.split(':');
 

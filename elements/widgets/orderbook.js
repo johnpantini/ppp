@@ -1041,7 +1041,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
         this.instrument
       );
 
-      if (foreignInstrument) {
+      if (!foreignInstrument.notSupported) {
         result = foreignInstrument.exchange;
       }
     }

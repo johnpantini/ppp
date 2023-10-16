@@ -4,7 +4,7 @@ import {
   INSTRUMENT_DICTIONARY,
   TRADER_DATUM
 } from '../lib/const.js';
-import { GlobalTraderDatum, Trader } from './common-trader.js';
+import { GlobalTraderDatum, USTrader } from './common-trader.js';
 import { ConnectionError, TradingError } from '../lib/ppp-errors.js';
 import { later } from '../lib/ppp-decorators.js';
 import { OperationType } from '../vendor/tinkoff/definitions/operations.js';
@@ -432,7 +432,7 @@ class TimelineDatum extends IbTraderGlobalDatum {
 /**
  * @typedef {Object} IbTrader
  */
-class IbTrader extends Trader {
+class IbTrader extends USTrader {
   #key;
 
   #pendingConnection;
@@ -850,36 +850,6 @@ class IbTrader extends Trader {
         message: orderResponse.result
       });
     }
-  }
-
-  supportsInstrument(instrument) {
-    // SPB@US
-    if (instrument?.symbol === 'SPB@US') {
-      return true;
-    }
-
-    return super.supportsInstrument(instrument);
-  }
-
-  adoptInstrument(instrument) {
-    if (instrument?.symbol === 'SPB@US') {
-      return this.instruments.get('SPB');
-    }
-
-    return super.adoptInstrument(instrument);
-  }
-
-  getInstrumentIconUrl(instrument) {
-    if (instrument?.symbol === 'PRN') {
-      return 'static/instruments/stocks/us/PRN@US.svg';
-    }
-
-    return instrument?.symbol
-      ? `static/instruments/stocks/us/${instrument.symbol.replace(
-          ' ',
-          '-'
-        )}.svg`
-      : super.getInstrumentIconUrl(instrument);
   }
 }
 

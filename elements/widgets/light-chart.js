@@ -66,9 +66,7 @@ export const lightChartWidgetTemplate = html`
           class="chart-holder"
           ?hidden="${(x) =>
             !x.instrument ||
-            (x.instrument &&
-              x.instrumentTrader &&
-              !x.instrumentTrader.supportsInstrument(x.instrument))}"
+            (x.instrument && x.instrumentTrader && x.unsupportedInstrument)}"
         >
           <div class="chart-holder-inner">
             <div class="toolbar"></div>
@@ -334,10 +332,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       lastValueVisible: false
     });
 
-    if (
-      this.instrument &&
-      this.instrumentTrader.supportsInstrument(this.instrument)
-    ) {
+    if (this.instrument && !this.unsupportedInstrument) {
       try {
         this.mainSeries.applyOptions({
           priceFormat: {
@@ -421,10 +416,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     super.instrumentChanged(oldValue, newValue);
 
     if (this.chartTrader) {
-      if (
-        this.instrument &&
-        this.instrumentTrader.supportsInstrument(this.instrument)
-      ) {
+      if (this.instrument && !this.unsupportedInstrument) {
         await this.loadHistory();
       }
 
@@ -456,11 +448,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   printChanged(oldValue, newValue) {
-    if (
-      this.ready &&
-      newValue?.price &&
-      this.chartTrader.getSymbol(this.instrument) === newValue.symbol
-    ) {
+    if (this.ready && newValue?.price) {
       if (newValue.timestamp < Date.now() - 3600 * 1000) {
         return;
       }

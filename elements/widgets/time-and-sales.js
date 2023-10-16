@@ -343,7 +343,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       if (
         this.instrument &&
         typeof this.tradesTrader.allTrades === 'function' &&
-        this.instrumentTrader.supportsInstrument(this.instrument)
+        !this.unsupportedInstrument
       ) {
         try {
           const trades = [];

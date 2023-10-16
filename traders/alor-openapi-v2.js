@@ -14,7 +14,8 @@ import {
   GlobalTraderDatum,
   Trader,
   TraderDatum,
-  TraderEventDatum
+  TraderEventDatum,
+  unsupportedInstrument
 } from './common-trader.js';
 import { formatPrice } from '../lib/intl.js';
 
@@ -953,7 +954,7 @@ class AlorOpenAPIV2Trader extends Trader {
   }
 
   async estimate(instrument, price, quantity) {
-    if (!this.supportsInstrument(instrument)) return {};
+    if (this.unsupportedInstrument) return {};
 
     await this.ensureAccessTokenIsOk();
 
@@ -1149,52 +1150,63 @@ class AlorOpenAPIV2Trader extends Trader {
     }
   }
 
-  supportsInstrument(instrument) {
-    if (!instrument) return true;
-
-    // SPB@US
-    if (
-      instrument?.symbol === 'SPB' &&
-      (instrument?.currency === 'USD' || instrument?.currency === 'USDT') &&
-      this.document.exchange === EXCHANGE.SPBX
-    ) {
-      return true;
-    }
-
+  adoptInstrument(instrument = {}) {
     if (
       this.document.exchange === EXCHANGE.MOEX &&
-      instrument?.exchange !== EXCHANGE.MOEX
+      instrument.exchange !== EXCHANGE.MOEX
     ) {
-      return false;
+      return unsupportedInstrument(instrument.symbol);
     }
 
+    // ASTR
     if (
-      this.document.exchange === EXCHANGE.SPBX &&
-      instrument?.exchange === EXCHANGE.MOEX
+      this.document.exchange === EXCHANGE.MOEX &&
+      instrument?.exchange === EXCHANGE.MOEX &&
+      (instrument.symbol === 'ASTR' || instrument.symbol === 'ASTR~MOEX')
     ) {
-      return false;
+      return this.instruments.get('ASTR');
     }
 
-    return super.supportsInstrument({
-      ...instrument,
-      ...{ symbol: instrument?.symbol.split('~')[0] }
-    });
-  }
+    // FIVE
+    if (
+      this.document.exchange === EXCHANGE.MOEX &&
+      instrument?.exchange === EXCHANGE.MOEX &&
+      (instrument.symbol === 'FIVE' || instrument.symbol === 'FIVE~MOEX')
+    ) {
+      return this.instruments.get('FIVE');
+    }
 
-  adoptInstrument(instrument) {
     // SPB@US
     if (
-      instrument?.symbol === 'SPB' &&
-      (instrument?.currency === 'USD' || instrument?.currency === 'USDT') &&
+      instrument.symbol === 'SPB' &&
+      (instrument.currency === 'USD' || instrument.currency === 'USDT') &&
       this.document.exchange === EXCHANGE.SPBX
     ) {
       return this.instruments.get('SPB@US');
     }
 
-    return super.adoptInstrument({
-      ...instrument,
-      ...{ symbol: instrument?.symbol.split('~')[0] }
-    });
+    let canAdopt = true;
+
+    if (
+      this.getSymbol(instrument) === 'TCS' &&
+      (instrument.exchange === EXCHANGE.US ||
+        instrument.exchange === EXCHANGE.UTEX_MARGIN_STOCKS)
+    ) {
+      canAdopt = false;
+    }
+
+    if (!canAdopt) {
+      return unsupportedInstrument(instrument.symbol);
+    }
+
+    if (instrument.symbol?.endsWith('~US')) {
+      return super.adoptInstrument({
+        ...instrument,
+        ...{ symbol: instrument.symbol.replace('~US', '') }
+      });
+    }
+
+    return super.adoptInstrument(instrument);
   }
 
   async formatError(instrument, error, defaultErrorMessage) {

@@ -108,7 +108,7 @@ class FinamTradeApiTrader extends Trader {
     const payload = {
       clientId: this.document.account,
       securityBoard: instrument.classCode,
-      securityCode: instrument.symbol,
+      securityCode: this.getSymbol(instrument),
       buySell: direction === 'buy' ? 'Buy' : 'Sell',
       quantity,
       useCredit: true,
@@ -166,12 +166,35 @@ class FinamTradeApiTrader extends Trader {
     }
   }
 
-  adoptInstrument(instrument) {
+  adoptInstrument(instrument = {}) {
     if (
-      instrument?.exchange === EXCHANGE.US &&
+      (instrument.exchange === EXCHANGE.US ||
+        instrument.exchange === EXCHANGE.UTEX_MARGIN_STOCKS) &&
       this.instruments.has(`${instrument.symbol}~US`)
     ) {
       return this.instruments.get(`${instrument.symbol}~US`);
+    }
+
+    if (
+      instrument.exchange === EXCHANGE.MOEX &&
+      (instrument.symbol === 'ASTR' || instrument.symbol === 'ASTR~MOEX')
+    ) {
+      return this.instruments.get(`ASTR~MOEX`);
+    }
+
+    if (
+      instrument.exchange === EXCHANGE.MOEX &&
+      (instrument.symbol === 'FIVE' || instrument.symbol === 'FIVE~MOEX')
+    ) {
+      return this.instruments.get(`FIVE~MOEX`);
+    }
+
+    if (
+      instrument.symbol === 'TCS' &&
+      (instrument.exchange === EXCHANGE.US ||
+        instrument.exchange === EXCHANGE.UTEX_MARGIN_STOCKS)
+    ) {
+      return this.instruments.get(`TCS~US`);
     }
 
     return super.adoptInstrument(instrument);

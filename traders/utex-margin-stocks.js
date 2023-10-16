@@ -10,7 +10,7 @@ import {
 import { debounce, later } from '../lib/ppp-decorators.js';
 import {
   GlobalTraderDatum,
-  Trader,
+  USTrader,
   TraderDatum,
   TraderEventDatum
 } from './common-trader.js';
@@ -305,7 +305,7 @@ class PositionDatum extends UtexMarginStocksTraderGlobalDatum {
 /**
  * @typedef {Object} UtexMarginStocksTrader
  */
-class UtexMarginStocksTrader extends Trader {
+class UtexMarginStocksTrader extends USTrader {
   #pendingAccessTokenRequest;
 
   accessToken;
@@ -806,24 +806,6 @@ class UtexMarginStocksTrader extends Trader {
 
   getBroker() {
     return BROKERS.UTEX;
-  }
-
-  getInstrumentIconUrl(instrument) {
-    if (!instrument) {
-      return 'static/instruments/unknown.svg';
-    }
-
-    if (instrument.symbol === 'PRN') {
-      return 'static/instruments/stocks/us/PRN@US.svg';
-    }
-
-    if (instrument.currency === 'USD' || instrument.currency === 'USDT') {
-      return `static/instruments/stocks/us/${instrument.symbol
-        .replace(' ', '-')
-        .replace('/', '-')}.svg`;
-    }
-
-    return super.getInstrumentIconUrl(instrument);
   }
 
   async modifyLimitOrders({ instrument, side, value }) {

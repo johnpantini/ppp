@@ -370,6 +370,10 @@ export class InstrumentsImportPage extends Page {
           return false;
         }
 
+        if (s.symbol?.endsWith('@GR')) {
+          return false;
+        }
+
         return !['SPB', 'SBER', 'SBERP'].includes(s.symbol);
       })
       .map((s) => {
