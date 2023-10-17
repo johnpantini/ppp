@@ -759,6 +759,13 @@ class Trader {
       return 'static/instruments/stocks/rus/TCSG.svg';
     }
 
+    if (
+      (instrument.symbol === 'GOLD' || instrument.symbol === 'GOLD~MOEX') &&
+      instrument.exchange === EXCHANGE.MOEX
+    ) {
+      return 'static/instruments/etfs/rus/GOLD.svg';
+    }
+
     if (typeof symbol === 'string') {
       symbol = symbol.split('/')[0].split('-')[0].split('-RM')[0];
 
@@ -924,9 +931,9 @@ class USTrader extends Trader {
     let canAdopt = true;
 
     // Possible collisions.
-    ['FIVE', 'CARM', 'ASTR'].forEach((ticker) => {
+    ['FIVE', 'CARM', 'ASTR', 'GOLD'].forEach((ticker) => {
       if (
-        instrument.symbol === ticker &&
+        this.getSymbol(instrument) === ticker &&
         instrument.exchange === EXCHANGE.MOEX
       ) {
         canAdopt = false;

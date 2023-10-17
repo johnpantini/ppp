@@ -319,7 +319,7 @@ export const orderWidgetTemplate = html`
                           x.instrument
                         )})`}"
                     ></div>
-                    ${(x) => x.instrument?.fullName[0]}
+                    ${(x) => x.instrument?.fullName?.[0]}
                   </div>
                 </div>
               </div>

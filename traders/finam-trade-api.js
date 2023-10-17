@@ -177,16 +177,23 @@ class FinamTradeApiTrader extends Trader {
 
     if (
       instrument.exchange === EXCHANGE.MOEX &&
-      (instrument.symbol === 'ASTR' || instrument.symbol === 'ASTR~MOEX')
+      this.getSymbol(instrument) === 'ASTR'
     ) {
       return this.instruments.get(`ASTR~MOEX`);
     }
 
     if (
       instrument.exchange === EXCHANGE.MOEX &&
-      (instrument.symbol === 'FIVE' || instrument.symbol === 'FIVE~MOEX')
+      this.getSymbol(instrument) === 'FIVE'
     ) {
       return this.instruments.get(`FIVE~MOEX`);
+    }
+
+    if (
+      instrument.exchange === EXCHANGE.MOEX &&
+      this.getSymbol(instrument) === 'GOLD'
+    ) {
+      return this.instruments.get(`GOLD~MOEX`);
     }
 
     if (

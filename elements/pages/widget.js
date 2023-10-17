@@ -6,11 +6,11 @@ import {
   css,
   ref,
   when,
+  attr,
   observable,
   Updates,
   Observable,
-  repeat,
-  attr
+  repeat
 } from '../../vendor/fast-element.min.js';
 import { documentPageHeaderPartial, Page, pageStyles } from '../page.js';
 import { Denormalization } from '../../lib/ppp-denormalize.js';
@@ -42,18 +42,7 @@ import {
 import { display } from '../../vendor/fast-utilities.js';
 import { RadioGroup, radioGroupTemplate } from '../radio-group.js';
 import { Radio } from '../radio.js';
-import {
-  activeOrdersWidget,
-  customWidget,
-  listWidget,
-  lightChartWidget,
-  orderbookWidget,
-  orderWidget,
-  portfolioWidget,
-  scalpingButtonsWidget,
-  timeAndSalesWidget,
-  timelineWidget
-} from '../../static/svg/sprite.js';
+import { customWidget } from '../../static/svg/sprite.js';
 import { normalize } from '../../design/styles.js';
 import { PAGE_STATUS, WIDGET_TYPES } from '../../lib/const.js';
 import { PPPElement } from '../../lib/ppp-element.js';
@@ -81,9 +70,13 @@ export const widgetTypeRadioGroupStyles = css`
 
   .positioning-region {
     display: flex;
-    flex-direction: column;
     flex-wrap: wrap;
     gap: ${spacing2};
+  }
+
+  ::slotted(ppp-widget-type-radio) {
+    display: flex;
+    flex-grow: 1;
   }
 `;
 
@@ -117,13 +110,14 @@ export const widgetTypeRadioStyles = css`
 
   .control {
     width: 100%;
-    padding: 10px 15px;
+    padding: 10px;
     cursor: pointer;
     border-width: 1px;
     border-style: solid;
     border-color: ${paletteGrayBase};
     border-image: initial;
     border-radius: 4px;
+    user-select: none;
   }
 
   :host(:not([checked]):not([disabled])) .control:hover {
@@ -141,7 +135,7 @@ export const widgetTypeRadioStyles = css`
   .content {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     width: 100%;
     color: ${themeConditional(paletteGrayBase, paletteWhite)};
@@ -152,11 +146,11 @@ export const widgetTypeRadioStyles = css`
     font-family: ${bodyFont};
     display: flex;
     flex-direction: column;
-    font-weight: bold;
     color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
 
   [name='icon']::slotted(*) {
+    margin-left: ${spacing3};
     height: 20px;
     width: 20px;
     color: ${themeConditional(paletteBlack, paletteGrayLight2)};
@@ -214,9 +208,6 @@ export const widgetPageTemplate = html`
                             value="order"
                           >
                             <span slot="text">Заявка</span>
-                            <span slot="icon">
-                              ${html.partial(orderWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -225,9 +216,6 @@ export const widgetPageTemplate = html`
                             value="scalping-buttons"
                           >
                             <span slot="text">Скальперские кнопки</span>
-                            <span slot="icon">
-                              ${html.partial(scalpingButtonsWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -236,9 +224,6 @@ export const widgetPageTemplate = html`
                             value="active-orders"
                           >
                             <span slot="text">Активные заявки</span>
-                            <span slot="icon">
-                              ${html.partial(activeOrdersWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -247,9 +232,6 @@ export const widgetPageTemplate = html`
                             value="light-chart"
                           >
                             <span slot="text">Лёгкий график</span>
-                            <span slot="icon">
-                              ${html.partial(lightChartWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -257,17 +239,7 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'orderbook'}"
                             value="orderbook"
                           >
-                            <div slot="text">
-                              Книга заявок
-                              <div class="widget-type-tags">
-                                <ppp-badge appearance="lightgray">
-                                  Биржевой стакан
-                                </ppp-badge>
-                              </div>
-                            </div>
-                            <span slot="icon">
-                              ${html.partial(orderbookWidget)}
-                            </span>
+                            <div slot="text">Книга заявок</div>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -275,17 +247,7 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'time-and-sales'}"
                             value="time-and-sales"
                           >
-                            <div slot="text">
-                              Лента всех сделок
-                              <div class="widget-type-tags">
-                                <ppp-badge appearance="lightgray">
-                                  Лента обезличенных сделок
-                                </ppp-badge>
-                              </div>
-                            </div>
-                            <span slot="icon">
-                              ${html.partial(timeAndSalesWidget)}
-                            </span>
+                            <div slot="text">Лента всех сделок</div>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -294,9 +256,6 @@ export const widgetPageTemplate = html`
                             value="portfolio"
                           >
                             <span slot="text">Портфель</span>
-                            <span slot="icon">
-                              ${html.partial(portfolioWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -304,9 +263,6 @@ export const widgetPageTemplate = html`
                             value="list"
                           >
                             <span slot="text">Список/таблица</span>
-                            <span slot="icon">
-                              ${html.partial(listWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -314,23 +270,13 @@ export const widgetPageTemplate = html`
                             value="timeline"
                           >
                             <span slot="text">Лента операций</span>
-                            <span slot="icon">
-                              ${html.partial(timelineWidget)}
-                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'custom'}"
                             value="custom"
                           >
-                            <div slot="text">
-                              По ссылке
-                              <div class="widget-type-tags">
-                                <ppp-badge appearance="lightgray"
-                                  >Загружаемый виджет
-                                </ppp-badge>
-                              </div>
-                            </div>
+                            <div slot="text">По ссылке</div>
                             <span slot="icon">
                               ${html.partial(customWidget)}
                             </span>

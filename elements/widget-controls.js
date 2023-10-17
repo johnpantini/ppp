@@ -82,8 +82,10 @@ import {
   notificationError,
   notificationSuccess,
   notificationNote,
-  upDown
+  upDown,
+  plus
 } from '../static/svg/sprite.js';
+import { uuidv4 } from '../lib/ppp-crypto.js';
 import {
   decSeparator,
   distanceToString,
@@ -506,7 +508,7 @@ export const widgetSearchControlTemplate = html`
       </div>
       <div class="divider"></div>
       ${when(
-        (x) => x.widget?.instrument,
+        (x) => x.widget?.instrument?.symbol,
         html`
           <div class="menu-item-holder">
             <div
@@ -1827,6 +1829,130 @@ export class WidgetHeaderButtons extends PPPElement {
     super.connectedCallback();
 
     this.widget = this.getRootNode().host;
+  }
+
+  async stackWidget() {
+    if (!this.widget.preview) {
+      this.widget.topLoader.start();
+
+      try {
+        const container = this.widget.container;
+        const { widgets } = await ppp.user.functions.findOne(
+          { collection: 'workspaces' },
+          {
+            _id: container.document._id
+          }
+        );
+
+        if (Array.isArray(widgets)) {
+          const copy = {
+            // Normalized on from MongoDB
+            savedDocument: widgets?.find(
+              (w) => w.uniqueID === this.widget.document.uniqueID
+            ),
+            // Denormalized one, used for placement
+            liveDocument: Object.assign({}, this.widget.document)
+          };
+
+          if (copy.savedDocument) {
+            copy.savedDocument.uniqueID = uuidv4();
+            copy.liveDocument.uniqueID = copy.savedDocument.uniqueID;
+
+            container.document.widgets.push(copy.liveDocument);
+            container.document.widgets[
+              container.document.widgets.length - 1
+            ].zIndex = container.zIndex + 1;
+
+            Observable.notify(container, 'document');
+
+            container.locked = true;
+
+            Updates.enqueue(async () => {
+              try {
+                const placedWidget = await container.placeWidget(
+                  copy.liveDocument
+                );
+
+                if (typeof this.widget.document.linkedWidgets === 'undefined') {
+                  this.widget.document.linkedWidgets = [];
+                }
+
+                const linkedWidgets = [this.widget.document.uniqueID];
+
+                for (const uid of this.widget.document.linkedWidgets) {
+                  if (!linkedWidgets.includes(uid)) {
+                    linkedWidgets.push(uid);
+                  }
+
+                  const widget = widgets.find((w) => w.uniqueID === uid);
+
+                  if (widget) {
+                    if (typeof widget.document.linkedWidgets === 'undefined') {
+                      widget.document.linkedWidgets = [];
+                    }
+
+                    if (
+                      !widget.document.linkedWidgets.includes(
+                        copy.liveDocument.uniqueID
+                      )
+                    ) {
+                      widget.document.linkedWidgets.push(
+                        copy.liveDocument.uniqueID
+                      );
+                    }
+                  }
+                }
+
+                this.widget.document.linkedWidgets.push(
+                  copy.liveDocument.uniqueID
+                );
+
+                placedWidget.document.linkedWidgets = linkedWidgets;
+
+                // Save new widget.
+                const bulkWritePayload = [
+                  {
+                    updateOne: {
+                      filter: {
+                        _id: container.document._id
+                      },
+                      update: {
+                        $push: {
+                          widgets: Object.assign(copy.savedDocument, {
+                            x: copy.liveDocument.x,
+                            y: copy.liveDocument.y,
+                            width: copy.liveDocument.width,
+                            height: copy.liveDocument.height,
+                            zIndex: copy.liveDocument.zIndex,
+                            linkedWidgets
+                          })
+                        }
+                      }
+                    }
+                  }
+                ];
+
+                // Update linked widgets.
+
+                await ppp.user.functions.bulkWrite(
+                  {
+                    collection: 'workspaces'
+                  },
+                  bulkWritePayload,
+                  {
+                    ordered: false
+                  }
+                );
+              } finally {
+                container.locked = false;
+              }
+            });
+          }
+        }
+      } finally {
+        this.widget.topLoader.stop();
+      }
+    }
   }
 
   async showWidgetSettings() {

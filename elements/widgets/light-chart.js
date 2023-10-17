@@ -56,7 +56,7 @@ export const lightChartWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${when(
-          (x) => !x.instrument,
+          (x) => !x.instrument?.symbol,
           html`${html.partial(
             widgetEmptyStateTemplate('Выберите инструмент.')
           )}`
@@ -65,7 +65,7 @@ export const lightChartWidgetTemplate = html`
         <div
           class="chart-holder"
           ?hidden="${(x) =>
-            !x.instrument ||
+            !x.instrument?.symbol ||
             (x.instrument && x.instrumentTrader && x.unsupportedInstrument)}"
         >
           <div class="chart-holder-inner">

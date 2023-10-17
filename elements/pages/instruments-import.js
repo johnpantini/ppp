@@ -374,7 +374,21 @@ export class InstrumentsImportPage extends Page {
           return false;
         }
 
-        return !['SPB', 'SBER', 'SBERP'].includes(s.symbol);
+        return ![
+          'SPB',
+          'SBER',
+          'SBERP',
+          'DSKY',
+          'GAZP',
+          'GMKN',
+          'RSTI',
+          'RTKM',
+          'RUAL',
+          'SIBN',
+          'GZPFY',
+          'SNGS',
+          'SNGSP'
+        ].includes(s.symbol);
       })
       .map((s) => {
         let type = 'stock';
@@ -605,6 +619,10 @@ export class InstrumentsImportPage extends Page {
     for (const e of etfs) {
       const realExchange = e.realExchange;
 
+      if (e.ticker === 'GOLD' && e.classCode === 'TQTF') {
+        e.ticker = 'GOLD~MOEX';
+      }
+
       if (
         realExchange === 'REAL_EXCHANGE_MOEX' ||
         realExchange === 'REAL_EXCHANGE_RTS'
@@ -740,6 +758,15 @@ export class InstrumentsImportPage extends Page {
         } else if (s.symbol === 'ASTR') {
           // ASTR
           s.symbol = 'ASTR~MOEX';
+        }
+
+        result.push(s);
+      } else if (s.type === 'etf') {
+        s.broker = BROKERS.FINAM;
+
+        if (s.symbol === 'GOLD') {
+          // GOLD
+          s.symbol = 'GOLD~MOEX';
         }
 
         result.push(s);

@@ -211,6 +211,7 @@ export const activeOrdersWidgetTemplate = html`
         </div>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
+    </div>
   </template>
 `;
 

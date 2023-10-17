@@ -102,7 +102,8 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
 
 export const widgetUnsupportedInstrumentTemplate = () => html`
   ${when(
-    (x) => x.instrument && x.instrumentTrader && x.unsupportedInstrument,
+    (x) =>
+      x.instrument?.symbol && x.instrumentTrader && x.unsupportedInstrument,
     html`${html.partial(
       widgetEmptyStateTemplate('Инструмент не поддерживается.')
     )}`
@@ -111,12 +112,13 @@ export const widgetUnsupportedInstrumentTemplate = () => html`
 
 export const widgetWithInstrumentBodyTemplate = (widgetBodyLayout) => html`
   ${when(
-    (x) => !x.instrument,
+    (x) => !x.instrument?.symbol,
     html`${html.partial(widgetEmptyStateTemplate('Выберите инструмент.'))}`
   )}
   ${widgetUnsupportedInstrumentTemplate()}
   ${when(
-    (x) => x.instrument && x.instrumentTrader && !x.unsupportedInstrument,
+    (x) =>
+      x.instrument?.symbol && x.instrumentTrader && !x.unsupportedInstrument,
     widgetBodyLayout
   )}
 `;

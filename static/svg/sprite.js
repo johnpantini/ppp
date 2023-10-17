@@ -47,7 +47,7 @@ export const pin =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M10 8.5V3.3h.683a.65.65 0 1 0 0-1.3H5.317a.65.65 0 1 0 0 1.3H6v5.2L4.383 9.55a.843.843 0 0 0 .46 1.55h2.624v3.367a.533.533 0 0 0 1.066 0V11.1h2.624a.843.843 0 0 0 .46-1.55L10 8.5Z"></path></svg>';
 
 export const plus =
-  '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M7.5 2a1 1 0 00-1 1v3.5H3a1 1 0 00-1 1v1a1 1 0 001 1h3.5V13a1 1 0 001 1h1a1 1 0 001-1V9.5H13a1 1 0 001-1v-1a1 1 0 00-1-1H9.5V3a1 1 0 00-1-1h-1z"/></svg>';
+  '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8 2C7.44772 2 7 2.44772 7 3V7H3C2.44772 7 2 7.44772 2 8C2 8.55228 2.44772 9 3 9H7V13C7 13.5523 7.44772 14 8 14C8.55228 14 9 13.5523 9 13V9H13C13.5523 9 14 8.55228 14 8C14 7.44772 13.5523 7 13 7H9V3C9 2.44772 8.55228 2 8 2Z"/></svg>';
 
 export const increment =
   '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M11 7H5C4.63163 7 4 7.44771 4 8C4 8.55228 4.63163 9 5 9H11C11.3684 9 12 8.55228 12 8C12 7.44771 11.3684 7 11 7Z" fill="currentColor"></path><path d="M9 11L9 5C9 4.63163 8.55229 4 8 4C7.44772 4 7 4.63163 7 5L7 11C7 11.3684 7.44772 12 8 12C8.55229 12 9 11.3684 9 11Z" fill="currentColor"></path></svg>';

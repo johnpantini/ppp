@@ -1520,7 +1520,10 @@ class TinkoffGrpcWebTrader extends Trader {
   }
 
   getSymbol(instrument = {}) {
-    if (instrument.symbol === 'ASTR~MOEX') {
+    if (
+      instrument.symbol === 'ASTR~MOEX' ||
+      instrument.symbol === 'GOLD~MOEX'
+    ) {
       return instrument.symbol;
     }
 
@@ -1539,9 +1542,17 @@ class TinkoffGrpcWebTrader extends Trader {
     // ASTR
     if (
       instrument?.exchange === EXCHANGE.MOEX &&
-      (instrument.symbol === 'ASTR' || instrument.symbol === 'ASTR~MOEX')
+      this.getSymbol(instrument) === 'ASTR'
     ) {
       return this.instruments.get(`ASTR~MOEX`);
+    }
+
+    // GOLD~MOEX
+    if (
+      instrument?.exchange === EXCHANGE.MOEX &&
+      this.getSymbol(instrument) === 'GOLD'
+    ) {
+      return this.instruments.get(`GOLD~MOEX`);
     }
 
     let canAdopt = true;

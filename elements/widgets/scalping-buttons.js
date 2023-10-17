@@ -2,7 +2,6 @@
 
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetUnsupportedInstrumentTemplate
@@ -50,8 +49,10 @@ export const scalpingButtonsWidgetTemplate = html`
         ${widgetUnsupportedInstrumentTemplate()}
         ${when(
           (x) =>
-            !x.instrument ||
-            (x.instrument && x.instrumentTrader && !x.unsupportedInstrument),
+            !x.instrument?.symbol ||
+            (x.instrument?.symbol &&
+              x.instrumentTrader &&
+              !x.unsupportedInstrument),
           html`
             <div class="toolbar">
               <div
