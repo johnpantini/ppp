@@ -5,7 +5,8 @@ import {
   widgetStyles,
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
-  widgetDefaultHeaderTemplate
+  widgetDefaultHeaderTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
@@ -58,6 +59,7 @@ export const activeOrdersWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         <div class="toolbar">
           <div class="tabs">
             <ppp-widget-box-radio-group

@@ -4,7 +4,8 @@ import {
   widgetStyles,
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
-  widgetDefaultHeaderTemplate
+  widgetDefaultHeaderTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
@@ -45,6 +46,7 @@ export const timelineWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         <div class="widget-card-list">
           ${when(
             (x) => x.empty,

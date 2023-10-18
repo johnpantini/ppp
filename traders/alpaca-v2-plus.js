@@ -265,6 +265,17 @@ class NoiiDatum extends AlpacaV2PlusTraderDatum {
       if (!source.noiiClose && nowHours > 14) {
         return false;
       }
+    } else {
+      // From history.
+      const noiiHours = new Date(data.t).getUTCHours();
+
+      if (source.noiiClose && noiiHours < 19) {
+        return false;
+      }
+
+      if (!source.noiiClose && noiiHours > 14) {
+        return false;
+      }
     }
 
     return super.filter(data, instrument, source);
@@ -276,8 +287,15 @@ class NoiiDatum extends AlpacaV2PlusTraderDatum {
         JSON.stringify({
           action: 'subscribe',
           noii: [symbol],
-          // Opening cross by default.
-          close: source.noiiClose ?? false
+          close: true
+        })
+      );
+
+      this.trader.connection.send(
+        JSON.stringify({
+          action: 'subscribe',
+          noii: [symbol],
+          close: false
         })
       );
     }

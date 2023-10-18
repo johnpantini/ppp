@@ -4,7 +4,8 @@ import ppp from '../../ppp.js';
 import {
   widgetStyles,
   WidgetWithInstrument,
-  widgetWithInstrumentBodyTemplate
+  widgetWithInstrumentBodyTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import { debounce } from '../../lib/ppp-decorators.js';
 import {
@@ -184,6 +185,7 @@ export const orderWidgetTemplate = html`
         </div>
       </div>
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         ${widgetWithInstrumentBodyTemplate(html`
           <ppp-widget-tabs
             ?hidden="${(x) =>

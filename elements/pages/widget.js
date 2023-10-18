@@ -324,6 +324,27 @@ export const widgetPageTemplate = html`
                           </div>
                         </div>
                         ${when(
+                          (x) => x.document.linkedWidgets?.length,
+                          html`
+                            <div class="widget-settings-section">
+                              <div class="widget-settings-label-group">
+                                <h5>Название в ансамбле</h5>
+                                <p class="description">
+                                  Будет отображаться во вкладках ансамбля.
+                                </p>
+                              </div>
+                              <div class="widget-settings-input-group">
+                                <ppp-text-field
+                                  standalone
+                                  placeholder="Название виджета в ансамбле"
+                                  value="${(x) => x.document.nameWhenStacked}"
+                                  ${ref('nameWhenStacked')}
+                                ></ppp-text-field>
+                              </div>
+                            </div>
+                          `
+                        )}
+                        ${when(
                           (x) => x.document.type === 'custom',
                           html`
                             <div class="widget-settings-section">
@@ -1115,6 +1136,7 @@ export class WidgetPage extends Page {
 
     const $set = {
       name: this.name.value.trim(),
+      nameWhenStacked: this.nameWhenStacked?.value.trim(),
       reportedType: this.widgetDefinition.type,
       updatedAt: new Date()
     };
@@ -1285,7 +1307,8 @@ export class WidgetPage extends Page {
             this.document,
             $set ?? {},
             {
-              name: this.name.value
+              name: this.name.value,
+              nameWhenStacked: this.nameWhenStacked?.value
             },
             urlObject
           )
@@ -1296,7 +1319,8 @@ export class WidgetPage extends Page {
             {},
             this.document,
             {
-              name: this.name.value
+              name: this.name.value,
+              nameWhenStacked: this.nameWhenStacked?.value
             },
             urlObject
           )

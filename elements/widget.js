@@ -8,7 +8,9 @@ import {
   html,
   Observable,
   observable,
-  when
+  when,
+  ref,
+  repeat
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
 import { ellipsis, scrollbars } from '../design/styles.js';
@@ -141,6 +143,109 @@ export const widgetDefaultHeaderTemplate = () => html`
       </span>
       <ppp-widget-header-buttons></ppp-widget-header-buttons>
     </div>
+  </div>
+`;
+
+export const widgetStackSelectorTemplate = () => html`
+  <div
+    ?hidden=${(x) => !x.document.linkedWidgets?.length}
+    class="widget-stack-selector"
+    ${ref('stackSelector')}
+  >
+    <ppp-widget-tabs
+      ${ref('stackSelectorTabs')}
+      activeid="${(x) => x.document.activeWidgetLink}"
+      @change="${(self) => {
+        self.document.activeWidgetLink = self.stackSelectorTabs.activeid;
+
+        const bulkWritePayload = [
+          {
+            updateOne: {
+              filter: {
+                _id: self.container.document._id,
+                'widgets.uniqueID': self.document.uniqueID
+              },
+              update: {
+                $set: {
+                  'widgets.$.activeWidgetLink': self.document.activeWidgetLink
+                }
+              }
+            }
+          }
+        ];
+
+        for (const link of self.document.linkedWidgets ?? []) {
+          const w = self.container.widgets.find(
+            (w) => w.document.uniqueID === link
+          );
+
+          if (w) {
+            w.document.activeWidgetLink = self.document.activeWidgetLink;
+
+            Observable.notify(w, 'document');
+
+            w.restack();
+
+            bulkWritePayload.push({
+              updateOne: {
+                filter: {
+                  _id: w.container.document._id,
+                  'widgets.uniqueID': w.document.uniqueID
+                },
+                update: {
+                  $set: {
+                    'widgets.$.activeWidgetLink': self.document.activeWidgetLink
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        self.restack();
+
+        return ppp.user.functions.bulkWrite(
+          {
+            collection: 'workspaces'
+          },
+          bulkWritePayload,
+          {
+            ordered: false
+          }
+        );
+      }}"
+    >
+      ${repeat(
+        (x) =>
+          // Sort explicitly to ensure stable ordering.
+          [
+            ...new Set(
+              x.container.document?.widgets
+                ?.filter(
+                  (w) =>
+                    w.uniqueID === x.document.uniqueID ||
+                    x.document.linkedWidgets?.includes(w.uniqueID)
+                )
+                ?.map((w) => w.uniqueID)
+            )
+          ],
+        html`
+          <ppp-widget-tab id="${(x) => x}">
+            ${(x, c) => {
+              const name = c.parent.container.widgets.find(
+                (w) => w.document.uniqueID === x
+              )?.document.nameWhenStacked;
+
+              return name || c.index + 1;
+            }}
+          </ppp-widget-tab>
+          <ppp-tab-panel id="${(x) => `${x}-panel`}"></ppp-tab-panel>
+        `,
+        {
+          positioning: true
+        }
+      )}
+    </ppp-widget-tabs>
   </div>
 `;
 
@@ -683,6 +788,7 @@ export class Widget extends PPPElement {
   connectedCallback() {
     super.connectedCallback();
 
+    this.restack();
     this.adjustTitleEllipsis();
 
     if (!this.preview) {
@@ -725,6 +831,76 @@ export class Widget extends PPPElement {
 
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
+    }
+  }
+
+  restack() {
+    if (typeof this.stackSelectorTabs === 'undefined') {
+      return;
+    }
+
+    // Called after linkedWidgets modification.
+    if (!this.document.linkedWidgets?.length) {
+      this.removeAttribute('hidden');
+    } else if (this.document.activeWidgetLink === this.document.uniqueID) {
+      this.removeAttribute('hidden');
+    } else {
+      this.setAttribute('hidden', '');
+    }
+  }
+
+  async repositionLinkedWidgets(isolatedResize) {
+    const bulkWritePayload = [];
+
+    for (const link of this.document.linkedWidgets ?? []) {
+      const w = this.container.widgets.find(
+        (w) => w.document.uniqueID === link
+      );
+
+      if (w) {
+        w.x = parseInt(this.style.left);
+        w.y = parseInt(this.style.top);
+
+        w.style.left = this.style.left;
+        w.style.top = this.style.top;
+
+        if (!isolatedResize) {
+          w.width = parseInt(this.style.width);
+          w.height = parseInt(this.style.height);
+
+          w.style.width = this.style.width;
+          w.style.height = this.style.height;
+        }
+
+        bulkWritePayload.push({
+          updateOne: {
+            filter: {
+              _id: w.container.document._id,
+              'widgets.uniqueID': w.document.uniqueID
+            },
+            update: {
+              $set: {
+                'widgets.$.x': w.x,
+                'widgets.$.y': w.y,
+                'widgets.$.width': w.width,
+                'widgets.$.height': w.height
+              }
+            }
+          }
+        });
+      }
+    }
+
+    if (bulkWritePayload.length) {
+      return ppp.user.functions.bulkWrite(
+        {
+          collection: 'workspaces'
+        },
+        bulkWritePayload,
+        {
+          ordered: false
+        }
+      );
     }
   }
 

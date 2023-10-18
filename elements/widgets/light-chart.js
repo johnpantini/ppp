@@ -5,7 +5,8 @@ import {
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetUnsupportedInstrumentTemplate
+  widgetUnsupportedInstrumentTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
@@ -55,6 +56,7 @@ export const lightChartWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         ${when(
           (x) => !x.instrument?.symbol,
           html`${html.partial(

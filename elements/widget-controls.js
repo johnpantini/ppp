@@ -1556,9 +1556,11 @@ export class WidgetResizeControls extends PPPElement {
     }
   }
 
-  onPointerUp() {
+  onPointerUp({ event }) {
     if (!this.widget.preview) {
-      void this.widget.updateDocumentFragment({
+      this.widget.repositionLinkedWidgets(event.shiftKey);
+
+      return this.widget.updateDocumentFragment({
         $set: {
           'widgets.$.x': parseInt(this.widget.style.left),
           'widgets.$.y': parseInt(this.widget.style.top),
@@ -1803,6 +1805,9 @@ export class WidgetNotificationsArea extends PPPElement {
 export const widgetHeaderButtonsTemplate = html`
   <template>
     <slot>
+      <div class="button" @click="${(x) => x.stackWidget()}">
+        ${html.partial(plus)}
+      </div>
       <div class="button" @click="${(x) => x.showWidgetSettings()}">
         ${html.partial(settings)}
       </div>
@@ -1833,10 +1838,17 @@ export class WidgetHeaderButtons extends PPPElement {
 
   async stackWidget() {
     if (!this.widget.preview) {
+      if (!this.widget.stackSelector) {
+        return this.widget.notificationsArea.error({
+          text: 'Этот виджет не поддерживает создание ансамблей.'
+        });
+      }
+
       this.widget.topLoader.start();
 
       try {
         const container = this.widget.container;
+        // For copy.
         const { widgets } = await ppp.user.functions.findOne(
           { collection: 'workspaces' },
           {
@@ -1846,7 +1858,7 @@ export class WidgetHeaderButtons extends PPPElement {
 
         if (Array.isArray(widgets)) {
           const copy = {
-            // Normalized on from MongoDB
+            // Normalized one from MongoDB
             savedDocument: widgets?.find(
               (w) => w.uniqueID === this.widget.document.uniqueID
             ),
@@ -1869,6 +1881,7 @@ export class WidgetHeaderButtons extends PPPElement {
 
             Updates.enqueue(async () => {
               try {
+                const bulkWritePayload = [];
                 const placedWidget = await container.placeWidget(
                   copy.liveDocument
                 );
@@ -1877,6 +1890,7 @@ export class WidgetHeaderButtons extends PPPElement {
                   this.widget.document.linkedWidgets = [];
                 }
 
+                // Add parent immediately.
                 const linkedWidgets = [this.widget.document.uniqueID];
 
                 for (const uid of this.widget.document.linkedWidgets) {
@@ -1884,7 +1898,9 @@ export class WidgetHeaderButtons extends PPPElement {
                     linkedWidgets.push(uid);
                   }
 
-                  const widget = widgets.find((w) => w.uniqueID === uid);
+                  const widget = container.widgets.find(
+                    (w) => w.document.uniqueID === uid
+                  );
 
                   if (widget) {
                     if (typeof widget.document.linkedWidgets === 'undefined') {
@@ -1899,6 +1915,31 @@ export class WidgetHeaderButtons extends PPPElement {
                       widget.document.linkedWidgets.push(
                         copy.liveDocument.uniqueID
                       );
+
+                      widget.document.activeWidgetLink =
+                        copy.liveDocument.uniqueID;
+
+                      Observable.notify(widget, 'document');
+
+                      widget.restack();
+
+                      // Save distant links.
+                      bulkWritePayload.push({
+                        updateOne: {
+                          filter: {
+                            _id: container.document._id,
+                            'widgets.uniqueID': widget.document.uniqueID
+                          },
+                          update: {
+                            $set: {
+                              'widgets.$.linkedWidgets':
+                                widget.document.linkedWidgets,
+                              'widgets.$.activeWidgetLink':
+                                widget.document.activeWidgetLink
+                            }
+                          }
+                        }
+                      });
                     }
                   }
                 }
@@ -1907,32 +1948,59 @@ export class WidgetHeaderButtons extends PPPElement {
                   copy.liveDocument.uniqueID
                 );
 
-                placedWidget.document.linkedWidgets = linkedWidgets;
+                this.widget.document.activeWidgetLink =
+                  copy.liveDocument.uniqueID;
 
-                // Save new widget.
-                const bulkWritePayload = [
-                  {
-                    updateOne: {
-                      filter: {
-                        _id: container.document._id
-                      },
-                      update: {
-                        $push: {
-                          widgets: Object.assign(copy.savedDocument, {
-                            x: copy.liveDocument.x,
-                            y: copy.liveDocument.y,
-                            width: copy.liveDocument.width,
-                            height: copy.liveDocument.height,
-                            zIndex: copy.liveDocument.zIndex,
-                            linkedWidgets
-                          })
-                        }
+                this.widget.restack();
+
+                // Save updated parent links.
+                bulkWritePayload.push({
+                  updateOne: {
+                    filter: {
+                      _id: container.document._id,
+                      'widgets.uniqueID': this.widget.document.uniqueID
+                    },
+                    update: {
+                      $set: {
+                        'widgets.$.linkedWidgets':
+                          this.widget.document.linkedWidgets,
+                        'widgets.$.activeWidgetLink':
+                          this.widget.document.activeWidgetLink
                       }
                     }
                   }
-                ];
+                });
 
-                // Update linked widgets.
+                placedWidget.document.linkedWidgets = linkedWidgets;
+
+                // Make new widget active.
+                placedWidget.document.activeWidgetLink =
+                  copy.liveDocument.uniqueID;
+
+                Observable.notify(this.widget, 'document');
+                Observable.notify(placedWidget, 'document');
+
+                // Save new widget with links.
+                bulkWritePayload.push({
+                  updateOne: {
+                    filter: {
+                      _id: container.document._id
+                    },
+                    update: {
+                      $push: {
+                        widgets: Object.assign(copy.savedDocument, {
+                          x: copy.liveDocument.x,
+                          y: copy.liveDocument.y,
+                          width: copy.liveDocument.width,
+                          height: copy.liveDocument.height,
+                          zIndex: copy.liveDocument.zIndex,
+                          linkedWidgets,
+                          activeWidgetLink: copy.liveDocument.uniqueID
+                        })
+                      }
+                    }
+                  }
+                });
 
                 await ppp.user.functions.bulkWrite(
                   {
@@ -2060,6 +2128,53 @@ export class WidgetHeaderButtons extends PPPElement {
           `Закрыть виджет «${this.widget.document.name}» ?`
         )
       ) {
+        const bulkWritePayload = [];
+
+        for (const link of this.widget.document.linkedWidgets ?? []) {
+          const w = this.widget.container.widgets.find(
+            (w) => w.document.uniqueID === link
+          );
+
+          if (w && Array.isArray(w.document.linkedWidgets)) {
+            w.document.linkedWidgets = w.document.linkedWidgets.filter(
+              (l) => l !== this.widget.document.uniqueID
+            );
+            w.document.activeWidgetLink = this.widget.document.linkedWidgets[0];
+
+            Observable.notify(w, 'document');
+
+            w.restack();
+
+            bulkWritePayload.push({
+              updateOne: {
+                filter: {
+                  _id: w.container.document._id,
+                  'widgets.uniqueID': w.document.uniqueID
+                },
+                update: {
+                  $set: {
+                    'widgets.$.linkedWidgets': w.document.linkedWidgets,
+                    'widgets.$.activeWidgetLink': w.document.activeWidgetLink
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        if (bulkWritePayload.length) {
+          await ppp.user.functions.bulkWrite(
+            {
+              collection: 'workspaces'
+            },
+            bulkWritePayload,
+            {
+              ordered: false
+            }
+          );
+        }
+
+        Observable.notify(this.widget, 'document');
         this.widget.close();
       }
     } else {

@@ -476,6 +476,7 @@ export class WorkspacePage extends Page {
           }
         });
 
+        this.draggedWidget.repositionLinkedWidgets(event.shiftKey);
         this.draggedWidget = null;
       }
 

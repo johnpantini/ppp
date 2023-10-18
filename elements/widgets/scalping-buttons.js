@@ -4,7 +4,8 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetUnsupportedInstrumentTemplate
+  widgetUnsupportedInstrumentTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
@@ -46,6 +47,7 @@ export const scalpingButtonsWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         ${widgetUnsupportedInstrumentTemplate()}
         ${when(
           (x) =>

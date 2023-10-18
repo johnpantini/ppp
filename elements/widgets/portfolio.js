@@ -5,7 +5,8 @@ import {
   widgetStyles,
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
-  widgetDefaultHeaderTemplate
+  widgetDefaultHeaderTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import { WidgetColumns } from '../widget-columns.js';
 import {
@@ -98,6 +99,7 @@ export const portfolioWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         <div class="portfolio-header">
           <div class="portfolio-name-section">
             <div style="display: flex">

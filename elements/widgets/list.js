@@ -5,7 +5,8 @@ import {
   widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetWithInstrumentBodyTemplate
+  widgetWithInstrumentBodyTemplate,
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
@@ -54,6 +55,7 @@ export const listWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
+        ${widgetStackSelectorTemplate()}
         ${widgetWithInstrumentBodyTemplate(html` <div></div> `)}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
