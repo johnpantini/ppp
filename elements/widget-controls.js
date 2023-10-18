@@ -2121,13 +2121,17 @@ export class WidgetHeaderButtons extends PPPElement {
   }
 
   async closeWidget() {
-    if (!this.widget.preview && ppp.settings.get('confirmWidgetClosing')) {
-      if (
-        await ppp.app.confirm(
+    if (!this.widget.preview) {
+      let shouldCloseNow = true;
+
+      if (ppp.settings.get('confirmWidgetClosing')) {
+        shouldCloseNow = await ppp.app.confirm(
           'Закрытие виджета',
           `Закрыть виджет «${this.widget.document.name}» ?`
-        )
-      ) {
+        );
+      }
+
+      if (shouldCloseNow) {
         const bulkWritePayload = [];
 
         for (const link of this.widget.document.linkedWidgets ?? []) {
@@ -2177,8 +2181,6 @@ export class WidgetHeaderButtons extends PPPElement {
         Observable.notify(this.widget, 'document');
         this.widget.close();
       }
-    } else {
-      this.widget.close();
     }
   }
 }

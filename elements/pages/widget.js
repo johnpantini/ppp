@@ -311,7 +311,8 @@ export const widgetPageTemplate = html`
                           <div class="widget-settings-label-group">
                             <h5>Название</h5>
                             <p class="description">
-                              Будет отображаться в списке виджетов.
+                              Название отображается в заголовке (если виджет его
+                              поддерживает).
                             </p>
                           </div>
                           <div class="widget-settings-input-group">
@@ -1211,7 +1212,7 @@ export class WidgetPage extends Page {
       this.widgetDefinition.collection = null;
       this.widgetDefinition.loaded = false;
       this.widgetDefinition.description =
-        'Введите имя виджета и URL, чтобы продолжить.';
+        'Введите название виджета и его URL, чтобы продолжить.';
 
       this.endOperation();
 
