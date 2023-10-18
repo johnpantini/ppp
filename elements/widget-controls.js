@@ -1857,18 +1857,24 @@ export class WidgetHeaderButtons extends PPPElement {
         );
 
         if (Array.isArray(widgets)) {
-          const copy = {
-            // Normalized one from MongoDB
-            savedDocument: widgets?.find(
-              (w) => w.uniqueID === this.widget.document.uniqueID
-            ),
-            // Denormalized one, used for placement
-            liveDocument: Object.assign({}, this.widget.document)
-          };
+          const copy = ppp.app.widgetClipboard
+            ? ppp.app.widgetClipboard
+            : {
+                // Normalized one from MongoDB
+                savedDocument: widgets?.find(
+                  (w) => w.uniqueID === this.widget.document.uniqueID
+                ),
+                // Denormalized one, used for placement
+                liveDocument: Object.assign({}, this.widget.document)
+              };
 
           if (copy.savedDocument) {
             copy.savedDocument.uniqueID = uuidv4();
             copy.liveDocument.uniqueID = copy.savedDocument.uniqueID;
+            copy.liveDocument.x = parseInt(this.widget.style.left);
+            copy.liveDocument.y = parseInt(this.widget.style.top);
+            copy.liveDocument.width = parseInt(this.widget.style.width);
+            copy.liveDocument.height = parseInt(this.widget.style.height);
 
             container.document.widgets.push(copy.liveDocument);
             container.document.widgets[
@@ -2002,6 +2008,14 @@ export class WidgetHeaderButtons extends PPPElement {
                   }
                 });
 
+                if (ppp.app.widgetClipboard) {
+                  ppp.app.widgetClipboard = null;
+
+                  this.widget.container.showSuccessNotification(
+                    'Виджет из буфера обмена был удалён и помещён в ансамбль другого виджета.'
+                  );
+                }
+
                 await ppp.user.functions.bulkWrite(
                   {
                     collection: 'workspaces'
@@ -2107,6 +2121,8 @@ export class WidgetHeaderButtons extends PPPElement {
           container.document.widgets.push(newWidgetDocument);
 
           that.widget = await container.placeWidget(newWidgetDocument);
+
+          container.lastWidgetSubmissionTime = Date.now();
 
           page.showSuccessNotification('Виджет сохранён.');
         } catch (e) {

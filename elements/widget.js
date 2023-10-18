@@ -54,6 +54,8 @@ import {
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
 
+window.Observable = Observable;
+
 export const importInstrumentsSuggestionTemplate = (e) => html`
   <span>
     <a
@@ -232,11 +234,9 @@ export const widgetStackSelectorTemplate = () => html`
         html`
           <ppp-widget-tab id="${(x) => x}">
             ${(x, c) => {
-              const name = c.parent.container.widgets.find(
-                (w) => w.document.uniqueID === x
-              )?.document.nameWhenStacked;
-
-              return name || c.index + 1;
+              return (
+                c.parent.container.getWidgetNameWhenStacked(x) || c.index + 1
+              );
             }}
           </ppp-widget-tab>
           <ppp-tab-panel id="${(x) => `${x}-panel`}"></ppp-tab-panel>
@@ -778,6 +778,9 @@ export class Widget extends PPPElement {
 
   @observable
   document;
+
+  @observable
+  container;
 
   constructor() {
     super();

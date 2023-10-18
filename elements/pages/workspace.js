@@ -128,6 +128,10 @@ export class WorkspacePage extends Page {
   @observable
   workspace;
 
+  // Use this to trigger getWidgetNameWhenStacked().
+  @observable
+  lastWidgetSubmissionTime;
+
   collection = 'workspaces';
 
   zIndex = 10;
@@ -142,6 +146,7 @@ export class WorkspacePage extends Page {
     super();
 
     this.document.widgets = [];
+    this.lastWidgetSubmissionTime = Date.now();
 
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
@@ -149,6 +154,15 @@ export class WorkspacePage extends Page {
     this.onDblClick = this.onDblClick.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+  }
+
+  getWidgetNameWhenStacked(uniqueID) {
+    return (
+      this.lastWidgetSubmissionTime &&
+      (this.widgets.find((w) => w.document.uniqueID === uniqueID)?.document
+        .nameWhenStacked ??
+        '')
+    );
   }
 
   async onKeyDown(event) {
