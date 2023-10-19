@@ -9,14 +9,11 @@ import {
   Observable
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { maybeFetchError, validate } from '../../lib/ppp-errors.js';
-import {
-  enableMongoDBRealmHosting,
-  getMongoDBRealmAccessToken
-} from '../../lib/realm.js';
+import { maybeFetchError } from '../../lib/ppp-errors.js';
+import { HMAC, sha256 } from '../../lib/ppp-crypto.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from './api-yc.js';
 import { formatDateWithOptions, formatFileSize } from '../../lib/intl.js';
 import '../../vendor/zip-full.min.js';
-import '../../vendor/spark-md5.min.js';
 import '../banner.js';
 import '../button.js';
 import '../query-select.js';
@@ -43,13 +40,44 @@ export const restoreMongodbModalPageTemplate = html`
         >.
       </ppp-banner>
       <div class="spacing2"></div>
+      <ppp-query-select
+        style="max-width: 384px"
+        placeholder="Выберите API Yandex Cloud для загрузки списка копий"
+        ${ref('ycApiId')}
+        :context="${(x) => x}"
+        @change="${(x) => {
+          x.ycApiId.disabled = true;
+
+          return x.populateDocuments();
+        }}"
+        :query="${() => {
+          return (context) => {
+            return context.services
+              .get('mongodb-atlas')
+              .db('ppp')
+              .collection('apis')
+              .find({
+                $and: [
+                  {
+                    type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.YC%]`
+                  },
+                  { removed: { $ne: true } }
+                ]
+              })
+              .sort({ updatedAt: -1 });
+          };
+        }}"
+        :transform="${() => ppp.decryptDocumentsTransformation()}"
+      ></ppp-query-select>
+      <div class="spacing2"></div>
       <ppp-table
+        ?hidden="${(x) => !x.ycApiId.value}"
         :columns="${() => [
           {
             label: 'База данных'
           },
           {
-            label: 'Дата создания копии'
+            label: 'Дата создания'
           },
           {
             label: 'Размер'
@@ -61,9 +89,7 @@ export const restoreMongodbModalPageTemplate = html`
         :rows="${(x) =>
           x.documents
             ?.sort(
-              (a, b) =>
-                new Date(b.last_modified * 1000) -
-                new Date(a.last_modified * 1000)
+              (a, b) => new Date(b.lastModified) - new Date(a.lastModified)
             )
             ?.map((datum) => {
               return {
@@ -80,7 +106,7 @@ export const restoreMongodbModalPageTemplate = html`
                         : 'Альтернативная'}</a
                     >
                   `,
-                  formatDateWithOptions(datum.last_modified * 1000, {
+                  formatDateWithOptions(datum.lastModified, {
                     year: 'numeric',
                     month: 'numeric',
                     day: 'numeric',
@@ -260,7 +286,7 @@ export class RestoreMongodbModalPage extends Page {
       await ppp.app.confirm(
         'Восстановление из резервной копии',
         `Будет восстановлена база данных по резервной копии, созданной ${formatDateWithOptions(
-          datum.last_modified * 1000,
+          datum.lastModified,
           {
             year: 'numeric',
             month: 'numeric',
@@ -282,7 +308,7 @@ export class RestoreMongodbModalPage extends Page {
       await ppp.app.confirm(
         'Удаление резервной копии',
         `Будет удалена резервная копия, созданная ${formatDateWithOptions(
-          datum.last_modified * 1000,
+          datum.lastModified,
           {
             year: 'numeric',
             month: 'numeric',
@@ -298,34 +324,41 @@ export class RestoreMongodbModalPage extends Page {
       this.beginOperation();
 
       try {
-        const groupId = ppp.keyVault.getKey('mongo-group-id');
-        const appId = ppp.keyVault.getKey('mongo-app-id');
-        const mongoDBRealmAccessToken = await getMongoDBRealmAccessToken();
+        const { ycStaticKeyID, ycStaticKeySecret } = this.ycApiId.datum();
+        const { host, key } = datum;
+        const xAmzDate =
+          new Date()
+            .toISOString()
+            .replaceAll('-', '')
+            .replaceAll(':', '')
+            .split('.')[0] + 'Z';
+        const date = xAmzDate.split('T')[0];
+        const signingKey = await generateYCAWSSigningKey({
+          ycStaticKeySecret,
+          date
+        });
+        const canonicalRequest = `DELETE\n/${key}\n\nhost:${host}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-date\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`;
+        const scope = `${date}/ru-central1/s3/aws4_request`;
+        const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+          canonicalRequest
+        )}`;
+        const signature = await HMAC(signingKey, stringToSign, {
+          format: 'hex'
+        });
+        const Authorization = `AWS4-HMAC-SHA256 Credential=${ycStaticKeyID}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-date, Signature=${signature}`;
 
         await maybeFetchError(
-          await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
-            {
-              cache: 'reload',
-              method: 'POST',
-              body: JSON.stringify({
-                method: 'DELETE',
-                url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/assets/asset?path=${encodeURIComponent(
-                  datum.path
-                )}`,
-                headers: {
-                  Authorization: `Bearer ${mongoDBRealmAccessToken}`
-                }
-              })
+          await ppp.fetch(`https://${host}/${key}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization,
+              'X-Amz-Date': xAmzDate
             }
-          ),
+          }),
           'Не удалось удалить резервную копию.'
         );
 
-        const index = this.documents.findIndex((d) => d.path === datum.path);
+        const index = this.documents.findIndex((d) => d.url === datum.url);
 
         if (index > -1) {
           this.documents.splice(index, 1);
@@ -342,42 +375,86 @@ export class RestoreMongodbModalPage extends Page {
   }
 
   async populate() {
-    const groupId = ppp.keyVault.getKey('mongo-group-id');
-    const appId = ppp.keyVault.getKey('mongo-app-id');
-    const mongoDBRealmAccessToken = await getMongoDBRealmAccessToken();
-    const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
+    if (!this.ycApiId.value) {
+      return;
+    }
 
-    await enableMongoDBRealmHosting({
-      groupId,
-      appId,
-      serviceMachineUrl,
-      mongoDBRealmAccessToken
+    const {
+      ycServiceAccountID,
+      ycPublicKeyID,
+      ycPrivateKey,
+      ycStaticKeyID,
+      ycStaticKeySecret
+    } = this.ycApiId.datum();
+    const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+      ycServiceAccountID,
+      ycPublicKeyID,
+      ycPrivateKey
     });
 
-    const request = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
-      {
-        cache: 'reload',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/assets?prefix=%2Fbackups%2F`,
+    const rBucketList = await maybeFetchError(
+      await ppp.fetch(
+        `https://storage.api.cloud.yandex.net/storage/v1/buckets?folderId=${psinaFolderId}`,
+        {
           headers: {
-            Authorization: `Bearer ${mongoDBRealmAccessToken}`
+            Authorization: `Bearer ${iamToken}`
           }
-        })
-      }
+        }
+      ),
+      'Не удалось получить список бакетов. Проверьте права доступа.'
     );
 
-    if (request.status === 404) {
-      return [];
-    } else {
-      await maybeFetchError(
-        request,
-        'Не удалось получить список резервных копий.'
+    const bucketList = await rBucketList.json();
+    let backupsBucket = bucketList?.buckets?.find((b) =>
+      /^ppp-backups-/.test(b.name)
+    );
+
+    if (backupsBucket) {
+      const host = `${backupsBucket.name}.storage.yandexcloud.net`;
+      const xAmzDate =
+        new Date()
+          .toISOString()
+          .replaceAll('-', '')
+          .replaceAll(':', '')
+          .split('.')[0] + 'Z';
+      const date = xAmzDate.split('T')[0];
+      const signingKey = await generateYCAWSSigningKey({
+        ycStaticKeySecret,
+        date
+      });
+      const canonicalRequest = `GET\n/\nlist-type=2\nhost:${host}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-date\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`;
+      const scope = `${date}/ru-central1/s3/aws4_request`;
+      const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+        canonicalRequest
+      )}`;
+      const signature = await HMAC(signingKey, stringToSign, { format: 'hex' });
+      const Authorization = `AWS4-HMAC-SHA256 Credential=${ycStaticKeyID}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-date, Signature=${signature}`;
+
+      const rObjectList = await maybeFetchError(
+        await ppp.fetch(`https://${host}/?list-type=2`, {
+          headers: {
+            Authorization,
+            'X-Amz-Date': xAmzDate
+          }
+        }),
+        'Не удалось выгрузить список резервных копий.'
       );
 
-      return request.json();
+      const xml = await rObjectList.text();
+      const parser = new DOMParser();
+      const list = parser.parseFromString(xml, 'application/xml');
+
+      return Array.from(list.querySelectorAll('Contents') ?? []).map((node) => {
+        const key = node.querySelector('Key').textContent;
+
+        return {
+          url: `https://${host}/${key}`,
+          key,
+          host,
+          lastModified: node.querySelector('LastModified').textContent,
+          size: parseFloat(node.querySelector('Size').textContent)
+        };
+      });
     }
   }
 }

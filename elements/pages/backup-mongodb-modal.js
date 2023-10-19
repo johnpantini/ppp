@@ -3,13 +3,15 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, attr } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import {
-  enableMongoDBRealmHosting,
-  getMongoDBRealmAccessToken
-} from '../../lib/realm.js';
+  maybeFetchError,
+  validate,
+  invalidate,
+  ValidationError
+} from '../../lib/ppp-errors.js';
+import { HMAC, uuidv4, sha256 } from '../../lib/ppp-crypto.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from './api-yc.js';
 import '../../vendor/zip-full.min.js';
-import '../../vendor/spark-md5.min.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
@@ -20,10 +22,10 @@ export const backupMongodbModalPageTemplate = html`
     <form novalidate>
       <section>
         <div class="label-group full">
-          <h5>Прокси MongoDB Realm</h5>
+          <h5>API Yandex Cloud</h5>
           <p class="description">
-            Сервис Cloudflare Worker, который будет использован для загрузки
-            файлов на хостинг MongoDB Realm.
+            API, который будет использован для выгрузки резервной копии в
+            облачное хранилище.
           </p>
           <div class="spacing2"></div>
           <ppp-checkbox checked ${ref('downloadBackupFile')}>
@@ -32,20 +34,19 @@ export const backupMongodbModalPageTemplate = html`
         </div>
         <div class="input-group">
           <ppp-query-select
-            ${ref('mongodbRealmProxyServiceId')}
+            ${ref('ycApiId')}
             :context="${(x) => x}"
             :query="${() => {
               return (context) => {
                 return context.services
                   .get('mongodb-atlas')
                   .db('ppp')
-                  .collection('services')
+                  .collection('apis')
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.YC%]`
                       },
-                      { workerPredefinedTemplate: 'mongoDBRealm' },
                       { removed: { $ne: true } }
                     ]
                   })
@@ -91,7 +92,7 @@ export class BackupMongodbModalPage extends Page {
     this.beginOperation();
 
     try {
-      await validate(this.mongodbRealmProxyServiceId);
+      await validate(this.ycApiId);
 
       const collections = [
         'apis',
@@ -130,69 +131,116 @@ export class BackupMongodbModalPage extends Page {
       }
 
       const zipBlob = await this.zipWriter.close();
-      const now = Date.now();
-      const groupId = ppp.keyVault.getKey('mongo-group-id');
-      const appId = ppp.keyVault.getKey('mongo-app-id');
-      const mongoDBRealmAccessToken = await getMongoDBRealmAccessToken();
-      const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
-
-      await enableMongoDBRealmHosting({
-        groupId,
-        appId,
-        serviceMachineUrl,
-        mongoDBRealmAccessToken
+      const {
+        ycServiceAccountID,
+        ycPublicKeyID,
+        ycPrivateKey,
+        ycStaticKeyID,
+        ycStaticKeySecret
+      } = this.ycApiId.datum();
+      const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+        ycServiceAccountID,
+        ycPublicKeyID,
+        ycPrivateKey
       });
 
-      const fd = new FormData();
+      const rBucketList = await maybeFetchError(
+        await ppp.fetch(
+          `https://storage.api.cloud.yandex.net/storage/v1/buckets?folderId=${psinaFolderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${iamToken}`
+            }
+          }
+        ),
+        'Не удалось получить список бакетов. Проверьте права доступа.'
+      );
+
+      const bucketList = await rBucketList.json();
+      let backupsBucket = bucketList?.buckets?.find((b) =>
+        /^ppp-backups-/.test(b.name)
+      );
+
+      if (!backupsBucket) {
+        // Create new bucket.
+        const rNewBucket = await maybeFetchError(
+          await ppp.fetch(
+            `https://storage.api.cloud.yandex.net/storage/v1/buckets`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${iamToken}`
+              },
+              body: JSON.stringify({
+                name: `ppp-backups-${uuidv4()}`,
+                folderId: psinaFolderId,
+                defaultStorageClass: 'STANDARD',
+                // 1 GB
+                maxSize: 1024 ** 3,
+                anonymousAccessFlags: {
+                  read: true,
+                  list: false,
+                  configRead: false
+                }
+              })
+            }
+          ),
+          'Не удалось создать бакет для резервных копий.'
+        );
+
+        backupsBucket = (await rNewBucket.json()).response;
+      }
+
+      const now = Date.now();
+      let key = `backup-of-${
+        this.cloud ? 'cloud' : 'alternative'
+      }-mongodb-${now}.zip`;
       const reader = new FileReader();
 
       reader.readAsArrayBuffer(zipBlob);
 
-      const hash = await new Promise((resolve) => {
-        reader.onloadend = async function () {
-          resolve(SparkMD5.ArrayBuffer.hash(reader.result));
-        };
+      const host = `${backupsBucket.name}.storage.yandexcloud.net`;
+      const xAmzDate =
+        new Date()
+          .toISOString()
+          .replaceAll('-', '')
+          .replaceAll(':', '')
+          .split('.')[0] + 'Z';
+      const date = xAmzDate.split('T')[0];
+      const signingKey = await generateYCAWSSigningKey({
+        ycStaticKeySecret,
+        date
       });
-
-      const backupRelativeUrl = `/backups/backup-of-${
-        this.cloud ? 'cloud' : 'alternative'
-      }-mongodb-${now}.zip`;
-
-      fd.set(
-        'meta',
-        JSON.stringify({
-          path: backupRelativeUrl,
-          size: zipBlob.size,
-          attrs: [
-            {
-              name: 'Cache-Control',
-              value: 'no-cache'
-            },
-            {
-              name: 'Content-Disposition',
-              value: 'attachment'
-            }
-          ],
-          hash
-        })
+      const hashBuffer = await crypto.subtle.digest(
+        'SHA-256',
+        await zipBlob.arrayBuffer()
       );
-      fd.set('file', zipBlob);
-
-      const proxyDatum = this.mongodbRealmProxyServiceId.datum();
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashedPayload = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      const canonicalRequest = `PUT\n/${encodeURIComponent(
+        key
+      )}\n\nhost:${host}\nx-amz-content-sha256:${hashedPayload}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-content-sha256;x-amz-date\n${hashedPayload}`;
+      const scope = `${date}/ru-central1/s3/aws4_request`;
+      const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+        canonicalRequest
+      )}`;
+      const signature = await HMAC(signingKey, stringToSign, { format: 'hex' });
+      const Authorization = `AWS4-HMAC-SHA256 Credential=${ycStaticKeyID}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=${signature}`;
 
       await maybeFetchError(
-        await fetch(
-          `https://ppp-${proxyDatum._id}.${proxyDatum.subdomain}.workers.dev/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/assets/asset`,
-          {
-            cache: 'reload',
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            },
-            body: fd
-          }
-        ),
-        'Не удалось загрузить резервную копию в облачное хранилище MongoDB Realm.'
+        await ppp.fetch(`https://${host}/${key}`, {
+          method: 'PUT',
+          headers: {
+            Authorization,
+            'x-amz-date': xAmzDate,
+            'x-amz-content-sha256': hashedPayload
+          },
+          body: zipBlob
+        }),
+        'Не удалось загрузить резервную копию в облачное хранилище.'
       );
 
       if (this.downloadBackupFile.checked) {
@@ -217,21 +265,6 @@ export class BackupMongodbModalPage extends Page {
         );
         link.remove();
       }
-
-      await maybeFetchError(
-        await fetch(
-          `https://ppp-${proxyDatum._id}.${proxyDatum.subdomain}.workers.dev/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/cache`,
-          {
-            cache: 'reload',
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            },
-            body: JSON.stringify({ invalidate: true, path: '/*' })
-          }
-        ),
-        'Не удалось сбросить кэш облачного хранилища MongoDB Realm.'
-      );
 
       ppp.app.mountPointModal.setAttribute('hidden', '');
 

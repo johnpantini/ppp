@@ -653,7 +653,8 @@ class PPP {
         body: JSON.stringify({
           method: options.method ?? 'GET',
           url,
-          headers: options.headers ?? {}
+          headers: options.headers ?? {},
+          body: options.body
         })
       });
     }

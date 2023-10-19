@@ -137,6 +137,10 @@ export const modalStyles = css`
     width: 400px;
   }
 
+  :host(.medium) .content {
+    width: 550px;
+  }
+
   :host(.large) .content {
     width: 720px;
   }

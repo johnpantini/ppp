@@ -667,8 +667,7 @@ export class CloudServicesPage extends Page {
         title: isCloud
           ? 'Восстановить облачную базу'
           : 'Восстановить альтернативную базу',
-        size: 'large',
-        autoRead: true
+        size: 'mediuum'
       });
 
       if (isCloud) {

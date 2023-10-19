@@ -7,6 +7,7 @@ import {
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
+import { HMAC } from '../../lib/ppp-crypto.js';
 import { APIS } from '../../lib/const.js';
 import * as jose from '../../vendor/jose.min.js';
 import '../badge.js';
@@ -83,6 +84,32 @@ export const apiYcPageTemplate = html`
           ></ppp-snippet>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Идентификатор статического ключа</h5>
+          <p class="description">Требуется для доступа к хранилищу объектов.</p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            placeholder="YC"
+            value="${(x) => x.document.ycStaticKeyID}"
+            ${ref('ycStaticKeyID')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Секрет статического ключа</h5>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="password"
+            placeholder="YC"
+            value="${(x) => x.document.ycStaticKeySecret}"
+            ${ref('ycStaticKeySecret')}
+          ></ppp-text-field>
+        </div>
+      </section>
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -117,6 +144,101 @@ export async function generateYandexIAMToken({
     .sign(key);
 }
 
+export async function generateYCAWSSigningKey({ ycStaticKeySecret, date }) {
+  const dateKey = await HMAC(`AWS4${ycStaticKeySecret}`, date);
+  const regionKey = await HMAC(dateKey, 'ru-central1');
+  const serviceKey = await HMAC(regionKey, 's3');
+
+  return HMAC(serviceKey, 'aws4_request');
+}
+
+export async function getYCPsinaFolder({
+  ycServiceAccountID,
+  ycPublicKeyID,
+  ycPrivateKey
+}) {
+  let jwt;
+
+  try {
+    jwt = await generateYandexIAMToken({
+      ycServiceAccountID,
+      ycPublicKeyID,
+      ycPrivateKey
+    });
+  } catch (e) {
+    invalidate(ppp.app.toast, {
+      errorMessage: 'Не удалось сгенерировать JWT-токен.',
+      raiseException: true
+    });
+  }
+
+  const iamTokenRequest = await ppp.fetch(
+    'https://iam.api.cloud.yandex.net/iam/v1/tokens',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ jwt })
+    }
+  );
+
+  await maybeFetchError(
+    iamTokenRequest,
+    'Не удалось получить IAM-токен. Проверьте правильность ключей Yandex Cloud.'
+  );
+
+  const { iamToken } = await iamTokenRequest.json();
+  const rCloudList = await maybeFetchError(
+    await ppp.fetch(
+      'https://resource-manager.api.cloud.yandex.net/resource-manager/v1/clouds',
+      {
+        headers: {
+          Authorization: `Bearer ${iamToken}`
+        }
+      }
+    ),
+    'Не удалось получить список облачных ресурсов Yandex Cloud.'
+  );
+
+  const { clouds } = await rCloudList.json();
+  const pppCloud = clouds?.find((c) => c.name === 'ppp');
+
+  if (!pppCloud) {
+    invalidate(ppp.app.toast, {
+      errorMessage: 'Облако под названием ppp не найдено в Yandex Cloud.',
+      raiseException: true
+    });
+  }
+
+  const rFolderList = await maybeFetchError(
+    await ppp.fetch(
+      `https://resource-manager.api.cloud.yandex.net/resource-manager/v1/folders?cloudId=${pppCloud.id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${iamToken}`
+        }
+      }
+    ),
+    'Не удалось получить список каталогов облака ppp Yandex Cloud.'
+  );
+
+  const { folders } = await rFolderList.json();
+  const psinaFolder = folders?.find(
+    (f) => f.name === 'psina' && f.status === 'ACTIVE'
+  );
+
+  if (!psinaFolder) {
+    invalidate(ppp.app.toast, {
+      errorMessage:
+        'Каталог psina не найден либо неактивен в облаке ppp Yandex Cloud.',
+      raiseException: true
+    });
+  }
+
+  return { psinaFolderId: psinaFolder.id, iamToken };
+}
+
 export class ApiYcPage extends Page {
   collection = 'apis';
 
@@ -125,6 +247,8 @@ export class ApiYcPage extends Page {
     await validate(this.ycServiceAccountID);
     await validate(this.ycPublicKeyID);
     await validate(this.ycPrivateKey);
+    await validate(this.ycStaticKeyID);
+    await validate(this.ycStaticKeySecret);
 
     let jwt;
 
@@ -187,6 +311,8 @@ export class ApiYcPage extends Page {
         ycServiceAccountID: this.ycServiceAccountID.value.trim(),
         ycPublicKeyID: this.ycPublicKeyID.value.trim(),
         ycPrivateKey: this.ycPrivateKey.value.trim(),
+        ycStaticKeyID: this.ycStaticKeyID.value.trim(),
+        ycStaticKeySecret: this.ycStaticKeySecret.value.trim(),
         version: 1,
         updatedAt: new Date()
       },
