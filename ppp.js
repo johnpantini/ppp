@@ -650,12 +650,15 @@ class PPP {
       return fetch(new URL('fetch', serviceMachineUrl).toString(), {
         method: 'POST',
         cache: 'reload',
-        body: JSON.stringify({
-          method: options.method ?? 'GET',
-          url,
-          headers: options.headers ?? {},
-          body: options.body
-        })
+        body:
+          options.body instanceof Blob || options.body instanceof FormData
+            ? options.body
+            : JSON.stringify({
+                method: options.method ?? 'GET',
+                url,
+                headers: options.headers ?? {},
+                body: options.body
+              })
       });
     }
   }

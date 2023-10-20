@@ -14,7 +14,8 @@ import {
   when,
   ref,
   observable,
-  attr
+  attr,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
@@ -276,8 +277,32 @@ export class LightChartWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  resizeChart() {
+    Updates.enqueue(() => {
+      if (this.chart) {
+        const { width, height } = getComputedStyle(this);
+
+        if (this.stackSelector.hasAttribute('hidden')) {
+          this.chart.resize(parseInt(width) - 2, parseInt(height) - 32);
+        } else {
+          this.chart.resize(
+            parseInt(width) - 2,
+            parseInt(height) -
+              32 -
+              parseInt(getComputedStyle(this.stackSelector).height)
+          );
+        }
+      }
+    });
+  }
+
   onResize({ width, height }) {
-    this.chart && this.chart.resize(width - 2, height - 32);
+    this.resizeChart();
+  }
+
+  restack() {
+    super.restack();
+    this.resizeChart();
   }
 
   priceFormatter(price) {
@@ -308,9 +333,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       }
     });
 
-    const { width, height } = getComputedStyle(this);
-
-    this.chart.resize(parseInt(width) - 2, parseInt(height) - 32);
+    this.resizeChart();
 
     this.mainSeries = this.chart.addCandlestickSeries({
       downColor: chartDownColor.$value,

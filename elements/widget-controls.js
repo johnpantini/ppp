@@ -1892,9 +1892,7 @@ export class WidgetHeaderButtons extends PPPElement {
                   copy.liveDocument
                 );
 
-                if (typeof this.widget.document.linkedWidgets === 'undefined') {
-                  this.widget.document.linkedWidgets = [];
-                }
+                this.widget.document.linkedWidgets ??= [];
 
                 // Add parent immediately.
                 const linkedWidgets = [this.widget.document.uniqueID];
@@ -1909,9 +1907,7 @@ export class WidgetHeaderButtons extends PPPElement {
                   );
 
                   if (widget) {
-                    if (typeof widget.document.linkedWidgets === 'undefined') {
-                      widget.document.linkedWidgets = [];
-                    }
+                    widget.document.linkedWidgets ??= [];
 
                     if (
                       !widget.document.linkedWidgets.includes(
