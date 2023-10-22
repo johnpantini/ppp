@@ -129,6 +129,15 @@ class UtexMarginStocksTraderGlobalDatum extends GlobalTraderDatum {
   // The same goes for other global datums.
   doNotClearValue = true;
 
+  filter(data, source, key, datum) {
+    // Check if the instrument exists.
+    if (typeof data.symbolId === 'number') {
+      return this.trader.symbols.has(data.symbolId);
+    }
+
+    return true;
+  }
+
   firstReferenceAdded(source, field, datum) {
     if (this.value.size) {
       for (const [key, data] of this.value) {
