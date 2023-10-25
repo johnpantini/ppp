@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -10,7 +11,6 @@ import { BROKERS } from '../../lib/const.js';
 import '../badge.js';
 import '../button.js';
 import '../text-field.js';
-import ppp from '../../ppp.js';
 
 export const brokerFinamPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -68,18 +68,12 @@ export const brokerFinamPageStyles = css`
 `;
 
 export async function checkFinamAPIToken({ token }) {
-  return fetch(
-    new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+  return ppp.fetch(
+    'https://trade-api.finam.ru/public/api/v1/access-tokens/check',
     {
-      cache: 'no-cache',
-      method: 'POST',
-      body: JSON.stringify({
-        method: 'GET',
-        url: 'https://trade-api.finam.ru/public/api/v1/access-tokens/check',
-        headers: {
-          'X-Api-Key': token
-        }
-      })
+      headers: {
+        'X-Api-Key': token
+      }
     }
   );
 }

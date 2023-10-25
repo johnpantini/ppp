@@ -197,24 +197,16 @@ export class ApiAstraDbPage extends Page {
 
       try {
         await maybeFetchError(
-          await fetch(
+          await ppp.fetch(
             new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
+              `/api/rest/v2/schemas/keyspaces/${this.document.dbKeyspace}/tables/${table}`,
+              `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
             ).toString(),
             {
-              cache: 'no-cache',
-              method: 'POST',
-              body: JSON.stringify({
-                method: 'DELETE',
-                url: new URL(
-                  `/api/rest/v2/schemas/keyspaces/${this.document.dbKeyspace}/tables/${table}`,
-                  `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com`
-                ).toString(),
-                headers: {
-                  'X-Cassandra-Token': this.document.dbToken
-                }
-              })
+              method: 'DELETE',
+              headers: {
+                'X-Cassandra-Token': this.document.dbToken
+              }
             }
           )
         );
@@ -265,8 +257,7 @@ export class ApiAstraDbPage extends Page {
         await checkAstraDbCredentials({
           dbUrl: `https://${this.dbID.value.trim()}-${this.dbRegion.value.trim()}.apps.astra.datastax.com`,
           dbKeyspace: this.dbKeyspace.value.trim(),
-          dbToken: this.dbToken.value.trim(),
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url')
+          dbToken: this.dbToken.value.trim()
         })
       ).ok
     ) {
@@ -302,7 +293,7 @@ export class ApiAstraDbPage extends Page {
     this.beginOperation();
 
     try {
-      const request = await ppp.fetch(
+      const res = await ppp.fetch(
         `https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections/stats`,
         {
           headers: {
@@ -312,11 +303,11 @@ export class ApiAstraDbPage extends Page {
       );
 
       await maybeFetchError(
-        request,
+        res,
         'Не удалось прочитать документ с состоянием базы.'
       );
 
-      const json = await request.json();
+      const json = await res.json();
       const time = json?.data?.heartbeat?.updatedAt;
 
       if (typeof time === 'undefined') {

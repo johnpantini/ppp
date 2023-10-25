@@ -86,20 +86,16 @@ export const botPageTemplate = html`
                   if (typeof context.http === 'undefined') {
                     return fetch(
                       new URL(
-                        'fetch',
-                        '[%#ppp.keyVault.getKey("service-machine-url")%]'
+                        '/api/admin/v3.0/groups/[%#ppp.keyVault.getKey("mongo-group-id")%]/apps/[%#ppp.keyVault.getKey("mongo-app-id")%]/endpoints',
+                        '[%#ppp.keyVault.getKey("global-proxy-url")%]'
                       ).toString(),
                       {
-                        cache: 'no-cache',
-                        method: 'POST',
-                        body: JSON.stringify({
-                          method: 'GET',
-                          url: 'https://realm.mongodb.com/api/admin/v3.0/groups/[%#ppp.keyVault.getKey("mongo-group-id")%]/apps/[%#ppp.keyVault.getKey("mongo-app-id")%]/endpoints',
-                          headers: {
-                            Authorization:
-                              'Bearer [%#(await this.getMongoDBRealmAccessToken())%]'
-                          }
-                        })
+                        headers: {
+                          Authorization:
+                            'Bearer [%#(await this.getMongoDBRealmAccessToken())%]',
+                          'X-Host': 'realm.mongodb.com',
+                          'X-Allowed-Headers': 'Authorization'
+                        }
                       }
                     )
                       .then((response) => response.json())
@@ -157,15 +153,10 @@ export const botPageStyles = css`
 export class BotPage extends Page {
   collection = 'bots';
 
-  async getMongoDBRealmAccessToken({
-    username,
-    apiKey,
-    serviceMachineUrl
-  } = {}) {
+  async getMongoDBRealmAccessToken({ username, apiKey } = {}) {
     return getMongoDBRealmAccessToken({
       username,
-      apiKey,
-      serviceMachineUrl
+      apiKey
     });
   }
 

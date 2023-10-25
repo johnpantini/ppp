@@ -69,17 +69,11 @@ export const brokerUtexPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkUtexCredentials({
-  serviceMachineUrl,
-  login,
-  password
-}) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
+export async function checkUtexCredentials({ login, password }) {
+  return ppp.fetch(
+    'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
+    {
       method: 'POST',
-      url: 'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
       headers: {
         'User-Agent': navigator.userAgent,
         'Content-Type': 'application/json'
@@ -92,8 +86,8 @@ export async function checkUtexCredentials({
         product: 'UTEX',
         locale: 'ru'
       })
-    })
-  });
+    }
+  );
 }
 
 export class BrokerUtexPage extends Page {
@@ -104,19 +98,18 @@ export class BrokerUtexPage extends Page {
     await validate(this.login);
     await validate(this.password);
 
-    const request = await checkUtexCredentials({
-      serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
+    const response = await checkUtexCredentials({
       login: this.login.value.trim(),
       password: this.password.value.trim()
     });
-    const json = await request.json();
+    const json = await response.json();
 
     if (/UserSoftBlockedException|BlockingException/i.test(json?.type)) {
       invalidate(this.login, {
         errorMessage: 'Учётная запись временно заблокирована',
         raiseException: true
       });
-    } else if (!request.ok) {
+    } else if (!response.ok) {
       invalidate(this.login, {
         errorMessage: 'Неверный логин или пароль',
         raiseException: true

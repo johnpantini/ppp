@@ -1,11 +1,7 @@
 {
   "name": "ppp",
-  "version": "4.10.1",
+  "version": "5.0.0",
   "description": "ppp monorepo",
   "author": "johnpantini",
-  "main": "ppp-dyno.mjs",
-  "scripts": {
-    "start": "node ppp-dyno.mjs"
-  },
   "license": "MIT"
 }

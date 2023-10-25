@@ -399,31 +399,23 @@ class UtexMarginStocksTrader extends USTrader {
 
             if (isJWTTokenExpired(savedAccessToken)) {
               if (isJWTTokenExpired(savedRefreshToken)) {
-                const tokensRequest = await fetch(
-                  new URL(
-                    'fetch',
-                    ppp.keyVault.getKey('service-machine-url')
-                  ).toString(),
+                const tokensRequest = await ppp.fetch(
+                  'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
                   {
-                    cache: 'reload',
                     method: 'POST',
+                    headers: {
+                      Origin: 'https://utex.io',
+                      Referer: 'https://utex.io/',
+                      'User-Agent': navigator.userAgent,
+                      'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                      method: 'POST',
-                      url: 'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
-                      headers: {
-                        Origin: 'https://utex.io',
-                        Referer: 'https://utex.io/',
-                        'User-Agent': navigator.userAgent,
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({
-                        realm: 'aurora',
-                        clientId: 'utexweb',
-                        loginOrEmail: this.document.broker.login,
-                        password: this.document.broker.password,
-                        product: 'UTEX',
-                        locale: 'ru'
-                      })
+                      realm: 'aurora',
+                      clientId: 'utexweb',
+                      loginOrEmail: this.document.broker.login,
+                      password: this.document.broker.password,
+                      product: 'UTEX',
+                      locale: 'ru'
                     })
                   }
                 );
@@ -431,28 +423,20 @@ class UtexMarginStocksTrader extends USTrader {
                 tokensResponse = await tokensRequest.json();
               } else {
                 // Refresh token is OK - try to refresh access token.
-                const refreshAuthRequest = await fetch(
-                  new URL(
-                    'fetch',
-                    ppp.keyVault.getKey('service-machine-url')
-                  ).toString(),
+                const refreshAuthRequest = await ppp.fetch(
+                  'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.refreshAuthorization',
                   {
-                    cache: 'reload',
                     method: 'POST',
+                    headers: {
+                      Origin: 'https://utex.io',
+                      Referer: 'https://utex.io/',
+                      'User-Agent': navigator.userAgent,
+                      'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                      method: 'POST',
-                      url: 'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.refreshAuthorization',
-                      headers: {
-                        Origin: 'https://utex.io',
-                        Referer: 'https://utex.io/',
-                        'User-Agent': navigator.userAgent,
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({
-                        realm: 'aurora',
-                        clientId: 'utexweb',
-                        refreshToken: savedRefreshToken
-                      })
+                      realm: 'aurora',
+                      clientId: 'utexweb',
+                      refreshToken: savedRefreshToken
                     })
                   }
                 );
@@ -891,27 +875,22 @@ class UtexMarginStocksTrader extends USTrader {
     if (order.orderType === 'limit') {
       await this.ensureAccessTokenIsOk();
 
-      const request = await fetch(
-        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      const request = await ppp.fetch(
+        'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileExecutionService.cancelOrderByExchangeOrderId',
         {
-          cache: 'reload',
           method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            'Content-Type': 'application/json;charset=UTF-8',
+            'User-Agent': navigator.userAgent,
+            Origin: 'https://margin.utex.io',
+            Referer: 'https://margin.utex.io/',
+            'x-b3-spanid': generateTraceId(),
+            'x-b3-traceid': generateTraceId()
+          },
           body: JSON.stringify({
-            method: 'POST',
-            url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileExecutionService.cancelOrderByExchangeOrderId',
-            body: JSON.stringify({
-              exchangeOrderId: order.orderId,
-              orderSymbolId: order.instrument.utexSymbolID
-            }),
-            headers: {
-              Authorization: `Bearer ${this.accessToken}`,
-              'Content-Type': 'application/json;charset=UTF-8',
-              'User-Agent': navigator.userAgent,
-              Origin: 'https://margin.utex.io',
-              Referer: 'https://margin.utex.io/',
-              'x-b3-spanid': generateTraceId(),
-              'x-b3-traceid': generateTraceId()
-            }
+            exchangeOrderId: order.orderId,
+            orderSymbolId: order.instrument.utexSymbolID
           })
         }
       );
@@ -928,32 +907,25 @@ class UtexMarginStocksTrader extends USTrader {
   async placeLimitOrder({ instrument, price, quantity, direction }) {
     await this.ensureAccessTokenIsOk();
 
-    const orderRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const orderRequest = await ppp.fetch(
+      'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileExecutionService.createLimitOrder',
       {
-        cache: 'reload',
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json;charset=UTF-8',
+          'User-Agent': navigator.userAgent,
+          Origin: 'https://margin.utex.io',
+          Referer: 'https://margin.utex.io/',
+          'x-b3-spanid': generateTraceId(),
+          'x-b3-traceid': generateTraceId()
+        },
         body: JSON.stringify({
-          method: 'POST',
-          url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileExecutionService.createLimitOrder',
-          body: JSON.stringify({
-            price: Math.round(
-              +this.fixPrice(instrument, price) * 1e8
-            ).toString(),
-            side: direction.toUpperCase(),
-            qty: (quantity * instrument.lot).toString(),
-            symbolId: instrument.utexSymbolID,
-            tif: 'GTC'
-          }),
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json;charset=UTF-8',
-            'User-Agent': navigator.userAgent,
-            Origin: 'https://margin.utex.io',
-            Referer: 'https://margin.utex.io/',
-            'x-b3-spanid': generateTraceId(),
-            'x-b3-traceid': generateTraceId()
-          }
+          price: Math.round(+this.fixPrice(instrument, price) * 1e8).toString(),
+          side: direction.toUpperCase(),
+          qty: (quantity * instrument.lot).toString(),
+          symbolId: instrument.utexSymbolID,
+          tif: 'GTC'
         })
       }
     );
@@ -974,28 +946,22 @@ class UtexMarginStocksTrader extends USTrader {
   async placeMarketOrder({ instrument, quantity, direction }) {
     await this.ensureAccessTokenIsOk();
 
-    const orderRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const orderRequest = await ppp.fetch(
+      'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileExecutionService.createMarketOrder',
       {
-        cache: 'reload',
-        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
+          'Content-Type': 'application/json;charset=UTF-8',
+          'User-Agent': navigator.userAgent,
+          Origin: 'https://margin.utex.io',
+          Referer: 'https://margin.utex.io/',
+          'x-b3-spanid': generateTraceId(),
+          'x-b3-traceid': generateTraceId()
+        },
         body: JSON.stringify({
-          method: 'POST',
-          url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileExecutionService.createMarketOrder',
-          body: JSON.stringify({
-            qty: (quantity * instrument.lot).toString(),
-            side: direction.toUpperCase(),
-            symbolId: instrument.utexSymbolID
-          }),
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-            'Content-Type': 'application/json;charset=UTF-8',
-            'User-Agent': navigator.userAgent,
-            Origin: 'https://margin.utex.io',
-            Referer: 'https://margin.utex.io/',
-            'x-b3-spanid': generateTraceId(),
-            'x-b3-traceid': generateTraceId()
-          }
+          qty: (quantity * instrument.lot).toString(),
+          side: direction.toUpperCase(),
+          symbolId: instrument.utexSymbolID
         })
       }
     );

@@ -1,4 +1,3 @@
-import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -43,59 +42,6 @@ export const brokerBinancePageTemplate = html`
 export const brokerBinancePageStyles = css`
   ${pageStyles}
 `;
-
-export async function checkBinanceCredentials({
-  serviceMachineUrl,
-  apiKey,
-  secret
-}) {
-  const stringifyKeyValuePair = ([key, value]) => {
-    const valueString = Array.isArray(value)
-      ? `["${value.join('","')}"]`
-      : value;
-
-    return `${key}=${encodeURIComponent(valueString)}`;
-  };
-
-  const buildQueryString = (params) => {
-    if (!params) return '';
-
-    return Object.entries(params).map(stringifyKeyValuePair).join('&');
-  };
-
-  const timestamp = Date.now();
-  const queryString = buildQueryString({ timestamp });
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signature = Array.from(
-    new Uint8Array(
-      await crypto.subtle.sign(
-        'HMAC',
-        key,
-        new TextEncoder().encode(queryString)
-      )
-    )
-  )
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
-
-  return await fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: `https://api.binance.com/api/v3/account?${queryString}&signature=${signature}`,
-      headers: {
-        'X-MBX-APIKEY': apiKey
-      }
-    })
-  });
-}
 
 export class BrokerBinancePage extends Page {
   collection = 'brokers';

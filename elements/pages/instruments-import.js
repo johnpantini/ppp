@@ -195,30 +195,29 @@ export class InstrumentsImportPage extends Page {
   collection = 'instruments';
 
   async [INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS]() {
-    const rSymbols = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const rStocks = await ppp.fetch(
+      'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
       {
-        cache: 'reload',
         method: 'POST',
-        body: JSON.stringify({
-          method: 'POST',
-          url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
-          body: JSON.stringify({})
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
       }
     );
 
-    await maybeFetchError(
-      rSymbols,
-      'Не удалось загрузить список инструментов.'
-    );
+    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
 
-    const symbols = await rSymbols.json();
-    const { symbolsInfo } = symbols;
+    const stocks = await rStocks.json();
+    const { symbolsInfo } = stocks;
 
     return symbolsInfo
       .filter((s) => {
-        return s.tagetCurrencyInfo.description;
+        return (
+          s.tagetCurrencyInfo?.description &&
+          s.baseCurrencyInfo?.code === 'M_USDT' &&
+          !/\:/.test(s.tagetCurrencyInfo.code)
+        );
       })
       .map((s) => {
         return {
@@ -237,32 +236,31 @@ export class InstrumentsImportPage extends Page {
   }
 
   async [INSTRUMENT_DICTIONARY.IB]() {
-    const rUtexSymbols = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const rUtexStocks = await ppp.fetch(
+      'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
       {
-        cache: 'reload',
         method: 'POST',
-        body: JSON.stringify({
-          method: 'POST',
-          url: 'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
-          body: JSON.stringify({})
-        })
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
       }
     );
 
     await maybeFetchError(
-      rUtexSymbols,
+      rUtexStocks,
       'Не удалось загрузить список инструментов.'
     );
 
-    const symbols = await rUtexSymbols.json();
-    const { symbolsInfo } = symbols;
+    const stocks = await rUtexStocks.json();
+    const { symbolsInfo } = stocks;
 
     return symbolsInfo
       .filter((s) => {
         return (
           s.tagetCurrencyInfo?.description &&
-          s.baseCurrencyInfo?.code === 'M_USDT'
+          s.baseCurrencyInfo?.code === 'M_USDT' &&
+          !/\:/.test(s.tagetCurrencyInfo.code)
         );
       })
       .map((s) => {
@@ -678,43 +676,25 @@ export class InstrumentsImportPage extends Page {
     return instruments;
   }
 
-  async #finamSecurities(token) {
-    try {
-      return (
-        await (
-          await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
-            {
-              cache: 'no-cache',
-              method: 'POST',
-              body: JSON.stringify({
-                method: 'GET',
-                url: `https://trade-api.finam.ru/public/api/v1/securities`,
-                headers: {
-                  'X-Api-Key': token
-                }
-              })
-            }
-          )
-        ).json()
-      ).data.securities;
-    } catch (e) {
-      console.error(e);
-
-      return [];
-    }
-  }
-
   async [INSTRUMENT_DICTIONARY.FINAM]() {
     await validate(this.finamBrokerId);
 
-    const instruments =
-      (await this.#finamSecurities(this.finamBrokerId.datum().token)) ?? [];
+    const rFinamSecurities = await ppp.fetch(
+      'https://trade-api.finam.ru/public/api/v1/securities',
+      {
+        headers: {
+          'X-Api-Key': this.finamBrokerId.datum().token
+        }
+      }
+    );
 
-    // US only.
+    await maybeFetchError(
+      rFinamSecurities,
+      'Не удалось авторизоваться в Finam.'
+    );
+
+    const instruments = (await rFinamSecurities.json()).data.securities ?? [];
+    // USD securities only.
     const mmaStocks = instruments.filter((i) => {
       return (
         !/\s/.test(i.code) &&

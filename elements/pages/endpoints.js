@@ -129,21 +129,12 @@ export class EndpointsPage extends Page {
 
     return await (
       await maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'GET',
-              url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints`,
-              headers: {
-                Authorization: `Bearer ${await getMongoDBRealmAccessToken()}`
-              }
-            })
+            headers: {
+              Authorization: `Bearer ${await getMongoDBRealmAccessToken()}`
+            }
           }
         ),
         'Не удалось получить список конечных точек.'

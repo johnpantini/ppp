@@ -75,17 +75,11 @@ class FinamTradeApiTrader extends Trader {
 
   async getAllOpenOrders() {
     const ordersRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      `https://trade-api.finam.ru/public/api/v1/orders?ClientId=${this.document.account}&IncludeMatched=false&IncludeCanceled=false&IncludeActive=true`,
       {
-        cache: 'reload',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          url: `https://trade-api.finam.ru/public/api/v1/orders?ClientId=${this.document.account}&IncludeMatched=false&IncludeCanceled=false&IncludeActive=true`,
-          headers: {
-            'X-Api-Key': this.document.broker.token
-          }
-        })
+        headers: {
+          'X-Api-Key': this.document.broker.token
+        }
       }
     );
 
@@ -120,18 +114,13 @@ class FinamTradeApiTrader extends Trader {
     }
 
     const orderRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      'https://trade-api.finam.ru/public/api/v1/orders',
       {
-        cache: 'reload',
         method: 'POST',
-        body: JSON.stringify({
-          method: 'POST',
-          url: 'https://trade-api.finam.ru/public/api/v1/orders',
-          body: JSON.stringify(payload),
-          headers: {
-            'X-Api-Key': this.document.broker.token
-          }
-        })
+        headers: {
+          'X-Api-Key': this.document.broker.token
+        },
+        body: JSON.stringify(payload)
       }
     );
 

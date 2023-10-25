@@ -1,23 +1,19 @@
 function appendMainScript() {
-  if (!document.querySelector('[ppp-state]')) {
-    const script = document.createElement('script');
+  const script = document.createElement('script');
 
-    script.src = 'ppp.js';
-    script.type = 'module';
-    document.body.append(script);
-  }
+  script.src = 'ppp.js';
+  script.type = 'module';
+  document.body.append(script);
 }
 
 window.addEventListener('load', async () => {
-  const serviceMachineInput = document.body.querySelector(
-    '.service-machine-url'
-  );
+  const globalProxyUrlInput = document.body.querySelector('.global-proxy-url');
 
-  serviceMachineInput.value =
-    localStorage.getItem('ppp-service-machine-url') ?? '';
+  globalProxyUrlInput.value =
+    localStorage.getItem('ppp-global-proxy-url') ?? '';
 
-  serviceMachineInput.addEventListener('input', (e) => {
-    localStorage.setItem('ppp-service-machine-url', e.target.value.trim());
+  globalProxyUrlInput.addEventListener('input', (e) => {
+    localStorage.setItem('ppp-global-proxy-url', e.target.value.trim());
   });
 
   const registration = await navigator.serviceWorker.register('ppp-sw.js');
@@ -25,10 +21,10 @@ window.addEventListener('load', async () => {
   if (navigator.serviceWorker.controller === null) {
     await navigator.serviceWorker.ready;
     registration.active.postMessage('reclaim');
-
-    navigator.serviceWorker.addEventListener('controllerchange', async () => {
-      appendMainScript();
-    });
+    navigator.serviceWorker.addEventListener(
+      'controllerchange',
+      appendMainScript
+    );
   } else {
     appendMainScript();
   }

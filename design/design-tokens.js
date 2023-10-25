@@ -1,6 +1,6 @@
+import ppp from '../ppp.js';
 import { DesignToken } from './design-token.js';
 import defaultTheme from './themes/tinkoff.js';
-import ppp from '../ppp.js';
 
 const { create } = DesignToken;
 

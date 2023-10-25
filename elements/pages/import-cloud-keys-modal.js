@@ -63,9 +63,9 @@ export class ImportCloudKeysModalPage extends Page {
       await validate(this.masterPasswordForImport);
       await validate(this.cloudCredentialsData);
 
-      const { s, u } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
+      const { u, e } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
 
-      if (!u.startsWith('https')) {
+      if (!e.startsWith('https')) {
         invalidate(ppp.app.toast, {
           errorMessage:
             'Компактное представление не содержит адреса URL базы данных.',
@@ -73,16 +73,7 @@ export class ImportCloudKeysModalPage extends Page {
         });
       }
 
-      const { iv, data } = await (
-        await fetch(new URL('fetch', s).toString(), {
-          cache: 'no-cache',
-          method: 'POST',
-          body: JSON.stringify({
-            method: 'GET',
-            url: u
-          })
-        })
-      ).json();
+      const { iv, data } = await (await ppp.fetch(e)).json();
 
       ppp.crypto.resetKey();
 
@@ -103,7 +94,7 @@ export class ImportCloudKeysModalPage extends Page {
         ppp.keyVault.setKey(k, decryptedCredentials[k]);
       });
 
-      ppp.keyVault.setKey('service-machine-url', s);
+      ppp.keyVault.setKey('global-proxy-url', u);
 
       if (+TAG > +decryptedCredentials.tag) {
         this.showSuccessNotification(

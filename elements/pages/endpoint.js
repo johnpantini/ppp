@@ -108,20 +108,6 @@ export const endpointPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkNorthflankCredentials({ token, serviceMachineUrl }) {
-  return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-    cache: 'reload',
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: 'https://api.northflank.com/v1/projects',
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-  });
-}
-
 export class EndpointPage extends Page {
   processSource(source) {
     const match = source.match(/\*\*@ppp([\s\S]+)@ppp\*/i);
@@ -147,21 +133,12 @@ export class EndpointPage extends Page {
 
     const endpoint = await (
       await maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints/${documentId}`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'GET',
-              url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints/${documentId}`,
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            })
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
         ),
         'Не удалось загрузить конечную точку.'
@@ -170,21 +147,12 @@ export class EndpointPage extends Page {
 
     const func = await (
       await maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${endpoint.function_id}`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'GET',
-              url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${endpoint.function_id}`,
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            })
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
         ),
         'Не удалось загрузить исходный код конечной точки.'
@@ -225,26 +193,19 @@ export class EndpointPage extends Page {
 
       if (this.document._id) {
         await maybeFetchError(
-          await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
+          await ppp.fetch(
+            `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${this.document.function_id}`,
             {
-              cache: 'reload',
-              method: 'POST',
+              method: 'PUT',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
               body: JSON.stringify({
-                method: 'PUT',
-                url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${this.document.function_id}`,
-                body: {
-                  name: this.document.function_name,
-                  private: false,
-                  run_as_system: true,
-                  source
-                },
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
+                name: this.document.function_name,
+                private: false,
+                run_as_system: true,
+                source
               })
             }
           ),
@@ -252,35 +213,28 @@ export class EndpointPage extends Page {
         );
 
         await maybeFetchError(
-          await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
+          await ppp.fetch(
+            `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints/${this.document._id}`,
             {
-              cache: 'reload',
-              method: 'POST',
+              method: 'PUT',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
               body: JSON.stringify({
-                method: 'PUT',
-                url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints/${this.document._id}`,
-                body: {
-                  _id: this.document._id,
-                  route: this.route.value,
-                  function_name: this.document.function_name,
-                  function_id: this.document.function_id,
-                  http_method: this.method.value,
-                  validation_method: 'NO_VALIDATION',
-                  secret_id: '',
-                  secret_name: '',
-                  create_user_on_auth: false,
-                  fetch_custom_user_data: false,
-                  respond_result: true,
-                  last_modified: Math.floor(Date.now() * 1000),
-                  disabled: false
-                },
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
+                _id: this.document._id,
+                route: this.route.value,
+                function_name: this.document.function_name,
+                function_id: this.document.function_id,
+                http_method: this.method.value,
+                validation_method: 'NO_VALIDATION',
+                secret_id: '',
+                secret_name: '',
+                create_user_on_auth: false,
+                fetch_custom_user_data: false,
+                respond_result: true,
+                last_modified: Math.floor(Date.now() * 1000),
+                disabled: false
               })
             }
           ),
@@ -288,26 +242,19 @@ export class EndpointPage extends Page {
         );
       } else {
         const rNewFunction = await maybeFetchError(
-          await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
+          await ppp.fetch(
+            `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
             {
-              cache: 'reload',
               method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
               body: JSON.stringify({
-                method: 'POST',
-                url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
-                body: {
-                  name: this.functionName.value.trim(),
-                  private: false,
-                  run_as_system: true,
-                  source
-                },
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
+                name: this.functionName.value.trim(),
+                private: false,
+                run_as_system: true,
+                source
               })
             }
           ),
@@ -316,33 +263,26 @@ export class EndpointPage extends Page {
 
         const jNewFunction = await rNewFunction.json();
         const rNewEndpoint = await maybeFetchError(
-          await fetch(
-            new URL(
-              'fetch',
-              ppp.keyVault.getKey('service-machine-url')
-            ).toString(),
+          await ppp.fetch(
+            `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints`,
             {
-              cache: 'reload',
               method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
               body: JSON.stringify({
-                method: 'POST',
-                url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints`,
-                body: {
-                  route: this.route.value.trim(),
-                  function_name: jNewFunction.name,
-                  function_id: jNewFunction._id,
-                  http_method: this.method.value,
-                  validation_method: 'NO_VALIDATION',
-                  secret_id: '',
-                  secret_name: '',
-                  create_user_on_auth: false,
-                  fetch_custom_user_data: false,
-                  respond_result: true,
-                  disabled: false
-                },
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
+                route: this.route.value.trim(),
+                function_name: jNewFunction.name,
+                function_id: jNewFunction._id,
+                http_method: this.method.value,
+                validation_method: 'NO_VALIDATION',
+                secret_id: '',
+                secret_name: '',
+                create_user_on_auth: false,
+                fetch_custom_user_data: false,
+                respond_result: true,
+                disabled: false
               })
             }
           ),
@@ -384,42 +324,26 @@ export class EndpointPage extends Page {
       const token = await getMongoDBRealmAccessToken();
 
       await maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints/${this.document._id}`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'DELETE',
-              url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints/${this.document._id}`,
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            })
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
         ),
         'Не удалось удалить функцию конечной точки.'
       );
 
       await maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${this.document.function_id}`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'DELETE',
-              url: `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${this.document.function_id}`,
-              headers: {
-                Authorization: `Bearer ${token}`
-              }
-            })
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
           }
         ),
         'Не удалось удалить конечную точку.'

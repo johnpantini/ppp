@@ -7,10 +7,59 @@ import {
   css
 } from './vendor/fast-element.min.js';
 import { DesignToken } from './design/design-token.js';
-import { KeyVault } from './lib/key-vault.js';
 import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
 import { PPPElement } from './lib/ppp-element.js';
 import { APIS, TRADERS } from './lib/const.js';
+import { TAG } from './lib/tag.js';
+
+export const keySet = [
+  'github-login',
+  'github-token',
+  'master-password',
+  'mongo-api-key',
+  'mongo-app-client-id',
+  'mongo-app-client-id',
+  'mongo-app-id',
+  'mongo-group-id',
+  'mongo-private-key',
+  'mongo-public-key',
+  'global-proxy-url'
+];
+
+class KeyVault {
+  #keys = {};
+
+  ok() {
+    if (this.getKey('tag') !== TAG) return false;
+
+    return keySet.map((k) => this.getKey(k)).every((i) => !!i);
+  }
+
+  setKey(key, value) {
+    if (key) {
+      this.#keys[key] = value;
+
+      localStorage.setItem(`ppp-${key}`, (value ?? '').trim());
+    }
+  }
+
+  decacheKey(key) {
+    this.#keys[key] = void 0;
+  }
+
+  getKey(key) {
+    if (!this.#keys[key])
+      this.#keys[key] = (localStorage.getItem(`ppp-${key}`) ?? '').trim();
+
+    return this.#keys[key];
+  }
+
+  removeKey(key) {
+    this.#keys[key] = void 0;
+
+    localStorage.removeItem(`ppp-${key}`);
+  }
+}
 
 (class DesignSystemCanvas extends PPPElement {
   connectedCallback() {
@@ -98,6 +147,10 @@ class PPP {
 
   traders = new Map();
 
+  pusherConnections = new Map();
+
+  keyVault = new KeyVault();
+
   constructor(appType) {
     this.workspaces = [];
     this.extensions = [];
@@ -124,7 +177,11 @@ class PPP {
 
     if (this.rootUrl.endsWith('.github.io')) this.rootUrl += '/ppp';
 
-    void this.start();
+    if (!this.keyVault.ok()) {
+      this.#createApplication({ emergency: true });
+    } else {
+      this.#createApplication({});
+    }
   }
 
   structuredClone(value) {
@@ -135,14 +192,14 @@ class PPP {
     }
   }
 
-  #showLoadingError({ errorText, shouldShowServiceMachineInput }) {
+  #showLoadingError({ errorText, shouldShowGlobalProxyUrlInput }) {
     document.querySelector('.splashscreen-loader').classList.add('error');
     document.querySelector('.loading-text').classList.add('error');
 
     document.querySelector('.loading-text').textContent = errorText;
 
-    if (shouldShowServiceMachineInput) {
-      document.querySelector('.service-machine-url').removeAttribute('hidden');
+    if (shouldShowGlobalProxyUrlInput) {
+      document.querySelector('.global-proxy-url').removeAttribute('hidden');
     }
   }
 
@@ -165,6 +222,8 @@ class PPP {
   }
 
   async #createApplication({ emergency }) {
+    await this.#rebuildDictionary();
+
     if (!emergency) {
       const { getApp, Credentials } = await import('./lib/realm.js');
 
@@ -200,8 +259,8 @@ class PPP {
               document.addEventListener('keydown', listener);
             } else {
               this.#showLoadingError({
-                errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
-                shouldShowServiceMachineInput: true
+                errorText: this.t('$loadingErrors.E_NO_PROXY_CONNECTION'),
+                shouldShowGlobalProxyUrlInput: true
               });
             }
           } else {
@@ -284,7 +343,7 @@ class PPP {
 
         const locale = this.settings.get('locale');
 
-        if (this.locales.indexOf(locale) > -1) {
+        if (this.locales.includes(locale)) {
           this.locale = locale;
         }
 
@@ -312,8 +371,8 @@ class PPP {
             document.addEventListener('keydown', listener);
           } else {
             this.#showLoadingError({
-              errorText: this.t('$loadingErrors.E_NO_SM_CONNECTION'),
-              shouldShowServiceMachineInput: true
+              errorText: this.t('$loadingErrors.E_NO_PROXY_CONNECTION'),
+              shouldShowGlobalProxyUrlInput: true
             });
           }
         } else if (/failed to find refresh token/i.test(e?.message)) {
@@ -385,18 +444,6 @@ class PPP {
 
   t(key, options) {
     return this.dict.t(key, options);
-  }
-
-  async start() {
-    await this.#rebuildDictionary();
-
-    this.keyVault = new KeyVault();
-
-    if (!this.keyVault.ok()) {
-      return this.#createApplication({ emergency: true });
-    } else {
-      return this.#createApplication({});
-    }
   }
 
   async encrypt(document = {}) {
@@ -498,8 +545,8 @@ class PPP {
 
       Pusher.logToConsole = false;
 
-      if (!this.traders.has(document._id)) {
-        this.traders.set(
+      if (!this.pusherConnections.has(document._id)) {
+        this.pusherConnections.set(
           document._id,
           new Pusher(document.key, {
             cluster: document.cluster,
@@ -508,11 +555,11 @@ class PPP {
           })
         );
 
-        this.traders.get(document._id).subscribe('telegram');
-        this.traders.get(document._id).subscribe('ppp');
+        this.pusherConnections.get(document._id).subscribe('telegram');
+        this.pusherConnections.get(document._id).subscribe('ppp');
       }
 
-      return this.traders.get(document._id);
+      return this.pusherConnections.get(document._id);
     }
   }
 
@@ -582,7 +629,7 @@ class PPP {
 
     const storeName = `${exchange}:${broker}`;
 
-    if (storeNames.indexOf(storeName) === -1) {
+    if (!storeNames.includes(storeName)) {
       version++;
     }
 
@@ -630,36 +677,33 @@ class PPP {
     return url;
   }
 
-  async fetch(url, options = {}) {
-    const globalProxy = this.settings.get('globalProxyUrl');
+  async fetch(url, options = {}, allowedHeaders = []) {
+    const globalProxy = this.keyVault.getKey('global-proxy-url');
 
     if (globalProxy) {
       const urlObject = new URL(url);
 
-      if (typeof options.headers === 'undefined') {
-        options.headers = {};
+      options.headers ??= {};
+      options.headers['X-Host'] = urlObject.hostname;
+
+      for (const h of Object.keys(options.headers)) {
+        const lower = h.toLowerCase();
+
+        if (lower === 'x-host') {
+          continue;
+        }
+
+        if (!allowedHeaders.includes(lower)) {
+          allowedHeaders.push(h);
+        }
       }
 
-      options.headers['X-Host'] = urlObject.hostname;
+      options.headers['X-Allowed-Headers'] = allowedHeaders.join(',');
       urlObject.hostname = new URL(globalProxy).hostname;
 
       return fetch(urlObject.toString(), options);
     } else {
-      const serviceMachineUrl = this.keyVault.getKey('service-machine-url');
-
-      return fetch(new URL('fetch', serviceMachineUrl).toString(), {
-        method: 'POST',
-        cache: 'reload',
-        body:
-          options.body instanceof Blob || options.body instanceof FormData
-            ? options.body
-            : JSON.stringify({
-                method: options.method ?? 'GET',
-                url,
-                headers: options.headers ?? {},
-                body: options.body
-              })
-      });
+      return fetch(url, options);
     }
   }
 }

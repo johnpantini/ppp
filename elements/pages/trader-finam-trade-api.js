@@ -111,18 +111,12 @@ export const traderFinamTradeApiStyles = css`
 `;
 
 export async function checkFinamAccount({ token, account }) {
-  return fetch(
-    new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+  return ppp.fetch(
+    `https://trade-api.finam.ru/public/api/v1/portfolio?ClientId=${account}`,
     {
-      cache: 'no-cache',
-      method: 'POST',
-      body: JSON.stringify({
-        method: 'GET',
-        url: `https://trade-api.finam.ru/public/api/v1/portfolio?ClientId=${account}`,
-        headers: {
-          'X-Api-Key': token
-        }
-      })
+      headers: {
+        'X-Api-Key': token
+      }
     }
   );
 }

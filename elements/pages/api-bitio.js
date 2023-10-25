@@ -1,6 +1,4 @@
-import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   Page,
   pageStyles,
@@ -77,37 +75,6 @@ export const apiBitioPageStyles = css`
 export class ApiBitioPage extends Page {
   collection = 'apis';
 
-  async validate() {
-    await validate(this.name);
-    await validate(this.apiKey);
-    await validate(this.db);
-
-    const checkCredentialsRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          url: 'https://api.bit.io/v2beta/query',
-          headers: {
-            Authorization: `Bearer ${this.apiKey.value.trim()}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query_string: 'SELECT 42;',
-            database_name: this.db.value.trim()
-          })
-        })
-      }
-    );
-
-    if (!checkCredentialsRequest.ok) {
-      invalidate(this.apiKey, {
-        errorMessage: 'Неверный ключ API',
-        raiseException: true
-      });
-    }
-  }
-
   async read() {
     return (context) => {
       return context.services
@@ -130,19 +97,7 @@ export class ApiBitioPage extends Page {
   }
 
   async submit() {
-    return {
-      $set: {
-        name: this.name.value.trim(),
-        apiKey: this.apiKey.value.trim(),
-        db: this.db.value.trim(),
-        version: 1,
-        updatedAt: new Date()
-      },
-      $setOnInsert: {
-        type: APIS.BITIO,
-        createdAt: new Date()
-      }
-    };
+    return false;
   }
 }
 
