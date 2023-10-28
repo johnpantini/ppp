@@ -552,6 +552,11 @@ class Trader {
         try {
           await new Promise((resolve, reject) => {
             const storeName = `${exchange}:${broker}`;
+
+            if (!cache.objectStoreNames.contains(storeName)) {
+              resolve();
+            }
+
             const tx = cache.transaction(storeName, 'readonly');
             const instrumentsStore = tx.objectStore(storeName);
             const cursorRequest = instrumentsStore.getAll();
