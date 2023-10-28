@@ -394,6 +394,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     return {
       ASPIRANT_ID: this.document._id,
+      PORT: 80,
       GLOBAL_PROXY_URL: ppp.keyVault.getKey('global-proxy-url'),
       REDIS_HOST: redisApi.host,
       REDIS_PORT: redisApi.port.toString(),
