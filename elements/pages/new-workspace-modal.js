@@ -142,6 +142,7 @@ export class NewWorkspaceModalPage extends Page {
 
   async submit() {
     const workspaceToClone = this.workspaceId.datum();
+    const seen = {};
 
     return {
       $set: {
@@ -149,7 +150,32 @@ export class NewWorkspaceModalPage extends Page {
         comment: this.comment.value.trim(),
         widgets: workspaceToClone
           ? workspaceToClone.widgets?.map((w) => {
-              w.uniqueID = uuidv4();
+              // Change every uniqueID.
+              if (seen[w.uniqueID]) {
+                w.uniqueID = seen[w.uniqueID];
+              } else {
+                seen[w.uniqueID] = uuidv4();
+                w.uniqueID = seen[w.uniqueID];
+              }
+
+              if (w.activeWidgetLink) {
+                if (seen[w.activeWidgetLink]) {
+                  w.activeWidgetLink = seen[w.activeWidgetLink];
+                } else {
+                  seen[w.activeWidgetLink] = uuidv4();
+                  w.activeWidgetLink = seen[w.activeWidgetLink];
+                }
+              }
+
+              if (Array.isArray(w.linkedWidgets)) {
+                w.linkedWidgets = w.linkedWidgets.map((lw) => {
+                  if (!seen[lw]) {
+                    seen[lw] = uuidv4();
+                  }
+
+                  return seen[lw];
+                });
+              }
 
               return w;
             })

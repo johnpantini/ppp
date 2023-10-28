@@ -527,7 +527,7 @@ class ActiveOrderDatum extends AlorTraderGlobalDatum {
  * @typedef {Object} AlorOpenAPIV2Trader
  */
 class AlorOpenAPIV2Trader extends Trader {
-  #pendingAccessTokenRequest;
+  #pendingAccessTokenResponse;
 
   accessToken;
 
@@ -646,10 +646,10 @@ class AlorOpenAPIV2Trader extends Trader {
 
       if (typeof this.accessToken === 'string') return;
 
-      if (this.#pendingAccessTokenRequest) {
-        await this.#pendingAccessTokenRequest;
+      if (this.#pendingAccessTokenResponse) {
+        await this.#pendingAccessTokenResponse;
       } else {
-        this.#pendingAccessTokenRequest = fetch(
+        this.#pendingAccessTokenResponse = fetch(
           `https://oauth.alor.ru/refresh?token=${this.document.broker.refreshToken}`,
           {
             method: 'POST'
@@ -664,7 +664,7 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             this.accessToken = AccessToken;
-            this.#pendingAccessTokenRequest = void 0;
+            this.#pendingAccessTokenResponse = void 0;
           })
           .catch((e) => {
             console.error(e);
@@ -673,7 +673,7 @@ class AlorOpenAPIV2Trader extends Trader {
               throw e;
             }
 
-            this.#pendingAccessTokenRequest = void 0;
+            this.#pendingAccessTokenResponse = void 0;
 
             return new Promise((resolve) => {
               setTimeout(async () => {
@@ -683,7 +683,7 @@ class AlorOpenAPIV2Trader extends Trader {
             });
           });
 
-        await this.#pendingAccessTokenRequest;
+        await this.#pendingAccessTokenResponse;
       }
     } catch (e) {
       console.error(e);
@@ -692,7 +692,7 @@ class AlorOpenAPIV2Trader extends Trader {
         throw e;
       }
 
-      this.#pendingAccessTokenRequest = void 0;
+      this.#pendingAccessTokenResponse = void 0;
 
       return new Promise((resolve) => {
         setTimeout(async () => {
@@ -832,7 +832,7 @@ class AlorOpenAPIV2Trader extends Trader {
     await this.ensureAccessTokenIsOk();
 
     const symbol = this.getSymbol(instrument);
-    const orderRequest = await fetch(
+    const orderResponse = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/market',
       {
         method: 'POST',
@@ -855,7 +855,7 @@ class AlorOpenAPIV2Trader extends Trader {
         }
       }
     );
-    const order = await orderRequest.json();
+    const order = await orderResponse.json();
 
     if (order.message === 'success') {
       return {
@@ -872,7 +872,7 @@ class AlorOpenAPIV2Trader extends Trader {
     await this.ensureAccessTokenIsOk();
 
     const symbol = this.getSymbol(instrument);
-    const orderRequest = await fetch(
+    const orderResponse = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit',
       {
         method: 'POST',
@@ -902,7 +902,7 @@ class AlorOpenAPIV2Trader extends Trader {
         }
       }
     );
-    const order = await orderRequest.json();
+    const order = await orderResponse.json();
 
     if (order.message === 'success') {
       return {
@@ -919,7 +919,7 @@ class AlorOpenAPIV2Trader extends Trader {
     await this.ensureAccessTokenIsOk();
 
     const qs = `format=Simple&take=${parseInt(depth)}&descending=true`;
-    const request = await fetch(
+    const response = await fetch(
       `https://api.alor.ru/md/v2/Securities/${
         this.document.exchange
       }/${encodeURIComponent(this.getSymbol(instrument))}/alltrades?${qs}`,
@@ -931,8 +931,8 @@ class AlorOpenAPIV2Trader extends Trader {
       }
     );
 
-    if (request.status === 200)
-      return (await request.json())?.map((t) => {
+    if (response.status === 200)
+      return (await response.json())?.map((t) => {
         return {
           orderId: t.id,
           side: t.side,
@@ -948,7 +948,7 @@ class AlorOpenAPIV2Trader extends Trader {
       });
     else {
       throw new TradingError({
-        message: await (await request).text()
+        message: await response.text()
       });
     }
   }
@@ -960,7 +960,7 @@ class AlorOpenAPIV2Trader extends Trader {
 
     if (instrument.type === 'future') return {};
 
-    const request = await fetch(
+    const response = await fetch(
       'https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/estimate',
       {
         method: 'POST',
@@ -979,10 +979,10 @@ class AlorOpenAPIV2Trader extends Trader {
       }
     );
 
-    if (request.status === 200) {
-      const response = await request.json();
+    if (response.status === 200) {
+      const json = await response.json();
 
-      let commission = response.commission;
+      let commission = json.commission;
       const flatCommissionRate = this.document?.flatCommissionRate ?? void 0;
 
       if (typeof flatCommissionRate !== 'undefined') {
@@ -991,15 +991,15 @@ class AlorOpenAPIV2Trader extends Trader {
       }
 
       return {
-        marginSellingPowerQuantity: response.quantityToSell,
-        marginBuyingPowerQuantity: response.quantityToBuy,
-        sellingPowerQuantity: response.notMarginQuantityToSell,
-        buyingPowerQuantity: response.notMarginQuantityToBuy,
+        marginSellingPowerQuantity: json.quantityToSell,
+        marginBuyingPowerQuantity: json.quantityToBuy,
+        sellingPowerQuantity: json.notMarginQuantityToSell,
+        buyingPowerQuantity: json.notMarginQuantityToBuy,
         commission
       };
     } else {
       throw new TradingError({
-        message: await (await request).text()
+        message: await response.text()
       });
     }
   }
@@ -1007,7 +1007,7 @@ class AlorOpenAPIV2Trader extends Trader {
   async modifyLimitOrders({ instrument, side, value }) {
     await this.ensureAccessTokenIsOk();
 
-    const ordersRequest = await fetch(
+    const ordersResponse = await fetch(
       `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
       {
         headers: {
@@ -1016,8 +1016,8 @@ class AlorOpenAPIV2Trader extends Trader {
       }
     );
 
-    if (ordersRequest.status === 200) {
-      const orders = await ordersRequest.json();
+    if (ordersResponse.status === 200) {
+      const orders = await ordersResponse.json();
 
       for (const o of orders) {
         if (o.status === 'working' && (o.side === side || side === 'all')) {
@@ -1042,7 +1042,7 @@ class AlorOpenAPIV2Trader extends Trader {
             }
 
             const symbol = this.getSymbol(orderInstrument);
-            const modifyOrderRequest = await fetch(
+            const modifyOrderResponse = await fetch(
               `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/actions/limit/${o.id}`,
               {
                 method: 'PUT',
@@ -1067,9 +1067,9 @@ class AlorOpenAPIV2Trader extends Trader {
               }
             );
 
-            if (modifyOrderRequest.status !== 200) {
+            if (modifyOrderResponse.status !== 200) {
               throw new TradingError({
-                message: await (await modifyOrderRequest).text()
+                message: await (await modifyOrderResponse).text()
               });
             }
           }
@@ -1077,7 +1077,7 @@ class AlorOpenAPIV2Trader extends Trader {
       }
     } else {
       throw new TradingError({
-        message: await (await ordersRequest).text()
+        message: await ordersResponse.text()
       });
     }
   }
@@ -1087,7 +1087,7 @@ class AlorOpenAPIV2Trader extends Trader {
       await this.ensureAccessTokenIsOk();
 
       const qs = `portfolio=${this.document.portfolio}&exchange=${this.document.exchange}&stop=false&format=Simple`;
-      const request = await fetch(
+      const response = await fetch(
         `https://api.alor.ru/commandapi/warptrans/TRADE/v2/client/orders/${order.orderId}?${qs}`,
         {
           method: 'DELETE',
@@ -1098,13 +1098,13 @@ class AlorOpenAPIV2Trader extends Trader {
         }
       );
 
-      if (request.status === 200)
+      if (response.status === 200)
         return {
           orderId: order.orderId
         };
       else {
         throw new TradingError({
-          message: await (await request).text()
+          message: await response.text()
         });
       }
     }
@@ -1113,7 +1113,7 @@ class AlorOpenAPIV2Trader extends Trader {
   async cancelAllLimitOrders({ instrument, filter } = {}) {
     await this.ensureAccessTokenIsOk();
 
-    const request = await fetch(
+    const response = await fetch(
       `https://api.alor.ru/md/v2/clients/${this.document.exchange}/${this.document.portfolio}/orders?format=Simple`,
       {
         headers: {
@@ -1122,8 +1122,8 @@ class AlorOpenAPIV2Trader extends Trader {
       }
     );
 
-    if (request.status === 200) {
-      const orders = await request.json();
+    if (response.status === 200) {
+      const orders = await response.json();
 
       for (const o of orders) {
         if (o.status === 'working') {
@@ -1145,7 +1145,7 @@ class AlorOpenAPIV2Trader extends Trader {
       }
     } else {
       throw new TradingError({
-        message: await (await request).text()
+        message: await response.text()
       });
     }
   }

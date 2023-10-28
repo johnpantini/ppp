@@ -30,6 +30,7 @@ import '../button.js';
 import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 
 export const serviceCloudPppAspirantTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -255,13 +256,19 @@ export class ServiceCloudPppAspirantPage extends Page {
       try {
         const api = this.document.redisApi;
 
-        await fetch(
-          new URL(
-            'redis',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
-          {
-            cache: 'reload',
+        if (!api.connectorServiceId) {
+          invalidate(this.redisApiId, {
+            errorMessage: 'Отсутствует сервис-соединитель',
+            raiseException: true
+          });
+        }
+
+        const connectorUrl = await getAspirantWorkerBaseUrl(
+          api.connectorServiceId
+        );
+
+        await maybeFetchError(
+          await fetch(`${connectorUrl}redis`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -280,16 +287,14 @@ export class ServiceCloudPppAspirantPage extends Page {
                 password: api.password
               },
               command: 'del',
-              // Delete legacy too
-              args: [
-                `aspirant:${this.document._id}`,
-                `ppp-aspirant:${this.document._id}:workers`
-              ]
+              args: [`aspirant:${this.document._id}`]
             })
-          }
+          }),
+          'Не удалось очистить хранилище Redis.'
         );
-      } finally {
+
         this.showSuccessNotification('Команда на очистку отправлена.');
+      } finally {
         this.endOperation();
       }
     }
@@ -313,23 +318,11 @@ export class ServiceCloudPppAspirantPage extends Page {
       let r;
 
       await maybeFetchError(
-        (r = await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
-          {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'GET',
-              url: 'https://api.render.com/v1/services',
-              headers: {
-                Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-              }
-            })
+        (r = await ppp.fetch('https://api.render.com/v1/services', {
+          headers: {
+            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
           }
-        )),
+        })),
         'Не удалось получить список сервисов в облаке Render. Операция не может быть выполнена.'
       );
 
@@ -401,7 +394,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     return {
       ASPIRANT_ID: this.document._id,
-      SERVICE_MACHINE_URL: ppp.keyVault.getKey('service-machine-url'),
+      GLOBAL_PROXY_URL: ppp.keyVault.getKey('global-proxy-url'),
       REDIS_HOST: redisApi.host,
       REDIS_PORT: redisApi.port.toString(),
       REDIS_TLS: !!redisApi.tls ? 'true' : '',
@@ -412,19 +405,12 @@ export class ServiceCloudPppAspirantPage extends Page {
   }
 
   async #deployOnNorthflank() {
-    const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
-    const rProjectList = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
+    const rProjectList = await ppp.fetch(
+      'https://api.northflank.com/v1/projects',
       {
-        cache: 'reload',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          url: 'https://api.northflank.com/v1/projects',
-          headers: {
-            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-          }
-        })
+        headers: {
+          Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+        }
       }
     );
 
@@ -446,62 +432,53 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     this.projectID = project.id;
 
-    const rPutService = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
+    const rPutService = await ppp.fetch(
+      `https://api.northflank.com/v1/projects/${project.id}/services/combined`,
       {
-        cache: 'reload',
-        method: 'POST',
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+        },
         body: JSON.stringify({
-          method: 'PUT',
-          url: `https://api.northflank.com/v1/projects/${project.id}/services/combined`,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+          name: `aspirant-${this.document.slug}`,
+          description: 'PPP Aspirant Service',
+          billing: {
+            deploymentPlan: 'nf-compute-20'
           },
-          body: JSON.stringify({
-            name: `aspirant-${this.document.slug}`,
-            description: 'PPP Aspirant Service',
-            billing: {
-              deploymentPlan: 'nf-compute-20'
-            },
-            deployment: {
-              instances: 1
-            },
-            ports: [
-              {
-                name: 'ppp',
-                public: true,
-                internalPort: 80,
-                protocol: 'HTTP'
-              }
-            ],
-            vcsData: {
-              projectUrl: `https://github.com/${ppp.keyVault.getKey(
-                'github-login'
-              )}/ppp`,
-              projectType: 'github',
-              accountLogin: ppp.keyVault.getKey('github-login'),
-              projectBranch: location.origin.endsWith('.io.dev')
-                ? 'johnpantini'
-                : 'main'
-            },
-            buildSettings: {
-              dockerfile: {
-                buildEngine: 'kaniko',
-                useCache: false,
-                dockerFilePath: '/salt/states/ppp/lib/aspirant/Dockerfile',
-                dockerWorkDir: '/salt/states/ppp/lib'
-              }
-            },
-            buildConfiguration: {
-              pathIgnoreRules: [
-                '*',
-                '!salt/states/ppp/lib/aspirant',
-                '!salt/states/ppp/lib/aspirant/*'
-              ]
-            },
-            runtimeEnvironment: this.#getEnvironment()
-          })
+          deployment: {
+            instances: 1
+          },
+          ports: [
+            {
+              name: 'ppp',
+              public: true,
+              internalPort: 80,
+              protocol: 'HTTP'
+            }
+          ],
+          vcsData: {
+            projectUrl: `https://github.com/${ppp.keyVault.getKey(
+              'github-login'
+            )}/ppp`,
+            projectType: 'github',
+            accountLogin: ppp.keyVault.getKey('github-login'),
+            projectBranch: location.origin.endsWith('.io.dev')
+              ? 'johnpantini'
+              : 'main'
+          },
+          buildSettings: {
+            dockerfile: {
+              buildEngine: 'kaniko',
+              useCache: false,
+              dockerFilePath: '/ppp/lib/aspirant/Dockerfile',
+              dockerWorkDir: '/ppp'
+            }
+          },
+          buildConfiguration: {
+            pathIgnoreRules: ['*', '!/ppp/lib/aspirant', '!/ppp/lib/aspirant/*']
+          },
+          runtimeEnvironment: this.#getEnvironment()
         })
       }
     );
@@ -515,7 +492,6 @@ export class ServiceCloudPppAspirantPage extends Page {
   }
 
   async #deployOnRender() {
-    const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
     const environment = this.#getEnvironment();
     const envVars = [];
 
@@ -526,20 +502,15 @@ export class ServiceCloudPppAspirantPage extends Page {
       });
     }
 
-    const rUpdateVars = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
+    const rUpdateVars = await ppp.fetch(
+      `https://api.render.com/v1/services/${this.serviceID}/env-vars`,
       {
-        cache: 'reload',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'PUT',
-          url: `https://api.render.com/v1/services/${this.serviceID}/env-vars`,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-          },
-          body: JSON.stringify(envVars)
-        })
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+        },
+        body: JSON.stringify(envVars)
       }
     );
 
@@ -548,28 +519,23 @@ export class ServiceCloudPppAspirantPage extends Page {
       'Не удалось обновить переменные окружения сервиса в облаке Render.'
     );
 
-    const rPatchService = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
+    const rPatchService = await ppp.fetch(
+      `https://api.render.com/v1/services/${this.serviceID}`,
       {
-        cache: 'reload',
-        method: 'POST',
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+        },
         body: JSON.stringify({
-          method: 'PATCH',
-          url: `https://api.render.com/v1/services/${this.serviceID}`,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-          },
-          body: JSON.stringify({
-            autoDeploy: 'no',
-            serviceDetails: {
-              env: 'docker',
-              envSpecificDetails: {
-                dockerContext: '/salt/states/ppp/lib',
-                dockerfilePath: '/salt/states/ppp/lib/aspirant/Dockerfile'
-              }
+          autoDeploy: 'no',
+          serviceDetails: {
+            env: 'docker',
+            envSpecificDetails: {
+              dockerContext: '/ppp/',
+              dockerfilePath: '/ppp/lib/aspirant/Dockerfile'
             }
-          })
+          }
         })
       }
     );
@@ -579,21 +545,16 @@ export class ServiceCloudPppAspirantPage extends Page {
       'Не удалось обновить сервис Aspirant в облаке Render, подробности в консоли браузера.'
     );
 
-    const rDeployService = await fetch(
-      new URL('fetch', serviceMachineUrl).toString(),
+    const rDeployService = await ppp.fetch(
+      `https://api.render.com/v1/services/${this.serviceID}/deploys`,
       {
-        cache: 'reload',
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.deploymentApiId.datum().token}`
+        },
         body: JSON.stringify({
-          method: 'POST',
-          url: `https://api.render.com/v1/services/${this.serviceID}/deploys`,
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.deploymentApiId.datum().token}`
-          },
-          body: JSON.stringify({
-            clearCache: 'clear'
-          })
+          clearCache: 'clear'
         })
       }
     );
@@ -653,77 +614,51 @@ export class ServiceCloudPppAspirantPage extends Page {
 
   async restart() {
     if (this.deploymentApiId.datum().type === APIS.NORTHFLANK) {
-      await fetch(
-        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      await ppp.fetch(
+        `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/resume`,
         {
-          cache: 'no-cache',
           method: 'POST',
-          body: JSON.stringify({
-            method: 'POST',
-            url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/resume`,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.document.deploymentApi.token}`
-            }
-          })
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.document.deploymentApi.token}`
+          }
         }
       );
 
       return maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/restart`,
           {
-            cache: 'reload',
             method: 'POST',
-            body: JSON.stringify({
-              method: 'POST',
-              url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/restart`,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.document.deploymentApi.token}`
-              }
-            })
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
           }
         ),
         'Не удалось перезапустить сервис в облаке Northflank.'
       );
     } else {
-      await fetch(
-        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      await ppp.fetch(
+        `https://api.render.com/v1/services/${this.document.serviceID}/resume`,
         {
-          cache: 'no-cache',
           method: 'POST',
-          body: JSON.stringify({
-            method: 'POST',
-            url: `https://api.render.com/v1/services/${this.document.serviceID}/resume`,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.document.deploymentApi.token}`
-            }
-          })
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.document.deploymentApi.token}`
+          }
         }
       );
 
       return maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://api.render.com/v1/services/${this.document.serviceID}/restart`,
           {
-            cache: 'reload',
             method: 'POST',
-            body: JSON.stringify({
-              method: 'POST',
-              url: `https://api.render.com/v1/services/${this.document.serviceID}/restart`,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.document.deploymentApi.token}`
-              }
-            })
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
           }
         ),
         'Не удалось перезапустить сервис в облаке Render.'
@@ -734,48 +669,32 @@ export class ServiceCloudPppAspirantPage extends Page {
   async stop() {
     if (this.deploymentApiId.datum().type === APIS.NORTHFLANK) {
       return maybeFetchError(async () => {
-        const request = await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        const response = await ppp.fetch(
+          `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/pause`,
           {
-            cache: 'reload',
             method: 'POST',
-            body: JSON.stringify({
-              method: 'POST',
-              url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}/pause`,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.document.deploymentApi.token}`
-              }
-            })
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
           }
         );
 
         return {
-          request,
-          ok: request.ok || request.status === 409
+          response,
+          ok: response.ok || response.status === 409
         };
       }, 'Не удалось остановить сервис в облаке Northflank.');
     } else {
       return maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://api.render.com/v1/services/${this.document.serviceID}/suspend`,
           {
-            cache: 'reload',
             method: 'POST',
-            body: JSON.stringify({
-              method: 'POST',
-              url: `https://api.render.com/v1/services/${this.document.serviceID}/suspend`,
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${this.document.deploymentApi.token}`
-              }
-            })
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
           }
         ),
         'Не удалось остановить сервис в облаке Render.'
@@ -786,21 +705,13 @@ export class ServiceCloudPppAspirantPage extends Page {
   async cleanup() {
     if (this.deploymentApiId.datum().type === APIS.NORTHFLANK) {
       return maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'DELETE',
-              url: `https://api.northflank.com/v1/projects/${this.document.projectID}/services/${this.document.serviceID}`,
-              headers: {
-                Authorization: `Bearer ${this.document.deploymentApi.token}`
-              }
-            })
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
           }
         ),
         'Не удалось полностью удалить сервис. Удалите его вручную в панели управления Northflank.'
@@ -820,21 +731,13 @@ export class ServiceCloudPppAspirantPage extends Page {
       });
 
       return maybeFetchError(
-        await fetch(
-          new URL(
-            'fetch',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+        await ppp.fetch(
+          `https://api.render.com/v1/services/${this.document.serviceID}`,
           {
-            cache: 'reload',
-            method: 'POST',
-            body: JSON.stringify({
-              method: 'DELETE',
-              url: `https://api.render.com/v1/services/${this.document.serviceID}`,
-              headers: {
-                Authorization: `Bearer ${this.document.deploymentApi.token}`
-              }
-            })
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${this.document.deploymentApi.token}`
+            }
           }
         ),
         'Не удалось полностью удалить сервис. Удалите его вручную в панели управления Render.'

@@ -8,8 +8,10 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { APIS } from '../../lib/const.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../button.js';
+import '../query-select.js';
 import '../text-field.js';
 
 export const apiSupabasePageTemplate = html`
@@ -129,6 +131,48 @@ export const apiSupabasePageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Сервис-соединитель</h5>
+          <p class="description">
+            Будет использован для совершения HTTP-запросов к Redis.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('connectorServiceId')}
+            :context="${(x) => x}"
+            value="${(x) => x.document.connectorServiceId}"
+            :preloaded="${(x) => x.document.connectorService ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('services')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                      },
+                      { workerPredefinedTemplate: 'connectors' },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.connectorServiceId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+        </div>
+      </section>
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -148,9 +192,11 @@ export async function checkSupabaseCredentials({ url, key }) {
   });
 }
 
-export async function checkPostgreSQLCredentials({ url, connectionString }) {
-  return fetch(url, {
-    cache: 'no-cache',
+export async function checkPostgreSQLCredentials({
+  connectorUrl,
+  connectionString
+}) {
+  return fetch(`${connectorUrl}pg`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -173,6 +219,7 @@ export class ApiSupabasePage extends Page {
     await validate(this.port);
     await validate(this.user);
     await validate(this.password);
+    await validate(this.connectorServiceId);
 
     if (
       !(
@@ -189,14 +236,13 @@ export class ApiSupabasePage extends Page {
     }
 
     const { hostname } = new URL(this.url.value);
+    const connector = this.connectorServiceId.datum();
+    const connectorUrl = await getAspirantWorkerBaseUrl(connector);
 
     if (
       !(
         await checkPostgreSQLCredentials({
-          url: new URL(
-            'pg',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
+          connectorUrl,
           connectionString: `postgres://${this.user.value.trim()}:${encodeURIComponent(
             this.password.value
           )}@db.${hostname}:${this.port.value.trim()}/${this.db.value.trim()}`
@@ -216,10 +262,28 @@ export class ApiSupabasePage extends Page {
         .get('mongodb-atlas')
         .db('ppp')
         .collection('[%#this.collection%]')
-        .findOne({
-          _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.SUPABASE%]`
-        });
+        .aggregate([
+          {
+            $match: {
+              _id: new BSON.ObjectId('[%#payload.documentId%]'),
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.SUPABASE%]`
+            }
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'connectorServiceId',
+              foreignField: '_id',
+              as: 'connectorService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$connectorService',
+              preserveNullAndEmptyArrays: true
+            }
+          }
+        ]);
     };
   }
 
@@ -241,6 +305,7 @@ export class ApiSupabasePage extends Page {
         port: +Math.abs(this.port.value),
         user: this.user.value.trim(),
         password: this.password.value.trim(),
+        connectorServiceId: this.connectorServiceId.value,
         version: 1,
         updatedAt: new Date()
       },

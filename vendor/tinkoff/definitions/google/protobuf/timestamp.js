@@ -1,4 +1,4 @@
-import Long from '../../../../../salt/states/ppp/lib/vendor/long.min.js';
+import Long from '../../../../long.min.js';
 import protobuf from '../../../../protobuf/minimal.js';
 
 export const protobufPackage = 'google.protobuf';

@@ -166,7 +166,7 @@ export class BrokerIbPage extends Page {
     const port = Math.abs(+this.twsPort.value);
     const key = `${host}:${port}`;
 
-    const connectionRequest = await fetch(`${gatewayUrl}call`, {
+    const connectionResponse = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'connect',
@@ -178,10 +178,10 @@ export class BrokerIbPage extends Page {
       })
     });
 
-    await maybeFetchError(connectionRequest, 'Нет связи со шлюзом.');
+    await maybeFetchError(connectionResponse, 'Нет связи со шлюзом.');
     await later(3000);
 
-    const timeRequest = await fetch(`${gatewayUrl}call`, {
+    const timeResponse = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         key,
@@ -189,9 +189,9 @@ export class BrokerIbPage extends Page {
       })
     });
 
-    await maybeFetchError(timeRequest, 'Шлюз не выполнил запрос времени.');
+    await maybeFetchError(timeResponse, 'Шлюз не выполнил запрос времени.');
 
-    const { result } = await timeRequest.json();
+    const { result } = await timeResponse.json();
 
     if (typeof result !== 'number') {
       invalidate(ppp.app.toast, {

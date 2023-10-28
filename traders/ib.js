@@ -612,7 +612,7 @@ class IbTrader extends USTrader {
   }
 
   async getAllOpenOrders() {
-    const ordersRequest = await fetch(`${this.gatewayUrl}call`, {
+    const ordersResponse = await fetch(`${this.gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'getAllOpenOrders',
@@ -620,13 +620,13 @@ class IbTrader extends USTrader {
       })
     });
 
-    const ordersResponse = await ordersRequest.json();
+    const ordersData = await ordersResponse.json();
 
-    return ordersResponse.result ?? [];
+    return ordersData.result ?? [];
   }
 
   async getExecutions() {
-    const executionsRequest = await fetch(`${this.gatewayUrl}call`, {
+    const executionsResponse = await fetch(`${this.gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'getExecutionDetails',
@@ -634,9 +634,9 @@ class IbTrader extends USTrader {
       })
     });
 
-    const executionsResponse = await executionsRequest.json();
+    const executionsData = await executionsResponse.json();
 
-    return executionsResponse.result?.reverse() ?? [];
+    return executionsData.result?.reverse() ?? [];
   }
 
   async modifyLimitOrders({ instrument, side, value }) {
@@ -658,10 +658,9 @@ class IbTrader extends USTrader {
         )
           continue;
 
-        if (orderInstrument?.minPriceIncrement > 0) {
+        if (orderInstrument?.minPriceIncrement >= 0) {
           // US stocks only.
           const minPriceIncrement = +o.order.lmtPrice < 1 ? 0.0001 : 0.01;
-
           const price = +this.fixPrice(
             orderInstrument,
             +o.order.lmtPrice + minPriceIncrement * value
@@ -732,7 +731,7 @@ class IbTrader extends USTrader {
   async cancelLimitOrder(order) {
     await this.ensureTwsIsConnected();
 
-    const orderRequest = await fetch(`${this.gatewayUrl}call`, {
+    const orderResponse = await fetch(`${this.gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'cancelOrder',
@@ -743,15 +742,15 @@ class IbTrader extends USTrader {
       })
     });
 
-    const orderResponse = await orderRequest.json();
+    const orderData = await orderResponse.json();
 
-    if (orderResponse.ok) {
+    if (orderData.ok) {
       return {
-        orderId: orderResponse.result
+        orderId: orderData.result
       };
     } else {
       throw new TradingError({
-        message: orderResponse.result
+        message: orderData.result
       });
     }
   }
@@ -766,7 +765,7 @@ class IbTrader extends USTrader {
   }) {
     await this.ensureTwsIsConnected();
 
-    const orderRequest = await fetch(`${this.gatewayUrl}call`, {
+    const orderResponse = await fetch(`${this.gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'placeNewOrder',
@@ -792,15 +791,15 @@ class IbTrader extends USTrader {
       })
     });
 
-    const orderResponse = await orderRequest.json();
+    const orderData = await orderResponse.json();
 
-    if (orderResponse.ok) {
+    if (orderData.ok) {
       return {
-        orderId: orderResponse.result
+        orderId: orderData.result
       };
     } else {
       throw new TradingError({
-        message: orderResponse.result
+        message: orderData.result
       });
     }
   }
@@ -814,7 +813,7 @@ class IbTrader extends USTrader {
   }) {
     await this.ensureTwsIsConnected();
 
-    const orderRequest = await fetch(`${this.gatewayUrl}call`, {
+    const orderResponse = await fetch(`${this.gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'placeNewOrder',
@@ -839,15 +838,15 @@ class IbTrader extends USTrader {
       })
     });
 
-    const orderResponse = await orderRequest.json();
+    const orderData = await orderResponse.json();
 
-    if (orderResponse.ok) {
+    if (orderData.ok) {
       return {
-        orderId: orderResponse.result
+        orderId: orderData.result
       };
     } else {
       throw new TradingError({
-        message: orderResponse.result
+        message: orderData.result
       });
     }
   }

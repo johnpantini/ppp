@@ -314,11 +314,11 @@ export class ServicesPage extends Page {
             url = new URL(doc.versioningUrl);
           }
 
-          const fcRequest = await fetch(url.toString(), {
+          const contentsResponse = await fetch(url.toString(), {
             cache: 'reload'
           });
 
-          const parsed = parsePPPScript(await fcRequest.text());
+          const parsed = parsePPPScript(await contentsResponse.text());
 
           if (parsed && Array.isArray(parsed.meta?.version)) {
             const [version] = parsed.meta?.version;

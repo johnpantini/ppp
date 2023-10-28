@@ -201,19 +201,6 @@ export const serviceSystemdPppAspirantTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      <section>
-        <div class="label-group">
-          <h5>Прокси-ресурс для загрузки RPM-пакетов</h5>
-          <p class="description">Требуется для обхода блокировок.</p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="https://example.com"
-            value="${(x) => x.document.rpmProxy}"
-            ${ref('rpmProxy')}
-          ></ppp-text-field>
-        </div>
-      </section>
       ${documentPageFooterPartial({
         text: 'Сохранить в PPP и развернуть на сервере',
         extraControls: html`
@@ -248,7 +235,6 @@ export class ServiceSystemdPppAspirantPage extends Page {
     await validate(this.redisApiId);
     await validate(this.serverId);
     await validate(this.tailnetDomain);
-    await validate(this.rpmProxy);
   }
 
   async read() {
@@ -303,7 +289,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
 
     return {
       ASPIRANT_ID: this.document._id,
-      SERVICE_MACHINE_URL: ppp.keyVault.getKey('service-machine-url'),
+      GLOBAL_PROXY_URL: ppp.keyVault.getKey('global-proxy-url'),
       REDIS_HOST: redisApi.host,
       REDIS_PORT: redisApi.port.toString(),
       REDIS_TLS: !!redisApi.tls ? 'true' : '',
@@ -314,74 +300,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
   }
 
   async #deployOnServer() {
-    const tailnetDomain = this.tailnetDomain.value.trim();
-    const pillar = {
-      serviceName: `aspirant@${this.document._id}`,
-      environment: this.#getEnvironment()
-    };
-
-    if (this.document.domain) {
-      pillar.domain = this.document.domain;
-    }
-
-    const sslReplacement = [];
-
-    sslReplacement.push('listen 8080;');
-    sslReplacement.push('listen 443 ssl;');
-    sslReplacement.push('listen [::]:443 ssl;');
-    sslReplacement.push(
-      `ssl_certificate /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.crt;`
-    );
-    sslReplacement.push(
-      `ssl_certificate_key /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.key;`
-    );
-    sslReplacement.push('ssl_session_timeout 1d;');
-    sslReplacement.push('ssl_session_tickets off;');
-    sslReplacement.push('ssl_protocols TLSv1.3;');
-    sslReplacement.push('ssl_prefer_server_ciphers off;');
-    sslReplacement.push('ssl_stapling on;');
-    sslReplacement.push('ssl_stapling_verify on;');
-    sslReplacement.push(`allow 100.0.0.0/8;`);
-    sslReplacement.push('deny all;');
-
-    const server = this.serverId.datum();
-    const commands = [
-      'sudo salt-call --local state.sls ppp ;',
-      'sudo salt-call --local state.sls node ;',
-      `sudo firewall-cmd --permanent --zone=trusted --add-source=100.0.0.0/8;`,
-      `sudo firewall-cmd --permanent --add-service=http;`,
-      `sudo firewall-cmd --permanent --add-service=https;`,
-      `sudo firewall-cmd --reload ;`,
-      `sudo salt-call --local state.sls consul pillar='${JSON.stringify({
-        rpmProxy: this.rpmProxy.value.trim()
-      })}' ;`,
-      `sudo salt-call --local state.sls nomad pillar='${JSON.stringify({
-        rpmProxy: this.rpmProxy.value.trim()
-      })}' ;`,
-      'sudo salt-call --local state.sls nginx ;',
-      `sudo salt-call --local state.sls aspirant.nginx-ssl pillar='${JSON.stringify(
-        {
-          sslReplacement: sslReplacement.join(' '),
-          tailnetDomain
-        }
-      )}' ;`,
-      `sudo salt-call --local state.sls aspirant pillar='${JSON.stringify(
-        pillar
-      )}' &&`
-    ].join(' ');
-
-    if (
-      !(await this.executeSSHCommands({
-        server,
-        commands,
-        commandsToDisplay: commands.replace(
-          /,"REDIS_PASSWORD":"[\s\S]+","/gi,
-          ',"REDIS_PASSWORD":"<hidden content>","'
-        )
-      }))
-    ) {
-      throw new Error('Не удалось настроить сервис Aspirant.');
-    }
+    // TODO
   }
 
   async submit() {
@@ -393,7 +312,6 @@ export class ServiceSystemdPppAspirantPage extends Page {
           serverId: this.serverId.value,
           domain: this.domain.value,
           tailnetDomain: this.tailnetDomain.value.trim(),
-          rpmProxy: this.rpmProxy.value.trim(),
           version: 1,
           state: SERVICE_STATE.FAILED,
           updatedAt: new Date()
@@ -420,7 +338,10 @@ export class ServiceSystemdPppAspirantPage extends Page {
         commands: `sudo systemctl restart aspirant@${this.document._id}.service &&`
       }))
     ) {
-      throw new Error('Не удалось перезапустить сервис Aspirant.');
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Не удалось перезапустить сервис Aspirant.',
+        raiseException: true
+      });
     }
   }
 
@@ -431,7 +352,10 @@ export class ServiceSystemdPppAspirantPage extends Page {
         commands: `sudo systemctl stop aspirant@${this.document._id}.service &&`
       }))
     ) {
-      throw new Error('Не удалось остановить сервис Aspirant.');
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Не удалось остановить сервис Aspirant.',
+        raiseException: true
+      });
     }
   }
 
@@ -443,12 +367,15 @@ export class ServiceSystemdPppAspirantPage extends Page {
           `sudo systemctl stop aspirant@${this.document._id}.service ;`,
           `sudo systemctl disable aspirant@${this.document._id}.service ;`,
           `sudo rm -f /etc/systemd/system/aspirant@${this.document._id}.service`,
-          `sudo systemctl daemon-reload ;`,
-          `sudo systemctl reset-failed &&`
+          'sudo systemctl daemon-reload ;',
+          'sudo systemctl reset-failed && '
         ].join(' ')
       }))
     ) {
-      throw new Error('Не удалось остановить сервис Aspirant.');
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Не удалось остановить сервис Aspirant.',
+        raiseException: true
+      });
     }
   }
 }

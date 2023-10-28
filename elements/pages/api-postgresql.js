@@ -128,26 +128,7 @@ export class ApiPostgreSqlPage extends Page {
     await validate(this.user);
     await validate(this.password);
 
-    if (
-      !(
-        await checkPostgreSQLCredentials({
-          url: new URL(
-            'pg',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
-          connectionString: `postgresql://${this.user.value.trim()}:${encodeURIComponent(
-            this.password.value
-          )}@${this.hostname.value.trim()}:${this.port.value.trim()}/${this.db.value
-            .trim()
-            .replace('/', '.')}?ssl=true`
-        })
-      ).ok
-    ) {
-      invalidate(this.password, {
-        errorMessage: 'Неверный пользователь или пароль',
-        raiseException: true
-      });
-    }
+    // TODO - check credentials.
   }
 
   async read() {

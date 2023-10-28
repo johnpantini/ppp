@@ -1,4 +1,4 @@
-import Long from '../../../salt/states/ppp/lib/vendor/long.min.js';
+import Long from '../../long.min.js';
 import protobuf from '../../protobuf/minimal.js';
 import { MoneyValue, Ping, Quotation } from './common.js';
 import { Timestamp } from './google/protobuf/timestamp.js';
@@ -6242,9 +6242,7 @@ function fromJsonTimestamp(o) {
 
 function longToNumber(long) {
   if (long.gt(Number.MAX_SAFE_INTEGER)) {
-    throw new Error(
-      'Value is larger than Number.MAX_SAFE_INTEGER'
-    );
+    throw new Error('Value is larger than Number.MAX_SAFE_INTEGER');
   }
 
   return long.toNumber();

@@ -1,4 +1,4 @@
-import Long from '../../../salt/states/ppp/lib/vendor/long.min.js';
+import Long from '../../long.min.js';
 import protobuf from '../../protobuf/minimal.js';
 import {
   Quotation,
@@ -393,7 +393,8 @@ export const MarketDataRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseMarketDataRequest();
 
@@ -556,7 +557,8 @@ export const MarketDataServerSideStreamRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseMarketDataServerSideStreamRequest();
 
@@ -738,7 +740,8 @@ export const MarketDataResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseMarketDataResponse();
 
@@ -908,7 +911,8 @@ export const SubscribeCandlesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeCandlesRequest();
 
@@ -992,7 +996,8 @@ export const CandleInstrument = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCandleInstrument();
 
@@ -1056,7 +1061,8 @@ export const SubscribeCandlesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeCandlesResponse();
 
@@ -1133,7 +1139,8 @@ export const CandleSubscription = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCandleSubscription();
 
@@ -1214,7 +1221,8 @@ export const SubscribeOrderBookRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeOrderBookRequest();
 
@@ -1288,7 +1296,8 @@ export const OrderBookInstrument = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrderBookInstrument();
 
@@ -1349,7 +1358,8 @@ export const SubscribeOrderBookResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeOrderBookResponse();
 
@@ -1428,7 +1438,8 @@ export const OrderBookSubscription = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrderBookSubscription();
 
@@ -1506,7 +1517,8 @@ export const SubscribeTradesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeTradesRequest();
 
@@ -1576,7 +1588,8 @@ export const TradeInstrument = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTradeInstrument();
 
@@ -1631,7 +1644,8 @@ export const SubscribeTradesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeTradesResponse();
 
@@ -1704,7 +1718,8 @@ export const TradeSubscription = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTradeSubscription();
 
@@ -1776,7 +1791,8 @@ export const SubscribeInfoRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeInfoRequest();
 
@@ -1846,7 +1862,8 @@ export const InfoInstrument = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseInfoInstrument();
 
@@ -1901,7 +1918,8 @@ export const SubscribeInfoResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeInfoResponse();
 
@@ -1974,7 +1992,8 @@ export const InfoSubscription = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseInfoSubscription();
 
@@ -2046,7 +2065,8 @@ export const SubscribeLastPriceRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeLastPriceRequest();
 
@@ -2116,7 +2136,8 @@ export const LastPriceInstrument = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseLastPriceInstrument();
 
@@ -2171,7 +2192,8 @@ export const SubscribeLastPriceResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseSubscribeLastPriceResponse();
 
@@ -2246,7 +2268,8 @@ export const LastPriceSubscription = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseLastPriceSubscription();
 
@@ -2367,7 +2390,8 @@ export const Candle = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseCandle();
 
@@ -2531,7 +2555,8 @@ export const OrderBook = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrderBook();
 
@@ -2664,7 +2689,8 @@ export const Order = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseOrder();
 
@@ -2750,7 +2776,8 @@ export const Trade = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTrade();
 
@@ -2868,7 +2895,8 @@ export const TradingStatus = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseTradingStatus();
 
@@ -2983,7 +3011,8 @@ export const GetCandlesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetCandlesRequest();
 
@@ -3057,7 +3086,8 @@ export const GetCandlesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetCandlesResponse();
 
@@ -3148,7 +3178,8 @@ export const HistoricCandle = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseHistoricCandle();
 
@@ -3238,7 +3269,8 @@ export const GetLastPricesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastPricesRequest();
 
@@ -3292,7 +3324,8 @@ export const GetLastPricesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastPricesResponse();
 
@@ -3363,7 +3396,8 @@ export const LastPrice = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseLastPrice();
 
@@ -3423,7 +3457,7 @@ export const LastPrice = {
 };
 
 function createBaseGetOrderBookRequest() {
-  return {depth: 0, instrumentId: '' };
+  return { depth: 0, instrumentId: '' };
 }
 
 export const GetOrderBookRequest = {
@@ -3439,7 +3473,8 @@ export const GetOrderBookRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetOrderBookRequest();
 
@@ -3562,7 +3597,8 @@ export const GetOrderBookResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetOrderBookResponse();
 
@@ -3729,7 +3765,8 @@ export const GetTradingStatusRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetTradingStatusRequest();
 
@@ -3807,7 +3844,8 @@ export const GetTradingStatusResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetTradingStatusResponse();
 
@@ -3914,7 +3952,8 @@ export const GetLastTradesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastTradesRequest();
 
@@ -3979,7 +4018,8 @@ export const GetLastTradesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetLastTradesResponse();
 
@@ -4029,7 +4069,8 @@ export const GetMySubscriptions = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetMySubscriptions();
 
@@ -4069,7 +4110,8 @@ export const GetClosePricesRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetClosePricesRequest();
 
@@ -4127,7 +4169,8 @@ export const InstrumentClosePriceRequest = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseInstrumentClosePriceRequest();
 
@@ -4178,7 +4221,8 @@ export const GetClosePricesResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseGetClosePricesResponse();
 
@@ -4253,7 +4297,8 @@ export const InstrumentClosePriceResponse = {
     return writer;
   },
   decode(input, length) {
-    const reader = input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
+    const reader =
+      input instanceof protobuf.Reader ? input : new protobuf.Reader(input);
     let end = length === undefined ? reader.len : reader.pos + length;
     const message = createBaseInstrumentClosePriceResponse();
 

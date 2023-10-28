@@ -9,7 +9,8 @@ import {
   observable
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { invalidate, validate } from '../../lib/ppp-errors.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../button.js';
 import '../text-field.js';
 
@@ -97,9 +98,9 @@ export class NewDomainModalPage extends Page {
         .map((d) => d.trim());
 
       const commands = [
-        'sudo salt-call --local state.sls epel ;',
         'sudo firewall-cmd --permanent --add-service=http ;',
         'sudo firewall-cmd --reload ;',
+        'sudo dnf -y install python3-pip ;',
         'sudo pip install --force-reinstall --target /usr/lib/python3.9/site-packages cryptography==37.0.2 pyopenssl==22.0.0 ;',
         'sudo pip install --force-reinstall --target /usr/lib64/python3.9/site-packages cryptography==37.0.2 pyopenssl==22.0.0 ;',
         'sudo dnf -y install python3-cryptography python3-pyOpenSSL python-cffi python-pycparser certbot ;',
@@ -113,15 +114,22 @@ export class NewDomainModalPage extends Page {
         'sudo systemctl restart certbot-renew.timer && '
       ].join(' ');
 
+      const connector = this.parent.connectorServiceId.datum();
+      const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+
       if (
         !(await this.parent.executeSSHCommands({
           server: this.parent.document,
+          connectorUrl,
           commands,
           commandsToDisplay: commands
         }))
       ) {
         // noinspection ExceptionCaughtLocallyJS
-        throw new Error('Не удалось добавить домены.');
+        invalidate(this.host, {
+          errorMessage: 'Не удалось добавить домены.',
+          raiseException: true
+        });
       }
 
       await ppp.user.functions.updateOne(

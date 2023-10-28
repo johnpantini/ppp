@@ -123,7 +123,7 @@ export class TraderIbPage extends Page {
       gatewayUrl = `${gatewayUrl}/`;
     }
 
-    const connectionRequest = await fetch(`${gatewayUrl}call`, {
+    const connectionResponse = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'connect',
@@ -135,10 +135,10 @@ export class TraderIbPage extends Page {
       })
     });
 
-    await maybeFetchError(connectionRequest, 'Нет связи со шлюзом.');
+    await maybeFetchError(connectionResponse, 'Нет связи со шлюзом.');
     await later(3000);
 
-    const summaryRequest = await fetch(`${gatewayUrl}call`, {
+    const summaryResponse = await fetch(`${gatewayUrl}call`, {
       method: 'POST',
       body: JSON.stringify({
         method: 'summary',
@@ -147,11 +147,11 @@ export class TraderIbPage extends Page {
     });
 
     await maybeFetchError(
-      summaryRequest,
+      summaryResponse,
       'Шлюз не выполнил запрос информации о портфеле.'
     );
 
-    const { result } = await summaryRequest.json();
+    const { result } = await summaryResponse.json();
 
     if (typeof result.summary[this.account.value.trim()] === 'undefined') {
       invalidate(ppp.app.toast, {

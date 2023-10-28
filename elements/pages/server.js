@@ -11,10 +11,12 @@ import {
 import { SERVER_STATE, SERVER_TYPES } from '../../lib/const.js';
 import { serverStateAppearance } from './servers.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../button.js';
 import '../radio-group.js';
 import '../snippet.js';
+import '../query-select.js';
 import '../table.js';
 import '../terminal.js';
 import '../text-field.js';
@@ -49,6 +51,48 @@ export const serverPageTemplate = html`
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Сервис-соединитель</h5>
+          <p class="description">
+            Будет использован для доступа к серверу по SSH.
+          </p>
+        </div>
+        <div class="input-group">
+        <ppp-query-select
+            ${ref('connectorServiceId')}
+            :context="${(x) => x}"
+            value="${(x) => x.document.connectorServiceId}"
+            :preloaded="${(x) => x.document.connectorService ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('services')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                      },
+                      { workerPredefinedTemplate: 'connectors' },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.connectorServiceId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
         </div>
       </section>
       <section>
@@ -299,6 +343,7 @@ export class ServerPage extends Page {
 
   async validate() {
     await validate(this.name);
+    await validate(this.connectorServiceId);
     await validate(this.hostname);
     await validate(this.port);
     await validate(this.username);
@@ -314,9 +359,27 @@ export class ServerPage extends Page {
         .get('mongodb-atlas')
         .db('ppp')
         .collection('[%#this.collection%]')
-        .findOne({
-          _id: new BSON.ObjectId('[%#payload.documentId%]')
-        });
+        .aggregate([
+          {
+            $match: {
+              _id: new BSON.ObjectId('[%#payload.documentId%]')
+            }
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'connectorServiceId',
+              foreignField: '_id',
+              as: 'connectorService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$connectorService',
+              preserveNullAndEmptyArrays: true
+            }
+          }
+        ]);
     };
   }
 
@@ -328,68 +391,36 @@ export class ServerPage extends Page {
   }
 
   async #deploy() {
-    const repoUrl = `https://github.com/${ppp.keyVault.getKey(
-      'github-login'
-    )}/ppp.git`;
-
-    const minionConfiguration = `backend: requests
-ext_pillar:
-  - git:
-    - main ${repoUrl}:
-      - root: salt/pillar
-file_client: local
-fileserver_backend:
-  - git
-gitfs_base: main
-gitfs_provider: pygit2
-gitfs_remotes:
-  - ${repoUrl}
-gitfs_root: salt/states
-gitfs_global_lock: False
-git_pillar_global_lock: False
-pillar_opts: true
-`;
-
     let commands = [
+      'sudo rm -f /etc/yum.repos.d/tailscale.repo ;',
       'sudo dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-$(rpm -q --provides $(rpm -q --whatprovides "system-release(releasever)") | grep "system-release(releasever)" | cut -d " " -f 3).noarch.rpm ;',
-      'sudo rm -f /etc/yum.repos.d/salt.repo ;',
-      'sudo mkdir -p /etc/salt ;',
+      'sudo dnf -y install dnf-plugins-core ;',
+      `sudo dnf -y config-manager --set-enabled powertools 2> /dev/null || echo 'OK' ;`,
+      `sudo dnf -y config-manager --set-enabled PowerTools 2> /dev/null || echo 'OK' ;`,
       'sudo dnf -y install epel-release ;',
-      'sudo dnf -y install wget git python3-pip python3-devel libffi-devel tar openssl openssl-devel ;',
-      'sudo dnf -y remove cmake ;',
-      'sudo dnf -y group install "Development Tools" ;',
-      'wget https://github.com/Kitware/CMake/releases/download/v3.25.1/cmake-3.25.1-linux-$(uname -m).tar.gz -O cmake-3.25.1-linux-$(uname -m).tar.gz ;',
-      'tar xzf cmake-3.25.1-linux-$(uname -m).tar.gz ;',
-      'sudo ln -fs ~/cmake-3.25.1-linux-$(uname -m)/bin/cmake /usr/bin/cmake ;',
-      'wget https://github.com/libgit2/libgit2/archive/refs/tags/v1.5.0.tar.gz -O libgit2-1.5.0.tar.gz ;',
-      'tar xzf libgit2-1.5.0.tar.gz ;',
-      'cd libgit2-1.5.0/ ; cmake . ; make -j$(nproc); sudo make install ;',
-      'sudo -H python3 -m pip install --upgrade pip setuptools wheel six ;',
-      'sudo dnf -y reinstall python3-six ;',
-      'sudo -H python3 -m pip install --upgrade --force-reinstall cffi==1.15.1 ;',
-      'sudo -H python3 -m pip install --upgrade --force-reinstall pygit2 ;',
-      'sudo ln -fs /usr/local/lib64/libgit2.so.1.5 /usr/lib64/libgit2.so.1.5 ; ',
-      'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall salt ;',
-      'sudo -H python3 -m pip install --upgrade --ignore-installed --force-reinstall jinja2==3.1.2 ;',
-      'sudo rm -f /etc/salt/minion ;',
-      `sudo sh -c "echo '${minionConfiguration}' >> /etc/salt/minion" ;`,
-      'sudo ln -fs /usr/local/bin/salt-call /usr/bin/salt-call ;',
-      'sudo salt-call --local state.sls epel ;',
-      'sudo salt-call --local state.sls ping && '
+      'sudo dnf -y install wget git tar openssl openssl-devel ;',
+      'sudo dnf -y group install "Development Tools" && '
     ].join(' ');
 
     const extraCommands = this.extraCommands.value.trim();
 
     if (extraCommands) commands = extraCommands + ' ; ' + commands;
 
+    const connector = this.connectorServiceId.datum();
+    const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+
     if (
       !(await this.executeSSHCommands({
         server: this.document,
+        connectorUrl,
         commands,
         commandsToDisplay: commands
       }))
     ) {
-      throw new Error('Не удалось настроить сервер.');
+      invalidate(this.host, {
+        errorMessage: 'Не удалось настроить сервер.',
+        raiseException: true
+      });
     }
   }
 
@@ -398,6 +429,7 @@ pillar_opts: true
       {
         $set: {
           name: this.name.value.trim(),
+          connectorServiceId: this.connectorServiceId.value,
           hostname: this.hostname.value.trim(),
           port: Math.abs(this.port.value),
           username: this.username.value.trim(),

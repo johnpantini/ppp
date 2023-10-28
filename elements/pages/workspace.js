@@ -198,10 +198,6 @@ export class WorkspacePage extends Page {
               };
 
               if (ppp.app.widgetClipboard.savedDocument) {
-                ppp.app.widgetClipboard.savedDocument.uniqueID = uuidv4();
-                ppp.app.widgetClipboard.liveDocument.uniqueID =
-                  ppp.app.widgetClipboard.savedDocument.uniqueID;
-
                 this.showSuccessNotification(
                   `Виджет «${selectedWidget.document.name}» скопирован в буфер обмена.`
                 );
@@ -218,9 +214,16 @@ export class WorkspacePage extends Page {
 
         savedDocument.x = void 0;
         savedDocument.y = void 0;
+        savedDocument.activeWidgetLink = void 0;
+        savedDocument.linkedWidgets = void 0;
         liveDocument.x = void 0;
         liveDocument.y = void 0;
+        liveDocument.activeWidgetLink = void 0;
+        liveDocument.linkedWidgets = void 0;
         liveDocument.symbol = savedDocument.symbol;
+
+        savedDocument.uniqueID = uuidv4();
+        liveDocument.uniqueID = savedDocument.uniqueID;
 
         this.document.widgets.push(liveDocument);
         this.document.widgets[this.document.widgets.length - 1].zIndex =

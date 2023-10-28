@@ -29,9 +29,7 @@ import {
   spacing1,
   spacing2,
   spacing4,
-  spacing3,
-  paletteGrayBase,
-  paletteGrayLight1
+  spacing3
 } from '../design/design-tokens.js';
 import {
   PAGE_STATUS,
@@ -1200,7 +1198,7 @@ class PageWithService {
         const versioningUrl = this.document.versioningUrl.trim();
 
         if (versioningUrl) {
-          const fcRequest = await fetch(
+          const contentsResponse = await fetch(
             ppp.getWorkerTemplateFullUrl(versioningUrl).toString(),
             {
               cache: 'reload'
@@ -1208,11 +1206,11 @@ class PageWithService {
           );
 
           await maybeFetchError(
-            fcRequest,
+            contentsResponse,
             'Не удалось отследить версию сервиса.'
           );
 
-          const parsed = parsePPPScript(await fcRequest.text());
+          const parsed = parsePPPScript(await contentsResponse.text());
 
           if (!parsed || !Array.isArray(parsed.meta?.version)) {
             invalidate(this.versioningUrl, {
@@ -1333,20 +1331,34 @@ class PageWithSupabaseService {
       select ${funcName}();
     `;
 
-    const rExecuteSQL = await fetch(
-      new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const connector = await ppp.user.functions.findOne(
+      { collection: 'services' },
       {
-        cache: 'reload',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          query,
-          connectionString: this.getConnectionString(api)
-        })
+        _id: api.connectorServiceId
       }
     );
+
+    if (!connector) {
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+        raiseException: true
+      });
+    }
+
+    const { getAspirantWorkerBaseUrl } = await import(
+      `${ppp.rootUrl}/elements/pages/service-ppp-aspirant-worker.js`
+    );
+    const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+    const rExecuteSQL = await fetch(`${connectorUrl}pg`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query,
+        connectionString: this.getConnectionString(api)
+      })
+    });
 
     await maybeFetchError(rExecuteSQL, 'Не удалось выполнить функцию.');
 
@@ -1396,20 +1408,34 @@ class PageWithSupabaseService {
       terminal.reset();
       terminal.writeInfo('Выполняется запрос к базе данных...\r\n');
 
-      const rSQL = await fetch(
-        new URL('pg', ppp.keyVault.getKey('service-machine-url')).toString(),
+      const connector = await ppp.user.functions.findOne(
+        { collection: 'services' },
         {
-          cache: 'no-cache',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            query,
-            connectionString: this.getConnectionString(api)
-          })
+          _id: api.connectorServiceId
         }
       );
+
+      if (!connector) {
+        invalidate(ppp.app.toast, {
+          errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+          raiseException: true
+        });
+      }
+
+      const { getAspirantWorkerBaseUrl } = await import(
+        `${ppp.rootUrl}/elements/pages/service-ppp-aspirant-worker.js`
+      );
+      const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+      const rSQL = await fetch(`${connectorUrl}pg`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          query,
+          connectionString: this.getConnectionString(api)
+        })
+      });
 
       const text = await rSQL.text();
 
@@ -1507,18 +1533,9 @@ class PageWithSSHTerminal {
     }
   }
 
-  async executeSSHCommandsSilently({ server = {}, commands }) {
+  async executeSSHCommandsSilently({ server = {}, connectorUrl, commands }) {
     try {
       commands += `echo '\x1b[32m\r\nppp-ssh-ok\r\n\x1b[0m'`;
-
-      // Only for development
-      if (location.origin.endsWith('.github.io.dev')) {
-        commands = commands.replaceAll(
-          'salt-call --local',
-          'salt-call --local -c /srv/salt'
-        );
-      }
-
       server.cmd = commands;
 
       if (server.authType === SERVER_TYPES.PASSWORD) {
@@ -1529,13 +1546,10 @@ class PageWithSSHTerminal {
         server.privateKey = server.key;
       }
 
-      const rSSH = await fetch(
-        new URL('ssh', ppp.keyVault.getKey('service-machine-url')).toString(),
-        {
-          method: 'POST',
-          body: JSON.stringify(server)
-        }
-      );
+      const rSSH = await fetch(`${connectorUrl}ssh`, {
+        method: 'POST',
+        body: JSON.stringify(server)
+      });
 
       await this.processChunkedResponse(rSSH);
 
@@ -1552,7 +1566,12 @@ class PageWithSSHTerminal {
     }
   }
 
-  async executeSSHCommands({ server = {}, commands, commandsToDisplay }) {
+  async executeSSHCommands({
+    server = {},
+    connectorUrl,
+    commands,
+    commandsToDisplay
+  }) {
     this.terminalOutput = '';
 
     ppp.app.terminalModal.dismissible = false;
@@ -1571,15 +1590,6 @@ class PageWithSSHTerminal {
       terminal.writeln('');
 
       commands += `echo '\x1b[32m\r\nppp-ssh-ok\r\n\x1b[0m'`;
-
-      // Only for development
-      if (location.origin.endsWith('.github.io.dev')) {
-        commands = commands.replaceAll(
-          'salt-call --local',
-          'salt-call --local -c /srv/salt'
-        );
-      }
-
       server.cmd = commands;
 
       if (server.authType === SERVER_TYPES.PASSWORD) {
@@ -1590,13 +1600,10 @@ class PageWithSSHTerminal {
         server.privateKey = server.key;
       }
 
-      const rSSH = await fetch(
-        new URL('ssh', ppp.keyVault.getKey('service-machine-url')).toString(),
-        {
-          method: 'POST',
-          body: JSON.stringify(server)
-        }
-      );
+      const rSSH = await fetch(`${connectorUrl}ssh`, {
+        method: 'POST',
+        body: JSON.stringify(server)
+      });
 
       await this.processChunkedResponse(rSSH, terminal);
 

@@ -752,7 +752,7 @@ export class ServiceSupabaseParserPage extends Page {
       const data = predefinedParserData[this.parserPredefinedTemplate.value];
 
       try {
-        const fcRequest = await fetch(
+        const contentsResponse = await fetch(
           ppp.getWorkerTemplateFullUrl(data.url).toString(),
           {
             cache: 'reload'
@@ -760,11 +760,11 @@ export class ServiceSupabaseParserPage extends Page {
         );
 
         await maybeFetchError(
-          fcRequest,
+          contentsResponse,
           'Не удалось загрузить файл с шаблоном.'
         );
 
-        this.parsingCode.updateCode(await fcRequest.text());
+        this.parsingCode.updateCode(await contentsResponse.text());
 
         if (!this.document._id || this.document.removed) {
           this.tableSchema.updateCode(data.tableSchema);
@@ -1155,16 +1155,16 @@ export class ServiceSupabaseParserPage extends Page {
 
   async update() {
     const data = predefinedParserData[this.parserPredefinedTemplate.value];
-    const fcRequest = await fetch(
+    const contentsResponse = await fetch(
       ppp.getWorkerTemplateFullUrl(data.url).toString(),
       {
         cache: 'reload'
       }
     );
 
-    await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+    await maybeFetchError(contentsResponse, 'Не удалось загрузить файл с шаблоном.');
 
-    this.parsingCode.updateCode(await fcRequest.text());
+    this.parsingCode.updateCode(await contentsResponse.text());
     this.constsCode.updateCode(data.constsCode);
     this.insertTriggerCode.updateCode(data.insertTriggerCode);
     this.deleteTriggerCode.updateCode(data.deleteTriggerCode);

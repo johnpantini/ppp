@@ -74,7 +74,7 @@ class FinamTradeApiTrader extends Trader {
   }
 
   async getAllOpenOrders() {
-    const ordersRequest = await fetch(
+    const ordersResponse = await fetch(
       `https://trade-api.finam.ru/public/api/v1/orders?ClientId=${this.document.account}&IncludeMatched=false&IncludeCanceled=false&IncludeActive=true`,
       {
         headers: {
@@ -83,9 +83,9 @@ class FinamTradeApiTrader extends Trader {
       }
     );
 
-    const { data } = await ordersRequest.json();
+    const { data } = await ordersResponse.json();
 
-    if (ordersRequest.ok) {
+    if (ordersResponse.ok) {
       return data.orders ?? [];
     } else {
       return [];
@@ -113,7 +113,7 @@ class FinamTradeApiTrader extends Trader {
       payload.price = +this.fixPrice(instrument, price);
     }
 
-    const orderRequest = await fetch(
+    const orderResponse = await fetch(
       'https://trade-api.finam.ru/public/api/v1/orders',
       {
         method: 'POST',
@@ -124,9 +124,9 @@ class FinamTradeApiTrader extends Trader {
       }
     );
 
-    const order = await orderRequest.json();
+    const order = await orderResponse.json();
 
-    if (orderRequest.status !== 200) {
+    if (orderResponse.status !== 200) {
       throw new TradingError({
         details: order
       });

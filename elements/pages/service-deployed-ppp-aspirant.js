@@ -131,16 +131,14 @@ export class ServiceDeployedPppAspirantPage extends Page {
       let command = [
         `docker run`,
         `--env=ASPIRANT_ID=${this.document._id}`,
-        `--env=SERVICE_MACHINE_URL=${ppp.keyVault.getKey(
-          'service-machine-url'
-        )}`,
+        `--env=GLOBAL_PROXY_URL=${ppp.keyVault.getKey('global-proxy-url')}`,
         `--env=REDIS_HOST=${datum.host}`,
         `--env=REDIS_PORT=${datum.port}`,
         `--env=REDIS_TLS=${datum.tls ? 'true' : ''}`,
         `--env=REDIS_DATABASE=${datum.database}`,
         `--env=REDIS_USERNAME=${datum.username}`,
         `--env=REDIS_PASSWORD=${datum.password}`,
-        `--workdir=/salt/states/ppp/lib`,
+        `--workdir=/ppp/lib`,
         `-p ${new URL(this.document.url).port}:80`,
         '-d',
         'johnpantini/aspirant'
@@ -164,16 +162,16 @@ export class ServiceDeployedPppAspirantPage extends Page {
         await maybeFetchError(await fetch(`${url}/nginx/health`));
         await maybeFetchError(await fetch(`${url}/nomad/health`));
 
-        const envRequest = await fetch(`${url}/nginx/env`);
+        const envResponse = await fetch(`${url}/nginx/env`);
 
-        await maybeFetchError(envRequest);
+        await maybeFetchError(envResponse);
 
-        const environment = await envRequest.json();
+        const environment = await envResponse.json();
 
         if (
           ![
             'ASPIRANT_ID',
-            'SERVICE_MACHINE_URL',
+            'GLOBAL_PROXY_URL',
             'REDIS_HOST',
             'REDIS_PORT'
           ].every((key) => typeof environment[key] !== 'undefined')

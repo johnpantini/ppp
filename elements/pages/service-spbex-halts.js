@@ -13,7 +13,7 @@ import {
   servicePageHeaderExtraControls
 } from './service.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
-import { APIS,  SERVICES } from '../../lib/const.js';
+import { APIS, SERVICES } from '../../lib/const.js';
 import '../badge.js';
 import '../button.js';
 import '../query-select.js';
@@ -307,7 +307,6 @@ export const serviceSpbexHaltsPageStyles = css`
   }
 `;
 
-// TODO - implement this class
 export class ServiceSpbexHaltsPage extends Page {
   collection = 'services';
 

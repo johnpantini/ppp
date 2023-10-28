@@ -209,7 +209,7 @@ export const apiPageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
-        <ppp-generic-card>
+        <ppp-generic-card hidden>
           <img
             slot="logo"
             draggable="false"
@@ -220,6 +220,7 @@ export const apiPageTemplate = html`
           <span slot="title">PostgreSQL</span>
           <span slot="description">Реляционная база данных.</span>
           <ppp-button
+            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({

@@ -188,7 +188,7 @@ export class BackupMongodbModalPage extends Page {
       }
 
       const now = Date.now();
-      let key = `backup-of-${
+      const key = `backup-of-${
         this.cloud ? 'cloud' : 'alternative'
       }-mongodb-${now}.zip`;
       const reader = new FileReader();

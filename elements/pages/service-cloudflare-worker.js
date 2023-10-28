@@ -52,11 +52,6 @@ export default {
     envSecret: '{}',
     url: '/lib/cloudflare-workers/thefly.js'
   },
-  mongoDBRealm: {
-    env: `{}`,
-    envSecret: '{}',
-    url: '/lib/cloudflare-workers/mongodb-realm.js'
-  },
   psinaPusher: {
     env: (pusherApi) => {
       return {
@@ -76,7 +71,7 @@ export default {
     url: '/lib/cloudflare-workers/psina-us-news-body-extraction.js',
     env: (astraDbApi) => {
       return {
-        SERVICE_MACHINE_URL: "[%#ppp.keyVault.getKey('service-machine-url')%]",
+        GLOBAL_PROXY_URL: "[%#ppp.keyVault.getKey('global-proxy-url')%]",
         ASTRA_DB_ID: astraDbApi.dbID,
         ASTRA_DB_REGION: astraDbApi.dbRegion,
         ASTRA_DB_KEYSPACE: astraDbApi.dbKeyspace
@@ -227,124 +222,127 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 Воспользуйтесь шаблонами готовых сервисов для их быстрой
                 настройки.
               </p>
-              <ppp-select
-                value="${(x) =>
-                  x.document.workerPredefinedTemplate ?? 'default'}"
-                ${ref('workerPredefinedTemplate')}
-              >
-                <ppp-option value="custom">По файлу отслеживания</ppp-option>
-                <ppp-option value="default">Тестовый пример</ppp-option>
-                <ppp-option value="tradingview">
-                  Прокси для ru.tradingview.com
-                </ppp-option>
-                <ppp-option value="thefly">Прокси для thefly.com</ppp-option>
-                <ppp-option value="mongoDBRealm">
-                  Прокси для MongoDB Realm
-                </ppp-option>
-                <ppp-option value="psinaPusher">
-                  Интеграция Pusher и Psina
-                </ppp-option>
-                <ppp-option value="psinaUsNewsBodyExtraction">
-                  Новости (Psina) - содержимое из AstraDB
-                </ppp-option>
-              </ppp-select>
-              ${when(
-                (x) => x.workerPredefinedTemplate.value === 'psinaPusher',
-                html`
-                  <div class="spacing2"></div>
-                  <div class="control-line flex-start">
-                    <ppp-query-select
-                      ${ref('psinaPusherApiId')}
-                      standalone
-                      placeholder="Выберите профиль API Pusher"
-                      :context="${(x) => x}"
-                      :query="${() => {
-                        return (context) => {
-                          return context.services
-                            .get('mongodb-atlas')
-                            .db('ppp')
-                            .collection('apis')
-                            .find({
-                              $and: [
-                                {
-                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
-                                },
-                                {
-                                  removed: { $ne: true }
-                                }
-                              ]
-                            })
-                            .sort({ updatedAt: -1 });
-                        };
-                      }}"
-                      :transform="${() => ppp.decryptDocumentsTransformation()}"
-                    ></ppp-query-select>
-                    <ppp-button
-                      appearance="default"
-                      @click="${() =>
-                        ppp.app.mountPage(`api-${APIS.PUSHER}`, {
-                          size: 'xlarge',
-                          adoptHeader: true
-                        })}"
-                    >
-                      +
-                    </ppp-button>
-                  </div>
-                `
-              )}
-              ${when(
-                (x) =>
-                  x.workerPredefinedTemplate.value ===
-                  'psinaUsNewsBodyExtraction',
-                html`
-                  <div class="spacing2"></div>
-                  <div class="control-line flex-start">
-                    <ppp-query-select
-                      ${ref('psinaUsNewsAstraDbApiId')}
-                      standalone
-                      placeholder="Выберите профиль API AstraDB"
-                      :context="${(x) => x}"
-                      :query="${() => {
-                        return (context) => {
-                          return context.services
-                            .get('mongodb-atlas')
-                            .db('ppp')
-                            .collection('apis')
-                            .find({
-                              $and: [
-                                {
-                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.ASTRADB%]`
-                                },
-                                {
-                                  removed: { $ne: true }
-                                }
-                              ]
-                            })
-                            .sort({ updatedAt: -1 });
-                        };
-                      }}"
-                      :transform="${() => ppp.decryptDocumentsTransformation()}"
-                    ></ppp-query-select>
-                    <ppp-button
-                      appearance="default"
-                      @click="${() =>
-                        ppp.app.mountPage(`api-${APIS.ASTRADB}`, {
-                          size: 'xlarge',
-                          adoptHeader: true
-                        })}"
-                    >
-                      +
-                    </ppp-button>
-                  </div>
-                `
-              )}
-              <div class="spacing2"></div>
-              <ppp-button
-                @click="${(x) => x.fillOutFormsWithTemplate()}"
-                appearance="primary"
-              >
-                Заполнить формы по этому шаблону
-              </ppp-button>
+              <div class="control-stack" style="align-items: unset">
+                <ppp-select
+                  value="${(x) =>
+                    x.document.workerPredefinedTemplate ?? 'default'}"
+                  ${ref('workerPredefinedTemplate')}
+                >
+                  <ppp-option value="custom">По файлу отслеживания</ppp-option>
+                  <ppp-option value="default">Тестовый пример</ppp-option>
+                  <ppp-option value="tradingview">
+                    Прокси для ru.tradingview.com
+                  </ppp-option>
+                  <ppp-option value="thefly">Прокси для thefly.com</ppp-option>
+                  <ppp-option value="psinaPusher">
+                    Интеграция Pusher и Psina
+                  </ppp-option>
+                  <ppp-option value="psinaUsNewsBodyExtraction">
+                    Новости (Psina) - содержимое из AstraDB
+                  </ppp-option>
+                </ppp-select>
+                ${when(
+                  (x) => x.workerPredefinedTemplate.value === 'psinaPusher',
+                  html`
+                    <div class="spacing2"></div>
+                    <div class="control-line flex-start">
+                      <ppp-query-select
+                        ${ref('psinaPusherApiId')}
+                        standalone
+                        placeholder="Выберите профиль API Pusher"
+                        :context="${(x) => x}"
+                        :query="${() => {
+                          return (context) => {
+                            return context.services
+                              .get('mongodb-atlas')
+                              .db('ppp')
+                              .collection('apis')
+                              .find({
+                                $and: [
+                                  {
+                                    type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
+                                  },
+                                  {
+                                    removed: { $ne: true }
+                                  }
+                                ]
+                              })
+                              .sort({ updatedAt: -1 });
+                          };
+                        }}"
+                        :transform="${() =>
+                          ppp.decryptDocumentsTransformation()}"
+                      ></ppp-query-select>
+                      <ppp-button
+                        appearance="default"
+                        @click="${() =>
+                          ppp.app.mountPage(`api-${APIS.PUSHER}`, {
+                            size: 'xlarge',
+                            adoptHeader: true
+                          })}"
+                      >
+                        +
+                      </ppp-button>
+                    </div>
+                  `
+                )}
+                ${when(
+                  (x) =>
+                    x.workerPredefinedTemplate.value ===
+                    'psinaUsNewsBodyExtraction',
+                  html`
+                    <div class="spacing2"></div>
+                    <div class="control-line flex-start">
+                      <ppp-query-select
+                        ${ref('psinaUsNewsAstraDbApiId')}
+                        standalone
+                        placeholder="Выберите профиль API AstraDB"
+                        :context="${(x) => x}"
+                        :query="${() => {
+                          return (context) => {
+                            return context.services
+                              .get('mongodb-atlas')
+                              .db('ppp')
+                              .collection('apis')
+                              .find({
+                                $and: [
+                                  {
+                                    type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.ASTRADB%]`
+                                  },
+                                  {
+                                    removed: { $ne: true }
+                                  }
+                                ]
+                              })
+                              .sort({ updatedAt: -1 });
+                          };
+                        }}"
+                        :transform="${() =>
+                          ppp.decryptDocumentsTransformation()}"
+                      ></ppp-query-select>
+                      <ppp-button
+                        appearance="default"
+                        @click="${() =>
+                          ppp.app.mountPage(`api-${APIS.ASTRADB}`, {
+                            size: 'xlarge',
+                            adoptHeader: true
+                          })}"
+                      >
+                        +
+                      </ppp-button>
+                    </div>
+                  `
+                )}
+                <ppp-checkbox ${ref('doNotFillEnvVars')}>
+                  Не заполнять переменные окружения
+                </ppp-checkbox>
+                <ppp-button
+                  @click="${(x) => x.fillOutFormsWithTemplate()}"
+                  appearance="primary"
+                >
+                  Заполнить формы по этому шаблону
+                </ppp-button>
+              </div>
             </div>
             <div class="label-group full">
               <h5>Переменные окружения</h5>
@@ -396,12 +394,18 @@ export class ServiceCloudflareWorkerPage extends Page {
     this.beginOperation();
 
     try {
-      if (this.workerPredefinedTemplate.value === 'psinaPusher') {
-        await validate(this.psinaPusherApiId);
-      }
+      const doNotFillEnvVars = this.doNotFillEnvVars.checked;
 
-      if (this.workerPredefinedTemplate.value === 'psinaUsNewsBodyExtraction') {
-        await validate(this.psinaUsNewsAstraDbApiId);
+      if (!doNotFillEnvVars) {
+        if (this.workerPredefinedTemplate.value === 'psinaPusher') {
+          await validate(this.psinaPusherApiId);
+        }
+
+        if (
+          this.workerPredefinedTemplate.value === 'psinaUsNewsBodyExtraction'
+        ) {
+          await validate(this.psinaUsNewsAstraDbApiId);
+        }
       }
 
       let data;
@@ -415,7 +419,7 @@ export class ServiceCloudflareWorkerPage extends Page {
       }
 
       try {
-        const fcRequest = await fetch(
+        const contentsResponse = await fetch(
           ppp.getWorkerTemplateFullUrl(data.url).toString(),
           {
             cache: 'reload'
@@ -423,11 +427,11 @@ export class ServiceCloudflareWorkerPage extends Page {
         );
 
         await maybeFetchError(
-          fcRequest,
+          contentsResponse,
           'Не удалось загрузить файл с шаблоном.'
         );
 
-        const code = await fcRequest.text();
+        const code = await contentsResponse.text();
 
         try {
           const { meta } = parsePPPScript(code);
@@ -443,26 +447,32 @@ export class ServiceCloudflareWorkerPage extends Page {
         if (this.workerPredefinedTemplate.value === 'psinaPusher') {
           const pusherApi = this.psinaPusherApiId.datum();
 
-          this.environmentCode.updateCode(
-            JSON.stringify(data.env(pusherApi), null, 2)
-          );
-          this.environmentCodeSecret.updateCode(
-            JSON.stringify(data.envSecret(pusherApi), null, 2)
-          );
+          !doNotFillEnvVars &&
+            this.environmentCode.updateCode(
+              JSON.stringify(data.env(pusherApi), null, 2)
+            );
+          !doNotFillEnvVars &&
+            this.environmentCodeSecret.updateCode(
+              JSON.stringify(data.envSecret(pusherApi), null, 2)
+            );
         } else if (
           this.workerPredefinedTemplate.value === 'psinaUsNewsBodyExtraction'
         ) {
           const astraDbApi = this.psinaUsNewsAstraDbApiId.datum();
 
-          this.environmentCode.updateCode(
-            JSON.stringify(data.env(astraDbApi), null, 2)
-          );
-          this.environmentCodeSecret.updateCode(
-            JSON.stringify(data.envSecret(astraDbApi), null, 2)
-          );
+          !doNotFillEnvVars &&
+            this.environmentCode.updateCode(
+              JSON.stringify(data.env(astraDbApi), null, 2)
+            );
+          !doNotFillEnvVars &&
+            this.environmentCodeSecret.updateCode(
+              JSON.stringify(data.envSecret(astraDbApi), null, 2)
+            );
         } else {
-          this.environmentCode.updateCode(data.env ?? '{}');
-          this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
+          !doNotFillEnvVars &&
+            this.environmentCode.updateCode(data.env ?? '{}');
+          !doNotFillEnvVars &&
+            this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
         }
 
         this.versioningUrl.value = data.url;
@@ -489,30 +499,23 @@ export class ServiceCloudflareWorkerPage extends Page {
     await validate(this.cloudflareApiId);
 
     const { email, apiKey, accountID } = this.cloudflareApiId.datum();
-
-    const subdomainRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    const subdomainResponse = await ppp.fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/subdomain`,
       {
-        cache: 'no-cache',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'GET',
-          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/subdomain`,
-          headers: {
-            'X-Auth-Email': email,
-            'X-Auth-Key': apiKey
-          }
-        })
+        headers: {
+          'X-Auth-Email': email,
+          'X-Auth-Key': apiKey
+        }
       }
     );
 
     await maybeFetchError(
-      subdomainRequest,
+      subdomainResponse,
       'Ошибка чтения поддомена Cloudflare Workers.'
     );
 
-    const subdomainResponse = await subdomainRequest.json();
-    const subdomain = subdomainResponse?.result?.subdomain;
+    const subdomainData = await subdomainResponse.json();
+    const subdomain = subdomainData?.result?.subdomain;
 
     if (!subdomain) {
       invalidate(this.cloudflareApiId, {
@@ -612,7 +615,6 @@ export class ServiceCloudflareWorkerPage extends Page {
   #getInternalEnv() {
     return {
       PPP_WORKER_ID: this.document._id,
-      SERVICE_MACHINE_URL: ppp.keyVault.getKey('service-machine-url'),
       PPP_ROOT_URL: ppp.rootUrl.replace('github.io.dev', 'pages.dev')
     };
   }
@@ -661,50 +663,43 @@ export class ServiceCloudflareWorkerPage extends Page {
     const { contentType, chunks } = fd.toPayload();
     const { email, apiKey, accountID } = this.cloudflareApiId.datum();
 
-    const updateWorkerRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')),
+    const updateWorkerResponse = await ppp.fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}`,
       {
-        method: 'POST',
-        body: JSON.stringify({
-          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}`,
-          method: 'PUT',
-          headers: {
-            'Content-Type': contentType,
-            'X-Auth-Email': email,
-            'X-Auth-Key': apiKey
-          },
-          body: await new Blob(chunks, {
-            type: contentType
-          }).text()
-        })
+        method: 'PUT',
+        headers: {
+          'Content-Type': contentType,
+          'X-Auth-Email': email,
+          'X-Auth-Key': apiKey
+        },
+        body: await new Blob(chunks, {
+          type: contentType
+        }).text()
       }
     );
 
     await maybeFetchError(
-      updateWorkerRequest,
+      updateWorkerResponse,
       'Не удалось развернуть сервис в Cloudflare.'
     );
 
-    const enableSubdomainRequest = await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')),
+    const enableSubdomainResponse = await ppp.fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}/subdomain`,
       {
         method: 'POST',
+        headers: {
+          'X-Auth-Email': email,
+          'X-Auth-Key': apiKey,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}/subdomain`,
-          method: 'POST',
-          headers: {
-            'X-Auth-Email': email,
-            'X-Auth-Key': apiKey
-          },
-          body: {
-            enabled: true
-          }
+          enabled: true
         })
       }
     );
 
     await maybeFetchError(
-      enableSubdomainRequest,
+      enableSubdomainResponse,
       'Не удалось активировать поддомен *.dev для сервиса в Cloudflare.'
     );
   }
@@ -757,35 +752,33 @@ export class ServiceCloudflareWorkerPage extends Page {
       data = predefinedWorkerData[this.workerPredefinedTemplate.value];
     }
 
-    const fcRequest = await fetch(
+    const contentsResponse = await fetch(
       ppp.getWorkerTemplateFullUrl(data.url).toString(),
       {
         cache: 'reload'
       }
     );
 
-    await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+    await maybeFetchError(
+      contentsResponse,
+      'Не удалось загрузить файл с шаблоном.'
+    );
 
-    this.sourceCode.updateCode(await fcRequest.text());
+    this.sourceCode.updateCode(await contentsResponse.text());
   }
 
   async cleanup() {
     const { email, apiKey, accountID } = this.cloudflareApiId.datum();
     const name = `ppp-${this.document._id}`;
 
-    await fetch(
-      new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+    await ppp.fetch(
+      `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}`,
       {
-        cache: 'no-cache',
-        method: 'POST',
-        body: JSON.stringify({
-          method: 'DELETE',
-          url: `https://api.cloudflare.com/client/v4/accounts/${accountID}/workers/scripts/${name}`,
-          headers: {
-            'X-Auth-Email': email,
-            'X-Auth-Key': apiKey
-          }
-        })
+        method: 'DELETE',
+        headers: {
+          'X-Auth-Email': email,
+          'X-Auth-Key': apiKey
+        }
       }
     );
   }

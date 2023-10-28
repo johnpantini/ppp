@@ -10,12 +10,7 @@ import {
   repeat,
   when
 } from '../../vendor/fast-element.min.js';
-import {
-  FetchError,
-  invalidate,
-  maybeFetchError,
-  validate
-} from '../../lib/ppp-errors.js';
+import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -29,10 +24,8 @@ import {
 } from './service.js';
 import { APIS, BROKERS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
-import {
-  enableMongoDBRealmHosting,
-  getMongoDBRealmAccessToken
-} from '../../lib/realm.js';
+import { HMAC, uuidv4, sha256 } from '../../lib/ppp-crypto.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from './api-yc.js';
 import { later } from '../../lib/ppp-decorators.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
@@ -43,7 +36,6 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 import '../../vendor/zip-full.min.js';
-import '../../vendor/spark-md5.min.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -56,14 +48,14 @@ import '../text-field.js';
 
 export const predefinedWorkerData = {
   default: {
-    env: `{}`,
+    env: '{}',
     envSecret: '{}',
-    url: '/salt/states/ppp/lib/aspirant-worker/example-worker.mjs',
+    url: '/lib/aspirant-worker/example-worker.mjs',
     sourceCode: `// ==PPPScript==
 // @version 1
 // ==/PPPScript==
 
-import uWS from '/salt/states/ppp/lib/uWebSockets.js/uws.js';
+import uWS from '/ppp/vendor/uWebSockets.js/uws.js';
 
 uWS
   .App({})
@@ -80,66 +72,94 @@ uWS
   UTEX_USER_AGENT: '[%#navigator.userAgent%]'
 }`,
     envSecret: '{}',
-    url: '/salt/states/ppp/lib/aspirant-worker/utex-alpaca/utex-alpaca.mjs',
+    url: '/lib/aspirant-worker/utex-alpaca/utex-alpaca.mjs',
     enableHttp: true,
     fileList: [
       {
-        url: '/salt/states/ppp/lib/utex/utex-connection.mjs',
-        path: 'utex/utex-connection.mjs'
+        url: '/lib/utex/utex-connection.mjs',
+        path: 'lib/utex/utex-connection.mjs'
       },
       {
-        url: '/salt/states/ppp/lib/utex/message-type.mjs',
-        path: 'utex/message-type.mjs'
+        url: '/lib/utex/message-type.mjs',
+        path: 'lib/utex/message-type.mjs'
       },
       {
-        url: '/salt/states/ppp/lib/utex/utex.proto',
-        path: 'utex/utex.proto'
+        url: '/lib/utex/utex.proto',
+        path: 'lib/utex/utex.proto'
       },
       {
-        url: '/salt/states/ppp/lib/vendor/protobuf.min.js',
+        url: '/vendor/protobuf.min.js',
         path: 'vendor/protobuf.min.js'
       },
       {
-        url: '/salt/states/ppp/lib/vendor/lzma/index.js',
+        url: '/vendor/lzma/index.js',
         path: 'vendor/lzma/index.js'
       },
       {
-        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma.js',
+        url: '/vendor/lzma/src/lzma.js',
         path: 'vendor/lzma/src/lzma.js'
       },
       {
-        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma-c.js',
+        url: '/vendor/lzma/src/lzma-c.js',
         path: 'vendor/lzma/src/lzma-c.js'
       },
       {
-        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma-d.js',
+        url: '/vendor/lzma/src/lzma-d.js',
         path: 'vendor/lzma/src/lzma-d.js'
       },
       {
-        url: '/salt/states/ppp/lib/vendor/lzma/src/lzma_worker.js',
+        url: '/vendor/lzma/src/lzma_worker.js',
         path: 'vendor/lzma/src/lzma_worker.js'
       }
     ]
   },
   ibGateway: {
-    env: `{}`,
+    env: '{}',
     envSecret: '{}',
-    url: '/salt/states/ppp/lib/aspirant-worker/ib-gateway/ib-gateway.mjs',
+    url: '/lib/aspirant-worker/ib-gateway/ib-gateway.mjs',
     enableHttp: true,
     fileList: [
       {
-        url: '/salt/states/ppp/lib/vendor/ib.min.js',
+        url: '/vendor/ib.min.js',
         path: 'vendor/ib.min.js'
       },
       {
-        url: '/salt/states/ppp/lib/utils.mjs',
-        path: 'utils.mjs'
+        url: '/lib/aspirant-worker/utils.mjs',
+        path: 'lib/aspirant-worker/utils.mjs'
+      }
+    ]
+  },
+  ppf: {
+    env: '{}',
+    envSecret: '{}',
+    url: '/lib/aspirant-worker/ppf/ppf.mjs',
+    enableHttp: true,
+    fileList: [
+      {
+        url: '/vendor/mongodb.min.js',
+        path: 'vendor/mongodb.min.js'
+      }
+    ]
+  },
+  connectors: {
+    env: '{}',
+    envSecret: '{}',
+    url: '/lib/aspirant-worker/connectors/connectors.mjs',
+    enableHttp: true,
+    fileList: [
+      {
+        url: '/vendor/pg/connection.min.mjs',
+        path: 'vendor/pg/connection.min.mjs'
+      },
+      {
+        url: '/vendor/ssh2/ssh2.min.js',
+        path: 'vendor/ssh2/ssh2.min.js'
       }
     ]
   },
   psinaUsNews: {
     enableHttp: false,
-    url: '/salt/states/ppp/lib/aspirant-worker/psina/us-news.mjs',
+    url: '/lib/aspirant-worker/psina/us-news.mjs',
     env: (pusherApi, astraDbApi) => {
       return {
         US_NEWS_FEED_URL: 'wss://johnpantini.com:38083',
@@ -164,6 +184,15 @@ uWS
 };
 
 export async function getAspirantBaseUrl(datum) {
+  if (typeof datum === 'string') {
+    datum = await ppp.user.functions.findOne(
+      { collection: 'services' },
+      {
+        _id: datum
+      }
+    );
+  }
+
   if (datum.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
     return datum.url.endsWith('/') ? datum.url.slice(0, -1) : datum.url;
   } else if (datum.type === SERVICES.CLOUD_PPP_ASPIRANT) {
@@ -177,19 +206,13 @@ export async function getAspirantBaseUrl(datum) {
     );
 
     if (deployment.type === APIS.NORTHFLANK) {
-      const rNFService = await fetch(
-        new URL('fetch', ppp.keyVault.getKey('service-machine-url')).toString(),
+      const rNFService = await ppp.fetch(
+        `https://api.northflank.com/v1/projects/${datum.projectID}/services/${datum.serviceID}`,
         {
-          cache: 'no-cache',
-          method: 'POST',
-          body: JSON.stringify({
-            method: 'GET',
-            url: `https://api.northflank.com/v1/projects/${datum.projectID}/services/${datum.serviceID}`,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${deployment.token}`
-            }
-          })
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${deployment.token}`
+          }
         }
       );
 
@@ -210,6 +233,145 @@ export async function getAspirantBaseUrl(datum) {
     return `https://${datum.tailnetDomain}`;
   }
 }
+
+export async function getAspirantWorkerBaseUrl(datum) {
+  if (typeof datum === 'string') {
+    datum = await ppp.user.functions.findOne(
+      { collection: 'services' },
+      {
+        _id: datum
+      }
+    );
+  }
+
+  const aspirantUrl = await getAspirantBaseUrl(datum.aspirantServiceId);
+
+  return `${aspirantUrl}/workers/${datum._id}/`;
+}
+
+export const psinaUsNewsTemplate = () =>
+  when(
+    (x) => x.workerPredefinedTemplate.value === 'psinaUsNews',
+    html`
+      <div class="spacing2"></div>
+      <div class="control-line flex-start">
+        <ppp-query-select
+          ${ref('psinaUsNewsBrokerId')}
+          standalone
+          placeholder="Выберите профиль Psina"
+          :context="${(x) => x}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('brokers')
+                .find({
+                  $and: [
+                    {
+                      type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.PSINA%]`
+                    },
+                    {
+                      removed: { $ne: true }
+                    }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-query-select>
+        <ppp-button
+          appearance="default"
+          @click="${() =>
+            ppp.app.mountPage(`broker-${BROKERS.PSINA}`, {
+              size: 'xlarge',
+              adoptHeader: true
+            })}"
+        >
+          +
+        </ppp-button>
+      </div>
+      <div class="spacing2"></div>
+      <div class="control-line flex-start">
+        <ppp-query-select
+          ${ref('psinaUsNewsPusherApiId')}
+          standalone
+          placeholder="Выберите профиль API Pusher"
+          :context="${(x) => x}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('apis')
+                .find({
+                  $and: [
+                    {
+                      type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
+                    },
+                    {
+                      removed: { $ne: true }
+                    }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-query-select>
+        <ppp-button
+          appearance="default"
+          @click="${() =>
+            ppp.app.mountPage(`api-${APIS.PUSHER}`, {
+              size: 'xlarge',
+              adoptHeader: true
+            })}"
+        >
+          +
+        </ppp-button>
+      </div>
+      <div class="spacing2"></div>
+      <div class="control-line flex-start">
+        <ppp-query-select
+          ${ref('psinaUsNewsAstraDbApiId')}
+          standalone
+          placeholder="Выберите профиль API AstraDB"
+          :context="${(x) => x}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('apis')
+                .find({
+                  $and: [
+                    {
+                      type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.ASTRADB%]`
+                    },
+                    {
+                      removed: { $ne: true }
+                    }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-query-select>
+        <ppp-button
+          appearance="default"
+          @click="${() =>
+            ppp.app.mountPage(`api-${APIS.ASTRADB}`, {
+              size: 'xlarge',
+              adoptHeader: true
+            })}"
+        >
+          +
+        </ppp-button>
+      </div>
+    `
+  );
 
 export const servicePppAspirantWorkerPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -319,35 +481,34 @@ export const servicePppAspirantWorkerPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Прокси MongoDB Realm</h5>
+          <h5>API Yandex Cloud</h5>
           <p class="description">
-            Сервис Cloudflare Worker, который будет использован для загрузки
-            файлов на хостинг MongoDB Realm.
+            API, который будет использован для выгрузки файлов сервиса в
+            облачное хранилище.
           </p>
         </div>
         <div class="input-group">
           <ppp-query-select
-            ${ref('mongodbRealmProxyServiceId')}
-            value="${(x) => x.document.mongodbRealmProxyServiceId}"
+            ${ref('ycApiId')}
+            value="${(x) => x.document.ycApiId}"
             :context="${(x) => x}"
-            :preloaded="${(x) => x.document.mongodbRealmProxyService ?? ''}"
+            :preloaded="${(x) => x.document.ycApi ?? ''}"
             :query="${() => {
               return (context) => {
                 return context.services
                   .get('mongodb-atlas')
                   .db('ppp')
-                  .collection('services')
+                  .collection('apis')
                   .find({
                     $and: [
                       {
-                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.CLOUDFLARE_WORKER%]`
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.YC%]`
                       },
-                      { workerPredefinedTemplate: 'mongoDBRealm' },
                       {
                         $or: [
                           { removed: { $ne: true } },
                           {
-                            _id: `[%#this.document.mongodbRealmProxyServiceId ?? ''%]`
+                            _id: `[%#this.document.ycApiId ?? ''%]`
                           }
                         ]
                       }
@@ -482,150 +643,35 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 Воспользуйтесь шаблонами готовых сервисов для их быстрой
                 настройки.
               </p>
-              <ppp-select
-                value="${(x) =>
-                  x.document.workerPredefinedTemplate ?? 'default'}"
-                ${ref('workerPredefinedTemplate')}
-              >
-                <ppp-option value="custom">По файлу отслеживания</ppp-option>
-                <ppp-option value="default">Тестовый пример</ppp-option>
-                <ppp-option value="utexAlpaca">
-                  Alpaca-совместимый API UTEX
-                </ppp-option>
-                <ppp-option value="ibGateway">Шлюз TWS API</ppp-option>
-                <ppp-option value="psinaUsNews">
-                  Новостной источник (Psina, US)
-                </ppp-option>
-              </ppp-select>
-              ${when(
-                (x) => x.workerPredefinedTemplate.value === 'psinaUsNews',
-                html`
-                  <div class="spacing2"></div>
-                  <div class="control-line flex-start">
-                    <ppp-query-select
-                      ${ref('psinaUsNewsBrokerId')}
-                      standalone
-                      placeholder="Выберите профиль Psina"
-                      :context="${(x) => x}"
-                      :query="${() => {
-                        return (context) => {
-                          return context.services
-                            .get('mongodb-atlas')
-                            .db('ppp')
-                            .collection('brokers')
-                            .find({
-                              $and: [
-                                {
-                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.PSINA%]`
-                                },
-                                {
-                                  removed: { $ne: true }
-                                }
-                              ]
-                            })
-                            .sort({ updatedAt: -1 });
-                        };
-                      }}"
-                      :transform="${() => ppp.decryptDocumentsTransformation()}"
-                    ></ppp-query-select>
-                    <ppp-button
-                      appearance="default"
-                      @click="${() =>
-                        ppp.app.mountPage(`broker-${BROKERS.PSINA}`, {
-                          size: 'xlarge',
-                          adoptHeader: true
-                        })}"
-                    >
-                      +
-                    </ppp-button>
-                  </div>
-                  <div class="spacing2"></div>
-                  <div class="control-line flex-start">
-                    <ppp-query-select
-                      ${ref('psinaUsNewsPusherApiId')}
-                      standalone
-                      placeholder="Выберите профиль API Pusher"
-                      :context="${(x) => x}"
-                      :query="${() => {
-                        return (context) => {
-                          return context.services
-                            .get('mongodb-atlas')
-                            .db('ppp')
-                            .collection('apis')
-                            .find({
-                              $and: [
-                                {
-                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.PUSHER%]`
-                                },
-                                {
-                                  removed: { $ne: true }
-                                }
-                              ]
-                            })
-                            .sort({ updatedAt: -1 });
-                        };
-                      }}"
-                      :transform="${() => ppp.decryptDocumentsTransformation()}"
-                    ></ppp-query-select>
-                    <ppp-button
-                      appearance="default"
-                      @click="${() =>
-                        ppp.app.mountPage(`api-${APIS.PUSHER}`, {
-                          size: 'xlarge',
-                          adoptHeader: true
-                        })}"
-                    >
-                      +
-                    </ppp-button>
-                  </div>
-                  <div class="spacing2"></div>
-                  <div class="control-line flex-start">
-                    <ppp-query-select
-                      ${ref('psinaUsNewsAstraDbApiId')}
-                      standalone
-                      placeholder="Выберите профиль API AstraDB"
-                      :context="${(x) => x}"
-                      :query="${() => {
-                        return (context) => {
-                          return context.services
-                            .get('mongodb-atlas')
-                            .db('ppp')
-                            .collection('apis')
-                            .find({
-                              $and: [
-                                {
-                                  type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.ASTRADB%]`
-                                },
-                                {
-                                  removed: { $ne: true }
-                                }
-                              ]
-                            })
-                            .sort({ updatedAt: -1 });
-                        };
-                      }}"
-                      :transform="${() => ppp.decryptDocumentsTransformation()}"
-                    ></ppp-query-select>
-                    <ppp-button
-                      appearance="default"
-                      @click="${() =>
-                        ppp.app.mountPage(`api-${APIS.ASTRADB}`, {
-                          size: 'xlarge',
-                          adoptHeader: true
-                        })}"
-                    >
-                      +
-                    </ppp-button>
-                  </div>
-                `
-              )}
-              <div class="spacing2"></div>
-              <ppp-button
-                @click="${(x) => x.fillOutFormsWithTemplate()}"
-                appearance="primary"
-              >
-                Заполнить формы по этому шаблону
-              </ppp-button>
+              <div class="control-stack">
+                <ppp-select
+                  value="${(x) =>
+                    x.document.workerPredefinedTemplate ?? 'default'}"
+                  ${ref('workerPredefinedTemplate')}
+                >
+                  <ppp-option value="custom">По файлу отслеживания</ppp-option>
+                  <ppp-option value="default">Тестовый пример</ppp-option>
+                  <ppp-option value="utexAlpaca">
+                    Alpaca-совместимый API UTEX
+                  </ppp-option>
+                  <ppp-option value="ibGateway">Шлюз TWS API</ppp-option>
+                  <ppp-option value="ppf">Шлюз MongoDB Realm</ppp-option>
+                  <ppp-option value="connectors">Соединители</ppp-option>
+                  <ppp-option value="psinaUsNews">
+                    Новостной источник (Psina, US)
+                  </ppp-option>
+                </ppp-select>
+                ${psinaUsNewsTemplate()}
+                <ppp-checkbox ${ref('doNotFillEnvVars')}>
+                  Не заполнять переменные окружения
+                </ppp-checkbox>
+                <ppp-button
+                  @click="${(x) => x.fillOutFormsWithTemplate()}"
+                  appearance="primary"
+                >
+                  Заполнить формы по этому шаблону
+                </ppp-button>
+              </div>
             </div>
             <div class="label-group full">
               <h5>Переменные окружения</h5>
@@ -681,8 +727,6 @@ export class ServicePppAspirantWorkerPage extends Page {
   collection = 'services';
 
   zipWriter;
-
-  zipBlob = null;
 
   @observable
   url;
@@ -741,7 +785,10 @@ export class ServicePppAspirantWorkerPage extends Page {
     this.beginOperation();
 
     try {
-      if (this.workerPredefinedTemplate.value === 'psinaUsNews') {
+      if (
+        this.workerPredefinedTemplate.value === 'psinaUsNews' &&
+        !this.doNotFillEnvVars.checked
+      ) {
         await validate(this.psinaUsNewsBrokerId);
         await validate(this.psinaUsNewsPusherApiId);
         await validate(this.psinaUsNewsAstraDbApiId);
@@ -749,6 +796,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
       let data;
 
+      // Watched file.
       if (this.workerPredefinedTemplate.value === 'custom') {
         data = {
           url: this.versioningUrl.value
@@ -758,7 +806,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       }
 
       try {
-        const fcRequest = await fetch(
+        const contentsResponse = await fetch(
           ppp.getWorkerTemplateFullUrl(data.url).toString(),
           {
             cache: 'reload'
@@ -766,11 +814,11 @@ export class ServicePppAspirantWorkerPage extends Page {
         );
 
         await maybeFetchError(
-          fcRequest,
+          contentsResponse,
           'Не удалось загрузить файл с шаблоном.'
         );
 
-        const code = await fcRequest.text();
+        const code = await contentsResponse.text();
 
         try {
           const { meta } = parsePPPScript(code);
@@ -785,28 +833,34 @@ export class ServicePppAspirantWorkerPage extends Page {
 
         this.sourceCode.updateCode(code);
 
+        const doNotFillEnvVars = this.doNotFillEnvVars.checked;
+
         if (this.workerPredefinedTemplate.value === 'psinaUsNews') {
           const pusherApi = this.psinaUsNewsPusherApiId.datum();
           const psinaBroker = this.psinaUsNewsBrokerId.datum();
           const astraDbApi = this.psinaUsNewsAstraDbApiId.datum();
 
-          this.environmentCode.updateCode(
-            JSON.stringify(
-              data.env(pusherApi, astraDbApi, psinaBroker),
-              null,
-              2
-            )
-          );
-          this.environmentCodeSecret.updateCode(
-            JSON.stringify(
-              data.envSecret(pusherApi, astraDbApi, psinaBroker),
-              null,
-              2
-            )
-          );
+          !doNotFillEnvVars &&
+            this.environmentCode.updateCode(
+              JSON.stringify(
+                data.env(pusherApi, astraDbApi, psinaBroker),
+                null,
+                2
+              )
+            );
+          !doNotFillEnvVars &&
+            this.environmentCodeSecret.updateCode(
+              JSON.stringify(
+                data.envSecret(pusherApi, astraDbApi, psinaBroker),
+                null,
+                2
+              )
+            );
         } else {
-          this.environmentCode.updateCode(data.env ?? '{}');
-          this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
+          !doNotFillEnvVars &&
+            this.environmentCode.updateCode(data.env ?? '{}');
+          !doNotFillEnvVars &&
+            this.environmentCodeSecret.updateCode(data.envSecret ?? '{}');
         }
 
         this.enableHttp.checked = !!data.enableHttp;
@@ -817,8 +871,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
         this.document.name = this.name.value;
         this.document.aspirantServiceId = this.aspirantServiceId.value;
-        this.document.mongodbRealmProxyServiceId =
-          this.mongodbRealmProxyServiceId.value;
+        this.document.ycApiId = this.ycApiId.value;
         this.document.sourceCode = this.sourceCode.value;
         this.document.environmentCode = this.environmentCode.value;
         this.document.environmentCodeSecret = this.environmentCodeSecret.value;
@@ -847,10 +900,30 @@ export class ServicePppAspirantWorkerPage extends Page {
     }
   }
 
+  async #checkAspirantConnection() {
+    let aspirantUrl;
+
+    try {
+      aspirantUrl = await getAspirantBaseUrl(this.aspirantServiceId.datum());
+
+      await maybeFetchError(
+        await fetch(`${aspirantUrl}/nomad/health`),
+        'Нет связи с родительским сервисом Aspirant.'
+      );
+
+      return aspirantUrl;
+    } catch (e) {
+      invalidate(this.aspirantServiceId, {
+        errorMessage: 'Нет связи с родительским сервисом Aspirant',
+        raiseException: true
+      });
+    }
+  }
+
   async validate() {
     await validate(this.name);
     await validate(this.aspirantServiceId);
-    await validate(this.mongodbRealmProxyServiceId);
+    await validate(this.ycApiId);
 
     if (this.useVersioning.checked) {
       await validate(this.versioningUrl);
@@ -872,7 +945,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
     this.zipWriter = new zip.ZipWriter(new zip.BlobWriter('application/zip'));
 
-    // Update text fields
+    // Update text fields.
     await later(1000);
 
     if (this.document.fileList?.length > 0) {
@@ -989,15 +1062,15 @@ export class ServicePppAspirantWorkerPage extends Page {
           },
           {
             $lookup: {
-              from: 'services',
-              localField: 'mongodbRealmProxyServiceId',
+              from: 'apis',
+              localField: 'ycApiId',
               foreignField: '_id',
-              as: 'mongodbRealmProxyService'
+              as: 'ycApi'
             }
           },
           {
             $unwind: {
-              path: '$mongodbRealmProxyService',
+              path: '$ycApi',
               preserveNullAndEmptyArrays: true
             }
           },
@@ -1033,160 +1106,127 @@ export class ServicePppAspirantWorkerPage extends Page {
     };
   }
 
-  async #getRedisApi() {
-    const aspirantDocument = await ppp.decrypt(
-      await ppp.user.functions.findOne(
-        {
-          collection: 'services'
-        },
-        {
-          _id: this.aspirantServiceId.datum()._id
-        }
-      )
-    );
-
-    let redisApi;
-
-    if (aspirantDocument.type === SERVICES.DEPLOYED_PPP_ASPIRANT) {
-      const aspirantUrl = await getAspirantBaseUrl(
-        this.aspirantServiceId.datum()
-      );
-
-      const envRequest = await fetch(`${aspirantUrl}/nginx/env`, {
-        cache: 'reload'
-      });
-
-      await maybeFetchError(
-        envRequest,
-        'Не удалось запросить переменные окружения.'
-      );
-
-      const env = await envRequest.json();
-
-      redisApi = {
-        host: env.REDIS_HOST,
-        port: env.REDIS_PORT,
-        tls: env.REDIS_TLS,
-        username: env.REDIS_USERNAME,
-        db: env.REDIS_DATABASE,
-        password: env.REDIS_PASSWORD
-      };
-    } else if (!aspirantDocument.redisApiId) {
-      throw new FetchError({
-        message:
-          'Aspirant не предоставил информацию о подключении к хранилищу.',
-        status: 404
-      });
-    } else {
-      redisApi = await ppp.decrypt(
-        await ppp.user.functions.findOne(
-          { collection: 'apis' },
-          {
-            _id: aspirantDocument.redisApiId,
-            type: APIS.REDIS
-          }
-        )
-      );
-    }
-
-    return redisApi;
-  }
-
   async #deployAspirantWorker() {
+    const aspirantUrl = await this.#checkAspirantConnection();
+
     await this.zipWriter.add(
       `${this.document._id}.mjs`,
       new zip.TextReader(this.sourceCode.value)
     );
 
-    this.zipBlob = null;
+    const zipBlob = await this.zipWriter?.close?.();
 
-    if (typeof this.zipWriter !== 'undefined') {
-      this.zipBlob = await this.zipWriter.close();
-    }
-
-    if (this.zipBlob) {
-      const groupId = ppp.keyVault.getKey('mongo-group-id');
-      const appId = ppp.keyVault.getKey('mongo-app-id');
-      const mongoDBRealmAccessToken = await getMongoDBRealmAccessToken();
-      const serviceMachineUrl = ppp.keyVault.getKey('service-machine-url');
-
-      await enableMongoDBRealmHosting({
-        groupId,
-        appId,
-        serviceMachineUrl,
-        mongoDBRealmAccessToken
+    if (zipBlob) {
+      const {
+        ycServiceAccountID,
+        ycPublicKeyID,
+        ycPrivateKey,
+        ycStaticKeyID,
+        ycStaticKeySecret
+      } = this.ycApiId.datum();
+      const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+        ycServiceAccountID,
+        ycPublicKeyID,
+        ycPrivateKey
       });
 
-      const formData = new FormData();
+      const rBucketList = await maybeFetchError(
+        await ppp.fetch(
+          `https://storage.api.cloud.yandex.net/storage/v1/buckets?folderId=${psinaFolderId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${iamToken}`
+            }
+          }
+        ),
+        'Не удалось получить список бакетов. Проверьте права доступа.'
+      );
+
+      const bucketList = await rBucketList.json();
+      let artifactsBucket = bucketList?.buckets?.find((b) =>
+        /^ppp-artifacts-/.test(b.name)
+      );
+
+      if (!artifactsBucket) {
+        // Create new bucket.
+        const rNewBucket = await maybeFetchError(
+          await ppp.fetch(
+            `https://storage.api.cloud.yandex.net/storage/v1/buckets`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${iamToken}`
+              },
+              body: JSON.stringify({
+                name: `ppp-artifacts-${uuidv4()}`,
+                folderId: psinaFolderId,
+                defaultStorageClass: 'STANDARD',
+                // 1 GB
+                maxSize: 1024 ** 3,
+                anonymousAccessFlags: {
+                  read: true,
+                  list: false,
+                  configRead: false
+                }
+              })
+            }
+          ),
+          'Не удалось создать бакет для сервисных файлов.'
+        );
+
+        artifactsBucket = (await rNewBucket.json()).response;
+      }
+
+      const key = `${this.document._id}.zip`;
       const reader = new FileReader();
 
-      reader.readAsArrayBuffer(this.zipBlob);
+      reader.readAsArrayBuffer(zipBlob);
 
-      const hash = await new Promise((resolve) => {
-        reader.onloadend = async function () {
-          resolve(SparkMD5.ArrayBuffer.hash(reader.result));
-        };
+      const host = `${artifactsBucket.name}.storage.yandexcloud.net`;
+      const xAmzDate =
+        new Date()
+          .toISOString()
+          .replaceAll('-', '')
+          .replaceAll(':', '')
+          .split('.')[0] + 'Z';
+      const date = xAmzDate.split('T')[0];
+      const signingKey = await generateYCAWSSigningKey({
+        ycStaticKeySecret,
+        date
       });
-
-      const artifactRelativeUrl = `/aspirant/${
-        this.aspirantServiceId.datum()._id
-      }/workers/${this.document._id}.zip`;
-
-      formData.set(
-        'meta',
-        JSON.stringify({
-          path: artifactRelativeUrl,
-          size: this.zipBlob.size,
-          attrs: [
-            {
-              name: 'Cache-Control',
-              value: 'no-cache'
-            }
-          ],
-          hash
-        })
+      const hashBuffer = await crypto.subtle.digest(
+        'SHA-256',
+        await zipBlob.arrayBuffer()
       );
-      formData.set('file', this.zipBlob);
-
-      const proxyDatum = this.mongodbRealmProxyServiceId.datum();
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashedPayload = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      const canonicalRequest = `PUT\n/${encodeURIComponent(
+        key
+      )}\n\nhost:${host}\nx-amz-content-sha256:${hashedPayload}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-content-sha256;x-amz-date\n${hashedPayload}`;
+      const scope = `${date}/ru-central1/s3/aws4_request`;
+      const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+        canonicalRequest
+      )}`;
+      const signature = await HMAC(signingKey, stringToSign, { format: 'hex' });
+      const Authorization = `AWS4-HMAC-SHA256 Credential=${ycStaticKeyID}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=${signature}`;
 
       await maybeFetchError(
-        await fetch(
-          `https://ppp-${proxyDatum._id}.${proxyDatum.subdomain}.workers.dev/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/assets/asset`,
-          {
-            cache: 'reload',
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            },
-            body: formData
-          }
-        ),
-        'Не удалось загрузить файлы сервиса в облачное хранилище MongoDB Realm.'
+        await ppp.fetch(`https://${host}/${key}`, {
+          method: 'PUT',
+          headers: {
+            Authorization,
+            'x-amz-date': xAmzDate,
+            'x-amz-content-sha256': hashedPayload
+          },
+          body: zipBlob
+        }),
+        'Не удалось загрузить файлы сервиса в облачное хранилище.'
       );
 
-      await maybeFetchError(
-        await fetch(
-          `https://ppp-${proxyDatum._id}.${proxyDatum.subdomain}.workers.dev/api/admin/v3.0/groups/${groupId}/apps/${appId}/hosting/cache`,
-          {
-            cache: 'reload',
-            method: 'PUT',
-            headers: {
-              Authorization: `Bearer ${mongoDBRealmAccessToken}`
-            },
-            body: JSON.stringify({ invalidate: true, path: '/*' })
-          }
-        ),
-        'Не удалось сбросить кэш облачного хранилища MongoDB Realm.'
-      );
-
-      const aspirantUrl = await getAspirantBaseUrl(
-        this.aspirantServiceId.datum()
-      );
-      const redisApi = await this.#getRedisApi();
-      const artifactUrl = `https://${ppp.keyVault.getKey(
-        'mongo-app-client-id'
-      )}.mongodbstitch.com${artifactRelativeUrl}`;
+      const artifactUrl = `https://${host}/${key}`;
       const env = Object.assign(
         {},
         new Function(
@@ -1199,49 +1239,6 @@ export class ServicePppAspirantWorkerPage extends Page {
           )});`
         )(),
         this.#getInternalEnv()
-      );
-
-      await maybeFetchError(
-        await fetch(
-          new URL(
-            'redis',
-            ppp.keyVault.getKey('service-machine-url')
-          ).toString(),
-          {
-            cache: 'reload',
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              options: {
-                host: redisApi.host,
-                port: redisApi.port,
-                tls: redisApi.tls
-                  ? {
-                      servername: redisApi.host
-                    }
-                  : void 0,
-                username: redisApi.username,
-                db: redisApi.database,
-                password: redisApi.password
-              },
-              command: 'hset',
-              args: [
-                `aspirant:${this.aspirantServiceId.datum()._id}`,
-                this.document._id,
-                JSON.stringify({
-                  env,
-                  artifactUrl,
-                  enableHttp: this.enableHttp.checked,
-                  command: this.document.command,
-                  args: this.document.args
-                })
-              ]
-            })
-          }
-        ),
-        'Не удалось создать запись сервиса в Redis.'
       );
 
       await maybeFetchError(
@@ -1264,6 +1261,11 @@ export class ServicePppAspirantWorkerPage extends Page {
       );
 
       await this.#generateLinks();
+    } else {
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Отсутствует архив с файлами сервиса.',
+        raiseException: true
+      });
     }
   }
 
@@ -1273,7 +1275,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         $set: {
           name: this.name.value.trim(),
           aspirantServiceId: this.aspirantServiceId.value,
-          mongodbRealmProxyServiceId: this.mongodbRealmProxyServiceId.value,
+          ycApiId: this.ycApiId.value,
           sourceCode: this.sourceCode.value,
           command: this.command.value.trim(),
           args: this.args.value.trim(),
@@ -1317,14 +1319,14 @@ export class ServicePppAspirantWorkerPage extends Page {
       data = predefinedWorkerData[this.workerPredefinedTemplate.value];
     }
 
-    const fcRequest = await fetch(
+    const contentsResponse = await fetch(
       ppp.getWorkerTemplateFullUrl(data.url).toString(),
       {
         cache: 'reload'
       }
     );
 
-    const code = await fcRequest.text();
+    const code = await contentsResponse.text();
 
     try {
       const { meta } = parsePPPScript(code);
@@ -1335,7 +1337,10 @@ export class ServicePppAspirantWorkerPage extends Page {
       void 0;
     }
 
-    await maybeFetchError(fcRequest, 'Не удалось загрузить файл с шаблоном.');
+    await maybeFetchError(
+      contentsResponse,
+      'Не удалось загрузить файл с шаблоном.'
+    );
     this.sourceCode.updateCode(code);
 
     this.document.fileList = structuredClone(data.fileList ?? []);
@@ -1364,9 +1369,73 @@ export class ServicePppAspirantWorkerPage extends Page {
   }
 
   async stop() {
-    const aspirantUrl = await getAspirantBaseUrl(
-      this.aspirantServiceId.datum()
+    const {
+      ycServiceAccountID,
+      ycPublicKeyID,
+      ycPrivateKey,
+      ycStaticKeyID,
+      ycStaticKeySecret
+    } = this.ycApiId.datum();
+    const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+      ycServiceAccountID,
+      ycPublicKeyID,
+      ycPrivateKey
+    });
+
+    const rBucketList = await maybeFetchError(
+      await ppp.fetch(
+        `https://storage.api.cloud.yandex.net/storage/v1/buckets?folderId=${psinaFolderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${iamToken}`
+          }
+        }
+      ),
+      'Не удалось получить список бакетов. Проверьте права доступа.'
     );
+
+    const bucketList = await rBucketList.json();
+    const artifactsBucket = bucketList?.buckets?.find((b) =>
+      /^ppp-artifacts-/.test(b.name)
+    );
+
+    if (artifactsBucket) {
+      const host = `${artifactsBucket.name}.storage.yandexcloud.net`;
+      const key = `${this.document._id}.zip`;
+      const xAmzDate =
+        new Date()
+          .toISOString()
+          .replaceAll('-', '')
+          .replaceAll(':', '')
+          .split('.')[0] + 'Z';
+      const date = xAmzDate.split('T')[0];
+      const signingKey = await generateYCAWSSigningKey({
+        ycStaticKeySecret,
+        date
+      });
+      const canonicalRequest = `DELETE\n/${key}\n\nhost:${host}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-date\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`;
+      const scope = `${date}/ru-central1/s3/aws4_request`;
+      const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+        canonicalRequest
+      )}`;
+      const signature = await HMAC(signingKey, stringToSign, {
+        format: 'hex'
+      });
+      const Authorization = `AWS4-HMAC-SHA256 Credential=${ycStaticKeyID}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-date, Signature=${signature}`;
+
+      await maybeFetchError(
+        await ppp.fetch(`https://${host}/${key}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization,
+            'X-Amz-Date': xAmzDate
+          }
+        }),
+        'Не удалось удалить файлы сервиса из облачного хранилища. Удаление прервано.'
+      );
+    }
+
+    const aspirantUrl = await this.#checkAspirantConnection();
 
     await maybeFetchError(
       await fetch(`${aspirantUrl}/api/v1/workers`, {
@@ -1379,42 +1448,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           workerId: this.document._id
         })
       }),
-      'Не удалось остановить сервис.'
-    );
-
-    const redisApi = await this.#getRedisApi();
-
-    await maybeFetchError(
-      await fetch(
-        new URL('redis', ppp.keyVault.getKey('service-machine-url')).toString(),
-        {
-          cache: 'reload',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            options: {
-              host: redisApi.host,
-              port: redisApi.port,
-              tls: redisApi.tls
-                ? {
-                    servername: redisApi.host
-                  }
-                : void 0,
-              username: redisApi.username,
-              db: redisApi.database,
-              password: redisApi.password
-            },
-            command: 'hdel',
-            args: [
-              `aspirant:${this.aspirantServiceId.datum()._id}`,
-              this.document._id
-            ]
-          })
-        }
-      ),
-      'Не удалось удалить запись сервиса из Redis.'
+      'Не удалось остановить (удалить) сервис.'
     );
   }
 
@@ -1423,9 +1457,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       return this.submitDocument();
     }
 
-    const aspirantUrl = await getAspirantBaseUrl(
-      this.aspirantServiceId.datum()
-    );
+    const aspirantUrl = await this.#checkAspirantConnection();
 
     await maybeFetchError(
       await fetch(`${aspirantUrl}/api/v1/workers`, {

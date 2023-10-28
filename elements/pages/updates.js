@@ -242,7 +242,7 @@ export class UpdatesPage extends Page {
         'Не удалось изменить ссылку HEAD на ветку main в текущем репозитории.'
       );
 
-      const rPagesBuildRequest = await fetch(
+      const rPagesBuildResponse = await fetch(
         `https://api.github.com/repos/${user.login}/ppp/pages/builds`,
         {
           method: 'POST',
@@ -254,9 +254,9 @@ export class UpdatesPage extends Page {
       );
 
       // The repository does not have a GitHub Pages site.
-      if (rPagesBuildRequest.status !== 403) {
+      if (rPagesBuildResponse.status !== 403) {
         await maybeFetchError(
-          rPagesBuildRequest,
+          rPagesBuildResponse,
           'Не удалось выполнить запрос на принудительную сборку GitHub Pages.'
         );
       }

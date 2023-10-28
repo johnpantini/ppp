@@ -202,17 +202,17 @@ export class TraderAlorOpenApiV2Page extends Page {
     }
 
     const broker = this.brokerId.datum();
-    const jwtRequest = await fetch(
+    const jwtResponse = await fetch(
       `https://oauth.alor.ru/refresh?token=${broker.refreshToken}`,
       {
         method: 'POST'
       }
     );
 
-    await maybeFetchError(jwtRequest, 'Неверный токен Alor.');
+    await maybeFetchError(jwtResponse, 'Неверный токен Alor.');
 
-    const { AccessToken } = await jwtRequest.json();
-    const summaryRequest = await fetch(
+    const { AccessToken } = await jwtResponse.json();
+    const summaryResponse = await fetch(
       `https://api.alor.ru/md/v2/Clients/${
         this.exchange.value
       }/${this.portfolio.value.trim()}/summary`,
@@ -225,7 +225,7 @@ export class TraderAlorOpenApiV2Page extends Page {
     );
 
     await maybeFetchError(
-      summaryRequest,
+      summaryResponse,
       'Не удаётся получить информацию о портфеле.'
     );
   }

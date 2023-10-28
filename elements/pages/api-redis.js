@@ -12,10 +12,12 @@ import {
   upsertMongoDBRealmScheduledTrigger,
   removeMongoDBRealmTrigger
 } from '../../lib/realm.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
+import '../query-select.js';
 import '../text-field.js';
 
 export const apiRedisPageTemplate = html`
@@ -127,6 +129,48 @@ export const apiRedisPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Сервис-соединитель</h5>
+          <p class="description">
+            Будет использован для совершения HTTP-запросов к Redis.
+          </p>
+        </div>
+        <div class="input-group">
+        <ppp-query-select
+            ${ref('connectorServiceId')}
+            :context="${(x) => x}"
+            value="${(x) => x.document.connectorServiceId}"
+            :preloaded="${(x) => x.document.connectorService ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('services')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                      },
+                      { workerPredefinedTemplate: 'connectors' },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.connectorServiceId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+        </div>
+      </section>
       ${documentPageFooterPartial({})}
     </form>
   </template>
@@ -140,7 +184,7 @@ export const apiRedisPageStyles = css`
 `;
 
 export async function checkRedisCredentials({
-  serviceMachineUrl,
+  connectorUrl,
   host,
   port,
   tls,
@@ -148,8 +192,7 @@ export async function checkRedisCredentials({
   database,
   password
 }) {
-  return fetch(new URL('redis', serviceMachineUrl).toString(), {
-    cache: 'no-cache',
+  return fetch(`${connectorUrl}redis`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -176,9 +219,19 @@ export class ApiRedisPage extends Page {
     this.beginOperation();
 
     try {
+      const connector = this.connectorServiceId.datum();
+
+      if (!connector) {
+        invalidate(this.connectorServiceId, {
+          errorMessage: 'Сначала выберите сервис-соединитель',
+          raiseException: true
+        });
+      }
+
+      const connectorUrl = await getAspirantWorkerBaseUrl(connector);
       const pong = await (
         await checkRedisCredentials({
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
+          connectorUrl,
           host: this.host.value.trim(),
           port: Math.abs(+this.port.value),
           tls: this.tls.checked
@@ -214,6 +267,7 @@ export class ApiRedisPage extends Page {
     await validate(this.host);
     await validate(this.port);
     await validate(this.database);
+    await validate(this.connectorServiceId);
 
     if (this.host.value.endsWith('upstash.io')) {
       await validate(this.database, {
@@ -228,10 +282,13 @@ export class ApiRedisPage extends Page {
       errorMessage: 'Введите значение в диапазоне от 0 до 16'
     });
 
+    const connector = this.connectorServiceId.datum();
+    const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+
     if (
       !(
         await checkRedisCredentials({
-          serviceMachineUrl: ppp.keyVault.getKey('service-machine-url'),
+          connectorUrl,
           host: this.host.value.trim(),
           port: Math.abs(+this.port.value),
           tls: this.tls.checked
@@ -258,10 +315,28 @@ export class ApiRedisPage extends Page {
         .get('mongodb-atlas')
         .db('ppp')
         .collection('[%#this.collection%]')
-        .findOne({
-          _id: new BSON.ObjectId('[%#payload.documentId%]'),
-          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.REDIS%]`
-        });
+        .aggregate([
+          {
+            $match: {
+              _id: new BSON.ObjectId('[%#payload.documentId%]'),
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.REDIS%]`
+            }
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'connectorServiceId',
+              foreignField: '_id',
+              as: 'connectorService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$connectorService',
+              preserveNullAndEmptyArrays: true
+            }
+          }
+        ]);
     };
   }
 
@@ -275,38 +350,69 @@ export class ApiRedisPage extends Page {
 
   async #createUpstashRedisPingTrigger() {
     if (this.document.host.endsWith('upstash.io')) {
+      // Upstash specific code and options.
       return upsertMongoDBRealmScheduledTrigger({
         functionName: `pppUpstashRedisPing${this.document._id}`,
         triggerName: `pppUpstashRedisPingTrigger${this.document._id}`,
         schedule: '0 */12 * * *',
         functionSource: `
-        exports = async function () {
-          return context.http
-            .post({
-              url: '${new URL(
-                'redis',
-                ppp.keyVault.getKey('service-machine-url')
-              ).toString()}',
-              headers: {
-                'Content-Type': ['application/json']
-              },
-              body: JSON.stringify({
-                options: {
-                    host: '${this.host.value.trim()}',
-                    port: ${Math.abs(+this.port.value)},
-                    tls: {
-                      servername: '${this.host.value.trim()}'
-                    },
-                    username: '${this.username.value.trim()}',
-                    db: 0,
-                    password: '${this.password.value.trim()}'
-                  },
-                  command: 'set',
-                  args: ['ppp:${this.document._id}', new Date().toISOString()]
-              })
-            })
-            .then((response) => response.body.text())
-            .catch(() => Promise.resolve({}));
+        exports = function () {
+          const tls = require('tls');
+ 
+          const star = Buffer.from('*', 'ascii');
+          const dollar = Buffer.from('$', 'ascii');
+          const crlf = Buffer.from('\\r\\n', 'ascii');
+          
+          function toRESPBulkString(string) {
+            const asciiString = Buffer.from(string, 'ascii');
+            const byteLength = Buffer.from(String(asciiString.length), 'ascii');
+            const totalLength =
+              dollar.length +
+              byteLength.length +
+              crlf.length +
+              asciiString.length +
+              crlf.length;
+          
+            return Buffer.concat(
+              [dollar, byteLength, crlf, asciiString, crlf],
+              totalLength
+            );
+          }
+          
+          function toRESPArray(command) {
+            const respStrings = command.map(toRESPBulkString);
+            const stringCount = Buffer.from(String(respStrings.length), 'ascii');
+          
+            return Buffer.concat([star, stringCount, crlf, ...respStrings]);
+          }
+          
+          function createRedisCommand(commands) {
+            const respArrays = commands.map(toRESPArray);
+          
+            return Buffer.concat([...respArrays, crlf]);
+          }
+          
+          const socket = tls.connect({
+            host: '${this.host.value.trim()}',
+            port: ${Math.abs(+this.port.value)},
+            servername: '${this.host.value.trim()}'
+          });
+          
+          socket.setEncoding('utf8');
+          socket.on('connect', () => {
+            socket.write(
+              createRedisCommand([
+                ['auth', '${this.username.value.trim()}' || 'default', '${this.password.value.trim()}']
+              ])
+            );
+            socket.write(
+              createRedisCommand([['set', 'ppp:${
+                this.document._id
+              }', new Date().toISOString()]])
+            );
+          
+            process.nextTick(() => socket.end());
+          });                   
         };
       `
       });
@@ -324,6 +430,7 @@ export class ApiRedisPage extends Page {
           database: Math.abs(+this.database.value),
           username: this.username.value.trim(),
           password: this.password.value.trim(),
+          connectorServiceId: this.connectorServiceId.value,
           version: 1,
           updatedAt: new Date()
         },

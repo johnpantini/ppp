@@ -405,7 +405,7 @@ export class RestoreMongodbModalPage extends Page {
     );
 
     const bucketList = await rBucketList.json();
-    let backupsBucket = bucketList?.buckets?.find((b) =>
+    const backupsBucket = bucketList?.buckets?.find((b) =>
       /^ppp-backups-/.test(b.name)
     );
 

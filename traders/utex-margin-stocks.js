@@ -395,16 +395,15 @@ class UtexMarginStocksTrader extends USTrader {
             let savedRefreshToken = sessionStorage.getItem(
               `utex-refresh-token-${this.document._id}`
             );
-            let tokensResponse;
+            let tokensData;
 
             if (isJWTTokenExpired(savedAccessToken)) {
               if (isJWTTokenExpired(savedRefreshToken)) {
-                const tokensRequest = await ppp.fetch(
+                const tokensResponse = await ppp.fetch(
                   'https://api.utex.io/rest/grpc/com.unitedtraders.luna.sessionservice.api.sso.SsoService.authorizeByFirstFactor',
                   {
                     method: 'POST',
                     headers: {
-                      Origin: 'https://utex.io',
                       Referer: 'https://utex.io/',
                       'User-Agent': navigator.userAgent,
                       'Content-Type': 'application/json'
@@ -420,7 +419,7 @@ class UtexMarginStocksTrader extends USTrader {
                   }
                 );
 
-                tokensResponse = await tokensRequest.json();
+                tokensData = await tokensResponse.json();
               } else {
                 // Refresh token is OK - try to refresh access token.
                 const refreshAuthRequest = await ppp.fetch(
@@ -428,7 +427,6 @@ class UtexMarginStocksTrader extends USTrader {
                   {
                     method: 'POST',
                     headers: {
-                      Origin: 'https://utex.io',
                       Referer: 'https://utex.io/',
                       'User-Agent': navigator.userAgent,
                       'Content-Type': 'application/json'
@@ -441,19 +439,19 @@ class UtexMarginStocksTrader extends USTrader {
                   }
                 );
 
-                tokensResponse = await refreshAuthRequest.json();
+                tokensData = await refreshAuthRequest.json();
 
-                if (tokensResponse.accessToken && tokensResponse.refreshToken) {
-                  tokensResponse.tokens = {
-                    accessToken: tokensResponse.accessToken,
-                    refreshToken: tokensResponse.refreshToken
+                if (tokensData.accessToken && tokensData.refreshToken) {
+                  tokensData.tokens = {
+                    accessToken: tokensData.accessToken,
+                    refreshToken: tokensData.refreshToken
                   };
                 }
               }
 
-              if (tokensResponse.tokens) {
-                savedAccessToken = tokensResponse.tokens.accessToken;
-                savedRefreshToken = tokensResponse.tokens.refreshToken;
+              if (tokensData.tokens) {
+                savedAccessToken = tokensData.tokens.accessToken;
+                savedRefreshToken = tokensData.tokens.refreshToken;
 
                 sessionStorage.setItem(
                   `utex-access-token-${this.document._id}`,
@@ -466,7 +464,7 @@ class UtexMarginStocksTrader extends USTrader {
               }
             } else {
               // Access token is OK.
-              tokensResponse = {
+              tokensData = {
                 tokens: {
                   accessToken: savedAccessToken,
                   refreshToken: savedRefreshToken
@@ -475,9 +473,9 @@ class UtexMarginStocksTrader extends USTrader {
             }
 
             if (
-              !tokensResponse?.tokens ||
+              !tokensData?.tokens ||
               /NoActiveSessionException|InvalidCredentialsException/i.test(
-                tokensResponse?.type
+                tokensData?.type
               )
             ) {
               sessionStorage.removeItem(
@@ -487,11 +485,11 @@ class UtexMarginStocksTrader extends USTrader {
                 `utex-refresh-token-${this.document._id}`
               );
 
-              reject(new AuthorizationError({ details: tokensResponse }));
-            } else if (/BlockingException/i.test(tokensResponse?.type)) {
-              reject(new UTEXBlockError({ details: tokensResponse }));
-            } else if (tokensResponse.tokens?.accessToken) {
-              this.accessToken = tokensResponse.tokens.accessToken;
+              reject(new AuthorizationError({ details: tokensData }));
+            } else if (/BlockingException/i.test(tokensData?.type)) {
+              reject(new UTEXBlockError({ details: tokensData }));
+            } else if (tokensData.tokens?.accessToken) {
+              this.accessToken = tokensData.tokens.accessToken;
 
               resolve(this.accessToken);
             }
@@ -883,7 +881,6 @@ class UtexMarginStocksTrader extends USTrader {
             Authorization: `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json;charset=UTF-8',
             'User-Agent': navigator.userAgent,
-            Origin: 'https://margin.utex.io',
             Referer: 'https://margin.utex.io/',
             'x-b3-spanid': generateTraceId(),
             'x-b3-traceid': generateTraceId()
@@ -915,7 +912,6 @@ class UtexMarginStocksTrader extends USTrader {
           Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json;charset=UTF-8',
           'User-Agent': navigator.userAgent,
-          Origin: 'https://margin.utex.io',
           Referer: 'https://margin.utex.io/',
           'x-b3-spanid': generateTraceId(),
           'x-b3-traceid': generateTraceId()
@@ -953,7 +949,6 @@ class UtexMarginStocksTrader extends USTrader {
           Authorization: `Bearer ${this.accessToken}`,
           'Content-Type': 'application/json;charset=UTF-8',
           'User-Agent': navigator.userAgent,
-          Origin: 'https://margin.utex.io',
           Referer: 'https://margin.utex.io/',
           'x-b3-spanid': generateTraceId(),
           'x-b3-traceid': generateTraceId()
