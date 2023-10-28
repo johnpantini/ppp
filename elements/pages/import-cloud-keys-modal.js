@@ -73,7 +73,20 @@ export class ImportCloudKeysModalPage extends Page {
         });
       }
 
-      const { iv, data } = await (await ppp.fetch(e)).json();
+      const proxyUrl = new URL(u);
+      const endpointUrl = new URL(e);
+
+      const endpointHostname = endpointUrl.hostname;
+
+      endpointUrl.hostname = proxyUrl.hostname;
+
+      const { iv, data } = await (
+        await fetch(endpointUrl.toString(), {
+          headers: {
+            'X-Host': endpointHostname
+          }
+        })
+      ).json();
 
       ppp.crypto.resetKey();
 

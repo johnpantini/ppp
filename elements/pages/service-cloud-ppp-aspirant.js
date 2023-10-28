@@ -471,12 +471,12 @@ export class ServiceCloudPppAspirantPage extends Page {
             dockerfile: {
               buildEngine: 'kaniko',
               useCache: false,
-              dockerFilePath: '/ppp/lib/aspirant/Dockerfile',
-              dockerWorkDir: '/ppp'
+              dockerFilePath: '/lib/aspirant/Dockerfile',
+              dockerWorkDir: '/'
             }
           },
           buildConfiguration: {
-            pathIgnoreRules: ['*', '!/ppp/lib/aspirant', '!/ppp/lib/aspirant/*']
+            pathIgnoreRules: ['*', '!/lib/aspirant', '!/lib/aspirant/*']
           },
           runtimeEnvironment: this.#getEnvironment()
         })
@@ -532,8 +532,8 @@ export class ServiceCloudPppAspirantPage extends Page {
           serviceDetails: {
             env: 'docker',
             envSpecificDetails: {
-              dockerContext: '/ppp/',
-              dockerfilePath: '/ppp/lib/aspirant/Dockerfile'
+              dockerContext: '/',
+              dockerfilePath: '/lib/aspirant/Dockerfile'
             }
           }
         })
