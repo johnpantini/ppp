@@ -1352,8 +1352,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
     this.document.name = this.name.value;
     this.document.aspirantServiceId = this.aspirantServiceId.value;
-    this.document.mongodbRealmProxyServiceId =
-      this.mongodbRealmProxyServiceId.value;
+    this.document.ycApiId = this.ycApiId.value;
     this.document.sourceCode = this.sourceCode.value;
     this.document.environmentCode = this.environmentCode.value;
     this.document.environmentCodeSecret = this.environmentCodeSecret.value;
