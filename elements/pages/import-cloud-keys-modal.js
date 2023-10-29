@@ -65,7 +65,7 @@ export class ImportCloudKeysModalPage extends Page {
 
       const { u, e } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
 
-      if (!e.startsWith('https')) {
+      if (!e?.startsWith('https')) {
         invalidate(ppp.app.toast, {
           errorMessage:
             'Компактное представление не содержит адреса URL базы данных.',
@@ -75,7 +75,6 @@ export class ImportCloudKeysModalPage extends Page {
 
       const proxyUrl = new URL(u);
       const endpointUrl = new URL(e);
-
       const endpointHostname = endpointUrl.hostname;
 
       endpointUrl.hostname = proxyUrl.hostname;

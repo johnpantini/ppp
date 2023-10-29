@@ -7,7 +7,7 @@ import {
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
-import { HMAC } from '../../lib/ppp-crypto.js';
+import { HMAC, sha256 } from '../../lib/ppp-crypto.js';
 import { APIS } from '../../lib/const.js';
 import * as jose from '../../vendor/jose.min.js';
 import '../badge.js';
@@ -280,6 +280,36 @@ export class ApiYcPage extends Page {
     await maybeFetchError(
       iamTokenRequest,
       'Не удалось получить IAM-токен. Проверьте правильность ключей Yandex Cloud.'
+    );
+
+    const host = 'storage.yandexcloud.net';
+    const xAmzDate =
+      new Date()
+        .toISOString()
+        .replaceAll('-', '')
+        .replaceAll(':', '')
+        .split('.')[0] + 'Z';
+    const date = xAmzDate.split('T')[0];
+    const signingKey = await generateYCAWSSigningKey({
+      ycStaticKeySecret: this.ycStaticKeySecret.value.trim(),
+      date
+    });
+    const canonicalRequest = `GET\n/\n\nhost:${host}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-date\ne3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`;
+    const scope = `${date}/ru-central1/s3/aws4_request`;
+    const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+      canonicalRequest
+    )}`;
+    const signature = await HMAC(signingKey, stringToSign, { format: 'hex' });
+    const Authorization = `AWS4-HMAC-SHA256 Credential=${this.ycStaticKeyID.value.trim()}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-date, Signature=${signature}`;
+
+    await maybeFetchError(
+      await ppp.fetch(`https://${host}/`, {
+        headers: {
+          Authorization,
+          'X-Amz-Date': xAmzDate
+        }
+      }),
+      'Не удалось выгрузить список бакетов. Проверьте статический ключ.'
     );
   }
 

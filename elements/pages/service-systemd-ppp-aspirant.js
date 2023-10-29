@@ -111,6 +111,59 @@ export const serviceSystemdPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
+          <h5>API Yandex Cloud</h5>
+          <p class="description">
+            API, который будет использован для выгрузки файлов сервиса в
+            облачное хранилище.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('ycApiId')}
+            value="${(x) => x.document.ycApiId}"
+            :context="${(x) => x}"
+            :preloaded="${(x) => x.document.ycApi ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('apis')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.YC%]`
+                      },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.ycApiId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <div class="spacing2"></div>
+          <ppp-button
+            @click="${() =>
+              ppp.app.mountPage(`api-${APIS.YC}`, {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
+            appearance="primary"
+          >
+            Добавить API Yandex Cloud
+          </ppp-button>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Сервер</h5>
           <p class="description">
             Сервер, на котором будет запущен Aspirant. Нельзя изменить после
@@ -233,6 +286,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
   async validate() {
     await validate(this.name);
     await validate(this.redisApiId);
+    await validate(this.ycApiId);
     await validate(this.serverId);
     await validate(this.tailnetDomain);
   }
@@ -271,6 +325,20 @@ export class ServiceSystemdPppAspirantPage extends Page {
           },
           {
             $unwind: '$server'
+          },
+          {
+            $lookup: {
+              from: 'apis',
+              localField: 'ycApiId',
+              foreignField: '_id',
+              as: 'ycApi'
+            }
+          },
+          {
+            $unwind: {
+              path: '$ycApi',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -300,7 +368,48 @@ export class ServiceSystemdPppAspirantPage extends Page {
   }
 
   async #deployOnServer() {
+    const tailnetDomain = this.tailnetDomain.value.trim();
+    const sslReplacement = [];
+
+    sslReplacement.push('listen 8080;');
+    sslReplacement.push('listen 443 ssl;');
+    sslReplacement.push('listen [::]:443 ssl;');
+    sslReplacement.push(
+      `ssl_certificate /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.crt;`
+    );
+    sslReplacement.push(
+      `ssl_certificate_key /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.key;`
+    );
+    sslReplacement.push('ssl_session_timeout 1d;');
+    sslReplacement.push('ssl_session_tickets off;');
+    sslReplacement.push('ssl_protocols TLSv1.3;');
+    sslReplacement.push('ssl_prefer_server_ciphers off;');
+    sslReplacement.push('ssl_stapling on;');
+    sslReplacement.push('ssl_stapling_verify on;');
+    sslReplacement.push(`allow 100.0.0.0/8;`);
+    sslReplacement.push('deny all;');
+
     // TODO
+    const commands = [
+      'sudo groupadd -f ppp ;',
+      'sudo useradd -g ppp ppp || true && '
+    ].join(' ');
+
+    if (
+      !(await this.executeSSHCommands({
+        server: this.serverId.datum(),
+        commands,
+        commandsToDisplay: commands.replace(
+          /,"REDIS_PASSWORD":"[\s\S]+","/gi,
+          ',"REDIS_PASSWORD":"<hidden content>","'
+        )
+      }))
+    ) {
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Не удалось настроить сервис Aspirant.',
+        raiseException: true
+      });
+    }
   }
 
   async submit() {
@@ -309,6 +418,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
         $set: {
           name: this.name.value.trim(),
           redisApiId: this.redisApiId.value,
+          ycApiId: this.ycApiId.value,
           serverId: this.serverId.value,
           domain: this.domain.value,
           tailnetDomain: this.tailnetDomain.value.trim(),

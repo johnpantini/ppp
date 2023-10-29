@@ -110,8 +110,6 @@ export default function (i18n) {
         'N/A': 'Нет данных'
       },
       service: {
-        [SERVICES.SSH]: 'Команды SSH',
-        [SERVICES.SPBEX_HALTS]: 'Торговые паузы SPBEX',
         [SERVICES.NYSE_NSDQ_HALTS]: 'Торговые паузы NYSE/NASDAQ',
         [SERVICES.SUPABASE_PARSER]: 'Парсер (Supabase)',
         [SERVICES.CLOUD_PPP_ASPIRANT]: 'Aspirant',

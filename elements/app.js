@@ -722,6 +722,10 @@ export class App extends PPPElement {
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Escape') {
         this.toast.setAttribute('hidden', '');
+
+        if (ppp.settings.get('closeModalsOnEsc')) {
+          this.getVisibleModal()?.close();
+        }
       }
     });
 

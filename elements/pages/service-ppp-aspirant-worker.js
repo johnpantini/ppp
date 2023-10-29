@@ -519,6 +519,17 @@ export const servicePppAspirantWorkerPageTemplate = html`
             }}"
             :transform="${() => ppp.decryptDocumentsTransformation()}"
           ></ppp-query-select>
+          <div class="spacing2"></div>
+          <ppp-button
+            @click="${() =>
+              ppp.app.mountPage(`api-${APIS.YC}`, {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
+            appearance="primary"
+          >
+            Добавить API Yandex Cloud
+          </ppp-button>
         </div>
       </section>
       <section>

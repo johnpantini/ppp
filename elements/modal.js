@@ -7,7 +7,6 @@ import {
   html,
   attr,
   when,
-  Observable,
   observable
 } from '../vendor/fast-element.min.js';
 import { normalize, scrollbars, typography } from '../design/styles.js';
@@ -15,15 +14,12 @@ import { close } from '../static/svg/sprite.js';
 import {
   paletteBlack,
   paletteBlueLight1,
-  paletteBlueLight2,
   paletteGrayBase,
   paletteGrayDark1,
-  paletteGrayDark2,
   paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
   paletteWhite,
-  spacing2,
   spacing3,
   themeConditional,
   toColorComponents
@@ -54,10 +50,7 @@ export const modalTemplate = html`
         ${when(
           (x) => x.dismissible,
           html` <button
-            @click="${(x) => {
-              x.setAttribute('hidden', '');
-              x.result = false;
-            }}"
+            @click="${(x) => x.close()}}"
             aria-disabled="false"
             class="close"
             tabindex="0"
@@ -231,6 +224,12 @@ export class Modal extends PPPElement {
 
   @attr({ mode: 'boolean' })
   dismissible;
+
+  close() {
+    this.setAttribute('hidden', '');
+
+    this.result = false;
+  }
 
   hiddenChanged(oldValue, newValue) {
     if (typeof oldValue !== 'undefined') {

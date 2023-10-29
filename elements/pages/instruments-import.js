@@ -80,6 +80,16 @@ export const instrumentsImportPageTemplate = html`
               ></ppp-text-field>
             </div>
           </section>
+          <section>
+            <div class="label-group">
+              <h5>Параметры импорта</h5>
+            </div>
+            <div class="input-group">
+              <ppp-checkbox checked ${ref('psinaSkipOTC')}>
+                Не импортировать инструменты OTC
+              </ppp-checkbox>
+            </div>
+          </section>
         `
       )}
       ${when(
@@ -286,24 +296,33 @@ export class InstrumentsImportPage extends Page {
     await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
 
     const stocks = await rStocks.json();
+    const psinaSkipOTC = this.psinaSkipOTC.checked;
 
-    return stocks.map((s) => {
-      return {
-        symbol: s.symbol.replace('-', ' '),
-        exchange: EXCHANGE.US,
-        broker: BROKERS.PSINA,
-        fullName: s.fullName,
-        minPriceIncrement: 0,
-        type:
-          s.fullName.toUpperCase().endsWith(' ETF') ||
-          /Invesco|ProShares|iShares/i.test(s.fullName)
-            ? 'etf'
-            : 'stock',
-        currency: 'USD',
-        forQualInvestorFlag: false,
-        lot: 1
-      };
-    });
+    return stocks
+      .filter((s) => {
+        if (psinaSkipOTC) {
+          return !s.realExchange?.startsWith('OTC');
+        } else {
+          return true;
+        }
+      })
+      .map((s) => {
+        return {
+          symbol: s.symbol.replace('-', ' '),
+          exchange: EXCHANGE.US,
+          broker: BROKERS.PSINA,
+          fullName: s.fullName,
+          minPriceIncrement: 0,
+          type:
+            s.fullName.toUpperCase().endsWith(' ETF') ||
+            /Invesco|ProShares|iShares/i.test(s.fullName)
+              ? 'etf'
+              : 'stock',
+          currency: 'USD',
+          forQualInvestorFlag: false,
+          lot: 1
+        };
+      });
   }
 
   async [INSTRUMENT_DICTIONARY.BINANCE]() {

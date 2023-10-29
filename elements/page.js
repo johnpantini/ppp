@@ -1579,6 +1579,28 @@ class PageWithSSHTerminal {
 
     const terminal = ppp.app.terminalWindow.terminal;
 
+    if (!connectorUrl) {
+      const connector = await ppp.user.functions.findOne(
+        { collection: 'services' },
+        {
+          _id: server.connectorServiceId
+        }
+      );
+
+      if (!connector) {
+        invalidate(ppp.app.toast, {
+          errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+          raiseException: true
+        });
+      }
+
+      const { getAspirantWorkerBaseUrl } = await import(
+        `${ppp.rootUrl}/elements/pages/service-ppp-aspirant-worker.js`
+      );
+
+      connectorUrl = await getAspirantWorkerBaseUrl(connector);
+    }
+
     try {
       terminal.clear();
       terminal.reset();
