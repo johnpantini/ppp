@@ -748,6 +748,16 @@ export class WorkspacePage extends Page {
     const type = widget.type;
 
     if (type === 'custom') {
+      if (/https:\/\/psina\.pages\.dev/i.test(widget.url)) {
+        const psinaBaseUrl =
+          ppp.settings.get('psinaBaseUrl') ?? 'https://psina.pages.dev';
+
+        widget.url = widget.url.replace(
+          'https://psina.pages.dev',
+          new URL(psinaBaseUrl).origin
+        );
+      }
+
       return new URL(widget.url).toString();
     } else {
       return `${ppp.rootUrl}/elements/widgets/${widget.type}.js`;

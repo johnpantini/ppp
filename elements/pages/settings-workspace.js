@@ -1,7 +1,7 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
 import '../text-field.js';
@@ -84,6 +84,23 @@ export const settingsWorkspacePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
+          <h5>Базовый URL виджетов Psina</h5>
+          <p class="description">
+            Позволяет указать альтернативный источник для загрузки виджетов.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="url"
+            placeholder="https://psina.pages.dev"
+            value="${(x) =>
+              x.document.psinaBaseUrl ?? 'https://psina.pages.dev'}"
+            ${ref('psinaBaseUrl')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Инсталляция в пустом терминале</h5>
         </div>
         <div class="input-group">
@@ -128,6 +145,7 @@ export class SettingsWorkspacePage extends Page {
   async validate() {
     await validate(this.workspaceSnapDistance);
     await validate(this.workspaceSnapMargin);
+    await validate(this.psinaBaseUrl);
 
     for (const input of [
       this.workspaceSnapDistance,
@@ -143,6 +161,19 @@ export class SettingsWorkspacePage extends Page {
       hook: async (value) => value <= +this.workspaceSnapDistance.value,
       errorMessage: `Значение должно быть не больше ${this.workspaceSnapDistance.value}`
     });
+
+    try {
+      await maybeFetchError(
+        await fetch(
+          new URL('/widgets/psina.js', this.psinaBaseUrl.value).toString()
+        )
+      );
+    } catch (e) {
+      invalidate(this.psinaBaseUrl, {
+        errorMessage: 'Этот URL не может быть использован',
+        raiseException: true
+      });
+    }
   }
 
   async submit() {
@@ -153,11 +184,13 @@ export class SettingsWorkspacePage extends Page {
     const widgetNotificationTimeout = Math.abs(
       Math.trunc(this.widgetNotificationTimeout.value)
     );
+    const psinaBaseUrl = new URL(this.psinaBaseUrl.value).origin;
 
     ppp.settings.set('workspaceSnapDistance', workspaceSnapDistance);
     ppp.settings.set('workspaceSnapMargin', workspaceSnapMargin);
     ppp.settings.set('confirmWidgetClosing', confirmWidgetClosing);
     ppp.settings.set('widgetNotificationTimeout', widgetNotificationTimeout);
+    ppp.settings.set('psinaBaseUrl', psinaBaseUrl);
     ppp.settings.set('hideEmptyWorkspaceGizmo', hideEmptyWorkspaceGizmo);
 
     return {
@@ -166,6 +199,7 @@ export class SettingsWorkspacePage extends Page {
         workspaceSnapMargin,
         confirmWidgetClosing,
         widgetNotificationTimeout,
+        psinaBaseUrl,
         hideEmptyWorkspaceGizmo
       }
     };

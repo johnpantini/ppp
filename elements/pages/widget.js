@@ -940,7 +940,20 @@ export class WidgetPage extends Page {
 
       try {
         new URL(this.url.value);
-        await fetch(this.url.value, {
+
+        let urlToCheck = this.url.value;
+
+        if (/https:\/\/psina\.pages\.dev/i.test(urlToCheck)) {
+          const psinaBaseUrl =
+            ppp.settings.get('psinaBaseUrl') ?? 'https://psina.pages.dev';
+
+          urlToCheck = urlToCheck.replace(
+            'https://psina.pages.dev',
+            new URL(psinaBaseUrl).origin
+          );
+        }
+
+        await fetch(urlToCheck, {
           cache: 'reload'
         });
       } catch (e) {
@@ -1222,6 +1235,16 @@ export class WidgetPage extends Page {
     if (url) {
       this.beginOperation();
 
+      if (/https:\/\/psina\.pages\.dev/i.test(url)) {
+        const psinaBaseUrl =
+          ppp.settings.get('psinaBaseUrl') ?? 'https://psina.pages.dev';
+
+        url = url.replace(
+          'https://psina.pages.dev',
+          new URL(psinaBaseUrl).origin
+        );
+      }
+
       try {
         const module = await import(url);
         const wUrl = new URL(url);
@@ -1339,14 +1362,27 @@ export class WidgetPage extends Page {
 
         try {
           new URL(this.url.value);
-          await fetch(this.url.value, {
-            cache: 'no-cache'
+
+          let urlToCheck = this.url.value;
+
+          if (/https:\/\/psina\.pages\.dev/i.test(urlToCheck)) {
+            const psinaBaseUrl =
+              ppp.settings.get('psinaBaseUrl') ?? 'https://psina.pages.dev';
+
+            urlToCheck = urlToCheck.replace(
+              'https://psina.pages.dev',
+              new URL(psinaBaseUrl).origin
+            );
+          }
+
+          await fetch(urlToCheck, {
+            cache: 'reload'
           });
         } catch (e) {
           this.widgetDefinition = {};
 
           invalidate(this.url, {
-            errorMessage: 'Неверный или неполный URL',
+            errorMessage: 'Этот URL не может быть использован',
             raiseException: true
           });
         }
