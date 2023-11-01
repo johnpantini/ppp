@@ -601,20 +601,28 @@ class PPP {
 
   async openInstrumentCache({ exchange, broker }) {
     let version = 1;
-    const databases = await indexedDB.databases();
-    const database = databases.find((db) => db.name === 'ppp');
 
-    if (database) {
-      version = database.version;
+    // Check for Firefox garbage browser.
+    if (typeof indexedDB.databases === 'function') {
+      const databases = await indexedDB.databases();
+      const database = databases.find((db) => db.name === 'ppp');
+
+      if (database) {
+        version = database.version;
+      }
     }
 
-    const checkStoreRequest = indexedDB.open('ppp', version);
+    const checkStoreRequest = indexedDB.open('ppp');
     let storeNames;
 
     try {
       storeNames = Array.from(
         await new Promise((resolve, reject) => {
           checkStoreRequest.onsuccess = () => {
+            if (typeof indexedDB.databases !== 'function') {
+              version = checkStoreRequest.result.version;
+            }
+
             resolve(checkStoreRequest.result.objectStoreNames);
           };
 

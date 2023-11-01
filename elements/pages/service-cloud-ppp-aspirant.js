@@ -219,7 +219,7 @@ export const serviceCloudPppAspirantTemplate = html`
         text: 'Сохранить в PPP и развернуть в облаке',
         extraControls: html`
           <ppp-button
-            class="clear-data"
+            class="extra-controls"
             ?hidden="${(x) => !x.document._id}"
             ?disabled="${(x) => !x.isSteady() || x.document.removed}"
             appearance="danger"
@@ -236,7 +236,7 @@ export const serviceCloudPppAspirantTemplate = html`
 
 export const serviceCloudPppAspirantStyles = css`
   ${pageStyles}
-  .clear-data {
+  .extra-controls {
     margin-right: auto;
   }
 `;
