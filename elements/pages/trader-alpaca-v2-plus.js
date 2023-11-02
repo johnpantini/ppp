@@ -220,7 +220,7 @@ const checkConnection = async (control, login, password) => {
 
   try {
     await new Promise((resolve, reject) => {
-      const timer = setTimeout(reject, 5000);
+      const timer = setTimeout(reject, 30000);
       const ws = new WebSocket(control.value);
 
       ws.onmessage = ({ data }) => {
