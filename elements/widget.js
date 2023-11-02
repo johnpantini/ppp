@@ -49,6 +49,7 @@ import { unsupportedInstrument } from '../traders/common-trader.js';
 import {
   AuthorizationError,
   ConnectionError,
+  ConnectionLimitExceededError,
   NoInstrumentsError,
   SerializationError,
   StaleInstrumentCacheError
@@ -920,7 +921,12 @@ export class Widget extends PPPElement {
       });
     } else if (e instanceof AuthorizationError) {
       return this.notificationsArea.error({
-        text: 'Ошибка авторизации, проверьте ключи и пароли.',
+        text: 'Ошибка авторизации в источнике данных.',
+        keep: true
+      });
+    } else if (e instanceof ConnectionLimitExceededError) {
+      return this.notificationsArea.error({
+        text: 'Исчерпан лимит доступных соединений.',
         keep: true
       });
     } else if (e instanceof ConnectionError) {

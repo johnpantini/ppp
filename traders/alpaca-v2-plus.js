@@ -7,6 +7,10 @@ import {
 import { later } from '../lib/ppp-decorators.js';
 import { isDST } from '../lib/intl.js';
 import { USTrader, TraderDatum } from './common-trader.js';
+import {
+  AuthorizationError,
+  ConnectionLimitExceededError
+} from '../lib/ppp-errors.js';
 
 class AlpacaV2PlusTraderDatum extends TraderDatum {
   filter(data, instrument, source, datum) {
@@ -511,13 +515,25 @@ class AlpacaV2PlusTrader extends USTrader {
                   { saveSlot: 1 }
                 );
               } else if (payload.T === 'error') {
-                console.error(payload);
+                if (payload.code === 407) {
+                  continue;
+                } else if (payload.code === 406) {
+                  this.authenticated = false;
+                  this.connection.onclose = null;
 
-                this.authenticated = false;
+                  reject(
+                    new ConnectionLimitExceededError({ details: payload })
+                  );
 
-                reject(payload);
+                  break;
+                } else {
+                  this.authenticated = false;
+                  this.connection.onclose = null;
 
-                break;
+                  reject(new AuthorizationError({ details: payload }));
+
+                  break;
+                }
               }
             }
           };
