@@ -76,6 +76,10 @@ uWS
     enableHttp: true,
     fileList: [
       {
+        url: '/lib/aspirant-worker/utils.mjs',
+        path: 'lib/aspirant-worker/utils.mjs'
+      },
+      {
         url: '/lib/utex/utex-connection.mjs',
         path: 'lib/utex/utex-connection.mjs'
       },
