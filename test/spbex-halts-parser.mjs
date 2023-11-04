@@ -1,5 +1,3 @@
-import { fetch } from '../salt/states/ppp/lib/fetch.mjs';
-
 const rss = `<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0">
   <channel>
@@ -220,9 +218,11 @@ function parse_spbex_halts() {
 }
 
 async function parse_spbex_halt(isin) {
-  const { responseText: page } = await fetch(
-    'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044'
-  );
+  const page = await (
+    await fetch(
+      'https://spbexchange.ru/ru/about/news.aspx?section=17&news=27044'
+    )
+  ).text();
 
   const name = page.match(
     /приостановке организованных торгов ценными бумагами (.*?)<\/h1>/i

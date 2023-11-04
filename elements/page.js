@@ -1579,6 +1579,15 @@ class PageWithSSHTerminal {
 
     const terminal = ppp.app.terminalWindow.terminal;
 
+    if (!server.connectorServiceId) {
+      ppp.app.terminalModal.dismissible = true;
+
+      invalidate(ppp.app.toast, {
+        errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+        raiseException: true
+      });
+    }
+
     if (!connectorUrl) {
       const connector = await ppp.user.functions.findOne(
         { collection: 'services' },
@@ -1588,6 +1597,8 @@ class PageWithSSHTerminal {
       );
 
       if (!connector) {
+        ppp.app.terminalModal.dismissible = true;
+
         invalidate(ppp.app.toast, {
           errorMessage: 'Запрос невозможен: отсутствует соединитель.',
           raiseException: true

@@ -1,7 +1,8 @@
-import { WebSocket } from '../salt/states/ppp/lib/websocket/websocket.mjs';
-import { default as UWS } from '../salt/states/ppp/lib/uWebSockets.js/uws.js';
+import { WebSocket } from '/ppp/vendor/websocket/websocket.mjs';
+import uWS from '/ppp/vendor/uWebSockets.js/uws.js';
 
-UWS.App({})
+uWS
+  .App({})
   .ws('/*', {
     message: (ws, message, isBinary) => {
       ws.send(

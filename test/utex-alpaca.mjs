@@ -1,4 +1,4 @@
-import { WebSocket } from '../salt/states/ppp/lib/websocket/websocket.mjs';
+import { WebSocket } from '/ppp/vendor/websocket/websocket.mjs';
 
 const client = new WebSocket('ws://localhost:24567');
 

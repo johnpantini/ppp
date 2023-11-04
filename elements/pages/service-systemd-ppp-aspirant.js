@@ -1,18 +1,6 @@
 import ppp from '../../ppp.js';
-import {
-  html,
-  css,
-  ref,
-  repeat,
-  Observable,
-  Updates
-} from '../../vendor/fast-element.min.js';
-import {
-  validate,
-  invalidate,
-  maybeFetchError,
-  ValidationError
-} from '../../lib/ppp-errors.js';
+import { html, css, ref, repeat } from '../../vendor/fast-element.min.js';
+import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -26,7 +14,6 @@ import {
   servicePageFooterExtraControls,
   servicePageHeaderExtraControls
 } from './service.js';
-import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
 import ServiceCloudPppAspirant from './service-cloud-ppp-aspirant.js';
 import '../badge.js';
@@ -420,6 +407,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
         'sender.mjs',
         'websocket.mjs'
       ].map((file) => `/ppp/vendor/websocket/${file}`),
+      '/ppp/vendor/uWebSockets.js/uws_linux_arm64_111.node',
       '/ppp/vendor/uWebSockets.js/uws_linux_arm_111.node',
       '/ppp/vendor/uWebSockets.js/uws_linux_x64_111.node',
       '/ppp/vendor/uWebSockets.js/uws.js',
