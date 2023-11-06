@@ -392,8 +392,6 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   async instrumentChanged(oldValue, newValue) {
     super.instrumentChanged();
 
-    await this.ordersTrader?.instrumentChanged?.(this, oldValue, newValue);
-
     this.orders = this.getOrdersArray();
   }
 
@@ -403,7 +401,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     for (const [_, order] of this.ordersMap ?? []) {
       if (order.status !== 'working') continue;
 
-      if (this.instrument) {
+      if (this.instrument?.symbol) {
         if (
           this.ordersTrader?.instrumentsAreEqual?.(
             order.instrument,
@@ -412,7 +410,9 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         ) {
           orders.push(order);
         }
-      } else orders.push(order);
+      } else {
+        orders.push(order);
+      }
     }
 
     this.empty = orders.length === 0;

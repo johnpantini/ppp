@@ -111,7 +111,10 @@ class TraderDatum {
           if (this.sources[d].has(source)) {
             const f = this.sources[d].get(source);
 
-            source[f] = this.emptyValue(d);
+            // Prevent resetting the value if trader is not allowed to change it.
+            if (this.filter(source[f], source.instrument, source, datum)) {
+              source[f] = this.emptyValue(d);
+            }
 
             if (oldValue) {
               await this.unsubscribe(source, oldValue);
@@ -144,14 +147,16 @@ class TraderDatum {
       const slots = this.values.get(symbol);
 
       if (!Array.isArray(slots)) {
-        if (this.filter(slots, source.instrument, source, datum)) {
-          if (source.instrument && typeof slots !== 'undefined') {
-            source[field] =
-              this?.[datum]?.(slots, source.instrument, source) ??
-              this.emptyValue(datum) ??
-              '—';
-          } else {
-            source[field] = this.emptyValue(datum) ?? '—';
+        if (typeof slots !== 'undefined') {
+          if (this.filter(slots, source.instrument, source, datum)) {
+            if (source.instrument) {
+              source[field] =
+                this?.[datum]?.(slots, source.instrument, source) ??
+                this.emptyValue(datum) ??
+                '—';
+            } else {
+              source[field] = this.emptyValue(datum) ?? '—';
+            }
           }
         }
       } else {

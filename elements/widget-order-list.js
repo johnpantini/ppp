@@ -57,37 +57,6 @@ export const widgetOrderListTemplate = html`
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
             </div>
-            <div class="control-stack">
-              <ppp-query-select
-                order-execution-environment
-                deselectable
-                standalone
-                ?disabled="${(x) => x.hidden}"
-                value="${(x) => x.execEnvironmentServiceId}"
-                :preloaded="${(x, c) => {
-                  return c.parent?.services?.find(
-                    (s) => s._id === x.execEnvironmentServiceId
-                  );
-                }}"
-                placeholder="Среда исполнения"
-                variant="compact"
-                :context="${(x) => x}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('services')
-                      .find({
-                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`,
-                        workerPredefinedTemplate: 'pppRuntime'
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-query-select>
-            </div>
             ${cloneControlsTemplate()}
           </div>
         `
@@ -127,9 +96,6 @@ export class WidgetOrderList extends ClonableList {
       orders.push({
         name: line.querySelector('[order-name]').value,
         orderId: line.querySelector('[order-id]').value,
-        execEnvironmentServiceId: line.querySelector(
-          '[order-execution-environment]'
-        ).value,
         hidden: !line.querySelector('[visibility-toggle]').checked
       });
     }

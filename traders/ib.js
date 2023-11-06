@@ -744,7 +744,7 @@ class IbTrader extends USTrader {
 
     const orderData = await orderResponse.json();
 
-    if (orderData.ok) {
+    if (orderResponse.ok) {
       return {
         orderId: orderData.result
       };
@@ -793,7 +793,7 @@ class IbTrader extends USTrader {
 
     const orderData = await orderResponse.json();
 
-    if (orderData.ok) {
+    if (orderResponse.ok) {
       return {
         orderId: orderData.result
       };
@@ -840,7 +840,7 @@ class IbTrader extends USTrader {
 
     const orderData = await orderResponse.json();
 
-    if (orderData.ok) {
+    if (orderResponse.ok) {
       return {
         orderId: orderData.result
       };

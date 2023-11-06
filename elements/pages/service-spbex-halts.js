@@ -324,7 +324,7 @@ export class ServiceSpbexHaltsPage extends Page {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.SPBEX_HALTS%]`
+              type: 'spbex-halts'
             }
           },
           {
@@ -369,7 +369,7 @@ export class ServiceSpbexHaltsPage extends Page {
 
   async find() {
     return {
-      type: SERVICES.SPBEX_HALTS,
+      type: 'spbex-halts',
       name: this.name.value.trim(),
       removed: { $ne: true }
     };

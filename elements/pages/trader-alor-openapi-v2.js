@@ -8,6 +8,7 @@ import {
 } from '../page.js';
 import { EXCHANGE, TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../radio-group.js';
@@ -21,25 +22,11 @@ export const traderAlorOpenApiV2Template = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="Alor"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
-      </section>
+      ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
+          <p class="description">Брокерский профиль Alor.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -184,6 +171,11 @@ export class TraderAlorOpenApiV2Page extends Page {
 
   async validate() {
     await validate(this.name);
+
+    if (this.runtime.value === 'aspirant-worker') {
+      await validate(this.runtimeServiceId);
+    }
+
     await validate(this.brokerId);
     await validate(this.portfolio);
 
@@ -253,6 +245,20 @@ export class TraderAlorOpenApiV2Page extends Page {
           },
           {
             $unwind: '$broker'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'runtimeServiceId',
+              foreignField: '_id',
+              as: 'runtimeService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$runtimeService',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -271,36 +277,41 @@ export class TraderAlorOpenApiV2Page extends Page {
       ppp.traders.delete(this.document._id);
     }
 
+    const $set = {
+      name: this.name.value.trim(),
+      runtime: this.runtime.value,
+      brokerId: this.brokerId.value,
+      portfolio: this.portfolio.value.trim(),
+      portfolioType: this.portfolioType.value,
+      exchange: this.exchange.value,
+      reconnectTimeout: this.reconnectTimeout.value
+        ? Math.abs(this.reconnectTimeout.value)
+        : void 0,
+      flatCommissionRate: this.flatCommissionRate.value
+        ? Math.abs(parseFloat(this.flatCommissionRate.value.replace(',', '.')))
+        : void 0,
+      version: 1,
+      caps: [
+        TRADER_CAPS.CAPS_LIMIT_ORDERS,
+        TRADER_CAPS.CAPS_MARKET_ORDERS,
+        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+        TRADER_CAPS.CAPS_ORDERBOOK,
+        TRADER_CAPS.CAPS_TIME_AND_SALES,
+        TRADER_CAPS.CAPS_POSITIONS,
+        TRADER_CAPS.CAPS_TIMELINE,
+        TRADER_CAPS.CAPS_LEVEL1,
+        TRADER_CAPS.CAPS_CHARTS
+      ],
+      type: TRADERS.ALOR_OPENAPI_V2,
+      updatedAt: new Date()
+    };
+
+    if (this.runtime.value === 'aspirant-worker') {
+      $set.runtimeServiceId = this.runtimeServiceId.value;
+    }
+
     return {
-      $set: {
-        name: this.name.value.trim(),
-        brokerId: this.brokerId.value,
-        portfolio: this.portfolio.value.trim(),
-        portfolioType: this.portfolioType.value,
-        exchange: this.exchange.value,
-        reconnectTimeout: this.reconnectTimeout.value
-          ? Math.abs(this.reconnectTimeout.value)
-          : void 0,
-        flatCommissionRate: this.flatCommissionRate.value
-          ? Math.abs(
-              parseFloat(this.flatCommissionRate.value.replace(',', '.'))
-            )
-          : void 0,
-        version: 1,
-        caps: [
-          TRADER_CAPS.CAPS_LIMIT_ORDERS,
-          TRADER_CAPS.CAPS_MARKET_ORDERS,
-          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-          TRADER_CAPS.CAPS_ORDERBOOK,
-          TRADER_CAPS.CAPS_TIME_AND_SALES,
-          TRADER_CAPS.CAPS_POSITIONS,
-          TRADER_CAPS.CAPS_TIMELINE,
-          TRADER_CAPS.CAPS_LEVEL1,
-          TRADER_CAPS.CAPS_CHARTS
-        ],
-        type: TRADERS.ALOR_OPENAPI_V2,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }

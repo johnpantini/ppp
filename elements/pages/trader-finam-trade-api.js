@@ -7,6 +7,7 @@ import {
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
 import '../badge.js';
 import '../button.js';
@@ -101,6 +102,48 @@ export const traderFinamTradeApiTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Сервис-соединитель</h5>
+          <p class="description">
+            Будет использован для совершения HTTP-запросов к Finam.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('connectorServiceId')}
+            :context="${(x) => x}"
+            value="${(x) => x.document.connectorServiceId}"
+            :preloaded="${(x) => x.document.connectorService ?? ''}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('services')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                      },
+                      { workerPredefinedTemplate: 'connectors' },
+                      {
+                        $or: [
+                          { removed: { $ne: true } },
+                          {
+                            _id: `[%#this.document.connectorServiceId ?? ''%]`
+                          }
+                        ]
+                      }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+        </div>
+      </section>
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -110,15 +153,17 @@ export const traderFinamTradeApiStyles = css`
   ${pageStyles}
 `;
 
-export async function checkFinamAccount({ token, account }) {
-  return ppp.fetch(
-    `https://trade-api.finam.ru/public/api/v1/portfolio?ClientId=${account}`,
-    {
+export async function checkFinamAccount({ connectorUrl, token, account }) {
+  return fetch(`${connectorUrl}fetch`, {
+    method: 'POST',
+    body: JSON.stringify({
+      method: 'GET',
+      url: `https://trade-api.finam.ru/public/api/v1/portfolio?ClientId=${account}`,
       headers: {
         'X-Api-Key': token
       }
-    }
-  );
+    })
+  });
 }
 
 export class TraderFinamTradeApiPage extends Page {
@@ -128,10 +173,16 @@ export class TraderFinamTradeApiPage extends Page {
     await validate(this.name);
     await validate(this.brokerId);
     await validate(this.account);
+    await validate(this.connectorServiceId);
+
+    const connector = this.connectorServiceId.datum();
+
+    this.connectorUrl = await getAspirantWorkerBaseUrl(connector);
 
     if (
       !(
         await checkFinamAccount({
+          connectorUrl: this.connectorUrl,
           account: this.account.value.trim(),
           token: this.brokerId.datum().token
         })
@@ -167,6 +218,20 @@ export class TraderFinamTradeApiPage extends Page {
           },
           {
             $unwind: '$broker'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'connectorServiceId',
+              foreignField: '_id',
+              as: 'connectorService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$connectorService',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -197,6 +262,8 @@ export class TraderFinamTradeApiPage extends Page {
           TRADER_CAPS.CAPS_POSITIONS,
           TRADER_CAPS.CAPS_TIMELINE
         ],
+        connectorServiceId: this.connectorServiceId.value,
+        connectorUrl: this.connectorUrl,
         version: 1,
         type: TRADERS.FINAM_TRADE_API,
         updatedAt: new Date()

@@ -6,10 +6,83 @@ import { cloudFunctions, search } from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import { designTokens } from '../../design/design-tokens.js';
 import { checkmark } from '../../static/svg/sprite.js';
-import '../text-field.js';
 import '../button.js';
+import '../radio-group.js';
+import '../query-select.js';
+import '../text-field.js';
 
 await ppp.i18n(import.meta.url);
+
+export const traderNameAndRuntimePartial = () => html`
+  <section>
+    <div class="label-group">
+      <h5>Название трейдера</h5>
+      <p class="description">
+        Произвольное имя, чтобы ссылаться на этот профиль, когда потребуется.
+      </p>
+    </div>
+    <div class="input-group">
+      <ppp-text-field
+        placeholder="Alor"
+        value="${(x) => x.document.name}"
+        ${ref('name')}
+      ></ppp-text-field>
+    </div>
+  </section>
+  <section>
+    <div class="label-group">
+      <h5>Среда выполнения</h5>
+      <p class="description">Выберите среду выполнения для трейдера.</p>
+    </div>
+    <div class="input-group">
+      <ppp-radio-group
+        orientation="vertical"
+        value="${(x) => x.document.runtime ?? 'main-thread'}"
+        ${ref('runtime')}
+      >
+        <ppp-radio value="main-thread">Основной поток, браузер</ppp-radio>
+        <ppp-radio value="shared-worker">Разделяемый поток, браузер</ppp-radio>
+        <ppp-radio value="aspirant-worker">Aspirant Worker</ppp-radio>
+      </ppp-radio-group>
+      <div
+        class="runtime-selector"
+        ?hidden="${(x) => x.runtime.value !== 'aspirant-worker'}"
+      >
+        <div class="spacing2"></div>
+        <ppp-query-select
+          ${ref('runtimeServiceId')}
+          value="${(x) => x.document.runtimeServiceId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.runtimeService ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('services')
+                .find({
+                  $and: [
+                    {
+                      type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
+                    },
+                    { workerPredefinedTemplate: 'pppRuntime' },
+                    {
+                      $or: [
+                        { removed: { $ne: true } },
+                        { _id: `[%#this.document.runtimeServiceId ?? ''%]` }
+                      ]
+                    }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-query-select>
+      </div>
+    </div>
+  </section>
+`;
 
 export const traderPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">

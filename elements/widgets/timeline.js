@@ -374,7 +374,7 @@ export class TimelineWidget extends WidgetWithInstrument {
   getCards(dateKey) {
     return Array.from(this.timelineMap.get(dateKey).values())
       .filter(([i]) => {
-        if (this.instrument) {
+        if (this.instrument?.symbol) {
           return this.instrumentTrader.instrumentsAreEqual(
             i.instrument,
             this.instrument
@@ -500,12 +500,12 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   isEmpty(dateKey) {
     if (!dateKey) {
-      if (!this.instrument) return !this.timelineMap.size;
+      if (!this.instrument?.symbol) return !this.timelineMap.size;
       else {
         return !this.emptyIndicatorMap.has(this.instrument.symbol);
       }
     } else {
-      if (!this.instrument) return !this.timelineMap.get(dateKey).size;
+      if (!this.instrument?.symbol) return !this.timelineMap.get(dateKey).size;
       else
         return !this.emptyIndicatorMap
           .get(this.instrument.symbol)
