@@ -199,11 +199,11 @@ class OrderAndTimelineDatum extends GlobalTraderDatum {
 
   #shouldLoop = false;
 
-  orders = new Map();
+  orders = [];
 
   filter(data, source, key, datum) {
     if (datum === TRADER_DATUM.ACTIVE_ORDER) {
-      // Active and Matched to removed orders properly.
+      // Countevery type to remove orders properly.
       return true;
     } else if (datum === TRADER_DATUM.TIMELINE_ITEM) {
       return data.status === 'Matched';
@@ -211,7 +211,7 @@ class OrderAndTimelineDatum extends GlobalTraderDatum {
   }
 
   firstReferenceAdded() {
-    this.orders.clear();
+    this.orders = [];
 
     clearTimeout(this.#timer);
 
@@ -221,7 +221,8 @@ class OrderAndTimelineDatum extends GlobalTraderDatum {
   }
 
   lastReferenceRemoved() {
-    this.orders.clear();
+    this.orders = [];
+
     clearTimeout(this.#timer);
 
     this.#shouldLoop = false;
@@ -234,26 +235,10 @@ class OrderAndTimelineDatum extends GlobalTraderDatum {
   async #fetchOrdersLoop() {
     if (this.#shouldLoop) {
       try {
-        const orders = await this.trader.getOrdersAndExecutions();
-        const newOrders = new Set();
+        this.orders = await this.trader.getOrdersAndExecutions();
 
-        for (const o of orders) {
-          newOrders.add(o.orderNo);
-
-          if (!this.orders.has(o.orderNo)) {
-            this.orders.set(o.orderNo, o);
-            this.dataArrived(o);
-          }
-        }
-
-        for (const [orderNo, order] of this.orders) {
-          if (!newOrders.has(orderNo)) {
-            // Order is absent, hide it from listing.
-            order.status = 'Unknown';
-
-            this.dataArrived(order);
-            this.orders.delete(orderNo);
-          }
+        for (const o of this.orders) {
+          this.dataArrived(o);
         }
 
         this.#timer = setTimeout(() => {
@@ -427,7 +412,7 @@ class FinamTradeApiTrader extends Trader {
       method: 'POST',
       body: JSON.stringify({
         method: 'GET',
-        url: `https://trade-api.finam.ru/public/api/v1/orders?ClientId=${this.document.account}&IncludeMatched=true&IncludeCanceled=false&IncludeActive=true`,
+        url: `https://trade-api.finam.ru/public/api/v1/orders?ClientId=${this.document.account}&IncludeMatched=true&IncludeCanceled=true&IncludeActive=true`,
         headers: {
           'X-Api-Key': this.document.broker.token
         }
@@ -446,7 +431,7 @@ class FinamTradeApiTrader extends Trader {
   async modifyLimitOrders({ instrument, side, value }) {
     const orders = this.datums[TRADER_DATUM.ACTIVE_ORDER].orders;
 
-    for (const [, o] of orders) {
+    for (const o of orders) {
       const status = this.getOrderStatus(o);
       const orderInstrument = this.securities
         .get(o.securityBoard)
@@ -492,7 +477,7 @@ class FinamTradeApiTrader extends Trader {
   async cancelAllLimitOrders({ instrument, filter } = {}) {
     const orders = this.datums[TRADER_DATUM.ACTIVE_ORDER].orders;
 
-    for (const [, o] of orders) {
+    for (const o of orders) {
       const status = this.getOrderStatus(o);
       const orderInstrument = this.securities
         .get(o.securityBoard)
