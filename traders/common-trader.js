@@ -111,11 +111,6 @@ class TraderDatum {
           if (this.sources[d].has(source)) {
             const f = this.sources[d].get(source);
 
-            // Prevent resetting the value if trader is not allowed to change it.
-            if (this.filter(source[f], source.instrument, source, datum)) {
-              source[f] = this.emptyValue(d);
-            }
-
             if (oldValue) {
               await this.unsubscribe(source, oldValue);
             }

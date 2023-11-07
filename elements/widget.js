@@ -1081,6 +1081,8 @@ export class WidgetWithInstrument extends Widget {
       Observable.notify(this.searchControl, 'widget');
     }
 
+    this.clearFields?.();
+
     this.$emit('instrumentchange', {
       source: this,
       oldValue,

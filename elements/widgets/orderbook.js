@@ -592,6 +592,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  clearFields() {
+    ['mainBook', 'extraBook1', 'extraBook2', 'extraBook3'].forEach(
+      (f) => (this[f] = {})
+    );
+
+    this.currentOrder = '—';
+  }
+
   #cloneOrderbook2Times(orderbook) {
     const result = [
       {

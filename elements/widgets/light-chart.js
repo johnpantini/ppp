@@ -441,12 +441,9 @@ export class LightChartWidget extends WidgetWithInstrument {
     super.instrumentChanged(oldValue, newValue);
 
     if (this.chartTrader) {
-      if (this.instrument && !this.unsupportedInstrument) {
+      if (this.instrument?.symbol) {
         await this.loadHistory();
       }
-
-      await this.chartTrader?.instrumentChanged?.(this, oldValue, newValue);
-      await this.tradesTrader?.instrumentChanged?.(this, oldValue, newValue);
     }
   }
 

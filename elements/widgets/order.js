@@ -1437,6 +1437,19 @@ export class OrderWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  clearFields() {
+    [
+      'lastPrice',
+      'lastPriceRelativeChange',
+      'lastPriceAbsoluteChange',
+      'extendedLastPrice',
+      'extendedLastPriceRelativeChange',
+      'extendedLastPriceAbsoluteChange',
+      'bestBid',
+      'bestAsk'
+    ].forEach((f) => (this[f] = '—'));
+  }
+
   async conditionalOrderChanged(_, order) {
     const type = order?.order?.type;
 
