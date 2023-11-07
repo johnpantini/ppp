@@ -140,6 +140,8 @@ export const apiRedisPageTemplate = html`
         <ppp-query-select
             ${ref('connectorServiceId')}
             :context="${(x) => x}"
+            deselectable
+            placeholder="Опционально, нажмите для выбора"
             value="${(x) => x.document.connectorServiceId}"
             :preloaded="${(x) => x.document.connectorService ?? ''}"
             :query="${() => {
@@ -223,7 +225,7 @@ export class ApiRedisPage extends Page {
 
       if (!connector) {
         invalidate(this.connectorServiceId, {
-          errorMessage: 'Сначала выберите сервис-соединитель',
+          errorMessage: 'Требуется сервис-соединитель',
           raiseException: true
         });
       }
@@ -267,7 +269,6 @@ export class ApiRedisPage extends Page {
     await validate(this.host);
     await validate(this.port);
     await validate(this.database);
-    await validate(this.connectorServiceId);
 
     if (this.host.value.endsWith('upstash.io')) {
       await validate(this.database, {
@@ -282,30 +283,33 @@ export class ApiRedisPage extends Page {
       errorMessage: 'Введите значение в диапазоне от 0 до 16'
     });
 
-    const connector = this.connectorServiceId.datum();
-    const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+    const credentials = {
+      host: this.host.value.trim(),
+      port: Math.abs(+this.port.value),
+      tls: this.tls.checked
+        ? {
+            servername: this.host.value.trim()
+          }
+        : void 0,
+      database: Math.abs(+this.database.value),
+      username: this.username.value.trim(),
+      password: this.password.value.trim()
+    };
 
-    if (
-      !(
-        await checkRedisCredentials({
-          connectorUrl,
-          host: this.host.value.trim(),
-          port: Math.abs(+this.port.value),
-          tls: this.tls.checked
-            ? {
-                servername: this.host.value.trim()
-              }
-            : void 0,
-          database: Math.abs(+this.database.value),
-          username: this.username.value.trim(),
-          password: this.password.value.trim()
-        })
-      ).ok
-    ) {
-      invalidate(this.host, {
-        errorMessage: 'Ошибка соединения',
-        raiseException: true
-      });
+    if (this.connectorServiceId.value) {
+      const connector = this.connectorServiceId.datum();
+      const connectorUrl = await getAspirantWorkerBaseUrl(connector);
+
+      credentials.connectorUrl = connectorUrl;
+
+      if (!(await checkRedisCredentials(credentials)).ok) {
+        invalidate(this.host, {
+          errorMessage: 'Ошибка соединения',
+          raiseException: true
+        });
+      }
+    } else {
+      // TODO - check without connector
     }
   }
 
