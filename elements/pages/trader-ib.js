@@ -8,6 +8,7 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import { later } from '../../lib/ppp-decorators.js';
 import '../badge.js';
 import '../button.js';
@@ -21,25 +22,11 @@ export const traderIbV3Template = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="IB"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
-      </section>
+      ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
+          <p class="description">Брокерский профиль Interactive Brokers.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -111,6 +98,11 @@ export class TraderIbPage extends Page {
 
   async validate() {
     await validate(this.name);
+
+    if (this.runtime.value === 'aspirant-worker') {
+      await validate(this.runtimeServiceId);
+    }
+
     await validate(this.brokerId);
     await validate(this.account);
 
@@ -184,6 +176,20 @@ export class TraderIbPage extends Page {
           },
           {
             $unwind: '$broker'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'runtimeServiceId',
+              foreignField: '_id',
+              as: 'runtimeService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$runtimeService',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -198,28 +204,31 @@ export class TraderIbPage extends Page {
   }
 
   async submit() {
-    if (ppp.traders.has(this.document._id)) {
-      ppp.traders.delete(this.document._id);
+    const $set = {
+      name: this.name.value.trim(),
+      runtime: this.runtime.value,
+      brokerId: this.brokerId.value,
+      account: this.account.value.trim(),
+      caps: [
+        TRADER_CAPS.CAPS_LIMIT_ORDERS,
+        TRADER_CAPS.CAPS_MARKET_ORDERS,
+        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+        TRADER_CAPS.CAPS_POSITIONS,
+        TRADER_CAPS.CAPS_TIMELINE,
+        TRADER_CAPS.CAPS_ORDER_DESTINATION,
+        TRADER_CAPS.CAPS_ORDER_TIF
+      ],
+      version: 1,
+      type: TRADERS.IB,
+      updatedAt: new Date()
+    };
+
+    if (this.runtime.value === 'aspirant-worker') {
+      $set.runtimeServiceId = this.runtimeServiceId.value;
     }
 
     return {
-      $set: {
-        name: this.name.value.trim(),
-        brokerId: this.brokerId.value,
-        account: this.account.value.trim(),
-        caps: [
-          TRADER_CAPS.CAPS_LIMIT_ORDERS,
-          TRADER_CAPS.CAPS_MARKET_ORDERS,
-          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-          TRADER_CAPS.CAPS_POSITIONS,
-          TRADER_CAPS.CAPS_TIMELINE,
-          TRADER_CAPS.CAPS_ORDER_DESTINATION,
-          TRADER_CAPS.CAPS_ORDER_TIF
-        ],
-        version: 1,
-        type: TRADERS.IB,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }

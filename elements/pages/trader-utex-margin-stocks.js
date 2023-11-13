@@ -7,6 +7,7 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -20,25 +21,13 @@ export const traderUtexMarginStocksTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="UTEX Margin Stocks"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
-      </section>
+      ${traderNameAndRuntimePartial({
+        sharedWorker: false
+      })}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
+          <p class="description">Брокерский профиль UTEX.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -133,6 +122,11 @@ export class TraderUtexMarginStocksPage extends Page {
 
   async validate() {
     await validate(this.name);
+
+    if (this.runtime.value === 'aspirant-worker') {
+      await validate(this.runtimeServiceId);
+    }
+
     await validate(this.brokerId);
     await validate(this.commissionRate);
 
@@ -174,6 +168,20 @@ export class TraderUtexMarginStocksPage extends Page {
           },
           {
             $unwind: '$broker'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'runtimeServiceId',
+              foreignField: '_id',
+              as: 'runtimeService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$runtimeService',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -188,32 +196,35 @@ export class TraderUtexMarginStocksPage extends Page {
   }
 
   async submit() {
-    if (ppp.traders.has(this.document._id)) {
-      ppp.traders.delete(this.document._id);
+    const $set = {
+      name: this.name.value.trim(),
+      runtime: this.runtime.value,
+      brokerId: this.brokerId.value,
+      commissionRate: Math.abs(
+        parseFloat(this.commissionRate.value.replace(',', '.'))
+      ),
+      reconnectTimeout: this.reconnectTimeout.value
+        ? Math.abs(this.reconnectTimeout.value)
+        : void 0,
+      caps: [
+        TRADER_CAPS.CAPS_LEVEL1,
+        TRADER_CAPS.CAPS_LIMIT_ORDERS,
+        TRADER_CAPS.CAPS_MARKET_ORDERS,
+        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+        TRADER_CAPS.CAPS_POSITIONS,
+        TRADER_CAPS.CAPS_TIMELINE
+      ],
+      version: 1,
+      type: TRADERS.UTEX_MARGIN_STOCKS,
+      updatedAt: new Date()
+    };
+
+    if (this.runtime.value === 'aspirant-worker') {
+      $set.runtimeServiceId = this.runtimeServiceId.value;
     }
 
     return {
-      $set: {
-        name: this.name.value.trim(),
-        brokerId: this.brokerId.value,
-        commissionRate: Math.abs(
-          parseFloat(this.commissionRate.value.replace(',', '.'))
-        ),
-        reconnectTimeout: this.reconnectTimeout.value
-          ? Math.abs(this.reconnectTimeout.value)
-          : void 0,
-        caps: [
-          TRADER_CAPS.CAPS_LEVEL1,
-          TRADER_CAPS.CAPS_LIMIT_ORDERS,
-          TRADER_CAPS.CAPS_MARKET_ORDERS,
-          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-          TRADER_CAPS.CAPS_POSITIONS,
-          TRADER_CAPS.CAPS_TIMELINE
-        ],
-        version: 1,
-        type: TRADERS.UTEX_MARGIN_STOCKS,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }

@@ -8,6 +8,7 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { BROKERS, TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import { getAspirantBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../button.js';
@@ -23,25 +24,11 @@ export const traderAlpacaV2PlusTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="Alpaca"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
-      </section>
+      ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
+          <p class="description">Брокерский профиль UTEX или Psina.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -288,6 +275,11 @@ export class TraderAlpacaV2PlusPage extends Page {
 
   async validate() {
     await validate(this.name);
+
+    if (this.runtime.value === 'aspirant-worker') {
+      await validate(this.runtimeServiceId);
+    }
+
     await validate(this.brokerId);
     await validate(this.wsUrl);
 
@@ -327,6 +319,20 @@ export class TraderAlpacaV2PlusPage extends Page {
           },
           {
             $unwind: '$broker'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'runtimeServiceId',
+              foreignField: '_id',
+              as: 'runtimeService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$runtimeService',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -341,10 +347,6 @@ export class TraderAlpacaV2PlusPage extends Page {
   }
 
   async submit() {
-    if (ppp.traders.has(this.document._id)) {
-      ppp.traders.delete(this.document._id);
-    }
-
     const caps = [TRADER_CAPS.CAPS_MIC];
     const brokerType = this.brokerId.datum().type;
 
@@ -372,20 +374,27 @@ export class TraderAlpacaV2PlusPage extends Page {
       caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);
     }
 
+    const $set = {
+      name: this.name.value.trim(),
+      runtime: this.runtime.value,
+      brokerId: this.brokerId.value,
+      wsUrl: this.wsUrl.value.trim(),
+      reconnectTimeout: this.reconnectTimeout.value
+        ? Math.abs(this.reconnectTimeout.value)
+        : void 0,
+      useLots: this.useLots.checked,
+      caps,
+      version: 1,
+      type: TRADERS.ALPACA_V2_PLUS,
+      updatedAt: new Date()
+    };
+
+    if (this.runtime.value === 'aspirant-worker') {
+      $set.runtimeServiceId = this.runtimeServiceId.value;
+    }
+
     return {
-      $set: {
-        name: this.name.value.trim(),
-        brokerId: this.brokerId.value,
-        wsUrl: this.wsUrl.value.trim(),
-        reconnectTimeout: this.reconnectTimeout.value
-          ? Math.abs(this.reconnectTimeout.value)
-          : void 0,
-        useLots: this.useLots.checked,
-        caps,
-        version: 1,
-        type: TRADERS.ALPACA_V2_PLUS,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }

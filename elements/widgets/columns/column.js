@@ -4,6 +4,7 @@ import { PPPElement } from '../../../lib/ppp-element.js';
 import { css, observable } from '../../../vendor/fast-element.min.js';
 import { widgetColumns } from '../../../design/styles.js';
 import { display } from '../../../vendor/fast-utilities.js';
+import { uuidv4 } from '../../../lib/ppp-crypto.js';
 
 export const columnStyles = css`
   ${widgetColumns()}
@@ -42,6 +43,7 @@ class Column extends PPPElement {
   async connectedCallback() {
     super.connectedCallback();
 
+    this.sourceID = uuidv4();
     this.widget = this.getRootNode().host;
     this.datum = this.parentNode.datum;
     this.column = this.parentNode.column;

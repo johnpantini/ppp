@@ -7,9 +7,13 @@ import {
   css
 } from './vendor/fast-element.min.js';
 import { DesignToken } from './design/design-token.js';
-import { bufferToString, generateIV, PPPCrypto } from './lib/ppp-crypto.js';
+import {
+  bufferToString,
+  generateIV,
+  stringToBuffer
+} from './lib/ppp-crypto.js';
 import { PPPElement } from './lib/ppp-element.js';
-import { APIS, TRADERS } from './lib/const.js';
+import { APIS } from './lib/const.js';
 import { TAG } from './lib/tag.js';
 
 export const keySet = [
@@ -58,6 +62,65 @@ class KeyVault {
     this.#keys[key] = void 0;
 
     localStorage.removeItem(`ppp-${key}`);
+  }
+}
+
+class PPPCrypto {
+  #key;
+
+  resetKey() {
+    this.#key = void 0;
+  }
+
+  async #generateKey(password = ppp.keyVault.getKey('master-password')) {
+    if (!this.#key) {
+      const rawKey = new TextEncoder().encode(
+        password.slice(0, 32).padEnd(32, '.')
+      );
+
+      this.#key = await window.crypto.subtle.importKey(
+        'raw',
+        rawKey,
+        'AES-GCM',
+        true,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    return this.#key;
+  }
+
+  async encrypt(iv, plaintext, password) {
+    if (typeof iv === 'string') iv = stringToBuffer(iv);
+
+    const encoded = new TextEncoder().encode(plaintext);
+    const key = await this.#generateKey(password);
+    const ciphertext = await window.crypto.subtle.encrypt(
+      {
+        name: 'AES-GCM',
+        iv
+      },
+      key,
+      encoded
+    );
+
+    return bufferToString(ciphertext);
+  }
+
+  async decrypt(iv, ciphertext, password) {
+    if (typeof iv === 'string') iv = stringToBuffer(iv);
+
+    const key = await this.#generateKey(password);
+    const decrypted = await window.crypto.subtle.decrypt(
+      {
+        name: 'AES-GCM',
+        iv
+      },
+      key,
+      stringToBuffer(ciphertext)
+    );
+
+    return new TextDecoder().decode(decrypted);
   }
 }
 
@@ -145,8 +208,6 @@ class PPP {
 
   crypto = new PPPCrypto();
 
-  traders = new Map();
-
   pusherConnections = new Map();
 
   keyVault = new KeyVault();
@@ -225,9 +286,15 @@ class PPP {
     await this.#rebuildDictionary();
 
     if (!emergency) {
-      const { getApp, Credentials } = await import('./lib/realm.js');
+      const { getApp, Credentials } = await import(
+        `${this.rootUrl}/lib/realm.js`
+      );
+      const { Traders } = await import(
+        `${this.rootUrl}/lib/traders/runtime.js`
+      );
 
       try {
+        this.traders = new Traders();
         this.realm = getApp(this.keyVault.getKey('mongo-app-client-id'));
         this.credentials = Credentials.apiKey(
           this.keyVault.getKey('mongo-api-key')
@@ -516,27 +583,7 @@ class PPP {
   }
 
   async getOrCreateTrader(document) {
-    if (document) {
-      const module = await import(
-        {
-          [TRADERS.ALOR_OPENAPI_V2]: `${this.rootUrl}/traders/alor-openapi-v2.js`,
-          [TRADERS.TINKOFF_GRPC_WEB]: `${this.rootUrl}/traders/tinkoff-grpc-web.js`,
-          [TRADERS.ALPACA_V2_PLUS]: `${this.rootUrl}/traders/alpaca-v2-plus.js`,
-          [TRADERS.BINANCE_V3]: `${this.rootUrl}/traders/binance-v3.js`,
-          [TRADERS.UTEX_MARGIN_STOCKS]: `${this.rootUrl}/traders/utex-margin-stocks.js`,
-          [TRADERS.FINAM_TRADE_API]: `${this.rootUrl}/traders/finam-trade-api.js`,
-          [TRADERS.IB]: `${this.rootUrl}/traders/ib.js`,
-          [TRADERS.PSINA_ALOR_OPENAPI_V2]: document.url,
-          [TRADERS.CUSTOM]: document.url
-        }[document.type]
-      );
-
-      if (!this.traders.has(document._id)) {
-        this.traders.set(document._id, new module.default(document));
-      }
-
-      return this.traders.get(document._id).buildInstrumentCache();
-    }
+    return this.traders.getOrCreateTrader(document);
   }
 
   async getOrCreatePusherConnection(document) {

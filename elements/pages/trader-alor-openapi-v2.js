@@ -273,10 +273,6 @@ export class TraderAlorOpenApiV2Page extends Page {
   }
 
   async submit() {
-    if (ppp.traders.has(this.document._id)) {
-      ppp.traders.delete(this.document._id);
-    }
-
     const $set = {
       name: this.name.value.trim(),
       runtime: this.runtime.value,

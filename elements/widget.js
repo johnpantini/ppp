@@ -45,7 +45,7 @@ import {
   paletteGreenDark1
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
-import { unsupportedInstrument } from '../traders/common-trader.js';
+import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
 import {
   AuthorizationError,
   ConnectionError,
@@ -54,6 +54,7 @@ import {
   SerializationError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
+import { uuidv4 } from '../lib/ppp-crypto.js';
 
 window.Observable = Observable;
 
@@ -73,7 +74,7 @@ export const importInstrumentsSuggestionTemplate = (e) => html`
         x.widget.container.beginOperation();
 
         try {
-          await e.trader.syncInstrumentCache(e);
+          await e.trader.syncDictionary(e);
         } finally {
           window.location.reload();
         }
@@ -94,7 +95,7 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
         x.widget.container.beginOperation();
 
         try {
-          await e.trader.syncInstrumentCache(e);
+          await e.trader.syncDictionary(e);
         } finally {
           window.location.reload();
         }
@@ -786,11 +787,14 @@ export class Widget extends PPPElement {
   constructor() {
     super();
 
+    this.canChangeInstrument = true;
     this.document = {};
   }
 
   connectedCallback() {
     super.connectedCallback();
+
+    this.sourceID = uuidv4();
 
     this.restack();
     this.adjustTitleEllipsis();

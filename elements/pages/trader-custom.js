@@ -14,6 +14,7 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { invalidate, validate, ValidationError } from '../../lib/ppp-errors.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import '../button.js';
 import '../text-field.js';
 
@@ -24,22 +25,7 @@ export const traderCustomPageTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="Trader"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
-      </section>
+      ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
           <h5>Ссылка на реализацию трейдера</h5>

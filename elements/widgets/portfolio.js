@@ -258,13 +258,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
   @observable
   zombies;
 
-  onTraderError() {
-    this.notificationsArea.error({
-      title: 'Портфель',
-      text: 'Возникла проблема с отображением инструментов. Смотрите консоль браузера.'
-    });
-  }
-
   constructor() {
     super();
 
@@ -310,8 +303,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
 
       await this.columns.registerColumns();
       this.selectInstrument(this.document.symbol, { isolate: true });
-
-      this.portfolioTrader.onError = this.onTraderError.bind(this);
 
       await this.portfolioTrader.subscribeFields?.({
         source: this,

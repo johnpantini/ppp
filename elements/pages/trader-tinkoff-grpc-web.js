@@ -15,6 +15,7 @@ import {
 import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../radio-group.js';
@@ -28,25 +29,11 @@ export const traderTinkoffGrpcWebTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="Tinkoff"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
-      </section>
+      ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
+          <p class="description">Брокерский профиль Tinkoff.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -177,6 +164,11 @@ export class TraderTinkoffGrpcWebPage extends Page {
 
   async validate() {
     await validate(this.name);
+
+    if (this.runtime.value === 'aspirant-worker') {
+      await validate(this.runtimeServiceId);
+    }
+
     await validate(this.brokerId);
     await validate(this.accountSelector);
 
@@ -211,6 +203,20 @@ export class TraderTinkoffGrpcWebPage extends Page {
           },
           {
             $unwind: '$broker'
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'runtimeServiceId',
+              foreignField: '_id',
+              as: 'runtimeService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$runtimeService',
+              preserveNullAndEmptyArrays: true
+            }
           }
         ]);
     };
@@ -231,34 +237,37 @@ export class TraderTinkoffGrpcWebPage extends Page {
   }
 
   async submit() {
-    if (ppp.traders.has(this.document._id)) {
-      ppp.traders.delete(this.document._id);
+    const $set = {
+      name: this.name.value.trim(),
+      runtime: this.runtime.value,
+      brokerId: this.brokerId.value,
+      account: this.accountSelector.value,
+      accountName: this.accountSelector.datum().name,
+      reconnectTimeout: this.reconnectTimeout.value
+        ? Math.abs(this.reconnectTimeout.value)
+        : void 0,
+      version: 1,
+      caps: [
+        TRADER_CAPS.CAPS_LIMIT_ORDERS,
+        TRADER_CAPS.CAPS_MARKET_ORDERS,
+        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+        TRADER_CAPS.CAPS_ORDERBOOK,
+        TRADER_CAPS.CAPS_TIME_AND_SALES,
+        TRADER_CAPS.CAPS_POSITIONS,
+        TRADER_CAPS.CAPS_TIMELINE,
+        TRADER_CAPS.CAPS_LEVEL1,
+        TRADER_CAPS.CAPS_CHARTS
+      ],
+      type: TRADERS.TINKOFF_GRPC_WEB,
+      updatedAt: new Date()
+    };
+
+    if (this.runtime.value === 'aspirant-worker') {
+      $set.runtimeServiceId = this.runtimeServiceId.value;
     }
 
     return {
-      $set: {
-        name: this.name.value.trim(),
-        brokerId: this.brokerId.value,
-        account: this.accountSelector.value,
-        accountName: this.accountSelector.datum().name,
-        reconnectTimeout: this.reconnectTimeout.value
-          ? Math.abs(this.reconnectTimeout.value)
-          : void 0,
-        version: 1,
-        caps: [
-          TRADER_CAPS.CAPS_LIMIT_ORDERS,
-          TRADER_CAPS.CAPS_MARKET_ORDERS,
-          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-          TRADER_CAPS.CAPS_ORDERBOOK,
-          TRADER_CAPS.CAPS_TIME_AND_SALES,
-          TRADER_CAPS.CAPS_POSITIONS,
-          TRADER_CAPS.CAPS_TIMELINE,
-          TRADER_CAPS.CAPS_LEVEL1,
-          TRADER_CAPS.CAPS_CHARTS
-        ],
-        type: TRADERS.TINKOFF_GRPC_WEB,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }

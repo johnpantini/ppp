@@ -13,7 +13,7 @@ import '../text-field.js';
 
 await ppp.i18n(import.meta.url);
 
-export const traderNameAndRuntimePartial = () => html`
+export const traderNameAndRuntimePartial = ({ sharedWorker } = {}) => html`
   <section>
     <div class="label-group">
       <h5>Название трейдера</h5>
@@ -41,8 +41,13 @@ export const traderNameAndRuntimePartial = () => html`
         ${ref('runtime')}
       >
         <ppp-radio value="main-thread">Основной поток, браузер</ppp-radio>
-        <ppp-radio value="shared-worker">Разделяемый поток, браузер</ppp-radio>
-        <ppp-radio value="aspirant-worker">Aspirant Worker</ppp-radio>
+        <ppp-radio
+          ?disabled="${() => sharedWorker === false}"
+          value="shared-worker"
+        >
+          Разделяемый поток, браузер
+        </ppp-radio>
+        <ppp-radio disabled value="aspirant-worker">Aspirant Worker</ppp-radio>
       </ppp-radio-group>
       <div
         class="runtime-selector"

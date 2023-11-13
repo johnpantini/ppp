@@ -9,6 +9,7 @@ import {
 } from '../page.js';
 import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
+import { traderNameAndRuntimePartial } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -22,25 +23,12 @@ export const traderFinamTradeApiTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      <section>
-        <div class="label-group">
-          <h5>Название трейдера</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="Finam"
-            value="${(x) => x.document.name}"
-            ${ref('name')}
-          ></ppp-text-field>
-        </div>
+      ${traderNameAndRuntimePartial()}
       </section>
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
+          <p class="description">Брокерский профиль Finam.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -171,6 +159,11 @@ export class TraderFinamTradeApiPage extends Page {
 
   async validate() {
     await validate(this.name);
+
+    if (this.runtime.value === 'aspirant-worker') {
+      await validate(this.runtimeServiceId);
+    }
+
     await validate(this.brokerId);
     await validate(this.account);
     await validate(this.connectorServiceId);
@@ -222,6 +215,20 @@ export class TraderFinamTradeApiPage extends Page {
           {
             $lookup: {
               from: 'services',
+              localField: 'runtimeServiceId',
+              foreignField: '_id',
+              as: 'runtimeService'
+            }
+          },
+          {
+            $unwind: {
+              path: '$runtimeService',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $lookup: {
+              from: 'services',
               localField: 'connectorServiceId',
               foreignField: '_id',
               as: 'connectorService'
@@ -246,28 +253,31 @@ export class TraderFinamTradeApiPage extends Page {
   }
 
   async submit() {
-    if (ppp.traders.has(this.document._id)) {
-      ppp.traders.delete(this.document._id);
+    const $set = {
+      name: this.name.value.trim(),
+      runtime: this.runtime.value,
+      brokerId: this.brokerId.value,
+      account: this.account.value.trim(),
+      caps: [
+        TRADER_CAPS.CAPS_LIMIT_ORDERS,
+        TRADER_CAPS.CAPS_MARKET_ORDERS,
+        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+        TRADER_CAPS.CAPS_POSITIONS,
+        TRADER_CAPS.CAPS_TIMELINE
+      ],
+      connectorServiceId: this.connectorServiceId.value,
+      connectorUrl: this.connectorUrl,
+      version: 1,
+      type: TRADERS.FINAM_TRADE_API,
+      updatedAt: new Date()
+    };
+
+    if (this.runtime.value === 'aspirant-worker') {
+      $set.runtimeServiceId = this.runtimeServiceId.value;
     }
 
     return {
-      $set: {
-        name: this.name.value.trim(),
-        brokerId: this.brokerId.value,
-        account: this.account.value.trim(),
-        caps: [
-          TRADER_CAPS.CAPS_LIMIT_ORDERS,
-          TRADER_CAPS.CAPS_MARKET_ORDERS,
-          TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-          TRADER_CAPS.CAPS_POSITIONS,
-          TRADER_CAPS.CAPS_TIMELINE
-        ],
-        connectorServiceId: this.connectorServiceId.value,
-        connectorUrl: this.connectorUrl,
-        version: 1,
-        type: TRADERS.FINAM_TRADE_API,
-        updatedAt: new Date()
-      },
+      $set,
       $setOnInsert: {
         createdAt: new Date()
       }
