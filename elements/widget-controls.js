@@ -1202,7 +1202,12 @@ export class WidgetSearchControl extends PPPOffClickElement {
   }
 
   chooseInstrument(instrument) {
-    this.widget.instrument = this.trader.adoptInstrument(instrument);
+    if (typeof instrument === 'undefined') {
+      this.widget.instrument = void 0;
+    } else {
+      this.widget.instrument = this.trader.adoptInstrument(instrument);
+    }
+
     this.open = false;
     this.suggestInput.value = '';
   }
@@ -3144,6 +3149,22 @@ export const widgetCardStyles = css`
         0,
       ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 30%,
       ${themeConditional(paletteGrayLight3, paletteGrayDark2)}
+    );
+  }
+
+  :host([clickable]) .actions {
+    background: linear-gradient(
+      90deg,
+      rgba(
+          ${themeConditional(
+            toColorComponents(paletteGrayLight2),
+            toColorComponents(paletteGrayDark1)
+          )},
+          0
+        )
+        0,
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)} 30%,
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)}
     );
   }
 

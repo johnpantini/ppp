@@ -150,7 +150,18 @@ export const activeOrdersWidgetTemplate = html`
               html`
                 <div class="widget-card-holder">
                   <div class="widget-card-holder-inner">
-                    <ppp-widget-card side="${(x) => x.side}">
+                    <ppp-widget-card
+                      ?clickable="${(x, c) =>
+                        c.parent.document.disableInstrumentFiltering}"
+                      side="${(x) => x.side}"
+                      @click="${(o, c) => {
+                        if (c.parent.document.disableInstrumentFiltering) {
+                          c.parent.selectInstrument(o.instrument.symbol);
+                        }
+
+                        return true;
+                      }}"
+                    >
                       <div slot="indicator" class="${(x) => x.side}"></div>
                       <div
                         slot="icon"
@@ -199,7 +210,11 @@ export const activeOrdersWidgetTemplate = html`
                       <button
                         class="widget-action-button"
                         slot="actions"
-                        @click="${(o, c) => c.parent.cancelOrder(o)}"
+                        @click="${(o, c) => {
+                          c.event.preventDefault();
+                          c.event.stopPropagation();
+                          c.parent.cancelOrder(o);
+                        }}"
                       >
                         <span>${html.partial(trash)}</span>
                       </button>
@@ -401,7 +416,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     for (const [_, order] of this.ordersMap ?? []) {
       if (order.status !== 'working') continue;
 
-      if (this.instrument?.symbol) {
+      if (
+        this.instrument?.symbol &&
+        !this.document.disableInstrumentFiltering
+      ) {
         if (
           this.ordersTrader?.instrumentsAreEqual?.(
             order.instrument,
@@ -512,9 +530,23 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         filter: options.filter
       });
 
-      this.notificationsArea.success({
-        title: 'Заявки отменены'
-      });
+      let filterText = ' ';
+
+      if (options?.filter === 'sell') {
+        filterText = ' на продажу ';
+      } else if (options?.filter === 'buy') {
+        filterText = ' на покупку ';
+      }
+
+      if (!this.instrument) {
+        this.notificationsArea.success({
+          title: `Заявки${filterText}отменены по всем инструментам`
+        });
+      } else {
+        this.notificationsArea.success({
+          title: `Заявки${filterText}отменены по инструменту ${this.instrument.symbol}`
+        });
+      }
     } catch (e) {
       console.log(e);
 
@@ -535,6 +567,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     return {
       $set: {
         ordersTraderId: this.container.ordersTraderId.value,
+        disableInstrumentFiltering:
+          this.container.disableInstrumentFiltering.checked,
         showAllTab: this.container.showAllTab.checked,
         showLimitTab: this.container.showLimitTab.checked,
         showConditionalTab: this.container.showConditionalTab.checked,
@@ -613,6 +647,17 @@ export async function widgetDefinition() {
             +
           </ppp-button>
         </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Интерфейс</h5>
+        </div>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.disableInstrumentFiltering}"
+          ${ref('disableInstrumentFiltering')}
+        >
+          Не фильтровать содержимое по выбранному инструменту
+        </ppp-checkbox>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
