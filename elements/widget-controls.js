@@ -1205,7 +1205,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
     if (typeof instrument === 'undefined') {
       this.widget.instrument = void 0;
     } else {
-      this.widget.instrument = this.trader.adoptInstrument(instrument);
+      this.widget.instrument = this.trader.adoptInstrument(instrument, {
+        origin: 'search-control'
+      });
     }
 
     this.open = false;
