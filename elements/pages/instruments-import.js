@@ -5,7 +5,7 @@ import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
 import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
-import { toNumber } from '../../traders/tinkoff-grpc-web.js';
+import { toNumber } from '../../lib/traders/tinkoff-grpc-web.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';

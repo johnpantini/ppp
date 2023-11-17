@@ -298,9 +298,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
             server: this.serverId.datum(),
             commands: [
               `sudo mkdir -p /usr/lib/nginx/certs/${tailnetDomain} ;`,
-              `/bin/sh -c 'cd /usr/lib/nginx/certs/${tailnetDomain} && tailscale cert ${tailnetDomain}' ;`,
-              `chmod 644 /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.crt ;`,
-              `chmod 644 /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.key && `
+              `sudo /bin/sh -c 'cd /usr/lib/nginx/certs/${tailnetDomain} && tailscale cert ${tailnetDomain}' ;`,
+              `sudo chmod 644 /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.crt ;`,
+              `sudo chmod 644 /usr/lib/nginx/certs/${tailnetDomain}/${tailnetDomain}.key && `
             ].join(' ')
           }))
         ) {
