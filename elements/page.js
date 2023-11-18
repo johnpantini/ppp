@@ -753,7 +753,41 @@ class Page extends PPPElement {
     return false;
   }
 
-  async cleanupFromListing({ pageName, documentId }) {
+  async cleanupFromListing({ pageName, documentId, removed }) {
+    if (removed) {
+      try {
+        if (
+          await ppp.app.confirm(
+            'Удаление документа',
+            'Документ будет удалён безвозвратно. Подтвердите действие.'
+          )
+        ) {
+          this.beginOperation();
+
+          const collection = pageName.split('-')[0] + 's';
+
+          await ppp.user.functions.deleteOne(
+            { collection },
+            { _id: documentId }
+          );
+
+          const index = this.documents.findIndex((d) => d._id === documentId);
+
+          if (index > -1) {
+            this.documents.splice(index, 1);
+          }
+
+          Observable.notify(this, 'documents');
+        } else {
+          return false;
+        }
+
+        return true;
+      } finally {
+        this.endOperation();
+      }
+    }
+
     const page = await ppp.app.mountPage(pageName, {
       documentId,
       stayHidden: true

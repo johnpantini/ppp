@@ -9,10 +9,7 @@
       "request": "launch",
       "name": "utex-alpaca",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\salt\\states\\ppp\\lib\\aspirant-worker\\utex-alpaca\\utex-alpaca.mjs",
-      "env": {
-        "PPP_LIB_DIR": "../.."
-      }
+      "program": "${workspaceFolder}\\lib\\aspirant-worker\\utex-alpaca\\utex-alpaca.mjs"
     }
   ]
 }

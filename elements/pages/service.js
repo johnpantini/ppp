@@ -8,7 +8,7 @@ import '../text-field.js';
 import '../button.js';
 
 export function serviceStateAppearance(document) {
-  if (document.removed) return 'lightgray';
+  if (document.removed) return 'red';
 
   switch (document.state) {
     case SERVICE_STATE.ACTIVE:

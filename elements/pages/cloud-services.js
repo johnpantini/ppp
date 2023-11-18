@@ -443,7 +443,7 @@ async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
 
     await maybeFetchError(
       rUpdateFunc,
-      `Не удалось обновить функцию триггера ${func.name}.`
+      'Не удалось обновить функцию триггера pppRealmWakeUp.'
     );
   } else {
     const rCreateFunc = await ppp.fetch(
@@ -464,7 +464,7 @@ async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
 
     await maybeFetchError(
       rCreateFunc,
-      `Не удалось создать функцию триггера ${func.name}.`
+      'Не удалось создать функцию триггера pppRealmWakeUp.'
     );
 
     const jCreateFunc = await rCreateFunc.json();

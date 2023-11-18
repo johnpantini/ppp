@@ -52,6 +52,12 @@ export const servicesPageTemplate = html`
                 <ppp-side-nav-item slug="" ?active="${(x) => !x.activeItem}">
                   <span>Все сервисы</span>
                 </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="removed"
+                  ?active="${(x) => x.activeItem === 'removed'}"
+                >
+                  <span>Удалённые сервисы</span>
+                </ppp-side-nav-item>
               </ppp-side-nav-group>
               <ppp-side-nav-group>
                 <span slot="title">Или по типу</span>
@@ -108,7 +114,8 @@ export const servicesPageTemplate = html`
               @cleanup="${(x, c) =>
                 x.cleanupFromListing({
                   pageName: `service-${c.event.detail.datum.type}`,
-                  documentId: c.event.detail.datum._id
+                  documentId: c.event.detail.datum._id,
+                  removed: c.event.detail.datum.removed
                 })}"
               :columns="${() => [
                 {
@@ -191,9 +198,12 @@ export const servicesPageTemplate = html`
                         <ppp-badge
                           appearance="${serviceStateAppearance(datum)}"
                         >
-                          ${ppp.t(
-                            `$const.serviceState.${datum.state ?? 'N/A'}`
-                          )}
+                          ${(x, c) =>
+                            c.parent.datum.removed
+                              ? 'Удалён'
+                              : ppp.t(
+                                  `$const.serviceState.${datum.state ?? 'N/A'}`
+                                )}
                         </ppp-badge>
                       `,
                       html`
@@ -273,8 +283,12 @@ export class ServicesPage extends Page {
         .db('ppp')
         .collection('[%#this.collection%]')
         .find({
-          removed: { $ne: true },
-          type: '[%#this.activeItem%]' || { $exists: true }
+          removed: {
+            '[%#(this.activeItem === "removed" ? "$eq" : "$ne")%]': true
+          },
+          type: '[%#(this.activeItem === "removed" ? "" : this.activeItem)%]' || {
+            $exists: true
+          }
         })
         .sort({ updatedAt: -1 });
     };
