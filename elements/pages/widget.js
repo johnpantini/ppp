@@ -198,6 +198,7 @@ export const widgetPageTemplate = html`
                     <div class="drawer-body">
                       <div class="drawer-body-inner">
                         <ppp-widget-type-radio-group
+                          ${ref('widgetTypeSelector')}
                           value="${(x) => x.document.type}"
                           @change="${(x, { event }) =>
                             x.handleWidgetTypeChange(event)}"
@@ -270,6 +271,13 @@ export const widgetPageTemplate = html`
                             value="timeline"
                           >
                             <span slot="text">Лента операций</span>
+                          </ppp-widget-type-radio>
+                          <ppp-widget-type-radio
+                            ?disabled="${(x) =>
+                              x.document._id && x.document.type !== 'clock'}"
+                            value="clock"
+                          >
+                            <span slot="text">Часы</span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -1081,8 +1089,7 @@ export class WidgetPage extends Page {
                     useVersioning: 0,
                     tableSchema: 0,
                     insertTriggerCode: 0,
-                    deleteTriggerCode: 0,
-                    proxyHeaders: 0
+                    deleteTriggerCode: 0
                   }
                 }
               ],
@@ -1275,6 +1282,10 @@ export class WidgetPage extends Page {
 
   onChange(event) {
     const cp = event.composedPath();
+
+    if (cp.find((n) => n === this.widgetTypeSelector)) {
+      return;
+    }
 
     if (cp?.[0].tagName?.toLowerCase() === 'ppp-tabs') {
       return;
@@ -1519,8 +1530,7 @@ export class WidgetPage extends Page {
                     useVersioning: 0,
                     tableSchema: 0,
                     insertTriggerCode: 0,
-                    deleteTriggerCode: 0,
-                    proxyHeaders: 0
+                    deleteTriggerCode: 0
                   }
                 }
               ],

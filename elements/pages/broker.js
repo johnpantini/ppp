@@ -220,7 +220,6 @@ export const brokerPageTemplate = html`
             >.
           </span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({

@@ -391,7 +391,9 @@ export class RadioGroup extends PPPElement {
       });
     }
 
-    this.$emit('change');
+    this.$emit('change', {
+      group: this
+    });
   }
 
   slottedRadioButtonsChanged(oldValue, newValue) {

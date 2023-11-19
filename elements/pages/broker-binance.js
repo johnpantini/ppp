@@ -1,5 +1,5 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate, invalidate } from '../../lib/ppp-errors.js';
+import { validate } from '../../lib/ppp-errors.js';
 import {
   Page,
   pageStyles,

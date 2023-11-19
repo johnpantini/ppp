@@ -697,8 +697,7 @@ export class WorkspacePage extends Page {
                     useVersioning: 0,
                     tableSchema: 0,
                     insertTriggerCode: 0,
-                    deleteTriggerCode: 0,
-                    proxyHeaders: 0
+                    deleteTriggerCode: 0
                   }
                 }
               ],

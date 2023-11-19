@@ -1382,6 +1382,15 @@ export const widgetResizeControlsStyles = css`
 `;
 
 export class WidgetResizeControls extends PPPElement {
+  @observable
+  ignoredHandles;
+
+  constructor() {
+    super();
+
+    this.ignoredHandles = [];
+  }
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -1404,6 +1413,11 @@ export class WidgetResizeControls extends PPPElement {
 
   onPointerMove({ event }) {
     const handle = this.widget.handle;
+
+    if (this.ignoredHandles.includes(handle)) {
+      return;
+    }
+
     const clientX = this.widget.container.clientX;
     const clientY = this.widget.container.clientY;
     let deltaX = event.clientX - clientX;
@@ -1812,7 +1826,11 @@ export class WidgetNotificationsArea extends PPPElement {
 export const widgetHeaderButtonsTemplate = html`
   <template>
     <slot>
-      <div class="button" @click="${(x) => x.stackWidget()}">
+      <div
+        ?hidden="${(x) => x.ensemble === 'disabled'}"
+        class="button"
+        @click="${(x) => x.stackWidget()}"
+      >
         ${html.partial(plus)}
       </div>
       <div class="button" @click="${(x) => x.showWidgetSettings()}">
@@ -1837,6 +1855,9 @@ export const widgetHeaderButtonsStyles = css`
 `;
 
 export class WidgetHeaderButtons extends PPPElement {
+  @attr
+  ensemble;
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -1864,16 +1885,20 @@ export class WidgetHeaderButtons extends PPPElement {
         );
 
         if (Array.isArray(widgets)) {
-          const copy = ppp.app.widgetClipboard
-            ? ppp.app.widgetClipboard
-            : {
-                // Normalized one from MongoDB
-                savedDocument: widgets?.find(
-                  (w) => w.uniqueID === this.widget.document.uniqueID
-                ),
-                // Denormalized one, used for placement
-                liveDocument: Object.assign({}, this.widget.document)
-              };
+          const copy =
+            ppp.app.widgetClipboard &&
+            ppp.app.widgetClipboard.liveDocument?.widgetElement?.getAttribute(
+              'ensemble'
+            ) !== 'disabled'
+              ? ppp.app.widgetClipboard
+              : {
+                  // Normalized one from MongoDB
+                  savedDocument: widgets?.find(
+                    (w) => w.uniqueID === this.widget.document.uniqueID
+                  ),
+                  // Denormalized one, used for placement
+                  liveDocument: Object.assign({}, this.widget.document)
+                };
 
           if (copy.savedDocument) {
             copy.savedDocument.uniqueID = uuidv4();

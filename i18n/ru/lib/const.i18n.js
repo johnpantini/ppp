@@ -133,6 +133,7 @@ export default function (i18n) {
         [WIDGET_TYPES.TIME_AND_SALES]: 'Лента всех сделок',
         [WIDGET_TYPES.PORTFOLIO]: 'Портфель',
         [WIDGET_TYPES.CALENDAR]: 'Календарь',
+        [WIDGET_TYPES.CLOCK]: 'Часы',
         [WIDGET_TYPES.POSITIONS]: 'Позиции',
         [WIDGET_TYPES.TIMELINE]: 'Лента операций',
         [WIDGET_TYPES.TRADES]: 'Сделки',

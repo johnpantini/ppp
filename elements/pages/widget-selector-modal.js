@@ -136,6 +136,12 @@ export const widgetSelectorModalPageTemplate = html`
                   <span>Лента операций</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
+                  slug="clock"
+                  ?active="${(x) => x.activeItem === 'clock'}"
+                >
+                  <span>Часы</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
                   slug="frame"
                   ?active="${(x) => x.activeItem === 'frame'}"
                 >
