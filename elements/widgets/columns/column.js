@@ -48,7 +48,7 @@ class Column extends PPPElement {
     this.datum = this.parentNode.datum;
     this.column = this.parentNode.column;
     this.isBalance = this.hasAttribute('balance');
-    this.defaultTrader = this.widget.instrumentTrader;
+    this.defaultTrader = this.parentNode.trader ?? this.widget.instrumentTrader;
 
     if (this.datum?.instrument) {
       this.instrument = this.datum.instrument;

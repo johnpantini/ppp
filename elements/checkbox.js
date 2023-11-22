@@ -37,16 +37,16 @@ export const checkboxTemplate = html`
     @keypress="${(x, c) => x.keypressHandler(c.event)}"
     @click="${(x, c) => x.clickHandler(c.event)}"
     class="${(x) => (x.readOnly ? 'readonly' : '')} ${(x) =>
-  x.checked ? 'checked' : ''} ${(x) =>
-  x.indeterminate ? 'indeterminate' : ''}"
+      x.checked ? 'checked' : ''} ${(x) =>
+      x.indeterminate ? 'indeterminate' : ''}"
   >
     <div part="control" class="control">
-      <slot name="checked-indicator">
-        ${html.partial(checkedIndicator)}
-      </slot>
+      <slot name="checked-indicator"> ${html.partial(checkedIndicator)} </slot>
       <slot name="indeterminate-indicator">
-        <div part="indeterminate-indicator"
-             class="indeterminate-indicator"></div
+        <div
+          part="indeterminate-indicator"
+          class="indeterminate-indicator"
+        ></div>
       </slot>
     </div>
     <label

@@ -352,6 +352,10 @@ export const orderWidgetTemplate = html`
                         @click="${async (x) => {
                           let observer;
 
+                          if (x.preview) {
+                            return true;
+                          }
+
                           const settingsPage =
                             await x.headerButtons.showWidgetSettings();
 

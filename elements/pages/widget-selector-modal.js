@@ -142,6 +142,12 @@ export const widgetSelectorModalPageTemplate = html`
                   <span>Часы</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
+                  slug="marquee"
+                  ?active="${(x) => x.activeItem === 'marquee'}"
+                >
+                  <span>Строка котировок</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
                   slug="frame"
                   ?active="${(x) => x.activeItem === 'frame'}"
                 >

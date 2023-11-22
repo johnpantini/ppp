@@ -422,9 +422,12 @@ export class WidgetGroupControl extends PPPOffClickElement {
       const sourceWidget = Array.from(
         this.widget.container.shadowRoot.querySelectorAll('.widget')
       )
-        .filter((w) => w !== this.widget)
-        .find(
-          (w) => w?.groupControl.selection === this.selection && w.instrument
+        ?.filter((w) => w !== this.widget)
+        ?.find(
+          (w) =>
+            w?.groupControl &&
+            w.groupControl.selection === this.selection &&
+            w.instrument
         );
 
       if (
@@ -437,22 +440,22 @@ export class WidgetGroupControl extends PPPOffClickElement {
         this.widget.isolated = true;
 
         if (typeof this.widget.instrumentTrader === 'undefined') {
-          return this.widget.notificationsArea.error({
+          this.widget.notificationsArea?.error({
             text: 'Не задан трейдер для работы с инструментом.'
           });
-        }
+        } else {
+          this.widget.instrument = this.widget.instrumentTrader.adoptInstrument(
+            sourceWidget.instrument
+          );
+          this.widget.isolated = false;
 
-        this.widget.instrument = this.widget.instrumentTrader.adoptInstrument(
-          sourceWidget.instrument
-        );
-        this.widget.isolated = false;
-
-        if (this.widget.instrument) {
-          void this.widget.updateDocumentFragment({
-            $set: {
-              'widgets.$.symbol': this.widget.instrument.symbol
-            }
-          });
+          if (this.widget.instrument) {
+            void this.widget.updateDocumentFragment({
+              $set: {
+                'widgets.$.symbol': this.widget.instrument.symbol
+              }
+            });
+          }
         }
       }
 
@@ -838,6 +841,10 @@ export const widgetSearchControlStyles = css`
       ${themeConditional(darken(paletteGrayLight1, 30), paletteGrayBase)};
   }
 
+  :host([readonly]) .popup-trigger {
+    cursor: not-allowed;
+  }
+
   .popup {
     top: 0;
     left: 0;
@@ -1079,6 +1086,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
   size;
 
   @attr({ mode: 'boolean' })
+  readonly;
+
+  @attr({ mode: 'boolean' })
   searching;
 
   @observable
@@ -1215,6 +1225,10 @@ export class WidgetSearchControl extends PPPOffClickElement {
   }
 
   handleClick({ event }) {
+    if (this.readonly) {
+      return;
+    }
+
     if (
       event.composedPath().find((n) => n.classList?.contains('popup-trigger'))
     ) {
@@ -1298,14 +1312,23 @@ export class WidgetSearchControl extends PPPOffClickElement {
 
 export const widgetResizeControlsTemplate = html`
   <template>
-    <div class="top"></div>
-    <div class="right"></div>
-    <div class="bottom"></div>
-    <div class="left"></div>
-    <div class="ne"></div>
-    <div class="se"></div>
-    <div class="sw"></div>
-    <div class="nw"></div>
+    <div class="top" ?hidden="${(x) => x.ignoredHandles.includes('top')}"></div>
+    <div
+      class="right"
+      ?hidden="${(x) => x.ignoredHandles.includes('right')}"
+    ></div>
+    <div
+      class="bottom"
+      ?hidden="${(x) => x.ignoredHandles.includes('bottom')}"
+    ></div>
+    <div
+      class="left"
+      ?hidden="${(x) => x.ignoredHandles.includes('left')}"
+    ></div>
+    <div class="ne" ?hidden="${(x) => x.ignoredHandles.includes('ne')}"></div>
+    <div class="se" ?hidden="${(x) => x.ignoredHandles.includes('se')}"></div>
+    <div class="sw" ?hidden="${(x) => x.ignoredHandles.includes('sw')}"></div>
+    <div class="nw" ?hidden="${(x) => x.ignoredHandles.includes('nw')}"></div>
   </template>
 `;
 
@@ -1409,6 +1432,10 @@ export class WidgetResizeControls extends PPPElement {
     this.widget.width = bcr.width;
     this.widget.height = bcr.height;
     this.widget.handle = node.getAttribute('class');
+
+    if (typeof this.widget.beforeResize === 'function') {
+      this.widget.beforeResize();
+    }
   }
 
   onPointerMove({ event }) {
@@ -1580,6 +1607,10 @@ export class WidgetResizeControls extends PPPElement {
   onPointerUp({ event }) {
     if (!this.widget.preview) {
       this.widget.repositionLinkedWidgets(event.shiftKey);
+
+      if (typeof this.widget.afterResize === 'function') {
+        this.widget.afterResize();
+      }
 
       return this.widget.updateDocumentFragment({
         $set: {

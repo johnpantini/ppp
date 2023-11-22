@@ -247,6 +247,29 @@ const checkConnection = async (control, login, password) => {
   }
 };
 
+export const PSINA_CAPS = {
+  38744: [TRADER_CAPS.CAPS_US_NBBO, TRADER_CAPS.CAPS_ORDERBOOK],
+  48744: [TRADER_CAPS.CAPS_US_NBBO, TRADER_CAPS.CAPS_ORDERBOOK],
+  38643: [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW, TRADER_CAPS.CAPS_ORDERBOOK],
+  48643: [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW, TRADER_CAPS.CAPS_ORDERBOOK],
+  38943: [TRADER_CAPS.CAPS_NOII],
+  48943: [TRADER_CAPS.CAPS_NOII],
+  38844: [
+    TRADER_CAPS.CAPS_TIME_AND_SALES,
+    TRADER_CAPS.CAPS_LEVEL1,
+    TRADER_CAPS.CAPS_EXTENDED_LEVEL1
+  ],
+  48844: [
+    TRADER_CAPS.CAPS_TIME_AND_SALES,
+    TRADER_CAPS.CAPS_LEVEL1,
+    TRADER_CAPS.CAPS_EXTENDED_LEVEL1
+  ],
+  38099: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
+  48099: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
+  38199: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
+  48199: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK]
+};
+
 export class TraderAlpacaV2PlusPage extends Page {
   collection = 'traders';
 
@@ -353,22 +376,7 @@ export class TraderAlpacaV2PlusPage extends Page {
     if (brokerType === BROKERS.PSINA) {
       const port = parseInt(new URL(this.wsUrl.value).port);
 
-      if (port === 38744) {
-        caps.push(TRADER_CAPS.CAPS_US_NBBO);
-        caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
-      } else if (port === 38643) {
-        caps.push(TRADER_CAPS.CAPS_NSDQ_TOTALVIEW);
-        caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
-      } else if (port === 38943) {
-        caps.push(TRADER_CAPS.CAPS_NOII);
-      } else if (port === 38844) {
-        caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);
-        caps.push(TRADER_CAPS.CAPS_LEVEL1);
-        caps.push(TRADER_CAPS.CAPS_EXTENDED_LEVEL1);
-      } else if (port === 38099 || port === 38199) {
-        caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
-        caps.push(TRADER_CAPS.CAPS_ARCABOOK);
-      }
+      caps.push(...PSINA_CAPS[port]);
     } else if (brokerType === BROKERS.UTEX) {
       caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
       caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);

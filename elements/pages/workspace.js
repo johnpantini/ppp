@@ -364,6 +364,10 @@ export class WorkspacePage extends Page {
           widget.y = parseInt(styles.top);
           widget.width = bcr.width;
           widget.height = bcr.height;
+
+          if (typeof this.draggedWidget.beforeDrag === 'function') {
+            this.draggedWidget.beforeDrag();
+          }
         } else if (this.resizing) {
           resizeControls.onPointerDown({ event, node: cp[0] });
         }
@@ -478,6 +482,10 @@ export class WorkspacePage extends Page {
 
       this.draggedWidget.style.left = `${newLeft}px`;
       this.draggedWidget.style.top = `${newTop}px`;
+
+      if (typeof this.draggedWidget.onDrag === 'function') {
+        this.draggedWidget.onDrag();
+      }
     } else if (this.resizing) {
       this.resizeControls.onPointerMove({ event });
     }
@@ -494,6 +502,11 @@ export class WorkspacePage extends Page {
         });
 
         this.draggedWidget.repositionLinkedWidgets(event.shiftKey);
+
+        if (typeof this.draggedWidget.afterDrag === 'function') {
+          this.draggedWidget.afterDrag();
+        }
+
         this.draggedWidget = null;
       }
 

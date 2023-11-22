@@ -5,24 +5,22 @@ import { validate } from '../lib/ppp-errors.js';
 import {
   ClonableList,
   clonableListStyles,
-  cloneControlsTemplate,
   defaultDragEndHandler,
-  dragHandleTemplate
+  dragControlsTemplate
 } from './clonable-list.js';
 import './draggable-stack.js';
 
 export const widgetOrderListTemplate = html`
   <template>
     <ppp-draggable-stack
-      class="control-stack"
       @pppdragend="${(x) => defaultDragEndHandler(x)}"
       ${ref('dragList')}
     >
       ${repeat(
         (x) => x.list,
         html`
-          <div class="control-line draggable">
-            ${dragHandleTemplate()}
+          <div class="control-line draggable main-line">
+            ${dragControlsTemplate()}
             <div class="control-stack">
               <ppp-text-field
                 order-name
@@ -57,7 +55,6 @@ export const widgetOrderListTemplate = html`
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
             </div>
-            ${cloneControlsTemplate()}
           </div>
         `
       )}
@@ -91,7 +88,7 @@ export class WidgetOrderList extends ClonableList {
     const orders = [];
 
     for (const line of Array.from(
-      this.dragList.querySelectorAll('.control-line')
+      this.dragList.querySelectorAll('.main-line')
     )) {
       orders.push({
         name: line.querySelector('[order-name]').value,

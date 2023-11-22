@@ -255,7 +255,6 @@ export class TraderTinkoffGrpcWebPage extends Page {
         TRADER_CAPS.CAPS_TIME_AND_SALES,
         TRADER_CAPS.CAPS_POSITIONS,
         TRADER_CAPS.CAPS_TIMELINE,
-        TRADER_CAPS.CAPS_LEVEL1,
         TRADER_CAPS.CAPS_CHARTS
       ],
       type: TRADERS.TINKOFF_GRPC_WEB,

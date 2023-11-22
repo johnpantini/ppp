@@ -281,6 +281,13 @@ export const widgetPageTemplate = html`
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
+                              x.document._id && x.document.type !== 'marquee'}"
+                            value="marquee"
+                          >
+                            <span slot="text">Строка котировок</span>
+                          </ppp-widget-type-radio>
+                          <ppp-widget-type-radio
+                            ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'custom'}"
                             value="custom"
                           >

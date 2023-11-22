@@ -6,24 +6,22 @@ import { validate } from '../lib/ppp-errors.js';
 import {
   ClonableList,
   clonableListStyles,
-  cloneControlsTemplate,
   defaultDragEndHandler,
-  dragHandleTemplate
+  dragControlsTemplate
 } from './clonable-list.js';
 import './draggable-stack.js';
 
 export const widgetColumnListTemplate = html`
   <template>
     <ppp-draggable-stack
-      class="control-stack"
       @pppdragend="${(x) => defaultDragEndHandler(x)}"
       ${ref('dragList')}
     >
       ${repeat(
         (x) => x.list,
         html`
-          <div class="control-line draggable">
-            ${dragHandleTemplate()}
+          <div class="control-line draggable main-line">
+            ${dragControlsTemplate()}
             <div class="control-stack">
               <ppp-text-field
                 column-name
@@ -34,7 +32,11 @@ export const widgetColumnListTemplate = html`
                 value="${(column) => column.name}"
               ></ppp-text-field>
               <ppp-query-select
-                ?hidden="${(x, c) =>
+                column-trader
+                deselectable
+                standalone
+                ?disabled="${(x, c) =>
+                  x.hidden ||
                   (
                     c.parent.mainTraderColumns ?? [
                       COLUMN_SOURCE.INSTRUMENT,
@@ -42,11 +44,7 @@ export const widgetColumnListTemplate = html`
                       COLUMN_SOURCE.POSITION_AVAILABLE,
                       COLUMN_SOURCE.POSITION_AVERAGE
                     ]
-                  ).indexOf(x.source) !== -1}"
-                column-trader
-                deselectable
-                standalone
-                ?disabled="${(x) => x.hidden}"
+                  ).includes(x.source)}"
                 value="${(x) => x.traderId}"
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
@@ -78,15 +76,14 @@ export const widgetColumnListTemplate = html`
                 placeholder="${(x, c) =>
                   ppp.t(`$const.columnSource.${c.source?.source}`)}"
                 @change="${(x, c) => {
-                  const hidden =
-                    (
-                      c.parent.mainTraderColumns ?? [
-                        COLUMN_SOURCE.INSTRUMENT,
-                        COLUMN_SOURCE.SYMBOL,
-                        COLUMN_SOURCE.POSITION_AVAILABLE,
-                        COLUMN_SOURCE.POSITION_AVERAGE
-                      ]
-                    ).indexOf(c.event.detail.value) !== -1;
+                  const hidden = (
+                    c.parent.mainTraderColumns ?? [
+                      COLUMN_SOURCE.INSTRUMENT,
+                      COLUMN_SOURCE.SYMBOL,
+                      COLUMN_SOURCE.POSITION_AVAILABLE,
+                      COLUMN_SOURCE.POSITION_AVERAGE
+                    ]
+                  ).includes(c.event.detail.value);
 
                   if (hidden) {
                     c.event.detail.nextElementSibling.setAttribute(
@@ -117,7 +114,11 @@ export const widgetColumnListTemplate = html`
                 )}
               </ppp-select>
               <ppp-query-select
-                ?hidden="${(x, c) =>
+                column-extra-trader
+                deselectable
+                standalone
+                ?disabled="${(x, c) =>
+                  x.hidden ||
                   (
                     c.parent.mainTraderColumns ?? [
                       COLUMN_SOURCE.INSTRUMENT,
@@ -125,11 +126,7 @@ export const widgetColumnListTemplate = html`
                       COLUMN_SOURCE.POSITION_AVAILABLE,
                       COLUMN_SOURCE.POSITION_AVERAGE
                     ]
-                  ).indexOf(x.source) !== -1}"
-                column-extra-trader
-                deselectable
-                standalone
-                ?disabled="${(x) => x.hidden}"
+                  ).includes(x.source)}"
                 value="${(x) => x.extraTraderId}"
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find(
@@ -154,7 +151,6 @@ export const widgetColumnListTemplate = html`
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
             </div>
-            ${cloneControlsTemplate()}
           </div>
         `
       )}
@@ -197,7 +193,7 @@ export class WidgetColumnList extends ClonableList {
     const columns = [];
 
     for (const line of Array.from(
-      this.dragList.querySelectorAll('.control-line')
+      this.dragList.querySelectorAll('.main-line')
     )) {
       const column = {
         source: line.querySelector('[column-source]').value,

@@ -42,7 +42,9 @@ import {
   paletteGreenLight2,
   palettePurpleDark2,
   palettePurpleLight2,
-  paletteGreenDark1
+  paletteGreenDark1,
+  paletteYellowLight2,
+  paletteYellowDark2
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
@@ -584,7 +586,6 @@ export const widgetCommonContentStyles = () => css`
   .control-line {
     display: flex;
     flex-direction: row;
-    align-items: center;
     gap: 0 ${spacing2};
   }
 
@@ -593,7 +594,8 @@ export const widgetCommonContentStyles = () => css`
   }
 
   .dot {
-    margin-left: 10px;
+    width: 5px;
+    height: 5px;
     position: relative;
   }
 
@@ -604,8 +606,8 @@ export const widgetCommonContentStyles = () => css`
     display: inline-block;
     width: 5px;
     height: 5px;
-    top: 6px;
-    left: -10px;
+    top: 0;
+    left: 0;
   }
 
   .dot-1::before {
@@ -623,6 +625,13 @@ export const widgetCommonContentStyles = () => css`
     background-color: ${themeConditional(
       palettePurpleDark2,
       palettePurpleLight2
+    )};
+  }
+
+  .dot-4::before {
+    background-color: ${themeConditional(
+      paletteYellowDark2,
+      paletteYellowLight2
     )};
   }
 
@@ -719,6 +728,7 @@ export const widgetStyles = () => css`
 
   .widget-title {
     display: flex;
+    align-items: center;
     gap: 0 6px;
     font-size: ${fontSizeWidget};
     font-weight: 500;

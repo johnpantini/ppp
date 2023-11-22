@@ -295,7 +295,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
         this.document.portfolioTrader
       );
       this.instrumentTrader = this.portfolioTrader;
-
       this.columns = new WidgetColumns({
         widget: this,
         columns: this.document.columns

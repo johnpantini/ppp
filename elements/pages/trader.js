@@ -282,7 +282,9 @@ export const traderPageTemplate = html`
           <div slot="description" class="caps-list">
             <ul>
               <li>
-                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`) +
+                  ' (NBBO)'}
               </li>
               <li>
                 ${() =>
@@ -340,9 +342,6 @@ export const traderPageTemplate = html`
               <li>
                 ${() =>
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
-              </li>
-              <li>
-                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
               </li>
               <li>
                 ${() =>

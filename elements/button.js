@@ -120,6 +120,10 @@ export const buttonStyles = css`
     font-weight: ${fontWeightBody1};
   }
 
+  :host(.squared) .control {
+    width: 36px;
+  }
+
   .content-container {
     display: grid;
     grid-auto-flow: column;

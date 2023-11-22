@@ -74,7 +74,7 @@ export const widgetsPageTemplate = html`
                       ${when(
                         (x, c) =>
                           isPredefinedWidgetType(FILTERED_WIDGET_TYPES[x]),
-                        html` <span slot="start">${html.partial(pin)}</span> `
+                        html`<span slot="start">${html.partial(pin)}</span>`
                       )}
                       <span
                         >${(x) =>

@@ -1,0 +1,433 @@
+/** @decorator */
+
+import { widgetStyles, WidgetWithInstrument } from '../widget.js';
+import {
+  html,
+  css,
+  ref,
+  observable,
+  Observable,
+  repeat,
+  Updates
+} from '../../vendor/fast-element.min.js';
+import { COLUMN_SOURCE, WIDGET_TYPES } from '../../lib/const.js';
+import { WidgetColumns } from '../widget-columns.js';
+import { normalize } from '../../design/styles.js';
+import { $debounce } from '../../lib/ppp-decorators.js';
+import {
+  fontSizeWidget,
+  monospaceFont,
+  paletteGrayBase,
+  paletteGrayLight1,
+  themeConditional
+} from '../../design/design-tokens.js';
+import { getUSMarketSession } from '../../lib/intl.js';
+import '../button.js';
+import '../checkbox.js';
+import '../radio-group.js';
+import '../tabs.js';
+import '../text-field.js';
+import '../widget-controls.js';
+import '../widget-marquee-list.js';
+
+const DEFAULT_MARQUEE = [
+  {
+    name: '',
+    hidden: true
+  }
+];
+
+export const marqueeWidgetTemplate = html`
+  <template ensemble="disabled">
+    <div class="widget-root">
+      <div class="widget-header">
+        <div class="widget-header-inner">
+          <ppp-widget-group-control></ppp-widget-group-control>
+          <ppp-widget-search-control
+            readonly
+            ?hidden="${(x) => !x.preview}"
+          ></ppp-widget-search-control>
+          <div class="root">
+            <div class="inner">
+              <div
+                class="line"
+                @pointerdown="${(x, { event }) => x.handleLineClick(event)}"
+              >
+                ${repeat(
+                  (x) => x.marquee ?? [],
+                  html`
+                    <div
+                      class="item"
+                      symbol="${(x) => x.symbol}"
+                      index="${(x, c) => c.index}"
+                    >
+                      <span class="widget-title">
+                        <span class="symbol">${(x) => x.name || x.symbol}</span>
+                        <span
+                          ?hidden="${(x) => !x.showPrice}"
+                          :trader="${(x) => x.pppTrader}"
+                          :datum="${(x) => ({
+                            instrument: x.pppTrader?.instruments?.get(x.symbol)
+                          })}"
+                          class="price"
+                        >
+                          ${(x, c) =>
+                            c.parent.columns.columnElement(
+                              c.parent.columnsBySource.get(
+                                COLUMN_SOURCE.LAST_PRICE
+                              )
+                            )}
+                        </span>
+                        <span
+                          ?hidden="${(x) => !x.showAbsoluteChange}"
+                          :trader="${(x) => x.pppTrader}"
+                          :datum="${(x) => ({
+                            instrument: x.pppTrader?.instruments?.get(x.symbol)
+                          })}"
+                          class="price"
+                        >
+                          ${(x, c) =>
+                            c.parent.columns.columnElement(
+                              c.parent.columnsBySource.get(
+                                COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
+                              )
+                            )}
+                        </span>
+                        <span
+                          ?hidden="${(x) => !x.showRelativeChange}"
+                          :trader="${(x) => x.pppTrader}"
+                          :datum="${(x) => ({
+                            instrument: x.pppTrader?.instruments?.get(x.symbol)
+                          })}"
+                          class="price"
+                        >
+                          ${(x, c) =>
+                            c.parent.columns.columnElement(
+                              c.parent.columnsBySource.get(
+                                COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+                              )
+                            )}
+                        </span>
+                      </span>
+                    </div>
+                  `,
+                  { positioning: true }
+                )}
+              </div>
+            </div>
+          </div>
+          <ppp-widget-header-buttons
+            ensemble="disabled"
+          ></ppp-widget-header-buttons>
+        </div>
+      </div>
+      <div class="widget-body"></div>
+      <ppp-widget-resize-controls
+        :ignoredHandles="${(x) => x.getIgnoredHandles()}"
+      ></ppp-widget-resize-controls>
+    </div>
+  </template>
+`;
+
+export const marqueeWidgetStyles = css`
+  ${normalize()}
+  ${widgetStyles()}
+  .root {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .inner {
+    position: absolute;
+    padding: 0 8px;
+    width: max-content;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 0 12px;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-family: ${monospaceFont};
+  }
+
+  .item > .widget-title {
+    font-size: calc(${fontSizeWidget} + 1px);
+    margin-right: unset;
+  }
+
+  .item > .symbol {
+    margin-right: 6px;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    font-feature-settings: 'tnum';
+    word-wrap: break-word;
+    font-size: ${fontSizeWidget};
+    line-height: 20px;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .item > .price {
+    font-weight: bold;
+  }
+
+  .widget-header::after {
+    border-bottom: none;
+  }
+`;
+
+export class MarqueeWidget extends WidgetWithInstrument {
+  @observable
+  marquee;
+
+  /**
+   * @type {WidgetColumns}
+   */
+  @observable
+  columns;
+
+  columnsBySource = new Map();
+
+  constructor() {
+    super();
+
+    this.marquee = [];
+
+    this.onWindowResize = this.onWindowResize.bind(this);
+    this.recalculateDimensionsDelayed = $debounce(
+      this.recalculateDimensions,
+      100
+    );
+  }
+
+  handleLineClick(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const cp = event.composedPath();
+    const node = cp.find((n) => n?.hasAttribute?.('symbol'));
+
+    if (node) {
+      const marqueeItem = this.marquee[parseInt(node.getAttribute('index'))];
+
+      if (marqueeItem?.pppTrader) {
+        this.instrumentTrader = marqueeItem.pppTrader;
+        this.selectInstrument(marqueeItem.symbol);
+      }
+    }
+  }
+
+  recalculateDimensions() {
+    const { left } = getComputedStyle(this);
+
+    if (this.document.snapToLeft) {
+      this.style.left = '0';
+    }
+
+    if (this.document.snapToRight) {
+      this.style.width = `calc(100% - ${
+        this.document.snapToLeft ? '0px' : left
+      })`;
+    }
+  }
+
+  onWindowResize() {
+    return this.recalculateDimensionsDelayed();
+  }
+
+  getIgnoredHandles() {
+    const always = ['top', 'bottom', 'ne', 'se', 'nw', 'sw'];
+
+    if (this.document.snapToLeft) {
+      always.push('left');
+    }
+
+    if (this.document.snapToRight) {
+      always.push('right');
+    }
+
+    return always;
+  }
+
+  async connectedCallback() {
+    super.connectedCallback();
+
+    this.style.overflow = 'unset';
+
+    window.addEventListener('resize', this.onWindowResize);
+    this.recalculateDimensions();
+
+    this.columns = new WidgetColumns({
+      widget: this,
+      columns: [
+        COLUMN_SOURCE.LAST_PRICE,
+        COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE,
+        COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+      ].map((source) => ({ source, name: source }))
+    });
+
+    await this.columns.registerColumns();
+
+    this.columns.array.forEach((column) => {
+      this.columnsBySource.set(column.source, column);
+    });
+
+    for (const m of this.document.marquee) {
+      if (m.hidden) {
+        continue;
+      }
+
+      const denormalized = await this.container.denormalization.denormalize(m);
+      const trader = await ppp.getOrCreateTrader(denormalized.trader);
+
+      denormalized.pppTrader = trader;
+
+      this.marquee.push(denormalized);
+    }
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('resize', this.onWindowResize);
+    super.disconnectedCallback();
+  }
+
+  afterResize() {
+    this.recalculateDimensions();
+  }
+
+  afterDrag() {
+    this.recalculateDimensions();
+  }
+
+  async validate() {
+    await this.container.marqueeList.validate();
+  }
+
+  async submit() {
+    return {
+      $set: {
+        snapToLeft: this.container.snapToLeft.checked,
+        snapToRight: this.container.snapToRight.checked,
+        marquee: this.container.marqueeList.value
+      }
+    };
+  }
+}
+
+export async function widgetDefinition() {
+  return {
+    type: WIDGET_TYPES.MARQUEE,
+    collection: 'PPP',
+    title: html`Строка котировок`,
+    description: html`Виджет
+      <span class="positive">Строка котировок</span> служит для отображения
+      котировок инструментов в виде компактной строки.`,
+    customElement: MarqueeWidget.compose({
+      template: marqueeWidgetTemplate,
+      styles: marqueeWidgetStyles
+    }).define(),
+    minWidth: 115,
+    minHeight: 32,
+    defaultWidth: 335,
+    settings: html`
+      <ppp-tabs activeid="main">
+        <ppp-tab id="instruments">Инструменты</ppp-tab>
+        <ppp-tab id="ui">UI</ppp-tab>
+        <ppp-tab-panel id="instruments-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Список инструментов</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-widget-marquee-list
+              @marqueesearch="${async (x, c) => {
+                const { event, source } = c;
+                const button = event.detail.button;
+                const symbol = button.previousElementSibling;
+                const trader = event.detail.trader;
+                const widget =
+                  source.widgetPreview.shadowRoot.querySelector(
+                    'ppp-marquee-widget'
+                  );
+
+                if (widget) {
+                  widget.instrumentTrader = await ppp.getOrCreateTrader(trader);
+                  widget.searchControl.open = true;
+
+                  const notifier = Observable.getNotifier(widget);
+                  const instrumentListener = {
+                    handleChange: () => {
+                      symbol.value = widget.instrument?.symbol ?? '';
+                      widget.searchControl.open = false;
+                    }
+                  };
+                  const searchControlListener = {
+                    handleChange: () => {
+                      if (!widget.searchControl.open) {
+                        notifier.unsubscribe(instrumentListener, 'instrument');
+                        Observable.getNotifier(
+                          widget.searchControl
+                        ).unsubscribe(searchControlListener, 'open');
+                      }
+                    }
+                  };
+
+                  Observable.getNotifier(widget.searchControl).subscribe(
+                    searchControlListener,
+                    'open'
+                  );
+
+                  notifier.subscribe(instrumentListener, 'instrument');
+
+                  Updates.enqueue(() =>
+                    widget.searchControl.suggestInput.focus()
+                  );
+                }
+              }}"
+              ${ref('marqueeList')}
+              :stencil="${() => {
+                return {};
+              }}"
+              :list="${(x) => x.document.marquee ?? DEFAULT_MARQUEE}"
+              :traders="${(x) => x.document.traders}"
+            ></ppp-widget-marquee-list>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="ui-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Прилипание к краю окна</h5>
+            </div>
+            <div class="widget-settings-input-group">
+              <div class="control-stack">
+                <ppp-checkbox
+                  ?checked="${(x) => x.document.snapToLeft}"
+                  ${ref('snapToLeft')}
+                >
+                  Слева
+                </ppp-checkbox>
+                <ppp-checkbox
+                  ?checked="${(x) => x.document.snapToRight}"
+                  ${ref('snapToRight')}
+                >
+                  Справа
+                </ppp-checkbox>
+              </div>
+            </div>
+          </div>
+        </ppp-tab-panel>
+      </ppp-tabs>
+    `
+  };
+}
