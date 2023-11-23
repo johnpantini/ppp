@@ -8,6 +8,7 @@ import {
   observable,
   Observable,
   repeat,
+  when,
   Updates
 } from '../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE, WIDGET_TYPES } from '../../lib/const.js';
@@ -22,6 +23,10 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 import { getUSMarketSession } from '../../lib/intl.js';
+import {
+  StaleInstrumentCacheError,
+  NoInstrumentsError
+} from '../../lib/ppp-exceptions.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
@@ -53,6 +58,44 @@ export const marqueeWidgetTemplate = html`
                 class="line"
                 @pointerdown="${(x, { event }) => x.handleLineClick(event)}"
               >
+                ${when(
+                  (x) => x.syncNeeded,
+                  html`
+                    <ppp-button
+                      appearance="primary"
+                      class="xsmall"
+                      @click="${async (x) => {
+                        x.container.beginOperation();
+
+                        try {
+                          await x.traderError.trader.syncDictionary(
+                            x.traderError
+                          );
+                        } finally {
+                          window.location.reload();
+                        }
+                      }}"
+                    >
+                      Синхронизация
+                    </ppp-button>
+                  `
+                )}
+                ${when(
+                  (x) => x.importNeeded,
+                  html`
+                    <ppp-button
+                      appearance="primary"
+                      class="xsmall"
+                      @click="${(x) => {
+                        x.notificationsArea.openInstrumentsImport(
+                          x.traderError.trader
+                        );
+                      }}"
+                    >
+                      Импорт
+                    </ppp-button>
+                  `
+                )}
                 ${repeat(
                   (x) => x.marquee ?? [],
                   html`
@@ -123,7 +166,9 @@ export const marqueeWidgetTemplate = html`
           ></ppp-widget-header-buttons>
         </div>
       </div>
-      <div class="widget-body"></div>
+      <div class="widget-body">
+        <ppp-widget-notifications-area hidden></ppp-widget-notifications-area>
+      </div>
       <ppp-widget-resize-controls
         :ignoredHandles="${(x) => x.getIgnoredHandles()}"
       ></ppp-widget-resize-controls>
@@ -193,6 +238,14 @@ export class MarqueeWidget extends WidgetWithInstrument {
   @observable
   marquee;
 
+  @observable
+  importNeeded;
+
+  @observable
+  syncNeeded;
+
+  traderError;
+
   /**
    * @type {WidgetColumns}
    */
@@ -211,6 +264,22 @@ export class MarqueeWidget extends WidgetWithInstrument {
       this.recalculateDimensions,
       100
     );
+  }
+
+  catchException(e) {
+    if (e instanceof NoInstrumentsError) {
+      this.traderError = e;
+      this.importNeeded = true;
+
+      return;
+    } else if (e instanceof StaleInstrumentCacheError) {
+      this.traderError = e;
+      this.syncNeeded = true;
+
+      return;
+    }
+
+    return super.catchException(e);
   }
 
   handleLineClick(event) {
@@ -263,39 +332,45 @@ export class MarqueeWidget extends WidgetWithInstrument {
   }
 
   async connectedCallback() {
-    super.connectedCallback();
+    try {
+      super.connectedCallback();
 
-    this.style.overflow = 'unset';
+      this.style.overflow = 'unset';
 
-    window.addEventListener('resize', this.onWindowResize);
-    this.recalculateDimensions();
+      window.addEventListener('resize', this.onWindowResize);
+      this.recalculateDimensions();
 
-    this.columns = new WidgetColumns({
-      widget: this,
-      columns: [
-        COLUMN_SOURCE.LAST_PRICE,
-        COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE,
-        COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
-      ].map((source) => ({ source, name: source }))
-    });
+      this.columns = new WidgetColumns({
+        widget: this,
+        columns: [
+          COLUMN_SOURCE.LAST_PRICE,
+          COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE,
+          COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+        ].map((source) => ({ source, name: source }))
+      });
 
-    await this.columns.registerColumns();
+      await this.columns.registerColumns();
 
-    this.columns.array.forEach((column) => {
-      this.columnsBySource.set(column.source, column);
-    });
+      this.columns.array.forEach((column) => {
+        this.columnsBySource.set(column.source, column);
+      });
 
-    for (const m of this.document.marquee) {
-      if (m.hidden) {
-        continue;
+      for (const m of this.document.marquee) {
+        if (m.hidden) {
+          continue;
+        }
+
+        const denormalized = await this.container.denormalization.denormalize(
+          m
+        );
+        const trader = await ppp.getOrCreateTrader(denormalized.trader);
+
+        denormalized.pppTrader = trader;
+
+        this.marquee.push(denormalized);
       }
-
-      const denormalized = await this.container.denormalization.denormalize(m);
-      const trader = await ppp.getOrCreateTrader(denormalized.trader);
-
-      denormalized.pppTrader = trader;
-
-      this.marquee.push(denormalized);
+    } catch (e) {
+      return this.catchException(e);
     }
   }
 
