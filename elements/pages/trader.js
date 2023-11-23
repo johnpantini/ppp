@@ -23,7 +23,7 @@ export const traderNameAndRuntimePartial = ({ sharedWorker } = {}) => html`
     </div>
     <div class="input-group">
       <ppp-text-field
-        placeholder="Alor"
+        placeholder="Trader"
         value="${(x) => x.document.name}"
         ${ref('name')}
       ></ppp-text-field>
@@ -413,6 +413,35 @@ export const traderPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.FINAM_TRADE_API}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Capital.com"
+            style="height: 42px"
+            src="${() => ppp.brandSvg('capitalcom')}"
+          />
+          <div slot="title">Capital.com</div>
+          <span slot="description">
+            Рыночные данные платформы Capital.com
+          </span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.CAPITALCOM}`
               })}"
           >
             Продолжить

@@ -39,7 +39,8 @@ export default function (i18n) {
         [BROKERS.PSINA]: 'Psina',
         [BROKERS.BINANCE]: 'Binance',
         [BROKERS.HUOBI]: 'Huobi',
-        [BROKERS.BYBIT]: 'Bybit'
+        [BROKERS.BYBIT]: 'Bybit',
+        [BROKERS.CAPITALCOM]: 'Capital.com'
       },
       columnSource: {
         [COLUMN_SOURCE.INSTRUMENT]: 'Инструмент',
@@ -62,7 +63,8 @@ export default function (i18n) {
         [EXCHANGE.MOEX]: 'Московская биржа',
         [EXCHANGE.SPBX]: 'СПБ Биржа',
         [EXCHANGE.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
-        [EXCHANGE.US]: 'Биржи США'
+        [EXCHANGE.US]: 'Биржи США',
+        [EXCHANGE.CAPITALCOM]: 'Capital.com'
       },
       order: {
         [ORDERS.STOP_LOSS_TAKE_PROFIT]: 'Stop Loss/Take Profit',
@@ -74,9 +76,11 @@ export default function (i18n) {
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',
+        [TRADERS.BYBIT_V5]: 'Bybit API V5',
         [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
         [TRADERS.FINAM_TRADE_API]: 'Finam Trade API',
         [TRADERS.IB]: 'Interactive Brokers',
+        [TRADERS.CAPITALCOM]: 'Capital.com',
         [TRADERS.CUSTOM]: 'По ссылке'
       },
       traderCaps: {

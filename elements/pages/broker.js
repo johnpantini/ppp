@@ -157,6 +157,26 @@ export const brokerPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
+            alt="capital.com"
+            style="height: 42px"
+            src="${() => ppp.brandSvg('capitalcom')}"
+          />
+          <span slot="title">capital.com</span>
+          <span slot="description">Рыночные данные Capital.com.</span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.CAPITALCOM}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
             alt="IB"
             style="height: 42px"
             src="${() => ppp.brandSvg('ib')}"

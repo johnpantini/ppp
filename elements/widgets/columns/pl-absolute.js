@@ -43,6 +43,7 @@ export class PLAbsoluteColumn extends LastPriceColumn {
   }
 
   lastPriceChanged() {
+    super.lastPriceChanged();
     this.recalculate();
   }
 

@@ -58,6 +58,9 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
               Interactive Brokers (акции и ETF, US)
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.CAPITALCOM}">
+              Capital.com
+            </ppp-option>
           </ppp-select>
           <div class="spacing2"></div>
           <ppp-checkbox ${ref('clearBeforeImport')}>
@@ -179,6 +182,52 @@ export const instrumentsImportPageTemplate = html`
                 appearance="primary"
               >
                 Добавить профиль Finam
+              </ppp-button>
+            </div>
+          </section>
+        `
+      )}
+      ${when(
+        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.CAPITALCOM,
+        html`
+          <section>
+            <div class="label-group">
+              <h5>Брокерский профиль Capital.com</h5>
+              <p class="description">Необходим для формирования словаря.</p>
+            </div>
+            <div class="input-group">
+              <ppp-query-select
+                ${ref('capitalcomBrokerId')}
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('brokers')
+                      .find({
+                        $and: [
+                          {
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.CAPITALCOM%]`
+                          },
+                          { removed: { $ne: true } }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <div class="spacing2"></div>
+              <ppp-button
+                @click="${() =>
+                  ppp.app.mountPage('broker-capitalcom', {
+                    size: 'xlarge',
+                    adoptHeader: true
+                  })}"
+                appearance="primary"
+              >
+                Добавить профиль Capital.com
               </ppp-button>
             </div>
           </section>
@@ -798,6 +847,73 @@ export class InstrumentsImportPage extends Page {
     return result;
   }
 
+  async [INSTRUMENT_DICTIONARY.CAPITALCOM]() {
+    await validate(this.capitalcomBrokerId);
+
+    const { identifier, key, password } = this.capitalcomBrokerId.datum();
+    const sessionResponse = await fetch(
+      'https://api-capital.backend-capital.com/api/v1/session',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CAP-API-KEY': key
+        },
+        body: JSON.stringify({
+          identifier,
+          password,
+          encryptedPassword: false
+        })
+      }
+    );
+
+    const rSecurities = await ppp.fetch(
+      'https://api-capital.backend-capital.com/api/v1/markets',
+      {
+        method: 'GET',
+        headers: {
+          'X-SECURITY-TOKEN': sessionResponse.headers.get('X-SECURITY-TOKEN'),
+          CST: sessionResponse.headers.get('CST')
+        }
+      }
+    );
+
+    const { markets } = await rSecurities.json();
+    const iterable = markets.filter((i) =>
+      ['COMMODITIES', 'CURRENCIES', 'INDICES'].includes(i?.instrumentType)
+    );
+
+    const result = [];
+
+    for (const s of iterable) {
+      const type = {
+        COMMODITIES: 'commodity',
+        CURRENCIES: 'currency',
+        INDICES: 'index'
+      }[s.instrumentType];
+
+      let currency = 'N/A';
+
+      if (['OIL_CRUDE', 'OIL_BRENT'].includes(s.epic)) {
+        currency = 'USD';
+      }
+
+      result.push({
+        symbol: s.epic,
+        exchange: EXCHANGE.CAPITALCOM,
+        broker: BROKERS.CAPITALCOM,
+        fullName: s.instrumentName,
+        minPriceIncrement: 0,
+        type,
+        currency,
+        forQualInvestorFlag: false,
+        lot: s.lotSize
+      });
+    }
+
+    return result;
+  }
+
   async submitDocument() {
     this.beginOperation();
 
@@ -867,6 +983,13 @@ export class InstrumentsImportPage extends Page {
             $in: [EXCHANGE.SPBX, EXCHANGE.MOEX, EXCHANGE.US]
           };
           broker = BROKERS.FINAM;
+
+          break;
+
+        case INSTRUMENT_DICTIONARY.CAPITALCOM:
+          exchange = EXCHANGE.CAPITALCOM;
+          exchangeForDBRequest = EXCHANGE.CAPITALCOM;
+          broker = BROKERS.CAPITALCOM;
 
           break;
       }

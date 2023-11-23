@@ -500,9 +500,15 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         value: 0
       });
 
-      this.notificationsArea.success({
-        title: 'Заявки переставлены'
-      });
+      if (!this.instrument) {
+        this.notificationsArea.success({
+          title: 'Заявки переставлены по всем инструментам'
+        });
+      } else {
+        this.notificationsArea.success({
+          title: `Заявки переставлены по инструменту ${this.instrument.symbol}`
+        });
+      }
     } catch (e) {
       console.error(e);
 

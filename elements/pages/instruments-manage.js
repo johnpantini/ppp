@@ -55,6 +55,10 @@ export const instrumentsManagePageTemplate = html`
             </ppp-option>
             <ppp-option value="${() => EXCHANGE.US}">Биржи США</ppp-option>
             <ppp-option value="${() => EXCHANGE.BINANCE}">Binance</ppp-option>
+            <ppp-option value="${() => EXCHANGE.BYBIT}">Bybit</ppp-option>
+            <ppp-option value="${() => EXCHANGE.CAPITALCOM}"
+              >Capital.com</ppp-option
+            >
           </ppp-select>
         </div>
       </section>
@@ -83,6 +87,9 @@ export const instrumentsManagePageTemplate = html`
             <ppp-option value="${() => BROKERS.FINAM}">Finam</ppp-option>
             <ppp-option value="${() => BROKERS.BINANCE}">Binance</ppp-option>
             <ppp-option value="${() => BROKERS.BYBIT}">Bybit</ppp-option>
+            <ppp-option value="${() => BROKERS.CAPITALCOM}"
+              >Capital.com</ppp-option
+            >
           </ppp-select>
         </div>
       </section>
@@ -145,6 +152,9 @@ export const instrumentsManagePageTemplate = html`
                 <ppp-radio value="bond">Облигация</ppp-radio>
                 <ppp-radio value="etf">Фонд</ppp-radio>
                 <ppp-radio value="future">Фьючерс</ppp-radio>
+                <ppp-radio value="currency">Валютная пара</ppp-radio>
+                <ppp-radio value="index">Индекс</ppp-radio>
+                <ppp-radio value="commodity">Товар</ppp-radio>
                 <ppp-radio value="cryptocurrency">
                   Криптовалютная пара
                 </ppp-radio>
@@ -166,6 +176,7 @@ export const instrumentsManagePageTemplate = html`
                     value="${(x) => x.document.currency ?? 'USD'}"
                     ${ref('currency')}
                   >
+                    <ppp-option value="N/A">Не применимо</ppp-option>
                     <ppp-option value="USD">USD</ppp-option>
                     <ppp-option value="USDT">USDT</ppp-option>
                     <ppp-option value="RUB">RUB</ppp-option>
@@ -320,7 +331,10 @@ export const instrumentsManagePageTemplate = html`
             `
           )}
           ${when(
-            (x) => x.type.value !== 'cryptocurrency',
+            (x) =>
+              !['currency', 'cryptocurrency', 'index', 'commodity'].includes(
+                x.type.value
+              ),
             html`
               <section>
                 <div class="label-group">

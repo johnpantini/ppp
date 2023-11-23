@@ -21,8 +21,34 @@ export const columnTemplate = html`
 `;
 
 export class LastPriceColumn extends Column {
+  #higlLightTimer;
+
   @observable
   lastPrice;
+
+  lastPriceChanged(oldValue, newValue) {
+    if (
+      typeof oldValue === 'number' &&
+      typeof newValue === 'number' &&
+      this.constructor.name === 'LastPriceColumn'
+    ) {
+      if (this.datum.highlightLastPriceChanges) {
+        if (oldValue !== newValue) {
+          clearTimeout(this.#higlLightTimer);
+          this.classList.remove('positive');
+          this.classList.remove('negative');
+
+          const newCls = oldValue < newValue ? 'positive' : 'negative';
+
+          this.classList.add(newCls);
+
+          this.#higlLightTimer = setTimeout(() => {
+            this.classList.remove(newCls);
+          }, 350);
+        }
+      }
+    }
+  }
 
   async connectedCallback() {
     await super.connectedCallback();

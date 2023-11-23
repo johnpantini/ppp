@@ -82,7 +82,12 @@ const portfolioSection = ({ title, section }) =>
             html`
               <td
                 class="cell"
-                :datum="${(x, c) => c.parent}"
+                :datum="${(x, c) => {
+                  c.parent.highlightLastPriceChanges =
+                    !!c.parentContext.parent.document.highlightLastPriceChanges;
+
+                  return c.parent;
+                }}"
                 :column="${(x) => x}"
               >
                 ${(x, c) => c.parentContext.parent.columns.columnElement(x)}
@@ -421,6 +426,8 @@ export class PortfolioWidget extends WidgetWithInstrument {
       $set: {
         portfolioTraderId: this.container.portfolioTraderId.value,
         hideBalances: this.container.hideBalances.checked,
+        highlightLastPriceChanges:
+          this.container.highlightLastPriceChanges.checked,
         columns: this.container.columnList.value
       }
     };
@@ -505,6 +512,12 @@ export async function widgetDefinition() {
               ${ref('hideBalances')}
             >
               Скрывать суммы валютных балансов
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.highlightLastPriceChanges}"
+              ${ref('highlightLastPriceChanges')}
+            >
+              Выделять изменения цены цветом
             </ppp-checkbox>
           </div>
         </ppp-tab-panel>

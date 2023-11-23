@@ -66,8 +66,10 @@ export const marqueeWidgetTemplate = html`
                         <span
                           ?hidden="${(x) => !x.showPrice}"
                           :trader="${(x) => x.pppTrader}"
-                          :datum="${(x) => ({
-                            instrument: x.pppTrader?.instruments?.get(x.symbol)
+                          :datum="${(x, c) => ({
+                            instrument: x.pppTrader?.instruments?.get(x.symbol),
+                            highlightLastPriceChanges:
+                              c.parent.document.highlightLastPriceChanges
                           })}"
                           class="price"
                         >
@@ -319,7 +321,9 @@ export class MarqueeWidget extends WidgetWithInstrument {
       $set: {
         snapToLeft: this.container.snapToLeft.checked,
         snapToRight: this.container.snapToRight.checked,
-        marquee: this.container.marqueeList.value
+        marquee: this.container.marqueeList.value,
+        highlightLastPriceChanges:
+          this.container.highlightLastPriceChanges.checked
       }
     };
   }
@@ -339,7 +343,7 @@ export async function widgetDefinition() {
     }).define(),
     minWidth: 115,
     minHeight: 32,
-    defaultWidth: 335,
+    defaultWidth: 360,
     settings: html`
       <ppp-tabs activeid="main">
         <ppp-tab id="instruments">Инструменты</ppp-tab>
@@ -422,6 +426,21 @@ export async function widgetDefinition() {
                   ${ref('snapToRight')}
                 >
                   Справа
+                </ppp-checkbox>
+              </div>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интерфейс</h5>
+            </div>
+            <div class="widget-settings-input-group">
+              <div class="control-stack">
+                <ppp-checkbox
+                  ?checked="${(x) => x.document.highlightLastPriceChanges}"
+                  ${ref('highlightLastPriceChanges')}
+                >
+                  Выделять изменения цены цветом
                 </ppp-checkbox>
               </div>
             </div>

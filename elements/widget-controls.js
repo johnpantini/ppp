@@ -558,7 +558,10 @@ export const widgetSearchControlTemplate = html`
               !x.bonds.length &&
               !x.etfs.length &&
               !x.futures.length &&
-              !x.cryptocurrencies.length,
+              !x.cryptocurrencies.length &&
+              !x.currencies.length &&
+              !x.commodities.length &&
+              !x.indices.length,
             html`
               ${html.partial(
                 widgetEmptyStateTemplate('Нет результатов для отображения.')
@@ -734,11 +737,107 @@ export const widgetSearchControlTemplate = html`
             `
           )}
           ${when(
+            (x) => x.currencies.length,
+            html`
+              <div class="menu-title">Валютные пары</div>
+              ${repeat(
+                (x) => x.currencies,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
+                        <div
+                          class="menu-item-icon-logo"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
+                        ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
             (x) => x.cryptocurrencies.length,
             html`
               <div class="menu-title">Криптовалютные пары</div>
               ${repeat(
                 (x) => x.cryptocurrencies,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
+                        <div
+                          class="menu-item-icon-logo"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
+                        ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
+            (x) => x.indices.length,
+            html`
+              <div class="menu-title">Индексы</div>
+              ${repeat(
+                (x) => x.indices,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
+                        <div
+                          class="menu-item-icon-logo"
+                          style="${(x, c) =>
+                            `background-image:url(${c.parent.getInstrumentIconUrl(
+                              x
+                            )})`}"
+                        ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
+            (x) => x.commodities.length,
+            html`
+              <div class="menu-title">Товары</div>
+              ${repeat(
+                (x) => x.commodities,
                 html`
                   <div
                     class="menu-item"
@@ -1115,6 +1214,15 @@ export class WidgetSearchControl extends PPPOffClickElement {
   @observable
   cryptocurrencies;
 
+  @observable
+  currencies;
+
+  @observable
+  commodities;
+
+  @observable
+  indices;
+
   constructor() {
     super();
 
@@ -1124,6 +1232,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
     this.etfs = [];
     this.futures = [];
     this.cryptocurrencies = [];
+    this.currencies = [];
+    this.commodities = [];
+    this.indices = [];
   }
 
   connectedCallback() {
@@ -1262,6 +1373,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
         this.etfs = [];
         this.futures = [];
         this.cryptocurrencies = [];
+        this.currencies = [];
+        this.commodities = [];
+        this.indices = [];
 
         [
           startsWithSymbolMatches,
@@ -1277,6 +1391,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
             else if (i.type === 'etf') this.etfs.push(i);
             else if (i.type === 'future') this.futures.push(i);
             else if (i.type === 'cryptocurrency') this.cryptocurrencies.push(i);
+            else if (i.type === 'currency') this.currencies.push(i);
+            else if (i.type === 'commodity') this.commodities.push(i);
+            else if (i.type === 'index') this.indices.push(i);
 
             seen[i.symbol] = true;
           }
@@ -1293,6 +1410,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
         this.etfs = [];
         this.futures = [];
         this.cryptocurrencies = [];
+        this.currencies = [];
+        this.commodities = [];
+        this.indices = [];
         this.ticker = null;
       } finally {
         this.searching = false;
@@ -1304,6 +1424,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
       this.etfs = [];
       this.futures = [];
       this.cryptocurrencies = [];
+      this.currencies = [];
+      this.commodities = [];
+      this.indices = [];
       this.ticker = null;
       this.searching = false;
     }
