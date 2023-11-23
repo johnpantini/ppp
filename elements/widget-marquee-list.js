@@ -79,9 +79,7 @@ export const widgetMarqueeListTemplate = html`
                       button,
                       trader: await c.parent
                         .getRootNode()
-                        .host.denormalization.denormalize(
-                          c.parent?.traders?.find((t) => t._id === x.traderId)
-                        )
+                        .host.denormalization.denormalize(traderId.datum())
                     });
                   }}"
                 >

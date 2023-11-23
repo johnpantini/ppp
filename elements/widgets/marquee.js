@@ -355,7 +355,7 @@ export class MarqueeWidget extends WidgetWithInstrument {
         this.columnsBySource.set(column.source, column);
       });
 
-      for (const m of this.document.marquee) {
+      for (const m of this.document.marquee ?? []) {
         if (m.hidden) {
           continue;
         }
