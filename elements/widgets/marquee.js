@@ -27,6 +27,7 @@ import {
   StaleInstrumentCacheError,
   NoInstrumentsError
 } from '../../lib/ppp-exceptions.js';
+import { invalidate } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
@@ -441,39 +442,57 @@ export async function widgetDefinition() {
                   );
 
                 if (widget) {
-                  widget.instrumentTrader = await ppp.getOrCreateTrader(trader);
-                  widget.searchControl.open = true;
+                  try {
+                    widget.instrumentTrader = await ppp.getOrCreateTrader(
+                      trader
+                    );
+                  } catch (e) {
+                    if (e instanceof NoInstrumentsError) {
+                      widget.importNeeded = true;
+                      widget.traderError = e;
 
-                  const notifier = Observable.getNotifier(widget);
-                  const instrumentListener = {
-                    handleChange: () => {
-                      symbol.value = widget.instrument?.symbol ?? '';
-                      widget.searchControl.open = false;
+                      invalidate(ppp.app.toast, {
+                        errorMessage:
+                          'Один или более трейдеров требуют импортировать инструменты кнопкой в заголовке виджета. Затем обновите страницу.'
+                      });
+
+                      return;
                     }
-                  };
-                  const searchControlListener = {
-                    handleChange: () => {
-                      if (!widget.searchControl.open) {
-                        notifier.unsubscribe(instrumentListener, 'instrument');
-                        Observable.getNotifier(
-                          widget.searchControl
-                        ).unsubscribe(searchControlListener, 'open');
-                      }
-                    }
-                  };
-
-                  Observable.getNotifier(widget.searchControl).subscribe(
-                    searchControlListener,
-                    'open'
-                  );
-
-                  notifier.subscribe(instrumentListener, 'instrument');
-
-                  Updates.enqueue(() =>
-                    widget.searchControl.suggestInput.focus()
-                  );
+                  }
                 }
-              }}"
+
+                widget.searchControl.open = true;
+
+                const notifier = Observable.getNotifier(widget);
+                const instrumentListener = {
+                  handleChange: () => {
+                    symbol.value = widget.instrument?.symbol ?? '';
+                    widget.searchControl.open = false;
+                  }
+                };
+                const searchControlListener = {
+                  handleChange: () => {
+                    if (!widget.searchControl.open) {
+                      notifier.unsubscribe(instrumentListener, 'instrument');
+                      Observable.getNotifier(widget.searchControl).unsubscribe(
+                        searchControlListener,
+                        'open'
+                      );
+                    }
+                  }
+                };
+
+                Observable.getNotifier(widget.searchControl).subscribe(
+                  searchControlListener,
+                  'open'
+                );
+
+                notifier.subscribe(instrumentListener, 'instrument');
+
+                Updates.enqueue(() =>
+                  widget.searchControl.suggestInput.focus()
+                );
+              }}}"
               ${ref('marqueeList')}
               :stencil="${() => {
                 return {};
