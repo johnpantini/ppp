@@ -56,7 +56,8 @@ export default function (i18n) {
         [COLUMN_SOURCE.PL_ABSOLUTE]: 'Доход',
         [COLUMN_SOURCE.PL_RELATIVE]: 'Доход, %',
         [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
-        [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя'
+        [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
+        [COLUMN_SOURCE.TOTAL_AMOUNT]: 'Стоимость'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

@@ -23,7 +23,7 @@ export const columnTemplate = html`
           ${(cell) =>
             formatAbsoluteChange(
               cell.lastPriceAbsoluteChange,
-              cell.datum?.instrument
+              cell.payload?.instrument
             )}
         </span>
       `

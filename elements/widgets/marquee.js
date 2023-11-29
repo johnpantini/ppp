@@ -6,7 +6,6 @@ import {
   css,
   ref,
   observable,
-  Observable,
   repeat,
   when,
   Updates
@@ -110,7 +109,7 @@ export const marqueeWidgetTemplate = html`
                         <span
                           ?hidden="${(x) => !x.showPrice}"
                           :trader="${(x) => x.pppTrader}"
-                          :datum="${(x, c) => ({
+                          :payload="${(x, c) => ({
                             instrument: x.pppTrader?.instruments?.get(x.symbol),
                             highlightLastPriceChanges:
                               c.parent.document.highlightLastPriceChanges
@@ -127,7 +126,7 @@ export const marqueeWidgetTemplate = html`
                         <span
                           ?hidden="${(x) => !x.showAbsoluteChange}"
                           :trader="${(x) => x.pppTrader}"
-                          :datum="${(x) => ({
+                          :payload="${(x) => ({
                             instrument: x.pppTrader?.instruments?.get(x.symbol)
                           })}"
                           class="price"
@@ -142,7 +141,7 @@ export const marqueeWidgetTemplate = html`
                         <span
                           ?hidden="${(x) => !x.showRelativeChange}"
                           :trader="${(x) => x.pppTrader}"
-                          :datum="${(x) => ({
+                          :payload="${(x) => ({
                             instrument: x.pppTrader?.instruments?.get(x.symbol)
                           })}"
                           class="price"
@@ -442,6 +441,8 @@ export async function widgetDefinition() {
                   );
 
                 if (widget) {
+                  widget.searchControl.reset();
+
                   try {
                     widget.instrumentTrader = await ppp.getOrCreateTrader(
                       trader
@@ -459,39 +460,35 @@ export async function widgetDefinition() {
                       return;
                     }
                   }
-                }
 
-                widget.searchControl.open = true;
+                  widget.searchControl.open = true;
 
-                const notifier = Observable.getNotifier(widget);
-                const instrumentListener = {
-                  handleChange: () => {
+                  const listener = () => {
                     symbol.value = widget.instrument?.symbol ?? '';
-                    widget.searchControl.open = false;
+
+                    widget.searchControl.removeEventListener(
+                      'chooseinstrument',
+                      listener
+                    );
+
+                    widget.pppMarqueeLocked = false;
+
+                    widget.container.applyModifications();
+                  };
+
+                  if (!widget.pppMarqueeLocked) {
+                    widget.pppMarqueeLocked = true;
+
+                    widget.searchControl.addEventListener(
+                      'chooseinstrument',
+                      listener
+                    );
                   }
-                };
-                const searchControlListener = {
-                  handleChange: () => {
-                    if (!widget.searchControl.open) {
-                      notifier.unsubscribe(instrumentListener, 'instrument');
-                      Observable.getNotifier(widget.searchControl).unsubscribe(
-                        searchControlListener,
-                        'open'
-                      );
-                    }
-                  }
-                };
 
-                Observable.getNotifier(widget.searchControl).subscribe(
-                  searchControlListener,
-                  'open'
-                );
-
-                notifier.subscribe(instrumentListener, 'instrument');
-
-                Updates.enqueue(() =>
-                  widget.searchControl.suggestInput.focus()
-                );
+                  Updates.enqueue(() =>
+                    widget.searchControl.suggestInput.focus()
+                  );
+                }
               }}}"
               ${ref('marqueeList')}
               :stencil="${() => {

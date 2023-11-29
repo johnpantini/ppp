@@ -118,10 +118,15 @@ export const widgetUnsupportedInstrumentTemplate = () => html`
   )}
 `;
 
-export const widgetWithInstrumentBodyTemplate = (widgetBodyLayout) => html`
+export const widgetWithInstrumentBodyTemplate = (
+  widgetBodyLayout,
+  options = {}
+) => html`
   ${when(
     (x) => !x.instrument?.symbol,
-    html`${html.partial(widgetEmptyStateTemplate('Выберите инструмент.'))}`
+    html`${html.partial(
+      widgetEmptyStateTemplate(options.emptyStateText ?? 'Выберите инструмент.')
+    )}`
   )}
   ${widgetUnsupportedInstrumentTemplate()}
   ${when(

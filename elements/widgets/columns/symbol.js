@@ -5,7 +5,7 @@ import '../../button.js';
 
 export const columnTemplate = html`
   <template>
-    <span> ${(cell) => cell.datum?.symbol} </span>
+    <span> ${(cell) => cell.payload?.symbol} </span>
   </template>
 `;
 

@@ -82,7 +82,7 @@ const portfolioSection = ({ title, section }) =>
             html`
               <td
                 class="cell"
-                :datum="${(x, c) => {
+                :payload="${(x, c) => {
                   c.parent.highlightLastPriceChanges =
                     !!c.parentContext.parent.document.highlightLastPriceChanges;
 
@@ -118,7 +118,7 @@ export const portfolioWidgetTemplate = html`
           <thead>
             <tr>
               ${repeat(
-                (x) => x.columns?.array,
+                (x) => x?.columns?.array,
                 html`
                   <th source="${(x) => x.source}">
                     <div class="resize-handle"></div>
@@ -145,7 +145,7 @@ export const portfolioWidgetTemplate = html`
                     html`
                       <td
                         class="cell"
-                        :datum="${(x, c) => c.parent}"
+                        :payload="${(x, c) => c.parent}"
                         :column="${(x) => x}"
                       >
                         ${(x, c) =>
@@ -529,12 +529,6 @@ export async function widgetDefinition() {
             <div class="spacing2"></div>
             <ppp-widget-column-list
               ${ref('columnList')}
-              :mainTraderColumns="${() => [
-                COLUMN_SOURCE.INSTRUMENT,
-                COLUMN_SOURCE.SYMBOL,
-                COLUMN_SOURCE.POSITION_AVAILABLE,
-                COLUMN_SOURCE.POSITION_AVERAGE
-              ]}"
               :stencil="${() => {
                 return {
                   source: COLUMN_SOURCE.SYMBOL,

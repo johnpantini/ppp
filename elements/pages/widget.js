@@ -157,7 +157,7 @@ export const widgetTypeRadioStyles = css`
   }
 
   :host([disabled]) {
-    display: none;
+    display: none !important;
   }
 `;
 
@@ -260,7 +260,8 @@ export const widgetPageTemplate = html`
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
-                              x.document._id && x.document.type !== 'list'}"
+                              true ||
+                              (x.document._id && x.document.type !== 'list')}"
                             value="list"
                           >
                             <span slot="text">Список/таблица</span>
@@ -326,8 +327,8 @@ export const widgetPageTemplate = html`
                           <div class="widget-settings-label-group">
                             <h5>Название</h5>
                             <p class="description">
-                              Название отображается в заголовке (если виджет его
-                              поддерживает).
+                              Название (если виджет поддерживает) отображается в
+                              заголовке.
                             </p>
                           </div>
                           <div class="widget-settings-input-group">
@@ -443,10 +444,7 @@ export const widgetPageTemplate = html`
                             </div>
                           `
                         )}
-                        ${when(
-                          (x) => x.widgetDefinition.settings,
-                          (x) => x.widgetDefinition.settings
-                        )}
+                        ${(x) => x.widgetDefinition?.settings}
                       </div>
                     </div>
                   </div>
@@ -805,6 +803,12 @@ export const widgetPageStyles = css`
     width: 100%;
     height: 180px;
   }
+
+  :host(.page.loader-visible) form {
+    opacity: 1;
+    pointer-events: all;
+    user-select: none;
+  }
 `;
 
 export class WidgetPage extends Page {
@@ -830,9 +834,16 @@ export class WidgetPage extends Page {
   @observable
   widgetDefinition;
 
+  @observable
+  extraSettings;
+
+  @observable
+  granary;
+
   constructor() {
     super();
 
+    this.granary = {};
     this.onChange = this.onChange.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
@@ -1311,7 +1322,14 @@ export class WidgetPage extends Page {
     // Discard input onChange
     if (event.type === 'change' && isTextFiled) return true;
 
-    if (cp.find((n) => n.classList?.contains('widget-area'))) return true;
+    if (
+      cp.find(
+        (n) =>
+          n.classList?.contains('widget-area') ||
+          n.classList?.contains('widget-ignore-changes')
+      )
+    )
+      return true;
 
     this.onChangeDelayed(event);
 
@@ -1372,7 +1390,9 @@ export class WidgetPage extends Page {
       this.document = Object.assign({}, documentAfterChanges ?? {});
 
       if (!this.document._id) {
-        this.document = await this.#denormalizePartialDocument();
+        await this.requestManualDenormalization();
+
+        this.document = await this.denormalization.denormalize(this.document);
       }
 
       if (this.url?.isConnected && this.document.type === 'custom') {
@@ -1420,14 +1440,15 @@ export class WidgetPage extends Page {
     }
   }
 
-  @debounce(100)
+  @debounce(300)
   onChangeDelayed(event) {
     this.beginOperation();
 
     return this.onChangeDelayedAsync(event);
   }
 
-  async #denormalizePartialDocument() {
+  // Needed when there is no document _id.
+  async requestManualDenormalization() {
     const lines = ((context) => {
       return context.services
         .get('mongodb-atlas')
@@ -1555,8 +1576,6 @@ export class WidgetPage extends Page {
     const [evalRequest] = await ppp.user.functions.eval(lines.join('\n'));
 
     this.denormalization.fillRefs(evalRequest);
-
-    return this.denormalization.denormalize(this.document);
   }
 
   statusChanged(oldValue, newValue) {
@@ -1596,6 +1615,9 @@ export class WidgetPage extends Page {
       Observable.notify(this, 'document');
       Updates.enqueue(() => (this.name.value = name));
     }
+
+    this.extraSettings = void 0;
+    this.granary = {};
 
     await this.loadWidget();
   }

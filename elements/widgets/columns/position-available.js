@@ -22,7 +22,7 @@ export const columnTemplate = html`
           class="balance-cell"
           ?hidden="${(x) => x.widget.document.hideBalances}"
         >
-          ${(cell) => formatAmount(cell.size, cell.datum?.symbol)}
+          ${(cell) => formatAmount(cell.size, cell.payload?.symbol)}
         </span>
       `
     )}

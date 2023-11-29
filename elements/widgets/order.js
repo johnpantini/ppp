@@ -558,8 +558,44 @@ export const orderWidgetTemplate = html`
               ${when(
                 (x) =>
                   x.instrument &&
-                  x.ordersTrader &&
-                  (x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_DESTINATION) ||
+                  x.ordersTrader?.hasCap(TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE),
+                html`
+                  <div class="widget-section">
+                    <div class="widget-margin-spacer"></div>
+                    <div class="widget-subsection">
+                      <div class="widget-subsection-item">
+                        <div class="widget-text-label">Отображаемый объём</div>
+                        <div class="widget-flex-line">
+                          <ppp-widget-trifecta-field
+                            kind="quantity"
+                            placeholder="Показывать весь объём"
+                            :instrument="${(x) => x.instrument}"
+                            :changeViaMouseWheel="${(x) =>
+                              x.document.changePriceQuantityViaMouseWheel}"
+                            value="${(x) => x.document?.lastDisplaySize || ''}"
+                            @pppstep="${(x) => {
+                              x.saveLastDisplaySizeValue();
+                            }}"
+                            @keydown=${(x, { event }) => {
+                              x.handleHotkeys(event);
+
+                              return true;
+                            }}
+                            @input=${(x) => {
+                              x.saveLastDisplaySizeValue();
+                            }}
+                            ${ref('displaySize')}
+                          ></ppp-widget-trifecta-field>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `
+              )}
+              ${when(
+                (x) =>
+                  x.instrument &&
+                  (x.ordersTrader?.hasCap(TRADER_CAPS.CAPS_ORDER_DESTINATION) ||
                     x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF)),
                 html`
                   <div class="widget-section">
@@ -1935,6 +1971,15 @@ export class OrderWidget extends WidgetWithInstrument {
     });
   }
 
+  @debounce(250)
+  saveLastDisplaySizeValue() {
+    return this.updateDocumentFragment({
+      $set: {
+        'widgets.$.lastDisplaySize': stringToFloat(this.displaySize.value)
+      }
+    });
+  }
+
   formatPositionSize() {
     let size = 0;
     let suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
@@ -1959,6 +2004,17 @@ export class OrderWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
+      let displaySize = stringToFloat(this.displaySize?.value);
+
+      if (
+        !(
+          typeof displaySize === 'number' &&
+          displaySize <= stringToFloat(this.quantity.value)
+        )
+      ) {
+        displaySize = void 0;
+      }
+
       if (this.orderTypeTabs?.activeid === 'limit') {
         if (typeof this.ordersTrader.placeLimitOrder !== 'function') {
           return this.notificationsArea.error({
@@ -1973,7 +2029,8 @@ export class OrderWidget extends WidgetWithInstrument {
           quantity: this.quantity.value,
           direction,
           destination: this.destination?.value,
-          tif: this.tif?.value
+          tif: this.tif?.value,
+          displaySize
         });
       } else if (this.orderTypeTabs?.activeid === 'market') {
         if (typeof this.ordersTrader.placeMarketOrder !== 'function') {
@@ -1988,7 +2045,8 @@ export class OrderWidget extends WidgetWithInstrument {
           quantity: this.quantity.value,
           direction,
           destination: this.destination?.value,
-          tif: this.tif?.value
+          tif: this.tif?.value,
+          displaySize
         });
       } else if (this.orderTypeTabs?.activeid === 'conditional') {
         return this.notificationsArea.note({

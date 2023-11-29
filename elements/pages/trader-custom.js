@@ -90,7 +90,7 @@ export class TraderCustomPage extends Page {
         traderUrl = new URL(url ?? this.url.value);
       } catch (e) {
         invalidate(this.url, {
-          errorMessage: 'Неверный или неполный URL',
+          errorMessage: 'Этот URL не может быть использован',
           raiseException: true
         });
       }

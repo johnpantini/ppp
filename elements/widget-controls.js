@@ -1227,6 +1227,11 @@ export class WidgetSearchControl extends PPPOffClickElement {
     super();
 
     this.open = false;
+
+    this.reset();
+  }
+
+  reset() {
     this.stocks = [];
     this.bonds = [];
     this.etfs = [];
@@ -1235,6 +1240,8 @@ export class WidgetSearchControl extends PPPOffClickElement {
     this.currencies = [];
     this.commodities = [];
     this.indices = [];
+    this.activeItem = null;
+    this.ticker = null;
   }
 
   connectedCallback() {
@@ -1333,6 +1340,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
 
     this.open = false;
     this.suggestInput.value = '';
+    this.$emit('chooseinstrument', this);
   }
 
   handleClick({ event }) {
@@ -1368,14 +1376,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
 
         const seen = {};
 
-        this.stocks = [];
-        this.bonds = [];
-        this.etfs = [];
-        this.futures = [];
-        this.cryptocurrencies = [];
-        this.currencies = [];
-        this.commodities = [];
-        this.indices = [];
+        this.reset();
 
         [
           startsWithSymbolMatches,
@@ -1404,30 +1405,13 @@ export class WidgetSearchControl extends PPPOffClickElement {
         });
       } catch (e) {
         console.error(e);
-
-        this.stocks = [];
-        this.bonds = [];
-        this.etfs = [];
-        this.futures = [];
-        this.cryptocurrencies = [];
-        this.currencies = [];
-        this.commodities = [];
-        this.indices = [];
-        this.ticker = null;
+        this.reset();
       } finally {
         this.searching = false;
       }
     } else {
-      this.activeItem = null;
-      this.stocks = [];
-      this.bonds = [];
-      this.etfs = [];
-      this.futures = [];
-      this.cryptocurrencies = [];
-      this.currencies = [];
-      this.commodities = [];
-      this.indices = [];
-      this.ticker = null;
+      this.reset();
+
       this.searching = false;
     }
   }
@@ -1752,7 +1736,7 @@ export const widgetNotificationsAreaTemplate = html`
     <div class="widget-notification-ps">
       <div class="widget-notification-holder">
         ${when(
-          (x) => x.title,
+          (x) => x?.title,
           html`
             <div
               class="widget-notification"
@@ -1938,7 +1922,7 @@ export class WidgetNotificationsArea extends PPPElement {
 
   #appearance({
     status,
-    title = this.widget.document.name ?? 'Виджет',
+    title = this.widget.document.name || 'Виджет',
     text,
     keep,
     timeout
@@ -1954,7 +1938,6 @@ export class WidgetNotificationsArea extends PPPElement {
     this.text = text;
 
     this.removeAttribute('hidden');
-
     clearTimeout(this.#timeout);
 
     if (!keep) {

@@ -24,10 +24,11 @@ class Column extends PPPElement {
   @observable
   widget;
 
-  // Instrument and symbol
+  // Instrument and symbol and any other column private data are here.
   @observable
-  datum;
+  payload;
 
+  /** @type {WidgetColumn} */
   @observable
   column;
 
@@ -45,17 +46,18 @@ class Column extends PPPElement {
 
     this.sourceID = uuidv4();
     this.widget = this.getRootNode().host;
-    this.datum = this.parentNode.datum;
+    this.payload = this.parentNode.payload;
     this.column = this.parentNode.column;
     this.isBalance = this.hasAttribute('balance');
-    this.defaultTrader = this.parentNode.trader ?? this.widget.instrumentTrader;
+    this.defaultTrader =
+      this.parentNode.trader ?? this.widget?.instrumentTrader;
 
-    if (this.datum?.instrument) {
-      this.instrument = this.datum.instrument;
+    if (this.payload?.instrument) {
+      this.instrument = this.payload.instrument;
     }
 
     const { trader, extraTrader } =
-      await this.widget.container.denormalization.denormalize(this.column);
+      await this.widget?.container.denormalization.denormalize(this.column);
 
     if (trader || extraTrader) {
       this.trader = await ppp.getOrCreateTrader(trader);

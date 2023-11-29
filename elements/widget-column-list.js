@@ -18,7 +18,7 @@ export const widgetColumnListTemplate = html`
       ${ref('dragList')}
     >
       ${repeat(
-        (x) => x.list,
+        (x) => x.list ?? [],
         html`
           <div class="control-line draggable main-line">
             ${dragControlsTemplate()}
@@ -35,16 +35,19 @@ export const widgetColumnListTemplate = html`
                 column-trader
                 deselectable
                 standalone
-                ?disabled="${(x, c) =>
-                  x.hidden ||
-                  (
-                    c.parent.mainTraderColumns ?? [
-                      COLUMN_SOURCE.INSTRUMENT,
-                      COLUMN_SOURCE.SYMBOL,
-                      COLUMN_SOURCE.POSITION_AVAILABLE,
-                      COLUMN_SOURCE.POSITION_AVERAGE
-                    ]
-                  ).includes(x.source)}"
+                ?disabled="${(x, c) => {
+                  return (
+                    x.hidden ||
+                    (
+                      c.parent.mainTraderColumns ?? [
+                        COLUMN_SOURCE.INSTRUMENT,
+                        COLUMN_SOURCE.SYMBOL,
+                        COLUMN_SOURCE.POSITION_AVAILABLE,
+                        COLUMN_SOURCE.POSITION_AVERAGE
+                      ]
+                    ).includes(x.source)
+                  );
+                }}"
                 value="${(x) => x.traderId}"
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
@@ -76,7 +79,7 @@ export const widgetColumnListTemplate = html`
                 placeholder="${(x, c) =>
                   ppp.t(`$const.columnSource.${c.source?.source}`)}"
                 @change="${(x, c) => {
-                  const hidden = (
+                  const disabled = (
                     c.parent.mainTraderColumns ?? [
                       COLUMN_SOURCE.INSTRUMENT,
                       COLUMN_SOURCE.SYMBOL,
@@ -85,19 +88,21 @@ export const widgetColumnListTemplate = html`
                     ]
                   ).includes(c.event.detail.value);
 
-                  if (hidden) {
+                  if (disabled) {
                     c.event.detail.nextElementSibling.setAttribute(
-                      'hidden',
+                      'disabled',
                       ''
                     );
                     c.event.detail.parentNode.previousElementSibling.lastElementChild.setAttribute(
-                      'hidden',
+                      'disabled',
                       ''
                     );
                   } else {
-                    c.event.detail.nextElementSibling.removeAttribute('hidden');
+                    c.event.detail.nextElementSibling.removeAttribute(
+                      'disabled'
+                    );
                     c.event.detail.parentNode.previousElementSibling.lastElementChild.removeAttribute(
-                      'hidden'
+                      'disabled'
                     );
                   }
                 }}"
@@ -162,6 +167,7 @@ export class WidgetColumnList extends ClonableList {
   @observable
   availableColumns;
 
+  // Only the main trader can modify.
   @observable
   mainTraderColumns;
 

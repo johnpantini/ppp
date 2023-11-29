@@ -48,6 +48,12 @@ export const tradersPageTemplate = html`
                 <ppp-side-nav-item slug="" ?active="${(x) => !x.activeItem}">
                   <span>Все трейдеры</span>
                 </ppp-side-nav-item>
+                <ppp-side-nav-item
+                  slug="removed"
+                  ?active="${(x) => x.activeItem === 'removed'}"
+                >
+                  <span>Удалённые трейдеры</span>
+                </ppp-side-nav-item>
               </ppp-side-nav-group>
               <ppp-side-nav-group>
                 <span slot="title">Или по типу</span>
@@ -79,7 +85,8 @@ export const tradersPageTemplate = html`
 
                 x.cleanupFromListing({
                   pageName: `trader-${type}`,
-                  documentId: c.event.detail.datum._id
+                  documentId: c.event.detail.datum._id,
+                  removed: c.event.detail.datum.removed
                 });
               }}"
               :columns="${() => [
@@ -197,8 +204,12 @@ export class TradersPage extends Page {
         .db('ppp')
         .collection('[%#this.collection%]')
         .find({
-          removed: { $ne: true },
-          type: '[%#this.activeItem%]' || { $exists: true }
+          removed: {
+            '[%#(this.activeItem === "removed" ? "$eq" : "$ne")%]': true
+          },
+          type: '[%#(this.activeItem === "removed" ? "" : this.activeItem)%]' || {
+            $exists: true
+          }
         })
         .sort({ updatedAt: -1 });
     };

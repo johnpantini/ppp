@@ -13,7 +13,7 @@ export const columnTemplate = html`
       (x) => !x.isBalance,
       html`
         <span>
-          ${(cell) => formatPrice(cell.lastPrice, cell.datum?.instrument)}
+          ${(cell) => formatPrice(cell.lastPrice, cell.payload?.instrument)}
         </span>
       `
     )}
@@ -32,7 +32,7 @@ export class LastPriceColumn extends Column {
       typeof newValue === 'number' &&
       this.constructor.name === 'LastPriceColumn'
     ) {
-      if (this.datum.highlightLastPriceChanges) {
+      if (this.payload.highlightLastPriceChanges) {
         if (oldValue !== newValue) {
           clearTimeout(this.#higlLightTimer);
           this.classList.remove('positive');

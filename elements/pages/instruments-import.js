@@ -69,7 +69,9 @@ export const instrumentsImportPageTemplate = html`
         </div>
       </section>
       ${when(
-        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS,
+        (x) =>
+          x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS ||
+          x.dictionary.value === INSTRUMENT_DICTIONARY.IB,
         html`
           <section>
             <div class="label-group">
@@ -295,41 +297,35 @@ export class InstrumentsImportPage extends Page {
   }
 
   async [INSTRUMENT_DICTIONARY.IB]() {
-    const rUtexStocks = await ppp.fetch(
-      'https://ususdt-api-margin.utex.io/rest/grpc/com.unitedtraders.luna.utex.protocol.mobile.MobileMetaService.getSymbolsIncludingMargin',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      }
-    );
+    await validate(this.dictionaryUrl);
 
-    await maybeFetchError(
-      rUtexStocks,
-      'Не удалось загрузить список инструментов.'
-    );
+    const rStocks = await ppp.fetch(this.dictionaryUrl.value);
 
-    const stocks = await rUtexStocks.json();
-    const { symbolsInfo } = stocks;
+    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
 
-    return symbolsInfo
+    const stocks = await rStocks.json();
+    const psinaSkipOTC = this.psinaSkipOTC.checked;
+
+    return stocks
       .filter((s) => {
-        return (
-          s.tagetCurrencyInfo?.description &&
-          s.baseCurrencyInfo?.code === 'M_USDT' &&
-          !/\:/.test(s.tagetCurrencyInfo.code)
-        );
+        if (psinaSkipOTC) {
+          return !s.realExchange?.startsWith('OTC');
+        } else {
+          return true;
+        }
       })
       .map((s) => {
         return {
-          symbol: s.tagetCurrencyInfo.code.split('M_')[1].replace('/', ' '),
+          symbol: s.symbol.replace('-', ' '),
           exchange: EXCHANGE.US,
           broker: BROKERS.IB,
-          fullName: s.tagetCurrencyInfo.description,
+          fullName: s.fullName,
           minPriceIncrement: 0,
-          type: 'stock',
+          type:
+            s.fullName.toUpperCase().endsWith(' ETF') ||
+            /Invesco|ProShares|iShares/i.test(s.fullName)
+              ? 'etf'
+              : 'stock',
           currency: 'USD',
           forQualInvestorFlag: false,
           lot: 1

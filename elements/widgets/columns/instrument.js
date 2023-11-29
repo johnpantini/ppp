@@ -24,10 +24,12 @@ export const columnTemplate = html`
             class="logo"
             style="${(cell) =>
               `background-image:url(${
-                'static/currency/' + cell.datum?.symbol + '.svg'
+                'static/currency/' + cell.payload?.symbol + '.svg'
               })`}"
           ></div>
-          <div class="name">${(cell) => currencyName(cell.datum?.symbol)}</div>
+          <div class="name">
+            ${(cell) => currencyName(cell.payload?.symbol)}
+          </div>
         </div>
       `
     )}
@@ -39,13 +41,13 @@ export const columnTemplate = html`
             class="logo"
             style="${(cell) =>
               `background-image:url(${cell.widget?.searchControl?.getInstrumentIconUrl(
-                cell.datum?.instrument
+                cell.payload?.instrument
               )})`}"
           ></div>
           <div class="name">
             ${(cell) =>
-              cell.datum?.instrument?.fullName ??
-              cell.datum?.instrument?.symbol}
+              cell.payload?.instrument?.fullName ??
+              cell.payload?.instrument?.symbol}
           </div>
         </div>
       `

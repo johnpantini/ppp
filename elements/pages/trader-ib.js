@@ -216,7 +216,8 @@ export class TraderIbPage extends Page {
         TRADER_CAPS.CAPS_POSITIONS,
         TRADER_CAPS.CAPS_TIMELINE,
         TRADER_CAPS.CAPS_ORDER_DESTINATION,
-        TRADER_CAPS.CAPS_ORDER_TIF
+        TRADER_CAPS.CAPS_ORDER_TIF,
+        TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE
       ],
       version: 1,
       type: TRADERS.IB,

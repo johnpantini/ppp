@@ -72,14 +72,16 @@ export const widgetMarqueeListTemplate = html`
                     const cp = c.event.composedPath();
                     const button = cp[0].getRootNode().host;
                     const traderId = button.parentNode.previousElementSibling;
+                    const container = c.parent.getRootNode().host;
 
                     await validate(traderId);
+                    await container.requestManualDenormalization();
 
                     return c.parent.$emit('marqueesearch', {
                       button,
-                      trader: await c.parent
-                        .getRootNode()
-                        .host.denormalization.denormalize(traderId.datum())
+                      trader: await container.denormalization.denormalize(
+                        traderId.datum()
+                      )
                     });
                   }}"
                 >

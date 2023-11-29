@@ -834,17 +834,17 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
           if (price === bookPriceAtThisLevel) {
             if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
-              orderbook.bids.splice(i, 0, {
+              orderbook.bids[i] = {
                 price,
-                volume,
+                volume: orderbook.bids[i].volume,
                 my: volume,
-                pool: this.#getMyOrderPool()
-              });
+                pool: orderbook.bids[i].pool
+              };
             } else {
               orderbook.bids[i].my = volume;
 
-              if (orderbook.bids[i].volume < volume)
-                orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
+              // if (orderbook.bids[i].volume < volume)
+              //   orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
             }
 
             insertAtTheEnd = false;
@@ -888,17 +888,17 @@ export class OrderbookWidget extends WidgetWithInstrument {
           if (price === bookPriceAtThisLevel) {
             // Always display fake pool
             if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
-              orderbook.asks.splice(i, 0, {
+              orderbook.asks[i] = {
                 price,
-                volume,
+                volume: orderbook.asks[i].volume,
                 my: volume,
-                pool: this.#getMyOrderPool()
-              });
+                pool: orderbook.asks[i].pool
+              };
             } else {
               orderbook.asks[i].my = volume;
 
-              if (orderbook.asks[i].volume < volume)
-                orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
+              // if (orderbook.asks[i].volume < volume)
+              //   orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
             }
 
             insertAtTheEnd = false;

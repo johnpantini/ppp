@@ -16,7 +16,7 @@ export const columnTemplate = html`
         <span
           class="${(x) => (x.pl > 0 ? 'positive' : x.pl < 0 ? 'negative' : '')}"
         >
-          ${(cell) => formatAbsoluteChange(cell.pl, cell.datum?.instrument)}
+          ${(cell) => formatAbsoluteChange(cell.pl, cell.payload?.instrument)}
         </span>
       `
     )}
@@ -34,11 +34,11 @@ export class PLAbsoluteColumn extends LastPriceColumn {
   averagePrice;
 
   recalculate() {
-    if (this.datum.instrument) {
+    if (this.payload.instrument) {
       this.pl =
         (this.lastPrice - this.averagePrice) *
         this.size *
-        this.datum.instrument.lot;
+        this.payload.instrument.lot;
     }
   }
 

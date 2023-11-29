@@ -13,7 +13,7 @@ export const columnTemplate = html`
       (x) => !x.isBalance,
       html`
         <span>
-          ${(cell) => formatPrice(cell.averagePrice, cell.datum?.instrument)}
+          ${(cell) => formatPrice(cell.averagePrice, cell.payload?.instrument)}
         </span>
       `
     )}
