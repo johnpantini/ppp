@@ -671,6 +671,8 @@ class Page extends PPPElement {
         this.endOperation();
       }
     } else {
+      this.transformCalled = true;
+
       this.status = PAGE_STATUS.READY;
     }
   }
