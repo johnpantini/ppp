@@ -3177,7 +3177,7 @@ export const widgetCardTemplate = html`
                 </div>
               </span>
             </div>
-            <span>
+            <span style="text-align: right;">
               <slot name="title-right"></slot>
             </span>
           </div>

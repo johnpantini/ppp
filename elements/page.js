@@ -481,6 +481,9 @@ class Page extends PPPElement {
   @observable
   documents;
 
+  @observable
+  transformCalled;
+
   @attr
   status;
 
@@ -559,9 +562,11 @@ class Page extends PPPElement {
   }
 
   isSteady() {
-    return !(
-      this.status === PAGE_STATUS.NOT_READY ||
-      this.status === PAGE_STATUS.OPERATION_STARTED
+    return (
+      !(
+        this.status === PAGE_STATUS.NOT_READY ||
+        this.status === PAGE_STATUS.OPERATION_STARTED
+      ) && this.transformCalled
     );
   }
 
@@ -608,7 +613,7 @@ class Page extends PPPElement {
             );
           }
 
-          let document;
+          let doc;
 
           if (typeof readMethodResult === 'string') {
             const code = readMethodResult.split(/\r?\n/);
@@ -616,18 +621,17 @@ class Page extends PPPElement {
             code.pop();
             code.shift();
 
-            document = await ppp.user.functions.eval(code.join('\n'));
+            doc = await ppp.user.functions.eval(code.join('\n'));
 
             // [] for empty aggregations
-            if (!document || (Array.isArray(document) && !document.length)) {
+            if (!doc || (Array.isArray(doc) && !doc.length)) {
               // noinspection ExceptionCaughtLocallyJS
               throw new DocumentNotFoundError({ documentId });
             }
 
-            if (Array.isArray(document) && document.length === 1)
-              document = document[0];
+            if (Array.isArray(doc) && doc.length === 1) doc = doc[0];
 
-            this.document = await ppp.decrypt(document);
+            this.document = await ppp.decrypt(doc);
           } else {
             this.document = readMethodResult ?? {};
           }
@@ -655,6 +659,7 @@ class Page extends PPPElement {
           this.document = await this.transform(documentId);
         }
 
+        this.transformCalled = true;
         this.status = PAGE_STATUS.READY;
       } catch (e) {
         this.document = {};
