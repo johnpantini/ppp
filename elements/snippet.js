@@ -508,7 +508,10 @@ export class Snippet extends PPPAppearanceElement {
     this.control.value = code;
     this.codeHolder.innerHTML = escapeHtml(code);
     this.highlight();
-    this.$emit('input');
+    this.$emit('input', {
+      snippet: this,
+      origin: 'updateCode'
+    });
   }
 
   highlight() {

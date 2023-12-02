@@ -336,6 +336,9 @@ export class Select extends ListboxElement {
   @observable
   errorMessage;
 
+  @observable
+  wasOpenAtLeastOnce;
+
   @attr
   placeholder;
 
@@ -384,6 +387,8 @@ export class Select extends ListboxElement {
     this.ariaExpanded = this.open ? 'true' : 'false';
 
     if (this.open) {
+      this.wasOpenAtLeastOnce = true;
+
       this.setPositioning();
       this.focusAndScrollOptionIntoView();
       this.indexWhenOpened = this.selectedIndex;

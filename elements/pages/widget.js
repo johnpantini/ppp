@@ -47,6 +47,9 @@ import { normalize } from '../../design/styles.js';
 import { PAGE_STATUS, WIDGET_TYPES } from '../../lib/const.js';
 import { PPPElement } from '../../lib/ppp-element.js';
 import { TextField } from '../text-field.js';
+import { Select } from '../select.js';
+import { Tabs } from '../tabs.js';
+import { QuerySelect } from '../query-select.js';
 import { Snippet } from '../snippet.js';
 import '../badge.js';
 import '../banner.js';
@@ -1125,11 +1128,33 @@ export class WidgetPage extends Page {
     );
 
     if (this.mounted && this.parentNode.widget) {
-      return Object.assign(
-        {},
-        this.templateDocument,
-        await this.denormalization.denormalize(this.parentNode.widget.document)
+      // From workpace, merge with template.
+      const mergedDocument = {};
+      const liveDocument = await this.denormalization.denormalize(
+        this.parentNode.widget.document
       );
+      const foreignKeys = new Set();
+
+      for (const key in this.templateDocument) {
+        mergedDocument[key] = this.templateDocument[key];
+
+        if (key.endsWith('Id')) {
+          foreignKeys.add(key);
+        }
+      }
+
+      for (const key in liveDocument) {
+        mergedDocument[key] = liveDocument[key];
+      }
+
+      for (const key of foreignKeys) {
+        if (!(key in liveDocument)) {
+          mergedDocument[key.split('Id')[0]] = null;
+          mergedDocument[key] = null;
+        }
+      }
+
+      return mergedDocument;
     } else {
       return this.templateDocument;
     }
@@ -1161,6 +1186,12 @@ export class WidgetPage extends Page {
     }
 
     await later(100);
+
+    // The user has to proceed first.
+    if (this.document.type === 'custom' && !this.document._id) {
+      return;
+    }
+
     await super.submitDocument(options);
   }
 
@@ -1299,41 +1330,53 @@ export class WidgetPage extends Page {
   }
 
   onChange(event) {
+    if (!this.autoApplyWidgetModifications.checked || !this.isSteady()) return;
+
     const cp = event.composedPath();
 
-    if (cp.find((n) => n === this.widgetTypeSelector)) {
+    // Filter out tabs change event.
+    if (cp[0] instanceof Tabs) {
       return;
     }
 
-    if (cp?.[0].tagName?.toLowerCase() === 'ppp-tabs') {
-      return;
+    for (const node of cp) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        continue;
+      }
+
+      if (
+        node === this.widgetTypeSelector ||
+        node.classList?.contains('widget-area') ||
+        node.classList?.contains('widget-ignore-changes')
+      ) {
+        return;
+      }
+
+      const isTextField = node instanceof TextField || node instanceof Snippet;
+      const isSelect = node instanceof Select;
+      const isQuerySelect = node instanceof QuerySelect;
+
+      if (isSelect && typeof node.wasOpenAtLeastOnce === 'undefined') {
+        return;
+      }
+
+      if (
+        isQuerySelect &&
+        typeof node.control.wasOpenAtLeastOnce === 'undefined'
+      ) {
+        return;
+      }
+
+      // Discard input 'change' event.
+      if (event.type === 'change' && isTextField) return true;
+
+      // Snippets.
+      if (event.detail?.origin === 'updateCode' && isTextField) {
+        return;
+      }
     }
 
-    const isTextFiled = cp.find(
-      (n) => n instanceof TextField || n instanceof Snippet
-    );
-
-    if (!event.detail && !isTextFiled) {
-      return;
-    }
-
-    if (!this.autoApplyWidgetModifications.checked) return true;
-
-    // Discard input onChange
-    if (event.type === 'change' && isTextFiled) return true;
-
-    if (
-      cp.find(
-        (n) =>
-          n.classList?.contains('widget-area') ||
-          n.classList?.contains('widget-ignore-changes')
-      )
-    )
-      return true;
-
-    this.onChangeDelayed(event);
-
-    return true;
+    return this.onChangeDelayed(event);
   }
 
   async applyModifications() {
@@ -1630,6 +1673,7 @@ class WidgetPreview extends PPPElement {
   connectedCallback() {
     super.connectedCallback();
 
+    // Wait for the parent page (WidgetPage) transform first!
     this.wtagChanged(void 0, this.wtag);
   }
 
