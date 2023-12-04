@@ -8,7 +8,7 @@ class WidgetColumns {
 
   #registeredColumns = [];
 
-  constructor({ widget, columns = [] } = {}) {
+  constructor({ columns = [] } = {}) {
     this.#columns = columns;
   }
 
@@ -22,6 +22,7 @@ class WidgetColumns {
         let url = `${ppp.rootUrl}/elements/widgets/columns/${column.source}.js`;
 
         if (column.source === COLUMN_SOURCE.CLOUDFLARE_WORKER) {
+          // TODO: add support for cloudflare workers
         } else if (column.source === COLUMN_SOURCE.URL) {
           url = column.url;
         }

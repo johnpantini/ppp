@@ -40,9 +40,9 @@ export const dragControlsTemplate = () => html`
           throw new TypeError('Stencil must be an object.');
         }
 
-        const controlLine = c.event.composedPath()[0].closest('.control-line');
-        const index = Array.from(controlLine.parentNode.children).indexOf(
-          controlLine
+        const dragLine = c.event.composedPath()[0].closest('.draggable-line');
+        const index = Array.from(dragLine.parentNode.children).indexOf(
+          dragLine
         );
         const value = c.parent.value;
 
@@ -66,12 +66,12 @@ export const dragControlsTemplate = () => html`
       ?hidden="${(x, c) => c.parent.list?.length <= 1}"
       @click="${(x, c) => {
         const cp = c.event.composedPath();
-        const controlLine = cp[0].closest('.control-line');
-        const index = Array.from(controlLine.parentNode.children).indexOf(
-          controlLine
+        const dragLine = cp[0].closest('.draggable-line');
+        const index = Array.from(dragLine.parentNode.children).indexOf(
+          dragLine
         );
 
-        controlLine.remove();
+        dragLine.remove();
         c.parent.list.splice(index, 1);
 
         Array.from(

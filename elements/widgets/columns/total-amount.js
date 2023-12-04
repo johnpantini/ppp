@@ -1,10 +1,11 @@
 /** @decorator */
 
 import { html, observable, when } from '../../../vendor/fast-element.min.js';
-import { uuidv4 } from '../../../lib/ppp-crypto.js';
-import { formatAbsoluteChange, getUSMarketSession } from '../../../lib/intl.js';
-import { Column, columnStyles } from './column.js';
 import { TRADER_DATUM } from '../../../lib/const.js';
+import { LastPriceColumn } from './last-price.js';
+import { uuidv4 } from '../../../lib/ppp-crypto.js';
+import { columnStyles } from './column.js';
+import { formatAmount, getUSMarketSession } from '../../../lib/intl.js';
 
 export const columnTemplate = html`
   <template>
@@ -15,24 +16,18 @@ export const columnTemplate = html`
         <div class="control-line dot-line">
           <span
             ?hidden="${(cell) =>
-              cell.datum === TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE ||
-              typeof cell.lastPriceAbsoluteChange !== 'number' ||
-              isNaN(cell.lastPriceAbsoluteChange) ||
+              cell.datum === TRADER_DATUM.LAST_PRICE ||
+              typeof cell.totalAmount !== 'number' ||
+              isNaN(cell.totalAmount) ||
               cell.currentUSMarketSession === 'regular'}"
             class="dot ${(cell) =>
               cell.currentUSMarketSession === 'premarket' ? 'dot-1' : 'dot-4'}"
           ></span>
-          <span
-            class="${(x) =>
-              x.lastPriceAbsoluteChange > 0
-                ? 'positive'
-                : x.lastPriceAbsoluteChange < 0
-                ? 'negative'
-                : ''}"
-          >
+          <span>
             ${(cell) =>
-              formatAbsoluteChange(
-                cell.lastPriceAbsoluteChange,
+              formatAmount(
+                cell.totalAmount,
+                cell.payload?.instrument?.currency,
                 cell.payload?.instrument
               )}
           </span>
@@ -42,23 +37,31 @@ export const columnTemplate = html`
   </template>
 `;
 
-export class LastPriceAbsoluteChangeColumn extends Column {
+export class TotalAmountColumn extends LastPriceColumn {
   @observable
-  lastPriceAbsoluteChange;
+  totalAmount;
 
-  lastPriceAbsoluteChangeChanged() {
-    this.currentUSMarketSession = getUSMarketSession();
-  }
+  @observable
+  size;
 
   @observable
   currentUSMarketSession;
 
-  datum;
+  recalculate() {
+    if (this.payload.instrument) {
+      this.currentUSMarketSession = getUSMarketSession();
+      this.totalAmount =
+        this.lastPrice * this.size * this.payload.instrument.lot;
+    }
+  }
 
-  constructor(datum = TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE) {
-    super();
+  lastPriceChanged() {
+    super.lastPriceChanged();
+    this.recalculate();
+  }
 
-    this.datum = datum;
+  sizeChanged() {
+    this.recalculate();
   }
 
   async connectedCallback() {
@@ -66,22 +69,22 @@ export class LastPriceAbsoluteChangeColumn extends Column {
 
     await super.connectedCallback();
 
-    if (!this.isBalance) {
-      await this.subscribeFields?.({
+    if (this.defaultTrader) {
+      await this.defaultTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          lastPriceAbsoluteChange: this.datum
+          size: TRADER_DATUM.POSITION_SIZE
         }
       });
     }
   }
 
   async disconnectedCallback() {
-    if (!this.isBalance) {
-      await this.unsubscribeFields?.({
+    if (this.defaultTrader) {
+      await this.defaultTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          lastPriceAbsoluteChange: this.datum
+          size: TRADER_DATUM.POSITION_SIZE
         }
       });
     }
@@ -91,7 +94,7 @@ export class LastPriceAbsoluteChangeColumn extends Column {
 }
 
 // noinspection JSVoidFunctionReturnValueUsed
-export default LastPriceAbsoluteChangeColumn.compose({
+export default TotalAmountColumn.compose({
   name: `ppp-${uuidv4()}`,
   template: columnTemplate,
   styles: columnStyles

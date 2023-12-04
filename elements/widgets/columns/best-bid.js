@@ -8,9 +8,9 @@ import { TRADER_DATUM } from '../../../lib/const.js';
 
 export const columnTemplate = html`
   <template>
-    ${when((x) => x.isBalance, html`<span></span>`)}
     ${when(
-      (x) => !x.isBalance,
+      (x) => x.isBalance,
+      html`<span></span>`,
       html`
         <span class="positive">
           ${(cell) => formatPrice(cell.bestBid, cell.payload?.instrument)}
@@ -27,17 +27,8 @@ export class BestBidColumn extends Column {
   async connectedCallback() {
     await super.connectedCallback();
 
-    if (this.trader && !this.isBalance) {
-      await this.trader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          bestBid: TRADER_DATUM.BEST_BID
-        }
-      });
-    }
-
-    if (this.extraTrader && !this.isBalance) {
-      await this.extraTrader.subscribeFields?.({
+    if (!this.isBalance) {
+      await this.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
           bestBid: TRADER_DATUM.BEST_BID
@@ -47,17 +38,8 @@ export class BestBidColumn extends Column {
   }
 
   async disconnectedCallback() {
-    if (this.trader && !this.isBalance) {
-      await this.trader.unsubscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          bestBid: TRADER_DATUM.BEST_BID
-        }
-      });
-    }
-
-    if (this.extraTrader && !this.isBalance) {
-      await this.extraTrader.unsubscribeFields?.({
+    if (!this.isBalance) {
+      await this.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
           bestBid: TRADER_DATUM.BEST_BID

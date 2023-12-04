@@ -21,7 +21,6 @@ import {
   paletteGrayLight1,
   themeConditional
 } from '../../design/design-tokens.js';
-import { getUSMarketSession } from '../../lib/intl.js';
 import {
   StaleInstrumentCacheError,
   NoInstrumentsError
@@ -110,10 +109,12 @@ export const marqueeWidgetTemplate = html`
                           ?hidden="${(x) => !x.showPrice}"
                           :trader="${(x) => x.pppTrader}"
                           :payload="${(x, c) => ({
-                            instrument: x.pppTrader?.instruments?.get(x.symbol),
-                            highlightLastPriceChanges:
-                              c.parent.document.highlightLastPriceChanges
+                            instrument: x.pppTrader?.instruments?.get(x.symbol)
                           })}"
+                          :column="${(x, c) =>
+                            c.parent.columnsBySource.get(
+                              COLUMN_SOURCE.LAST_PRICE
+                            )}"
                           class="price"
                         >
                           ${(x, c) =>
@@ -129,6 +130,10 @@ export const marqueeWidgetTemplate = html`
                           :payload="${(x) => ({
                             instrument: x.pppTrader?.instruments?.get(x.symbol)
                           })}"
+                          :column="${(x, c) =>
+                            c.parent.columnsBySource.get(
+                              COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
+                            )}"
                           class="price"
                         >
                           ${(x, c) =>
@@ -144,6 +149,10 @@ export const marqueeWidgetTemplate = html`
                           :payload="${(x) => ({
                             instrument: x.pppTrader?.instruments?.get(x.symbol)
                           })}"
+                          :column="${(x, c) =>
+                            c.parent.columnsBySource.get(
+                              COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+                            )}"
                           class="price"
                         >
                           ${(x, c) =>
@@ -341,12 +350,18 @@ export class MarqueeWidget extends WidgetWithInstrument {
       this.recalculateDimensions();
 
       this.columns = new WidgetColumns({
-        widget: this,
         columns: [
-          COLUMN_SOURCE.LAST_PRICE,
-          COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE,
-          COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
-        ].map((source) => ({ source, name: source }))
+          {
+            source: COLUMN_SOURCE.LAST_PRICE,
+            highlightChanges: this.document.highlightLastPriceChanges
+          },
+          {
+            source: COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
+          },
+          {
+            source: COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+          }
+        ]
       });
 
       await this.columns.registerColumns();

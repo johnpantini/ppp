@@ -8,9 +8,9 @@ import { TRADER_DATUM } from '../../../lib/const.js';
 
 export const columnTemplate = html`
   <template>
-    ${when((x) => x.isBalance, html`<span></span>`)}
     ${when(
-      (x) => !x.isBalance,
+      (x) => x.isBalance,
+      html`<span></span>`,
       html`
         <span>
           ${(cell) => formatPrice(cell.averagePrice, cell.payload?.instrument)}

@@ -31,10 +31,7 @@ export const columnTemplate = html`
             ${(cell) => currencyName(cell.payload?.symbol)}
           </div>
         </div>
-      `
-    )}
-    ${when(
-      (x) => !x.isBalance,
+      `,
       html`
         <div class="logo-with-name capitalize">
           <div

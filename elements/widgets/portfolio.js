@@ -82,12 +82,7 @@ const portfolioSection = ({ title, section }) =>
             html`
               <td
                 class="cell"
-                :payload="${(x, c) => {
-                  c.parent.highlightLastPriceChanges =
-                    !!c.parentContext.parent.document.highlightLastPriceChanges;
-
-                  return c.parent;
-                }}"
+                :payload="${(x, c) => c.parent}"
                 :column="${(x) => x}"
               >
                 ${(x, c) => c.parentContext.parent.columns.columnElement(x)}
@@ -151,6 +146,7 @@ export const portfolioWidgetTemplate = html`
                         ${(x, c) =>
                           c.parentContext.parent.columns.columnElement(
                             x,
+                            // Balance currency.
                             c.parent.symbol
                           )}
                       </td>
@@ -301,7 +297,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.portfolioTrader;
       this.columns = new WidgetColumns({
-        widget: this,
         columns: this.document.columns
       });
 
@@ -425,9 +420,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
     return {
       $set: {
         portfolioTraderId: this.container.portfolioTraderId.value,
-        hideBalances: this.container.hideBalances.checked,
-        highlightLastPriceChanges:
-          this.container.highlightLastPriceChanges.checked,
         columns: this.container.columnList.value
       }
     };
@@ -449,10 +441,10 @@ export async function widgetDefinition() {
     minHeight: 120,
     defaultWidth: 620,
     settings: html`
-      <ppp-tabs activeid="main">
-        <ppp-tab id="main">Основные настройки</ppp-tab>
+      <ppp-tabs activeid="integrations">
+        <ppp-tab id="integrations">Подключения</ppp-tab>
         <ppp-tab id="columns">Столбцы таблицы</ppp-tab>
-        <ppp-tab-panel id="main-panel">
+        <ppp-tab-panel id="integrations-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Трейдер позиций портфеля</h5>
@@ -502,23 +494,6 @@ export async function widgetDefinition() {
                 +
               </ppp-button>
             </div>
-          </div>
-          <div class="widget-settings-section">
-            <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
-            </div>
-            <ppp-checkbox
-              ?checked="${(x) => x.document.hideBalances}"
-              ${ref('hideBalances')}
-            >
-              Скрывать суммы валютных балансов
-            </ppp-checkbox>
-            <ppp-checkbox
-              ?checked="${(x) => x.document.highlightLastPriceChanges}"
-              ${ref('highlightLastPriceChanges')}
-            >
-              Выделять изменения цены цветом
-            </ppp-checkbox>
           </div>
         </ppp-tab-panel>
         <ppp-tab-panel id="columns-panel">

@@ -3,7 +3,7 @@
 import {
   widgetStyles,
   WidgetWithInstrument,
-  widgetDefaultHeaderTemplate,
+  widgetEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
@@ -11,11 +11,13 @@ import {
   css,
   when,
   ref,
-  observable
+  observable,
+  repeat
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
 import { invalidate, validate } from '../../lib/ppp-errors.js';
+import { WidgetColumns } from '../widget-columns.js';
 import '../button.js';
 import '../query-select.js';
 import '../radio-group.js';
@@ -44,7 +46,33 @@ export const listWidgetTemplate = html`
         </div>
       </div>
       <div class="widget-body">
-        ${widgetStackSelectorTemplate()}
+        ${widgetStackSelectorTemplate()} ${(x) => x?.extraControls}
+        ${when(
+          (x) => !x?.sources?.length,
+          html`${html.partial(widgetEmptyStateTemplate('Список пуст.'))}`,
+          html`
+            <table class="widget-table">
+              <thead>
+                <tr>
+                  ${repeat(
+                    (x) => x?.columns?.array,
+                    html`
+                      <th source="${(x) => x.source}">
+                        <div class="resize-handle"></div>
+                        <div>${(x) => x.name}</div>
+                      </th>
+                    `
+                  )}
+                  <th class="empty">
+                    <div class="resize-handle"></div>
+                    <div></div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody @click="${(x, c) => x.handleListTableClick(c)}"></tbody>
+            </table>
+          `
+        )}
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -59,7 +87,25 @@ export const listWidgetStyles = css`
 
 export class ListWidget extends WidgetWithInstrument {
   @observable
-  listDefinition;
+  extraControls;
+
+  @observable
+  source;
+
+  @observable
+  pagination;
+
+  /**
+   * @type {WidgetColumns}
+   */
+  @observable
+  columns;
+
+  constructor() {
+    super();
+
+    this.source = [];
+  }
 
   async connectedCallback() {
     super.connectedCallback();
@@ -71,18 +117,20 @@ export class ListWidget extends WidgetWithInstrument {
           : `${ppp.rootUrl}/elements/widgets/lists/instruments.js`
       );
 
-      const module = await import(url);
+      const mod = await import(url);
 
-      this.listDefinition = module.listDefinition;
-
-      if (typeof this.listDefinition !== 'function') {
+      if (typeof mod.listDefinition !== 'function') {
         return this.notificationsArea.error({
           text: 'Не удалось загрузить список.',
           keep: true
         });
       }
 
-      const { settings, validate, submit } = await this.listDefinition();
+      const { settings, validate, submit, extraControls, pagination } =
+        await mod.listDefinition();
+
+      this.extraControls = extraControls;
+      this.pagination = pagination;
 
       if (
         this.preview &&
@@ -93,7 +141,16 @@ export class ListWidget extends WidgetWithInstrument {
         this.container.granary.validate = validate;
         this.container.granary.submit = submit;
       }
+
+      this.columns = new WidgetColumns({
+        widget: this,
+        columns: this.document.columns ?? []
+      });
+
+      await this.columns.registerColumns();
     } catch (e) {
+      console.error(e);
+
       return this.notificationsArea.error({
         text: 'Не удалось загрузить список.',
         keep: true
@@ -104,6 +161,8 @@ export class ListWidget extends WidgetWithInstrument {
   disconnectedCallback() {
     super.disconnectedCallback();
   }
+
+  handleListTableClick({ event }) {}
 
   async validate() {
     this.container.listType.value === 'url' &&

@@ -1269,7 +1269,11 @@ export class OrderWidget extends WidgetWithInstrument {
       });
     }
 
-    if (!this.document.level1Trader) {
+    if (
+      !this.document.level1Trader &&
+      !this.document.extraLevel1Trader &&
+      !this.document.extraLevel1Trader2
+    ) {
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер данных L1.',
         keep: true
@@ -1308,9 +1312,11 @@ export class OrderWidget extends WidgetWithInstrument {
         }
       });
 
-      this.level1Trader = await ppp.getOrCreateTrader(
-        this.document.level1Trader
-      );
+      if (this.document.level1Trader) {
+        this.level1Trader = await ppp.getOrCreateTrader(
+          this.document.level1Trader
+        );
+      }
 
       if (this.document.extraLevel1Trader) {
         this.extraLevel1Trader = await ppp.getOrCreateTrader(
@@ -1324,21 +1330,23 @@ export class OrderWidget extends WidgetWithInstrument {
         );
       }
 
-      await this.level1Trader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          lastPrice: TRADER_DATUM.LAST_PRICE,
-          lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
-          lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
-          extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
-          extendedLastPriceRelativeChange:
-            TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
-          extendedLastPriceAbsoluteChange:
-            TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
-          bestBid: TRADER_DATUM.BEST_BID,
-          bestAsk: TRADER_DATUM.BEST_ASK
-        }
-      });
+      if (this.level1Trader) {
+        await this.level1Trader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            lastPrice: TRADER_DATUM.LAST_PRICE,
+            lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
+            lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
+            extendedLastPriceRelativeChange:
+              TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
+            extendedLastPriceAbsoluteChange:
+              TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE,
+            bestBid: TRADER_DATUM.BEST_BID,
+            bestAsk: TRADER_DATUM.BEST_ASK
+          }
+        });
+      }
 
       if (this.extraLevel1Trader) {
         await this.extraLevel1Trader.subscribeFields?.({

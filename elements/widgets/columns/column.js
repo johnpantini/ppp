@@ -3,14 +3,21 @@
 import { PPPElement } from '../../../lib/ppp-element.js';
 import { css, observable } from '../../../vendor/fast-element.min.js';
 import { widgetColumns } from '../../../design/styles.js';
+import { widgetStyles } from '../../widget.js';
 import { display } from '../../../vendor/fast-utilities.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
 
 export const columnStyles = css`
   ${widgetColumns()}
+  ${widgetStyles()}
   ${display('inline')}
   :host {
     width: 100%;
+  }
+
+  .dot-line {
+    align-items: center;
+    justify-content: right;
   }
 `;
 
@@ -24,7 +31,7 @@ class Column extends PPPElement {
   @observable
   widget;
 
-  // Instrument and symbol and any other column private data are here.
+  // Instrument and symbol and any other column dynamic data.
   @observable
   payload;
 
@@ -33,10 +40,10 @@ class Column extends PPPElement {
   column;
 
   @observable
-  trader;
+  defaultTrader;
 
   @observable
-  defaultTrader;
+  trader;
 
   @observable
   extraTrader;
@@ -56,14 +63,38 @@ class Column extends PPPElement {
       this.instrument = this.payload.instrument;
     }
 
-    const { trader, extraTrader } =
-      await this.widget?.container.denormalization.denormalize(this.column);
+    const column = await this.widget?.container.denormalization.denormalize(
+      this.column
+    );
 
-    if (trader || extraTrader) {
-      this.trader = await ppp.getOrCreateTrader(trader);
-      this.extraTrader = await ppp.getOrCreateTrader(extraTrader);
-    } else {
-      this.trader = this.defaultTrader;
+    if (column?.trader) {
+      this.trader = await ppp.getOrCreateTrader(column.trader);
+    }
+
+    if (column?.extraTrader) {
+      this.extraTrader = await ppp.getOrCreateTrader(column.extraTrader);
+    }
+  }
+
+  async subscribeFields({ source, fieldDatumPairs }) {
+    for (const trader of [this.defaultTrader, this.trader, this.extraTrader]) {
+      if (trader) {
+        await trader.subscribeFields?.({
+          source,
+          fieldDatumPairs
+        });
+      }
+    }
+  }
+
+  async unsubscribeFields({ source, fieldDatumPairs }) {
+    for (const trader of [this.defaultTrader, this.trader, this.extraTrader]) {
+      if (trader) {
+        await trader.unsubscribeFields?.({
+          source,
+          fieldDatumPairs
+        });
+      }
     }
   }
 }

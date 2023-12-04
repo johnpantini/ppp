@@ -19,7 +19,7 @@ export const widgetOrderListTemplate = html`
       ${repeat(
         (x) => x.list,
         html`
-          <div class="control-line draggable main-line">
+          <div class="control-line draggable draggable-line">
             ${dragControlsTemplate()}
             <div class="control-stack">
               <ppp-text-field
@@ -88,7 +88,7 @@ export class WidgetOrderList extends ClonableList {
     const orders = [];
 
     for (const line of Array.from(
-      this.dragList.querySelectorAll('.main-line')
+      this.dragList.querySelectorAll('.draggable-line')
     )) {
       orders.push({
         name: line.querySelector('[order-name]').value,

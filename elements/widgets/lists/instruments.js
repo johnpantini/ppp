@@ -37,6 +37,7 @@ class ListSource {}
 
 export async function listDefinition() {
   return {
+    extraControls: null,
     pagination: false,
     validate: async (widget) => {
       await widget.container.columnList.validate();

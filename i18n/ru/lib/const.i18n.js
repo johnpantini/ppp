@@ -40,6 +40,7 @@ export default function (i18n) {
         [BROKERS.BINANCE]: 'Binance',
         [BROKERS.HUOBI]: 'Huobi',
         [BROKERS.BYBIT]: 'Bybit',
+        [BROKERS.MEXC]: 'MEXC',
         [BROKERS.CAPITALCOM]: 'Capital.com'
       },
       columnSource: {
@@ -55,9 +56,12 @@ export default function (i18n) {
         [COLUMN_SOURCE.EXTENDED_LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены+, %',
         [COLUMN_SOURCE.PL_ABSOLUTE]: 'Доход',
         [COLUMN_SOURCE.PL_RELATIVE]: 'Доход, %',
+        [COLUMN_SOURCE.EXTENDED_PL_ABSOLUTE]: 'Доход+',
+        [COLUMN_SOURCE.EXTENDED_PL_RELATIVE]: 'Доход+, %',
         [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
         [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
-        [COLUMN_SOURCE.TOTAL_AMOUNT]: 'Стоимость'
+        [COLUMN_SOURCE.TOTAL_AMOUNT]: 'Стоимость',
+        [COLUMN_SOURCE.EXTENDED_TOTAL_AMOUNT]: 'Стоимость+'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
@@ -77,8 +81,9 @@ export default function (i18n) {
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',
+        [TRADERS.MEXC_V3]: 'MEXC API V3',
         [TRADERS.BYBIT_V5]: 'Bybit API V5',
-        [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',
+        [TRADERS.UTEX_MARGIN_STOCKS]: 'UTEX Margin, акции',
         [TRADERS.FINAM_TRADE_API]: 'Finam Trade API',
         [TRADERS.IB]: 'Interactive Brokers',
         [TRADERS.CAPITALCOM]: 'Capital.com',

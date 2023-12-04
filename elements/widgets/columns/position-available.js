@@ -12,27 +12,14 @@ export const columnTemplate = html`
     ${when(
       (x) => x.isBalance,
       html`
-        <ppp-button
-          class="xsmall"
-          ?hidden="${(x) => !x.widget.document.hideBalances}"
-        >
+        <ppp-button class="xsmall" ?hidden="${(x) => !x.column?.hideBalances}">
           Скрыто
         </ppp-button>
-        <span
-          class="balance-cell"
-          ?hidden="${(x) => x.widget.document.hideBalances}"
-        >
-          ${(cell) => formatAmount(cell.size, cell.payload?.symbol)}
+        <span class="balance-cell" ?hidden="${(x) => x.column?.hideBalances}">
+          ${(x) => formatAmount(x.size, x.payload?.symbol)}
         </span>
-      `
-    )}
-    ${when(
-      (x) => !x.isBalance,
-      html`
-        <span>
-          ${(cell) => formatQuantity(cell.size * cell.instrument?.lot)}
-        </span>
-      `
+      `,
+      html`<span>${(x) => formatQuantity(x.size * x.instrument?.lot)}</span>`
     )}
   </template>
 `;

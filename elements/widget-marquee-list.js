@@ -26,7 +26,7 @@ export const widgetMarqueeListTemplate = html`
       ${repeat(
         (x) => x.list,
         html`
-          <div class="control-line draggable main-line">
+          <div class="control-line draggable draggable-line">
             ${dragControlsTemplate()}
             <div class="control-stack">
               <ppp-query-select
@@ -161,7 +161,7 @@ export class WidgetMarqueeList extends ClonableList {
 
   async validate() {
     for (const line of Array.from(
-      this.dragList.querySelectorAll('.main-line')
+      this.dragList.querySelectorAll('.draggable-line')
     )) {
       const traderId = line.querySelector('[marquee-trader]');
 
@@ -190,7 +190,7 @@ export class WidgetMarqueeList extends ClonableList {
     const lines = [];
 
     for (const line of Array.from(
-      this.dragList.querySelectorAll('.main-line')
+      this.dragList.querySelectorAll('.draggable-line')
     )) {
       lines.push({
         traderId: line.querySelector('[marquee-trader]').value,
