@@ -666,8 +666,8 @@ export const orderWidgetTemplate = html`
                                 <ppp-widget-option value="ISE">
                                   ISE
                                 </ppp-widget-option>
-                                <ppp-widget-option value="ISLAND">
-                                  ISLAND
+                                <ppp-widget-option value="NASDAQ">
+                                  NASDAQ
                                 </ppp-widget-option>
                                 <ppp-widget-option value="LTSE">
                                   LTSE

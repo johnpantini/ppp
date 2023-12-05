@@ -11,7 +11,8 @@ import {
   VERSIONING_STATUS,
   EXCHANGE,
   COLUMN_SOURCE,
-  ORDERS
+  ORDERS,
+  TRADING_STATUS
 } from '../../../lib/const.js';
 
 export default function (i18n) {
@@ -61,7 +62,9 @@ export default function (i18n) {
         [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
         [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
         [COLUMN_SOURCE.TOTAL_AMOUNT]: 'Стоимость',
-        [COLUMN_SOURCE.EXTENDED_TOTAL_AMOUNT]: 'Стоимость+'
+        [COLUMN_SOURCE.EXTENDED_TOTAL_AMOUNT]: 'Стоимость+',
+        [COLUMN_SOURCE.DAY_VOLUME]: 'Объём',
+        [COLUMN_SOURCE.TRADING_STATUS]: 'Торговый статус'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
@@ -107,6 +110,30 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_US_NBBO]: 'NBBO (США)',
         [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW]: 'Nasdaq TotalView',
         [TRADER_CAPS.CAPS_ARCABOOK]: 'NYSE ArcaBook'
+      },
+      tradingStatus: {
+        [TRADING_STATUS.UNSPECIFIED]: 'Нет',
+        [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]: 'Торгов нет',
+        [TRADING_STATUS.OPENING_PERIOD]: 'Открытие торгов',
+        [TRADING_STATUS.CLOSING_PERIOD]: 'Закрытие торгов',
+        [TRADING_STATUS.BREAK_IN_TRADING]: 'Перерыв в торгах',
+        [TRADING_STATUS.NORMAL_TRADING]: 'Идут торги',
+        [TRADING_STATUS.CLOSING_AUCTION]: 'Аукцион закрытия',
+        [TRADING_STATUS.DARK_POOL_AUCTION]: 'Аукцион DP',
+        [TRADING_STATUS.DISCRETE_AUCTION]: 'Аукцион',
+        [TRADING_STATUS.OPENING_AUCTION_PERIOD]: 'Аукцион открытия',
+        [TRADING_STATUS.TRADING_AT_CLOSING_AUCTION_PRICE]: 'Аукцион закрытия*',
+        [TRADING_STATUS.SESSION_ASSIGNED]: 'Сессия назначена',
+        [TRADING_STATUS.SESSION_CLOSE]: 'Сессия закрыта',
+        [TRADING_STATUS.SESSION_OPEN]: 'Сессия открыта',
+        [TRADING_STATUS.DEALER_NORMAL_TRADING]: 'Ликвидность брокера',
+        [TRADING_STATUS.DEALER_BREAK_IN_TRADING]: 'Перерыв в торгах',
+        [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]: 'Торги недоступны',
+        [TRADING_STATUS.PREMARKET]: 'Премаркет',
+        [TRADING_STATUS.AFTER_HOURS]: 'После закрытия',
+        [TRADING_STATUS.TRADING_SUSPENDED]: 'Торговая пауза',
+        [TRADING_STATUS.DELISTED]: 'Делистинг',
+        [TRADING_STATUS.IPO_TODAY]: 'Сегодня IPO'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',

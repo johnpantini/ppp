@@ -33,17 +33,6 @@ const exampleSymbolsCodeAll = `/**
  */
 return [];`;
 
-const exampleSymbolsCodeSPBEX = `/**
- * Возвращает массив тикеров для отслеживания (СПБ Биржа, словарь Алор).
- *
- */
-return [%#JSON.stringify((await(await fetch(
-  'https://api.alor.ru/md/v2/Securities?exchange=SPBX&limit=5000&offset=0',
-  {
-    cache: 'reload'
-  }
-  )).json()).filter((i) => ['TCS', 'MNK', 'CHK'].indexOf(i.symbol) == -1).map(i => i.symbol))%];`;
-
 const exampleFormatterCode = `/**
  * Функция форматирования сообщения о торговой паузе.
  *
@@ -308,17 +297,14 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
             отслеживания. Можно воспользоваться готовыми шаблонами:
           </p>
           <ppp-select
-            value="${(x) => x.document.symbolsTemplate ?? 'spbex'}"
+            value="${(x) => x.document.symbolsTemplate ?? 'all'}"
             @change="${(x) => {
               x.symbolsCode.updateCode(
-                x.symbolsTemplate.value === 'all'
-                  ? exampleSymbolsCodeAll
-                  : exampleSymbolsCodeSPBEX
+                x.symbolsTemplate.value === 'all' ? exampleSymbolsCodeAll : ''
               );
             }}"
             ${ref('symbolsTemplate')}
           >
-            <ppp-option value="spbex">Только СПБ Биржа</ppp-option>
             <ppp-option value="all">
               Отслеживать все тикеры
             </ppp-option>
@@ -327,12 +313,10 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
         <div class="input-group">
           <ppp-snippet
             revertable
-            :code="${(x) => x.document.symbolsCode ?? exampleSymbolsCodeSPBEX}"
+            :code="${(x) => x.document.symbolsCode ?? exampleSymbolsCodeAll}"
             @revert="${(x) => {
               x.symbolsCode.updateCode(
-                x.symbolsTemplate.value === 'all'
-                  ? exampleSymbolsCodeAll
-                  : exampleSymbolsCodeSPBEX
+                x.symbolsTemplate.value === 'all' ? exampleSymbolsCodeAll : ''
               );
             }}"
             ${ref('symbolsCode')}

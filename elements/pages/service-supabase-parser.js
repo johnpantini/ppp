@@ -82,17 +82,7 @@ topic text,
 date text not null,
 priority bool not null,
 link text`,
-    constsCode: `const symbols = [%#JSON.stringify((await(await fetch(
-  'https://api.alor.ru/md/v2/Securities?exchange=SPBX&limit=5000&offset=0',
-  {
-    cache: 'reload'
-  }
-  )).json()).filter((i) => ['TCS', 'MNK', 'CHK'].indexOf(i.symbol) == -1).map(i => i.symbol))%];
-
-symbols.push('$ECON');
-symbols.push('SPY');
-
-return symbols;`,
+    constsCode: `return [];`,
     insertTriggerCode: `/**
  * @constant {string} TABLE_NAME - Имя таблицы состояния.
  */
@@ -524,10 +514,8 @@ export const serviceSupabaseParserPageTemplate = html`
                   x.document.parserPredefinedTemplate ?? 'default'}"
                 ${ref('parserPredefinedTemplate')}
               >
-                <ppp-option value="default"> По умолчанию</ppp-option>
-                <ppp-option value="thefly"
-                  >Новости TheFly (СПБ Биржа)
-                </ppp-option>
+                <ppp-option value="default">По умолчанию</ppp-option>
+                <ppp-option value="thefly">Новости TheFly</ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
               <ppp-button
@@ -1162,7 +1150,10 @@ export class ServiceSupabaseParserPage extends Page {
       }
     );
 
-    await maybeFetchError(contentsResponse, 'Не удалось загрузить файл с шаблоном.');
+    await maybeFetchError(
+      contentsResponse,
+      'Не удалось загрузить файл с шаблоном.'
+    );
 
     this.parsingCode.updateCode(await contentsResponse.text());
     this.constsCode.updateCode(data.constsCode);

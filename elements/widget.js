@@ -44,7 +44,9 @@ import {
   palettePurpleLight2,
   paletteGreenDark1,
   paletteYellowLight2,
-  paletteYellowDark2
+  paletteYellowDark2,
+  paletteRedDark2,
+  paletteRedLight2
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
@@ -638,6 +640,10 @@ export const widgetCommonContentStyles = () => css`
       paletteYellowDark2,
       paletteYellowLight2
     )};
+  }
+
+  .dot-5::before {
+    background-color: ${themeConditional(paletteRedDark2, paletteRedLight2)};
   }
 
   .link {

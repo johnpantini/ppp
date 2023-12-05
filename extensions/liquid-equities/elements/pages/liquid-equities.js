@@ -34,11 +34,11 @@ export async function extension({ ppp, baseExtensionUrl, extension }) {
           <ppp-tab id="alor-kpur">Алор КПУР</ppp-tab>
           <ppp-tab id="alor-ksur-turbo">Алор КСУР с Турбо</ppp-tab>
           <ppp-tab id="alor-kpur-turbo">Алор КПУР с Турбо</ppp-tab>
-          <ppp-tab id="alor-ksur-spbex-no-overnight"
-            >Алор КСУР СПБ без переноса
+          <ppp-tab id="alor-ksur-spbex-no-overnight">
+            Алор КСУР СПБ без переноса
           </ppp-tab>
-          <ppp-tab id="alor-kpur-spbex-no-overnight"
-            >Алор КПУР СПБ без переноса
+          <ppp-tab id="alor-kpur-spbex-no-overnight">
+            Алор КПУР СПБ без переноса
           </ppp-tab>
           <ppp-tab id="tinkoff">Тинькофф</ppp-tab>
           <ppp-tab-panel id="alor-ksur-panel"></ppp-tab-panel>
