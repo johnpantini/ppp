@@ -2,9 +2,9 @@
 
 import { html, observable, when } from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
-import { formatAbsoluteChange, getUSMarketSession } from '../../../lib/intl.js';
+import { formatAbsoluteChange } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
-import { TRADER_DATUM } from '../../../lib/const.js';
+import { TRADER_DATUM, TRADING_STATUS } from '../../../lib/const.js';
 
 export const columnTemplate = html`
   <template>
@@ -14,13 +14,15 @@ export const columnTemplate = html`
       html`
         <div class="control-line dot-line">
           <span
-            ?hidden="${(cell) =>
-              cell.datum === TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE ||
-              typeof cell.lastPriceAbsoluteChange !== 'number' ||
-              isNaN(cell.lastPriceAbsoluteChange) ||
-              cell.currentUSMarketSession === 'regular'}"
-            class="dot ${(cell) =>
-              cell.currentUSMarketSession === 'premarket' ? 'dot-1' : 'dot-4'}"
+            ?hidden="${(x) =>
+              x.datum === TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE ||
+              typeof x.lastPriceAbsoluteChange !== 'number' ||
+              isNaN(x.lastPriceAbsoluteChange) ||
+              ![TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
+                x.status
+              )}"
+            class="dot ${(x) =>
+              x.status === TRADING_STATUS.PREMARKET ? 'dot-1' : 'dot-4'}"
           ></span>
           <span
             class="${(x) =>
@@ -46,12 +48,8 @@ export class LastPriceAbsoluteChangeColumn extends Column {
   @observable
   lastPriceAbsoluteChange;
 
-  lastPriceAbsoluteChangeChanged() {
-    this.currentUSMarketSession = getUSMarketSession();
-  }
-
   @observable
-  currentUSMarketSession;
+  status;
 
   datum;
 
@@ -62,15 +60,14 @@ export class LastPriceAbsoluteChangeColumn extends Column {
   }
 
   async connectedCallback() {
-    this.currentUSMarketSession = getUSMarketSession();
-
     await super.connectedCallback();
 
     if (!this.isBalance) {
       await this.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          lastPriceAbsoluteChange: this.datum
+          lastPriceAbsoluteChange: this.datum,
+          status: TRADER_DATUM.STATUS
         }
       });
     }
@@ -81,7 +78,8 @@ export class LastPriceAbsoluteChangeColumn extends Column {
       await this.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          lastPriceAbsoluteChange: this.datum
+          lastPriceAbsoluteChange: this.datum,
+          status: TRADER_DATUM.STATUS
         }
       });
     }

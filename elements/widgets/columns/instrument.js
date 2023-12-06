@@ -22,29 +22,26 @@ export const columnTemplate = html`
         <div class="logo-with-name capitalize">
           <div
             class="logo"
-            style="${(cell) =>
+            style="${(x) =>
               `background-image:url(${
-                'static/currency/' + cell.payload?.symbol + '.svg'
+                'static/currency/' + x.payload?.symbol + '.svg'
               })`}"
           ></div>
-          <div class="name">
-            ${(cell) => currencyName(cell.payload?.symbol)}
-          </div>
+          <div class="name">${(x) => currencyName(x.payload?.symbol)}</div>
         </div>
       `,
       html`
         <div class="logo-with-name capitalize">
           <div
             class="logo"
-            style="${(cell) =>
-              `background-image:url(${cell.widget?.searchControl?.getInstrumentIconUrl(
-                cell.payload?.instrument
+            style="${(x) =>
+              `background-image:url(${x.widget?.searchControl?.getInstrumentIconUrl(
+                x.payload?.instrument
               )})`}"
           ></div>
           <div class="name">
-            ${(cell) =>
-              cell.payload?.instrument?.fullName ??
-              cell.payload?.instrument?.symbol}
+            ${(x) =>
+              x.payload?.instrument?.fullName ?? x.payload?.instrument?.symbol}
           </div>
         </div>
       `

@@ -13,7 +13,7 @@ export const columnTemplate = html`
       html`<span></span>`,
       html`
         <span class="negative">
-          ${(cell) => formatPrice(cell.bestAsk, cell.payload?.instrument)}
+          ${(x) => formatPrice(x.bestAsk, x.payload?.instrument)}
         </span>
       `
     )}

@@ -14,11 +14,6 @@ export const columnStyles = css`
   :host {
     width: 100%;
   }
-
-  .dot-line {
-    align-items: center;
-    justify-content: right;
-  }
 `;
 
 class Column extends PPPElement {

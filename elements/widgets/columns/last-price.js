@@ -2,9 +2,9 @@
 
 import { html, observable, when } from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
-import { formatPrice, getUSMarketSession } from '../../../lib/intl.js';
+import { formatPrice } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
-import { TRADER_DATUM } from '../../../lib/const.js';
+import { TRADER_DATUM, TRADING_STATUS } from '../../../lib/const.js';
 
 export const columnTemplate = html`
   <template>
@@ -14,13 +14,15 @@ export const columnTemplate = html`
       html`
         <div class="control-line dot-line">
           <span
-            ?hidden="${(cell) =>
-              cell.datum === TRADER_DATUM.LAST_PRICE ||
-              typeof cell.lastPrice !== 'number' ||
-              isNaN(cell.lastPrice) ||
-              cell.currentUSMarketSession === 'regular'}"
-            class="dot ${(cell) =>
-              cell.currentUSMarketSession === 'premarket' ? 'dot-1' : 'dot-4'}"
+            ?hidden="${(x) =>
+              x.datum === TRADER_DATUM.LAST_PRICE ||
+              typeof x.lastPrice !== 'number' ||
+              isNaN(x.lastPrice) ||
+              ![TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
+                x.status
+              )}"
+            class="dot ${(x) =>
+              x.status === TRADING_STATUS.PREMARKET ? 'dot-1' : 'dot-4'}"
           ></span>
           <span>
             ${(x) => formatPrice(x.lastPrice, x.payload?.instrument)}
@@ -38,7 +40,7 @@ export class LastPriceColumn extends Column {
   lastPrice;
 
   @observable
-  currentUSMarketSession;
+  status;
 
   datum;
 
@@ -49,8 +51,6 @@ export class LastPriceColumn extends Column {
   }
 
   lastPriceChanged(oldValue, newValue) {
-    this.currentUSMarketSession = getUSMarketSession();
-
     if (
       (typeof oldValue === 'number' &&
         typeof newValue === 'number' &&
@@ -76,15 +76,14 @@ export class LastPriceColumn extends Column {
   }
 
   async connectedCallback() {
-    this.currentUSMarketSession = getUSMarketSession();
-
     await super.connectedCallback();
 
     if (!this.isBalance) {
       await this.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          lastPrice: this.datum
+          lastPrice: this.datum,
+          status: TRADER_DATUM.STATUS
         }
       });
     }
@@ -95,7 +94,8 @@ export class LastPriceColumn extends Column {
       await this.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          lastPrice: this.datum
+          lastPrice: this.datum,
+          status: TRADER_DATUM.STATUS
         }
       });
     }

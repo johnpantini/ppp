@@ -784,6 +784,11 @@ export const widgetStyles = () => css`
     max-width: 134px;
     white-space: nowrap;
   }
+
+  .dot-line {
+    align-items: center;
+    justify-content: right;
+  }
 `;
 
 export class Widget extends PPPElement {

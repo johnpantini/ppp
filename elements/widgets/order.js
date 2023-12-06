@@ -21,7 +21,8 @@ import {
   WIDGET_TYPES,
   TRADER_DATUM,
   TRADER_CAPS,
-  ORDERS
+  ORDERS,
+  TRADING_STATUS
 } from '../../lib/const.js';
 import {
   formatRelativeChange,
@@ -32,8 +33,7 @@ import {
   formatCommission,
   decSeparator,
   getInstrumentQuantityPrecision,
-  stringToFloat,
-  getUSMarketSession
+  stringToFloat
 } from '../../lib/intl.js';
 import {
   ellipsis,
@@ -239,17 +239,48 @@ export const orderWidgetTemplate = html`
               </div>
               ${when(
                 (x) =>
-                  x.extendedLastPrice > 0 &&
-                  x.currentUSMarketSession !== 'regular',
+                  x.extendedLastPrice > 0 ||
+                  (x.securityStatus &&
+                    x.securityStatus !== TRADING_STATUS.NORMAL_TRADING),
                 html`
                   <div class="company-card-item extended-hours">
-                    <span>
-                      ${(x) =>
-                        x.currentUSMarketSession === 'premarket'
-                          ? 'Премаркет:'
-                          : 'После закрытия:'}
-                    </span>
-                    <span class="extended-last-price-line">
+                    <div class="control-line dot-line">
+                      <span
+                        class="dot ${(x) => {
+                          return (
+                            {
+                              [TRADING_STATUS.PREMARKET]: 'dot-1',
+                              [TRADING_STATUS.IPO_TODAY]: 'dot-3',
+                              [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
+                              [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
+                              [TRADING_STATUS.OPENING_AUCTION_PERIOD]: 'dot-4',
+                              [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
+                              [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
+                              [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
+                              [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
+                              [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]:
+                                'dot-5',
+                              [TRADING_STATUS.DEALER_BREAK_IN_TRADING]: 'dot-5',
+                              [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
+                              [TRADING_STATUS.DELISTED]: 'dot-5',
+                              [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
+                                'dot-5'
+                            }[x.securityStatus] ?? ''
+                          );
+                        }}"
+                      ></span>
+                      <span
+                        title="${(x) =>
+                          ppp.t(`$const.tradingStatus.${x.securityStatus}`)}"
+                      >
+                        ${(x) =>
+                          ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
+                      </span>
+                    </div>
+                    <span
+                      class="extended-last-price-line"
+                      ?hidden="${(x) => !(x.extendedLastPrice > 0)}"
+                    >
                       <span
                         style="cursor: pointer"
                         @click="${(x) => x.setPrice(x.extendedLastPrice ?? 0)}"
@@ -1198,15 +1229,40 @@ export class OrderWidget extends WidgetWithInstrument {
   @observable
   lastPriceRelativeChange;
 
+  // Extended session type. US stocks only.
+  @observable
+  status;
+
+  statusChanged() {
+    this.#reassignSecurityStatus();
+  }
+
+  @observable
+  tradingStatus;
+
+  tradingStatusChanged() {
+    this.#reassignSecurityStatus();
+  }
+
+  @observable
+  securityStatus;
+
+  #reassignSecurityStatus() {
+    if (this.tradingStatus === TRADING_STATUS.NORMAL_TRADING) {
+      this.securityStatus = TRADING_STATUS.NORMAL_TRADING;
+    } else if (
+      [TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
+        this.status
+      )
+    ) {
+      this.securityStatus = this.status;
+    } else {
+      this.securityStatus = this.tradingStatus;
+    }
+  }
+
   @observable
   extendedLastPrice;
-
-  @observable
-  currentUSMarketSession;
-
-  extendedLastPriceChanged() {
-    this.currentUSMarketSession = getUSMarketSession();
-  }
 
   @observable
   extendedLastPriceAbsoluteChange;
@@ -1257,7 +1313,6 @@ export class OrderWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.currentUSMarketSession = getUSMarketSession();
     this.conditionalOrders = (this.document.conditionalOrders ?? []).filter(
       (o) => !o.hidden && o.orderId
     );
@@ -1337,6 +1392,8 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPrice: TRADER_DATUM.LAST_PRICE,
             lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            status: TRADER_DATUM.STATUS,
+            tradingStatus: TRADER_DATUM.TRADING_STATUS,
             extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
             extendedLastPriceRelativeChange:
               TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
@@ -1355,6 +1412,8 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPrice: TRADER_DATUM.LAST_PRICE,
             lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            status: TRADER_DATUM.STATUS,
+            tradingStatus: TRADER_DATUM.TRADING_STATUS,
             extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
             extendedLastPriceRelativeChange:
               TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
@@ -1373,6 +1432,8 @@ export class OrderWidget extends WidgetWithInstrument {
             lastPrice: TRADER_DATUM.LAST_PRICE,
             lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
             lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+            status: TRADER_DATUM.STATUS,
+            tradingStatus: TRADER_DATUM.TRADING_STATUS,
             extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
             extendedLastPriceRelativeChange:
               TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
@@ -1421,6 +1482,8 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          status: TRADER_DATUM.STATUS,
+          tradingStatus: TRADER_DATUM.TRADING_STATUS,
           extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
           extendedLastPriceRelativeChange:
             TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
@@ -1439,6 +1502,8 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          status: TRADER_DATUM.STATUS,
+          tradingStatus: TRADER_DATUM.TRADING_STATUS,
           extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
           extendedLastPriceRelativeChange:
             TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
@@ -1457,6 +1522,8 @@ export class OrderWidget extends WidgetWithInstrument {
           lastPrice: TRADER_DATUM.LAST_PRICE,
           lastPriceRelativeChange: TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE,
           lastPriceAbsoluteChange: TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE,
+          status: TRADER_DATUM.STATUS,
+          tradingStatus: TRADER_DATUM.TRADING_STATUS,
           extendedLastPrice: TRADER_DATUM.EXTENDED_LAST_PRICE,
           extendedLastPriceRelativeChange:
             TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE,
