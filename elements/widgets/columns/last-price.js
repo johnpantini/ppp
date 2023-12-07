@@ -14,13 +14,17 @@ export const columnTemplate = html`
       html`
         <div class="control-line dot-line">
           <span
-            ?hidden="${(x) =>
-              x.datum === TRADER_DATUM.LAST_PRICE ||
-              typeof x.lastPrice !== 'number' ||
-              isNaN(x.lastPrice) ||
-              ![TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
-                x.status
-              )}"
+            ?hidden="${(x) => {
+              return (
+                x.datum === TRADER_DATUM.LAST_PRICE ||
+                typeof x.lastPrice !== 'number' ||
+                isNaN(x.lastPrice) ||
+                ![
+                  TRADING_STATUS.PREMARKET,
+                  TRADING_STATUS.AFTER_HOURS
+                ].includes(x.status)
+              );
+            }}"
             class="dot ${(x) =>
               x.status === TRADING_STATUS.PREMARKET ? 'dot-1' : 'dot-4'}"
           ></span>

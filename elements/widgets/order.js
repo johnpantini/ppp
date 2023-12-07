@@ -244,39 +244,50 @@ export const orderWidgetTemplate = html`
                     x.securityStatus !== TRADING_STATUS.NORMAL_TRADING),
                 html`
                   <div class="company-card-item extended-hours">
-                    <div class="control-line dot-line">
-                      <span
-                        class="dot ${(x) => {
-                          return (
-                            {
-                              [TRADING_STATUS.PREMARKET]: 'dot-1',
-                              [TRADING_STATUS.IPO_TODAY]: 'dot-3',
-                              [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
-                              [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
-                              [TRADING_STATUS.OPENING_AUCTION_PERIOD]: 'dot-4',
-                              [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
-                              [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
-                              [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
-                              [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
-                              [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]:
-                                'dot-5',
-                              [TRADING_STATUS.DEALER_BREAK_IN_TRADING]: 'dot-5',
-                              [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
-                              [TRADING_STATUS.DELISTED]: 'dot-5',
-                              [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
-                                'dot-5'
-                            }[x.securityStatus] ?? ''
-                          );
-                        }}"
-                      ></span>
-                      <span
-                        title="${(x) =>
-                          ppp.t(`$const.tradingStatus.${x.securityStatus}`)}"
-                      >
-                        ${(x) =>
-                          ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
-                      </span>
-                    </div>
+                    ${when(
+                      (x) => x.securityStatus,
+                      html`
+                        <div class="control-line dot-line">
+                          <span
+                            class="dot ${(x) => {
+                              return (
+                                {
+                                  [TRADING_STATUS.PREMARKET]: 'dot-1',
+                                  [TRADING_STATUS.IPO_TODAY]: 'dot-3',
+                                  [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
+                                  [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
+                                  [TRADING_STATUS.OPENING_AUCTION_PERIOD]:
+                                    'dot-4',
+                                  [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
+                                  [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
+                                  [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
+                                  [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
+                                  [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]:
+                                    'dot-5',
+                                  [TRADING_STATUS.DEALER_BREAK_IN_TRADING]:
+                                    'dot-5',
+                                  [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
+                                  [TRADING_STATUS.DELISTED]: 'dot-5',
+                                  [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
+                                    'dot-5'
+                                }[x.securityStatus] ?? ''
+                              );
+                            }}"
+                          ></span>
+                          <span
+                            title="${(x) =>
+                              x.securityStatus &&
+                              ppp.t(
+                                `$const.tradingStatus.${x.securityStatus}`
+                              )}"
+                          >
+                            ${(x) =>
+                              x.securityStatus &&
+                              ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
+                          </span>
+                        </div>
+                      `
+                    )}
                     <span
                       class="extended-last-price-line"
                       ?hidden="${(x) => !(x.extendedLastPrice > 0)}"
@@ -1229,7 +1240,7 @@ export class OrderWidget extends WidgetWithInstrument {
   @observable
   lastPriceRelativeChange;
 
-  // Extended session type. US stocks only.
+  // Extended session type or trading suspension. US stocks only.
   @observable
   status;
 
@@ -1248,16 +1259,27 @@ export class OrderWidget extends WidgetWithInstrument {
   securityStatus;
 
   #reassignSecurityStatus() {
-    if (this.tradingStatus === TRADING_STATUS.NORMAL_TRADING) {
-      this.securityStatus = TRADING_STATUS.NORMAL_TRADING;
-    } else if (
-      [TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
-        this.status
-      )
+    if (
+      [
+        TRADING_STATUS.PREMARKET,
+        TRADING_STATUS.AFTER_HOURS,
+        TRADING_STATUS.TRADING_SUSPENDED
+      ].includes(this.status)
     ) {
       this.securityStatus = this.status;
+    } else if (this.tradingStatus === TRADING_STATUS.NORMAL_TRADING) {
+      this.securityStatus = TRADING_STATUS.NORMAL_TRADING;
     } else {
       this.securityStatus = this.tradingStatus;
+    }
+
+    if (
+      !(this.extendedLastPrice > 0) &&
+      [TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
+        this.securityStatus
+      )
+    ) {
+      this.securityStatus = '';
     }
   }
 
@@ -1599,6 +1621,12 @@ export class OrderWidget extends WidgetWithInstrument {
   }
 
   instrumentChanged(oldValue, newValue) {
+    this.securityStatus = '';
+    this.status = '';
+    this.tradingStatus = '';
+
+    this.#reassignSecurityStatus();
+
     super.instrumentChanged(oldValue, newValue);
 
     // Clear price after instrument changes.

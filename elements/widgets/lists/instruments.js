@@ -1,9 +1,14 @@
 import ppp from '../../../ppp.js';
-import { html, ref, Updates } from '../../../vendor/fast-element.min.js';
+import {
+  html,
+  Observable,
+  ref,
+  Updates
+} from '../../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE } from '../../../lib/const.js';
 import { search } from '../../../static/svg/sprite.js';
 import '../../widget-column-list.js';
-import { validate, invalidate } from '../../../lib/ppp-errors.js';
+import { validate } from '../../../lib/ppp-errors.js';
 
 const DEFAULT_COLUMNS = [
   {
@@ -33,19 +38,66 @@ const DEFAULT_COLUMNS = [
   return column;
 });
 
-class ListSource {}
-
 export async function listDefinition() {
   return {
     extraControls: null,
     pagination: false,
+    control: class {
+      connectedCallback(widget) {
+        widget.deletionAvailable = true;
+
+        if (widget.preview) {
+          // List was modified.
+          if (Array.isArray(widget.container.granary.listSource)) {
+            widget.document.listSource = structuredClone(
+              widget.container.granary.listSource
+            );
+          } else {
+            // Sync granary with the document.
+            widget.container.granary.listSource = structuredClone(
+              widget.document.listSource ?? []
+            );
+          }
+        } else {
+          // A fake one.
+          widget.instrumentTrader = {
+            adoptInstrument: (i) => i
+          };
+        }
+      }
+
+      removeElement(index, widget) {
+        widget.document.listSource.splice(index, 1);
+
+        if (widget.preview) {
+          widget.container.granary.listSource.splice(index, 1);
+        } else {
+          ppp.user.functions.updateOne(
+            {
+              collection: 'workspaces'
+            },
+            {
+              _id: widget.container.document._id,
+              'widgets.uniqueID': widget.document.uniqueID
+            },
+            {
+              $set: {
+                'widgets.$.listSource': widget.document.listSource
+              }
+            }
+          );
+        }
+
+        Observable.notify(widget, 'document');
+      }
+    },
     validate: async (widget) => {
       await widget.container.columnList.validate();
     },
-    source: ListSource,
     submit: async (widget) => {
       return {
-        columns: widget.container.columnList.value
+        columns: widget.container.columnList.value,
+        listSource: widget.container.granary.listSource
       };
     },
     settings: html`
@@ -122,7 +174,18 @@ export async function listDefinition() {
                     widget.searchControl.open = true;
 
                     const listener = () => {
-                      console.log(widget.instrument);
+                      widget.document.listSource ??= [];
+
+                      widget.document.listSource.push({
+                        symbol: widget.instrument.symbol,
+                        traderId: widget.instrumentTrader.document._id
+                      });
+
+                      x.granary.listSource = structuredClone(
+                        widget.document.listSource
+                      );
+
+                      Observable.notify(widget, 'document');
 
                       widget.searchControl.removeEventListener(
                         'chooseinstrument',

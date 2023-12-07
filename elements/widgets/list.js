@@ -12,12 +12,14 @@ import {
   when,
   ref,
   observable,
-  repeat
+  repeat,
+  attr
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
 import { invalidate, validate } from '../../lib/ppp-errors.js';
 import { WidgetColumns } from '../widget-columns.js';
+import { trash } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../query-select.js';
 import '../radio-group.js';
@@ -33,25 +35,40 @@ export const listWidgetTemplate = html`
           <ppp-widget-group-control></ppp-widget-group-control>
           <ppp-widget-search-control
             readonly
-            ?hidden="${(x) => !x.instrumentTrader}"
+            ?hidden="${(x) => !x.preview || !x.instrumentTrader}"
           ></ppp-widget-search-control>
           ${when(
             (x) => !x.instrumentTrader,
             html`<span class="no-spacing"></span>`
           )}
           <span class="widget-title">
-            <span class="title">${(x) => x.document?.name ?? ''}</span>
+            ${when(
+              (x) => x.deletion,
+              html`<span class="negative">Режим удаления</span>`,
+              html`
+                <span class="title">${(x) => x.document?.name ?? ''}</span>
+              `
+            )}
           </span>
-          <ppp-widget-header-buttons></ppp-widget-header-buttons>
+          <ppp-widget-header-buttons>
+            <div
+              ?hidden="${(x) => !x.deletionAvailable}"
+              class="button${(x) => (x.deletion ? ' negative' : '')}"
+              slot="start"
+              @click="${(x) => x.toggleDeletionMode()}"
+            >
+              ${html.partial(trash)}
+            </div>
+          </ppp-widget-header-buttons>
         </div>
       </div>
       <div class="widget-body">
         ${widgetStackSelectorTemplate()} ${(x) => x?.extraControls}
         ${when(
-          (x) => !x?.sources?.length,
+          (x) => !x?.document?.listSource?.length,
           html`${html.partial(widgetEmptyStateTemplate('Список пуст.'))}`,
           html`
-            <table class="widget-table">
+            <table class="widget-table" ${ref('table')}>
               <thead>
                 <tr>
                   ${repeat(
@@ -69,7 +86,29 @@ export const listWidgetTemplate = html`
                   </th>
                 </tr>
               </thead>
-              <tbody @click="${(x, c) => x.handleListTableClick(c)}"></tbody>
+              <tbody @click="${(x, c) => x.handleListTableClick(c)}">
+                ${repeat(
+                  (x) => x?.document?.listSource,
+                  html`
+                    <tr class="row" symbol="${(x, c) => c.parent.symbol}">
+                      ${repeat(
+                        (instrument, c) => c.parent.columns?.array,
+                        html`
+                          <td
+                            class="cell"
+                            :payload="${(x, c) => c.parent}"
+                            :trader="${(x, c) => c.parent.traderId}"
+                            :column="${(x) => x}"
+                          >
+                            ${(x, c) =>
+                              c.parentContext.parent.columns.columnElement(x)}
+                          </td>
+                        `
+                      )}
+                    </tr>
+                  `
+                )}
+              </tbody>
             </table>
           `
         )}
@@ -90,9 +129,6 @@ export class ListWidget extends WidgetWithInstrument {
   extraControls;
 
   @observable
-  source;
-
-  @observable
   pagination;
 
   /**
@@ -101,11 +137,13 @@ export class ListWidget extends WidgetWithInstrument {
   @observable
   columns;
 
-  constructor() {
-    super();
+  @attr({ mode: 'boolean' })
+  deletion;
 
-    this.source = [];
-  }
+  @observable
+  deletionAvailable;
+
+  control;
 
   async connectedCallback() {
     super.connectedCallback();
@@ -126,8 +164,12 @@ export class ListWidget extends WidgetWithInstrument {
         });
       }
 
-      const { settings, validate, submit, extraControls, pagination } =
+      const { settings, validate, submit, extraControls, pagination, control } =
         await mod.listDefinition();
+
+      if (typeof control === 'function') {
+        this.control = new control();
+      }
 
       this.extraControls = extraControls;
       this.pagination = pagination;
@@ -140,14 +182,16 @@ export class ListWidget extends WidgetWithInstrument {
         this.container.extraSettings = settings;
         this.container.granary.validate = validate;
         this.container.granary.submit = submit;
+        // Container and widget share the same source.
+        this.document.listSource = structuredClone(this.document.listSource);
       }
 
       this.columns = new WidgetColumns({
-        widget: this,
         columns: this.document.columns ?? []
       });
 
       await this.columns.registerColumns();
+      await this.control?.connectedCallback?.(this);
     } catch (e) {
       console.error(e);
 
@@ -158,11 +202,52 @@ export class ListWidget extends WidgetWithInstrument {
     }
   }
 
-  disconnectedCallback() {
-    super.disconnectedCallback();
+  async disconnectedCallback() {
+    await this.control?.disconnectedCallback?.(this);
+
+    return super.disconnectedCallback();
   }
 
-  handleListTableClick({ event }) {}
+  handleListTableClick({ event }) {
+    if (!this.document?.listSource?.length) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    let index = -1;
+    let column;
+
+    const cp = event.composedPath();
+    const rows = Array.from(this.table.querySelectorAll('.row'));
+
+    for (const n of cp) {
+      if (n.classList?.contains?.('row')) {
+        index = rows.indexOf(n);
+
+        break;
+      } else if (n.classList?.contains?.('cell')) {
+        column = n.firstElementChild;
+      }
+    }
+
+    if (index > -1) {
+      if (this.deletion) {
+        this.control?.removeElement?.(index, this, column);
+      } else if (column.defaultTrader) {
+        this.instrumentTrader = column.defaultTrader;
+
+        if (this.groupControl.selection && !this.preview) {
+          this.selectInstrument(column.instrument.symbol);
+        }
+      }
+    }
+  }
+
+  toggleDeletionMode() {
+    this.deletion = !this.deletion;
+  }
 
   async validate() {
     this.container.listType.value === 'url' &&
@@ -225,8 +310,9 @@ export async function widgetDefinition() {
             value="${(x) => x.document.listType ?? 'instruments'}"
             ${ref('listType')}
           >
-            <ppp-radio value="instruments">Список инструментов</ppp-radio>
-            <ppp-radio value="url">Реализация по ссылке</ppp-radio>
+            <ppp-radio value="instruments">Инструменты</ppp-radio>
+            <ppp-radio value="mru" disabled>Недавние инструменты</ppp-radio>
+            <ppp-radio value="url">По ссылке</ppp-radio>
           </ppp-radio-group>
           <ppp-text-field
             ?hidden="${(x) => x.listType.value !== 'url'}"

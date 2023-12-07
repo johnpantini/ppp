@@ -263,8 +263,7 @@ export const widgetPageTemplate = html`
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
-                              true ||
-                              (x.document._id && x.document.type !== 'list')}"
+                              x.document._id && x.document.type !== 'list'}"
                             value="list"
                           >
                             <span slot="text">Список/таблица</span>
@@ -307,25 +306,20 @@ export const widgetPageTemplate = html`
                   <div class="drawer">
                     <div class="drawer-header">
                       <div class="drawer-header-inner">
-                        <div
-                          class="control-line"
-                          style="justify-content: space-between;"
-                        >
-                          <h3>Настройки</h3>
-                          <ppp-button
-                            style="margin-bottom: 6px;"
-                            ?hidden="${(x) => !x.mounted}"
-                            appearance="primary"
-                            class="xsmall"
-                            @click="${(x) => x.loadTemplateSettings()}"
-                          >
-                            Подставить настройки из шаблона
-                          </ppp-button>
-                        </div>
+                        <h3>Настройки</h3>
                       </div>
                     </div>
                     <div class="drawer-body">
                       <div class="drawer-body-inner" style="padding-bottom: 0">
+                        <ppp-button
+                          style="margin-bottom: 6px;"
+                          ?hidden="${(x) => !x.mounted}"
+                          appearance="primary"
+                          class="xsmall"
+                          @click="${(x) => x.loadTemplateSettings()}"
+                        >
+                          Подставить настройки из шаблона
+                        </ppp-button>
                         <div class="widget-settings-section">
                           <div class="widget-settings-label-group">
                             <h5>Название</h5>
@@ -720,7 +714,7 @@ export const widgetPageStyles = css`
   }
 
   .drawer-body-inner {
-    padding: 25px 4px;
+    padding: 12px 4px;
   }
 
   .drawer-body ppp-tab-panel {
@@ -1331,6 +1325,13 @@ export class WidgetPage extends Page {
 
   onChange(event) {
     if (!this.autoApplyWidgetModifications.checked || !this.isSteady()) return;
+
+    if (
+      ['click', 'pointerdwon', 'pointerup', 'mousedown', 'mouseup'].includes(
+        event.type
+      )
+    )
+      return;
 
     const cp = event.composedPath();
 

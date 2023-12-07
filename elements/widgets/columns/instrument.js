@@ -35,7 +35,7 @@ export const columnTemplate = html`
           <div
             class="logo"
             style="${(x) =>
-              `background-image:url(${x.widget?.searchControl?.getInstrumentIconUrl(
+              `background-image:url(${x.getInstrumentIconUrl(
                 x.payload?.instrument
               )})`}"
           ></div>
@@ -84,7 +84,19 @@ export const columnStyles = css`
 `;
 
 // noinspection JSVoidFunctionReturnValueUsed
-export default (class extends Column {}
+export default (class extends Column {
+  getInstrumentIconUrl(instrument) {
+    let url = '';
+
+    if (this.defaultTrader) {
+      url = this.defaultTrader.getInstrumentIconUrl?.(instrument);
+    } else if (this.widget) {
+      url = this.widget.instrumentTrader?.getInstrumentIconUrl?.(instrument);
+    }
+
+    return url || 'static/instruments/unknown.svg';
+  }
+}
   .compose({
     name: `ppp-${uuidv4()}`,
     template: columnTemplate,

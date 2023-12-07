@@ -223,9 +223,10 @@ export class WidgetsPage extends Page {
           removed: {
             '[%#(this.activeItem === "removed" ? "$eq" : "$ne")%]': true
           },
-          type: '[%#(this.activeItem === "removed" ? "" : this.activeItem)%]' || {
-            $exists: true
-          }
+          reportedType:
+            '[%#(this.activeItem === "removed" ? "" : this.activeItem)%]' || {
+              $exists: true
+            }
         })
         .sort({ updatedAt: -1 });
     };

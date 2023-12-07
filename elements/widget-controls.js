@@ -107,6 +107,7 @@ import {
   listboxOptionTemplate
 } from './listbox-option.js';
 import { widgetEmptyStateTemplate, widgetEmptyStateStyles } from './widget.js';
+import { endSlotTemplate, startSlotTemplate } from '../vendor/fast-patterns.js';
 
 export const widgetGroupControlTemplate = html`
   <template @click="${(x, c) => x.handleClick(c)}">
@@ -1962,26 +1963,27 @@ export class WidgetNotificationsArea extends PPPElement {
 
 export const widgetHeaderButtonsTemplate = html`
   <template>
-    <slot>
-      <div
-        ?hidden="${(x) => x.ensemble === 'disabled'}"
-        class="button"
-        @click="${(x) => x.stackWidget()}"
-      >
-        ${html.partial(plus)}
-      </div>
-      <div class="button" @click="${(x) => x.showWidgetSettings()}">
-        ${html.partial(settings)}
-      </div>
-      <div class="button" @click="${(x) => x.closeWidget()}">
-        ${html.partial(close)}
-      </div>
-    </slot>
+    ${startSlotTemplate()}
+    <div
+      ?hidden="${(x) => x.ensemble === 'disabled'}"
+      class="button"
+      @click="${(x) => x.stackWidget()}"
+    >
+      ${html.partial(plus)}
+    </div>
+    <div class="button" @click="${(x) => x.showWidgetSettings()}">
+      ${html.partial(settings)}
+    </div>
+    <div class="button" @click="${(x) => x.closeWidget()}">
+      ${html.partial(close)}
+    </div>
+    ${endSlotTemplate()}
   </template>
 `;
 
 export const widgetHeaderButtonsStyles = css`
   ${display('flex')}
+  ::slotted(.button),
   .button {
     margin-right: 2px;
     width: 16px;
