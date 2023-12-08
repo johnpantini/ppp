@@ -7,8 +7,8 @@ import {
 } from '../../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE } from '../../../lib/const.js';
 import { search } from '../../../static/svg/sprite.js';
-import '../../widget-column-list.js';
 import { validate } from '../../../lib/ppp-errors.js';
+import '../../widget-column-list.js';
 
 const DEFAULT_COLUMNS = [
   {

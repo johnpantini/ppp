@@ -1373,12 +1373,6 @@ export class OrderWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.ordersTrader;
 
-      this.selectInstrument(this.document.symbol, { isolate: true });
-
-      setTimeout(() => {
-        this.calculateEstimate();
-      }, 1000);
-
       await this.ordersTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
@@ -1466,6 +1460,12 @@ export class OrderWidget extends WidgetWithInstrument {
           }
         });
       }
+
+      this.selectInstrument(this.document.symbol, { isolate: true });
+
+      setTimeout(() => {
+        this.calculateEstimate();
+      }, 1000);
 
       if (this.document.pusherApi) {
         this.pusherTelegramHandler = this.pusherTelegramHandler.bind(this);

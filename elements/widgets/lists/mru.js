@@ -1,0 +1,201 @@
+import ppp from '../../../ppp.js';
+import { html, Observable, ref } from '../../../vendor/fast-element.min.js';
+import { COLUMN_SOURCE, TRADER_CAPS } from '../../../lib/const.js';
+import { validate } from '../../../lib/ppp-errors.js';
+import { TraderRuntime } from '../../../lib/traders/runtime.js';
+import '../../widget-column-list.js';
+
+const DEFAULT_COLUMNS = [
+  {
+    source: COLUMN_SOURCE.INSTRUMENT
+  },
+  {
+    source: COLUMN_SOURCE.SYMBOL
+  },
+  {
+    source: COLUMN_SOURCE.LAST_PRICE
+  },
+  {
+    source: COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
+  },
+  {
+    source: COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+  },
+  {
+    source: COLUMN_SOURCE.BEST_BID
+  },
+  {
+    source: COLUMN_SOURCE.BEST_ASK
+  }
+].map((column) => {
+  column.name = ppp.t(`$const.columnSource.${column.source}`);
+
+  return column;
+});
+
+export async function listDefinition() {
+  return {
+    extraControls: null,
+    pagination: false,
+    control: class {
+      connectedCallback(widget) {
+        if (!widget.preview) {
+          widget.deletionAvailable = true;
+
+          // A fake one.
+          widget.instrumentTrader = {
+            adoptInstrument: (i) => i
+          };
+
+          this.listener ??= (event) => {
+            const { source, newValue: instrument } = event.detail;
+
+            if (source !== widget && widget.groupControl.selection) {
+              if (
+                instrument &&
+                widget.groupControl.selection === source.groupControl?.selection
+              ) {
+                widget.document.listSource ??= [];
+
+                for (const trader of [
+                  source.instrumentTrader,
+                  source.level1Trader,
+                  source.extraLevel1Trader,
+                  source.extraLevel1Trader2
+                ]) {
+                  if (
+                    trader instanceof TraderRuntime &&
+                    trader.hasCap(TRADER_CAPS.CAPS_LEVEL1) &&
+                    !trader.adoptInstrument(instrument)?.notSupported
+                  ) {
+                    if (
+                      widget.document.listSource.find(
+                        (e) => e.symbol === trader.getSymbol(instrument)
+                      )
+                    ) {
+                      return;
+                    }
+
+                    let depth = widget.document.depth;
+
+                    if (depth < 1) {
+                      depth = 1;
+                    }
+
+                    if (typeof depth !== 'number' || depth > 100) {
+                      depth = 100;
+                    }
+
+                    if (widget.document.listSource.length >= depth) {
+                      widget.document.listSource.pop();
+                    }
+
+                    widget.document.listSource.unshift({
+                      symbol: instrument.symbol,
+                      traderId: trader.document._id
+                    });
+
+                    ppp.user.functions.updateOne(
+                      {
+                        collection: 'workspaces'
+                      },
+                      {
+                        _id: widget.container.document._id,
+                        'widgets.uniqueID': widget.document.uniqueID
+                      },
+                      {
+                        $set: {
+                          'widgets.$.listSource': widget.document.listSource
+                        }
+                      }
+                    );
+
+                    Observable.notify(widget, 'document');
+                  }
+                }
+              }
+            }
+          };
+
+          document.addEventListener('instrumentchange', this.listener);
+        }
+      }
+
+      disconnectedCallback() {
+        document.removeEventListener('instrumentchange', this.listener);
+      }
+
+      removeElement(index, widget) {
+        widget.document.listSource.splice(index, 1);
+
+        if (!widget.preview) {
+          ppp.user.functions.updateOne(
+            {
+              collection: 'workspaces'
+            },
+            {
+              _id: widget.container.document._id,
+              'widgets.uniqueID': widget.document.uniqueID
+            },
+            {
+              $set: {
+                'widgets.$.listSource': widget.document.listSource
+              }
+            }
+          );
+        }
+
+        Observable.notify(widget, 'document');
+      }
+    },
+    validate: async (widget) => {
+      await validate(widget.container.depth);
+
+      await validate(widget.container.depth, {
+        hook: async (value) => +value >= 1 && +value <= 100,
+        errorMessage: 'Введите значение от 1 до 100'
+      });
+      await widget.container.columnList.validate();
+    },
+    submit: async (widget) => {
+      return {
+        depth: +Math.abs(widget.container.depth.value) || 100,
+        columns: widget.container.columnList.value
+      };
+    },
+    settings: html`
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Глубина списка</h5>
+          <p class="description">Введите значение от 1 до 100.</p>
+        </div>
+        <div class="widget-settings-input-group">
+          <ppp-text-field
+            type="number"
+            placeholder="100"
+            value="${(x) => x.document.depth ?? 100}"
+            ${ref('depth')}
+          ></ppp-text-field>
+        </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Столбцы таблицы инструментов</h5>
+        </div>
+        <div class="spacing2"></div>
+        <ppp-widget-column-list
+          ${ref('columnList')}
+          :stencil="${() => {
+            return {
+              source: COLUMN_SOURCE.SYMBOL,
+              name: ppp.t(`$const.columnSource.${COLUMN_SOURCE.SYMBOL}`)
+            };
+          }}"
+          :mainTraderColumns="${(x) => Object.values(COLUMN_SOURCE)}"
+          :list="${(x) => x.document.columns ?? DEFAULT_COLUMNS}"
+          :traders="${(x) => x.document.traders}"
+        ></ppp-widget-column-list>
+      </div>
+    `
+  };
+}

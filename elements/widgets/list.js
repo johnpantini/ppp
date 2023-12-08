@@ -43,7 +43,7 @@ export const listWidgetTemplate = html`
           )}
           <span class="widget-title">
             ${when(
-              (x) => x.deletion,
+              (x) => x.deletionAvailable && x.deletion,
               html`<span class="negative">Режим удаления</span>`,
               html`
                 <span class="title">${(x) => x.document?.name ?? ''}</span>
@@ -148,11 +148,19 @@ export class ListWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    if (this.preview) {
+      if (this.document.listType === 'url' && !this.document.listWidgetUrl) {
+        return;
+      }
+    }
+
     try {
       const url = new URL(
         this.document.listType === 'url'
           ? this.document.listWidgetUrl
-          : `${ppp.rootUrl}/elements/widgets/lists/instruments.js`
+          : `${ppp.rootUrl}/elements/widgets/lists/${
+              this.document.listType ?? 'instruments'
+            }.js`
       );
 
       const mod = await import(url);
@@ -232,7 +240,7 @@ export class ListWidget extends WidgetWithInstrument {
       }
     }
 
-    if (index > -1) {
+    if (index > -1 && column) {
       if (this.deletion) {
         this.control?.removeElement?.(index, this, column);
       } else if (column.defaultTrader) {
@@ -311,7 +319,7 @@ export async function widgetDefinition() {
             ${ref('listType')}
           >
             <ppp-radio value="instruments">Инструменты</ppp-radio>
-            <ppp-radio value="mru" disabled>Недавние инструменты</ppp-radio>
+            <ppp-radio value="mru">Недавние инструменты</ppp-radio>
             <ppp-radio value="url">По ссылке</ppp-radio>
           </ppp-radio-group>
           <ppp-text-field
@@ -333,7 +341,7 @@ export async function widgetDefinition() {
             const url = new URL(
               x.listType.value === 'url'
                 ? x.listWidgetUrl.value
-                : `${ppp.rootUrl}/elements/widgets/lists/instruments.js`
+                : `${ppp.rootUrl}/elements/widgets/lists/${x.listType.value}.js`
             );
 
             const { listDefinition } = await import(url);
