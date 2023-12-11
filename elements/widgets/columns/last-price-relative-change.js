@@ -45,6 +45,10 @@ export class LastPriceRelativeChangeColumn extends Column {
   @observable
   lastPriceRelativeChange;
 
+  get value() {
+    return this.lastPriceRelativeChange;
+  }
+
   @observable
   status;
 

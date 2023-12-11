@@ -24,6 +24,10 @@ export class BestAskColumn extends Column {
   @observable
   bestAsk;
 
+  get value() {
+    return this.bestAsk;
+  }
+
   async connectedCallback() {
     await super.connectedCallback();
 

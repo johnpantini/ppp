@@ -43,6 +43,10 @@ export class TotalAmountColumn extends LastPriceColumn {
   @observable
   totalAmount;
 
+  get value() {
+    return this.totalAmount;
+  }
+
   @observable
   size;
 

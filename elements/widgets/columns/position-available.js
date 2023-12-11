@@ -28,6 +28,10 @@ export class PositionAvailableColumn extends Column {
   @observable
   size;
 
+  get value() {
+    return this.size;
+  }
+
   async connectedCallback() {
     await super.connectedCallback();
 

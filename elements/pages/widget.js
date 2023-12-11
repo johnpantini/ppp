@@ -1011,6 +1011,11 @@ export class WidgetPage extends Page {
               from: 'apis',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -1025,6 +1030,11 @@ export class WidgetPage extends Page {
             $lookup: {
               from: 'traders',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -1041,6 +1051,11 @@ export class WidgetPage extends Page {
               from: 'brokers',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -1055,6 +1070,11 @@ export class WidgetPage extends Page {
             $lookup: {
               from: 'bots',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -1073,6 +1093,11 @@ export class WidgetPage extends Page {
               from: 'orders',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -1087,6 +1112,11 @@ export class WidgetPage extends Page {
             $lookup: {
               from: 'services',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -1509,6 +1539,11 @@ export class WidgetPage extends Page {
               from: 'apis',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -1523,6 +1558,11 @@ export class WidgetPage extends Page {
             $lookup: {
               from: 'traders',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -1539,6 +1579,11 @@ export class WidgetPage extends Page {
               from: 'brokers',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -1553,6 +1598,11 @@ export class WidgetPage extends Page {
             $lookup: {
               from: 'bots',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -1571,6 +1621,11 @@ export class WidgetPage extends Page {
               from: 'orders',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -1585,6 +1640,11 @@ export class WidgetPage extends Page {
             $lookup: {
               from: 'services',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,

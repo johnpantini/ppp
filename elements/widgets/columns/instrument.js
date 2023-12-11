@@ -31,7 +31,7 @@ export const columnTemplate = html`
         </div>
       `,
       html`
-        <div class="logo-with-name capitalize">
+        <div class="logo-with-name capitalize" title="${(x) => x.value}">
           <div
             class="logo"
             style="${(x) =>
@@ -39,10 +39,7 @@ export const columnTemplate = html`
                 x.payload?.instrument
               )})`}"
           ></div>
-          <div class="name">
-            ${(x) =>
-              x.payload?.instrument?.fullName ?? x.payload?.instrument?.symbol}
-          </div>
+          <div class="name">${(x) => x.value}</div>
         </div>
       `
     )}
@@ -85,6 +82,10 @@ export const columnStyles = css`
 
 // noinspection JSVoidFunctionReturnValueUsed
 export default (class extends Column {
+  get value() {
+    return this.payload?.instrument?.fullName ?? this.payload?.symbol;
+  }
+
   getInstrumentIconUrl(instrument) {
     let url = '';
 

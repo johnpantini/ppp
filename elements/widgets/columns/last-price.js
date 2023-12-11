@@ -43,6 +43,10 @@ export class LastPriceColumn extends Column {
   @observable
   lastPrice;
 
+  get value() {
+    return this.lastPrice;
+  }
+
   @observable
   status;
 

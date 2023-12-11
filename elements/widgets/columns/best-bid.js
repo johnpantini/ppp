@@ -24,6 +24,10 @@ export class BestBidColumn extends Column {
   @observable
   bestBid;
 
+  get value() {
+    return this.bestBid;
+  }
+
   async connectedCallback() {
     await super.connectedCallback();
 

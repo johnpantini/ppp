@@ -65,6 +65,10 @@ export class TradingStatusColumn extends Column {
   @observable
   status;
 
+  get value() {
+    return this.status;
+  }
+
   statusChanged() {
     this.statusText = this.status
       ? ppp.t(`$const.tradingStatus.${this.status}`)

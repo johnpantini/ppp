@@ -30,6 +30,12 @@ export const instrumentsImportPageTemplate = html`
             <ppp-option value="${() => INSTRUMENT_DICTIONARY.BINANCE}">
               Binance
             </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_LINEAR}">
+              Bybit (деривативы)
+            </ppp-option>
+            <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_SPOT}">
+              Bybit (спот)
+            </ppp-option>
             <ppp-option
               value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
             >
@@ -368,47 +374,6 @@ export class InstrumentsImportPage extends Page {
           lot: 1
         };
       });
-  }
-
-  async [INSTRUMENT_DICTIONARY.BINANCE]() {
-    const rExchangeInfo = await fetch(
-      `https://api.binance.com/api/v3/exchangeInfo`,
-      {
-        cache: 'reload'
-      }
-    );
-
-    await maybeFetchError(
-      rExchangeInfo,
-      'Не удалось загрузить список инструментов.'
-    );
-
-    const { symbols } = await rExchangeInfo.json();
-    const result = [];
-
-    for (const s of symbols) {
-      result.push({
-        symbol: s.symbol,
-        exchange: EXCHANGE.BINANCE,
-        broker: BROKERS.BINANCE,
-        fullName: `${s.baseAsset}/${s.quoteAsset}`,
-        minPriceIncrement: parseFloat(
-          s.filters.find((f) => f.filterType === 'PRICE_FILTER').tickSize
-        ),
-        minQuantityIncrement: parseFloat(
-          s.filters.find((f) => f.filterType === 'LOT_SIZE').stepSize
-        ),
-        type: 'cryptocurrency',
-        baseCryptoAsset: s.baseAsset,
-        quoteCryptoAsset: s.quoteAsset,
-        minNotional: parseFloat(
-          s.filters.find((f) => f.filterType === 'NOTIONAL').minNotional
-        ),
-        forQualInvestorFlag: false
-      });
-    }
-
-    return result;
   }
 
   async [INSTRUMENT_DICTIONARY.ALOR_SPBX]() {
@@ -910,15 +875,112 @@ export class InstrumentsImportPage extends Page {
     return result;
   }
 
+  async [INSTRUMENT_DICTIONARY.BINANCE]() {
+    const rExchangeInfo = await fetch(
+      `https://api.binance.com/api/v3/exchangeInfo`,
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(
+      rExchangeInfo,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const { symbols } = await rExchangeInfo.json();
+    const result = [];
+
+    for (const s of symbols) {
+      result.push({
+        symbol: s.symbol,
+        exchange: EXCHANGE.BINANCE,
+        broker: BROKERS.BINANCE,
+        fullName: `${s.baseAsset}/${s.quoteAsset}`,
+        minPriceIncrement: parseFloat(
+          s.filters.find((f) => f.filterType === 'PRICE_FILTER').tickSize
+        ),
+        minQuantityIncrement: parseFloat(
+          s.filters.find((f) => f.filterType === 'LOT_SIZE').stepSize
+        ),
+        type: 'cryptocurrency',
+        baseCryptoAsset: s.baseAsset,
+        quoteCryptoAsset: s.quoteAsset,
+        minNotional: parseFloat(
+          s.filters.find((f) => f.filterType === 'NOTIONAL').minNotional
+        ),
+        forQualInvestorFlag: false
+      });
+    }
+
+    return result;
+  }
+
+  async #bybitInstruments(category = 'spot') {
+    const rInstrumentsInfo = await fetch(
+      `https://api.bybit.com//v5/market/instruments-info?category=${category}&limit=1000`,
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(
+      rInstrumentsInfo,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const json = await rInstrumentsInfo.json();
+    const result = [];
+
+    for (const s of json.result.list ?? []) {
+      result.push({
+        symbol: s.symbol,
+        exchange: EXCHANGE.BYBIT,
+        broker: BROKERS.BYBIT,
+        fullName: `${s.baseCoin}/${s.quoteCoin}`,
+        minPriceIncrement: parseFloat(s.priceFilter.tickSize),
+        minQuantityIncrement: parseFloat(s.lotSizeFilter.qtyStep),
+        type: 'cryptocurrency',
+        baseCryptoAsset: s.baseCoin,
+        quoteCryptoAsset: s.quoteCoin,
+        minNotional:
+          parseFloat(s.lotSizeFilter.minOrderQty) *
+          parseFloat(s.priceFilter.minPrice),
+        forQualInvestorFlag: false
+      });
+    }
+
+    return result;
+  }
+
+  async [INSTRUMENT_DICTIONARY.BYBIT_SPOT]() {
+    return this.#bybitInstruments('spot');
+  }
+
+  async [INSTRUMENT_DICTIONARY.BYBIT_LINEAR]() {
+    return this.#bybitInstruments('linear');
+  }
+
   async submitDocument() {
     this.beginOperation();
 
     try {
+      // For cache key.
       let exchange;
       let exchangeForDBRequest;
       let broker;
 
       switch (this.dictionary.value) {
+        case INSTRUMENT_DICTIONARY.BYBIT_LINEAR:
+          exchange = EXCHANGE.BYBIT_LINEAR;
+          exchangeForDBRequest = EXCHANGE.BYBIT;
+          broker = BROKERS.BYBIT;
+
+        case INSTRUMENT_DICTIONARY.BYBIT_SPOT:
+          exchange = EXCHANGE.BYBIT_SPOT;
+          exchangeForDBRequest = EXCHANGE.BYBIT;
+          broker = BROKERS.BYBIT;
+
         case INSTRUMENT_DICTIONARY.BINANCE:
           exchange = EXCHANGE.BINANCE;
           exchangeForDBRequest = EXCHANGE.BINANCE;

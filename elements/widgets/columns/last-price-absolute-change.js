@@ -48,6 +48,10 @@ export class LastPriceAbsoluteChangeColumn extends Column {
   @observable
   lastPriceAbsoluteChange;
 
+  get value() {
+    return this.lastPriceAbsoluteChange;
+  }
+
   @observable
   status;
 

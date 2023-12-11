@@ -68,6 +68,7 @@ export default function (i18n) {
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
+        [EXCHANGE.BYBIT]: 'Bybit',
         [EXCHANGE.MOEX]: 'Московская биржа',
         [EXCHANGE.SPBX]: 'СПБ Биржа',
         [EXCHANGE.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции)',

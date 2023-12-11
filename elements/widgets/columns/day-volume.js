@@ -28,6 +28,10 @@ export class DayVolumeColumn extends Column {
   @observable
   volume;
 
+  get value() {
+    return this.volume;
+  }
+
   async connectedCallback() {
     await super.connectedCallback();
 

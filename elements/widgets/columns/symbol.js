@@ -10,7 +10,11 @@ export const columnTemplate = html`
 `;
 
 // noinspection JSVoidFunctionReturnValueUsed
-export default (class extends Column {}
+export default (class extends Column {
+  get value() {
+    return this.payload?.symbol;
+  }
+}
   .compose({
     name: `ppp-${uuidv4()}`,
     template: columnTemplate,

@@ -13,7 +13,8 @@ import {
   ref,
   observable,
   repeat,
-  attr
+  attr,
+  Observable
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
@@ -88,7 +89,7 @@ export const listWidgetTemplate = html`
               </thead>
               <tbody @click="${(x, c) => x.handleListTableClick(c)}">
                 ${repeat(
-                  (x) => x?.document?.listSource,
+                  (x) => x?.getSortedSource(),
                   html`
                     <tr class="row" symbol="${(x, c) => c.parent.symbol}">
                       ${repeat(
@@ -130,6 +131,9 @@ export class ListWidget extends WidgetWithInstrument {
 
   @observable
   pagination;
+
+  @observable
+  lastSortTime;
 
   /**
    * @type {WidgetColumns}
@@ -200,6 +204,12 @@ export class ListWidget extends WidgetWithInstrument {
 
       await this.columns.registerColumns();
       await this.control?.connectedCallback?.(this);
+
+      setTimeout(() => {
+        this.document.listSource = this.document.listSource.sort();
+
+        Observable.notify(this, 'document');
+      }, 5000);
     } catch (e) {
       console.error(e);
 
@@ -214,6 +224,11 @@ export class ListWidget extends WidgetWithInstrument {
     await this.control?.disconnectedCallback?.(this);
 
     return super.disconnectedCallback();
+  }
+
+  getSortedSource() {
+    // TODO
+    return this.document?.listSource;
   }
 
   handleListTableClick({ event }) {

@@ -24,6 +24,10 @@ export class PositionAverageColumn extends Column {
   @observable
   averagePrice;
 
+  get value() {
+    return this.averagePrice;
+  }
+
   async connectedCallback() {
     await super.connectedCallback();
 

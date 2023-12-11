@@ -844,6 +844,7 @@ export class InstrumentsManagePage extends Page {
     let exchange = this.exchange.value;
 
     // Handle special cases
+    // TODO - handle BYBIT, IB and other custom exchanges.
     if (this.broker.value === BROKERS.TINKOFF) {
       exchange = EXCHANGE.RUS;
     }

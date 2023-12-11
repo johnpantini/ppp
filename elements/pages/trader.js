@@ -275,7 +275,7 @@ export const traderPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('utex')}"
           />
-          <div slot="title">UTEX Margin (акции)</div>
+          <div slot="title">UTEX Margin, акции и ETF</div>
           <span slot="description">
             Торговля акциями США через брокерский профиль UTEX.
           </span>
@@ -325,7 +325,7 @@ export const traderPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('tinkoff')}"
           />
-          <div slot="title">Tinkoff Invest API (gRPC-Web)</div>
+          <div slot="title">Tinkoff Invest API, gRPC-Web</div>
           <span slot="description">
             Торговля через брокерский профиль Tinkoff Invest API.
           </span>
@@ -442,6 +442,66 @@ export const traderPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.CAPITALCOM}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Bybit"
+            style="height: 32px"
+            src="${() => ppp.brandSvg('bybit')}"
+          />
+          <div slot="title">Bybit API V5</div>
+          <span slot="description">
+            Торговля и рыночные данные через брокерский профиль Bybit.
+          </span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ORDERBOOK}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIME_AND_SALES}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            disabled
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.BYBIT_V5}`
               })}"
           >
             Продолжить

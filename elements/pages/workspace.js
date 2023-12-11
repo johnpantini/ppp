@@ -617,6 +617,11 @@ export class WorkspacePage extends Page {
               from: 'apis',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -631,6 +636,11 @@ export class WorkspacePage extends Page {
             $lookup: {
               from: 'traders',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -647,6 +657,11 @@ export class WorkspacePage extends Page {
               from: 'brokers',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -661,6 +676,11 @@ export class WorkspacePage extends Page {
             $lookup: {
               from: 'bots',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,
@@ -679,6 +699,11 @@ export class WorkspacePage extends Page {
               from: 'orders',
               pipeline: [
                 {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
+                {
                   $project: {
                     updatedAt: 0,
                     createdAt: 0,
@@ -693,6 +718,11 @@ export class WorkspacePage extends Page {
             $lookup: {
               from: 'services',
               pipeline: [
+                {
+                  $match: {
+                    isolated: { $ne: true }
+                  }
+                },
                 {
                   $project: {
                     updatedAt: 0,

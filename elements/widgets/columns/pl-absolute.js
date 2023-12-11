@@ -41,6 +41,10 @@ export class PLAbsoluteColumn extends LastPriceColumn {
   @observable
   pl;
 
+  get value() {
+    return this.pl;
+  }
+
   @observable
   size;
 
@@ -73,10 +77,16 @@ export class PLAbsoluteColumn extends LastPriceColumn {
     await super.connectedCallback();
 
     if (!this.isBalance) {
+      await this.defaultTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          averagePrice: TRADER_DATUM.POSITION_AVERAGE
+        }
+      });
+
       await this.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          averagePrice: TRADER_DATUM.POSITION_AVERAGE,
           size: TRADER_DATUM.POSITION_SIZE
         }
       });
@@ -85,10 +95,16 @@ export class PLAbsoluteColumn extends LastPriceColumn {
 
   async disconnectedCallback() {
     if (!this.isBalance) {
+      await this.defaultTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          averagePrice: TRADER_DATUM.POSITION_AVERAGE
+        }
+      });
+
       await this.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          averagePrice: TRADER_DATUM.POSITION_AVERAGE,
           size: TRADER_DATUM.POSITION_SIZE
         }
       });

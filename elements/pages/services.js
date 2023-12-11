@@ -17,6 +17,7 @@ import { serviceStateAppearance } from './service.js';
 import { later } from '../../lib/ppp-decorators.js';
 import '../badge.js';
 import '../button.js';
+import '../checkbox.js';
 import '../table.js';
 
 await ppp.i18n(import.meta.url);
@@ -140,6 +141,9 @@ export const servicesPageTemplate = html`
                   label: 'Состояние'
                 },
                 {
+                  label: 'Изоляция'
+                },
+                {
                   label: 'Действия'
                 }
               ]}"
@@ -205,6 +209,30 @@ export const servicesPageTemplate = html`
                                   `$const.serviceState.${datum.state ?? 'N/A'}`
                                 )}
                         </ppp-badge>
+                      `,
+                      html`
+                        <ppp-checkbox
+                          ?checked="${() => datum.isolated}"
+                          @change="${(x, c) => {
+                            ppp.user.functions.updateOne(
+                              {
+                                collection:
+                                  c.parentContext.parent.getRootNode().host
+                                    .collection
+                              },
+                              {
+                                _id: datum._id
+                              },
+                              {
+                                $set: {
+                                  isolated: !datum.isolated
+                                }
+                              }
+                            );
+                          }}"
+                        >
+                          Изолирован
+                        </ppp-checkbox>
                       `,
                       html`
                         <div class="control-line">
