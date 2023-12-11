@@ -5,11 +5,16 @@ import {
   css,
   ref,
   when,
-  Observable,
-  observable
+  observable,
+  repeat,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { BROKERS, EXCHANGE } from '../../lib/const.js';
+import {
+  BROKERS,
+  INSTRUMENT_DICTIONARY,
+  getInstrumentDictionaryMeta
+} from '../../lib/const.js';
 import { search } from '../../static/svg/sprite.js';
 import { DocumentNotFoundError, validate } from '../../lib/ppp-errors.js';
 import { decimalSeparator } from '../../lib/intl.js';
@@ -25,78 +30,103 @@ import '../text-field.js';
 
 await ppp.i18n(import.meta.url);
 
+export const dictionarySelectorTemplate = () => html`
+  <ppp-select
+    value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}"
+    @change="${(x) => {
+      ppp.app.setURLSearchParams({
+        dictionary: encodeURIComponent(x.dictionary.value)
+      });
+    }}"
+    ${ref('dictionary')}
+  >
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.BINANCE}">
+      Binance
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_LINEAR}">
+      Bybit (деривативы)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_SPOT}">
+      Bybit (спот)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}">
+      UTEX Margin (акции и ETF, US)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
+      Psina (акции и ETF, US)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
+      Alor (СПБ Биржа)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}">
+      Alor (Московская биржа), фондовый рынок
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_FORTS}">
+      Alor (Московская биржа), срочный рынок
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
+      Tinkoff
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
+      Finam
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
+      Interactive Brokers (акции и ETF, US)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.CAPITALCOM}">
+      Capital.com
+    </ppp-option>
+  </ppp-select>
+`;
+
 export const instrumentsManagePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Торговая площадка</h5>
+          <h5>Словарь</h5>
           <p class="description">
-            Торговая площадка (биржа), на которой торгуется инструмент.
+            Выберите словарь-источник. Инструменты добавляются и редактируются в
+            рамках существующего словаря.
           </p>
         </div>
-        <div class="input-group">
-          <ppp-select
-            value="${() => EXCHANGE.SPBX}"
-            @change="${(x) => {
-              ppp.app.setURLSearchParams({
-                exchange: encodeURIComponent(x.exchange.value)
-              });
-            }}"
-            ${ref('exchange')}
-          >
-            <ppp-option value="${() => EXCHANGE.MOEX}">
-              Московская биржа
-            </ppp-option>
-            <ppp-option value="${() => EXCHANGE.SPBX}">СПБ Биржа</ppp-option>
-            <ppp-option value="${() => EXCHANGE.UTEX_MARGIN_STOCKS}">
-              UTEX Margin (акции)
-            </ppp-option>
-            <ppp-option value="${() => EXCHANGE.US}">Биржи США</ppp-option>
-            <ppp-option value="${() => EXCHANGE.BINANCE}">Binance</ppp-option>
-            <ppp-option value="${() => EXCHANGE.BYBIT}">Bybit</ppp-option>
-            <ppp-option value="${() => EXCHANGE.CAPITALCOM}"
-              >Capital.com</ppp-option
-            >
-          </ppp-select>
-        </div>
+        <div class="input-group">${dictionarySelectorTemplate()}</div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Брокер</h5>
+          <h5>Торговая площадка</h5>
           <p class="description">
-            Брокер, предоставляющий доступ к торговле инструментом.
+            Торговая площадка (биржа), на которой торгуется (листингован)
+            инструмент.
           </p>
         </div>
         <div class="input-group">
-          <ppp-select
-            value="${() => BROKERS.ALOR}"
+          <ppp-radio-group
+            orientation="vertical"
             @change="${(x) => {
-              ppp.app.setURLSearchParams({
-                broker: encodeURIComponent(x.broker.value)
-              });
+              x.symbol.value && x.search(true);
             }}"
-            ${ref('broker')}
+            ${ref('exchange')}
           >
-            <ppp-option value="${() => BROKERS.PSINA}">Psina</ppp-option>
-            <ppp-option value="${() => BROKERS.UTEX}">UTEX</ppp-option>
-            <ppp-option value="${() => BROKERS.IB}">IB</ppp-option>
-            <ppp-option value="${() => BROKERS.TINKOFF}">Tinkoff</ppp-option>
-            <ppp-option value="${() => BROKERS.ALOR}">Alor</ppp-option>
-            <ppp-option value="${() => BROKERS.FINAM}">Finam</ppp-option>
-            <ppp-option value="${() => BROKERS.BINANCE}">Binance</ppp-option>
-            <ppp-option value="${() => BROKERS.BYBIT}">Bybit</ppp-option>
-            <ppp-option value="${() => BROKERS.CAPITALCOM}"
-              >Capital.com</ppp-option
-            >
-          </ppp-select>
+            ${repeat(
+              (x) =>
+                getInstrumentDictionaryMeta(x.dictionary.value).exchangeList,
+              html`
+                <ppp-radio value="${(x) => x}">
+                  ${(x) => ppp.t(`$const.exchange.${x}`)}
+                </ppp-radio>
+              `
+            )}
+          </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
           <h5>Тикер</h5>
-          <p class="description">Введите тикер, чтобы найти инструмент.</p>
+          <p class="description">
+            Введите тикер, чтобы найти инструмент в базе данных.
+          </p>
           ${when(
             (x) => x.isSteady() && x.notFound && x.symbol.value,
             html`
@@ -113,7 +143,7 @@ export const instrumentsManagePageTemplate = html`
               ${ref('symbol')}
               class="search-input"
               type="search"
-              placeholder="AAPL"
+              placeholder="SBER"
               @input="${(x) => x.search()}"
             >
               <span class="icon" slot="end">${html.partial(search)}</span>
@@ -188,7 +218,8 @@ export const instrumentsManagePageTemplate = html`
             `
           )}
           ${when(
-            (x) => x.exchange.value === EXCHANGE.UTEX_MARGIN_STOCKS,
+            (x) =>
+              x.dictionary.value === INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS,
             html`
               <section>
                 <div class="label-group">
@@ -357,7 +388,7 @@ export const instrumentsManagePageTemplate = html`
                 </div>
               </section>
               ${when(
-                (x) => x.broker.value === BROKERS.TINKOFF,
+                (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.TINKOFF,
                 html`
                   <section>
                     <div class="label-group">
@@ -588,43 +619,49 @@ export class InstrumentsManagePage extends Page {
   notFound;
 
   @observable
-  searchEnded;
+  exchange;
 
-  changeNotifier = {
-    handleChange() {
-      this.search(false);
-    }
-  };
+  @observable
+  searchEnded;
 
   constructor() {
     super();
 
-    this.changeNotifier.handleChange =
-      this.changeNotifier.handleChange.bind(this);
+    this.dictionaryChangeListener = this.dictionaryChangeListener.bind(this);
+  }
+
+  dictionaryChangeListener() {
+    this.exchange.value = getInstrumentDictionaryMeta(
+      this.dictionary.value
+    ).exchangeList[0];
+
+    this.search();
   }
 
   async connectedCallback() {
     await super.connectedCallback();
 
+    let { dictionary = INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES, symbol } =
+      ppp.app.params() ?? {};
+
+    if (Object.values(INSTRUMENT_DICTIONARY).indexOf(dictionary) === -1) {
+      dictionary = INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES;
+    }
+
+    this.dictionary.value = dictionary;
+
+    if (!this.document.exchange) {
+      Updates.enqueue(() => {
+        this.exchange.value = getInstrumentDictionaryMeta(
+          this.dictionary.value
+        ).exchangeList[0];
+      });
+    }
+
     this.notFound = false;
     this.searchEnded = true;
 
-    let {
-      exchange = EXCHANGE.SPBX,
-      broker = BROKERS.ALOR,
-      symbol
-    } = ppp.app.params() ?? {};
-
-    if (Object.values(BROKERS).indexOf(broker) === -1) {
-      broker = BROKERS.ALOR;
-    }
-
-    if (Object.values(EXCHANGE).indexOf(exchange) === -1) {
-      exchange = EXCHANGE.SPBX;
-    }
-
-    this.exchange.value = exchange;
-    this.broker.value = broker;
+    this.dictionary.addEventListener('change', this.dictionaryChangeListener);
 
     if (symbol) {
       this.symbol.value = decodeURIComponent(symbol).toUpperCase();
@@ -633,6 +670,8 @@ export class InstrumentsManagePage extends Page {
         this.searchEnded = false;
 
         await this.readDocument({ raiseException: true });
+
+        this.notFound = false;
       } catch (e) {
         if (e instanceof DocumentNotFoundError) {
           this.notFound = true;
@@ -641,31 +680,20 @@ export class InstrumentsManagePage extends Page {
         this.searchEnded = true;
       }
     }
-
-    Observable.getNotifier(this.exchange).subscribe(
-      this.changeNotifier,
-      'value'
-    );
-
-    Observable.getNotifier(this.broker).subscribe(this.changeNotifier, 'value');
   }
 
-  disconnectedCallback() {
-    Observable.getNotifier(this.exchange).unsubscribe(
-      this.changeNotifier,
-      'value'
+  async disconnectedCallback() {
+    this.dictionary.removeEventListener(
+      'change',
+      this.dictionaryChangeListener
     );
 
-    Observable.getNotifier(this.broker).unsubscribe(
-      this.changeNotifier,
-      'value'
-    );
-
-    super.disconnectedCallback();
+    return super.disconnectedCallback();
   }
 
   async #search() {
     return this.readDocument({ raiseException: true })
+      .then(() => (this.notFound = false))
       .catch((e) => {
         if (e instanceof DocumentNotFoundError) {
           this.notFound = true;
@@ -674,7 +702,7 @@ export class InstrumentsManagePage extends Page {
       .finally(() => (this.searchEnded = true));
   }
 
-  @debounce(500)
+  @debounce(400)
   delayedSearch() {
     return this.#search();
   }
@@ -696,8 +724,7 @@ export class InstrumentsManagePage extends Page {
 
   getDocumentId() {
     return {
-      exchange: this.exchange.value,
-      broker: this.broker.value,
+      dictionary: this.dictionary.value,
       symbol: this.symbol.value.toUpperCase()
     };
   }
@@ -706,7 +733,7 @@ export class InstrumentsManagePage extends Page {
     await validate(this.symbol);
     await validate(this.fullName);
 
-    if (this.exchange.value === EXCHANGE.UTEX_MARGIN_STOCKS) {
+    if (this.dictionary.value === INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS) {
       await validate(this.utexSymbolID);
     }
 
@@ -720,7 +747,8 @@ export class InstrumentsManagePage extends Page {
 
     await validate(this.minPriceIncrement);
 
-    if (this.broker.value === BROKERS.TINKOFF) await validate(this.tinkoffFigi);
+    if (this.dictionary.value === INSTRUMENT_DICTIONARY.TINKOFF)
+      await validate(this.tinkoffFigi);
 
     if (this.type.value === 'bond') {
       await validate(this.initialNominal);
@@ -744,6 +772,10 @@ export class InstrumentsManagePage extends Page {
   async read() {
     if (!this.symbol.value) return {};
 
+    const { broker } = getInstrumentDictionaryMeta(this.dictionary.value);
+
+    this.broker = broker;
+
     return (context) => {
       return context.services
         .get('mongodb-atlas')
@@ -751,8 +783,8 @@ export class InstrumentsManagePage extends Page {
         .collection('[%#this.collection%]')
         .findOne(
           {
+            broker: '[%#this.broker%]',
             exchange: '[%#this.exchange.value%]',
-            broker: '[%#this.broker.value%]',
             symbol: '[%#this.symbol.value.toUpperCase()%]'
           },
           {
@@ -770,12 +802,14 @@ export class InstrumentsManagePage extends Page {
 
     this.notFound = false;
 
+    const { broker } = getInstrumentDictionaryMeta(this.dictionary.value);
+
     const $set = {
       symbol: this.symbol.value.trim(),
       fullName: this.fullName.value.trim(),
       type: this.type.value,
       exchange: this.exchange.value,
-      broker: this.broker.value,
+      broker,
       minPriceIncrement: Math.abs(
         this.minPriceIncrement.value?.replace(',', '.')
       ),
@@ -796,11 +830,11 @@ export class InstrumentsManagePage extends Page {
       $set.classCode = this.classCode.value.trim();
     }
 
-    if (this.exchange.value === EXCHANGE.UTEX_MARGIN_STOCKS) {
+    if (this.dictionary.value === INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS) {
       $set.utexSymbolID = this.utexSymbolID.value;
     }
 
-    if (this.broker.value === BROKERS.TINKOFF) {
+    if (this.dictionary.value === INSTRUMENT_DICTIONARY.TINKOFF) {
       $set.tinkoffFigi = this.tinkoffFigi.value.trim();
     }
 
@@ -828,6 +862,7 @@ export class InstrumentsManagePage extends Page {
       $set.minQuantityIncrement = Math.abs(
         this.minQuantityIncrement.value?.replace(',', '.')
       );
+      $set.minNotional = Math.abs(this.minNotional.value?.replace(',', '.'));
       $set.baseCryptoAsset = this.baseCryptoAsset.value;
       $set.quoteCryptoAsset = this.quoteCryptoAsset.value;
     }
@@ -841,26 +876,21 @@ export class InstrumentsManagePage extends Page {
   }
 
   async updateLocalCache() {
-    let exchange = this.exchange.value;
-
-    // Handle special cases
-    // TODO - handle BYBIT, IB and other custom exchanges.
-    if (this.broker.value === BROKERS.TINKOFF) {
-      exchange = EXCHANGE.RUS;
-    }
-
+    const { exchange, broker } = getInstrumentDictionaryMeta(
+      this.dictionary.value
+    );
     const nextCacheVersion = await ppp.nextInstrumentCacheVersion({
       exchange,
-      broker: this.broker.value
+      broker
     });
     const cache = await ppp.openInstrumentCache({
       exchange,
-      broker: this.broker.value
+      broker
     });
 
     try {
       await new Promise((resolve, reject) => {
-        const storeName = `${exchange}:${this.broker.value}`;
+        const storeName = `${exchange}:${broker}`;
         const tx = cache.transaction(storeName, 'readwrite');
         const instrumentsStore = tx.objectStore(storeName);
 

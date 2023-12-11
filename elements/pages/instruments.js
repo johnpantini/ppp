@@ -14,7 +14,8 @@ export const instrumentsTemplate = html`
       @change="${(x, { event }) => {
         ppp.app.navigate({
           page: 'instruments',
-          tab: event.detail.id
+          tab: event.detail.id,
+          dictionary: encodeURIComponent(ppp.app.params().dictionary ?? '')
         });
       }}}"
     >

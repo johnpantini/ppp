@@ -3,9 +3,15 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { BROKERS, EXCHANGE, INSTRUMENT_DICTIONARY } from '../../lib/const.js';
+import {
+  BROKERS,
+  EXCHANGE,
+  INSTRUMENT_DICTIONARY,
+  getInstrumentDictionaryMeta
+} from '../../lib/const.js';
 import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import { toNumber } from '../../lib/traders/tinkoff-grpc-web.js';
+import { dictionarySelectorTemplate } from './instruments-manage.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
@@ -23,51 +29,7 @@ export const instrumentsImportPageTemplate = html`
           </p>
         </div>
         <div class="input-group">
-          <ppp-select
-            value="${() => INSTRUMENT_DICTIONARY.BINANCE}"
-            ${ref('dictionary')}
-          >
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.BINANCE}">
-              Binance
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_LINEAR}">
-              Bybit (деривативы)
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_SPOT}">
-              Bybit (спот)
-            </ppp-option>
-            <ppp-option
-              value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}"
-            >
-              UTEX Margin (акции и ETF, US)
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
-              Psina (акции и ETF, US)
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
-              Alor (СПБ Биржа)
-            </ppp-option>
-            <ppp-option
-              value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}"
-            >
-              Alor (Московская биржа), фондовый рынок
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_FORTS}">
-              Alor (Московская биржа), срочный рынок
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
-              Tinkoff
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
-              Finam
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
-              Interactive Brokers (акции и ETF, US)
-            </ppp-option>
-            <ppp-option value="${() => INSTRUMENT_DICTIONARY.CAPITALCOM}">
-              Capital.com
-            </ppp-option>
-          </ppp-select>
+          ${dictionarySelectorTemplate()}
           <div class="spacing2"></div>
           <ppp-checkbox ${ref('clearBeforeImport')}>
             Удалить инструменты словаря перед импортом (ускоряет импорт)
@@ -935,17 +897,20 @@ export class InstrumentsImportPage extends Page {
     for (const s of json.result.list ?? []) {
       result.push({
         symbol: s.symbol,
-        exchange: EXCHANGE.BYBIT,
+        exchange:
+          category === 'spot' ? EXCHANGE.BYBIT_SPOT : EXCHANGE.BYBIT_LINEAR,
         broker: BROKERS.BYBIT,
         fullName: `${s.baseCoin}/${s.quoteCoin}`,
         minPriceIncrement: parseFloat(s.priceFilter.tickSize),
-        minQuantityIncrement: parseFloat(s.lotSizeFilter.qtyStep),
+        minQuantityIncrement: parseFloat(
+          category === 'linear'
+            ? s.lotSizeFilter.qtyStep
+            : s.lotSizeFilter.basePrecision
+        ),
         type: 'cryptocurrency',
         baseCryptoAsset: s.baseCoin,
         quoteCryptoAsset: s.quoteCoin,
-        minNotional:
-          parseFloat(s.lotSizeFilter.minOrderQty) *
-          parseFloat(s.priceFilter.minPrice),
+        minNotional: 0,
         forQualInvestorFlag: false
       });
     }
@@ -961,96 +926,25 @@ export class InstrumentsImportPage extends Page {
     return this.#bybitInstruments('linear');
   }
 
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    let { dictionary = INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES, symbol } =
+      ppp.app.params() ?? {};
+
+    if (Object.values(INSTRUMENT_DICTIONARY).indexOf(dictionary) === -1) {
+      dictionary = INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES;
+    }
+
+    this.dictionary.value = dictionary;
+  }
+
   async submitDocument() {
     this.beginOperation();
 
     try {
-      // For cache key.
-      let exchange;
-      let exchangeForDBRequest;
-      let broker;
-
-      switch (this.dictionary.value) {
-        case INSTRUMENT_DICTIONARY.BYBIT_LINEAR:
-          exchange = EXCHANGE.BYBIT_LINEAR;
-          exchangeForDBRequest = EXCHANGE.BYBIT;
-          broker = BROKERS.BYBIT;
-
-        case INSTRUMENT_DICTIONARY.BYBIT_SPOT:
-          exchange = EXCHANGE.BYBIT_SPOT;
-          exchangeForDBRequest = EXCHANGE.BYBIT;
-          broker = BROKERS.BYBIT;
-
-        case INSTRUMENT_DICTIONARY.BINANCE:
-          exchange = EXCHANGE.BINANCE;
-          exchangeForDBRequest = EXCHANGE.BINANCE;
-          broker = BROKERS.BINANCE;
-
-          break;
-        case INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS:
-          exchange = EXCHANGE.UTEX_MARGIN_STOCKS;
-          exchangeForDBRequest = EXCHANGE.UTEX_MARGIN_STOCKS;
-          broker = BROKERS.UTEX;
-
-          break;
-        case INSTRUMENT_DICTIONARY.IB:
-          exchange = EXCHANGE.CUSTOM;
-          exchangeForDBRequest = EXCHANGE.US;
-          broker = BROKERS.IB;
-
-          break;
-        case INSTRUMENT_DICTIONARY.PSINA_US_STOCKS:
-          exchange = EXCHANGE.US;
-          exchangeForDBRequest = EXCHANGE.US;
-          broker = BROKERS.PSINA;
-
-          break;
-
-        case INSTRUMENT_DICTIONARY.ALOR_SPBX:
-          exchange = EXCHANGE.SPBX;
-          exchangeForDBRequest = EXCHANGE.SPBX;
-          broker = BROKERS.ALOR;
-
-          break;
-
-        case INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES:
-          exchange = EXCHANGE.MOEX_SECURITIES;
-          exchangeForDBRequest = EXCHANGE.MOEX;
-          broker = BROKERS.ALOR;
-
-          break;
-
-        case INSTRUMENT_DICTIONARY.ALOR_FORTS:
-          exchange = EXCHANGE.MOEX_FORTS;
-          exchangeForDBRequest = EXCHANGE.MOEX;
-          broker = BROKERS.ALOR;
-
-          break;
-
-        case INSTRUMENT_DICTIONARY.TINKOFF:
-          exchange = EXCHANGE.RUS;
-          exchangeForDBRequest = {
-            $in: [EXCHANGE.SPBX, EXCHANGE.MOEX]
-          };
-          broker = BROKERS.TINKOFF;
-
-          break;
-        case INSTRUMENT_DICTIONARY.FINAM:
-          exchange = EXCHANGE.CUSTOM;
-          exchangeForDBRequest = {
-            $in: [EXCHANGE.SPBX, EXCHANGE.MOEX, EXCHANGE.US]
-          };
-          broker = BROKERS.FINAM;
-
-          break;
-
-        case INSTRUMENT_DICTIONARY.CAPITALCOM:
-          exchange = EXCHANGE.CAPITALCOM;
-          exchangeForDBRequest = EXCHANGE.CAPITALCOM;
-          broker = BROKERS.CAPITALCOM;
-
-          break;
-      }
+      const { exchange, exchangeForDBRequest, broker } =
+        getInstrumentDictionaryMeta(this.dictionary.value);
 
       let existingInstruments;
 

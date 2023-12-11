@@ -625,6 +625,8 @@ class Page extends PPPElement {
 
             // [] for empty aggregations
             if (!doc || (Array.isArray(doc) && !doc.length)) {
+              this.transformCalled = true;
+
               // noinspection ExceptionCaughtLocallyJS
               throw new DocumentNotFoundError({ documentId });
             }
@@ -647,6 +649,7 @@ class Page extends PPPElement {
 
           if (!this.document) {
             this.document = {};
+            this.transformCalled = true;
 
             // noinspection ExceptionCaughtLocallyJS
             throw new DocumentNotFoundError({ documentId });
@@ -666,13 +669,14 @@ class Page extends PPPElement {
 
         if (options.raiseException) throw e;
 
+        this.transformCalled = true;
+
         this.failOperation(e);
       } finally {
         this.endOperation();
       }
     } else {
       this.transformCalled = true;
-
       this.status = PAGE_STATUS.READY;
     }
   }
