@@ -150,7 +150,11 @@ export async function listDefinition() {
     submit: async (widget) => {
       return {
         depth: +Math.abs(widget.container.depth.value) || 100,
-        columns: widget.container.columnList.value
+        columns: widget.container.columnList.value.map((c, index) => {
+          c.sort = widget.document.columns?.[index]?.sort ?? null;
+
+          return c;
+        })
       };
     },
     settings: html`

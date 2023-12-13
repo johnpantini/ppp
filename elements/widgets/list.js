@@ -12,6 +12,7 @@ import {
   when,
   ref,
   observable,
+  Observable,
   repeat,
   attr
 } from '../../vendor/fast-element.min.js';
@@ -20,7 +21,7 @@ import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
 import { invalidate, validate } from '../../lib/ppp-errors.js';
 import { WidgetColumns } from '../widget-columns.js';
-import { trash } from '../../static/svg/sprite.js';
+import { sortAsc, sortDesc, trash } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../query-select.js';
 import '../radio-group.js';
@@ -77,11 +78,27 @@ export const listWidgetTemplate = html`
           <div class="thead">
             <div class="tr">
               ${repeat(
-                (x) => x?.columns?.array,
+                (x) => x.columnsArray ?? [],
                 html`
-                  <div class="th" source="${(x) => x.source}">
+                  <div
+                    class="th"
+                    sort="${(x) => x.sort}"
+                    source="${(x) => x.source}"
+                    @click="${(x, c) => c.parent.toggleSort(x)}"
+                  >
                     <div class="resize-handle"></div>
-                    <div>${(x) => x.name}</div>
+                    <div>
+                      <div class="sort-holder" ?hidden="${(x) => !x.sort}">
+                        <span class="sort-icon">
+                          ${(x) =>
+                            html`${html.partial(
+                              x.sort === 'asc' ? sortAsc : sortDesc
+                            )}`}
+                        </span>
+                        <div class="sort-shadow"></div>
+                      </div>
+                      ${(x) => x.name}
+                    </div>
                   </div>
                 `
               )}
@@ -117,13 +134,17 @@ export class ListWidget extends WidgetWithInstrument {
   pagination;
 
   @observable
-  lastSortTime;
+  columnsArray;
 
-  /**
-   * @type {WidgetColumns}
-   */
-  @observable
-  columns;
+  refreshColumns() {
+    const newArray = [];
+
+    for (const column of this.columnsArray ?? []) {
+      newArray.push(Object.assign({}, column));
+    }
+
+    return (this.columnsArray = newArray);
+  }
 
   @attr({ mode: 'boolean' })
   deletion;
@@ -137,20 +158,23 @@ export class ListWidget extends WidgetWithInstrument {
 
   slot;
 
+  columns;
+
+  #sortLoop;
+
   constructor() {
     super();
 
     this.sort = $throttle(this.internalSort, 500);
+    this.updateHeaderCounter = 1;
   }
 
   async connectedCallback() {
     super.connectedCallback();
 
-    this.tableBody.attachShadow({ mode: 'open', slotAssignment: 'manual' });
-
-    this.slot = document.createElement('slot');
-
-    this.tableBody.shadowRoot.append(this.slot);
+    if (this.tableBody.shadowRoot) {
+      return;
+    }
 
     if (this.preview) {
       if (this.document.listType === 'url' && !this.document.listWidgetUrl) {
@@ -198,13 +222,38 @@ export class ListWidget extends WidgetWithInstrument {
         this.document.listSource = structuredClone(this.document.listSource);
       }
 
+      this.tableBody.attachShadow({ mode: 'open', slotAssignment: 'manual' });
+
+      this.slot = document.createElement('slot');
+
+      this.tableBody.shadowRoot.append(this.slot);
+
       this.columns = new WidgetColumns({
         columns: this.document.columns ?? []
       });
 
       await this.columns.registerColumns();
+
+      // One-time assignment.
+      this.columnsArray = this.columns.array;
+
       await this.control?.connectedCallback?.(this);
       this.internalSort();
+      this.refreshColumns();
+
+      this.#sortLoop = setInterval(() => {
+        let needSort = false;
+
+        for (let i = 0; i < this.columnsArray.length; i++) {
+          if (this.columnsArray[i].sort) {
+            needSort = true;
+
+            break;
+          }
+        }
+
+        needSort && this.internalSort();
+      }, 500);
     } catch (e) {
       console.error(e);
 
@@ -216,20 +265,102 @@ export class ListWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
+    clearInterval(this.#sortLoop);
     await this.control?.disconnectedCallback?.(this);
 
     return super.disconnectedCallback();
   }
 
   internalSort() {
-    const comparator = (a, b) => {
-      const aIndex = parseInt(a.getAttribute('index'));
-      const bIndex = parseInt(b.getAttribute('index'));
+    // 1. ORDER BY index DESC by default (preserve insertion order).
+    const sortedByDefault = Array.from(this.tableBody.children).sort((a, d) => {
+      return (
+        parseInt(d.getAttribute('index')) - parseInt(a.getAttribute('index'))
+      );
+    });
 
-      return bIndex - aIndex;
+    // 2. ORDER BY individual columns sort direction.
+    const comparator = (a, d) => {
+      let result;
+
+      for (let i = 0; i < this.columnsArray.length; i++) {
+        const sort = this.columnsArray[i].sort;
+        const aValue = a.children[i].firstElementChild.value;
+        const dValue = d.children[i].firstElementChild.value;
+
+        if (sort === 'asc') {
+          if (typeof aValue === 'number' && typeof dValue === 'number') {
+            if (typeof result == 'undefined') {
+              result = aValue - dValue;
+            } else {
+              result ||= aValue - dValue;
+            }
+          } else if (typeof aValue === 'string' && typeof dValue === 'string') {
+            if (typeof result == 'undefined') {
+              result = aValue.localeCompare(dValue);
+            } else {
+              result ||= aValue.localeCompare(dValue);
+            }
+          }
+        } else if (sort === 'desc') {
+          if (typeof aValue === 'number' && typeof dValue === 'number') {
+            if (typeof result == 'undefined') {
+              result = dValue - aValue;
+            } else {
+              result ||= dValue - aValue;
+            }
+          } else if (typeof aValue === 'string' && typeof dValue === 'string') {
+            if (typeof result == 'undefined') {
+              result = dValue.localeCompare(aValue);
+            } else {
+              result ||= dValue.localeCompare(aValue);
+            }
+          }
+        }
+      }
+
+      return result;
     };
 
-    this.slot.assign(...Array.from(this.tableBody.children).sort(comparator));
+    this.slot.assign(...sortedByDefault.sort(comparator));
+  }
+
+  toggleSort(column) {
+    if (this.preview) {
+      return;
+    }
+
+    {
+      if (!column.sort) {
+        column.sort = 'asc';
+      } else if (column.sort === 'asc') {
+        column.sort = 'desc';
+      } else if (column.sort === 'desc') {
+        column.sort = null;
+      }
+
+      if (Array.isArray(this.document.columns)) {
+        this.document.columns[column.index].sort = column.sort;
+      }
+
+      ppp.user.functions.updateOne(
+        {
+          collection: 'workspaces'
+        },
+        {
+          _id: this.container.document._id,
+          'widgets.uniqueID': this.document.uniqueID
+        },
+        {
+          $set: {
+            [`widgets.$.columns.${column.index}.sort`]: column.sort
+          }
+        }
+      );
+
+      this.refreshColumns();
+      this.internalSort();
+    }
   }
 
   appendRow(payload, fallbackIndex) {

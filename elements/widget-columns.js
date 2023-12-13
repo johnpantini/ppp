@@ -13,7 +13,11 @@ class WidgetColumns {
   }
 
   async registerColumns() {
+    let index = 0;
+
     for (const column of this.#columns) {
+      column.index = index++;
+
       if (column.hidden) {
         continue;
       }
@@ -43,6 +47,7 @@ class WidgetColumns {
         this.#registeredColumns.push({
           name: column.name,
           source: column.source,
+          index: column.index,
           content: '<span>—</span>'
         });
       }

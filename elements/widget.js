@@ -46,7 +46,8 @@ import {
   paletteYellowLight2,
   paletteYellowDark2,
   paletteRedDark2,
-  paletteRedLight2
+  paletteRedLight2,
+  toColorComponents
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
@@ -316,6 +317,8 @@ export const widgetTableStyles = () => css`
   .widget-table .thead {
     display: table-header-group;
     vertical-align: middle;
+    border-bottom: 1px solid
+      var(--palette-gray-light-2-with-palette-gray-dark-1);
   }
 
   .widget-table .tbody {
@@ -356,11 +359,6 @@ export const widgetTableStyles = () => css`
     min-width: 3px;
   }
 
-  .widget-table th:first-of-type,
-  .widget-table .th:first-of-type {
-    text-align: left;
-  }
-
   .widget-table th > div,
   .widget-table .th > div {
     text-align: right;
@@ -369,11 +367,6 @@ export const widgetTableStyles = () => css`
     font-size: ${fontSizeWidget};
     line-height: ${lineHeightWidget};
     ${ellipsis()};
-  }
-
-  .widget-table th:first-of-type > div,
-  .widget-table .th:first-of-type > div {
-    text-align: left;
   }
 
   .widget-table th .resize-handle,
@@ -683,6 +676,50 @@ export const widgetCommonContentStyles = () => css`
 
   .link {
     padding-bottom: 2px;
+  }
+
+  .sort-holder {
+    position: absolute;
+    left: ${spacing2};
+    height: 18px;
+    width: 16px;
+  }
+
+  .sort-icon svg {
+    width: 16px;
+    height: 16px;
+    z-index: 10;
+    display: inline-block;
+    position: relative;
+  }
+
+  .sort-shadow {
+    pointer-events: none;
+    z-index: 9;
+    width: 36px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+    left: -12px;
+    background: linear-gradient(
+      90deg,
+      rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayLight3),
+          toColorComponents(paletteGrayDark2)
+        )},
+        0
+      ),
+      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 25%,
+      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 75%,
+      rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayLight3),
+          toColorComponents(paletteGrayDark2)
+        )},
+        0
+      )
+    );
   }
 `;
 

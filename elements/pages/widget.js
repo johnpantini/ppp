@@ -1741,8 +1741,7 @@ class WidgetPreview extends PPPElement {
   wtagChanged(oldValue, newValue) {
     if (this.$fastController.isConnected) {
       if (newValue) {
-        this.shadowRoot.firstChild &&
-          this.shadowRoot.removeChild(this.shadowRoot.firstChild);
+        this.shadowRoot.firstChild?.remove();
 
         const element = document.createElement(newValue);
 
