@@ -47,7 +47,7 @@ export async function listDefinition() {
         widget.deletionAvailable = true;
 
         if (widget.preview) {
-          // List was modified.
+          // The list was modified.
           if (Array.isArray(widget.container.granary.listSource)) {
             widget.document.listSource = structuredClone(
               widget.container.granary.listSource
@@ -64,31 +64,30 @@ export async function listDefinition() {
             adoptInstrument: (i) => i
           };
         }
+
+        for (let i = 0; i < widget.document?.listSource?.length ?? 0; i++) {
+          widget.appendRow(widget.document.listSource[i], i);
+        }
       }
 
-      removeElement(index, widget) {
-        widget.document.listSource.splice(index, 1);
+      removeRow(index, widget) {
+        const arrayIndex = widget.document.listSource.findIndex(
+          (payload) => payload.index === index
+        );
 
-        if (widget.preview) {
-          widget.container.granary.listSource.splice(index, 1);
-        } else {
-          ppp.user.functions.updateOne(
-            {
-              collection: 'workspaces'
-            },
-            {
-              _id: widget.container.document._id,
-              'widgets.uniqueID': widget.document.uniqueID
-            },
-            {
-              $set: {
-                'widgets.$.listSource': widget.document.listSource
-              }
-            }
-          );
+        if (arrayIndex > -1) {
+          widget.document.listSource.splice(arrayIndex, 1);
+
+          if (widget.preview) {
+            widget.container.granary.listSource = structuredClone(
+              widget.document.listSource
+            );
+          } else {
+            widget.saveListSource();
+          }
+
+          Observable.notify(widget, 'document');
         }
-
-        Observable.notify(widget, 'document');
       }
     },
     validate: async (widget) => {
@@ -97,7 +96,12 @@ export async function listDefinition() {
     submit: async (widget) => {
       return {
         columns: widget.container.columnList.value,
-        listSource: widget.container.granary.listSource
+        listSource: widget.container.granary.listSource?.map((i) => {
+          return {
+            symbol: i.symbol,
+            traderId: i.traderId
+          };
+        })
       };
     },
     settings: html`
@@ -176,16 +180,17 @@ export async function listDefinition() {
                     const listener = () => {
                       widget.document.listSource ??= [];
 
-                      widget.document.listSource.push({
+                      const row = {
                         symbol: widget.instrument.symbol,
                         traderId: widget.instrumentTrader.document._id
-                      });
+                      };
+
+                      widget.document.listSource.push(row);
+                      widget.appendRow(row);
 
                       x.granary.listSource = structuredClone(
                         widget.document.listSource
                       );
-
-                      Observable.notify(widget, 'document');
 
                       widget.searchControl.removeEventListener(
                         'chooseinstrument',

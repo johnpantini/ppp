@@ -87,29 +87,22 @@ export async function listDefinition() {
                     }
 
                     if (widget.document.listSource.length >= depth) {
-                      widget.document.listSource.pop();
+                      const ae = widget.slot.assignedElements();
+                      const tr = ae[ae.length - 1];
+                      const index = parseInt(tr.getAttribute('index'));
+
+                      this.removeRow(index, widget);
+                      tr.remove();
                     }
 
-                    widget.document.listSource.unshift({
+                    const row = {
                       symbol: instrument.symbol,
                       traderId: trader.document._id
-                    });
+                    };
 
-                    ppp.user.functions.updateOne(
-                      {
-                        collection: 'workspaces'
-                      },
-                      {
-                        _id: widget.container.document._id,
-                        'widgets.uniqueID': widget.document.uniqueID
-                      },
-                      {
-                        $set: {
-                          'widgets.$.listSource': widget.document.listSource
-                        }
-                      }
-                    );
-
+                    widget.document.listSource.push(row);
+                    widget.appendRow(row);
+                    widget.saveListSource();
                     Observable.notify(widget, 'document');
                   }
                 }
@@ -119,33 +112,30 @@ export async function listDefinition() {
 
           document.addEventListener('instrumentchange', this.listener);
         }
+
+        for (let i = 0; i < widget.document?.listSource?.length ?? 0; i++) {
+          widget.appendRow(widget.document.listSource[i], i);
+        }
       }
 
       disconnectedCallback() {
         document.removeEventListener('instrumentchange', this.listener);
       }
 
-      removeElement(index, widget) {
-        widget.document.listSource.splice(index, 1);
+      removeRow(index, widget) {
+        const arrayIndex = widget.document.listSource.findIndex(
+          (payload) => payload.index === index
+        );
 
-        if (!widget.preview) {
-          ppp.user.functions.updateOne(
-            {
-              collection: 'workspaces'
-            },
-            {
-              _id: widget.container.document._id,
-              'widgets.uniqueID': widget.document.uniqueID
-            },
-            {
-              $set: {
-                'widgets.$.listSource': widget.document.listSource
-              }
-            }
-          );
+        if (arrayIndex > -1) {
+          widget.document.listSource.splice(arrayIndex, 1);
+
+          if (!widget.preview) {
+            widget.saveListSource();
+          }
+
+          Observable.notify(widget, 'document');
         }
-
-        Observable.notify(widget, 'document');
       }
     },
     validate: async (widget) => {

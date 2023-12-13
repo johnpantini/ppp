@@ -302,7 +302,9 @@ export const widgetEmptyStateStyles = () => css`
 export const widgetTableStyles = () => css`
   .widget-table {
     contain: layout;
+    display: table;
     table-layout: fixed;
+    text-indent: initial;
     min-width: 140px;
     width: 100%;
     padding: 0;
@@ -311,7 +313,29 @@ export const widgetTableStyles = () => css`
     border-spacing: 0;
   }
 
-  .widget-table th {
+  .widget-table .thead {
+    display: table-header-group;
+    vertical-align: middle;
+  }
+
+  .widget-table .tbody {
+    display: table-row-group;
+    vertical-align: middle;
+  }
+
+  .widget-table .tr {
+    display: table-row;
+    vertical-align: middle;
+  }
+
+  .widget-table .td,
+  .widget-table .th {
+    display: table-cell;
+    vertical-align: middle;
+  }
+
+  .widget-table th,
+  .widget-table .th {
     text-align: right;
     position: sticky;
     top: 0;
@@ -325,17 +349,20 @@ export const widgetTableStyles = () => css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
 
-  .widget-table th.empty {
+  .widget-table th.empty,
+  .widget-table .th.empty {
     width: 3px;
     padding: 0;
     min-width: 3px;
   }
 
-  .widget-table th:first-of-type {
+  .widget-table th:first-of-type,
+  .widget-table .th:first-of-type {
     text-align: left;
   }
 
-  .widget-table th > div {
+  .widget-table th > div,
+  .widget-table .th > div {
     text-align: right;
     overflow: hidden;
     font-weight: 500;
@@ -344,11 +371,13 @@ export const widgetTableStyles = () => css`
     ${ellipsis()};
   }
 
-  .widget-table th:first-of-type > div {
+  .widget-table th:first-of-type > div,
+  .widget-table .th:first-of-type > div {
     text-align: left;
   }
 
-  .widget-table th .resize-handle {
+  .widget-table th .resize-handle,
+  .widget-table .th .resize-handle {
     position: absolute;
     width: 18px;
     height: 100%;
@@ -359,7 +388,8 @@ export const widgetTableStyles = () => css`
     z-index: 10;
   }
 
-  .widget-table th .resize-handle::before {
+  .widget-table th .resize-handle::before,
+  .widget-table .th .resize-handle::before {
     position: absolute;
     content: '';
     background: ${paletteBlueLight1};
@@ -368,16 +398,19 @@ export const widgetTableStyles = () => css`
     left: 8px;
   }
 
-  .widget-table th .resize-handle:hover {
+  .widget-table th .resize-handle:hover,
+  .widget-table .th .resize-handle:hover {
     opacity: 1;
   }
 
-  .widget-table th + th {
+  .widget-table th + th,
+  .widget-table .th + .th {
     border-left: 1px solid
       ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 
-  .widget-table th:hover {
+  .widget-table th:hover,
+  .widget-table .th:hover {
     color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
   }
 
@@ -423,7 +456,8 @@ export const widgetTableStyles = () => css`
     )};
   }
 
-  .widget-table .row td:first-child::before {
+  .widget-table .row td:first-child::before,
+  .widget-table .row .td:first-child::before {
     content: '';
     position: absolute;
     background-color: transparent;
@@ -435,7 +469,8 @@ export const widgetTableStyles = () => css`
     pointer-events: none;
   }
 
-  .widget-table .row[active] td:first-child::before {
+  .widget-table .row[active] td:first-child::before,
+  .widget-table .row[active] .td:first-child::before {
     transform: scaleY(1);
     background-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }

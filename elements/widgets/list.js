@@ -13,9 +13,9 @@ import {
   ref,
   observable,
   repeat,
-  attr,
-  Observable
+  attr
 } from '../../vendor/fast-element.min.js';
+import { $throttle } from '../../lib/ppp-decorators.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize } from '../../design/styles.js';
 import { invalidate, validate } from '../../lib/ppp-errors.js';
@@ -67,52 +67,36 @@ export const listWidgetTemplate = html`
         ${widgetStackSelectorTemplate()} ${(x) => x?.extraControls}
         ${when(
           (x) => !x?.document?.listSource?.length,
-          html`${html.partial(widgetEmptyStateTemplate('Список пуст.'))}`,
-          html`
-            <table class="widget-table" ${ref('table')}>
-              <thead>
-                <tr>
-                  ${repeat(
-                    (x) => x?.columns?.array,
-                    html`
-                      <th source="${(x) => x.source}">
-                        <div class="resize-handle"></div>
-                        <div>${(x) => x.name}</div>
-                      </th>
-                    `
-                  )}
-                  <th class="empty">
-                    <div class="resize-handle"></div>
-                    <div></div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody @click="${(x, c) => x.handleListTableClick(c)}">
-                ${repeat(
-                  (x) => x?.getSortedSource(),
-                  html`
-                    <tr class="row" symbol="${(x, c) => c.parent.symbol}">
-                      ${repeat(
-                        (instrument, c) => c.parent.columns?.array,
-                        html`
-                          <td
-                            class="cell"
-                            :payload="${(x, c) => c.parent}"
-                            :trader="${(x, c) => c.parent.traderId}"
-                            :column="${(x) => x}"
-                          >
-                            ${(x, c) =>
-                              c.parentContext.parent.columns.columnElement(x)}
-                          </td>
-                        `
-                      )}
-                    </tr>
-                  `
-                )}
-              </tbody>
-            </table>
-          `
+          html` ${html.partial(widgetEmptyStateTemplate('Список пуст.'))} `
         )}
+        <div
+          class="widget-table"
+          ${ref('table')}
+          ?hidden="${(x) => !x?.document?.listSource?.length}"
+        >
+          <div class="thead">
+            <div class="tr">
+              ${repeat(
+                (x) => x?.columns?.array,
+                html`
+                  <div class="th" source="${(x) => x.source}">
+                    <div class="resize-handle"></div>
+                    <div>${(x) => x.name}</div>
+                  </div>
+                `
+              )}
+              <div class="th empty">
+                <div class="resize-handle"></div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="tbody"
+            @click="${(x, c) => x.handleListTableClick(c)}"
+            ${ref('tableBody')}
+          ></div>
+        </div>
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -149,8 +133,24 @@ export class ListWidget extends WidgetWithInstrument {
 
   control;
 
+  maxSeenIndex = -1;
+
+  slot;
+
+  constructor() {
+    super();
+
+    this.sort = $throttle(this.internalSort, 500);
+  }
+
   async connectedCallback() {
     super.connectedCallback();
+
+    this.tableBody.attachShadow({ mode: 'open', slotAssignment: 'manual' });
+
+    this.slot = document.createElement('slot');
+
+    this.tableBody.shadowRoot.append(this.slot);
 
     if (this.preview) {
       if (this.document.listType === 'url' && !this.document.listWidgetUrl) {
@@ -194,7 +194,7 @@ export class ListWidget extends WidgetWithInstrument {
         this.container.extraSettings = settings;
         this.container.granary.validate = validate;
         this.container.granary.submit = submit;
-        // Container and widget share the same source.
+        // Container and widget share the same source by default.
         this.document.listSource = structuredClone(this.document.listSource);
       }
 
@@ -204,12 +204,7 @@ export class ListWidget extends WidgetWithInstrument {
 
       await this.columns.registerColumns();
       await this.control?.connectedCallback?.(this);
-
-      setTimeout(() => {
-        this.document.listSource = this.document.listSource.sort();
-
-        Observable.notify(this, 'document');
-      }, 5000);
+      this.internalSort();
     } catch (e) {
       console.error(e);
 
@@ -226,12 +221,88 @@ export class ListWidget extends WidgetWithInstrument {
     return super.disconnectedCallback();
   }
 
-  getSortedSource() {
-    // TODO
-    return this.document?.listSource;
+  internalSort() {
+    const comparator = (a, b) => {
+      const aIndex = parseInt(a.getAttribute('index'));
+      const bIndex = parseInt(b.getAttribute('index'));
+
+      return bIndex - aIndex;
+    };
+
+    this.slot.assign(...Array.from(this.tableBody.children).sort(comparator));
   }
 
-  handleListTableClick({ event }) {
+  appendRow(payload, fallbackIndex) {
+    let index = payload.index;
+
+    if (typeof index !== 'number') {
+      index = fallbackIndex ?? this.maxSeenIndex + 1;
+
+      payload.index = index;
+    }
+
+    const tr = document.createElement('div');
+
+    tr.setAttribute('class', 'tr');
+    tr.setAttribute('symbol', payload.symbol);
+    tr.setAttribute('index', index);
+    tr.classList.add('row');
+
+    for (const col of this.columns.array) {
+      const cell = document.createElement('div');
+
+      cell.setAttribute('class', 'td');
+
+      const column = document.createElement(col.definition.name);
+
+      cell.classList.add('cell');
+
+      cell.column = col;
+      cell.payload = payload;
+      cell.trader = payload.traderId;
+
+      cell.appendChild(column);
+      tr.appendChild(cell);
+    }
+
+    this.tableBody.appendChild(tr);
+
+    this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
+
+    this.sort();
+  }
+
+  setRows(rows) {}
+
+  async saveListSource() {
+    return ppp.user.functions.updateOne(
+      {
+        collection: 'workspaces'
+      },
+      {
+        _id: this.container.document._id,
+        'widgets.uniqueID': this.document.uniqueID
+      },
+      {
+        $set: {
+          'widgets.$.listSource': this.document.listSource?.map((payload) => {
+            const result = {
+              symbol: payload.symbol,
+              traderId: payload.traderId
+            };
+
+            if (typeof payload.index === 'number') {
+              result.index = payload.index;
+            }
+
+            return result;
+          })
+        }
+      }
+    );
+  }
+
+  async handleListTableClick({ event }) {
     if (!this.document?.listSource?.length) {
       return;
     }
@@ -243,11 +314,13 @@ export class ListWidget extends WidgetWithInstrument {
     let column;
 
     const cp = event.composedPath();
-    const rows = Array.from(this.table.querySelectorAll('.row'));
+    let row;
 
     for (const n of cp) {
-      if (n.classList?.contains?.('row')) {
-        index = rows.indexOf(n);
+      if (n.hasAttribute?.('index')) {
+        index = parseInt(n.getAttribute('index'));
+
+        row = n;
 
         break;
       } else if (n.classList?.contains?.('cell')) {
@@ -257,7 +330,9 @@ export class ListWidget extends WidgetWithInstrument {
 
     if (index > -1 && column) {
       if (this.deletion) {
-        this.control?.removeElement?.(index, this, column);
+        await this.control?.removeRow?.(index, this, column);
+        row.remove();
+        this.sort();
       } else if (column.defaultTrader) {
         this.instrumentTrader = column.defaultTrader;
 

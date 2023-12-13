@@ -1,5 +1,5 @@
-import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate, invalidate } from '../../lib/ppp-errors.js';
+import { html, css, ref, when } from '../../vendor/fast-element.min.js';
+import { validate } from '../../lib/ppp-errors.js';
 import {
   Page,
   pageStyles,
@@ -72,34 +72,50 @@ export const traderBybitV5Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Базовый URL для подключения к потоку рыночных данных</h5>
-          <p class="description">Ссылка для установки WebSocket-соединения.</p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            placeholder="wss://data-stream.binance.com"
-            value="${(x) =>
-              x.document.wsUrl ?? 'wss://data-stream.binance.com'}"
-            ${ref('wsUrl')}
-          ></ppp-text-field>
-        </div>
-      </section>
-      <section>
-        <div class="label-group">
-          <h5>Режим ленты сделок</h5>
+          <h5>Продукт</h5>
           <p class="description">
-            В режиме агрегирования сделки суммируются по количеству и попадают в
-            ленту как одна, если они принадлежат одной заявке тейкера.
+            Выберите продукт, в рамках которого будете торговать.
           </p>
         </div>
         <div class="input-group">
           <ppp-radio-group
             orientation="vertical"
-            value="${(x) => (x.document.showAggTrades ?? true ? 'agg' : 'raw')}"
-            ${ref('showAggTrades')}
+            value="${(x) => x.document.productLine ?? 'linear'}"
+            @change="${(x) => {
+              if (
+                x.productLine.value === 'spot' &&
+                x.orderbookDepth.value === '500'
+              ) {
+                x.orderbookDepth.value = '50';
+              }
+            }}"
+            ${ref('productLine')}
           >
-            <ppp-radio value="agg">Агрегированные сделки</ppp-radio>
-            <ppp-radio value="raw">Все сделки</ppp-radio>
+            <ppp-radio value="linear">Деривативы</ppp-radio>
+            <ppp-radio value="spot">Спот</ppp-radio>
+          </ppp-radio-group>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Глубина книги заявок</h5>
+          <p class="description">
+            Чем меньше глубина, тем быстрее будет обновляться книга заявок.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-radio-group
+            orientation="vertical"
+            value="${(x) => x.document.orderbookDepth ?? '50'}"
+            ${ref('orderbookDepth')}
+          >
+            <ppp-radio value="1">1</ppp-radio>
+            <ppp-radio value="50">50</ppp-radio>
+            <ppp-radio value="200">200</ppp-radio>
+            ${when(
+              (x) => x.productLine.value === 'linear',
+              html`<ppp-radio value="500">500</ppp-radio>`
+            )}
           </ppp-radio-group>
         </div>
       </section>
@@ -122,21 +138,7 @@ export const traderBybitV5Template = html`
           ></ppp-text-field>
         </div>
       </section>
-      <section>
-        <div class="label-group">
-          <h5>Интервал обновления книги заявок</h5>
-        </div>
-        <div class="input-group">
-          <ppp-select
-            placeholder="Выберите значение"
-            value="${(x) => x.document.orderbookUpdateInterval ?? '100ms'}"
-            ${ref('orderbookUpdateInterval')}
-          >
-            <ppp-option value="100ms">100 мс</ppp-option>
-            <ppp-option value="1000ms">1000 мс</ppp-option>
-          </ppp-select>
-        </div>
-      </section>
+
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -157,62 +159,11 @@ export class TraderBybitV5Page extends Page {
     }
 
     await validate(this.brokerId);
-    await validate(this.wsUrl);
-
-    try {
-      new URL(this.wsUrl.value);
-    } catch (e) {
-      invalidate(this.wsUrl, {
-        errorMessage: 'Неверный или неполный URL',
-        raiseException: true
-      });
-    }
-
-    await validate(this.wsUrl, {
-      hook: async (value) => {
-        const url = new URL(value);
-
-        return url.protocol === 'wss:';
-      },
-      errorMessage: 'Недопустимый протокол URL'
-    });
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
         errorMessage: 'Введите значение в диапазоне от 100 до 10000'
-      });
-    }
-
-    await validate(this.orderbookUpdateInterval);
-
-    try {
-      await new Promise((resolve, reject) => {
-        const timer = setTimeout(reject, 5000);
-        const ws = new WebSocket(new URL('ws/btcusdt@trade', this.wsUrl.value));
-
-        ws.onmessage = ({ data }) => {
-          const payload = JSON.parse(data);
-
-          if (payload.e === 'trade' && payload.s === 'BTCUSDT') {
-            ws.close();
-            clearTimeout(timer);
-            resolve();
-          } else {
-            ws.close();
-            clearTimeout(timer);
-            reject();
-          }
-        };
-        ws.onerror = () => {
-          clearTimeout(timer);
-          reject();
-        };
-      });
-    } catch (e) {
-      invalidate(this.wsUrl, {
-        errorMessage: 'Не удалось соединиться',
-        raiseException: true
       });
     }
   }
@@ -272,12 +223,11 @@ export class TraderBybitV5Page extends Page {
       name: this.name.value.trim(),
       runtime: this.runtime.value,
       brokerId: this.brokerId.value,
-      wsUrl: this.wsUrl.value.trim(),
-      showAggTrades: this.showAggTrades.value === 'agg',
+      productLine: this.productLine.value,
+      orderbookDepth: this.orderbookDepth.value,
       reconnectTimeout: this.reconnectTimeout.value
         ? Math.abs(this.reconnectTimeout.value)
         : void 0,
-      orderbookUpdateInterval: this.orderbookUpdateInterval.value,
       caps: [
         TRADER_CAPS.CAPS_LEVEL1,
         TRADER_CAPS.CAPS_LIMIT_ORDERS,

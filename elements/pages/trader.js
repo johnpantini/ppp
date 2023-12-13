@@ -497,7 +497,6 @@ export const traderPageTemplate = html`
             </ul>
           </div>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({
