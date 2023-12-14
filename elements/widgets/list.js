@@ -289,31 +289,31 @@ export class ListWidget extends WidgetWithInstrument {
         const dValue = d.children[i].firstElementChild.value;
 
         if (sort === 'asc') {
-          if (typeof aValue === 'number' && typeof dValue === 'number') {
-            if (typeof result == 'undefined') {
-              result = aValue - dValue;
+          if (typeof aValue === 'number' || typeof dValue === 'number') {
+            if (typeof result === 'undefined') {
+              result = (aValue ?? 0) - (dValue ?? 0);
             } else {
-              result ||= aValue - dValue;
+              result ||= (aValue ?? 0) - (dValue ?? 0);
             }
-          } else if (typeof aValue === 'string' && typeof dValue === 'string') {
-            if (typeof result == 'undefined') {
-              result = aValue.localeCompare(dValue);
+          } else if (typeof aValue === 'string' || typeof dValue === 'string') {
+            if (typeof result === 'undefined') {
+              result = (aValue ?? '').localeCompare(dValue ?? '');
             } else {
-              result ||= aValue.localeCompare(dValue);
+              result ||= (aValue ?? '').localeCompare(dValue ?? '');
             }
           }
         } else if (sort === 'desc') {
-          if (typeof aValue === 'number' && typeof dValue === 'number') {
-            if (typeof result == 'undefined') {
-              result = dValue - aValue;
+          if (typeof aValue === 'number' || typeof dValue === 'number') {
+            if (typeof result === 'undefined') {
+              result = (dValue ?? 0) - (aValue ?? 0);
             } else {
-              result ||= dValue - aValue;
+              result ||= (dValue ?? 0) - (aValue ?? 0);
             }
-          } else if (typeof aValue === 'string' && typeof dValue === 'string') {
-            if (typeof result == 'undefined') {
-              result = dValue.localeCompare(aValue);
+          } else if (typeof aValue === 'string' || typeof dValue === 'string') {
+            if (typeof result === 'undefined') {
+              result = (dValue ?? '').localeCompare(aValue ?? '');
             } else {
-              result ||= dValue.localeCompare(aValue);
+              result ||= (dValue ?? '').localeCompare(aValue ?? '');
             }
           }
         }
