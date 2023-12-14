@@ -203,6 +203,10 @@ export const selectStyles = css`
     min-width: 200px;
   }
 
+  :host([variant='tiny']) .control {
+    min-width: 150px;
+  }
+
   :host(:hover:not([disabled])) .control:hover {
     border-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
   }

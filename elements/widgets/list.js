@@ -69,7 +69,7 @@ export const listWidgetTemplate = html`
           html` ${html.partial(widgetEmptyStateTemplate('Список пуст.'))} `
         )}
         <div
-          class="widget-table"
+          class="widget-table list-table"
           ${ref('table')}
           ?hidden="${(x) => !x?.document?.listSource?.length}"
         >

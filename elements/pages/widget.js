@@ -62,6 +62,63 @@ import '../top-loader.js';
 import '../widget.js';
 import '../pages/template-library-modal.js';
 
+export const colorSelectorTemplate = ({
+  refName,
+  value,
+  isDark,
+  variant
+}) => html`
+  <ppp-select
+    variant="${variant ?? 'tiny'}"
+    ${ref(refName)}
+    value="${() => value ?? 'default'}"
+  >
+    <span slot="label">${isDark ? 'Тёмная тема' : 'Светлая тема'}</span>
+    <ppp-option value="default">По умолчанию</ppp-option>
+    <ppp-option value="palette-white">Белый</ppp-option>
+    <ppp-option value="palette-black">Чёрный</ppp-option>
+    <ppp-option value="palette-gray-dark-4">Серый -4</ppp-option>
+    <ppp-option value="palette-gray-dark-3">Серый -3</ppp-option>
+    <ppp-option value="palette-gray-dark-2">Серый -2</ppp-option>
+    <ppp-option value="palette-gray-dark-1">Серый -1</ppp-option>
+    <ppp-option value="palette-gray-base">Серый</ppp-option>
+    <ppp-option value="palette-gray-light-1">Серый +1</ppp-option>
+    <ppp-option value="palette-gray-light-2">Серый +2</ppp-option>
+    <ppp-option value="palette-gray-light-3">Серый +3</ppp-option>
+    <ppp-option value="palette-green-dark-3">Зелёный -3</ppp-option>
+    <ppp-option value="palette-green-dark-2">Зелёный -2</ppp-option>
+    <ppp-option value="palette-green-dark-1">Зелёный -1</ppp-option>
+    <ppp-option value="palette-green-base">Зелёный</ppp-option>
+    <ppp-option value="palette-green-light-1">Зелёный +1</ppp-option>
+    <ppp-option value="palette-green-light-2">Зелёный +2</ppp-option>
+    <ppp-option value="palette-green-light-3">Зелёный +3</ppp-option>
+    <ppp-option value="palette-purple-dark-3">Фиолетовый -3</ppp-option>
+    <ppp-option value="palette-purple-dark-2">Фиолетовый -2</ppp-option>
+    <ppp-option value="palette-purple-base">Фиолетовый</ppp-option>
+    <ppp-option value="palette-purple-light-2">Фиолетовый +2</ppp-option>
+    <ppp-option value="palette-purple-light-3">Фиолетовый +3</ppp-option>
+    <ppp-option value="palette-blue-dark-3">Синий -3</ppp-option>
+    <ppp-option value="palette-blue-dark-2">Синий -2</ppp-option>
+    <ppp-option value="palette-blue-dark-1">Синий -1</ppp-option>
+    <ppp-option value="palette-blue-base">Синий</ppp-option>
+    <ppp-option value="palette-blue-light-1">Синий +1</ppp-option>
+    <ppp-option value="palette-blue-light-2">Синий +2</ppp-option>
+    <ppp-option value="palette-blue-light-3">Синий +3</ppp-option>
+    <ppp-option value="palette-yellow-dark-3">Жёлтый -3</ppp-option>
+    <ppp-option value="palette-yellow-dark-2">Жёлтый -2</ppp-option>
+    <ppp-option value="palette-yellow-base">Жёлтый</ppp-option>
+    <ppp-option value="palette-yellow-light-2">Жёлтый +2</ppp-option>
+    <ppp-option value="palette-yellow-light-3">Жёлтый +3</ppp-option>
+    <ppp-option value="palette-red-dark-3">Красный -3</ppp-option>
+    <ppp-option value="palette-red-dark-2">Красный -2</ppp-option>
+    <ppp-option value="palette-red-dark-1">Красный -1</ppp-option>
+    <ppp-option value="palette-red-base">Красный</ppp-option>
+    <ppp-option value="palette-red-light-1">Красный +1</ppp-option>
+    <ppp-option value="palette-red-light-2">Красный +2</ppp-option>
+    <ppp-option value="palette-red-light-3">Красный +3</ppp-option>
+  </ppp-select>
+`;
+
 export const widgetTypeRadioGroupStyles = css`
   ${normalize()}
   ${display('flex')}
@@ -335,6 +392,59 @@ export const widgetPageTemplate = html`
                               value="${(x) => x.document.name}"
                               ${ref('name')}
                             ></ppp-text-field>
+                          </div>
+                        </div>
+                        <div class="widget-settings-section">
+                          <div class="widget-settings-label-group">
+                            <h5>Цвет фона заголовка</h5>
+                          </div>
+                          <div class="widget-settings-input-group">
+                            <div class="control-line colors-line">
+                              ${(x) =>
+                                colorSelectorTemplate({
+                                  refName: 'headerBgDark',
+                                  value: x.document.headerBgDark,
+                                  isDark: true
+                                })}
+                              ${(x) =>
+                                colorSelectorTemplate({
+                                  refName: 'headerBgLight',
+                                  value: x.document.headerBgLight
+                                })}
+                              <ppp-text-field
+                                placeholder="20"
+                                min="0"
+                                step="1"
+                                max="100"
+                                type="number"
+                                value="${(x) => x.document.headerBgOpacity}"
+                                ${ref('headerBgOpacity')}
+                              >
+                                <span slot="label">Прозрачность, %</span>
+                              </ppp-text-field>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="widget-settings-section">
+                          <div class="widget-settings-label-group">
+                            <h5>Цвет шрифта заголовка</h5>
+                          </div>
+                          <div class="widget-settings-input-group">
+                            <div class="control-line colors-line">
+                              ${(x) =>
+                                colorSelectorTemplate({
+                                  refName: 'headerColorDark',
+                                  value: x.document.headerColorDark,
+                                  variant: 'compact',
+                                  isDark: true
+                                })}
+                              ${(x) =>
+                                colorSelectorTemplate({
+                                  refName: 'headerColorLight',
+                                  value: x.document.headerColorLight,
+                                  variant: 'compact'
+                                })}
+                            </div>
                           </div>
                         </div>
                         ${when(
@@ -1228,9 +1338,27 @@ export class WidgetPage extends Page {
         this.widgetPreview.shadowRoot.firstChild
       );
 
+    let headerBgOpacity =
+      this.headerBgOpacity.value === ''
+        ? ''
+        : Math.trunc(Math.abs(this.headerBgOpacity.value));
+
+    if (headerBgOpacity > 100) {
+      headerBgOpacity = 100;
+    }
+
+    if (isNaN(headerBgOpacity)) {
+      headerBgOpacity = '';
+    }
+
     const $set = {
       name: this.name.value.trim(),
       nameWhenStacked: this.nameWhenStacked?.value.trim(),
+      headerBgDark: this.headerBgDark.value,
+      headerBgLight: this.headerBgLight.value,
+      headerBgOpacity,
+      headerColorDark: this.headerColorDark.value,
+      headerColorLight: this.headerColorLight.value,
       reportedType: this.widgetDefinition.type,
       updatedAt: new Date()
     };
@@ -1432,32 +1560,28 @@ export class WidgetPage extends Page {
         urlObject.url = this.url.value ?? '';
       }
 
+      const mainFields = {
+        name: this.name.value,
+        headerBgDark: this.headerBgDark.value,
+        headerBgLight: this.headerBgLight.value,
+        headerBgOpacity:
+          this.headerBgOpacity.value === ''
+            ? ''
+            : Math.abs(this.headerBgOpacity.value),
+        headerColorDark: this.headerColorDark.value,
+        headerColorLight: this.headerColorLight.value,
+        nameWhenStacked: this.nameWhenStacked?.value
+      };
+
       if (typeof this.widgetElement?.submit === 'function') {
         const { $set } = await this.widgetElement?.submit({ preview: true });
 
         documentAfterChanges = await this.denormalization.denormalize(
-          Object.assign(
-            {},
-            this.document,
-            $set ?? {},
-            {
-              name: this.name.value,
-              nameWhenStacked: this.nameWhenStacked?.value
-            },
-            urlObject
-          )
+          Object.assign({}, this.document, $set ?? {}, mainFields, urlObject)
         );
       } else {
         documentAfterChanges = await this.denormalization.denormalize(
-          Object.assign(
-            {},
-            this.document,
-            {
-              name: this.name.value,
-              nameWhenStacked: this.nameWhenStacked?.value
-            },
-            urlObject
-          )
+          Object.assign({}, this.document, mainFields, urlObject)
         );
       }
 

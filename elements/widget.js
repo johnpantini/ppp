@@ -47,7 +47,8 @@ import {
   paletteYellowDark2,
   paletteRedDark2,
   paletteRedLight2,
-  toColorComponents
+  toColorComponents,
+  createThemed
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
@@ -431,7 +432,7 @@ export const widgetTableStyles = () => css`
     text-align: left;
   }
 
-  .widget-table .row:nth-of-type(2n) {
+  .widget-table:not(.list-table) .row:nth-of-type(2n) {
     background-color: ${themeConditional(
       lighten(paletteGrayLight3, 1),
       paletteGrayDark2
@@ -937,6 +938,40 @@ export class Widget extends PPPElement {
 
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
+    }
+
+    const header = this.shadowRoot.querySelector('.widget-header');
+
+    if (header) {
+      const title = header.querySelector('.widget-title');
+
+      const headerBg =
+        this.document[`headerBg${ppp.darkMode ? 'Dark' : 'Light'}`];
+
+      if (headerBg && headerBg !== 'default') {
+        let opacity = Math.trunc(Math.abs(this.document.headerBgOpacity));
+
+        if (typeof opacity !== 'number' || isNaN(opacity)) {
+          opacity = 20;
+        }
+
+        if (opacity > 100) {
+          opacity = 100;
+        }
+
+        header.style.backgroundColor = `rgba(${toColorComponents(
+          createThemed(headerBg)
+        ).createCSS()}, ${(opacity / 100).toFixed(2)})`;
+      }
+
+      if (title) {
+        const color =
+          this.document[`headerColor${ppp.darkMode ? 'Dark' : 'Light'}`];
+
+        if (color && color !== 'default') {
+          title.style.color = createThemed(color).createCSS();
+        }
+      }
     }
   }
 
