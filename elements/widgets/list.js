@@ -12,7 +12,6 @@ import {
   when,
   ref,
   observable,
-  Observable,
   repeat,
   attr
 } from '../../vendor/fast-element.min.js';
@@ -25,7 +24,6 @@ import { sortAsc, sortDesc, trash } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../query-select.js';
 import '../radio-group.js';
-import '../snippet.js';
 import '../text-field.js';
 import '../widget-controls.js';
 
@@ -464,7 +462,7 @@ export class ListWidget extends WidgetWithInstrument {
         await this.control?.removeRow?.(index, this, column);
         row.remove();
         this.sort();
-      } else if (column.defaultTrader) {
+      } else if (column.defaultTrader && column.instrument) {
         this.instrumentTrader = column.defaultTrader;
 
         if (this.groupControl.selection && !this.preview) {

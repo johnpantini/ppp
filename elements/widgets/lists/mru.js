@@ -63,10 +63,12 @@ export async function listDefinition() {
                   source.extraLevel1Trader,
                   source.extraLevel1Trader2
                 ]) {
+                  const adopted = trader?.adoptInstrument(instrument);
+
                   if (
                     trader instanceof TraderRuntime &&
                     trader.hasCap(TRADER_CAPS.CAPS_LEVEL1) &&
-                    !trader.adoptInstrument(instrument)?.notSupported
+                    !adopted?.notSupported
                   ) {
                     if (
                       widget.document.listSource.find(
@@ -96,7 +98,7 @@ export async function listDefinition() {
                     }
 
                     const row = {
-                      symbol: instrument.symbol,
+                      symbol: adopted.symbol,
                       traderId: trader.document._id
                     };
 

@@ -1,17 +1,11 @@
 import ppp from '../../ppp.js';
-import {
-  html,
-  css,
-  Observable,
-  ref,
-  Updates
-} from '../../vendor/fast-element.min.js';
+import { html, css, Observable, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { ConflictError, validate, invalidate } from '../../lib/ppp-errors.js';
+import { uuidv4 } from '../../lib/ppp-crypto.js';
 import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
-import { uuidv4 } from '../../lib/ppp-crypto.js';
 
 export const newWorkspaceModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -106,10 +100,6 @@ export class NewWorkspaceModalPage extends Page {
         name: next.name,
         workspaceId: this.workspaceId.value
       };
-
-      Updates.enqueue(() => {
-        location.reload();
-      });
     }
   }
 
