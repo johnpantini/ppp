@@ -311,15 +311,13 @@ export const widgetTableStyles = () => css`
     width: 100%;
     padding: 0;
     user-select: none;
-    border-collapse: collapse;
+    border-collapse: separate;
     border-spacing: 0;
   }
 
   .widget-table .thead {
     display: table-header-group;
     vertical-align: middle;
-    border-bottom: 1px solid
-      var(--palette-gray-light-2-with-palette-gray-dark-1);
   }
 
   .widget-table .tbody {
@@ -351,6 +349,8 @@ export const widgetTableStyles = () => css`
     cursor: pointer;
     background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    border-bottom: 1px solid
+      var(--palette-gray-light-2-with-palette-gray-dark-1);
   }
 
   .widget-table th.empty,

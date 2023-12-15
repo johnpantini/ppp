@@ -401,8 +401,6 @@ export class ListWidget extends WidgetWithInstrument {
     this.sort();
   }
 
-  setRows(rows) {}
-
   async saveListSource() {
     return ppp.user.functions.updateOne(
       {

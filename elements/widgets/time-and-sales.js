@@ -27,7 +27,8 @@ import {
   priceCurrencySymbol,
   formatQuantity,
   formatDate,
-  formatPriceWithoutCurrency
+  formatPriceWithoutCurrency,
+  stringToFloat
 } from '../../lib/intl.js';
 import { ellipsis, normalize } from '../../design/styles.js';
 import {
@@ -385,6 +386,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
     await validate(this.container.threshold);
 
+    // Plain text (code) or number. Check manually.
     const threshold = +this.container.threshold.value
       .toString()
       .replace(',', '.');
@@ -392,7 +394,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     if (!isNaN(threshold) && typeof threshold === 'number') {
       await validate(this.container.threshold, {
         hook: async (value) => {
-          const v = +value.toString().replace(',', '.');
+          const v = stringToFloat(value);
 
           return v >= 0 && v <= 10000000;
         },

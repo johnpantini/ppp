@@ -35,6 +35,10 @@ class WidgetColumns {
           column.name = ppp.t(`$const.columnSource.${column.source}`);
         }
 
+        if (column.source === COLUMN_SOURCE.URL && !column.url) {
+          continue;
+        }
+
         const module = await import(url);
 
         this.#registeredColumns.push({

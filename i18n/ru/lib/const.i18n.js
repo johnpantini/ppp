@@ -64,7 +64,9 @@ export default function (i18n) {
         [COLUMN_SOURCE.TOTAL_AMOUNT]: 'Стоимость',
         [COLUMN_SOURCE.EXTENDED_TOTAL_AMOUNT]: 'Стоимость+',
         [COLUMN_SOURCE.DAY_VOLUME]: 'Объём',
-        [COLUMN_SOURCE.TRADING_STATUS]: 'Торговый статус'
+        [COLUMN_SOURCE.TRADING_STATUS]: 'Торговый статус',
+        [COLUMN_SOURCE.FORMATTED_VALUE]: 'Значение',
+        [COLUMN_SOURCE.URL]: 'По ссылке'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

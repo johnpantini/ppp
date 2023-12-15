@@ -64,6 +64,16 @@ export const widgetColumnListItemTemplate = html`
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-query-select>
         ${when(
+          (x) => x.source?.value === COLUMN_SOURCE.FORMATTED_VALUE,
+          html`
+            <ppp-text-field
+              ${ref('valueKey')}
+              placeholder="Ключ"
+              value="${(x) => x.column.valueKey}"
+            ></ppp-text-field>
+          `
+        )}
+        ${when(
           (x) => x.source?.value === COLUMN_SOURCE.POSITION_AVAILABLE,
           html`
             <ppp-checkbox
@@ -180,6 +190,10 @@ export class WidgetColumnListItem extends PPPElement {
 
     if (value.source === COLUMN_SOURCE.POSITION_AVAILABLE) {
       value.hideBalances = this.hideBalances.checked;
+    }
+
+    if (value.source === COLUMN_SOURCE.FORMATTED_VALUE) {
+      value.valueKey = this.valueKey.value.trim();
     }
 
     if (
