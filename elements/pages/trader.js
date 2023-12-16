@@ -514,7 +514,7 @@ export const traderPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('binance')}"
           />
-          <div slot="title">Binance API V3</div>
+          <div slot="title">Binance API V3 (Spot)</div>
           <span slot="description">
             Рыночные данные через брокерский профиль Binance.
           </span>

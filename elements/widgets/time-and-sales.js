@@ -87,7 +87,7 @@ export const timeAndSalesWidgetTemplate = html`
             </thead>
             <tbody @click="${(x, c) => x.handleTableClick(c)}">
               ${repeat(
-                (x) => x.trades ?? [],
+                (x) => (x.trades ?? []).slice(0, x.document.depth),
                 html`
                   <tr
                     class="price-line"
@@ -240,6 +240,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   @observable
   trades;
 
+  isWaitingForHistory = false;
+
+  #rtQueue = [];
+
   constructor() {
     super();
 
@@ -314,13 +318,17 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         return;
       }
 
-      this.trades.unshift(newValue);
+      if (this.isWaitingForHistory) {
+        this.#rtQueue.unshift(newValue);
+      } else {
+        this.trades.unshift(newValue);
 
-      while (this.trades.length > this.document.depth) {
-        this.trades.pop();
+        while (this.trades.length > this.document.depth) {
+          this.trades.pop();
+        }
+
+        Observable.notify(this, 'trades');
       }
-
-      Observable.notify(this, 'trades');
     }
   }
 
@@ -340,6 +348,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
 
+    this.#rtQueue = [];
     this.trades = [];
 
     if (this.tradesTrader) {
@@ -351,15 +360,26 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         try {
           const trades = [];
 
-          for (const print of (await this.tradesTrader.allTrades({
-            instrument: this.instrument,
-            depth: this.document.depth
-          })) ?? []) {
-            const threshold = await this.getThreshold(print);
+          this.isWaitingForHistory = true;
 
-            if (typeof threshold === 'number' && print.volume >= threshold) {
-              trades.push(print);
+          try {
+            for (const print of (await this.tradesTrader.allTrades({
+              instrument: this.instrument,
+              depth: this.document.depth
+            })) ?? []) {
+              const threshold = await this.getThreshold(print);
+
+              if (typeof threshold === 'number' && print.volume >= threshold) {
+                trades.push(print);
+              }
             }
+          } finally {
+            this.isWaitingForHistory = false;
+          }
+
+          if (this.#rtQueue.length) {
+            trades.unshift(...this.#rtQueue);
+            this.#rtQueue = [];
           }
 
           this.trades = trades;
@@ -372,8 +392,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
           });
         }
       }
-
-      await this.tradesTrader.instrumentChanged?.(this, oldValue, newValue);
     }
   }
 
@@ -427,7 +445,9 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async submit() {
     return {
       $set: {
-        depth: Math.abs(this.container.depth.value),
+        depth: this.container.depth.value
+          ? Math.trunc(Math.abs(this.container.depth.value))
+          : '',
         tradesTraderId: this.container.tradesTraderId.value,
         threshold: this.container.threshold.value,
         displayCurrency: this.container.displayCurrency.checked

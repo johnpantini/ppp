@@ -33,14 +33,7 @@ export const listWidgetTemplate = html`
       <div class="widget-header">
         <div class="widget-header-inner">
           <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control
-            readonly
-            ?hidden="${(x) => !x.preview || !x.instrumentTrader}"
-          ></ppp-widget-search-control>
-          ${when(
-            (x) => !x.instrumentTrader,
-            html`<span class="no-spacing"></span>`
-          )}
+          <ppp-widget-search-control readonly></ppp-widget-search-control>
           <span class="widget-title">
             ${when(
               (x) => x.deletionAvailable && x.deletion,
@@ -320,7 +313,17 @@ export class ListWidget extends WidgetWithInstrument {
       return result;
     };
 
-    this.slot.assign(...sortedByDefault.sort(comparator));
+    this.slot.assign(
+      ...sortedByDefault.sort(comparator).map((r, i) => {
+        if ((i + 1) % 2 === 0) {
+          r.classList.add('even');
+        } else {
+          r.classList.remove('even');
+        }
+
+        return r;
+      })
+    );
   }
 
   toggleSort(column) {

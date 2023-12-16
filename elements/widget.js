@@ -432,7 +432,8 @@ export const widgetTableStyles = () => css`
     text-align: left;
   }
 
-  .widget-table:not(.list-table) .row:nth-of-type(2n) {
+  .widget-table:not(.list-table) .row:nth-of-type(2n),
+  .tr.even {
     background-color: ${themeConditional(
       lighten(paletteGrayLight3, 1),
       paletteGrayDark2

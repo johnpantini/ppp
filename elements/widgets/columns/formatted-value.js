@@ -49,9 +49,7 @@ export class FormattedValueColumn extends Column {
     }
   }
 
-  async connectedCallback() {
-    await super.connectedCallback();
-
+  rebuild() {
     if (!this.column?.valueKey) {
       this.value = '—';
     } else {
@@ -59,6 +57,14 @@ export class FormattedValueColumn extends Column {
 
       this.value = entry.value ?? '—';
       this.formatter = entry.formatter;
+    }
+  }
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (!this.isBalance) {
+      this.rebuild();
     }
   }
 }
