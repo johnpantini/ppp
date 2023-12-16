@@ -354,7 +354,7 @@ export class ListWidget extends WidgetWithInstrument {
         },
         {
           $set: {
-            [`widgets.$.columns.${column.index}.sort`]: column.sort
+            'widgets.$.columns': this.document.columns
           }
         }
       );
