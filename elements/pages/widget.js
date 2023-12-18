@@ -1307,6 +1307,9 @@ export class WidgetPage extends Page {
   }
 
   async submitDocument(options = {}) {
+    const hasDefinition =
+      typeof this.widgetDefinition?.customElement !== 'undefined';
+
     try {
       await this.validate();
       await this.applyModifications();
@@ -1322,7 +1325,11 @@ export class WidgetPage extends Page {
     await later(100);
 
     // The user has to proceed first.
-    if (this.document.type === 'custom' && !this.document._id) {
+    if (
+      !this.document._id &&
+      this.document.type === 'custom' &&
+      !hasDefinition
+    ) {
       return;
     }
 
