@@ -1,5 +1,5 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
   Page,
   pageStyles,
@@ -61,6 +61,22 @@ export const brokerPsinaPageTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Шлюз Psina</h5>
+          <p class="description">
+            Будет использован для проверки учётных данных.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="url"
+            placeholder="https://example.com"
+            value="${(x) => x.document.gateway}"
+            ${ref('gateway')}
+          ></ppp-text-field>
+        </div>
+      </section>
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -77,6 +93,43 @@ export class BrokerPsinaPage extends Page {
     await validate(this.name);
     await validate(this.login);
     await validate(this.password);
+    await validate(this.gateway);
+
+    let json;
+
+    try {
+      const response = await maybeFetchError(
+        await fetch(
+          new URL('check_credentials', this.gateway.value).toString(),
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              login: parseInt(this.login.value),
+              password: this.password.value.trim()
+            })
+          }
+        )
+      );
+
+      json = await response.json();
+    } catch (e) {
+      console.error(e);
+
+      invalidate(this.gateway, {
+        errorMessage: 'Этот URL не может быть использован',
+        raiseException: true
+      });
+    }
+
+    if (!json.psina?.result) {
+      invalidate(this.password, {
+        errorMessage: 'Неверный логин или пароль',
+        raiseException: true
+      });
+    }
   }
 
   async read() {
@@ -104,8 +157,9 @@ export class BrokerPsinaPage extends Page {
     return {
       $set: {
         name: this.name.value.trim(),
-        login: this.login.value.trim(),
+        login: parseInt(this.login.value),
         password: this.password.value.trim(),
+        gateway: new URL(this.gateway.value).toString(),
         version: 1,
         type: BROKERS.PSINA,
         updatedAt: new Date()

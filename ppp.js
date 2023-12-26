@@ -604,6 +604,7 @@ class PPP {
 
         this.pusherConnections.get(document._id).subscribe('telegram');
         this.pusherConnections.get(document._id).subscribe('ppp');
+        this.pusherConnections.get(document._id).subscribe('psina');
       }
 
       return this.pusherConnections.get(document._id);

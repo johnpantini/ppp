@@ -480,6 +480,10 @@ export const widgetCommonContentStyles = () => css`
     color: ${negative};
   }
 
+  .earth {
+    color: ${themeConditional(paletteYellowDark2, paletteYellowLight2)};
+  }
+
   .widget-section {
     width: 100%;
     padding: 0 10px;

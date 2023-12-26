@@ -1,5 +1,6 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
+import { ConnectionLimitExceededError } from '../../lib/ppp-errors.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
   Page,
@@ -231,7 +232,12 @@ const checkConnection = async (control, login, password) => {
         } else {
           ws.close();
           clearTimeout(timer);
-          reject();
+
+          if (payload?.find?.((m) => m.code === 406)) {
+            reject(new ConnectionLimitExceededError({ details: payload }));
+          } else {
+            reject();
+          }
         }
       };
       ws.onerror = () => {
@@ -241,7 +247,10 @@ const checkConnection = async (control, login, password) => {
     });
   } catch (e) {
     invalidate(control, {
-      errorMessage: 'Не удалось соединиться, проверьте ссылку и брокера',
+      errorMessage:
+        e instanceof ConnectionLimitExceededError
+          ? 'Исчерпан лимит доступных соединений'
+          : 'Не удалось соединиться, проверьте ссылку и брокера',
       raiseException: true
     });
   }
