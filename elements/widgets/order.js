@@ -833,11 +833,7 @@ export const orderWidgetTemplate = html`
                       ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
                           ? 'по факту сделки'
-                          : formatAmount(
-                              x.totalAmount,
-                              x.instrument?.currency,
-                              x.instrument
-                            )}
+                          : formatAmount(x.totalAmount, x.instrument)}
                     </span>
                   </div>
                   <div class="widget-summary-line">

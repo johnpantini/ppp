@@ -65,8 +65,7 @@ export default function (i18n) {
         [COLUMN_SOURCE.EXTENDED_TOTAL_AMOUNT]: 'Стоимость+',
         [COLUMN_SOURCE.DAY_VOLUME]: 'Объём',
         [COLUMN_SOURCE.TRADING_STATUS]: 'Торговый статус',
-        [COLUMN_SOURCE.FORMATTED_VALUE]: 'Значение',
-        [COLUMN_SOURCE.URL]: 'По ссылке'
+        [COLUMN_SOURCE.FORMATTED_VALUE]: 'Значение'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',
@@ -85,7 +84,6 @@ export default function (i18n) {
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
-        [TRADERS.PSINA_ALOR_OPENAPI_V2]: 'Alor Open API V2 (Psina)',
         [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',

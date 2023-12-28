@@ -727,6 +727,13 @@ export const widgetCommonContentStyles = () => css`
       )
     );
   }
+
+  ppp-badge {
+    height: 16px;
+    font-size: calc(${fontSizeWidget} - 1px);
+    line-height: 14px;
+    font-weight: ${fontWeightWidget};
+  }
 `;
 
 export const widgetStyles = () => css`

@@ -111,10 +111,10 @@ export const widgetColumnListItemTemplate = html`
           value="${(x) => x.column.source}"
         >
           ${repeat(
-            (x) => x.availableColumns ?? Object.keys(COLUMN_SOURCE),
+            (x) => x.availableColumns ?? Object.values(COLUMN_SOURCE),
             html`
-              <ppp-option value="${(x) => COLUMN_SOURCE[x]}">
-                ${(x) => ppp.t(`$const.columnSource.${COLUMN_SOURCE[x]}`)}
+              <ppp-option value="${(x) => x}">
+                ${(x) => ppp.t(`$const.columnSource.${x}`)}
               </ppp-option>
             `
           )}
@@ -123,7 +123,7 @@ export const widgetColumnListItemTemplate = html`
           ${ref('extraTraderId')}
           deselectable
           standalone
-          ?disabled="${(x, c) =>
+          ?disabled="${(x) =>
             x.column.hidden || x.mainTraderColumns.includes(x.column.source)}"
           value="${(x) => x.column.extraTraderId}"
           :preloaded="${(x) => {

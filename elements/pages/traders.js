@@ -77,11 +77,7 @@ export const tradersPageTemplate = html`
             <ppp-table
               sticky
               @cleanup="${(x, c) => {
-                let type = c.event.detail.datum.type;
-
-                if (type === TRADERS.PSINA_ALOR_OPENAPI_V2) {
-                  type = TRADERS.CUSTOM;
-                }
+                const type = c.event.detail.datum.type;
 
                 x.cleanupFromListing({
                   pageName: `trader-${type}`,
@@ -117,11 +113,7 @@ export const tradersPageTemplate = html`
                       html`<a
                         class="link"
                         @click="${() => {
-                          let type = datum.type;
-
-                          if (type === TRADERS.PSINA_ALOR_OPENAPI_V2) {
-                            type = TRADERS.CUSTOM;
-                          }
+                          const type = datum.type;
 
                           ppp.app.navigate({
                             page: `trader-${type}`,

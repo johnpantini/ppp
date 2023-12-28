@@ -26,12 +26,7 @@ export const columnTemplate = html`
               x.status === TRADING_STATUS.PREMARKET ? 'dot-1' : 'dot-4'}"
           ></span>
           <span>
-            ${(x) =>
-              formatAmount(
-                x.totalAmount,
-                x.payload?.instrument?.currency,
-                x.payload?.instrument
-              )}
+            ${(x) => formatAmount(x.totalAmount, x.payload?.instrument)}
           </span>
         </div>
       `

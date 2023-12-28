@@ -180,13 +180,14 @@ export const activeOrdersWidgetTemplate = html`
                       </span>
                       <span slot="title-right">
                         ${(o) =>
-                          formatAmount(
-                            o.instrument?.lot *
-                              o.price *
-                              (o.quantity - o.filled),
-                            o.instrument?.currency,
-                            o.instrument
-                          )}
+                          o.price
+                            ? formatAmount(
+                                o.instrument?.lot *
+                                  o.price *
+                                  (o.quantity - o.filled),
+                                o.instrument
+                              )
+                            : 'По рынку'}
                       </span>
                       <span
                         slot="subtitle-left"
@@ -205,7 +206,10 @@ export const activeOrdersWidgetTemplate = html`
                         )}
                         ${(o, c) => c.parent.formatRestQuantity(o)}
                         <span class="dot-divider">•</span>
-                        ${(o) => formatPrice(o.price, o.instrument)}
+                        ${(o) =>
+                          o.price
+                            ? formatPrice(o.price, o.instrument)
+                            : 'По рынку'}
                       </div>
                       <button
                         class="widget-action-button"

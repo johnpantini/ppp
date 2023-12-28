@@ -1019,6 +1019,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
         if (
           order.status === 'working' &&
           order.filled < order.quantity &&
+          // Discard market orders.
+          order.price > 0 &&
           this.ordersTrader.instrumentsAreEqual(
             order.instrument,
             this.instrument

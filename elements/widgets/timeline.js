@@ -273,11 +273,7 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     totalAmount *= firstOperation.instrument.lot;
 
-    return formatAmount(
-      totalAmount,
-      firstOperation.instrument?.currency,
-      firstOperation.instrument
-    );
+    return formatAmount(totalAmount, firstOperation.instrument);
   }
 
   getCardAmountExtraClasses(operations) {

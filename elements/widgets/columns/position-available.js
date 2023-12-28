@@ -16,7 +16,10 @@ export const columnTemplate = html`
           Скрыто
         </ppp-button>
         <span class="balance-cell" ?hidden="${(x) => x.column?.hideBalances}">
-          ${(x) => formatAmount(x.size, x.payload?.symbol)}
+          ${(x) =>
+            formatAmount(x.size, {
+              currency: x.payload?.symbol
+            })}
         </span>
       `,
       html`<span>${(x) => formatQuantity(x.size * x.instrument?.lot)}</span>`

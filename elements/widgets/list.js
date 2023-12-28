@@ -292,6 +292,15 @@ export class ListWidget extends WidgetWithInstrument {
             } else {
               result ||= (aValue ?? '').localeCompare(dValue ?? '');
             }
+          } else if (
+            typeof aValue === 'boolean' ||
+            typeof dValue === 'boolean'
+          ) {
+            if (typeof result === 'undefined') {
+              result = (aValue ?? false) - (dValue ?? false);
+            } else {
+              result ||= (aValue ?? false) - (dValue ?? false);
+            }
           }
         } else if (sort === 'desc') {
           if (typeof aValue === 'number' || typeof dValue === 'number') {
@@ -305,6 +314,15 @@ export class ListWidget extends WidgetWithInstrument {
               result = (dValue ?? '').localeCompare(aValue ?? '');
             } else {
               result ||= (dValue ?? '').localeCompare(aValue ?? '');
+            }
+          } else if (
+            typeof aValue === 'boolean' ||
+            typeof dValue === 'boolean'
+          ) {
+            if (typeof result === 'undefined') {
+              result = (dValue ?? false) - (aValue ?? false);
+            } else {
+              result ||= (dValue ?? false) - (aValue ?? false);
             }
           }
         }
@@ -543,6 +561,7 @@ export async function widgetDefinition() {
             <ppp-radio value="url">По ссылке</ppp-radio>
           </ppp-radio-group>
           <ppp-text-field
+            ?disabled="${(x) => x.setupStep.value === '2'}"
             ?hidden="${(x) => x.listType.value !== 'url'}"
             type="url"
             placeholder="https://example.com/list.js"

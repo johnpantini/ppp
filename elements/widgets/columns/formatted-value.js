@@ -7,7 +7,8 @@ import {
   formatVolume,
   formatRelativeChange,
   formatDateWithOptions,
-  stringToFloat
+  stringToFloat,
+  formatAmount
 } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
 
@@ -27,6 +28,8 @@ export class FormattedValueColumn extends Column {
 
   formatter;
 
+  formatterOptions;
+
   formatValue() {
     if (typeof this.formatter === 'function') {
       return this.formatter(this.value);
@@ -34,16 +37,22 @@ export class FormattedValueColumn extends Column {
       return formatPercentage(stringToFloat(this.value));
     } else if (this.formatter === 'change') {
       return formatRelativeChange(stringToFloat(this.value));
+    } else if (this.formatter === 'amount') {
+      return formatAmount(stringToFloat(this.value), this.instrument);
     } else if (this.formatter === 'volume') {
-      return formatVolume(stringToFloat(this.value));
+      return formatVolume(stringToFloat(this.value), this.formatterOptions);
     } else if (this.formatter === 'datetime') {
-      return formatDateWithOptions(this.value, {
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-      });
+      return formatDateWithOptions(
+        this.value,
+        {
+          month: 'numeric',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric'
+        },
+        this.formatterOptions
+      );
     } else {
       return this.value;
     }
@@ -57,6 +66,7 @@ export class FormattedValueColumn extends Column {
 
       this.value = entry.value ?? '—';
       this.formatter = entry.formatter;
+      this.formatterOptions = entry.formatterOptions;
     }
   }
 
