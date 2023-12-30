@@ -24,7 +24,6 @@ export const traderFinamTradeApiTemplate = html`
         pageUrl: import.meta.url
       })}
       ${traderNameAndRuntimePartial()}
-      </section>
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
