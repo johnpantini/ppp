@@ -147,16 +147,10 @@ export async function listDefinition() {
         hook: async (value) => +value >= 1 && +value <= 100,
         errorMessage: 'Введите значение от 1 до 100'
       });
-      await widget.container.columnList.validate();
     },
     submit: async (widget) => {
       return {
-        depth: +Math.abs(widget.container.depth.value) || 100,
-        columns: widget.container.columnList.value.map((c, index) => {
-          c.sort = widget.document.columns?.[index]?.sort ?? null;
-
-          return c;
-        })
+        depth: +Math.abs(widget.container.depth.value) || 100
       };
     },
     settings: html`

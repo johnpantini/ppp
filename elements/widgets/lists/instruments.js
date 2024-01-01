@@ -90,16 +90,11 @@ export async function listDefinition() {
         }
       }
     },
-    validate: async (widget) => {
-      await widget.container.columnList.validate();
+    validate: async () => {
+      // No-op.
     },
     submit: async (widget) => {
       return {
-        columns: widget.container.columnList.value.map((c, index) => {
-          c.sort = widget.document.columns?.[index]?.sort ?? null;
-
-          return c;
-        }),
         listSource: widget.container.granary.listSource?.map((i) => {
           return {
             symbol: i.symbol,

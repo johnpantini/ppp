@@ -6,6 +6,7 @@ import {
   widgetEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
+import { PPPElement } from '../../lib/ppp-element.js';
 import {
   html,
   css,
@@ -17,18 +18,158 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { $throttle } from '../../lib/ppp-decorators.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
-import { normalize } from '../../design/styles.js';
+import { normalize, ellipsis } from '../../design/styles.js';
 import { invalidate, validate } from '../../lib/ppp-errors.js';
 import { WidgetColumns } from '../widget-columns.js';
 import { sortAsc, sortDesc, trash } from '../../static/svg/sprite.js';
+import {
+  themeConditional,
+  toColorComponents,
+  fontSizeWidget,
+  lineHeightWidget,
+  paletteGrayLight3,
+  paletteGrayDark2,
+  paletteGrayDark1,
+  paletteGrayLight2,
+  spacing2
+} from '../../design/design-tokens.js';
 import '../button.js';
 import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
 
+const listWidgetThCellTemplate = html`
+  <template
+    sort="${(x) => x.sort}"
+    source="${(x) => x.source}"
+    @click="${(x) => x.toggleSort()}"
+  >
+    <div class="sort-holder" ?hidden="${(x) => !x.sort}">
+      <span class="sort-icon">
+        ${(x) => html`${html.partial(x.sort === 'asc' ? sortAsc : sortDesc)}`}
+      </span>
+      <div class="sort-shadow"></div>
+    </div>
+    <slot></slot>
+  </template>
+`;
+
+const listWidgetThCellStyles = css`
+  :host {
+    display: block;
+    width: 100%;
+    positive
+    text-align: right;
+    overflow: hidden;
+    font-weight: 500;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    ${ellipsis()};
+  }
+  
+  :host(:hover) {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
+  .sort-holder {
+    position: absolute;
+    left: ${spacing2};
+    height: 18px;
+    width: 16px;
+  }
+
+  .sort-icon svg {
+    width: 16px;
+    height: 16px;
+    z-index: 10;
+    display: inline-block;
+    position: relative;
+  }
+
+  .sort-shadow {
+    pointer-events: none;
+    z-index: 9;
+    width: 36px;
+    height: 20px;
+    position: absolute;
+    top: 0;
+    left: -12px;
+    background: linear-gradient(
+      90deg,
+      rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayLight3),
+          toColorComponents(paletteGrayDark2)
+        )},
+        0
+      ),
+      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 25%,
+      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 75%,
+      rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayLight3),
+          toColorComponents(paletteGrayDark2)
+        )},
+        0
+      )
+    );
+  }
+`;
+
+class ListWidgetThCell extends PPPElement {
+  @attr
+  sort;
+
+  @attr
+  source;
+
+  @observable
+  column;
+
+  toggleSort() {
+    if (!this.sort) {
+      this.sort = 'asc';
+    } else if (this.sort === 'asc') {
+      this.sort = 'desc';
+    } else if (this.sort === 'desc') {
+      this.sort = null;
+    }
+
+    this.column.sort = this.sort;
+
+    this.$emit('columnsort', this);
+  }
+}
+
 export const listWidgetTemplate = html`
-  <template>
+  <template
+    @columnsort="${(x, { event }) => {
+      const column = event.detail.column;
+
+      if (Array.isArray(x.document.columns)) {
+        x.document.columns[column.index].sort = column.sort;
+      }
+
+      !x.preview &&
+        ppp.user.functions.updateOne(
+          {
+            collection: 'workspaces'
+          },
+          {
+            _id: x.container.document._id,
+            'widgets.uniqueID': x.document.uniqueID
+          },
+          {
+            $set: {
+              'widgets.$.columns': x.document.columns
+            }
+          }
+        );
+
+      return x.internalSort();
+    }}"
+  >
     <div class="widget-root">
       <div class="widget-header">
         <div class="widget-header-inner">
@@ -71,25 +212,15 @@ export const listWidgetTemplate = html`
               ${repeat(
                 (x) => x.columnsArray ?? [],
                 html`
-                  <div
-                    class="th"
-                    sort="${(x) => x.sort}"
-                    source="${(x) => x.source}"
-                    @click="${(x, c) => c.parent.toggleSort(x)}"
-                  >
+                  <div class="th">
                     <div class="resize-handle"></div>
-                    <div>
-                      <div class="sort-holder" ?hidden="${(x) => !x.sort}">
-                        <span class="sort-icon">
-                          ${(x) =>
-                            html`${html.partial(
-                              x.sort === 'asc' ? sortAsc : sortDesc
-                            )}`}
-                        </span>
-                        <div class="sort-shadow"></div>
-                      </div>
+                    <ppp-list-widget-th-cell
+                      sort="${(x) => x.sort}"
+                      source="${(x) => x.source}"
+                      :column="${(x) => x}"
+                    >
                       ${(x) => x.name}
-                    </div>
+                    </ppp-list-widget-th-cell>
                   </div>
                 `
               )}
@@ -126,16 +257,6 @@ export class ListWidget extends WidgetWithInstrument {
 
   @observable
   columnsArray;
-
-  refreshColumns() {
-    const newArray = [];
-
-    for (const column of this.columnsArray ?? []) {
-      newArray.push(Object.assign({}, column));
-    }
-
-    return (this.columnsArray = newArray);
-  }
 
   @attr({ mode: 'boolean' })
   deletion;
@@ -230,7 +351,6 @@ export class ListWidget extends WidgetWithInstrument {
 
       await this.control?.connectedCallback?.(this);
       this.internalSort();
-      this.refreshColumns();
 
       this.#sortLoop = setInterval(() => {
         let needSort = false;
@@ -342,44 +462,6 @@ export class ListWidget extends WidgetWithInstrument {
         return r;
       })
     );
-  }
-
-  toggleSort(column) {
-    if (this.preview) {
-      return;
-    }
-
-    {
-      if (!column.sort) {
-        column.sort = 'asc';
-      } else if (column.sort === 'asc') {
-        column.sort = 'desc';
-      } else if (column.sort === 'desc') {
-        column.sort = null;
-      }
-
-      if (Array.isArray(this.document.columns)) {
-        this.document.columns[column.index].sort = column.sort;
-      }
-
-      ppp.user.functions.updateOne(
-        {
-          collection: 'workspaces'
-        },
-        {
-          _id: this.container.document._id,
-          'widgets.uniqueID': this.document.uniqueID
-        },
-        {
-          $set: {
-            'widgets.$.columns': this.document.columns
-          }
-        }
-      );
-
-      this.refreshColumns();
-      this.internalSort();
-    }
   }
 
   appendRow(payload, fallbackIndex) {
@@ -507,17 +589,25 @@ export class ListWidget extends WidgetWithInstrument {
       });
     }
 
+    await this.container.columnList?.validate();
     await this.container.granary?.validate?.(this);
   }
 
   async submit() {
     const submission = await this.container.granary?.submit?.(this);
+    const columns =
+      this.container.columnList?.value?.map((c, index) => {
+        c.sort = this.document.columns?.[index]?.sort ?? null;
+
+        return c;
+      }) ?? [];
 
     return {
       $set: {
         listType: this.container.listType.value,
         listWidgetUrl: this.container.listWidgetUrl.value,
         setupStep: this.container.setupStep.value,
+        columns,
         ...(submission ?? {})
       }
     };
@@ -558,6 +648,9 @@ export async function widgetDefinition() {
           >
             <ppp-radio value="instruments">Инструменты</ppp-radio>
             <ppp-radio value="mru">Недавние инструменты</ppp-radio>
+            <ppp-radio disabled value="intraday-stats"
+              >Статистика внутри дня</ppp-radio
+            >
             <ppp-radio value="url">По ссылке</ppp-radio>
           </ppp-radio-group>
           <ppp-text-field
@@ -611,3 +704,8 @@ export async function widgetDefinition() {
     `
   };
 }
+
+export default ListWidgetThCell.compose({
+  template: listWidgetThCellTemplate,
+  styles: listWidgetThCellStyles
+}).define();

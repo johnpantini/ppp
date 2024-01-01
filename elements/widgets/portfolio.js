@@ -18,7 +18,7 @@ import {
   repeat
 } from '../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
-import { normalize } from '../../design/styles.js';
+import { normalize, ellipsis } from '../../design/styles.js';
 import {
   fontSizeWidget,
   fontWeightWidget,
@@ -225,6 +225,18 @@ export const portfolioWidgetStyles = css`
 
   .balance-row .cell {
     cursor: default;
+  }
+
+  th > div {
+    display: block;
+    width: 100%;
+    positive
+    text-align: right;
+    overflow: hidden;
+    font-weight: 500;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    ${ellipsis()};
   }
 `;
 

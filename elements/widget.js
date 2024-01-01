@@ -360,16 +360,6 @@ export const widgetTableStyles = () => css`
     min-width: 3px;
   }
 
-  .widget-table th > div,
-  .widget-table .th > div {
-    text-align: right;
-    overflow: hidden;
-    font-weight: 500;
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    ${ellipsis()};
-  }
-
   .widget-table th .resize-handle,
   .widget-table .th .resize-handle {
     position: absolute;
@@ -401,11 +391,6 @@ export const widgetTableStyles = () => css`
   .widget-table .th + .th {
     border-left: 1px solid
       ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
-  }
-
-  .widget-table th:hover,
-  .widget-table .th:hover {
-    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
   }
 
   .widget-table .cell {
@@ -682,50 +667,6 @@ export const widgetCommonContentStyles = () => css`
 
   .link {
     padding-bottom: 2px;
-  }
-
-  .sort-holder {
-    position: absolute;
-    left: ${spacing2};
-    height: 18px;
-    width: 16px;
-  }
-
-  .sort-icon svg {
-    width: 16px;
-    height: 16px;
-    z-index: 10;
-    display: inline-block;
-    position: relative;
-  }
-
-  .sort-shadow {
-    pointer-events: none;
-    z-index: 9;
-    width: 36px;
-    height: 20px;
-    position: absolute;
-    top: 0;
-    left: -12px;
-    background: linear-gradient(
-      90deg,
-      rgba(
-        ${themeConditional(
-          toColorComponents(paletteGrayLight3),
-          toColorComponents(paletteGrayDark2)
-        )},
-        0
-      ),
-      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 25%,
-      ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 75%,
-      rgba(
-        ${themeConditional(
-          toColorComponents(paletteGrayLight3),
-          toColorComponents(paletteGrayDark2)
-        )},
-        0
-      )
-    );
   }
 
   ppp-badge {
