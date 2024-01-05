@@ -85,9 +85,9 @@ export const activeOrdersWidgetTemplate = html`
                 Лимитные
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
+                disabled
                 ?hidden="${(x) => showConditionalTabHidden(x)}"
                 value="conditional"
-                disabled
               >
                 Условные
               </ppp-widget-box-radio>
@@ -336,6 +336,9 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   activeOrder;
 
   @observable
+  conditionalOrder;
+
+  @observable
   orders;
 
   @attr
@@ -370,7 +373,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       await this.ordersTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          activeOrder: TRADER_DATUM.ACTIVE_ORDER
+          activeOrder: TRADER_DATUM.ACTIVE_ORDER,
+          conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
         }
       });
     } catch (e) {
@@ -383,12 +387,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          activeOrder: TRADER_DATUM.ACTIVE_ORDER
+          activeOrder: TRADER_DATUM.ACTIVE_ORDER,
+          conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
         }
       });
     }
 
-    super.disconnectedCallback();
+    return super.disconnectedCallback();
   }
 
   activeOrderChanged(oldValue, newValue) {
@@ -406,6 +411,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         this.orders = this.getOrdersArray();
       }
     }
+  }
+
+  conditionalOrderChanged(oldValue, newValue) {
+    // TODO - conditional orders.
   }
 
   async instrumentChanged(oldValue, newValue) {

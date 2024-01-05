@@ -354,7 +354,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     if (this.tradesTrader) {
       if (
         this.instrument &&
-        typeof this.tradesTrader.allTrades === 'function' &&
+        typeof this.tradesTrader.historicalTimeAndSales === 'function' &&
         !this.unsupportedInstrument
       ) {
         try {
@@ -363,10 +363,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
           this.isWaitingForHistory = true;
 
           try {
-            for (const print of (await this.tradesTrader.allTrades({
-              instrument: this.instrument,
-              depth: this.document.depth
-            })) ?? []) {
+            for (const print of (await this.tradesTrader.historicalTimeAndSales(
+              {
+                instrument: this.instrument,
+                depth: this.document.depth
+              }
+            )) ?? []) {
               const threshold = await this.getThreshold(print);
 
               if (typeof threshold === 'number' && print.volume >= threshold) {

@@ -47,6 +47,7 @@ export default function (i18n) {
       columnSource: {
         [COLUMN_SOURCE.INSTRUMENT]: 'Инструмент',
         [COLUMN_SOURCE.SYMBOL]: 'Тикер',
+        [COLUMN_SOURCE.INSTRUMENT_TYPE]: 'Тип',
         [COLUMN_SOURCE.BEST_BID]: 'Bid',
         [COLUMN_SOURCE.BEST_ASK]: 'Ask',
         [COLUMN_SOURCE.LAST_PRICE]: 'Цена',
@@ -77,6 +78,19 @@ export default function (i18n) {
         [EXCHANGE.UTEX_MARGIN_STOCKS]: 'UTEX Margin (акции и ETF)',
         [EXCHANGE.US]: 'Биржи США',
         [EXCHANGE.CAPITALCOM]: 'Capital.com'
+      },
+      instrumentType: {
+        unknown: 'Неизвестно',
+        stock: 'Акция',
+        bond: 'Облигация',
+        etf: 'Фонд',
+        future: 'Фьючерс',
+        option: 'Опцион',
+        index: 'Индекс',
+        commodity: 'Товар',
+        balance: 'Баланс',
+        currency: 'Валюта',
+        cryptocurrency: 'Криптовалюта'
       },
       order: {
         [ORDERS.STOP_LOSS_TAKE_PROFIT]: 'Stop Loss/Take Profit',
@@ -175,6 +189,7 @@ export default function (i18n) {
         [WIDGET_TYPES.ORDERBOOK]: 'Книга заявок',
         [WIDGET_TYPES.TIME_AND_SALES]: 'Лента всех сделок',
         [WIDGET_TYPES.PORTFOLIO]: 'Портфель',
+        [WIDGET_TYPES.BALANCES]: 'Балансы',
         [WIDGET_TYPES.CALENDAR]: 'Календарь',
         [WIDGET_TYPES.CLOCK]: 'Часы',
         [WIDGET_TYPES.MARQUEE]: 'Строка котировок',
@@ -186,7 +201,7 @@ export default function (i18n) {
         [WIDGET_TYPES.RATINGS]: 'Рейтинги',
         [WIDGET_TYPES.INSIDER_TRADES]: 'Сделки инсайдеров',
         [WIDGET_TYPES.OPTIONS]: 'Опционы',
-        [WIDGET_TYPES.LIST]: 'Список/таблица',
+        [WIDGET_TYPES.LIST]: 'Список',
         [WIDGET_TYPES.SCANNER]: 'Сканер',
         [WIDGET_TYPES.SCREENER]: 'Скринер',
         [WIDGET_TYPES.PARSER]: 'Парсер',

@@ -320,10 +320,17 @@ export const widgetPageTemplate = html`
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
+                              x.document._id && x.document.type !== 'balances'}"
+                            value="balances"
+                          >
+                            <span slot="text">Балансы</span>
+                          </ppp-widget-type-radio>
+                          <ppp-widget-type-radio
+                            ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'list'}"
                             value="list"
                           >
-                            <span slot="text">Список/таблица</span>
+                            <span slot="text">Список</span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>

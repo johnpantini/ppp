@@ -1,5 +1,5 @@
-import { html, css, ref, when } from '../../vendor/fast-element.min.js';
-import { validate } from '../../lib/ppp-errors.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
+import { validate, validateDistanceElement } from '../../lib/ppp-errors.js';
 import {
   Page,
   pageStyles,
@@ -8,13 +8,18 @@ import {
   documentPageNameSectionPartial
 } from '../page.js';
 import { ORDERS, TRADER_DATUM } from '../../lib/const.js';
-import { distanceToString, parseDistance } from '../../lib/intl.js';
+import {
+  distanceToString,
+  parseDistance,
+  stringToFloat
+} from '../../lib/intl.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
 import '../radio-group.js';
+import '../snippet.js';
 import '../text-field.js';
 
 export const orderStopLossTakeProfitTemplate = html`
@@ -27,6 +32,24 @@ export const orderStopLossTakeProfitTemplate = html`
       ${documentPageNameSectionPartial({
         placeholder: 'Stop Loss/Take Profit'
       })}
+      <section>
+        <div class="label-group">
+          <h5>Спецификация</h5>
+          <p class="description">
+            Узнайте, каким образом используются трейдеры для этой условной
+            заявки. Трейдеры задаются в виджете заявки.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-snippet
+            readonly
+            style="height: 128px"
+            :code="${(x) =>
+              `Трейдер #1 - источник данных L1.\nТрейдер #2 - источник данных L1.\nТрейдер #3 - источник данных L1.\nТрейдер #4 - источник данных L1.`}"
+            ${ref('ycPrivateKey')}
+          ></ppp-snippet>
+        </div>
+      </section>
       <section>
         <div class="label-group">
           <h5>Тип заявки</h5>
@@ -51,7 +74,8 @@ export const orderStopLossTakeProfitTemplate = html`
           <h5>Цены для отслеживания</h5>
           <p class="description">
             Возможно выбрать сразу несколько цен. При отсутствии выбора будет
-            отслеживаться цена последней сделки.
+            отслеживаться цена последней сделки. MidPoint срабатывает, если и
+            цена bid, и цена ask положительны одновременно.
           </p>
         </div>
         <div class="input-group">
@@ -87,6 +111,13 @@ export const orderStopLossTakeProfitTemplate = html`
             >
               Лучшая цена ask
             </ppp-checkbox>
+            <ppp-checkbox
+              ${ref('midpointWatchFlag')}
+              ?checked="${(x) =>
+                x.document.watchPrices?.includes(TRADER_DATUM.MIDPOINT)}"
+            >
+              Цена MidPoint
+            </ppp-checkbox>
           </div>
         </div>
       </section>
@@ -114,66 +145,17 @@ export const orderStopLossTakeProfitTemplate = html`
           ></ppp-text-field>
         </div>
       </section>
-      ${when(
-        (x) => x.orderType.value !== 'take-profit',
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Дистанция Trailing Stop</h5>
-              <p class="description">
-                Расстояние, на котором цена активации заявки будет следовать за
-                ценой инструмента (только в сторону безубытка). Если значение не
-                указано, Trailing Stop применяться не будет.
-              </p>
-            </div>
-            <div class="input-group">
-              <ppp-text-field
-                disabled
-                placeholder="Нет"
-                value="${(x) => x.document.trailingStopDistance}"
-                ${ref('trailingStopDistance')}
-              ></ppp-text-field>
-            </div>
-          </section>
-        `
-      )}
-      ${when(
-        (x) => x.orderType.value === 'take-profit',
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Коррекция Take Profit</h5>
-              <p class="description">
-                При достижении цены активации заявки Take Profit может быть
-                включен механизм, который отслеживает коррекцию цены инструмента
-                от локальных максимумов. При изменении цены инструмента на
-                величину, равную или большую указанной, Take Profit сработает и
-                выставит биржевую заявку. Если значение не указано, механизм не
-                будет применяться.
-              </p>
-            </div>
-            <div class="input-group">
-              <ppp-text-field
-                disabled
-                placeholder="Нет"
-                value="${(x) => x.document.takeProfitCorrection}"
-                ${ref('takeProfitCorrection')}
-              ></ppp-text-field>
-            </div>
-          </section>
-        `
-      )}
       <section>
         <div class="label-group">
           <h5>Защитное время</h5>
           <p class="description">
             Время, в течение которого должно сохраняться условие срабатывания
-            заявки. Задаётся в секундах.
+            заявки. Задаётся в секундах в диапазоне от 1 до 3600.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            disabled
+            type="number"
             placeholder="Нет"
             value="${(x) => x.document.timeDelay}"
             ${ref('timeDelay')}
@@ -193,22 +175,43 @@ export const orderStopLossTakeProfitTemplate = html`
             <div class="row">
               <ppp-text-field
                 disabled
-                type="text"
+                type="number"
                 min="0"
-                placeholder="00:00"
+                placeholder="00"
                 value="${(x) => x.document.timeFrom}"
-                ${ref('timeFrom')}
+                ${ref('timeFromHours')}
               >
-                <span slot="label">От</span>
+                <span slot="label">От (ч.)</span>
               </ppp-text-field>
               <ppp-text-field
                 disabled
-                type="text"
-                placeholder="23:59"
-                value="${(x) => x.document.timeTo}"
-                ${ref('timeTo')}
+                type="number"
+                min="0"
+                placeholder="00"
+                value="${(x) => x.document.timeFrom}"
+                ${ref('timeFromMinutes')}
               >
-                <span slot="label">До</span>
+                <span slot="label">От (мин.)</span>
+              </ppp-text-field>
+            </div>
+            <div class="row">
+              <ppp-text-field
+                disabled
+                type="number"
+                placeholder="23"
+                value="${(x) => x.document.timeTo}"
+                ${ref('timeToHours')}
+              >
+                <span slot="label">До (ч.)</span>
+              </ppp-text-field>
+              <ppp-text-field
+                disabled
+                type="number"
+                placeholder="59"
+                value="${(x) => x.document.timeTo}"
+                ${ref('timeToMinutes')}
+              >
+                <span slot="label">До (мин.)</span>
               </ppp-text-field>
             </div>
           </div>
@@ -221,30 +224,18 @@ export const orderStopLossTakeProfitTemplate = html`
 
 export const orderStopLossTakeProfitStyles = css`
   ${pageStyles}
+
+  .settings-grid ppp-text-field {
+    width: 64px;
+  }
 `;
 
 export class OrderStopLossTakeProfitPage extends Page {
   collection = 'orders';
 
-  async #validateDistanceField(field) {
-    if (field.value) {
-      await validate(field, {
-        hook: async (value) =>
-          typeof parseDistance(value).value !== 'undefined',
-        errorMessage: 'Это значение недопустимо'
-      });
-
-      await validate(field, {
-        hook: async (value) => parseDistance(value).value > 0,
-        errorMessage: 'Значение должно быть положительным'
-      });
-    }
-  }
-
   async validate() {
     await validate(this.name);
-    await this.#validateDistanceField(this.limitPriceDistance);
-    await this.#validateDistanceField(this.trailingStopDistance);
+    await validateDistanceElement(this.limitPriceDistance);
   }
 
   async read() {
@@ -287,6 +278,10 @@ export class OrderStopLossTakeProfitPage extends Page {
       watchPrices.push(TRADER_DATUM.BEST_ASK);
     }
 
+    if (this.midpointWatchFlag.checked) {
+      watchPrices.push(TRADER_DATUM.MIDPOINT);
+    }
+
     if (!watchPrices.length) {
       watchPrices.push(TRADER_DATUM.LAST_PRICE);
     }
@@ -304,14 +299,20 @@ export class OrderStopLossTakeProfitPage extends Page {
       updatedAt: new Date()
     };
 
-    if ($set.orderType === 'stop-loss') {
-      $set.trailingStopDistance = distanceToString(
-        parseDistance(this.trailingStopDistance.value)
-      );
+    const timeDelay = stringToFloat(this.timeDelay.value);
+
+    if (!timeDelay || isNaN(timeDelay)) {
+      $set.timeDelay = void 0;
     } else {
-      $set.takeProfitCorrection = distanceToString(
-        parseDistance(this.takeProfitCorrection.value)
-      );
+      $set.timeDelay = Math.trunc(Math.abs(timeDelay));
+    }
+
+    if ($set.timeDelay < 1) {
+      $set.timeDelay = void 0;
+    }
+
+    if ($set.timeDelay > 3600) {
+      $set.timeDelay = 3600;
     }
 
     return {

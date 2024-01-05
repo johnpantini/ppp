@@ -140,7 +140,7 @@ export const buttonStyles = css`
   }
 
   :host(.xsmall) .control {
-    height: 22px;
+    height: 20px;
     text-transform: uppercase;
     font-size: calc(${fontSizeBody1} - 1px);
     line-height: 1em;

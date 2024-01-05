@@ -42,6 +42,9 @@ const DEFAULT_COLUMNS = [
     source: COLUMN_SOURCE.SYMBOL
   },
   {
+    source: COLUMN_SOURCE.INSTRUMENT_TYPE
+  },
+  {
     source: COLUMN_SOURCE.POSITION_AVAILABLE
   },
   {
@@ -64,9 +67,6 @@ const DEFAULT_COLUMNS = [
 
 const portfolioSection = ({ title, section }) =>
   html`
-    <tr class="table-group" ?hidden="${(x) => !x?.[section].length}">
-      <td colspan="1">${title}</td>
-    </tr>
     ${repeat(
       (x) => x?.[section],
       html`
@@ -127,35 +127,6 @@ export const portfolioWidgetTemplate = html`
               </th>
             </tr>
           </thead>
-          <tbody @click="${(x, c) => x.handleBalancesTableClick(c)}">
-            <tr class="table-group" ?hidden="${(x) => !x?.balances.length}">
-              <td colspan="1">Валютные балансы</td>
-            </tr>
-            ${repeat(
-              (x) => x?.balances ?? [],
-              html`
-                <tr class="row balance-row">
-                  ${repeat(
-                    (instrument, c) => c.parent.columns?.array,
-                    html`
-                      <td
-                        class="cell"
-                        :payload="${(x, c) => c.parent}"
-                        :column="${(x) => x}"
-                      >
-                        ${(x, c) =>
-                          c.parentContext.parent.columns.columnElement(
-                            x,
-                            // Balance currency.
-                            c.parent.symbol
-                          )}
-                      </td>
-                    `
-                  )}
-                </tr>
-              `
-            )}
-          </tbody>
           <tbody @click="${(x, c) => x.handlePortfolioTableClick(c)}">
             ${portfolioSection({ title: 'Акции', section: 'stocks' })}
             ${portfolioSection({ title: 'Фонды', section: 'etfs' })}
@@ -165,7 +136,6 @@ export const portfolioWidgetTemplate = html`
         </table>
         ${when(
           (x) =>
-            !x?.balances?.length &&
             !x?.stocks?.length &&
             !x?.bonds?.length &&
             !x?.futures?.length &&
@@ -254,9 +224,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
   position;
 
   @observable
-  balances;
-
-  @observable
   stocks;
 
   @observable
@@ -274,7 +241,6 @@ export class PortfolioWidget extends WidgetWithInstrument {
   constructor() {
     super();
 
-    this.balances = [];
     this.stocks = [];
     this.etfs = [];
     this.bonds = [];
@@ -291,13 +257,12 @@ export class PortfolioWidget extends WidgetWithInstrument {
 
     if (!this.document.portfolioTrader) {
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер портфеля.',
+        text: 'Отсутствует портфельный трейдер.',
         keep: true
       });
     }
 
     try {
-      this.balancesMap = new Map();
       this.stocksMap = new Map();
       this.etfsMap = new Map();
       this.bondsMap = new Map();
@@ -336,18 +301,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
       });
     }
 
-    super.disconnectedCallback();
-  }
-
-  handleBalancesTableClick({ event }) {
-    const button = event
-      .composedPath()
-      .find((n) => n.tagName?.toLowerCase?.() === 'ppp-button');
-
-    if (button) {
-      button.setAttribute('hidden', '');
-      button.nextElementSibling.removeAttribute('hidden', '');
-    }
+    return super.disconnectedCallback();
   }
 
   async handlePortfolioTableClick({ event }) {
@@ -362,7 +316,7 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   portfolioMapToArray(map) {
-    if (!map || !map.size) {
+    if (!map?.size) {
       return [];
     }
 
@@ -385,18 +339,8 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   positionChanged(oldValue, newValue) {
-    if (newValue) {
-      if (newValue.isBalance) {
-        const existing = this.balancesMap.get(newValue.symbol);
-
-        if (!this.#arePositionsEqual(existing, newValue)) {
-          if (newValue.size !== 0)
-            this.balancesMap.set(newValue.symbol, newValue);
-          else this.balancesMap.delete(newValue.symbol);
-
-          this.balances = this.portfolioMapToArray(this.balancesMap);
-        }
-      } else if (!newValue.instrument?.type) {
+    if (newValue && !newValue.isBalance) {
+      if (!newValue.instrument?.type) {
         const existing = this.zombiesMap.get(newValue.symbol);
 
         if (!this.#arePositionsEqual(existing, newValue)) {
@@ -459,7 +403,7 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="integrations-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер позиций портфеля</h5>
+              <h5>Портфельный трейдер</h5>
               <p class="description">
                 Трейдер, который будет источником позиций в портфеле.
               </p>

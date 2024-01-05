@@ -55,19 +55,19 @@ export const columnStyles = css`
     font-weight: ${fontWeightWidget};
     display: flex;
     align-items: center;
+    gap: 0 8px;
     width: 100%;
     letter-spacing: 0;
   }
 
   .logo {
-    min-width: 20px;
-    min-height: 20px;
-    height: 20px;
-    width: 20px;
+    min-width: 14px;
+    min-height: 14px;
+    height: 14px;
+    width: 14px;
     padding: 2px;
     border-radius: 50%;
     background-size: 100%;
-    margin-right: 10px;
     color: ${themeConditional(paletteGrayLight1, paletteBlack)};
     background-color: ${themeConditional(paletteGrayLight2, paletteGrayBase)};
   }

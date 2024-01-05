@@ -5,7 +5,7 @@ export default function (i18n) {
       E_NO_MONGODB_CONNECTION:
         'Нет связи с базой данных. Нажмите Enter для переключения на облачную MongoDB.',
       E_BROKEN_ATLAS_REALM_LINK:
-        'Хранилище MongoDB Atlas не имеет связи с приложением MongoDB Realm',
+        'Отсутствует связь между базой данных и приложением MongoDB',
       E_OFFLINE_REALM:
         'Приложение MongoDB Realm не в сети или отключено за неактивность',
       E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT:

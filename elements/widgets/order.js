@@ -2148,9 +2148,28 @@ export class OrderWidget extends WidgetWithInstrument {
           displaySize
         });
       } else if (this.orderTypeTabs?.activeid === 'conditional') {
-        return this.notificationsArea.note({
-          text: 'Условные заявки не поддерживаются трейдером.'
-        });
+        await this.conditionalOrderHolder?.firstElementChild?.validate?.();
+
+        const type = this.conditionalOrder?.order?.type;
+        let implUrl = `${ppp.rootUrl}/lib/orders/stop-loss-take-profit/impl.js`;
+
+        if (
+          type === ORDERS.CUSTOM &&
+          typeof payload.order.baseUrl === 'string'
+        ) {
+          implUrl = `${payload.order.baseUrl}/impl.js`;
+        }
+
+        if (this.ordersTrader.document.runtime === 'aspirant-worker') {
+          // TODO - AW.
+        } else {
+          await this.ordersTrader.placeConditionalOrder({
+            instrument: this.instrument,
+            direction,
+            payload: this.conditionalOrder,
+            implUrl
+          });
+        }
       }
 
       return this.notificationsArea.success({
@@ -2161,7 +2180,11 @@ export class OrderWidget extends WidgetWithInstrument {
 
       return this.notificationsArea.error({
         title: 'Заявка не выставлена',
-        text: await this.ordersTrader?.formatError?.(this.instrument, e)
+        text: await this.ordersTrader?.formatError?.(
+          this.instrument,
+          e,
+          e.message
+        )
       });
     } finally {
       this.topLoader.stop();
@@ -2776,7 +2799,7 @@ export async function widgetDefinition() {
               :list="${(x) =>
                 x.document.conditionalOrders ?? DEFAULT_CONDITIONAL_ORDERS}"
               :orders="${(x) => x.document.orders}"
-              :services="${(x) => x.document.services}"
+              :traders="${(x) => x.document.traders}"
             ></ppp-widget-order-list>
           </div>
         </ppp-tab-panel>

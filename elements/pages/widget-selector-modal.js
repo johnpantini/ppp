@@ -124,10 +124,16 @@ export const widgetSelectorModalPageTemplate = html`
                   <span>Портфель</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
+                  slug="balances"
+                  ?active="${(x) => x.activeItem === 'balances'}"
+                >
+                  <span>Балансы</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
                   slug="list"
                   ?active="${(x) => x.activeItem === 'list'}"
                 >
-                  <span>Список/таблица</span>
+                  <span>Список</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="timeline"

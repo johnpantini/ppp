@@ -74,18 +74,6 @@ export const widgetColumnListItemTemplate = html`
           `
         )}
         ${when(
-          (x) => x.source?.value === COLUMN_SOURCE.POSITION_AVAILABLE,
-          html`
-            <ppp-checkbox
-              ${ref('hideBalances')}
-              value="${(x) => x.column.hideBalances}"
-              ?checked="${(x) => x.column.hideBalances}"
-            >
-              Скрывать валютные балансы
-            </ppp-checkbox>
-          `
-        )}
-        ${when(
           (x) =>
             x.source?.value === COLUMN_SOURCE.LAST_PRICE ||
             x.source?.value === COLUMN_SOURCE.EXTENDED_LAST_PRICE,
@@ -188,10 +176,6 @@ export class WidgetColumnListItem extends PPPElement {
     value.traderId = this.traderId.value;
     value.extraTraderId = this.extraTraderId.value;
 
-    if (value.source === COLUMN_SOURCE.POSITION_AVAILABLE) {
-      value.hideBalances = this.hideBalances.checked;
-    }
-
     if (value.source === COLUMN_SOURCE.FORMATTED_VALUE) {
       value.valueKey = this.valueKey.value.trim();
     }
@@ -224,6 +208,7 @@ export const widgetColumnListTemplate = html`
               :mainTraderColumns="${(x, c) =>
                 c.parent.mainTraderColumns ?? [
                   COLUMN_SOURCE.INSTRUMENT,
+                  COLUMN_SOURCE.INSTRUMENT_TYPE,
                   COLUMN_SOURCE.SYMBOL,
                   COLUMN_SOURCE.POSITION_AVAILABLE,
                   COLUMN_SOURCE.POSITION_AVERAGE

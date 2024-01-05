@@ -1,6 +1,6 @@
 /** @decorator */
 
-import { html, repeat, observable, ref } from '../vendor/fast-element.min.js';
+import { html, repeat, ref } from '../vendor/fast-element.min.js';
 import { validate } from '../lib/ppp-errors.js';
 import {
   ClonableList,
@@ -9,6 +9,7 @@ import {
   dragControlsTemplate
 } from './clonable-list.js';
 import './draggable-stack.js';
+import './query-select.js';
 
 export const widgetOrderListTemplate = html`
   <template>
@@ -27,9 +28,59 @@ export const widgetOrderListTemplate = html`
                 style="width: 200px;"
                 standalone
                 ?disabled="${(x) => x.hidden}"
-                placeholder="${(order) => order.name || 'Введите имя'}"
+                placeholder="Название"
                 value="${(order) => order.name}"
               ></ppp-text-field>
+              <ppp-query-select
+                trader1-id
+                deselectable
+                standalone
+                ?disabled="${(x) => x.hidden}"
+                value="${(order) => order.trader1Id}"
+                :preloaded="${(x, c) => {
+                  return c.parent?.traders?.find((t) => t._id === x.trader1Id);
+                }}"
+                placeholder="Трейдер #1"
+                variant="compact"
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({ removed: { $ne: true } })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-query-select
+                trader3-id
+                deselectable
+                standalone
+                ?disabled="${(x) => x.hidden}"
+                value="${(order) => order.trader3Id}"
+                :preloaded="${(x, c) => {
+                  return c.parent?.traders?.find((t) => t._id === x.trader3Id);
+                }}"
+                placeholder="Трейдер #3"
+                variant="compact"
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({ removed: { $ne: true } })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+            </div>
+            <div class="control-stack">
               <ppp-query-select
                 order-id
                 deselectable
@@ -54,6 +105,54 @@ export const widgetOrderListTemplate = html`
                 }}"
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
+              <ppp-query-select
+                trader2-id
+                deselectable
+                standalone
+                ?disabled="${(x) => x.hidden}"
+                value="${(order) => order.trader2Id}"
+                :preloaded="${(x, c) => {
+                  return c.parent?.traders?.find((t) => t._id === x.trader2Id);
+                }}"
+                placeholder="Трейдер #2"
+                variant="compact"
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({ removed: { $ne: true } })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-query-select
+                trader4-id
+                deselectable
+                standalone
+                ?disabled="${(x) => x.hidden}"
+                value="${(order) => order.trader4Id}"
+                :preloaded="${(x, c) => {
+                  return c.parent?.traders?.find((t) => t._id === x.trader4Id);
+                }}"
+                placeholder="Трейдер #4"
+                variant="compact"
+                :context="${(x) => x}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({ removed: { $ne: true } })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
             </div>
           </div>
         `
@@ -63,23 +162,18 @@ export const widgetOrderListTemplate = html`
 `;
 
 export class WidgetOrderList extends ClonableList {
-  @observable
-  services;
-
-  constructor() {
-    super();
-
-    this.services = [];
-  }
-
   async validate() {
     for (const field of Array.from(
-      this.dragList.querySelectorAll('ppp-text-field')
+      this.dragList.querySelectorAll('[order-name]')
     )) {
       await validate(field);
+    }
 
-      if (!field.nextElementSibling.hasAttribute('disabled')) {
-        await validate(field.nextElementSibling);
+    for (const field of Array.from(
+      this.dragList.querySelectorAll('[order-id]')
+    )) {
+      if (!field.hasAttribute('disabled')) {
+        await validate(field);
       }
     }
   }
@@ -93,6 +187,10 @@ export class WidgetOrderList extends ClonableList {
       orders.push({
         name: line.querySelector('[order-name]').value,
         orderId: line.querySelector('[order-id]').value,
+        trader1Id: line.querySelector('[trader1-id]').value,
+        trader2Id: line.querySelector('[trader2-id]').value,
+        trader3Id: line.querySelector('[trader3-id]').value,
+        trader4Id: line.querySelector('[trader4-id]').value,
         hidden: !line.querySelector('[visibility-toggle]').checked
       });
     }

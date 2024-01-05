@@ -1,7 +1,6 @@
+import { observable, Observable } from '../lib/fast/observable.js';
+import { Updates } from '../lib/fast/update-queue.js';
 import {
-  observable,
-  Observable,
-  Updates,
   ElementStyles,
   htmlDirective,
   cssDirective,
@@ -9,10 +8,7 @@ import {
   SubscriberSet
 } from '../vendor/fast-element.min.js';
 
-import {
-  composedParent,
-  composedContains
-} from '../vendor/fast-utilities.js';
+import { composedParent, composedContains } from '../vendor/fast-utilities.js';
 
 const __decorate = function (decorators, target, key, desc) {
   let c = arguments.length,

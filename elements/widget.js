@@ -262,9 +262,9 @@ export const widgetStackSelectorTemplate = () => html`
   </div>
 `;
 
-export const widgetEmptyStateTemplate = (text) => `
+export const widgetEmptyStateTemplate = (text, options = {}) => `
   <div class="widget-empty-state-holder">
-    ${emptyWidgetState}
+    ${options.hideGlyph ? '' : emptyWidgetState}
     <span>${text}</span>
   </div>`;
 
@@ -401,9 +401,9 @@ export const widgetTableStyles = () => css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
     font-size: ${fontSizeWidget};
     line-height: ${lineHeightWidget};
-    white-space: nowrap;
     position: relative;
     vertical-align: middle;
+    ${ellipsis()};
   }
 
   .widget-table .cell ppp-button {

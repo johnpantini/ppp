@@ -1,6 +1,11 @@
 /** @decorator */
 
-import { html, observable, when } from '../../../vendor/fast-element.min.js';
+import {
+  html,
+  observable,
+  when,
+  ref
+} from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { formatAmount, formatQuantity } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
@@ -12,7 +17,15 @@ export const columnTemplate = html`
     ${when(
       (x) => x.isBalance,
       html`
-        <ppp-button class="xsmall" ?hidden="${(x) => !x.column?.hideBalances}">
+        <ppp-button
+          ${ref('hideButton')}
+          class="xsmall"
+          ?hidden="${(x) => !x.column?.hideBalances}"
+          @click="${(x) => {
+            x.hideButton.setAttribute('hidden', '');
+            x.hideButton.nextElementSibling.removeAttribute('hidden', '');
+          }}"
+        >
           Скрыто
         </ppp-button>
         <span class="balance-cell" ?hidden="${(x) => x.column?.hideBalances}">

@@ -648,9 +648,9 @@ export async function widgetDefinition() {
           >
             <ppp-radio value="instruments">Инструменты</ppp-radio>
             <ppp-radio value="mru">Недавние инструменты</ppp-radio>
-            <ppp-radio disabled value="intraday-stats"
-              >Статистика внутри дня</ppp-radio
-            >
+            <ppp-radio disabled value="intraday-stats">
+              Статистика внутри дня
+            </ppp-radio>
             <ppp-radio value="url">По ссылке</ppp-radio>
           </ppp-radio-group>
           <ppp-text-field

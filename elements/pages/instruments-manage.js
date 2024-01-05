@@ -41,7 +41,7 @@ export const dictionarySelectorTemplate = () => html`
     ${ref('dictionary')}
   >
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.BINANCE}">
-      Binance
+      Binance (спот)
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_LINEAR}">
       Bybit (деривативы)
