@@ -1679,20 +1679,17 @@ export class OrderWidget extends WidgetWithInstrument {
       this.document.cancelAllOrdersShortcut &&
       event.code === this.document.cancelAllOrdersShortcut
     ) {
-      if (typeof this.ordersTrader?.cancelAllLimitOrders !== 'function') {
-        return this.notificationsArea.error({
-          text: 'Трейдер не поддерживает отмену всех заявок.'
-        });
-      }
-
       this.topLoader.start();
 
       try {
-        await this.ordersTrader?.cancelAllLimitOrders?.({
+        await this.ordersTrader?.cancelAllRealOrders?.({
+          instrument: this.instrument
+        });
+        await this.ordersTrader?.cancelAllConditionalOrders?.({
           instrument: this.instrument
         });
 
-        this.notificationsArea.success({
+        this.notificationsArea.note({
           title: 'Заявки отменены'
         });
       } catch (e) {

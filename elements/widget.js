@@ -469,6 +469,29 @@ export const widgetCommonContentStyles = () => css`
     color: ${themeConditional(paletteYellowDark2, paletteYellowLight2)};
   }
 
+  .ocean {
+    color: ${themeConditional(paletteBlueDark2, paletteBlueLight2)};
+  }
+
+  .dot-line {
+    align-items: center;
+    justify-content: right;
+  }
+
+  .dot-divider-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0px ${spacing1};
+  }
+
+  .subtitle-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1px 0;
+  }
+
   .widget-section {
     width: 100%;
     padding: 0 10px;
@@ -604,7 +627,13 @@ export const widgetCommonContentStyles = () => css`
     vertical-align: text-bottom;
   }
 
-  .widget-action-button span svg {
+  .widget-action-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .widget-action-button span svg,
+  .widget-action-icon svg {
     width: 16px;
     height: 16px;
   }
@@ -615,13 +644,13 @@ export const widgetCommonContentStyles = () => css`
     gap: 0 ${spacing2};
   }
 
-  .dot-divider {
-    margin: 0 4px;
+  .control-line.centered {
+    align-items: center;
   }
 
   .dot {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
     position: relative;
   }
 
@@ -809,11 +838,6 @@ export const widgetStyles = () => css`
     padding: 4px 8px;
     max-width: 134px;
     white-space: nowrap;
-  }
-
-  .dot-line {
-    align-items: center;
-    justify-content: right;
   }
 `;
 

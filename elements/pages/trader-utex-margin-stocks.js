@@ -21,9 +21,7 @@ export const traderUtexMarginStocksTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      ${traderNameAndRuntimePartial({
-        sharedWorker: false
-      })}
+      ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>

@@ -49,6 +49,8 @@ import {
   paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
+  paletteYellowDark2,
+  paletteYellowLight2,
   paletteGreenBase,
   paletteGreenLight3,
   paletteRedBase,
@@ -3288,6 +3290,14 @@ export const widgetCardStyles = css`
 
   slot[name='indicator']::slotted(div.sell) {
     background: linear-gradient(90deg, ${negative} 50%, transparent 0);
+  }
+
+  slot[name='indicator']::slotted(div.earth) {
+    background: linear-gradient(
+      90deg,
+      ${themeConditional(paletteYellowDark2, paletteYellowLight2)} 50%,
+      transparent 0
+    );
   }
 
   .actions {

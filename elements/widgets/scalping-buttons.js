@@ -31,13 +31,13 @@ const defaultBuySideButtonsTemplate = `+1,+2,+5,+10
 const defaultSellSideButtonsTemplate = `+1,+2,+5,+10
 -1,-2,-5,-10`;
 
-const showAllTabHidden = (x) =>
+const allTabHidden = (x) =>
   typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
-const showLimitTabHidden = (x) =>
-  typeof x.document.showLimitTab === 'undefined'
+const realTabHidden = (x) =>
+  typeof x.document.showRealTab === 'undefined'
     ? false
-    : !x.document.showLimitTab;
-const showConditionalTabHidden = (x) =>
+    : !x.document.showRealTab;
+const conditionalTabHidden = (x) =>
   typeof x.document.showConditionalTab === 'undefined'
     ? false
     : !x.document.showConditionalTab;
@@ -60,9 +60,9 @@ export const scalpingButtonsWidgetTemplate = html`
               <div
                 class="tabs"
                 ?hidden="${(x) =>
-                  showAllTabHidden(x) &&
-                  showLimitTabHidden(x) &&
-                  showConditionalTabHidden(x)}"
+                  allTabHidden(x) &&
+                  realTabHidden(x) &&
+                  conditionalTabHidden(x)}"
               >
                 <ppp-widget-box-radio-group
                   class="order-type-selector"
@@ -71,19 +71,19 @@ export const scalpingButtonsWidgetTemplate = html`
                   ${ref('orderTypeSelector')}
                 >
                   <ppp-widget-box-radio
-                    ?hidden="${(x) => showAllTabHidden(x)}"
+                    ?hidden="${(x) => allTabHidden(x)}"
                     value="all"
                   >
                     Все
                   </ppp-widget-box-radio>
                   <ppp-widget-box-radio
-                    ?hidden="${(x) => showLimitTabHidden(x)}"
-                    value="limit"
+                    ?hidden="${(x) => realTabHidden(x)}"
+                    value="real"
                   >
-                    Лимитные
+                    Биржевые
                   </ppp-widget-box-radio>
                   <ppp-widget-box-radio
-                    ?hidden="${(x) => showConditionalTabHidden(x)}"
+                    ?hidden="${(x) => conditionalTabHidden(x)}"
                     value="conditional"
                     disabled
                   >
@@ -253,7 +253,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
   }
 
   async handleBuySellButtonClick({ event }, side) {
-    if (typeof this.ordersTrader?.modifyLimitOrders === 'function') {
+    if (typeof this.ordersTrader?.modifyRealOrders === 'function') {
       const button = event
         .composedPath()
         .find((n) => n.tagName?.toLowerCase?.() === 'ppp-widget-button');
@@ -272,7 +272,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
             this.topLoader.start();
             this.#buttons.forEach((b) => b.setAttribute('disabled', true));
 
-            await this.ordersTrader.modifyLimitOrders({
+            await this.ordersTrader.modifyRealOrders({
               instrument: this.instrument,
               side,
               value
@@ -298,11 +298,6 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
           }
         }
       }
-    } else {
-      return this.notificationsArea.error({
-        title: 'Скальперские кнопки',
-        text: 'Трейдер не поддерживает переставление заявок.'
-      });
     }
   }
 
@@ -326,7 +321,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
         buySideButtonsTemplate: this.container.buySideButtonsTemplate.value,
         sellSideButtonsTemplate: this.container.sellSideButtonsTemplate.value,
         showAllTab: this.container.showAllTab.checked,
-        showLimitTab: this.container.showLimitTab.checked,
+        showRealTab: this.container.showRealTab.checked,
         showConditionalTab: this.container.showConditionalTab.checked
       }
     };
@@ -458,10 +453,10 @@ export async function widgetDefinition() {
           Показывать вкладку «Все»
         </ppp-checkbox>
         <ppp-checkbox
-          ?checked="${(x) => x.document.showLimitTab ?? true}"
-          ${ref('showLimitTab')}
+          ?checked="${(x) => x.document.showRealTab ?? true}"
+          ${ref('showRealTab')}
         >
-          Показывать вкладку «Лимитные»
+          Показывать вкладку «Биржевые»
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.showConditionalTab ?? true}"
