@@ -43,9 +43,13 @@ import {
   paletteWhite,
   darken,
   themeConditional,
-  toColorComponents
+  toColorComponents,
+  lineHeightWidget,
+  fontWeightWidget,
+  positive,
+  negative
 } from '../../design/design-tokens.js';
-import { formatPriceWithoutCurrency } from '../../lib/intl.js';
+import { formatPriceWithoutCurrency, formatVolume } from '../../lib/intl.js';
 import { CandleInterval } from '../../vendor/tinkoff/definitions/market-data.js';
 import '../button.js';
 import '../query-select.js';
@@ -73,7 +77,65 @@ export const lightChartWidgetTemplate = html`
         >
           <div class="chart-holder-inner">
             <div class="toolbar"></div>
-            <div class="chart"></div>
+            <div class="chart">
+              <div
+                class="price-info-holder${(x) =>
+                  x.openPrice <= x.closePrice ? ' positive' : ' negative'}"
+                ?hidden="${(x) => !x.shouldShowPriceInfo}"
+              >
+                <div class="price-info-holder-stack">
+                  <div class="ohlcv-line">
+                    <div class="pair">
+                      <span>O</span>
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.openPrice === 'number'
+                            ? x.priceFormatter(x.openPrice)
+                            : ''}
+                      </span>
+                    </div>
+                    <div class="pair">
+                      <span>H</span>
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.highPrice === 'number'
+                            ? x.priceFormatter(x.highPrice)
+                            : ''}
+                      </span>
+                    </div>
+                    <div class="pair">
+                      <span>L</span>
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.lowPrice === 'number'
+                            ? x.priceFormatter(x.lowPrice)
+                            : ''}
+                      </span>
+                    </div>
+                    <div class="pair">
+                      <span>C</span>
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.closePrice === 'number'
+                            ? x.priceFormatter(x.closePrice)
+                            : ''}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="ohlcv-line">
+                    <div class="pair volume">
+                      <span>Volume</span>
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.volume === 'number'
+                            ? formatVolume(x.volume)
+                            : ''}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
@@ -114,6 +176,52 @@ export const lightChartWidgetStyles = css`
     border-top: 1px solid
       ${themeConditional(darken(paletteGrayLight3, 5), paletteGrayDark1)};
   }
+
+  .price-info-holder {
+    position: absolute;
+    margin: 2px 10px;
+    left: 0;
+    top: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .price-info-holder-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 4px 0;
+  }
+
+  .ohlcv-line {
+    display: flex;
+    flex-direction: row;
+    gap: 0 8px;
+  }
+
+  .ohlcv-line .pair {
+    display: flex;
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .ohlcv-line .pair.volume {
+    gap: 0 8px;
+  }
+
+  .ohlcv-line span {
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    font-weight: ${fontWeightWidget};
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+  }
+
+  .price-info-holder.positive .ohlcv {
+    color: ${positive};
+  }
+
+  .price-info-holder.negative .ohlcv {
+    color: ${negative};
+  }
 `;
 
 export class LightChartWidget extends WidgetWithInstrument {
@@ -129,7 +237,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   tradesTrader;
 
-  // Ready to receive realtime updates
+  // Ready to receive realtime updates.
   @attr({ mode: 'boolean' })
   ready;
 
@@ -145,6 +253,30 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   lastCandle;
 
+  // Previous candle for timeframe.
+  prev;
+
+  // Next candle for timeframe.
+  next;
+
+  @observable
+  openPrice;
+
+  @observable
+  highPrice;
+
+  @observable
+  lowPrice;
+
+  @observable
+  closePrice;
+
+  @observable
+  volume;
+
+  @observable
+  shouldShowPriceInfo;
+
   css(dt) {
     const value = dt.$value;
 
@@ -155,6 +287,7 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   async connectedCallback() {
     this.ready = false;
+    this.onCrosshairMove = this.onCrosshairMove.bind(this);
 
     super.connectedCallback();
 
@@ -255,6 +388,8 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
+    this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
+
     if (this.chartTrader) {
       await this.chartTrader.unsubscribeFields?.({
         source: this,
@@ -309,6 +444,25 @@ export class LightChartWidget extends WidgetWithInstrument {
     return formatPriceWithoutCurrency(price, this.instrument);
   }
 
+  onCrosshairMove(param) {
+    if (param.time) {
+      this.shouldShowPriceInfo = true;
+
+      const values = param.seriesPrices.values();
+      const [candle, volume] = values;
+
+      if (candle) {
+        this.openPrice = candle.open;
+        this.highPrice = candle.high;
+        this.lowPrice = candle.low;
+        this.closePrice = candle.close;
+        this.volume = volume;
+      }
+    } else {
+      this.shouldShowPriceInfo = false;
+    }
+  }
+
   async setupChart() {
     this.chart.applyOptions({
       timeframe: '5',
@@ -333,6 +487,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       }
     });
 
+    this.chart.subscribeCrosshairMove(this.onCrosshairMove);
     this.resizeChart();
 
     this.mainSeries = this.chart.addCandlestickSeries({
@@ -380,7 +535,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
-  // Older quotes come first
+  // Older quotes come first.
   setData(quotes) {
     this.mainSeries.setData(quotes.map(this.traderQuoteToChartQuote));
 
@@ -415,20 +570,16 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.ready = false;
 
       try {
-        // TODO
-        const to = new Date();
-        const from = new Date();
-
-        from.setUTCHours(from.getUTCHours() - 24);
-
-        this.setData(
+        const { candles, prev, next } =
           await this.chartTrader.historicalCandles({
             instrument: this.instrument,
-            interval: CandleInterval.CANDLE_INTERVAL_5_MIN,
-            from,
-            to
-          })
-        );
+            tf: CandleInterval.CANDLE_INTERVAL_5_MIN
+          });
+
+        this.prev = prev;
+        this.next = next;
+
+        this.setData(candles);
       } finally {
         this.ready = true;
 
@@ -475,7 +626,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         return;
       }
 
-      // Update the last candle here
+      // Update the last candle here.
       const time = this.roundTimestampForTimeframe(newValue.timestamp, 5);
 
       if (
@@ -493,14 +644,13 @@ export class LightChartWidget extends WidgetWithInstrument {
       } else {
         const { high, low, open, volume } = this.lastCandle;
 
-        // Do not touch volume here
         this.lastCandle = {
           open,
           high: Math.max(high, newValue.price),
           low: Math.min(low, newValue.price),
           close: newValue.price,
           time,
-          volume
+          volume: volume + newValue.volume
         };
       }
     }

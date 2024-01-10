@@ -202,6 +202,9 @@ export const traderPageTemplate = html`
               <li>
                 ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_NOII}`)}
               </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
+              </li>
             </ul>
           </div>
           <ppp-button
@@ -405,6 +408,9 @@ export const traderPageTemplate = html`
               </li>
               <li>
                 ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
               </li>
             </ul>
           </div>

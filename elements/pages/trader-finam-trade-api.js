@@ -262,7 +262,8 @@ export class TraderFinamTradeApiPage extends Page {
         TRADER_CAPS.CAPS_MARKET_ORDERS,
         TRADER_CAPS.CAPS_ACTIVE_ORDERS,
         TRADER_CAPS.CAPS_POSITIONS,
-        TRADER_CAPS.CAPS_TIMELINE
+        TRADER_CAPS.CAPS_TIMELINE,
+        TRADER_CAPS.CAPS_CHARTS
       ],
       connectorServiceId: this.connectorServiceId.value,
       connectorUrl: this.connectorUrl,
