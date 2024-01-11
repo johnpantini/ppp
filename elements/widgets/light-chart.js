@@ -288,6 +288,8 @@ export class LightChartWidget extends WidgetWithInstrument {
   async connectedCallback() {
     this.ready = false;
     this.onCrosshairMove = this.onCrosshairMove.bind(this);
+    this.onVisibleLogicalRangeChanged =
+      this.onVisibleLogicalRangeChanged.bind(this);
 
     super.connectedCallback();
 
@@ -389,6 +391,9 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   async disconnectedCallback() {
     this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
+    this.chart
+      .timeScale()
+      .unsubscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
 
     if (this.chartTrader) {
       await this.chartTrader.unsubscribeFields?.({
@@ -444,6 +449,14 @@ export class LightChartWidget extends WidgetWithInstrument {
     return formatPriceWithoutCurrency(price, this.instrument);
   }
 
+  onVisibleLogicalRangeChanged(newRange) {
+    const info = this.mainSeries.barsInLogicalRange(newRange);
+
+    if (info !== null && info.barsBefore < 50) {
+      // TODO.
+    }
+  }
+
   onCrosshairMove(param) {
     if (param.time) {
       this.shouldShowPriceInfo = true;
@@ -488,6 +501,9 @@ export class LightChartWidget extends WidgetWithInstrument {
     });
 
     this.chart.subscribeCrosshairMove(this.onCrosshairMove);
+    this.chart
+      .timeScale()
+      .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
     this.resizeChart();
 
     this.mainSeries = this.chart.addCandlestickSeries({

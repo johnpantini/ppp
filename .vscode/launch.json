@@ -10,6 +10,13 @@
       "name": "utex-alpaca",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\lib\\aspirant-worker\\utex-alpaca\\utex-alpaca.mjs"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "build-traders-and-orders",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\bin\\build-traders-and-orders.js"
     }
   ]
 }

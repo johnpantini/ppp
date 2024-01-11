@@ -77,6 +77,17 @@ export const timelineWidgetTemplate = html`
                     <div class="widget-card-holder">
                       <div class="widget-card-holder-inner">
                         <ppp-widget-card
+                          ?clickable="${(x, c) =>
+                            c.parent.document.disableInstrumentFiltering}"
+                          @click="${(x, c) => {
+                            if (c.parent.document.disableInstrumentFiltering) {
+                              c.parent.selectInstrument(
+                                x[0]?.instrument?.symbol
+                              );
+                            }
+
+                            return true;
+                          }}"
                           class="${(x, c) => c.parent.getExtraCardClasses(x)}"
                         >
                           <div
@@ -370,6 +381,10 @@ export class TimelineWidget extends WidgetWithInstrument {
   getCards(dateKey) {
     return Array.from(this.timelineMap.get(dateKey).values())
       .filter(([i]) => {
+        if (this.document.disableInstrumentFiltering) {
+          return true;
+        }
+
         if (this.instrument?.symbol) {
           return this.instrumentTrader.instrumentsAreEqual(
             i.instrument,
@@ -443,7 +458,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     if (this.emptyIndicatorMap.has(symbol)) {
       const array = this.emptyIndicatorMap.get(symbol);
 
-      if (array.indexOf(topLevelKey) === -1) {
+      if (!array.includes(topLevelKey)) {
         array.push(topLevelKey);
       }
     } else {
@@ -496,12 +511,14 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   isEmpty(dateKey) {
     if (!dateKey) {
-      if (!this.instrument?.symbol) return !this.timelineMap.size;
+      if (!this.instrument?.symbol || this.document.disableInstrumentFiltering)
+        return !this.timelineMap.size;
       else {
         return !this.emptyIndicatorMap.has(this.instrument.symbol);
       }
     } else {
-      if (!this.instrument?.symbol) return !this.timelineMap.get(dateKey).size;
+      if (!this.instrument?.symbol || this.document.disableInstrumentFiltering)
+        return !this.timelineMap.get(dateKey).size;
       else
         return !this.emptyIndicatorMap
           .get(this.instrument.symbol)
@@ -522,7 +539,9 @@ export class TimelineWidget extends WidgetWithInstrument {
       $set: {
         timelineTraderId: this.container.timelineTraderId.value,
         depth: Math.abs(this.container.depth.value),
-        highlightTrades: this.container.highlightTrades.checked
+        highlightTrades: this.container.highlightTrades.checked,
+        disableInstrumentFiltering:
+          this.container.disableInstrumentFiltering.checked
       }
     };
   }
@@ -617,6 +636,12 @@ export async function widgetDefinition() {
           ${ref('highlightTrades')}
         >
           Выделять покупки и продажи фоновым цветом
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.disableInstrumentFiltering}"
+          ${ref('disableInstrumentFiltering')}
+        >
+          Не фильтровать содержимое по выбранному инструменту
         </ppp-checkbox>
       </div>
     `
