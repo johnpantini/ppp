@@ -780,19 +780,19 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   mainBookChanged() {
-    return this.#rebuildMontage();
+    requestAnimationFrame(() => this.#rebuildMontage());
   }
 
   extraBook1Changed() {
-    return this.#rebuildMontage();
+    requestAnimationFrame(() => this.#rebuildMontage());
   }
 
   extraBook2Changed() {
-    return this.#rebuildMontage();
+    requestAnimationFrame(() => this.#rebuildMontage());
   }
 
   extraBook3Changed() {
-    return this.#rebuildMontage();
+    requestAnimationFrame(() => this.#rebuildMontage());
   }
 
   montageChanged(oldValue, newValue) {

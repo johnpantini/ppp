@@ -13,9 +13,8 @@ import {
   css,
   when,
   ref,
-  repeat,
-  observable,
-  Observable
+  attr,
+  observable
 } from '../../vendor/fast-element.min.js';
 import {
   WIDGET_TYPES,
@@ -85,50 +84,13 @@ export const timeAndSalesWidgetTemplate = html`
                 </th>
               </tr>
             </thead>
-            <tbody @click="${(x, c) => x.handleTableClick(c)}">
-              ${repeat(
-                (x) => (x.trades ?? []).slice(0, x.document.depth),
-                html`
-                  <tr
-                    class="price-line"
-                    side="${(x) => x.side}"
-                    price="${(x) => x.price}"
-                  >
-                    <td>
-                      <div class="cell">
-                        ${(x, c) =>
-                          formatPriceWithoutCurrency(
-                            x.price,
-                            c.parent.instrument,
-                            c.parent.instrument.broker === BROKERS.UTEX
-                          )}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        ${(x, c) =>
-                          formatQuantity(x.volume ?? 0, c.parent.instrument)}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">${(x) => formatDate(x.timestamp)}</div>
-                    </td>
-                    <td
-                      style="display: ${(x, c) =>
-                        c.parent.tradesTrader &&
-                        c.parent.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
-                          ? 'table-cell'
-                          : 'none'}"
-                    >
-                      <div class="cell">${(x) => x.pool}</div>
-                    </td>
-                  </tr>
-                `
-              )}
-            </tbody>
+            <tbody
+              @click="${(x, c) => x.handleTableClick(c)}"
+              ${ref('tableBody')}
+            ></tbody>
           </table>
           ${when(
-            (x) => !x.trades?.length,
+            (x) => x.empty,
             html`${html.partial(
               widgetEmptyStateTemplate('Лента сделок пуста.')
             )}`
@@ -231,14 +193,93 @@ export const timeAndSalesWidgetStyles = css`
 `;
 
 export class TimeAndSalesWidget extends WidgetWithInstrument {
+  @attr({ mode: 'boolean' })
+  empty;
+
   @observable
   tradesTrader;
 
   @observable
   print;
 
-  @observable
-  trades;
+  async printChanged(oldValue, trade) {
+    const threshold = await this.getThreshold(trade);
+
+    if (this.instrumentTrader.getSymbol(this.instrument) !== trade.symbol) {
+      return;
+    }
+
+    if (trade?.price) {
+      this.empty = false;
+
+      if (typeof threshold === 'number' && trade?.volume < threshold) {
+        return;
+      }
+
+      if (this.isWaitingForHistory) {
+        this.#rtQueue.unshift(trade);
+      } else {
+        requestAnimationFrame(() => this.#appendTrade(trade));
+      }
+    }
+  }
+
+  #appendTrade(trade) {
+    const tr = document.createElement('tr');
+
+    tr.classList.add('price-line');
+    tr.setAttribute('side', trade.side);
+    tr.setAttribute('price', trade.price);
+
+    const td1 = document.createElement('td');
+    const div1 = document.createElement('div');
+
+    div1.classList.add('cell');
+    div1.textContent = formatPriceWithoutCurrency(
+      trade.price,
+      this.instrument,
+      this.instrument.broker === BROKERS.UTEX
+    );
+
+    const td2 = document.createElement('td');
+    const div2 = document.createElement('div');
+
+    div2.classList.add('cell');
+
+    div2.textContent = formatQuantity(trade.volume ?? 0, this.instrument);
+
+    const td3 = document.createElement('td');
+    const div3 = document.createElement('div');
+
+    div3.classList.add('cell');
+
+    div3.textContent = formatDate(trade.timestamp);
+
+    td1.appendChild(div1);
+    td2.appendChild(div2);
+    td3.appendChild(div3);
+    tr.appendChild(td1);
+    tr.appendChild(td2);
+    tr.appendChild(td3);
+
+    if (this.tradesTrader && this.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)) {
+      const td4 = document.createElement('td');
+      const div4 = document.createElement('div');
+
+      div4.classList.add('cell');
+
+      div4.textContent = trade.pool;
+
+      td4.appendChild(div4);
+      tr.appendChild(td4);
+    }
+
+    this.tableBody.prepend(tr);
+
+    while (this.tableBody.childElementCount > this.document.depth) {
+      this.tableBody.lastElementChild.remove();
+    }
+  }
 
   isWaitingForHistory = false;
 
@@ -247,7 +288,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   constructor() {
     super();
 
-    this.trades = [];
+    this.empty = true;
   }
 
   async connectedCallback() {
@@ -277,6 +318,19 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     } catch (e) {
       return this.catchException(e);
     }
+  }
+
+  async disconnectedCallback() {
+    if (this.tradesTrader) {
+      await this.tradesTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
+    }
+
+    return super.disconnectedCallback();
   }
 
   handleTableClick({ event }) {
@@ -310,46 +364,13 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
   }
 
-  async printChanged(oldValue, newValue) {
-    const threshold = await this.getThreshold(newValue);
-
-    if (newValue?.price) {
-      if (typeof threshold === 'number' && newValue?.volume < threshold) {
-        return;
-      }
-
-      if (this.isWaitingForHistory) {
-        this.#rtQueue.unshift(newValue);
-      } else {
-        this.trades.unshift(newValue);
-
-        while (this.trades.length > this.document.depth) {
-          this.trades.pop();
-        }
-
-        Observable.notify(this, 'trades');
-      }
-    }
-  }
-
-  async disconnectedCallback() {
-    if (this.tradesTrader) {
-      await this.tradesTrader.unsubscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
-        }
-      });
-    }
-
-    super.disconnectedCallback();
-  }
-
   async instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
 
     this.#rtQueue = [];
-    this.trades = [];
+
+    this.tableBody?.replaceChildren();
+    this.empty = true;
 
     if (this.tradesTrader) {
       if (
@@ -384,7 +405,13 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
             this.#rtQueue = [];
           }
 
-          this.trades = trades;
+          if (trades.length) {
+            this.empty = false;
+          }
+
+          for (let i = 0; i < trades.length; i++) {
+            this.#appendTrade(trades[trades.length - i - 1]);
+          }
         } catch (e) {
           console.error(e);
 
