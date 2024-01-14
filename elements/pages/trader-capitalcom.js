@@ -1,15 +1,14 @@
 import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { invalidate, validate } from '../../lib/ppp-errors.js';
+import { validate } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -144,16 +143,15 @@ export const traderCapitalcomStyles = css`
   ${pageStyles}
 `;
 
-export class TraderCapitalcomPage extends Page {
+export class TraderCapitalcomPage extends TraderCommonPage {
   collection = 'traders';
 
+  getDefaultCaps() {
+    return [TRADER_CAPS.CAPS_LEVEL1];
+  }
+
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
     await validate(this.connectorServiceId);
 
@@ -189,20 +187,6 @@ export class TraderCapitalcomPage extends Page {
           {
             $lookup: {
               from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
-          },
-          {
-            $lookup: {
-              from: 'services',
               localField: 'connectorServiceId',
               foreignField: '_id',
               as: 'connectorService'
@@ -227,29 +211,20 @@ export class TraderCapitalcomPage extends Page {
   }
 
   async submit() {
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    const sup = await super.submit();
+
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       lastPriceMode: this.lastPriceMode.value,
-      caps: [TRADER_CAPS.CAPS_LEVEL1],
+
       connectorServiceId: this.connectorServiceId.value,
       connectorUrl: this.connectorUrl,
       version: 1,
-      type: TRADERS.CAPITALCOM,
-      updatedAt: new Date()
+      type: TRADERS.CAPITALCOM
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

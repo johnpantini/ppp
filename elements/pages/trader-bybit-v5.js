@@ -1,13 +1,12 @@
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../query-select.js';
@@ -138,7 +137,6 @@ export const traderBybitV5Template = html`
           ></ppp-text-field>
         </div>
       </section>
-
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -148,16 +146,25 @@ export const traderBybitV5Styles = css`
   ${pageStyles}
 `;
 
-export class TraderBybitV5Page extends Page {
+export class TraderBybitV5Page extends TraderCommonPage {
   collection = 'traders';
 
+  getDefaultCaps() {
+    return [
+      TRADER_CAPS.CAPS_LEVEL1,
+      TRADER_CAPS.CAPS_LIMIT_ORDERS,
+      TRADER_CAPS.CAPS_MARKET_ORDERS,
+      TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+      TRADER_CAPS.CAPS_ORDERBOOK,
+      TRADER_CAPS.CAPS_TIME_AND_SALES,
+      TRADER_CAPS.CAPS_POSITIONS,
+      TRADER_CAPS.CAPS_TIMELINE,
+      TRADER_CAPS.CAPS_CHARTS
+    ];
+  }
+
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
 
     if (this.reconnectTimeout.value.trim()) {
@@ -191,20 +198,6 @@ export class TraderBybitV5Page extends Page {
           },
           {
             $unwind: '$broker'
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
           }
         ]);
     };
@@ -219,41 +212,21 @@ export class TraderBybitV5Page extends Page {
   }
 
   async submit() {
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    const sup = await super.submit();
+
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       productLine: this.productLine.value,
       orderbookDepth: this.orderbookDepth.value,
       reconnectTimeout: this.reconnectTimeout.value
         ? Math.abs(this.reconnectTimeout.value)
         : void 0,
-      caps: [
-        TRADER_CAPS.CAPS_LEVEL1,
-        TRADER_CAPS.CAPS_LIMIT_ORDERS,
-        TRADER_CAPS.CAPS_MARKET_ORDERS,
-        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-        TRADER_CAPS.CAPS_ORDERBOOK,
-        TRADER_CAPS.CAPS_TIME_AND_SALES,
-        TRADER_CAPS.CAPS_POSITIONS,
-        TRADER_CAPS.CAPS_TIMELINE,
-        TRADER_CAPS.CAPS_CHARTS
-      ],
       version: 1,
-      type: TRADERS.BYBIT_V5,
-      updatedAt: new Date()
+      type: TRADERS.BYBIT_V5
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

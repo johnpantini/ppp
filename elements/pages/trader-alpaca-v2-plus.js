@@ -3,13 +3,12 @@ import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { ConnectionLimitExceededError } from '../../lib/ppp-errors.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { BROKERS, TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import { getAspirantBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../button.js';
@@ -25,7 +24,7 @@ export const traderAlpacaV2PlusTemplate = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      ${traderNameAndRuntimePartial()}
+      ${traderNameAndRuntimePartial({ editableCaps: true })}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
@@ -257,29 +256,64 @@ const checkConnection = async (control, login, password) => {
 };
 
 export const PSINA_CAPS = {
-  38744: [TRADER_CAPS.CAPS_US_NBBO, TRADER_CAPS.CAPS_ORDERBOOK],
-  48744: [TRADER_CAPS.CAPS_US_NBBO, TRADER_CAPS.CAPS_ORDERBOOK],
-  38643: [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW, TRADER_CAPS.CAPS_ORDERBOOK],
-  48643: [TRADER_CAPS.CAPS_NSDQ_TOTALVIEW, TRADER_CAPS.CAPS_ORDERBOOK],
-  38943: [TRADER_CAPS.CAPS_NOII],
-  48943: [TRADER_CAPS.CAPS_NOII],
+  38744: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_US_NBBO,
+    TRADER_CAPS.CAPS_ORDERBOOK
+  ],
+  48744: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_US_NBBO,
+    TRADER_CAPS.CAPS_ORDERBOOK
+  ],
+  38643: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_NSDQ_TOTALVIEW,
+    TRADER_CAPS.CAPS_ORDERBOOK
+  ],
+  48643: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_NSDQ_TOTALVIEW,
+    TRADER_CAPS.CAPS_ORDERBOOK
+  ],
+  38943: [TRADER_CAPS.CAPS_MIC, TRADER_CAPS.CAPS_NOII],
+  48943: [TRADER_CAPS.CAPS_MIC, TRADER_CAPS.CAPS_NOII],
   38844: [
+    TRADER_CAPS.CAPS_MIC,
     TRADER_CAPS.CAPS_CHARTS,
     TRADER_CAPS.CAPS_TIME_AND_SALES,
     TRADER_CAPS.CAPS_LEVEL1,
     TRADER_CAPS.CAPS_EXTENDED_LEVEL1
   ],
   48844: [
+    TRADER_CAPS.CAPS_MIC,
     TRADER_CAPS.CAPS_CHARTS,
     TRADER_CAPS.CAPS_TIME_AND_SALES,
     TRADER_CAPS.CAPS_LEVEL1,
     TRADER_CAPS.CAPS_EXTENDED_LEVEL1
   ],
-  38099: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
-  48099: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
-  38199: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
-  48199: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_ARCABOOK],
+  38099: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_ORDERBOOK,
+    TRADER_CAPS.CAPS_ARCABOOK
+  ],
+  48099: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_ORDERBOOK,
+    TRADER_CAPS.CAPS_ARCABOOK
+  ],
+  38199: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_ORDERBOOK,
+    TRADER_CAPS.CAPS_ARCABOOK
+  ],
+  48199: [
+    TRADER_CAPS.CAPS_MIC,
+    TRADER_CAPS.CAPS_ORDERBOOK,
+    TRADER_CAPS.CAPS_ARCABOOK
+  ],
   38222: [
+    TRADER_CAPS.CAPS_MIC,
     TRADER_CAPS.CAPS_ORDERBOOK,
     TRADER_CAPS.CAPS_BLUEATS,
     TRADER_CAPS.CAPS_ARCABOOK,
@@ -289,6 +323,7 @@ export const PSINA_CAPS = {
     TRADER_CAPS.CAPS_NSDQ_TOTALVIEW
   ],
   48222: [
+    TRADER_CAPS.CAPS_MIC,
     TRADER_CAPS.CAPS_ORDERBOOK,
     TRADER_CAPS.CAPS_BLUEATS,
     TRADER_CAPS.CAPS_ARCABOOK,
@@ -299,8 +334,37 @@ export const PSINA_CAPS = {
   ]
 };
 
-export class TraderAlpacaV2PlusPage extends Page {
+export class TraderAlpacaV2PlusPage extends TraderCommonPage {
   collection = 'traders';
+
+  getCaps() {
+    const brokerType = this.brokerId?.datum?.()?.type;
+
+    if (brokerType === BROKERS.PSINA) {
+      let port;
+
+      try {
+        port = parseInt(new URL(this.wsUrl.value).port);
+      } catch (e) {
+        port = null;
+      }
+
+      // Use user-provided caps for unknown ports.
+      return PSINA_CAPS[port] ?? super.getCaps();
+    } else if (brokerType === BROKERS.UTEX) {
+      return [
+        TRADER_CAPS.CAPS_MIC,
+        TRADER_CAPS.CAPS_ORDERBOOK,
+        TRADER_CAPS.CAPS_TIME_AND_SALES
+      ];
+    } else {
+      return [TRADER_CAPS.CAPS_MIC];
+    }
+  }
+
+  getDefaultCaps() {
+    return this.getCaps();
+  }
 
   async generateLink() {
     const datum = this.aspirantWorkerSelector.datum();
@@ -326,12 +390,7 @@ export class TraderAlpacaV2PlusPage extends Page {
   }
 
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
     await validate(this.wsUrl);
 
@@ -371,20 +430,6 @@ export class TraderAlpacaV2PlusPage extends Page {
           },
           {
             $unwind: '$broker'
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
           }
         ]);
     };
@@ -399,43 +444,21 @@ export class TraderAlpacaV2PlusPage extends Page {
   }
 
   async submit() {
-    const caps = [TRADER_CAPS.CAPS_MIC];
-    const brokerType = this.brokerId.datum().type;
+    const sup = await super.submit();
 
-    if (brokerType === BROKERS.PSINA) {
-      const port = parseInt(new URL(this.wsUrl.value).port);
-
-      caps.push(...PSINA_CAPS[port]);
-    } else if (brokerType === BROKERS.UTEX) {
-      caps.push(TRADER_CAPS.CAPS_ORDERBOOK);
-      caps.push(TRADER_CAPS.CAPS_TIME_AND_SALES);
-    }
-
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       wsUrl: this.wsUrl.value.trim(),
       reconnectTimeout: this.reconnectTimeout.value
         ? Math.abs(this.reconnectTimeout.value)
         : void 0,
       useLots: this.useLots.checked,
-      caps,
       version: 1,
-      type: TRADERS.ALPACA_V2_PLUS,
-      updatedAt: new Date()
+      type: TRADERS.ALPACA_V2_PLUS
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

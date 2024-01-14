@@ -145,10 +145,10 @@ uWS
       }
     ]
   },
-  pppRuntime: {
+  pppTraderRuntime: {
     env: '{}',
     envSecret: '{}',
-    url: '/lib/aspirant-worker/ppp-runtime/ppp-runtime.mjs',
+    url: '/lib/aspirant-worker/ppp-trader-runtime/ppp-trader-runtime.mjs',
     enableHttp: true,
     fileList: []
   },
@@ -679,7 +679,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   <ppp-option value="ibGateway">Шлюз TWS API</ppp-option>
                   <ppp-option value="ppf">Шлюз MongoDB Realm</ppp-option>
                   <ppp-option value="connectors">Соединители</ppp-option>
-                  <ppp-option value="pppRuntime">
+                  <ppp-option value="pppTraderRuntime">
                     Среда выполнения трейдеров
                   </ppp-option>
                   <ppp-option value="psinaUsNews">

@@ -1,7 +1,6 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
@@ -15,7 +14,7 @@ import {
 import { createClient } from '../../vendor/nice-grpc-web/client/ClientFactory.js';
 import { createChannel } from '../../vendor/nice-grpc-web/client/channel.js';
 import { Metadata } from '../../vendor/nice-grpc-web/nice-grpc-common/Metadata.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../radio-group.js';
@@ -159,16 +158,24 @@ export const traderTinkoffGrpcWebStyles = css`
   ${pageStyles}
 `;
 
-export class TraderTinkoffGrpcWebPage extends Page {
+export class TraderTinkoffGrpcWebPage extends TraderCommonPage {
   collection = 'traders';
 
+  getDefaultCaps() {
+    return [
+      TRADER_CAPS.CAPS_LIMIT_ORDERS,
+      TRADER_CAPS.CAPS_MARKET_ORDERS,
+      TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+      TRADER_CAPS.CAPS_ORDERBOOK,
+      TRADER_CAPS.CAPS_TIME_AND_SALES,
+      TRADER_CAPS.CAPS_POSITIONS,
+      TRADER_CAPS.CAPS_TIMELINE,
+      TRADER_CAPS.CAPS_CHARTS
+    ];
+  }
+
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
     await validate(this.accountSelector);
 
@@ -203,20 +210,6 @@ export class TraderTinkoffGrpcWebPage extends Page {
           },
           {
             $unwind: '$broker'
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
           }
         ]);
     };
@@ -237,9 +230,10 @@ export class TraderTinkoffGrpcWebPage extends Page {
   }
 
   async submit() {
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    const sup = await super.submit();
+
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       account: this.accountSelector.value,
       accountName: this.accountSelector.datum().name,
@@ -247,30 +241,10 @@ export class TraderTinkoffGrpcWebPage extends Page {
         ? Math.abs(this.reconnectTimeout.value)
         : void 0,
       version: 1,
-      caps: [
-        TRADER_CAPS.CAPS_LIMIT_ORDERS,
-        TRADER_CAPS.CAPS_MARKET_ORDERS,
-        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-        TRADER_CAPS.CAPS_ORDERBOOK,
-        TRADER_CAPS.CAPS_TIME_AND_SALES,
-        TRADER_CAPS.CAPS_POSITIONS,
-        TRADER_CAPS.CAPS_TIMELINE,
-        TRADER_CAPS.CAPS_CHARTS
-      ],
-      type: TRADERS.TINKOFF_GRPC_WEB,
-      updatedAt: new Date()
+      type: TRADERS.TINKOFF_GRPC_WEB
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

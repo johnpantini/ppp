@@ -1,13 +1,12 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -115,16 +114,23 @@ export const traderUtexMarginStocksStyles = css`
   ${pageStyles}
 `;
 
-export class TraderUtexMarginStocksPage extends Page {
+export class TraderUtexMarginStocksPage extends TraderCommonPage {
   collection = 'traders';
 
+  getDefaultCaps() {
+    return [
+      TRADER_CAPS.CAPS_LEVEL1,
+      TRADER_CAPS.CAPS_LIMIT_ORDERS,
+      TRADER_CAPS.CAPS_MARKET_ORDERS,
+      TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+      TRADER_CAPS.CAPS_POSITIONS,
+      TRADER_CAPS.CAPS_TIMELINE,
+      TRADER_CAPS.CAPS_CHARTS
+    ];
+  }
+
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
     await validate(this.commissionRate);
 
@@ -166,20 +172,6 @@ export class TraderUtexMarginStocksPage extends Page {
           },
           {
             $unwind: '$broker'
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
           }
         ]);
     };
@@ -194,9 +186,10 @@ export class TraderUtexMarginStocksPage extends Page {
   }
 
   async submit() {
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    const sup = await super.submit();
+
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       commissionRate: Math.abs(
         parseFloat(this.commissionRate.value.replace(',', '.'))
@@ -204,29 +197,11 @@ export class TraderUtexMarginStocksPage extends Page {
       reconnectTimeout: this.reconnectTimeout.value
         ? Math.abs(this.reconnectTimeout.value)
         : void 0,
-      caps: [
-        TRADER_CAPS.CAPS_LEVEL1,
-        TRADER_CAPS.CAPS_LIMIT_ORDERS,
-        TRADER_CAPS.CAPS_MARKET_ORDERS,
-        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-        TRADER_CAPS.CAPS_POSITIONS,
-        TRADER_CAPS.CAPS_TIMELINE
-      ],
       version: 1,
-      type: TRADERS.UTEX_MARGIN_STOCKS,
-      updatedAt: new Date()
+      type: TRADERS.UTEX_MARGIN_STOCKS
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

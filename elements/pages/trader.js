@@ -1,19 +1,93 @@
 import ppp from '../../ppp.js';
-import { html, css, ref } from '../../vendor/fast-element.min.js';
+import { html, css, ref, repeat, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { TRADERS, TRADER_CAPS } from '../../lib/const.js';
+import { validate, invalidate, ValidationError } from '../../lib/ppp-errors.js';
 import { cloudFunctions, search } from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import { designTokens } from '../../design/design-tokens.js';
 import { checkmark } from '../../static/svg/sprite.js';
+import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../button.js';
+import '../checkbox.js';
 import '../radio-group.js';
 import '../query-select.js';
 import '../text-field.js';
 
 await ppp.i18n(import.meta.url);
 
-export const traderNameAndRuntimePartial = ({ sharedWorker } = {}) => html`
+export class TraderCommonPage extends Page {
+  async connectedCallback() {
+    await super.connectedCallback();
+    this.setCaps(this.document?.caps);
+  }
+
+  getCaps() {
+    return Array.from(this.shadowRoot.querySelectorAll('[trader-cap]'))
+      .filter((c) => c.checked)
+      .map((c) => c.getAttribute('trader-cap'));
+  }
+
+  setCaps(caps = this.getDefaultCaps?.() ?? []) {
+    Array.from(this.shadowRoot.querySelectorAll('[trader-cap]')).forEach(
+      (c) => (c.checked = false)
+    );
+
+    for (const cap of caps) {
+      const checkbox = this.shadowRoot.querySelector(`[trader-cap="${cap}"]`);
+
+      checkbox && (checkbox.checked = true);
+    }
+  }
+
+  async validate() {
+    await validate(this.name);
+
+    if (this.runtime.value === 'url') {
+      await validate(this.runtimeUrl);
+
+      try {
+        const response = await fetch(new URL(this.runtimeUrl.value).toString());
+        const json = await response.json();
+
+        if (!json?.pppTraderRuntime?.ok) {
+          throw new ValidationError();
+        }
+      } catch (e) {
+        console.error(e);
+
+        invalidate(this.runtimeUrl, {
+          errorMessage: 'Этот URL не может быть использован',
+          raiseException: true
+        });
+      }
+    }
+  }
+
+  async submit() {
+    this.setCaps();
+
+    return {
+      $set: {
+        name: this.name.value.trim(),
+        runtime: this.runtime.value,
+        caps: this.getCaps(),
+        updatedAt: new Date(),
+        runtimeUrl: this.runtimeUrl.value
+          ? new URL(this.runtimeUrl.value).toString()
+          : null
+      },
+      $setOnInsert: {
+        createdAt: new Date()
+      }
+    };
+  }
+}
+
+export const traderNameAndRuntimePartial = ({
+  sharedWorker,
+  editableCaps
+} = {}) => html`
   <section>
     <div class="label-group">
       <h5>Название трейдера</h5>
@@ -47,13 +121,25 @@ export const traderNameAndRuntimePartial = ({ sharedWorker } = {}) => html`
         >
           Разделяемый поток, браузер
         </ppp-radio>
-        <ppp-radio disabled value="aspirant-worker">Aspirant Worker</ppp-radio>
+        <ppp-radio disabled value="url">По ссылке</ppp-radio>
       </ppp-radio-group>
       <div
         class="runtime-selector"
-        ?hidden="${(x) => x.runtime.value !== 'aspirant-worker'}"
+        ?hidden="${(x) => x.runtime.value !== 'url'}"
       >
         <div class="spacing2"></div>
+        <div class="input-group">
+          <ppp-text-field
+            placeholder="https://example.com"
+            value="${(x) => x.document.runtimeUrl}"
+            ${ref('runtimeUrl')}
+          ></ppp-text-field>
+        </div>
+        <div class="spacing2"></div>
+        <p class="description">
+          Cформировать ссылку по шаблону Aspirant Worker «Среда выполнения
+          трейдеров»:
+        </p>
         <ppp-query-select
           ${ref('runtimeServiceId')}
           value="${(x) => x.document.runtimeServiceId}"
@@ -70,7 +156,7 @@ export const traderNameAndRuntimePartial = ({ sharedWorker } = {}) => html`
                     {
                       type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
                     },
-                    { workerPredefinedTemplate: 'pppRuntime' },
+                    { workerPredefinedTemplate: 'pppTraderRuntime' },
                     {
                       $or: [
                         { removed: { $ne: true } },
@@ -84,7 +170,104 @@ export const traderNameAndRuntimePartial = ({ sharedWorker } = {}) => html`
           }}"
           :transform="${() => ppp.decryptDocumentsTransformation()}"
         ></ppp-query-select>
+        <div class="spacing2"></div>
+        <ppp-button
+          ?disabled="${(x) => !x.runtimeServiceId.value}"
+          appearance="primary"
+          @click="${async (x) => {
+            x.url.value = await getAspirantWorkerBaseUrl(
+              x.runtimeServiceId.datum()
+            );
+
+            return true;
+          }}"
+        >
+          Вставить ссылку по шаблону
+        </ppp-button>
       </div>
+    </div>
+  </section>
+  <section>
+    <div class="label-group">
+      <h5>Возможности трейдера</h5>
+      <p class="description">
+        Флаги, определяющие возможности трейдера как поставщика данных и
+        исполнителя торговых поручений. Значения могут быть перекрыты для
+        известных хостов или портов.
+      </p>
+      ${when(
+        () => !editableCaps,
+        html`
+          <div class="spacing2"></div>
+          <ppp-banner class="inline" appearance="warning">
+            Данный трейдер не поддерживает редактирование возможностей.
+          </ppp-banner>
+        `
+      )}
+    </div>
+    <div class="input-group">
+      <div class="control-line">
+        <div class="control-stack">
+          ${repeat(
+            [
+              TRADER_CAPS.CAPS_LIMIT_ORDERS,
+              TRADER_CAPS.CAPS_MARKET_ORDERS,
+              TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+              TRADER_CAPS.CAPS_ORDERBOOK,
+              TRADER_CAPS.CAPS_TIME_AND_SALES,
+              TRADER_CAPS.CAPS_POSITIONS,
+              TRADER_CAPS.CAPS_TIMELINE,
+              TRADER_CAPS.CAPS_LEVEL1,
+              TRADER_CAPS.CAPS_EXTENDED_LEVEL1,
+              TRADER_CAPS.CAPS_CHARTS,
+              TRADER_CAPS.CAPS_MIC
+            ],
+            html`
+              <ppp-checkbox
+                trader-cap="${(x) => x}"
+                ?disabled="${(x) => !editableCaps}"
+                ?checked="${(x, c) => c.parent.document?.caps?.includes(x)}"
+              >
+                ${(x) => ppp.t(`$const.traderCaps.${x}`)}
+              </ppp-checkbox>
+            `
+          )}
+        </div>
+        <div class="control-stack">
+          ${repeat(
+            [
+              TRADER_CAPS.CAPS_ORDER_DESTINATION,
+              TRADER_CAPS.CAPS_ORDER_TIF,
+              TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE,
+              TRADER_CAPS.CAPS_US_NBBO,
+              TRADER_CAPS.CAPS_NSDQ_TOTALVIEW,
+              TRADER_CAPS.CAPS_ARCABOOK,
+              TRADER_CAPS.CAPS_BLUEATS,
+              TRADER_CAPS.CAPS_NYSE_OPENBOOK,
+              TRADER_CAPS.CAPS_DIRECTEDGE_BOOK,
+              TRADER_CAPS.CAPS_BZX_BOOK,
+              TRADER_CAPS.CAPS_NOII
+            ],
+            html`
+              <ppp-checkbox
+                trader-cap="${(x) => x}"
+                ?disabled="${(x) => !editableCaps}"
+                ?checked="${(x, c) => c.parent.document?.caps?.includes(x)}"
+              >
+                ${(x) => ppp.t(`$const.traderCaps.${x}`)}
+              </ppp-checkbox>
+            `
+          )}
+        </div>
+      </div>
+      <div class="spacing4"></div>
+      <ppp-button
+        @click="${(x) => x.setCaps()}"
+        ?disabled="${(x) => !editableCaps}"
+        appearance="primary"
+      >
+        Восстановить значения по умолчанию
+      </ppp-button>
     </div>
   </section>
 `;
@@ -288,6 +471,9 @@ export const traderPageTemplate = html`
                 ${() =>
                   ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`) +
                   ' (NBBO)'}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
               </li>
               <li>
                 ${() =>

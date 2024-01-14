@@ -1,13 +1,12 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../badge.js';
 import '../button.js';
 import '../query-select.js';
@@ -146,16 +145,15 @@ export const traderBinanceV3Styles = css`
   ${pageStyles}
 `;
 
-export class TraderBinanceV3Page extends Page {
+export class TraderBinanceV3Page extends TraderCommonPage {
   collection = 'traders';
 
+  getDefaultCaps() {
+    return [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_TIME_AND_SALES];
+  }
+
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
     await validate(this.wsUrl);
 
@@ -240,20 +238,6 @@ export class TraderBinanceV3Page extends Page {
           },
           {
             $unwind: '$broker'
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
           }
         ]);
     };
@@ -268,9 +252,10 @@ export class TraderBinanceV3Page extends Page {
   }
 
   async submit() {
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    const sup = await super.submit();
+
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       wsUrl: this.wsUrl.value.trim(),
       showAggTrades: this.showAggTrades.value === 'agg',
@@ -278,22 +263,11 @@ export class TraderBinanceV3Page extends Page {
         ? Math.abs(this.reconnectTimeout.value)
         : void 0,
       orderbookUpdateInterval: this.orderbookUpdateInterval.value,
-      caps: [TRADER_CAPS.CAPS_ORDERBOOK, TRADER_CAPS.CAPS_TIME_AND_SALES],
       version: 1,
-      type: TRADERS.BINANCE_V3,
-      updatedAt: new Date()
+      type: TRADERS.BINANCE_V3
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

@@ -8,13 +8,12 @@ import {
   when
 } from '../../vendor/fast-element.min.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { invalidate, validate, ValidationError } from '../../lib/ppp-errors.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../button.js';
 import '../text-field.js';
 
@@ -69,7 +68,7 @@ export const traderCustomPageStyles = css`
   ${pageStyles}
 `;
 
-export class TraderCustomPage extends Page {
+export class TraderCustomPage extends TraderCommonPage {
   collection = 'traders';
 
   @observable
@@ -111,17 +110,32 @@ export class TraderCustomPage extends Page {
             this.traderPageDefinition = await module.traderPageDefinition(this);
             this.traderPageDefinition.styles.addStylesTo(this);
 
+            TraderCustomPage.prototype.getCaps =
+              this.traderPageDefinition.pageClass.prototype.getCaps;
+
+            TraderCustomPage.prototype.getDefaultCaps =
+              TraderCustomPage.prototype.getCaps;
+
             TraderCustomPage.prototype.read =
               this.traderPageDefinition.pageClass.prototype.read;
 
             TraderCustomPage.prototype.find =
               this.traderPageDefinition.pageClass.prototype.find;
 
-            TraderCustomPage.prototype.validate =
-              this.traderPageDefinition.pageClass.prototype.validate;
+            TraderCustomPage.prototype.validate = async function () {
+              await TraderCommonPage.prototype.validate.call(this);
 
-            TraderCustomPage.prototype.submit =
-              this.traderPageDefinition.pageClass.prototype.submit;
+              return this.traderPageDefinition.pageClass.prototype.validate.call(
+                this
+              );
+            };
+
+            TraderCustomPage.prototype.submit = async function () {
+              return this.traderPageDefinition.pageClass.prototype.submit.call(
+                this,
+                await TraderCommonPage.prototype.submit.call(this)
+              );
+            };
           }
         }
       } catch (e) {
@@ -138,11 +152,14 @@ export class TraderCustomPage extends Page {
   }
 
   async connectedCallback() {
-    await super.connectedCallback();
+    // Get the URL first.
+    await this.readDocument();
 
     if (this.document.url) {
-      return this.loadTraderPageDefinition(this.document.url);
+      await this.loadTraderPageDefinition(this.document.url);
     }
+
+    return super.connectedCallback();
   }
 }
 

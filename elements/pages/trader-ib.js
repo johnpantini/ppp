@@ -2,13 +2,12 @@ import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
-  Page,
   pageStyles,
   documentPageHeaderPartial,
   documentPageFooterPartial
 } from '../page.js';
 import { TRADER_CAPS, TRADERS } from '../../lib/const.js';
-import { traderNameAndRuntimePartial } from './trader.js';
+import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import { later } from '../../lib/ppp-decorators.js';
 import '../badge.js';
 import '../button.js';
@@ -93,16 +92,24 @@ export const traderIbV3Styles = css`
   ${pageStyles}
 `;
 
-export class TraderIbPage extends Page {
+export class TraderIbPage extends TraderCommonPage {
   collection = 'traders';
 
+  getDefaultCaps() {
+    return [
+      TRADER_CAPS.CAPS_LIMIT_ORDERS,
+      TRADER_CAPS.CAPS_MARKET_ORDERS,
+      TRADER_CAPS.CAPS_ACTIVE_ORDERS,
+      TRADER_CAPS.CAPS_POSITIONS,
+      TRADER_CAPS.CAPS_TIMELINE,
+      TRADER_CAPS.CAPS_ORDER_DESTINATION,
+      TRADER_CAPS.CAPS_ORDER_TIF,
+      TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE
+    ];
+  }
+
   async validate() {
-    await validate(this.name);
-
-    if (this.runtime.value === 'aspirant-worker') {
-      await validate(this.runtimeServiceId);
-    }
-
+    await super.validate();
     await validate(this.brokerId);
     await validate(this.account);
 
@@ -176,20 +183,6 @@ export class TraderIbPage extends Page {
           },
           {
             $unwind: '$broker'
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'runtimeServiceId',
-              foreignField: '_id',
-              as: 'runtimeService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$runtimeService',
-              preserveNullAndEmptyArrays: true
-            }
           }
         ]);
     };
@@ -204,36 +197,17 @@ export class TraderIbPage extends Page {
   }
 
   async submit() {
-    const $set = {
-      name: this.name.value.trim(),
-      runtime: this.runtime.value,
+    const sup = await super.submit();
+
+    sup.$set = {
+      ...sup.$set,
       brokerId: this.brokerId.value,
       account: this.account.value.trim(),
-      caps: [
-        TRADER_CAPS.CAPS_LIMIT_ORDERS,
-        TRADER_CAPS.CAPS_MARKET_ORDERS,
-        TRADER_CAPS.CAPS_ACTIVE_ORDERS,
-        TRADER_CAPS.CAPS_POSITIONS,
-        TRADER_CAPS.CAPS_TIMELINE,
-        TRADER_CAPS.CAPS_ORDER_DESTINATION,
-        TRADER_CAPS.CAPS_ORDER_TIF,
-        TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE
-      ],
       version: 1,
-      type: TRADERS.IB,
-      updatedAt: new Date()
+      type: TRADERS.IB
     };
 
-    if (this.runtime.value === 'aspirant-worker') {
-      $set.runtimeServiceId = this.runtimeServiceId.value;
-    }
-
-    return {
-      $set,
-      $setOnInsert: {
-        createdAt: new Date()
-      }
-    };
+    return sup;
   }
 }
 

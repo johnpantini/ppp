@@ -16,6 +16,7 @@ import {
   attr,
   observable
 } from '../../vendor/fast-element.min.js';
+import { Updates } from '../../lib/fast/update-queue.js';
 import {
   WIDGET_TYPES,
   TRADER_DATUM,
@@ -219,7 +220,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       if (this.isWaitingForHistory) {
         this.#rtQueue.unshift(trade);
       } else {
-        requestAnimationFrame(() => this.#appendTrade(trade));
+        Updates.enqueue(() => this.#appendTrade(trade));
       }
     }
   }
