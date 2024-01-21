@@ -150,7 +150,12 @@ uWS
     envSecret: '{}',
     url: '/lib/aspirant-worker/ppp-trader-runtime/ppp-trader-runtime.mjs',
     enableHttp: true,
-    fileList: []
+    fileList: [
+      {
+        url: '/lib/aspirant-worker/utils.mjs',
+        path: 'lib/aspirant-worker/utils.mjs'
+      }
+    ]
   },
   connectors: {
     env: '{}',

@@ -1872,7 +1872,7 @@ export const widgetNotificationsAreaStyles = css`
 
   .widget-notification-text-container {
     flex-grow: 1;
-    font-size: 12px;
+    font-size: ${fontSizeWidget};
   }
 
   .widget-notification-title {

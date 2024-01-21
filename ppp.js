@@ -181,9 +181,6 @@ class SettingsMap extends Map {
   }
 }
 
-/**
- * @typedef {Object} PPP
- */
 class PPP {
   @observable
   workspaces;

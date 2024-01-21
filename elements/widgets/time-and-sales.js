@@ -275,10 +275,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       tr.appendChild(td4);
     }
 
-    this.tableBody.prepend(tr);
+    this.tableBody?.prepend(tr);
 
-    while (this.tableBody.childElementCount > this.document.depth) {
-      this.tableBody.lastElementChild.remove();
+    while (this.tableBody?.childElementCount > this.document.depth) {
+      this.tableBody?.lastElementChild.remove();
     }
   }
 

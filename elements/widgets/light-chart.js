@@ -390,10 +390,14 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
-    this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
-    this.chart
-      .timeScale()
-      .unsubscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
+    if (this.chart) {
+      this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
+      this.chart
+        .timeScale()
+        .unsubscribeVisibleLogicalRangeChange(
+          this.onVisibleLogicalRangeChanged
+        );
+    }
 
     if (this.chartTrader) {
       await this.chartTrader.unsubscribeFields?.({

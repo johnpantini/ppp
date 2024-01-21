@@ -50,7 +50,7 @@ export class TraderCommonPage extends Page {
         const response = await fetch(new URL(this.runtimeUrl.value).toString());
         const json = await response.json();
 
-        if (!json?.pppTraderRuntime?.ok) {
+        if (!json.ok || !json.result?.env?.PPP_WORKER_ID) {
           throw new ValidationError();
         }
       } catch (e) {
@@ -64,8 +64,49 @@ export class TraderCommonPage extends Page {
     }
   }
 
+  async submitDocument(options = {}) {
+    const result = await super.submitDocument(options);
+
+    // Always initialize Aspirant Worker traders.
+    if (this.runtime.value === 'url') {
+      await ppp.getOrCreateTrader(this.document);
+    }
+
+    return result;
+  }
+
   async submit() {
+    // Enforce checked values.
     this.setCaps();
+
+    try {
+      let bailOutTimer;
+
+      await new Promise(async (resolve, reject) => {
+        bailOutTimer = setTimeout(() => {
+          reject(new Error());
+        }, 10000);
+
+        // Terminate the trader if runtime was modified.
+        if (this.document._id && this.document.runtime !== this.runtime.value) {
+          switch (this.document.runtime) {
+            case 'shared-worker':
+            case 'url':
+              const trader = await ppp.getOrCreateTrader(this.document);
+
+              trader.terminate();
+              ppp.traders.runtimes.delete(this.document._id);
+
+              clearTimeout(bailOutTimer);
+              resolve();
+          }
+        } else {
+          resolve();
+        }
+      });
+    } catch (e) {
+      ppp.traders.runtimes.delete(this.document._id);
+    }
 
     return {
       $set: {
@@ -107,6 +148,11 @@ export const traderNameAndRuntimePartial = ({
     <div class="label-group">
       <h5>Среда выполнения</h5>
       <p class="description">Выберите среду выполнения для трейдера.</p>
+      <div class="spacing2"></div>
+      <ppp-banner class="inline" appearance="warning">
+        Если изменить среду, а затем сохраниться, то старая среда выполнения
+        получит команду на остановку трейдера.
+      </ppp-banner>
     </div>
     <div class="input-group">
       <ppp-radio-group
@@ -121,7 +167,7 @@ export const traderNameAndRuntimePartial = ({
         >
           Разделяемый поток, браузер
         </ppp-radio>
-        <ppp-radio disabled value="url">По ссылке</ppp-radio>
+        <ppp-radio value="url">По ссылке</ppp-radio>
       </ppp-radio-group>
       <div
         class="runtime-selector"
@@ -175,7 +221,7 @@ export const traderNameAndRuntimePartial = ({
           ?disabled="${(x) => !x.runtimeServiceId.value}"
           appearance="primary"
           @click="${async (x) => {
-            x.url.value = await getAspirantWorkerBaseUrl(
+            x.runtimeUrl.value = await getAspirantWorkerBaseUrl(
               x.runtimeServiceId.datum()
             );
 

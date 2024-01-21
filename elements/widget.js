@@ -57,7 +57,7 @@ import {
   ConnectionError,
   ConnectionLimitExceededError,
   NoInstrumentsError,
-  SerializationError,
+  TraderTrinityError,
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
@@ -777,6 +777,7 @@ export const widgetStyles = () => css`
 
   .widget-body {
     display: flex;
+    position: relative;
     flex-direction: column;
     flex-shrink: 1;
     height: calc(100% - 30px);
@@ -1048,9 +1049,9 @@ export class Widget extends PPPElement {
         text: 'Ошибка соединения с источником данных.',
         keep: true
       });
-    } else if (e instanceof SerializationError) {
+    } else if (e instanceof TraderTrinityError) {
       return this.notificationsArea.error({
-        text: 'Ошибка сериализации.',
+        text: 'Трейдер не загружается (проверьте URL).',
         keep: true
       });
     } else {

@@ -1839,7 +1839,7 @@ export class OrderWidget extends WidgetWithInstrument {
       if (!isNaN(price) && price) {
         this.ordersTrader
           .estimate(this.instrument, price, 1)
-          .then((estimate) => {
+          .then((estimate = {}) => {
             this.marginBuyingPowerQuantity = estimate.marginBuyingPowerQuantity;
             this.marginSellingPowerQuantity =
               estimate.marginSellingPowerQuantity;
@@ -2157,8 +2157,17 @@ export class OrderWidget extends WidgetWithInstrument {
           implUrl = `${payload.order.baseUrl}/impl.js`;
         }
 
-        if (this.ordersTrader.document.runtime === 'aspirant-worker') {
-          // TODO - AW.
+        if (this.ordersTrader.document.runtime === 'url') {
+          const code = await fetch(implUrl.replace('impl.js', 'impl.min.js'), {
+            cache: 'reload'
+          }).then((r) => r.text());
+
+          await this.ordersTrader.placeConditionalOrder({
+            instrument: this.instrument,
+            direction,
+            payload: this.conditionalOrder,
+            code
+          });
         } else {
           await this.ordersTrader.placeConditionalOrder({
             instrument: this.instrument,
