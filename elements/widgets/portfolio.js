@@ -200,7 +200,6 @@ export const portfolioWidgetStyles = css`
   th > div {
     display: block;
     width: 100%;
-    positive
     text-align: right;
     overflow: hidden;
     font-weight: 500;

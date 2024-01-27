@@ -181,7 +181,7 @@ export async function listDefinition() {
               name: ppp.t(`$const.columnSource.${COLUMN_SOURCE.SYMBOL}`)
             };
           }}"
-          :mainTraderColumns="${(x) => Object.values(COLUMN_SOURCE)}"
+          :mainTraderColumns="${() => Object.values(COLUMN_SOURCE)}"
           :list="${(x) => x.document.columns ?? DEFAULT_COLUMNS}"
           :traders="${(x) => x.document.traders}"
         ></ppp-widget-column-list>

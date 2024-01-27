@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import { widgetStyles, Widget } from '../widget.js';
 import { html, css, ref, observable } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
@@ -50,14 +51,24 @@ export class ClockWidget extends Widget {
   @observable
   time;
 
+  options;
+
   constructor() {
     super();
+
+    this.rafLoop = this.rafLoop.bind(this);
   }
 
-  async connectedCallback() {
+  rafLoop() {
+    if (this.$fastController.isConnected) {
+      this.time = formatDateWithOptions(new Date(), this.options);
+    }
+  }
+
+  connectedCallback() {
     super.connectedCallback();
 
-    const options = {
+    this.options = {
       default: {
         hour: 'numeric',
         minute: 'numeric',
@@ -82,15 +93,12 @@ export class ClockWidget extends Widget {
       }
     }[this.document.headerTimeFormat ?? 'default'];
 
-    const looper = () => {
-      const now = new Date();
+    ppp.app.rafEnqueue(this.rafLoop);
+  }
 
-      this.time = formatDateWithOptions(now, options);
-
-      window.requestAnimationFrame(looper);
-    };
-
-    window.requestAnimationFrame(looper);
+  disconnectedCallback() {
+    ppp.app.rafDequeue(this.rafLoop);
+    super.disconnectedCallback();
   }
 
   async validate() {}

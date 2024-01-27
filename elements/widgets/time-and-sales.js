@@ -14,38 +14,32 @@ import {
   when,
   ref,
   attr,
+  repeat,
   observable
 } from '../../vendor/fast-element.min.js';
-import { Updates } from '../../lib/fast/update-queue.js';
-import {
-  WIDGET_TYPES,
-  TRADER_DATUM,
-  TRADER_CAPS,
-  BROKERS
-} from '../../lib/const.js';
+import { WIDGET_TYPES, TRADER_DATUM, BROKERS } from '../../lib/const.js';
 import {
   priceCurrencySymbol,
   formatQuantity,
   formatDate,
   formatPriceWithoutCurrency,
-  stringToFloat
+  stringToFloat,
+  getInstrumentPrecision,
+  formatNumber
 } from '../../lib/intl.js';
-import { ellipsis, normalize } from '../../design/styles.js';
+import { ellipsis, normalize, scrollbars } from '../../design/styles.js';
 import {
-  buy,
   fontSizeWidget,
-  paletteBlack,
   paletteGrayBase,
   paletteGrayDark1,
   paletteGrayDark4,
   paletteGrayLight1,
   paletteGrayLight2,
-  paletteWhite,
-  sell,
   themeConditional,
   toColorComponents,
   lighten,
-  lineHeightWidget
+  lineHeightWidget,
+  darken
 } from '../../design/design-tokens.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { AsyncFunction } from '../../vendor/fast-utilities.js';
@@ -53,8 +47,39 @@ import { invalidate, validate, ValidationError } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../query-select.js';
 import '../snippet.js';
+import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
+import '../widget-time-and-sales-column-list.js';
+
+await ppp.i18n(import.meta.url);
+
+const DEFAULT_COLUMNS = [
+  {
+    source: 'price',
+    width: 95
+  },
+  {
+    source: 'volume',
+    width: 64
+  },
+  {
+    source: 'amount',
+    width: 95
+  },
+  {
+    source: 'time',
+    width: 100
+  },
+  {
+    source: 'pool',
+    width: 48
+  }
+].map((column) => {
+  column.name = ppp.t(`$timeAndSalesWidget.columns.${column.source}`);
+
+  return column;
+});
 
 export const timeAndSalesWidgetTemplate = html`
   <template>
@@ -63,37 +88,50 @@ export const timeAndSalesWidgetTemplate = html`
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         ${widgetWithInstrumentBodyTemplate(html`
-          <table class="trades-table">
+          <table class="widget-table trades-table" ${ref('table')}>
             <thead>
               <tr>
-                <th>
-                  ${(x) =>
-                    x.instrument && x.document.displayCurrency
-                      ? 'Цена, ' + priceCurrencySymbol(x.instrument)
-                      : 'Цена'}
-                </th>
-                <th>Лоты</th>
-                <th>Время</th>
-                <th
-                  style="display: ${(x) =>
-                    x.tradesTrader &&
-                    x.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)
-                      ? 'table-cell'
-                      : 'none'}"
-                >
-                  MM
+                ${repeat(
+                  (x) => x.columns,
+                  html`
+                    <th
+                      source="${(x) => x.source}"
+                      style="width:${(x, c) => c.parent.getColumnWidth(x)}"
+                    >
+                      <div class="resize-handle"></div>
+                      <div>
+                        ${(x, c) => {
+                          if (x.source === 'price' || x.source === 'amount') {
+                            return `${x.name}, ${priceCurrencySymbol(
+                              c.parent.instrument
+                            )}`;
+                          }
+
+                          return x.name;
+                        }}
+                      </div>
+                    </th>
+                  `
+                )}
+                <th class="empty">
+                  <div class="resize-handle"></div>
+                  <div></div>
                 </th>
               </tr>
             </thead>
-            <tbody
-              @click="${(x, c) => x.handleTableClick(c)}"
-              ${ref('tableBody')}
-            ></tbody>
           </table>
+          <div
+            class="trades-grid-holder"
+            ?hidden="${(x) => x.empty || !x.columns?.length}"
+          >
+            <div class="trades-grid-holder-inner">
+              <div class="trades-grid" ${ref('grid')}></div>
+            </div>
+          </div>
           ${when(
-            (x) => x.empty,
+            (x) => x.empty || !x.columns?.length,
             html`${html.partial(
-              widgetEmptyStateTemplate('Лента сделок пуста.')
+              widgetEmptyStateTemplate('Нет сделок для отображения.')
             )}`
           )}
         `)}
@@ -105,67 +143,104 @@ export const timeAndSalesWidgetTemplate = html`
 `;
 
 export const timeAndSalesWidgetStyles = css`
-  ${normalize()}
-  ${widgetStyles()}
-  .trades-table {
-    text-align: left;
-    min-width: 140px;
-    width: 100%;
-    padding: 0;
-    user-select: none;
-    border-collapse: collapse;
-  }
-
-  .trades-table th {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    width: 50%;
-    height: 28px;
-    padding: 4px 8px;
-    font-weight: 500;
-    font-size: ${fontSizeWidget};
-    line-height: 20px;
-    white-space: nowrap;
-    color: ${themeConditional(
-      paletteGrayDark1,
-      lighten(paletteGrayLight1, 10)
-    )};
-    background: ${themeConditional(paletteWhite, paletteBlack)};
-  }
-
-  .trades-table th::after {
-    content: '';
+  .column-content {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    display: block;
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
-  }
-
-  .trades-table .cell {
-    padding: 2px 4px;
-    font-variant-numeric: tabular-nums;
+    top: 0;
+    min-width: max-content;
+    left: 8px;
+    right: 8px;
+    width: calc(100% - 16px);
     color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
   }
 
-  .trades-table tr[side='buy'] {
-    background-color: rgba(
-      ${toColorComponents(buy)},
-      ${ppp.darkMode ? 0.4 : 0.3}
-    );
+  :host(.highlighted-volume-enabled) .column-content.regular {
+    color: ${themeConditional(darken(paletteGrayLight1, 10))};
   }
 
-  .trades-table tr[side='sell'] {
-    background-color: rgba(
-      ${toColorComponents(sell)},
-      ${ppp.darkMode ? 0.4 : 0.3}
-    );
+  .column-content.highlighted {
+    color: ${themeConditional(paletteGrayBase, darken(paletteGrayLight2, 10))};
+    font-weight: 500;
   }
 
-  .trades-table tr:hover {
+  ${normalize()}
+  ${widgetStyles()}
+  ${scrollbars('.trades-grid-holder')}
+  .trades-table {
+    z-index: 2;
+    position: sticky;
+    top: 0;
+  }
+
+  .trades-table tr th {
+    cursor: default;
+  }
+
+  .trades-table th > div {
+    cursor: default;
+    display: block;
+    width: 100%;
+    text-align: right;
+    overflow: hidden;
+    font-weight: 500;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    ${ellipsis()};
+  }
+
+  .trades-grid-holder {
+    display: flex;
+    position: relative;
+    height: 100%;
+    user-select: none;
+  }
+
+  .trades-grid-holder-inner {
+    position: absolute;
+    inset: 0;
+  }
+
+  .trades-grid {
+    display: grid;
+    grid-template-rows: 1fr 0;
+    position: relative;
+    width: 100%;
+    min-width: fit-content;
+    font-variant-numeric: tabular-nums;
+    z-index: 0;
+  }
+
+  .column {
+    pointer-events: none;
+    word-wrap: break-word;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 20px;
+    position: relative;
+    overflow: hidden;
+    white-space: pre-wrap;
+    text-align: right;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  .rows-holder {
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    cursor: pointer;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .rows-holder > div {
+    width: 100%;
+    height: 20px;
+    border-bottom: 1px solid
+      ${themeConditional(lighten(paletteGrayLight2, 10), paletteGrayDark4)};
+  }
+
+  .rows-holder > div:hover {
     background-color: rgba(
       ${themeConditional(
         toColorComponents(paletteGrayLight2),
@@ -174,34 +249,54 @@ export const timeAndSalesWidgetStyles = css`
       0.7
     );
   }
-
-  .trades-table td {
-    width: 50%;
-    padding: 0;
-    border: none;
-    border-bottom: 1px solid
-      ${themeConditional(lighten(paletteGrayLight2, 10), paletteGrayDark4)};
-    background: transparent;
-    cursor: pointer;
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    ${ellipsis()};
-  }
-
-  .trades-table .cell:last-child {
-    margin-right: 8px;
-  }
 `;
 
 export class TimeAndSalesWidget extends WidgetWithInstrument {
+  #refs = {
+    price: {
+      hidden: true
+    },
+    volume: {
+      hidden: true
+    },
+    amount: {
+      hidden: true
+    },
+    time: {
+      hidden: true
+    },
+    pool: {
+      hidden: true
+    }
+  };
+
+  #stillGrowing;
+
+  #rowsHolder;
+
+  #trades = [];
+
+  #inflyQueue = [];
+
+  #updateNeeded = false;
+
+  #shouldCreateColumns = true;
+
+  isWaitingForHistory = false;
+
   @attr({ mode: 'boolean' })
   empty;
+
+  @observable
+  columns;
 
   @observable
   tradesTrader;
 
   @observable
   print;
+
+  highlightedVolumeThreshold = 0;
 
   async printChanged(oldValue, trade) {
     const threshold = await this.getThreshold(trade);
@@ -218,82 +313,205 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       }
 
       if (this.isWaitingForHistory) {
-        this.#rtQueue.unshift(trade);
+        this.#inflyQueue.unshift(this.formatTrade(trade));
       } else {
-        Updates.enqueue(() => this.#appendTrade(trade));
+        this.#trades.unshift(this.formatTrade(trade));
+
+        while (this.#trades.length > this.document.depth) {
+          this.#trades.pop();
+        }
+
+        this.#stillGrowing = this.#trades.length < this.document.depth + 1;
+        this.#updateNeeded = true;
       }
     }
   }
 
-  #appendTrade(trade) {
-    const tr = document.createElement('tr');
-
-    tr.classList.add('price-line');
-    tr.setAttribute('side', trade.side);
-    tr.setAttribute('price', trade.price);
-
-    const td1 = document.createElement('td');
-    const div1 = document.createElement('div');
-
-    div1.classList.add('cell');
-    div1.textContent = formatPriceWithoutCurrency(
-      trade.price,
-      this.instrument,
-      this.instrument.broker === BROKERS.UTEX
-    );
-
-    const td2 = document.createElement('td');
-    const div2 = document.createElement('div');
-
-    div2.classList.add('cell');
-
-    div2.textContent = formatQuantity(trade.volume ?? 0, this.instrument);
-
-    const td3 = document.createElement('td');
-    const div3 = document.createElement('div');
-
-    div3.classList.add('cell');
-
-    div3.textContent = formatDate(trade.timestamp);
-
-    td1.appendChild(div1);
-    td2.appendChild(div2);
-    td3.appendChild(div3);
-    tr.appendChild(td1);
-    tr.appendChild(td2);
-    tr.appendChild(td3);
-
-    if (this.tradesTrader && this.tradesTrader.hasCap(TRADER_CAPS.CAPS_MIC)) {
-      const td4 = document.createElement('td');
-      const div4 = document.createElement('div');
-
-      div4.classList.add('cell');
-
-      div4.textContent = trade.pool;
-
-      td4.appendChild(div4);
-      tr.appendChild(td4);
-    }
-
-    this.tableBody?.prepend(tr);
-
-    while (this.tableBody?.childElementCount > this.document.depth) {
-      this.tableBody?.lastElementChild.remove();
-    }
-  }
-
-  isWaitingForHistory = false;
-
-  #rtQueue = [];
-
   constructor() {
     super();
 
+    this.rafLoop = this.rafLoop.bind(this);
+    this.onRowsHolderPointerDown = this.onRowsHolderPointerDown.bind(this);
+
+    this.clear();
+  }
+
+  clear() {
+    this.#stillGrowing = void 0;
+    this.#inflyQueue = [];
+    this.#trades = [];
     this.empty = true;
+
+    if (this.grid) {
+      this.grid.style.height = '0';
+    }
+
+    if (this.#rowsHolder) {
+      this.#rowsHolder.style.height = '0';
+    }
+  }
+
+  formatTrade(trade) {
+    return {
+      rawPrice: trade.price,
+      price: formatPriceWithoutCurrency(
+        trade.price,
+        this.instrument,
+        this.instrument.broker === BROKERS.UTEX
+      ),
+      side: trade.side,
+      volume: formatQuantity(trade.volume ?? 0, this.instrument),
+      rawVolume: trade.volume,
+      amount: formatNumber(+trade.volume * +trade.price, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: Math.max(
+          2,
+          getInstrumentPrecision(this.instrument)
+        )
+      }),
+      time: formatDate(trade.timestamp),
+      pool: trade.pool
+    };
+  }
+
+  onRowsHolderPointerDown(event) {
+    const index = Array.from(this.#rowsHolder.children).indexOf(
+      event.composedPath()[0]
+    );
+
+    if (index > -1) {
+      this.broadcastPrice(this.#trades[index].rawPrice);
+    }
+  }
+
+  #createDOMColumns() {
+    if (!this.#shouldCreateColumns) {
+      return;
+    }
+
+    this.#shouldCreateColumns = false;
+
+    const layout = [];
+
+    for (const { source } of this.columns) {
+      this.#refs[source].hidden = false;
+
+      if (source === 'price' || source === 'amount') {
+        layout.push([
+          `<div class="column" source="${source}"><div class="column-content positive"></div><div class="column-content negative"></div></div>`
+        ]);
+      } else if (source === 'time' || source === 'pool') {
+        layout.push([
+          `<div class="column" source="${source}"><div class="column-content"></div></div>`
+        ]);
+      } else if (source === 'volume') {
+        layout.push([
+          `<div class="column" source="${source}"><div class="column-content regular"></div><div class="column-content highlighted"></div></div>`
+        ]);
+      }
+    }
+
+    layout.push(['<div class="column"></div>']);
+    layout.push(['<div class="rows-holder"></div>']);
+
+    this.grid.insertAdjacentHTML('beforeend', layout.join(''));
+
+    if (!this.#refs.price.hidden) {
+      this.#refs.price.positive = this.grid.querySelector(
+        'div[source="price"] div.positive'
+      );
+      this.#refs.price.negative = this.grid.querySelector(
+        'div[source="price"] div.negative'
+      );
+      this.#refs.price.th = this.table.querySelector('th[source="price"]');
+    }
+
+    if (!this.#refs.volume.hidden) {
+      this.#refs.volume.regular = this.grid.querySelector(
+        'div[source="volume"] div.regular'
+      );
+      this.#refs.volume.highlighted = this.grid.querySelector(
+        'div[source="volume"] div.highlighted'
+      );
+      this.#refs.volume.th = this.table.querySelector('th[source="volume"]');
+    }
+
+    if (!this.#refs.amount.hidden) {
+      this.#refs.amount.positive = this.grid.querySelector(
+        'div[source="amount"] div.positive'
+      );
+      this.#refs.amount.negative = this.grid.querySelector(
+        'div[source="amount"] div.negative'
+      );
+      this.#refs.amount.th = this.table.querySelector('th[source="amount"]');
+    }
+
+    if (!this.#refs.time.hidden) {
+      this.#refs.time.content = this.grid.querySelector(
+        'div[source="time"] div.column-content'
+      );
+      this.#refs.time.th = this.table.querySelector('th[source="time"]');
+    }
+
+    if (!this.#refs.pool.hidden) {
+      this.#refs.pool.content = this.grid.querySelector(
+        'div[source="pool"] div.column-content'
+      );
+      this.#refs.pool.th = this.table.querySelector('th[source="pool"]');
+    }
+
+    this.#rowsHolder = this.grid.querySelector('div.rows-holder');
+
+    let rowsLayout = '';
+
+    for (let i = 0; i < this.document.depth; i++) {
+      rowsLayout += '<div></div>';
+    }
+
+    this.#rowsHolder.insertAdjacentHTML('beforeend', rowsLayout);
+    this.#rowsHolder.addEventListener(
+      'pointerdown',
+      this.onRowsHolderPointerDown
+    );
+    this.#recalculateGridDimensions();
+  }
+
+  #recalculateGridDimensions() {
+    const values = [];
+
+    for (const { source } of this.columns) {
+      values.push(
+        this.#refs[source].th.style.width || this.getColumnWidth({ source })
+      );
+    }
+
+    values.push('1fr');
+
+    this.grid.style.gridTemplateColumns = values.join(' ');
+  }
+
+  rafLoop() {
+    if (this.$fastController.isConnected && this.#updateNeeded) {
+      this.#updateNeeded = false;
+
+      this.#repaint();
+    }
   }
 
   async connectedCallback() {
     super.connectedCallback();
+
+    this.highlightedVolumeThreshold = Math.abs(
+      stringToFloat(this.document.highlightedVolumeThreshold)
+    );
+
+    if (this.highlightedVolumeThreshold > 0) {
+      this.classList.add('highlighted-volume-enabled');
+    }
+
+    this.columns = (this.document?.columns ?? DEFAULT_COLUMNS).filter(
+      (c) => !c.hidden
+    );
 
     if (!this.document.tradesTrader) {
       return this.notificationsArea.error({
@@ -309,7 +527,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.instrumentTrader = this.tradesTrader;
 
       this.selectInstrument(this.document.symbol, { isolate: true });
-
+      ppp.app.rafEnqueue(this.rafLoop);
       await this.tradesTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
@@ -322,6 +540,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
+    ppp.app.rafDequeue(this.rafLoop);
+    this.#rowsHolder?.removeEventListener(
+      'pointerdown',
+      this.onRowsHolderPointerDown
+    );
+
     if (this.tradesTrader) {
       await this.tradesTrader.unsubscribeFields?.({
         source: this,
@@ -334,18 +558,110 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     return super.disconnectedCallback();
   }
 
-  handleTableClick({ event }) {
-    const price = parseFloat(
-      event
-        .composedPath()
-        .find((n) => n?.classList?.contains('price-line'))
-        ?.getAttribute('price')
-    );
+  #repaint() {
+    this.#createDOMColumns();
 
-    return this.broadcastPrice(price);
+    if (this.#stillGrowing || typeof this.#stillGrowing === 'undefined') {
+      this.grid.style.height = `${this.#trades.length * 20}px`;
+      this.#rowsHolder.style.height = `${this.#trades.length * 20}px`;
+    }
+
+    let positivePriceValues = '';
+    let negativePriceValues = '';
+    let regularVolumeValues = '';
+    let highlightedVolumeValues = '';
+    let positiveAmountValues = '';
+    let negativeAmountValues = '';
+    let timeValues = '';
+    let poolValues = '';
+
+    for (let i = 0; i < this.#trades.length; i++) {
+      const trade = this.#trades[i];
+
+      if (!this.#refs.price.hidden) {
+        if (trade.side === 'buy') {
+          positivePriceValues += `${trade.price}\n`;
+          negativePriceValues += '\n';
+        } else {
+          positivePriceValues += '\n';
+          negativePriceValues += `${trade.price}\n`;
+        }
+      }
+
+      if (!this.#refs.volume.hidden) {
+        if (this.highlightedVolumeThreshold > 0) {
+          if (trade.rawVolume >= this.highlightedVolumeThreshold) {
+            highlightedVolumeValues += `${trade.volume}\n`;
+            regularVolumeValues += '\n';
+          } else {
+            regularVolumeValues += `${trade.volume}\n`;
+            highlightedVolumeValues += '\n';
+          }
+        } else {
+          regularVolumeValues += `${trade.volume}\n`;
+        }
+      }
+
+      if (!this.#refs.amount.hidden) {
+        if (trade.side === 'buy') {
+          positiveAmountValues += `${trade.amount}\n`;
+          negativeAmountValues += '\n';
+        } else {
+          positiveAmountValues += '\n';
+          negativeAmountValues += `${trade.amount}\n`;
+        }
+      }
+
+      if (!this.#refs.time.hidden) {
+        timeValues += `${trade.time}\n`;
+      }
+
+      if (!this.#refs.pool.hidden) {
+        poolValues += `${trade.pool}\n`;
+      }
+    }
+
+    if (!this.#refs.price.hidden) {
+      this.#refs.price.positive.textContent = positivePriceValues;
+      this.#refs.price.negative.textContent = negativePriceValues;
+    }
+
+    if (!this.#refs.volume.hidden) {
+      this.#refs.volume.regular.textContent = regularVolumeValues;
+      this.#refs.volume.highlighted.textContent = highlightedVolumeValues;
+    }
+
+    if (!this.#refs.amount.hidden) {
+      this.#refs.amount.positive.textContent = positiveAmountValues;
+      this.#refs.amount.negative.textContent = negativeAmountValues;
+    }
+
+    if (!this.#refs.time.hidden) {
+      this.#refs.time.content.textContent = timeValues;
+    }
+
+    if (!this.#refs.pool.hidden) {
+      this.#refs.pool.content.textContent = poolValues;
+    }
   }
 
-  async getThreshold(print) {
+  getColumnWidth(column) {
+    if (typeof column.width === 'number') {
+      return `${column.width}px`;
+    } else {
+      const defaultColumn = DEFAULT_COLUMNS.find(
+        (c) => c.source === column.source
+      );
+
+      if (defaultColumn) {
+        return `${defaultColumn.width}px`;
+      } else {
+        return '100px';
+      }
+    }
+  }
+
+  async getThreshold(trade) {
     const threshold = +this.document.threshold.toString().replace(',', '.');
 
     if (!isNaN(threshold) && typeof threshold === 'number') {
@@ -355,7 +671,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         'widget',
         'print',
         await new Tmpl().render(this, this.document.threshold, {})
-      )(this, print);
+      )(this, trade);
 
       if (isNaN(evaluated) || typeof evaluated !== 'number') {
         return 0;
@@ -367,11 +683,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   async instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
-
-    this.#rtQueue = [];
-
-    this.tableBody?.replaceChildren();
-    this.empty = true;
+    this.clear();
 
     if (this.tradesTrader) {
       if (
@@ -380,38 +692,37 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         !this.unsupportedInstrument
       ) {
         try {
-          const trades = [];
-
           this.isWaitingForHistory = true;
 
           try {
-            for (const print of (await this.tradesTrader.historicalTimeAndSales(
+            for (const trade of (await this.tradesTrader.historicalTimeAndSales(
               {
                 instrument: this.instrument,
                 depth: this.document.depth
               }
             )) ?? []) {
-              const threshold = await this.getThreshold(print);
+              const threshold = await this.getThreshold(trade);
 
-              if (typeof threshold === 'number' && print.volume >= threshold) {
-                trades.push(print);
+              if (typeof threshold === 'number' && trade.volume >= threshold) {
+                this.#trades.push(this.formatTrade(trade));
               }
             }
           } finally {
             this.isWaitingForHistory = false;
           }
 
-          if (this.#rtQueue.length) {
-            trades.unshift(...this.#rtQueue);
-            this.#rtQueue = [];
+          if (this.#inflyQueue.length) {
+            this.#trades.unshift(...this.#inflyQueue);
+            this.#inflyQueue = [];
           }
 
-          if (trades.length) {
+          if (this.#trades.length) {
             this.empty = false;
+            this.#updateNeeded = true;
           }
 
-          for (let i = 0; i < trades.length; i++) {
-            this.#appendTrade(trades[trades.length - i - 1]);
+          while (this.#trades.length > this.document.depth) {
+            this.#trades.pop();
           }
         } catch (e) {
           console.error(e);
@@ -426,12 +737,13 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async validate() {
+    await this.container.columnList.validate();
+
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 500,
       errorMessage: 'Введите значение в диапазоне от 1 до 500'
     });
-
     await validate(this.container.threshold);
 
     // Plain text (code) or number. Check manually.
@@ -475,12 +787,14 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async submit() {
     return {
       $set: {
+        tradesTraderId: this.container.tradesTraderId.value,
+        columns: this.container.columnList.value,
+        threshold: this.container.threshold.value,
         depth: this.container.depth.value
           ? Math.trunc(Math.abs(this.container.depth.value))
           : '',
-        tradesTraderId: this.container.tradesTraderId.value,
-        threshold: this.container.threshold.value,
-        displayCurrency: this.container.displayCurrency.checked
+        highlightedVolumeThreshold:
+          this.container.highlightedVolumeThreshold.value
       }
     };
   }
@@ -501,98 +815,132 @@ export async function widgetDefinition() {
     }).define(),
     minWidth: 140,
     minHeight: 120,
-    defaultWidth: 280,
+    defaultWidth: 320,
     settings: html`
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер ленты</h5>
-          <p class="description">
-            Трейдер, который будет источником ленты сделок.
-          </p>
-        </div>
-        <div class="control-line flex-start">
-          <ppp-query-select
-            ${ref('tradesTraderId')}
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.tradesTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.tradesTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.tradesTraderId ?? ''%]` }
+      <ppp-tabs activeid="main">
+        <ppp-tab id="main">Подключения</ppp-tab>
+        <ppp-tab id="columns">Столбцы</ppp-tab>
+        <ppp-tab id="filter">Фильтр</ppp-tab>
+        <ppp-tab id="ui">UI</ppp-tab>
+        <ppp-tab-panel id="main-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер ленты</h5>
+              <p class="description">
+                Трейдер, который будет источником ленты сделок.
+              </p>
+            </div>
+            <div class="control-line flex-start">
+              <ppp-query-select
+                ${ref('tradesTraderId')}
+                deselectable
+                standalone
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.tradesTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.tradesTrader ?? ''}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.tradesTraderId ?? ''%]` }
+                            ]
+                          }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Количество сделок для отображения</h5>
-          <p class="description">
-            Максимальное количество сделок, отображаемое в ленте.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-text-field
-            type="number"
-            placeholder="100"
-            value="${(x) => x.document.depth ?? 100}"
-            ${ref('depth')}
-          ></ppp-text-field>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Фильтр объёма</h5>
-          <p class="description">
-            Сделки с объёмом меньше указанного не будут отображены в ленте.
-            Чтобы всегда отображать все сделки, введите 0. Можно вводить целые,
-            дробные числа или код тела функции JavaScript.
-          </p>
-        </div>
-        <div class="widget-settings-input-group">
-          <ppp-snippet
-            :code="${(x) => x.document.threshold ?? '0'}"
-            ${ref('threshold')}
-          ></ppp-snippet>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Интерфейс</h5>
-        </div>
-        <ppp-checkbox
-          ?checked="${(x) => x.document.displayCurrency}"
-          ${ref('displayCurrency')}
-        >
-          Показывать валюту в столбце "Цена"
-        </ppp-checkbox>
-      </div>
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="columns-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Столбцы таблицы сделок</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-widget-time-and-sales-column-list
+              ${ref('columnList')}
+              :stencil="${() => {
+                return {};
+              }}"
+              :list="${(x) => x.document.columns ?? DEFAULT_COLUMNS}"
+              :orders="${(x) => x.document.orders}"
+            ></ppp-widget-time-and-sales-column-list>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="filter-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Фильтр объёма</h5>
+              <p class="description">
+                Сделки с объёмом меньше указанного не будут отображены в ленте.
+                Чтобы всегда отображать все сделки, введите 0. Можно вводить
+                целые, дробные числа или код тела функции JavaScript.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-snippet
+                :code="${(x) => x.document.threshold ?? '0'}"
+                ${ref('threshold')}
+              ></ppp-snippet>
+            </div>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="ui-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Количество сделок для отображения</h5>
+              <p class="description">
+                Максимальное количество сделок, отображаемое в ленте.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                type="number"
+                placeholder="100"
+                value="${(x) => x.document.depth ?? 100}"
+                ${ref('depth')}
+              ></ppp-text-field>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Выделение сделок по объёму</h5>
+              <p class="description">
+                Будут выделяться сделки с объёмом не меньше заданного.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-text-field
+                type="number"
+                placeholder="Нет"
+                value="${(x) => x.document.highlightedVolumeThreshold ?? ''}"
+                ${ref('highlightedVolumeThreshold')}
+              ></ppp-text-field>
+            </div>
+          </div>
+        </ppp-tab-panel>
+      </ppp-tabs>
     `
   };
 }

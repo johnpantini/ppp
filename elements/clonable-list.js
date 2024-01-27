@@ -22,7 +22,7 @@ export function defaultDragEndHandler(x) {
   });
 }
 
-export const dragControlsTemplate = () => html`
+export const dragControlsTemplate = (options = {}) => html`
   <div class="control-stack" style="align-items: center;">
     <span class="drag-handle">${html.partial(drag)}</span>
     <ppp-checkbox
@@ -35,6 +35,7 @@ export const dragControlsTemplate = () => html`
     ></ppp-checkbox>
     <span
       class="line-control-icon add"
+      ?hidden="${() => options.add === false}"
       @click="${(x, c) => {
         if (typeof c.parent.stencil !== 'object') {
           throw new TypeError('Stencil must be an object.');
@@ -63,7 +64,8 @@ export const dragControlsTemplate = () => html`
     </span>
     <span
       class="line-control-icon remove"
-      ?hidden="${(x, c) => c.parent.list?.length <= 1}"
+      ?hidden="${(x, c) =>
+        options.remove === false || c.parent.list?.length <= 1}"
       @click="${(x, c) => {
         const cp = c.event.composedPath();
         const dragLine = cp[0].closest('.draggable-line');

@@ -7,7 +7,7 @@ import {
   widgetWithInstrumentBodyTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
-import { debounce } from '../../lib/ppp-decorators.js';
+import { $debounce } from '../../lib/ppp-decorators.js';
 import {
   html,
   css,
@@ -1331,6 +1331,24 @@ export class OrderWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    this.calculateEstimate = $debounce(this.#calculateEstimate.bind(this), 250);
+    this.calculateCommission = $debounce(
+      this.#calculateCommission.bind(this),
+      250
+    );
+    this.saveLastPriceValueDelayed = $debounce(
+      this.#calculateEstimate.bind(this),
+      250
+    );
+    this.saveLastQuantityValue = $debounce(
+      this.#calculateEstimate.bind(this),
+      250
+    );
+    this.saveLastDisplaySizeValue = $debounce(
+      this.#calculateEstimate.bind(this),
+      250
+    );
+
     this.conditionalOrders = (this.document.conditionalOrders ?? []).filter(
       (o) => !o.hidden && o.orderId
     );
@@ -1779,8 +1797,7 @@ export class OrderWidget extends WidgetWithInstrument {
     return result;
   }
 
-  @debounce(250)
-  calculateCommission() {
+  #calculateCommission() {
     if (
       !this.unsupportedInstrument &&
       typeof this.ordersTrader?.estimate === 'function'
@@ -1808,8 +1825,7 @@ export class OrderWidget extends WidgetWithInstrument {
     }
   }
 
-  @debounce(250)
-  calculateEstimate() {
+  #calculateEstimate() {
     if (
       !this.unsupportedInstrument &&
       typeof this.ordersTrader?.estimate === 'function'
@@ -1940,6 +1956,7 @@ export class OrderWidget extends WidgetWithInstrument {
         this.price.value = formatPriceWithoutCurrency(price, this.instrument);
 
         this.calculateTotalAmount();
+        this.price.input.$emit('input');
         this.price.focus();
 
         // Locked quantity mode.
@@ -2053,13 +2070,11 @@ export class OrderWidget extends WidgetWithInstrument {
     });
   }
 
-  @debounce(250)
-  saveLastPriceValueDelayed() {
+  #saveLastPriceValueDelayed() {
     return this.saveLastPriceValue();
   }
 
-  @debounce(250)
-  saveLastQuantityValue() {
+  #saveLastQuantityValue() {
     return this.updateDocumentFragment({
       $set: {
         'widgets.$.lastQuantity': stringToFloat(this.quantity.value)
@@ -2067,8 +2082,7 @@ export class OrderWidget extends WidgetWithInstrument {
     });
   }
 
-  @debounce(250)
-  saveLastDisplaySizeValue() {
+  #saveLastDisplaySizeValue() {
     return this.updateDocumentFragment({
       $set: {
         'widgets.$.lastDisplaySize': stringToFloat(this.displaySize.value)

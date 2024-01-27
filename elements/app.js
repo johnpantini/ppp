@@ -573,6 +573,10 @@ export class App extends PPPElement {
     return this.#toast;
   }
 
+  #rafQueue = new Set();
+
+  #rafReqID;
+
   currentVersion = localStorage.getItem('ppp-version') ?? '1.0.0';
 
   lastVersion;
@@ -713,9 +717,40 @@ export class App extends PPPElement {
     ppp.settings.set('sideNavCollapsed', expanded);
   }
 
+  rafLoop() {
+    for (const fn of this.#rafQueue) {
+      fn();
+    }
+
+    if (this.#rafQueue.size) {
+      this.#rafReqID = window.requestAnimationFrame(this.rafLoop);
+    }
+  }
+
+  rafEnqueue(fn) {
+    this.#rafQueue.add(fn);
+
+    if (!this.#rafReqID) {
+      this.#rafReqID = window.requestAnimationFrame(this.rafLoop);
+    }
+  }
+
+  rafDequeue(fn) {
+    this.#rafQueue.delete(fn);
+
+    if (!this.#rafQueue.size) {
+      if (this.#rafReqID) {
+        window.cancelAnimationFrame(this.#rafReqID);
+
+        this.#rafReqID = null;
+      }
+    }
+  }
+
   constructor() {
     super();
 
+    this.rafLoop = this.rafLoop.bind(this);
     this.onDragEnd = this.onDragEnd.bind(this);
     this.#checkForAvailableUpdatesLoop();
 

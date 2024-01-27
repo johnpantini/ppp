@@ -641,6 +641,7 @@ export async function widgetDefinition() {
         </div>
         <div class="widget-settings-input-group">
           <ppp-radio-group
+            class="widget-ignore-changes"
             ?disabled="${(x) => x.setupStep.value === '2'}"
             orientation="vertical"
             value="${(x) => x.document.listType ?? 'instruments'}"

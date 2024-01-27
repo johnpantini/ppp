@@ -30,7 +30,7 @@ export const widgetColumnListItemTemplate = html`
           class="name"
           standalone
           ?disabled="${(x) => x.column.hidden}"
-          placeholder="${(x) => x.column.name || 'Введите название'}"
+          placeholder="Название"
           value="${(x) => x.column.name}"
         ></ppp-text-field>
         <ppp-query-select

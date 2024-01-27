@@ -342,7 +342,6 @@ export const widgetTableStyles = () => css`
     position: sticky;
     top: 0;
     z-index: 100;
-    width: 50%;
     height: 26px;
     padding: 2px 8px;
     white-space: nowrap;
@@ -355,7 +354,7 @@ export const widgetTableStyles = () => css`
 
   .widget-table th.empty,
   .widget-table .th.empty {
-    width: 3px;
+    width: auto;
     padding: 0;
     min-width: 3px;
   }
