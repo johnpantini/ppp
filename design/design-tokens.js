@@ -256,7 +256,7 @@ export const spacing7 = createThemed('spacing-7');
 // Side navigation
 export const sideNavCollapsedWidth = createThemed('side-nav-collapsed-width');
 export const sideNavExpandedWidth = createThemed('side-nav-expanded-width');
-// Scrollbars
+// Scrollbars.Not used since Chrome 121.
 export const scrollBarSize = createThemed('scroll-bar-size');
 // Links
 export const linkColor = fromPair('linkColor');
