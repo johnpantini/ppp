@@ -103,6 +103,37 @@ export const normalize = () => css`
 `;
 
 export const scrollbars = (selector = '') => css`
+  @supports selector(::-webkit-scrollbar) {
+    ${selector}::-webkit-scrollbar {
+      width: calc(${scrollBarSize} * 1px);
+      height: calc(${scrollBarSize} * 1px);
+    }
+    ${selector}::-webkit-scrollbar-track {
+      background-color: ${themeConditional(
+        paletteGrayLight3,
+        paletteGrayDark3
+      )};
+    }
+    ${selector}::-webkit-scrollbar-thumb {
+      background-color: rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayDark1),
+          toColorComponents(paletteGrayLight1)
+        )},
+        0.2
+      );
+    }
+    ${selector}::-webkit-scrollbar-corner {
+      background-color: rgba(
+        ${themeConditional(
+          toColorComponents(paletteGrayDark1),
+          toColorComponents(paletteGrayLight1)
+        )},
+        0.2
+      );
+    }
+  }
+
   ${selector} {
     scrollbar-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)}
       rgba(
@@ -129,6 +160,7 @@ export const scrollbars = (selector = '') => css`
 `;
 
 [
+  scrollBarSize,
   themeConditional(paletteGrayLight3, paletteGrayDark3),
   themeConditional(
     toColorComponents(paletteGrayDark1),
@@ -140,6 +172,17 @@ export const scrollbars = (selector = '') => css`
     typeof dt.$value === 'object' ? dt.$value.createCSS() : dt.$value
   );
 });
+
+if (!CSS.supports('scrollbar-width', 'thin')) {
+  scrollbars('body').addStylesTo(document.body);
+
+  css`
+    body::-webkit-scrollbar {
+      width: calc(${scrollBarSize} * 1px + 1px);
+      height: calc(${scrollBarSize} * 1px + 1px);
+    }
+  `.addStylesTo(document.body);
+}
 
 export const ellipsis = () => css.partial`
   overflow: hidden;

@@ -222,6 +222,7 @@ export const timeAndSalesWidgetStyles = css`
     text-align: right;
     user-select: none;
     cursor: pointer;
+    text-rendering: optimizeSpeed;
   }
 
   .rows-holder {

@@ -17,7 +17,7 @@ export const columnStyles = css`
   ${widgetStyles()}
   ${display('inline')}
   :host {
-    width: 100%;
+    text-rendering: optimizeSpeed;
   }
 `;
 
