@@ -595,12 +595,14 @@ export class ListWidget extends WidgetWithInstrument {
 
   async submit() {
     const submission = await this.container.granary?.submit?.(this);
+
+    // columnList is undefined when setupStep === 1.
     const columns =
       this.container.columnList?.value?.map((c, index) => {
         c.sort = this.document.columns?.[index]?.sort ?? null;
 
         return c;
-      }) ?? [];
+      }) ?? null;
 
     return {
       $set: {
