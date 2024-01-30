@@ -103,6 +103,7 @@ export const sideNavStyles = css`
   ${notDefined}
   ${normalize()}
   ${scrollbars()}
+  ${scrollbars('ul')}
   :host {
     position: relative;
     width: calc(${sideNavCollapsedWidth} * 1px);

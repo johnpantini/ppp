@@ -21,7 +21,7 @@ import { WIDGET_TYPES, TRADER_DATUM, BROKERS } from '../../lib/const.js';
 import {
   priceCurrencySymbol,
   formatQuantity,
-  formatDate,
+  formatDateWithOptions,
   formatPriceWithoutCurrency,
   stringToFloat,
   getInstrumentPrecision,
@@ -46,6 +46,7 @@ import { AsyncFunction } from '../../vendor/fast-utilities.js';
 import { invalidate, validate, ValidationError } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../query-select.js';
+import '../radio-group.js';
 import '../snippet.js';
 import '../tabs.js';
 import '../text-field.js';
@@ -299,6 +300,8 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   highlightedVolumeThreshold = 0;
 
+  timeColumnOptions;
+
   async printChanged(oldValue, trade) {
     const threshold = await this.getThreshold(trade);
 
@@ -370,7 +373,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
           getInstrumentPrecision(this.instrument)
         )
       }),
-      time: formatDate(trade.timestamp),
+      time: formatDateWithOptions(trade.timestamp, this.timeColumnOptions),
       pool: trade.pool
     };
   }
@@ -501,6 +504,31 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   async connectedCallback() {
     super.connectedCallback();
+
+    this.timeColumnOptions = {
+      default: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      },
+      'day-1': {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      },
+      compact: {
+        hour: 'numeric',
+        minute: 'numeric'
+      },
+      'day-2': {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      }
+    }[this.document.timeColumnOptions ?? 'default'];
 
     this.highlightedVolumeThreshold = Math.abs(
       stringToFloat(this.document.highlightedVolumeThreshold)
@@ -791,6 +819,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         tradesTraderId: this.container.tradesTraderId.value,
         columns: this.container.columnList.value,
         threshold: this.container.threshold.value,
+        timeColumnOptions: this.container.timeColumnOptions.value,
         depth: this.container.depth.value
           ? Math.trunc(Math.abs(this.container.depth.value))
           : '',
@@ -908,6 +937,23 @@ export async function widgetDefinition() {
           </div>
         </ppp-tab-panel>
         <ppp-tab-panel id="ui-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Формат отображения в заголовке</h5>
+            </div>
+            <div class="widget-settings-input-group">
+              <ppp-radio-group
+                orientation="vertical"
+                value="${(x) => x.document.timeColumnOptions ?? 'default'}"
+                ${ref('timeColumnOptions')}
+              >
+                <ppp-radio value="default">Часы, минуты, секунды</ppp-radio>
+                <ppp-radio value="day-1">День, часы, минуты, секунды</ppp-radio>
+                <ppp-radio value="compact">Часы, минуты</ppp-radio>
+                <ppp-radio value="day-2">День, часы, минуты</ppp-radio>
+              </ppp-radio-group>
+            </div>
+          </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Количество сделок для отображения</h5>

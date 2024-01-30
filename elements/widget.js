@@ -364,11 +364,16 @@ export const widgetTableStyles = () => css`
     position: absolute;
     width: 18px;
     height: 100%;
-    left: -9px;
+    left: -8px;
     top: 0;
     opacity: 0;
     cursor: col-resize;
     z-index: 10;
+  }
+
+  .widget-table th:first-child .resize-handle,
+  .widget-table .th:first-child .resize-handle {
+    left: 0;
   }
 
   .widget-table th .resize-handle::before,
@@ -379,6 +384,11 @@ export const widgetTableStyles = () => css`
     width: 3px;
     height: 26px;
     left: 8px;
+  }
+
+  .widget-table th:first-child .resize-handle::before,
+  .widget-table .th:first-child .resize-handle::before {
+    left: 0;
   }
 
   .widget-table th .resize-handle:hover,

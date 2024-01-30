@@ -49,7 +49,14 @@ import {
   positive,
   negative
 } from '../../design/design-tokens.js';
-import { formatPriceWithoutCurrency, formatVolume } from '../../lib/intl.js';
+import {
+  formatAbsoluteChange,
+  formatAmount,
+  formatPriceWithoutCurrency,
+  formatRelativeChange,
+  formatVolume,
+  getInstrumentPrecision
+} from '../../lib/intl.js';
 import { CandleInterval } from '../../vendor/tinkoff/definitions/market-data.js';
 import '../button.js';
 import '../query-select.js';
@@ -118,6 +125,32 @@ export const lightChartWidgetTemplate = html`
                         ${(x) =>
                           typeof x.closePrice === 'number'
                             ? x.priceFormatter(x.closePrice)
+                            : ''}
+                      </span>
+                    </div>
+                    <div class="pair">
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.absoluteChange === 'number' && x?.instrument
+                            ? formatAmount(x.absoluteChange, x.instrument, {
+                                signDisplay: 'always',
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: Math.max(
+                                  2,
+                                  getInstrumentPrecision(
+                                    x.instrument,
+                                    x.absoluteChange
+                                  )
+                                )
+                              })
+                            : ''}
+                      </span>
+                    </div>
+                    <div class="pair">
+                      <span class="ohlcv">
+                        ${(x) =>
+                          typeof x.relativeChange === 'number'
+                            ? formatRelativeChange(x.relativeChange)
                             : ''}
                       </span>
                     </div>
@@ -273,6 +306,12 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   @observable
   volume;
+
+  @observable
+  absoluteChange;
+
+  @observable
+  relativeChange;
 
   @observable
   shouldShowPriceInfo;
@@ -474,6 +513,8 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.lowPrice = candle.low;
         this.closePrice = candle.close;
         this.volume = volume;
+        this.absoluteChange = candle.close - candle.open;
+        this.relativeChange = (candle.close - candle.open) / candle.open;
       }
     } else {
       this.shouldShowPriceInfo = false;
