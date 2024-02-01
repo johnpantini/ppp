@@ -766,7 +766,14 @@ export class WorkspacePage extends Page {
 
       widgets.push(
         Object.assign(
-          {},
+          {
+            apis: this.document.apis,
+            traders: this.document.traders,
+            brokers: this.document.brokers,
+            bots: this.document.bots,
+            orders: this.document.orders,
+            services: this.document.services
+          },
           // Denormalize widget template.
           await this.denormalization.denormalize(
             this.document.denormalizedWidgets.find(

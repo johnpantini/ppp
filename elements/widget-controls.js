@@ -72,7 +72,10 @@ import {
   darken,
   lighten,
   themeConditional,
-  toColorComponents
+  toColorComponents,
+  paletteBlueDark2,
+  palettePurpleDark2,
+  palettePurpleLight2
 } from '../design/design-tokens.js';
 import {
   circleNotch,
@@ -108,7 +111,11 @@ import {
   listboxOptionStyles,
   listboxOptionTemplate
 } from './listbox-option.js';
-import { widgetEmptyStateTemplate, widgetEmptyStateStyles } from './widget.js';
+import {
+  widgetEmptyStateTemplate,
+  widgetEmptyStateStyles,
+  widgetCommonColors
+} from './widget.js';
 import { endSlotTemplate, startSlotTemplate } from '../vendor/fast-patterns.js';
 
 export const widgetGroupControlTemplate = html`
@@ -3215,6 +3222,7 @@ export const widgetCardTemplate = html`
 
 export const widgetCardStyles = css`
   ${normalize()}
+  ${widgetCommonColors()}
   :host {
     position: relative;
   }
@@ -3239,7 +3247,8 @@ export const widgetCardStyles = css`
     background-color: rgba(${toColorComponents(paletteBlueBase)}, 0.3);
   }
 
-  :host([clickable]) .card {
+  :host([clickable]) .card,
+  :host([selectable]) .card {
     cursor: pointer;
   }
 
@@ -3284,11 +3293,13 @@ export const widgetCardStyles = css`
     display: inline-block;
   }
 
-  slot[name='indicator']::slotted(div.buy) {
+  slot[name='indicator']::slotted(div.buy),
+  slot[name='indicator']::slotted(div.positive) {
     background: linear-gradient(90deg, ${positive} 50%, transparent 0);
   }
 
-  slot[name='indicator']::slotted(div.sell) {
+  slot[name='indicator']::slotted(div.sell),
+  slot[name='indicator']::slotted(div.negative) {
     background: linear-gradient(90deg, ${negative} 50%, transparent 0);
   }
 
@@ -3296,6 +3307,22 @@ export const widgetCardStyles = css`
     background: linear-gradient(
       90deg,
       ${themeConditional(paletteYellowDark2, paletteYellowLight2)} 50%,
+      transparent 0
+    );
+  }
+
+  slot[name='indicator']::slotted(div.alien) {
+    background: linear-gradient(
+      90deg,
+      ${themeConditional(palettePurpleDark2, palettePurpleLight2)} 50%,
+      transparent 0
+    );
+  }
+
+  slot[name='indicator']::slotted(div.ocean) {
+    background: linear-gradient(
+      90deg,
+      ${themeConditional(paletteBlueDark2, paletteBlueLight2)} 50%,
       transparent 0
     );
   }
@@ -3325,22 +3352,6 @@ export const widgetCardStyles = css`
         0,
       ${themeConditional(paletteGrayLight3, paletteGrayDark2)} 30%,
       ${themeConditional(paletteGrayLight3, paletteGrayDark2)}
-    );
-  }
-
-  :host([clickable]) .actions {
-    background: linear-gradient(
-      90deg,
-      rgba(
-          ${themeConditional(
-            toColorComponents(paletteGrayLight2),
-            toColorComponents(paletteGrayDark1)
-          )},
-          0
-        )
-        0,
-      ${themeConditional(paletteGrayLight2, paletteGrayDark1)} 30%,
-      ${themeConditional(paletteGrayLight2, paletteGrayDark1)}
     );
   }
 

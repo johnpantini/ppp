@@ -33,7 +33,6 @@ import {
   paletteGrayDark1,
   paletteGrayLight1,
   paletteGrayLight2,
-  spacing1,
   paletteGreenBase,
   paletteGreenLight3,
   paletteRedBase,
@@ -75,7 +74,7 @@ export const activeOrdersWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        <div class="toolbar">
+        <div class="widget-toolbar">
           <div class="tabs">
             <ppp-widget-box-radio-group
               ?hidden="${(x) =>
@@ -180,7 +179,7 @@ export const activeOrdersWidgetTemplate = html`
                       `,
                       html`
                         <ppp-widget-card
-                          ?clickable="${(x, c) =>
+                          ?selectable="${(x, c) =>
                             c.parent.document.disableInstrumentFiltering}"
                           side="${(x) => x.side}"
                           @click="${(o, c) => {
@@ -271,14 +270,6 @@ export const activeOrdersWidgetStyles = css`
   ${normalize()}
   ${widgetStyles()}
   ${spacing()}
-  .toolbar {
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-right: 8px;
-  }
-
   .tabs {
     padding: 0 8px 8px 8px;
   }

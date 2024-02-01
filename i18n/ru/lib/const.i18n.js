@@ -198,6 +198,7 @@ export default function (i18n) {
         [WIDGET_TYPES.CALENDAR]: 'Календарь',
         [WIDGET_TYPES.CLOCK]: 'Часы',
         [WIDGET_TYPES.MARQUEE]: 'Строка котировок',
+        [WIDGET_TYPES.TCC]: 'Управление трейдерами',
         [WIDGET_TYPES.POSITIONS]: 'Позиции',
         [WIDGET_TYPES.TIMELINE]: 'Лента операций',
         [WIDGET_TYPES.TRADES]: 'Сделки',

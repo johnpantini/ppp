@@ -442,7 +442,7 @@ export const widgetTableStyles = () => css`
     background-color: ${themeConditional(
       lighten(paletteGrayLight2, 5),
       darken(paletteGrayDark1, 10)
-    )};
+    )} !important;
   }
 
   .widget-table .row td:first-child::before,
@@ -465,7 +465,7 @@ export const widgetTableStyles = () => css`
   }
 `;
 
-export const widgetCommonContentStyles = () => css`
+export const widgetCommonColors = () => css`
   .positive {
     color: ${positive};
   }
@@ -482,6 +482,13 @@ export const widgetCommonContentStyles = () => css`
     color: ${themeConditional(paletteBlueDark2, paletteBlueLight2)};
   }
 
+  .alien {
+    color: ${themeConditional(palettePurpleDark2, palettePurpleLight2)};
+  }
+`;
+
+export const widgetCommonContentStyles = () => css`
+  ${widgetCommonColors()}
   .dot-line {
     align-items: center;
     justify-content: right;
@@ -832,6 +839,14 @@ export const widgetStyles = () => css`
   .widget-footer {
     padding: 8px 0;
     position: relative;
+  }
+
+  .widget-toolbar {
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-right: 8px;
   }
 
   tr.table-group {

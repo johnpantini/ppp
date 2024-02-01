@@ -154,6 +154,12 @@ export const widgetSelectorModalPageTemplate = html`
                   <span>Строка котировок</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
+                  slug="tcc"
+                  ?active="${(x) => x.activeItem === 'tcc'}"
+                >
+                  <span>Управление трейдерами</span>
+                </ppp-side-nav-item>
+                <ppp-side-nav-item
                   slug="frame"
                   ?active="${(x) => x.activeItem === 'frame'}"
                 >

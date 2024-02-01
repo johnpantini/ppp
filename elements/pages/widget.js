@@ -355,6 +355,13 @@ export const widgetPageTemplate = html`
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
+                              x.document._id && x.document.type !== 'tcc'}"
+                            value="tcc"
+                          >
+                            <span slot="text">Управление трейдерами</span>
+                          </ppp-widget-type-radio>
+                          <ppp-widget-type-radio
+                            ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'custom'}"
                             value="custom"
                           >
@@ -969,6 +976,16 @@ export class WidgetPage extends Page {
   async connectedCallback() {
     await super.connectedCallback();
 
+    // Lists require traders.
+    if (!this.document._id) {
+      const entities = await this.requestManualDenormalization();
+
+      this.document = {
+        ...(await this.denormalization.denormalize(this.document)),
+        ...entities
+      };
+    }
+
     document.addEventListener('pointerdown', this.onPointerDown);
     document.addEventListener('pointerup', this.onPointerUp);
     document.addEventListener('pointermove', this.onPointerMove);
@@ -1269,7 +1286,7 @@ export class WidgetPage extends Page {
     );
 
     if (this.mounted && this.parentNode.widget) {
-      // From workpace, merge with template.
+      // From workspace, merge with template.
       const mergedDocument = {};
       const liveDocument = await this.denormalization.denormalize(
         this.parentNode.widget.document
@@ -1602,8 +1619,6 @@ export class WidgetPage extends Page {
       this.document = Object.assign({}, documentAfterChanges ?? {});
 
       if (!this.document._id) {
-        await this.requestManualDenormalization();
-
         this.document = await this.denormalization.denormalize(this.document);
       }
 
@@ -1659,7 +1674,7 @@ export class WidgetPage extends Page {
     return this.onChangeDelayedAsync(event);
   }
 
-  // Needed when there is no document _id.
+  // Needed when there is no document _id. Use  _id: '@settings' to retrieve lookups.
   async requestManualDenormalization() {
     const lines = ((context) => {
       return context.services
@@ -1818,6 +1833,15 @@ export class WidgetPage extends Page {
     const [evalRequest] = await ppp.user.functions.eval(lines.join('\n'));
 
     this.denormalization.fillRefs(evalRequest);
+
+    return {
+      apis: evalRequest.apis,
+      traders: evalRequest.traders,
+      brokers: evalRequest.brokers,
+      bots: evalRequest.bots,
+      orders: evalRequest.orders,
+      services: evalRequest.services
+    };
   }
 
   statusChanged(oldValue, newValue) {
