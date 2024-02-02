@@ -7,7 +7,6 @@ import {
   widgetDefaultHeaderTemplate,
   widgetEmptyStateTemplate,
   widgetStackSelectorTemplate,
-  widgetCommonColors,
   widgetCommonContentStyles
 } from '../widget.js';
 import {
@@ -29,15 +28,15 @@ import {
   dragControlsTemplate
 } from '../clonable-list.js';
 import { normalize } from '../../design/styles.js';
+import { PPPElement } from '../../lib/ppp-element.js';
+import { formatDate } from '../../lib/intl.js';
+import { fontWeightWidget } from '../../design/design-tokens.js';
+import { disconnect } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
-import { PPPElement } from '../../lib/ppp-element.js';
-import { formatDate } from '../../lib/intl.js';
-import { fontWeightWidget } from '../../design/design-tokens.js';
-import { close, disconnect, trash } from '../../static/svg/sprite.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -145,14 +144,14 @@ export const tccWidgetCardTemplate = html`
               c.event.preventDefault();
               c.event.stopPropagation();
 
-              x.workspace.topLoader.start();
+              x.widget.topLoader.start();
 
               try {
                 await x.traderRuntime.terminate();
 
                 x.status = 'terminated';
               } finally {
-                x.workspace.topLoader.stop();
+                x.widget.topLoader.stop();
               }
             }}"
           >
@@ -191,14 +190,18 @@ export class TccWidgetCard extends PPPElement {
   @observable
   serialized;
 
-  workspace;
+  widget;
 
   async connectedCallback() {
     super.connectedCallback();
 
-    this.workspace = this.getRootNode().host;
-    this.traderRuntime = await ppp.getOrCreateTrader(this.trader);
-    this.serialized = await this.traderRuntime.serialize();
+    try {
+      this.widget = this.getRootNode().host;
+      this.traderRuntime = await ppp.getOrCreateTrader(this.trader);
+      this.serialized = await this.traderRuntime.serialize();
+    } catch (e) {
+      return this.widget.catchException(e);
+    }
   }
 
   getIconUrl() {

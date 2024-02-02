@@ -70,25 +70,31 @@ class Column extends PPPElement {
       this.column
     );
 
-    if (column?.defaultTraderId) {
-      this.defaultTrader = await ppp.getOrCreateTrader(column.defaultTrader);
-    }
+    try {
+      if (column?.defaultTraderId) {
+        this.defaultTrader = await ppp.getOrCreateTrader(column.defaultTrader);
+      }
 
-    if (this.payload?.instrument) {
-      this.instrument = this.payload.instrument;
-    } else if (this.payload?.symbol && this.defaultTrader) {
-      this.instrument = this.defaultTrader.instruments.get(this.payload.symbol);
-      this.payload.instrument = this.instrument;
+      if (this.payload?.instrument) {
+        this.instrument = this.payload.instrument;
+      } else if (this.payload?.symbol && this.defaultTrader) {
+        this.instrument = this.defaultTrader.instruments.get(
+          this.payload.symbol
+        );
+        this.payload.instrument = this.instrument;
 
-      Observable.notify(this, 'payload');
-    }
+        Observable.notify(this, 'payload');
+      }
 
-    if (column?.trader) {
-      this.trader = await ppp.getOrCreateTrader(column.trader);
-    }
+      if (column?.trader) {
+        this.trader = await ppp.getOrCreateTrader(column.trader);
+      }
 
-    if (column?.extraTrader) {
-      this.extraTrader = await ppp.getOrCreateTrader(column.extraTrader);
+      if (column?.extraTrader) {
+        this.extraTrader = await ppp.getOrCreateTrader(column.extraTrader);
+      }
+    } catch (e) {
+      return this.widget.catchException(e);
     }
   }
 

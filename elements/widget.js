@@ -1050,11 +1050,13 @@ export class Widget extends PPPElement {
   catchException(e) {
     if (e instanceof NoInstrumentsError) {
       return this.notificationsArea.note({
+        title: e.trader.document.name,
         text: importInstrumentsSuggestionTemplate(e),
         keep: true
       });
     } else if (e instanceof StaleInstrumentCacheError) {
       return this.notificationsArea.note({
+        title: e.trader.document.name,
         text: staleInstrumentCacheSuggestionTemplate(e),
         keep: true
       });
