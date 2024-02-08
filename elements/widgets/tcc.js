@@ -270,13 +270,13 @@ export const tccWidgetTemplate = html`
         </div>
         <div class="widget-card-list">
           ${when(
-            (x) => !x.traders.length,
+            (x) => !x?.traders.length,
             html`${html.partial(
               widgetEmptyStateTemplate('Нет трейдеров для отображения.')
             )}`,
             html`
               ${repeat(
-                (x) => x.traders,
+                (x) => x?.traders ?? [],
                 html`
                   <div class="widget-card-holder">
                     <div class="widget-card-holder-inner">

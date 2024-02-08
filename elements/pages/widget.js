@@ -722,13 +722,6 @@ export const widgetPageTemplate = html`
 
 export const widgetPageStyles = css`
   ${pageStyles}
-  .positive {
-    color: ${positive};
-  }
-
-  .negative {
-    color: ${negative};
-  }
 
   h3 {
     margin-bottom: ${spacing2};
@@ -866,6 +859,10 @@ export const widgetPageStyles = css`
     margin-bottom: 0;
   }
 
+  .widget-settings-section ppp-text-field {
+    max-width: 268px;
+  }
+
   .widget-settings-label-group {
     margin-bottom: ${spacing2};
   }
@@ -882,10 +879,6 @@ export const widgetPageStyles = css`
   .widget-settings-label-group .description {
     margin-top: ${spacing1};
     padding-right: 20px;
-  }
-
-  .widget-settings-section .control-line ppp-query-select:first-child {
-    width: 100%;
   }
 
   .divider {

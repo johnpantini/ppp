@@ -38,7 +38,7 @@ export const columnTemplate = html`
 `;
 
 export class LastPriceColumn extends Column {
-  #higlLightTimer;
+  #highLightTimer;
 
   @observable
   lastPrice;
@@ -67,7 +67,7 @@ export class LastPriceColumn extends Column {
     ) {
       if (this.column?.highlightChanges) {
         if (oldValue !== newValue) {
-          clearTimeout(this.#higlLightTimer);
+          clearTimeout(this.#highLightTimer);
           this.classList.remove('positive');
           this.classList.remove('negative');
 
@@ -75,7 +75,7 @@ export class LastPriceColumn extends Column {
 
           this.classList.add(newCls);
 
-          this.#higlLightTimer = setTimeout(() => {
+          this.#highLightTimer = setTimeout(() => {
             this.classList.remove(newCls);
           }, 350);
         }

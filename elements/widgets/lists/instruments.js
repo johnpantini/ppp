@@ -10,7 +10,7 @@ import { search } from '../../../static/svg/sprite.js';
 import { validate } from '../../../lib/ppp-errors.js';
 import '../../widget-column-list.js';
 
-const DEFAULT_COLUMNS = [
+export const DEFAULT_COLUMNS = [
   {
     source: COLUMN_SOURCE.INSTRUMENT
   },
@@ -18,7 +18,8 @@ const DEFAULT_COLUMNS = [
     source: COLUMN_SOURCE.SYMBOL
   },
   {
-    source: COLUMN_SOURCE.LAST_PRICE
+    source: COLUMN_SOURCE.LAST_PRICE,
+    highlightChanges: true
   },
   {
     source: COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
@@ -42,6 +43,7 @@ export async function listDefinition() {
   return {
     extraControls: null,
     pagination: false,
+    defaultColumns: DEFAULT_COLUMNS,
     control: class {
       connectedCallback(widget) {
         widget.deletionAvailable = true;

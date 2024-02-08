@@ -172,6 +172,56 @@ export class TimelineWidget extends WidgetWithInstrument {
   @observable
   timelineItem;
 
+  timelineItemChanged(oldValue, newValue) {
+    if (typeof newValue.operationId === 'undefined') {
+      return;
+    }
+
+    const date = new Date(newValue.createdAt);
+    // Timeline item date (bucket)
+    const topLevelKey = `${date.getFullYear()}-${this.#padTo2Digits(
+      date.getMonth() + 1
+    )}-${this.#padTo2Digits(date.getDate())}`;
+
+    if (!this.timelineMap.has(topLevelKey)) {
+      this.timelineMap.set(
+        topLevelKey,
+        new Map().set(newValue.parentId, [newValue])
+      );
+    } else {
+      const topLevelMap = this.timelineMap.get(topLevelKey);
+
+      if (topLevelMap.has(newValue.parentId)) {
+        const parent = topLevelMap.get(newValue.parentId);
+
+        if (
+          !parent.find(
+            (operation) => operation.operationId === newValue.operationId
+          )
+        )
+          parent.push(newValue);
+      } else {
+        topLevelMap.set(newValue.parentId, [newValue]);
+      }
+    }
+
+    const symbol = newValue.instrument?.symbol ?? newValue.symbol;
+
+    if (this.emptyIndicatorMap.has(symbol)) {
+      const array = this.emptyIndicatorMap.get(symbol);
+
+      if (!array.includes(topLevelKey)) {
+        array.push(topLevelKey);
+      }
+    } else {
+      this.emptyIndicatorMap.set(symbol, [topLevelKey]);
+    }
+
+    this.timeline = [];
+
+    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+  }
+
   @observable
   timeline;
 
@@ -418,56 +468,6 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   #padTo2Digits(number) {
     return number.toString().padStart(2, '0');
-  }
-
-  timelineItemChanged(oldValue, newValue) {
-    if (typeof newValue.operationId === 'undefined') {
-      return;
-    }
-
-    const date = new Date(newValue.createdAt);
-    // Timeline item date (bucket)
-    const topLevelKey = `${date.getFullYear()}-${this.#padTo2Digits(
-      date.getMonth() + 1
-    )}-${this.#padTo2Digits(date.getDate())}`;
-
-    if (!this.timelineMap.has(topLevelKey)) {
-      this.timelineMap.set(
-        topLevelKey,
-        new Map().set(newValue.parentId, [newValue])
-      );
-    } else {
-      const topLevelMap = this.timelineMap.get(topLevelKey);
-
-      if (topLevelMap.has(newValue.parentId)) {
-        const parent = topLevelMap.get(newValue.parentId);
-
-        if (
-          !parent.find(
-            (operation) => operation.operationId === newValue.operationId
-          )
-        )
-          parent.push(newValue);
-      } else {
-        topLevelMap.set(newValue.parentId, [newValue]);
-      }
-    }
-
-    const symbol = newValue.instrument?.symbol ?? newValue.symbol;
-
-    if (this.emptyIndicatorMap.has(symbol)) {
-      const array = this.emptyIndicatorMap.get(symbol);
-
-      if (!array.includes(topLevelKey)) {
-        array.push(topLevelKey);
-      }
-    } else {
-      this.emptyIndicatorMap.set(symbol, [topLevelKey]);
-    }
-
-    this.timeline = [];
-
-    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
   }
 
   instrumentChanged() {

@@ -2297,7 +2297,7 @@ export async function widgetDefinition() {
         <ppp-tab id="traders">Подключения</ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab id="hotkeys">Горячие клавиши</ppp-tab>
-        <ppp-tab id="conditionals">Заявки</ppp-tab>
+        <ppp-tab id="conditionals">Условные заявки</ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">

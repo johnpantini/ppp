@@ -495,7 +495,11 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   rafLoop() {
-    if (this.$fastController.isConnected && this.#updateNeeded) {
+    if (
+      this.$fastController.isConnected &&
+      this.#updateNeeded &&
+      typeof this.grid !== 'undefined'
+    ) {
       this.#updateNeeded = false;
 
       this.#repaint();

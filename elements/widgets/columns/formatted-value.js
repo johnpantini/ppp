@@ -8,7 +8,8 @@ import {
   formatRelativeChange,
   formatDateWithOptions,
   stringToFloat,
-  formatAmount
+  formatAmount,
+  formatQuantity
 } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
 
@@ -41,6 +42,8 @@ export class FormattedValueColumn extends Column {
       return formatAmount(stringToFloat(this.value), this.instrument);
     } else if (this.formatter === 'volume') {
       return formatVolume(stringToFloat(this.value), this.formatterOptions);
+    } else if (this.formatter === 'quantity') {
+      return formatQuantity(stringToFloat(this.value), this.formatterOptions);
     } else if (this.formatter === 'datetime') {
       return formatDateWithOptions(
         this.value,

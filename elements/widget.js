@@ -325,6 +325,11 @@ export const widgetTableStyles = () => css`
     vertical-align: middle;
   }
 
+  .widget-table .tfoot {
+    display: table-footer-group;
+    vertical-align: middle;
+  }
+
   .widget-table .tr {
     display: table-row;
     vertical-align: middle;
@@ -334,13 +339,33 @@ export const widgetTableStyles = () => css`
   .widget-table .th {
     display: table-cell;
     vertical-align: middle;
+    overflow: hidden;
+    font-weight: ${fontWeightWidget};
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+  }
+
+  .widget-table .th {
+    font-weight: 500;
+  }
+
+  .widget-table .cell {
+    text-align: right;
+    padding: 4px 8px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    position: relative;
+    vertical-align: middle;
+    ${ellipsis()};
   }
 
   .widget-table th,
   .widget-table .th {
     text-align: right;
     position: sticky;
-    top: 0;
     z-index: 100;
     height: 26px;
     padding: 2px 8px;
@@ -350,6 +375,17 @@ export const widgetTableStyles = () => css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
     border-bottom: 1px solid
       var(--palette-gray-light-2-with-palette-gray-dark-1);
+  }
+
+  .widget-table thead .th,
+  .widget-table .thead .th {
+    top: 0;
+  }
+
+  .widget-table tfoot .th,
+  .widget-table .tfoot .th {
+    bottom: 0;
+    cursor: default;
   }
 
   .widget-table th.empty,
@@ -402,19 +438,6 @@ export const widgetTableStyles = () => css`
       ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 
-  .widget-table .cell {
-    text-align: right;
-    padding: 4px 8px;
-    font-variant-numeric: tabular-nums;
-    cursor: pointer;
-    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    position: relative;
-    vertical-align: middle;
-    ${ellipsis()};
-  }
-
   .widget-table .cell ppp-button {
     position: absolute;
     z-index: 10;
@@ -434,7 +457,8 @@ export const widgetTableStyles = () => css`
     )};
   }
 
-  .widget-table .row {
+  .widget-table .row,
+  .widget-table .total {
     position: relative;
   }
 
@@ -467,11 +491,11 @@ export const widgetTableStyles = () => css`
 
 export const widgetCommonColors = () => css`
   .positive {
-    color: ${positive};
+    color: ${positive} !important;
   }
 
   .negative {
-    color: ${negative};
+    color: ${negative} !important;
   }
 
   .earth {
@@ -725,8 +749,8 @@ export const widgetCommonContentStyles = () => css`
 export const widgetStyles = () => css`
   ${display('inline-flex')}
   ${scrollbars('.widget-body')}
-  ${widgetEmptyStateStyles()}
-  ${widgetTableStyles()}
+  ${widgetEmptyStateStyles()} 
+  ${widgetTableStyles()}  
   ${widgetCommonContentStyles()}
   .widget-root {
     position: relative;

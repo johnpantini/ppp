@@ -14,7 +14,8 @@ import {
   ref,
   observable,
   repeat,
-  attr
+  attr,
+  Updates
 } from '../../vendor/fast-element.min.js';
 import { $throttle } from '../../lib/ppp-decorators.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
@@ -235,6 +236,7 @@ export const listWidgetTemplate = html`
             @click="${(x, c) => x.handleListTableClick(c)}"
             ${ref('tableBody')}
           ></div>
+          <div class="tfoot" ${ref('tableFoot')}></div>
         </div>
         <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
@@ -312,8 +314,15 @@ export class ListWidget extends WidgetWithInstrument {
         });
       }
 
-      const { settings, validate, submit, extraControls, pagination, control } =
-        await mod.listDefinition();
+      const {
+        settings,
+        validate,
+        submit,
+        extraControls,
+        pagination,
+        control,
+        defaultColumns
+      } = await mod.listDefinition();
 
       if (typeof control === 'function') {
         this.control = new control();
@@ -341,7 +350,7 @@ export class ListWidget extends WidgetWithInstrument {
       this.tableBody.shadowRoot.append(this.slot);
 
       this.columns = new WidgetColumns({
-        columns: this.document.columns ?? []
+        columns: this.document.columns ?? defaultColumns
       });
 
       await this.columns.registerColumns();
@@ -483,11 +492,9 @@ export class ListWidget extends WidgetWithInstrument {
     for (const col of this.columns.array) {
       const cell = document.createElement('div');
 
-      cell.setAttribute('class', 'td');
+      cell.setAttribute('class', 'td cell');
 
       const column = document.createElement(col.definition.name);
-
-      cell.classList.add('cell');
 
       cell.column = col;
       cell.payload = payload;
@@ -497,11 +504,17 @@ export class ListWidget extends WidgetWithInstrument {
       tr.appendChild(cell);
     }
 
+    const lastEmptyCell = document.createElement('div');
+
+    lastEmptyCell.setAttribute('class', 'td cell');
+    tr.appendChild(lastEmptyCell);
     this.tableBody.appendChild(tr);
 
     this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
 
     this.sort();
+
+    return tr;
   }
 
   async saveListSource() {
@@ -651,7 +664,7 @@ export async function widgetDefinition() {
           >
             <ppp-radio value="instruments">Инструменты</ppp-radio>
             <ppp-radio value="mru">Недавние инструменты</ppp-radio>
-            <ppp-radio disabled value="intraday-stats">
+            <ppp-radio value="intraday-stats">
               Статистика внутри дня
             </ppp-radio>
             <ppp-radio value="url">По ссылке</ppp-radio>
@@ -692,7 +705,10 @@ export async function widgetDefinition() {
             x.granary.validate = validate;
             x.granary.submit = submit;
             x.extraSettings = settings;
+
+            Updates.enqueue(() => x.applyModifications());
           } catch (e) {
+            console.error(e);
             invalidate(x.listWidgetUrl, {
               errorMessage: 'Этот URL не может быть использован',
               raiseException: true

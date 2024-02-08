@@ -379,10 +379,6 @@ export const pageStyles = css`
     justify-content: space-between;
   }
 
-  .control-line ppp-checkbox + ppp-query-select {
-    flex: 1 0 0;
-  }
-
   .control-stack {
     display: flex;
     flex-direction: column;
