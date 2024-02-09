@@ -722,6 +722,13 @@ export const widgetPageTemplate = html`
 
 export const widgetPageStyles = css`
   ${pageStyles}
+  .positive {
+    color: ${positive} !important;
+  }
+
+  .negative {
+    color: ${negative} !important;
+  }
 
   h3 {
     margin-bottom: ${spacing2};

@@ -10,7 +10,8 @@ import {
 import {
   COLUMN_SOURCE,
   OPERATION_TYPE,
-  TRADER_DATUM
+  TRADER_DATUM,
+  TRADERS
 } from '../../../lib/const.js';
 import { $throttle } from '../../../lib/ppp-decorators.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
@@ -183,8 +184,55 @@ export class IntradayStats {
   @observable
   timelineItem;
 
+  isTradeEligibleForStats(trade = {}) {
+    if (typeof trade.operationId === 'undefined') {
+      return;
+    }
+
+    if (this.trader.document.type === TRADERS.UTEX_MARGIN_STOCKS) {
+      let commissionRate = +this.trader.document.commissionRate;
+
+      if (typeof commissionRate !== 'number') {
+        commissionRate = 0;
+      }
+
+      if (!trade.commission) {
+        trade.commission =
+          (commissionRate *
+            trade.quantity *
+            trade.price *
+            trade.instrument.lot) /
+          100;
+      }
+
+      const date = new Date(trade.createdAt);
+      const nowUtc = new Date();
+      const startOfDayUtc = new Date(
+        Date.UTC(
+          nowUtc.getUTCFullYear(),
+          nowUtc.getUTCMonth(),
+          nowUtc.getUTCDate(),
+          8,
+          0,
+          0
+        )
+      );
+      const startOfPreviousDayUtc = new Date(
+        startOfDayUtc.getTime() - 24 * 60 * 60 * 1000
+      );
+
+      if (nowUtc.getUTCHours() >= 8) {
+        return date >= startOfDayUtc && date <= nowUtc;
+      } else {
+        return date >= startOfPreviousDayUtc && date <= nowUtc;
+      }
+    }
+
+    return true;
+  }
+
   timelineItemChanged(oldValue, newValue) {
-    if (typeof newValue.operationId === 'undefined') {
+    if (!this.isTradeEligibleForStats(newValue)) {
       return;
     }
 
@@ -888,6 +936,9 @@ export async function listDefinition() {
                         },
                         {
                           type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.IB%]`
+                        },
+                        {
+                          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.UTEX_MARGIN_STOCKS%]`
                         }
                       ]
                     })
