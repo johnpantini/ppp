@@ -1643,7 +1643,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
     super.instrumentChanged(oldValue, newValue);
 
-    // Clear price after instrument changes.
+    // Clear price upon change.
     if (
       this.price &&
       (!this.ordersTrader.instrumentsAreEqual(oldValue, newValue) || !oldValue)
