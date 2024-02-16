@@ -15,7 +15,6 @@ import {
   servicePageHeaderExtraControls
 } from './service.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
-import ServiceCloudPppAspirant from './service-cloud-ppp-aspirant.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -192,14 +191,6 @@ export const serviceSystemdPppAspirantTemplate = html`
         text: 'Сохранить в PPP и развернуть на сервере',
         extraControls: html`
           <div class="control-line extra-controls">
-            <ppp-button
-              ?hidden="${(x) => !x.document._id}"
-              ?disabled="${(x) => !x.isSteady() || x.document.removed}"
-              appearance="danger"
-              @click="${(x) => x.clearRedisData()}"
-            >
-              Очистить хранилище Redis
-            </ppp-button>
             <ppp-button
               ?hidden="${(x) => !x.document._id}"
               ?disabled="${(x) => !x.isSteady() || x.document.removed}"
@@ -666,10 +657,6 @@ export class ServiceSystemdPppAspirantPage extends Page {
     }
   }
 }
-
-// noinspection JSPotentiallyInvalidConstructorUsage
-ServiceSystemdPppAspirantPage.prototype.clearRedisData =
-  ServiceCloudPppAspirant.type.prototype.clearRedisData;
 
 applyMixins(
   ServiceSystemdPppAspirantPage,

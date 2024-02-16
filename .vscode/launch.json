@@ -21,6 +21,25 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "local-connectors",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\lib\\aspirant-worker\\connectors\\connectors.mjs",
+      "env": {
+        "REDIS_HOST": "${env:REDIS_HOST}",
+        "REDIS_PORT": "${env:REDIS_PORT}",
+        "REDIS_TLS": "${env:REDIS_TLS}",
+        "REDIS_USERNAME": "${env:REDIS_USERNAME}",
+        "REDIS_PASSWORD": "${env:REDIS_PASSWORD}",
+        "REDIS_DATABASE": "${env:REDIS_DATABASE}",
+        "PPP_ROOT_URL": "${env:PPP_ROOT_URL}",
+        "GLOBAL_PROXY_URL": "${env:GLOBAL_PROXY_URL}",
+        "ASPIRANT_ID": "${env:ASPIRANT_ID}",
+        "PPP_WORKER_ID": "${env:PPP_CONNECTORS_WORKER_ID}"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "local-trader-runtime",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppp-trader-runtime\\ppp-trader-runtime.mjs",
@@ -36,6 +55,56 @@
         "ASPIRANT_ID": "${env:ASPIRANT_ID}",
         "PPP_WORKER_ID": "${env:PPP_TRADER_RUNTIME_WORKER_ID}"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "ppf",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppf\\ppf.mjs",
+      "env": {
+        "REDIS_HOST": "${env:REDIS_HOST}",
+        "REDIS_PORT": "${env:REDIS_PORT}",
+        "REDIS_TLS": "${env:REDIS_TLS}",
+        "REDIS_USERNAME": "${env:REDIS_USERNAME}",
+        "REDIS_PASSWORD": "${env:REDIS_PASSWORD}",
+        "REDIS_DATABASE": "${env:REDIS_DATABASE}",
+        "PPP_ROOT_URL": "${env:PPP_ROOT_URL}",
+        "GLOBAL_PROXY_URL": "${env:GLOBAL_PROXY_URL}",
+        "ASPIRANT_ID": "${env:ASPIRANT_ID}",
+        "PPP_WORKER_ID": "${env:PPP_PPF_WORKER_ID}"
+      }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "ib-gateway",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ib-gateway\\ib-gateway.mjs",
+      "env": {
+        "REDIS_HOST": "${env:REDIS_HOST}",
+        "REDIS_PORT": "${env:REDIS_PORT}",
+        "REDIS_TLS": "${env:REDIS_TLS}",
+        "REDIS_USERNAME": "${env:REDIS_USERNAME}",
+        "REDIS_PASSWORD": "${env:REDIS_PASSWORD}",
+        "REDIS_DATABASE": "${env:REDIS_DATABASE}",
+        "PPP_ROOT_URL": "${env:PPP_ROOT_URL}",
+        "GLOBAL_PROXY_URL": "${env:GLOBAL_PROXY_URL}",
+        "ASPIRANT_ID": "${env:ASPIRANT_ID}",
+        "PPP_WORKER_ID": "${env:PPP_IB_GATEWAY_WORKER_ID}"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "ppp",
+      "configurations": [
+        "ppf",
+        "ib-gateway",
+        "local-connectors",
+        "local-trader-runtime"
+      ],
+      "stopAll": false
     }
   ]
 }

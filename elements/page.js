@@ -927,6 +927,12 @@ class Page extends PPPElement {
         'ReferenceError'
       ].indexOf(errorName) > -1
     ) {
+      if (e?.message === 'Failed to fetch') {
+        return invalidate(ppp.app.toast, {
+          errorMessage: ppp.t('$pppErrors.E_FETCH_FAILED')
+        });
+      }
+
       return invalidate(ppp.app.toast, {
         errorMessage: ppp.t(`$exceptions.${errorName}`, {
           _: ppp.t('$pppErrors.E_UNKNOWN')

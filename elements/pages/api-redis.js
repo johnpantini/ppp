@@ -1,6 +1,5 @@
-import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { validate, invalidate } from '../../lib/ppp-errors.js';
+import { validate } from '../../lib/ppp-errors.js';
 import {
   Page,
   pageStyles,
@@ -12,7 +11,6 @@ import {
   upsertMongoDBRealmScheduledTrigger,
   removeMongoDBRealmTrigger
 } from '../../lib/realm.js';
-import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -25,16 +23,7 @@ export const apiRedisPageTemplate = html`
     <ppp-loader></ppp-loader>
     <form novalidate>
       ${documentPageHeaderPartial({
-        pageUrl: import.meta.url,
-        extraControls: html`
-          <ppp-button
-            appearance="default"
-            slot="controls"
-            @click="${(x) => x.pingRedis()}"
-          >
-            Проверить подключение к базе
-          </ppp-button>
-        `
+        pageUrl: import.meta.url
       })}
       <section>
         <div class="label-group">
@@ -128,51 +117,7 @@ export const apiRedisPageTemplate = html`
             ${ref('password')}
           ></ppp-text-field>
         </div>
-      </section>
-      <section>
-        <div class="label-group">
-          <h5>Сервис-соединитель</h5>
-          <p class="description">
-            Будет использован для совершения HTTP-запросов к Redis.
-          </p>
-        </div>
-        <div class="input-group">
-        <ppp-query-select
-            ${ref('connectorServiceId')}
-            :context="${(x) => x}"
-            deselectable
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.connectorServiceId}"
-            :preloaded="${(x) => x.document.connectorService ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('services')
-                  .find({
-                    $and: [
-                      {
-                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
-                      },
-                      { workerPredefinedTemplate: 'connectors' },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          {
-                            _id: `[%#this.document.connectorServiceId ?? ''%]`
-                          }
-                        ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-        </div>
-      </section>
+      </section>    
       ${documentPageFooterPartial({})}
     </form>
   </template>
@@ -185,84 +130,8 @@ export const apiRedisPageStyles = css`
   }
 `;
 
-export async function checkRedisCredentials({
-  connectorUrl,
-  host,
-  port,
-  tls,
-  username,
-  database,
-  password
-}) {
-  return fetch(`${connectorUrl}redis`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      options: {
-        host,
-        port,
-        tls,
-        username,
-        db: database ?? 0,
-        password
-      },
-      command: 'ping',
-      args: []
-    })
-  });
-}
-
 export class ApiRedisPage extends Page {
   collection = 'apis';
-
-  async pingRedis() {
-    this.beginOperation();
-
-    try {
-      const connector = this.connectorServiceId.datum();
-
-      if (!connector) {
-        invalidate(this.connectorServiceId, {
-          errorMessage: 'Требуется сервис-соединитель',
-          raiseException: true
-        });
-      }
-
-      const connectorUrl = await getAspirantWorkerBaseUrl(connector);
-      const pong = await (
-        await checkRedisCredentials({
-          connectorUrl,
-          host: this.host.value.trim(),
-          port: Math.abs(+this.port.value),
-          tls: this.tls.checked
-            ? {
-                servername: this.host.value.trim()
-              }
-            : void 0,
-          database: Math.abs(+this.database.value),
-          username: this.username.value.trim(),
-          password: this.password.value.trim()
-        })
-      ).text();
-
-      if (pong !== 'PONG') {
-        invalidate(ppp.app.toast, {
-          errorMessage: 'Redis не ответил на запрос.',
-          raiseException: true
-        });
-      } else {
-        this.showSuccessNotification(
-          'База данных в порядке. Redis корректно ответил на запрос.'
-        );
-      }
-    } catch (e) {
-      this.failOperation(e);
-    } finally {
-      this.endOperation();
-    }
-  }
 
   async validate() {
     await validate(this.name);
@@ -282,35 +151,6 @@ export class ApiRedisPage extends Page {
       hook: async (value) => +value >= 0 && +value <= 16,
       errorMessage: 'Введите значение в диапазоне от 0 до 16'
     });
-
-    const credentials = {
-      host: this.host.value.trim(),
-      port: Math.abs(+this.port.value),
-      tls: this.tls.checked
-        ? {
-            servername: this.host.value.trim()
-          }
-        : void 0,
-      database: Math.abs(+this.database.value),
-      username: this.username.value.trim(),
-      password: this.password.value.trim()
-    };
-
-    if (this.connectorServiceId.value) {
-      const connector = this.connectorServiceId.datum();
-      const connectorUrl = await getAspirantWorkerBaseUrl(connector);
-
-      credentials.connectorUrl = connectorUrl;
-
-      if (!(await checkRedisCredentials(credentials)).ok) {
-        invalidate(this.host, {
-          errorMessage: 'Ошибка соединения',
-          raiseException: true
-        });
-      }
-    } else {
-      // TODO - check without connector
-    }
   }
 
   async read() {
@@ -324,20 +164,6 @@ export class ApiRedisPage extends Page {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
               type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.REDIS%]`
-            }
-          },
-          {
-            $lookup: {
-              from: 'services',
-              localField: 'connectorServiceId',
-              foreignField: '_id',
-              as: 'connectorService'
-            }
-          },
-          {
-            $unwind: {
-              path: '$connectorService',
-              preserveNullAndEmptyArrays: true
             }
           }
         ]);
@@ -416,7 +242,7 @@ export class ApiRedisPage extends Page {
             );
           
             process.nextTick(() => socket.end());
-          });                   
+          });
         };
       `
       });
@@ -434,7 +260,6 @@ export class ApiRedisPage extends Page {
           database: Math.abs(+this.database.value),
           username: this.username.value.trim(),
           password: this.password.value.trim(),
-          connectorServiceId: this.connectorServiceId.value,
           version: 1,
           updatedAt: new Date()
         },

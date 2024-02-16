@@ -30,7 +30,6 @@ import '../button.js';
 import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
-import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 
 export const serviceCloudPppAspirantTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -217,18 +216,7 @@ export const serviceCloudPppAspirantTemplate = html`
       </section>
       ${documentPageFooterPartial({
         text: 'Сохранить в PPP и развернуть в облаке',
-        extraControls: html`
-          <ppp-button
-            class="extra-controls"
-            ?hidden="${(x) => !x.document._id}"
-            ?disabled="${(x) => !x.isSteady() || x.document.removed}"
-            appearance="danger"
-            @click="${(x) => x.clearRedisData()}"
-          >
-            Очистить хранилище Redis
-          </ppp-button>
-          ${servicePageFooterExtraControls}
-        `
+        extraControls: html`${servicePageFooterExtraControls}`
       })}
     </form>
   </template>
@@ -243,62 +231,6 @@ export const serviceCloudPppAspirantStyles = css`
 
 export class ServiceCloudPppAspirantPage extends Page {
   collection = 'services';
-
-  async clearRedisData() {
-    if (
-      await ppp.app.confirm(
-        'Очистка хранилища Redis',
-        `Будет удалена информация о дочерних рабочих процессах. Подтвердите действие.`
-      )
-    ) {
-      this.beginOperation();
-
-      try {
-        const api = this.document.redisApi;
-
-        if (!api.connectorServiceId) {
-          invalidate(this.redisApiId, {
-            errorMessage: 'Отсутствует сервис-соединитель',
-            raiseException: true
-          });
-        }
-
-        const connectorUrl = await getAspirantWorkerBaseUrl(
-          api.connectorServiceId
-        );
-
-        await maybeFetchError(
-          await fetch(`${connectorUrl}redis`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              options: {
-                host: api.host,
-                port: api.port,
-                tls: api.tls
-                  ? {
-                      servername: api.host
-                    }
-                  : void 0,
-                username: api.username,
-                db: api.database,
-                password: api.password
-              },
-              command: 'del',
-              args: [`aspirant:${this.document._id}`]
-            })
-          }),
-          'Не удалось очистить хранилище Redis.'
-        );
-
-        this.showSuccessNotification('Команда на очистку отправлена.');
-      } finally {
-        this.endOperation();
-      }
-    }
-  }
 
   async validate() {
     await validate(this.name);

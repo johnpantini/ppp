@@ -4,7 +4,7 @@ export default function (i18n) {
       E_REQUIRED_FIELD: 'Это поле обязательно',
       E_DOCUMENT_CONFLICT: 'Документ не может быть записан',
       E_DOCUMENT_NOT_FOUND: 'Документ не найден',
-      E_FETCH_FAILED: 'Ошибка сетевого запроса',
+      E_FETCH_FAILED: 'Ошибка сетевого запроса, подробности в консоли браузера',
       E_BAD_FORM: 'Форма заполнена с ошибками или не полностью',
       E_UNKNOWN: 'Неизвестная ошибка'
     },

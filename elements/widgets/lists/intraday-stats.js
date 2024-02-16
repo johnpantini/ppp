@@ -161,6 +161,8 @@ export class IntradayStats {
   @observable
   position;
 
+  #duplicates = new Set();
+
   positionChanged(oldValue, newValue) {
     if (!newValue.isBalance) {
       const currency = newValue.instrument.currency;
@@ -187,6 +189,12 @@ export class IntradayStats {
   isTradeEligibleForStats(trade = {}) {
     if (typeof trade.operationId === 'undefined') {
       return;
+    }
+
+    if (this.#duplicates.has(trade.operationId)) {
+      return;
+    } else {
+      this.#duplicates.add(trade.operationId);
     }
 
     if (this.trader.document.type === TRADERS.UTEX_MARGIN_STOCKS) {

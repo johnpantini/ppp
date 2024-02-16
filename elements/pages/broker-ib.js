@@ -70,7 +70,8 @@ export const brokerIbPageTemplate = html`
           <h5>Ссылка на шлюз TWS API</h5>
           <p class="description">
             Конечная точка, которая будет использована для взаимодействия с IB.
-            Можно установить по сервису:
+            Можно установить по сервису типа Aspirant Worker (шаблон «Шлюз TWS
+            API»):
           </p>
           <ppp-query-select
             ${ref('ibGatewayServiceId')}
