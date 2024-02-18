@@ -20,7 +20,10 @@ export const widgetTimeAndSalesColumnListTemplate = html`
       ${repeat(
         (x) => x.list,
         html`
-          <div class="control-line draggable draggable-line">
+          <div
+            class="control-line draggable draggable-line"
+            :column="${(x) => x}"
+          >
             ${dragControlsTemplate({
               add: false,
               remove: false
@@ -81,6 +84,7 @@ export class WidgetTimeAndSalesColumnList extends ClonableList {
     )) {
       columns.push({
         name: line.querySelector('[column-name]').value,
+        width: line.column.width,
         source: line.querySelector('[column-source]').value,
         hidden: !line.querySelector('[visibility-toggle]').checked
       });

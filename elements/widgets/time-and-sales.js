@@ -83,7 +83,7 @@ const DEFAULT_COLUMNS = [
 });
 
 export const timeAndSalesWidgetTemplate = html`
-  <template>
+  <template @columnresize="${(x) => x.recalculateGridDimensions()}}">
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
@@ -91,12 +91,14 @@ export const timeAndSalesWidgetTemplate = html`
         ${widgetWithInstrumentBodyTemplate(html`
           <table class="widget-table trades-table" ${ref('table')}>
             <thead>
-              <tr>
+              <tr @pointerdown="${(x, c) => x.beginPossibleColumnResize(c)}">
                 ${repeat(
                   (x) => x.columns,
                   html`
                     <th
                       source="${(x) => x.source}"
+                      :column="${(x) => x}"
+                      title="${(x) => x.name}"
                       style="width:${(x, c) => c.parent.getColumnWidth(x)}"
                     >
                       <div class="resize-handle"></div>
@@ -477,21 +479,23 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       'pointerdown',
       this.onRowsHolderPointerDown
     );
-    this.#recalculateGridDimensions();
+    this.recalculateGridDimensions();
   }
 
-  #recalculateGridDimensions() {
-    const values = [];
+  recalculateGridDimensions() {
+    if (this.grid) {
+      const values = [];
 
-    for (const { source } of this.columns) {
-      values.push(
-        this.#refs[source].th.style.width || this.getColumnWidth({ source })
-      );
+      for (const { source } of this.columns) {
+        values.push(
+          this.#refs[source].th?.style.width || this.getColumnWidth({ source })
+        );
+      }
+
+      values.push('1fr');
+
+      this.grid.style.gridTemplateColumns = values.join(' ');
     }
-
-    values.push('1fr');
-
-    this.grid.style.gridTemplateColumns = values.join(' ');
   }
 
   rafLoop() {
@@ -542,9 +546,11 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.classList.add('highlighted-volume-enabled');
     }
 
-    this.columns = (this.document?.columns ?? DEFAULT_COLUMNS).filter(
-      (c) => !c.hidden
-    );
+    if (!Array.isArray(this.document?.columns)) {
+      this.document.columns = DEFAULT_COLUMNS;
+    }
+
+    this.columns = this.document.columns.filter((c) => !c.hidden);
 
     if (!this.document.tradesTrader) {
       return this.notificationsArea.error({
@@ -680,7 +686,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   getColumnWidth(column) {
     if (typeof column.width === 'number') {
-      return `${column.width}px`;
+      return `${Math.max(32, column.width)}px`;
     } else {
       const defaultColumn = DEFAULT_COLUMNS.find(
         (c) => c.source === column.source
@@ -689,7 +695,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       if (defaultColumn) {
         return `${defaultColumn.width}px`;
       } else {
-        return '100px';
+        return '70px';
       }
     }
   }
@@ -850,6 +856,7 @@ export async function widgetDefinition() {
     minWidth: 140,
     minHeight: 120,
     defaultWidth: 320,
+    defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="main">
         <ppp-tab id="main">Подключения</ppp-tab>

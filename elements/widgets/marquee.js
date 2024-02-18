@@ -451,9 +451,7 @@ export async function widgetDefinition() {
                 const symbol = button.previousElementSibling;
                 const trader = event.detail.trader;
                 const widget =
-                  source.widgetPreview.shadowRoot.querySelector(
-                    'ppp-marquee-widget'
-                  );
+                  source.widgetPreview.querySelector('ppp-marquee-widget');
 
                 if (widget) {
                   widget.searchControl.reset();

@@ -2292,6 +2292,7 @@ export async function widgetDefinition() {
     minWidth: 230,
     minHeight: 120,
     defaultWidth: 290,
+    defaultHeight: 420,
     settings: html`
       <ppp-tabs activeid="traders" ${ref('settingsTabs')}>
         <ppp-tab id="traders">Подключения</ppp-tab>

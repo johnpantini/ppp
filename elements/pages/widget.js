@@ -39,13 +39,12 @@ import {
   spacing5,
   themeConditional
 } from '../../design/design-tokens.js';
-import { display } from '../../vendor/fast-utilities.js';
+import { display, staticallyCompose } from '../../vendor/fast-utilities.js';
 import { RadioGroup, radioGroupTemplate } from '../radio-group.js';
 import { Radio } from '../radio.js';
 import { customWidget } from '../../static/svg/sprite.js';
-import { normalize } from '../../design/styles.js';
+import { normalize, scrollbars } from '../../design/styles.js';
 import { PAGE_STATUS, WIDGET_TYPES } from '../../lib/const.js';
-import { PPPElement } from '../../lib/ppp-element.js';
 import { TextField } from '../text-field.js';
 import { Select } from '../select.js';
 import { Tabs } from '../tabs.js';
@@ -259,9 +258,8 @@ export const widgetPageTemplate = html`
                       <div class="drawer-body-inner">
                         <ppp-widget-type-radio-group
                           ${ref('widgetTypeSelector')}
-                          value="${(x) => x.document.type}"
                           @change="${(x, { event }) =>
-                            x.handleWidgetTypeChange(event)}"
+                            x.handleWidgetTypeChange(event.detail.group.value)}"
                         >
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -565,7 +563,7 @@ export const widgetPageTemplate = html`
                             </div>
                           `
                         )}
-                        ${(x) => x.widgetDefinition?.settings}
+                        ${(x) => x.widgetSettings}
                       </div>
                     </div>
                   </div>
@@ -685,16 +683,16 @@ export const widgetPageTemplate = html`
                 `
               )}
               ${when(
-                (x) => x.isSteady() && x.getWidgetTagName(),
+                (x) => x.loadedWidgetTag && x.widgetDefinitionLoaded,
                 html`
                   <hr class="divider" />
                   <div class="widget-area" ${ref('widgetArea')}>
-                    <ppp-widget-preview
-                      ${ref('widgetPreview')}
-                      wtag="${(x) => x.getWidgetTagName()}"
-                      :widgetDefinition="${(x) => x.widgetDefinition ?? {}}"
-                      :container="${(x) => x}"
-                    ></ppp-widget-preview>
+                    <div class="widget-preview" ${ref('widgetPreview')}>
+                      ${(x) =>
+                        html`${staticallyCompose(
+                          `<${x.loadedWidgetTag} preview></${x.loadedWidgetTag}>`
+                        )}`}
+                    </div>
                   </div>
                 `
               )}
@@ -722,6 +720,7 @@ export const widgetPageTemplate = html`
 
 export const widgetPageStyles = css`
   ${pageStyles}
+  ${scrollbars('.widget-area')}
   .positive {
     color: ${positive} !important;
   }
@@ -732,6 +731,16 @@ export const widgetPageStyles = css`
 
   h3 {
     margin-bottom: ${spacing2};
+  }
+
+  .widget-area {
+    padding-bottom: ${spacing2};
+  }
+
+  .widget-preview {
+    position: relative;
+    width: 100%;
+    height: 100%;
   }
 
   .preview-header {
@@ -953,7 +962,16 @@ export class WidgetPage extends Page {
   resizeObserver;
 
   @observable
+  loadedWidgetTag;
+
+  @observable
+  widgetDefinitionLoaded;
+
+  @observable
   widgetDefinition;
+
+  @observable
+  widgetSettings;
 
   @observable
   extraSettings;
@@ -964,6 +982,7 @@ export class WidgetPage extends Page {
   constructor() {
     super();
 
+    this.document = {};
     this.granary = {};
     this.onChange = this.onChange.bind(this);
     this.onPointerDown = this.onPointerDown.bind(this);
@@ -971,6 +990,9 @@ export class WidgetPage extends Page {
     this.onPointerUp = this.onPointerUp.bind(this);
     this.onResize = this.onResize.bind(this);
     this.widgetDefinition = {};
+    this.widgetDefinitionLoaded = false;
+    this.loadedWidgetTag = null;
+    this.widgetSettings = null;
   }
 
   async connectedCallback() {
@@ -993,6 +1015,10 @@ export class WidgetPage extends Page {
 
     if (this.hasAttribute('mounted')) {
       this.resizeObserver = new ResizeObserver(this.onResize).observe(this);
+    }
+
+    if (!this.document._id) {
+      this.widgetTypeSelector.value = this.document.type;
     }
   }
 
@@ -1079,10 +1105,8 @@ export class WidgetPage extends Page {
       await validate(this.name);
     }
 
-    if (this.document.type === 'custom' && !this.widgetDefinition.loaded) {
-      await this.loadWidget();
-
-      return;
+    if (this.document.type === 'custom' && !this.widgetDefinitionLoaded) {
+      return await this.loadWidget();
     }
 
     if (typeof this.widgetDefinition?.customElement !== 'object') {
@@ -1115,6 +1139,9 @@ export class WidgetPage extends Page {
         });
       } catch (e) {
         this.widgetDefinition = {};
+        this.widgetDefinitionLoaded = false;
+        this.loadedWidgetTag = null;
+        this.widgetSettings = null;
 
         invalidate(this.url, {
           errorMessage: 'Неверный или неполный URL',
@@ -1312,8 +1339,16 @@ export class WidgetPage extends Page {
         }
       }
 
+      Updates.enqueue(
+        () => (this.widgetTypeSelector.value = mergedDocument.type)
+      );
+
       return mergedDocument;
     } else {
+      Updates.enqueue(
+        () => (this.widgetTypeSelector.value = this.templateDocument.type)
+      );
+
       return this.templateDocument;
     }
   }
@@ -1362,12 +1397,6 @@ export class WidgetPage extends Page {
 
   async submit() {
     let widgetUpdateResult = {};
-
-    // Needed to prevent widget preview null document
-    this.widgetPreview?.shadowRoot.firstChild &&
-      this.widgetPreview.shadowRoot.removeChild(
-        this.widgetPreview.shadowRoot.firstChild
-      );
 
     let headerBgOpacity =
       this.headerBgOpacity.value === ''
@@ -1428,7 +1457,7 @@ export class WidgetPage extends Page {
     return result;
   }
 
-  getWidgetTagName() {
+  #getWidgetTagName() {
     if (this.document.type === 'custom' && !this.document.url) return null;
 
     if (typeof this.widgetDefinition?.customElement === 'object') {
@@ -1458,17 +1487,15 @@ export class WidgetPage extends Page {
     this.beginOperation();
 
     if (!url && this.document.type === 'custom') {
-      this.widgetDefinition.settings = null;
-      this.widgetDefinition.title = 'По ссылке';
-      this.widgetDefinition.tags = ['Загружаемый виджет'];
-      this.widgetDefinition.collection = null;
-      this.widgetDefinition.loaded = false;
-      this.widgetDefinition.description =
-        'Введите название виджета и его URL, чтобы продолжить.';
+      this.widgetDefinitionLoaded = false;
+      this.widgetDefinition = {
+        title: 'По ссылке',
+        tags: ['Загружаемый виджет'],
+        collection: null,
+        description: 'Введите название виджета и его URL, чтобы продолжить.'
+      };
 
       this.endOperation();
-
-      Observable.notify(this, 'widgetDefinition');
     }
 
     if (url) {
@@ -1501,9 +1528,13 @@ export class WidgetPage extends Page {
           });
         }
 
-        this.widgetDefinition.loaded = true;
+        // Preserve on modifications.
+        if (!this.widgetSettings) {
+          this.widgetSettings = this.widgetDefinition.settings;
+        }
 
-        Observable.notify(this, 'widgetDefinition');
+        this.widgetDefinitionLoaded = true;
+        this.loadedWidgetTag = this.#getWidgetTagName();
       } catch (e) {
         this.failOperation(e);
       } finally {
@@ -1645,6 +1676,9 @@ export class WidgetPage extends Page {
           });
         } catch (e) {
           this.widgetDefinition = {};
+          this.widgetDefinitionLoaded = false;
+          this.widgetSettings = null;
+          this.loadedWidgetTag = null;
 
           invalidate(this.url, {
             errorMessage: 'Этот URL не может быть использован',
@@ -1653,17 +1687,11 @@ export class WidgetPage extends Page {
         }
       }
 
-      if (this.document.type === 'custom' && !this.widgetDefinition.loaded) {
-        await this.loadWidget();
-      }
+      this.widgetDefinitionLoaded = false;
+      await later(100);
+      await this.loadWidget();
     } finally {
-      this.widgetPreview?.shadowRoot.firstChild &&
-        this.widgetPreview.shadowRoot.removeChild(
-          this.widgetPreview.shadowRoot.firstChild
-        );
-
-      // Force widget connectedCallback
-      Updates.enqueue(() => this.endOperation());
+      this.endOperation();
     }
   }
 
@@ -1861,18 +1889,27 @@ export class WidgetPage extends Page {
     }
   }
 
-  async handleWidgetTypeChange(event) {
+  async handleWidgetTypeChange(newType) {
     if (!this.document._id) {
+      this.document = {
+        name: this.name.value.trim(),
+        type: newType,
+        apis: this.document.apis,
+        traders: this.document.traders,
+        brokers: this.document.brokers,
+        bots: this.document.bots,
+        orders: this.document.orders,
+        services: this.document.services
+      };
+
       this.widgetDefinition = {};
+      this.widgetDefinitionLoaded = false;
+      this.loadedWidgetTag = null;
       this.savedInstrument = void 0;
       this.savedWidth = void 0;
       this.savedHeight = void 0;
 
       const name = this.name.value.trim();
-
-      this.document.type = event.target.value;
-
-      await later(100);
 
       ppp.app.setURLSearchParams({
         type: this.document.type
@@ -1882,43 +1919,11 @@ export class WidgetPage extends Page {
       Updates.enqueue(() => (this.name.value = name));
     }
 
-    this.extraSettings = void 0;
+    this.extraSettings = null;
+    this.widgetSettings = null;
     this.granary = {};
 
     await this.loadWidget();
-  }
-}
-
-class WidgetPreview extends PPPElement {
-  @attr
-  wtag;
-
-  connectedCallback() {
-    super.connectedCallback();
-
-    // Wait for the parent page (WidgetPage) transform first!
-    this.wtagChanged(void 0, this.wtag);
-  }
-
-  wtagChanged(oldValue, newValue) {
-    if (this.$fastController.isConnected) {
-      if (newValue) {
-        this.shadowRoot.firstChild?.remove();
-
-        const element = document.createElement(newValue);
-
-        element.setAttribute('preview', '');
-
-        element.container = this.container;
-        element.widgetDefinition = this.widgetDefinition;
-        this.container.widgetElement = element;
-
-        this.shadowRoot.appendChild(element);
-        this.$emit('widgetpreviewchange', {
-          element
-        });
-      }
-    }
   }
 }
 
@@ -1934,16 +1939,5 @@ export default {
   WidgetTypeRadioComposition: WidgetTypeRadio.compose({
     template: widgetTypeRadioTemplate,
     styles: widgetTypeRadioStyles
-  }).define(),
-  WidgetPreviewComposition: WidgetPreview.compose({
-    template: html` <template></template> `,
-    styles: css`
-      ${display('flex')}
-      :host {
-        position: relative;
-        width: 100%;
-        height: 100%;
-      }
-    `
   }).define()
 };

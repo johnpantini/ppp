@@ -18,7 +18,7 @@ import {
   Updates
 } from '../../vendor/fast-element.min.js';
 import { $throttle } from '../../lib/ppp-decorators.js';
-import { WIDGET_TYPES } from '../../lib/const.js';
+import { COLUMN_SOURCE, WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, ellipsis } from '../../design/styles.js';
 import { invalidate, validate } from '../../lib/ppp-errors.js';
 import { WidgetColumns } from '../widget-columns.js';
@@ -30,8 +30,6 @@ import {
   lineHeightWidget,
   paletteGrayLight3,
   paletteGrayDark2,
-  paletteGrayDark1,
-  paletteGrayLight2,
   spacing2
 } from '../../design/design-tokens.js';
 import '../button.js';
@@ -41,11 +39,7 @@ import '../text-field.js';
 import '../widget-controls.js';
 
 const listWidgetThCellTemplate = html`
-  <template
-    sort="${(x) => x.sort}"
-    source="${(x) => x.source}"
-    @click="${(x) => x.toggleSort()}"
-  >
+  <template sort="${(x) => x.sort}" source="${(x) => x.source}">
     <div class="sort-holder" ?hidden="${(x) => !x.sort}">
       <span class="sort-icon">
         ${(x) => html`${html.partial(x.sort === 'asc' ? sortAsc : sortDesc)}`}
@@ -67,10 +61,6 @@ const listWidgetThCellStyles = css`
     font-size: ${fontSizeWidget};
     line-height: ${lineHeightWidget};
     ${ellipsis()};
-  }
-  
-  :host(:hover) {
-    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
   }
 
   .sort-holder {
@@ -152,21 +142,7 @@ export const listWidgetTemplate = html`
         x.document.columns[column.index].sort = column.sort;
       }
 
-      !x.preview &&
-        ppp.user.functions.updateOne(
-          {
-            collection: 'workspaces'
-          },
-          {
-            _id: x.container.document._id,
-            'widgets.uniqueID': x.document.uniqueID
-          },
-          {
-            $set: {
-              'widgets.$.columns': x.document.columns
-            }
-          }
-        );
+      x.saveColumns();
 
       return x.internalSort();
     }}"
@@ -209,11 +185,34 @@ export const listWidgetTemplate = html`
           ?hidden="${(x) => !x?.document?.listSource?.length}"
         >
           <div class="thead">
-            <div class="tr">
+            <div
+              class="tr"
+              @pointerdown="${(x, c) => x.beginPossibleColumnResize(c)}"
+            >
               ${repeat(
                 (x) => x.columnsArray ?? [],
                 html`
-                  <div class="th">
+                  <div
+                    class="th"
+                    :column="${(x) => x}"
+                    title="${(x) => x.name}"
+                    style="width:${(x, c) => c.parent.getColumnWidth(x)}"
+                    @pointerdown="${(x, c) => {
+                      const cp = c.event.composedPath();
+
+                      for (const node of cp) {
+                        if (node.classList?.contains?.('th')) {
+                          node.lastElementChild.toggleSort();
+
+                          break;
+                        } else if (
+                          node.classList?.contains?.('resize-handle')
+                        ) {
+                          break;
+                        }
+                      }
+                    }}"
+                  >
                     <div class="resize-handle"></div>
                     <ppp-list-widget-th-cell
                       sort="${(x) => x.sort}"
@@ -389,6 +388,26 @@ export class ListWidget extends WidgetWithInstrument {
     await this.control?.disconnectedCallback?.(this);
 
     return super.disconnectedCallback();
+  }
+
+  getColumnWidth(column) {
+    if (typeof column.width === 'number') {
+      return `${Math.max(48, column.width)}px`;
+    } else {
+      switch (column.source) {
+        case COLUMN_SOURCE.INSTRUMENT:
+          return '128px';
+        case COLUMN_SOURCE.TRADING_STATUS:
+          return '100px';
+        case COLUMN_SOURCE.EXTENDED_LAST_PRICE:
+          return '80px';
+        case COLUMN_SOURCE.SYMBOL:
+        case COLUMN_SOURCE.INSTRUMENT_TYPE:
+          return '60px';
+        default:
+          return '70px';
+      }
+    }
   }
 
   internalSort() {
@@ -609,20 +628,13 @@ export class ListWidget extends WidgetWithInstrument {
   async submit() {
     const submission = await this.container.granary?.submit?.(this);
 
-    // columnList is undefined when setupStep === 1.
-    const columns =
-      this.container.columnList?.value?.map((c, index) => {
-        c.sort = this.document.columns?.[index]?.sort ?? null;
-
-        return c;
-      }) ?? null;
-
     return {
       $set: {
         listType: this.container.listType.value,
         listWidgetUrl: this.container.listWidgetUrl.value,
         setupStep: this.container.setupStep.value,
-        columns,
+        // columnList is undefined when setupStep === 1.
+        columns: this.container.columnList?.value ?? null,
         ...(submission ?? {})
       }
     };
@@ -644,6 +656,7 @@ export async function widgetDefinition() {
     minWidth: 275,
     minHeight: 120,
     defaultWidth: 620,
+    defaultHeight: 350,
     settings: html`
       <ppp-text-field
         hidden

@@ -159,7 +159,7 @@ export async function listDefinition() {
                     x.level1TraderId.datum()
                   );
                   const widget =
-                    x.widgetPreview.shadowRoot.querySelector('ppp-list-widget');
+                    x.widgetPreview.querySelector('ppp-list-widget');
 
                   if (widget) {
                     try {

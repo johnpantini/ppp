@@ -772,6 +772,7 @@ export async function widgetDefinition() {
     defaultWidth: 280,
     minHeight: 120,
     minWidth: 140,
+    defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="main">
         <ppp-tab id="main">Основные настройки</ppp-tab>

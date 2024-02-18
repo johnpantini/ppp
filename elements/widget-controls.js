@@ -1191,6 +1191,29 @@ export class WidgetSearchControl extends PPPOffClickElement {
   @attr({ mode: 'boolean' })
   open;
 
+  openChanged(oldValue, newValue) {
+    if (this.$fastController.isConnected) {
+      if (newValue) {
+        this.widget.style.overflow = 'visible';
+      } else {
+        this.widget.style.overflow = 'hidden';
+      }
+
+      if (this.widget.preview) {
+        this.widget.style.position = 'relative';
+        this.widget.container.widgetArea.style.height = null;
+      }
+
+      if (
+        !newValue &&
+        this.widget.instrument &&
+        this.widget.document?.type === 'order'
+      ) {
+        Updates.enqueue(() => this.widget.lastFocusedElement?.focus());
+      }
+    }
+  }
+
   @attr
   size;
 
@@ -1316,26 +1339,6 @@ export class WidgetSearchControl extends PPPOffClickElement {
 
     if (newValue) {
       newValue.classList.add('active');
-    }
-  }
-
-  openChanged(oldValue, newValue) {
-    if (this.$fastController.isConnected) {
-      if (newValue) this.widget.style.overflow = 'visible';
-      else this.widget.style.overflow = 'hidden';
-
-      if (this.widget.preview) {
-        this.widget.style.position = 'relative';
-        this.widget.container.widgetArea.style.height = null;
-      }
-
-      if (
-        !newValue &&
-        this.widget.instrument &&
-        this.widget.document?.type === 'order'
-      ) {
-        Updates.enqueue(() => this.widget.lastFocusedElement?.focus());
-      }
     }
   }
 
@@ -2242,18 +2245,6 @@ export class WidgetHeaderButtons extends PPPElement {
           );
         }
       };
-
-      const listener = (event) => {
-        if (event.detail?.element) {
-          setTimeout(() => {
-            event.detail.element.instrument = that.widget?.instrument;
-          }, 100);
-        }
-
-        page.removeEventListener('widgetpreviewchange', listener);
-      };
-
-      page.addEventListener('widgetpreviewchange', listener);
 
       page.submitDocument = async function () {
         page.beginOperation();

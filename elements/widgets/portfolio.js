@@ -34,6 +34,8 @@ import '../text-field.js';
 import '../widget-column-list.js';
 import '../widget-controls.js';
 
+await ppp.i18n(import.meta.url);
+
 const DEFAULT_COLUMNS = [
   {
     source: COLUMN_SOURCE.INSTRUMENT
@@ -116,13 +118,11 @@ export const portfolioWidgetTemplate = html`
                 (x) => x?.columns?.array,
                 html`
                   <th source="${(x) => x.source}">
-                    <div class="resize-handle"></div>
                     <div>${(x) => x.name}</div>
                   </th>
                 `
               )}
               <th class="empty">
-                <div class="resize-handle"></div>
                 <div></div>
               </th>
             </tr>
@@ -368,14 +368,14 @@ export class PortfolioWidget extends WidgetWithInstrument {
   }
 
   async validate() {
-    await this.container.columnList.validate();
+    await this.container.columnList2.validate();
   }
 
   async submit() {
     return {
       $set: {
         portfolioTraderId: this.container.portfolioTraderId.value,
-        columns: this.container.columnList.value
+        columns: this.container.columnList2.value
       }
     };
   }
@@ -395,6 +395,7 @@ export async function widgetDefinition() {
     minWidth: 275,
     minHeight: 120,
     defaultWidth: 620,
+    defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="integrations">
         <ppp-tab id="integrations">Подключения</ppp-tab>
@@ -458,7 +459,7 @@ export async function widgetDefinition() {
             </div>
             <div class="spacing2"></div>
             <ppp-widget-column-list
-              ${ref('columnList')}
+              ${ref('columnList2')}
               :stencil="${() => {
                 return {
                   source: COLUMN_SOURCE.SYMBOL,

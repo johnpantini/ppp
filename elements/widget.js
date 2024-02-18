@@ -61,6 +61,8 @@ import {
   StaleInstrumentCacheError
 } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
+import { WidgetColumns } from './widget-columns.js';
+import { $debounce } from '../lib/ppp-decorators.js';
 
 window.Observable = Observable;
 
@@ -382,6 +384,11 @@ export const widgetTableStyles = () => css`
     top: 0;
   }
 
+  .widget-table thead .th:hover,
+  .widget-table .thead .th:hover {
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight2)};
+  }
+
   .widget-table tfoot .th,
   .widget-table .tfoot .th {
     bottom: 0;
@@ -398,18 +405,18 @@ export const widgetTableStyles = () => css`
   .widget-table th .resize-handle,
   .widget-table .th .resize-handle {
     position: absolute;
-    width: 18px;
+    width: 16px;
     height: 100%;
-    left: -8px;
+    left: 0;
     top: 0;
     opacity: 0;
     cursor: col-resize;
-    z-index: 10;
+    z-index: 100;
   }
 
   .widget-table th:first-child .resize-handle,
   .widget-table .th:first-child .resize-handle {
-    left: 0;
+    display: none;
   }
 
   .widget-table th .resize-handle::before,
@@ -419,7 +426,7 @@ export const widgetTableStyles = () => css`
     background: ${paletteBlueLight1};
     width: 3px;
     height: 26px;
-    left: 8px;
+    left: 0;
   }
 
   .widget-table th:first-child .resize-handle::before,
@@ -897,6 +904,9 @@ export class Widget extends PPPElement {
   @attr({ mode: 'boolean' })
   resizing;
 
+  @attr({ attribute: 'column-resizing', mode: 'boolean' })
+  columnResizing;
+
   @attr({ mode: 'boolean' })
   preview;
 
@@ -914,9 +924,14 @@ export class Widget extends PPPElement {
 
     this.canChangeInstrument = true;
     this.document = {};
+    this.saveColumns = $debounce(this.#saveColumns.bind(this), 250);
   }
 
   connectedCallback() {
+    this.container = this.getRootNode().host;
+    this.container.widgetElement = this;
+    this.widgetDefinition ??= this.container.widgetDefinition;
+
     super.connectedCallback();
 
     this.sourceID = uuidv4();
@@ -954,12 +969,15 @@ export class Widget extends PPPElement {
       }
 
       this.style.maxHeight = `512px`;
+      this.style.maxWidth = `544px`;
       this.style.minHeight = `${this.widgetDefinition.minHeight ?? 120}px`;
 
       if (this.container.savedHeight > 0)
         this.style.height = `${this.container.savedHeight}px`;
       else {
-        this.style.height = `auto`;
+        this.style.height = this.widgetDefinition.defaultHeight
+          ? `${this.widgetDefinition.defaultHeight}px`
+          : `${this.widgetDefinition.minHeight ?? 120}px`;
       }
 
       this.document = this.container.document;
@@ -1013,6 +1031,78 @@ export class Widget extends PPPElement {
       this.removeAttribute('hidden');
     } else {
       this.setAttribute('hidden', '');
+    }
+  }
+
+  #saveColumns() {
+    !this.preview &&
+      ppp.user.functions.updateOne(
+        {
+          collection: 'workspaces'
+        },
+        {
+          _id: this.container.document._id,
+          'widgets.uniqueID': this.document.uniqueID
+        },
+        {
+          $set: {
+            'widgets.$.columns': this.document.columns
+          }
+        }
+      );
+  }
+
+  beginPossibleColumnResize({ event }) {
+    if (this.columns instanceof WidgetColumns || Array.isArray(this.columns)) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const handle = event.composedPath()[0];
+
+      if (handle?.classList?.contains?.('resize-handle')) {
+        const th = handle.parentNode.previousElementSibling;
+
+        if (th) {
+          this.columnResizing = true;
+
+          const x = event.clientX;
+          const initialWidth = parseInt(th.style.width);
+
+          const temporaryListener = (e) => {
+            if (e.type === 'pointermove') {
+              const delta = e.clientX - x;
+              const newWidth = Math.max(32, initialWidth + delta);
+
+              th.style.width = `${newWidth}px`;
+              th.column.width = newWidth;
+
+              if (Array.isArray(this.document.columns)) {
+                // For custom lists like T&S.
+                if (typeof th.column.index !== 'number') {
+                  th.column.index = this.document.columns.findIndex(
+                    (c) => c === th.column
+                  );
+                }
+
+                this.document.columns[th.column.index].width = newWidth;
+
+                this.saveColumns();
+                this.$emit('columnresize', this);
+              }
+            } else {
+              document.removeEventListener('pointermove', temporaryListener);
+              document.removeEventListener('pointerup', temporaryListener);
+              document.removeEventListener('pointercancel', temporaryListener);
+
+              this.columnResizing = false;
+            }
+          };
+
+          document.addEventListener('pointermove', temporaryListener);
+          document.addEventListener('pointerup', temporaryListener);
+          document.addEventListener('pointercancel', temporaryListener);
+        }
+      }
     }
   }
 

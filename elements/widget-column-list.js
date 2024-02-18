@@ -170,6 +170,8 @@ export class WidgetColumnListItem extends PPPElement {
     const value = {
       source: this.source.value,
       name: this.name.value.trim(),
+      sort: this.column.sort,
+      width: this.column.width,
       hidden: !this.parentNode.querySelector('[visibility-toggle]').checked
     };
 
