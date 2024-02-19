@@ -59,10 +59,13 @@ export const dictionarySelectorTemplate = () => html`
       Alor (СПБ Биржа)
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}">
-      Alor (Московская биржа), фондовый рынок
+      Alor (MOEX), фондовый рынок
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_FORTS}">
-      Alor (Московская биржа), срочный рынок
+      Alor (MOEX), срочный рынок
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_FX_METALS}">
+      Alor (MOEX), валюта и драг. металлы
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
       Tinkoff
@@ -182,7 +185,7 @@ export const instrumentsManagePageTemplate = html`
                 <ppp-radio value="bond">Облигация</ppp-radio>
                 <ppp-radio value="etf">Фонд</ppp-radio>
                 <ppp-radio value="future">Фьючерс</ppp-radio>
-                <ppp-radio value="currency">Валютная пара</ppp-radio>
+                <ppp-radio value="currency">FX</ppp-radio>
                 <ppp-radio value="index">Индекс</ppp-radio>
                 <ppp-radio value="commodity">Товар</ppp-radio>
                 <ppp-radio value="cryptocurrency">
@@ -413,6 +416,7 @@ export const instrumentsManagePageTemplate = html`
           ${when(
             (x) =>
               !x.type.value ||
+              x.type.value === 'currency' ||
               x.type.value === 'stock' ||
               x.type.value === 'etf' ||
               x.type.value === 'bond' ||
@@ -824,9 +828,15 @@ export class InstrumentsManagePage extends Page {
       this.type.value === 'bond' ||
       this.type.value === 'future'
     ) {
-      $set.lot = Math.abs(this.lot.value) || 1;
       $set.currency = this.currency.value;
+      $set.lot = Math.abs(this.lot.value) || 1;
       $set.isin = this.isin.value.trim();
+      $set.classCode = this.classCode.value.trim();
+    }
+
+    if (this.type.value === 'currency') {
+      $set.currency = this.currency.value;
+      $set.lot = Math.abs(this.lot.value) || 1;
       $set.classCode = this.classCode.value.trim();
     }
 

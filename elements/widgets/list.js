@@ -237,8 +237,8 @@ export const listWidgetTemplate = html`
           ></div>
           <div class="tfoot" ${ref('tableFoot')}></div>
         </div>
-        <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
+      <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
     </div>
   </template>
@@ -332,7 +332,7 @@ export class ListWidget extends WidgetWithInstrument {
 
       if (
         this.preview &&
-        this.container.setupStep.value === '2' &&
+        this.container.setupStep?.value === '2' &&
         !this.container.extraSettings
       ) {
         this.container.extraSettings = settings;
@@ -694,7 +694,7 @@ export async function widgetDefinition() {
       </div>
       <div class="spacing2"></div>
       <ppp-button
-        ?hidden="${(x) => x.setupStep.value === '2'}"
+        ?hidden="${(x) => x.setupStep?.value === '2'}"
         appearance="primary"
         class="xsmall"
         @click="${async (x) => {

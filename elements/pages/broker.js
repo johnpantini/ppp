@@ -249,35 +249,6 @@ export const brokerPageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
-        <ppp-generic-card>
-          <img
-            slot="logo"
-            draggable="false"
-            alt="MEXC"
-            style="height: 32px"
-            src="${() => ppp.brandSvg('mexc')}"
-          />
-          <span slot="title">MEXC</span>
-          <span slot="description">
-            Торговля и рыночные данные через криптовалютную биржу MEXC.&nbsp;<a
-              class="link"
-              target="_blank"
-              rel="noopener"
-              href="https://www.mexc.com/"
-              >Официальный ресурс</a
-            >.
-          </span>
-          <ppp-button
-            disabled
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `broker-${BROKERS.MEXC}`
-              })}"
-          >
-            Продолжить
-          </ppp-button>
-        </ppp-generic-card>
       </div>
     </form>
   </template>

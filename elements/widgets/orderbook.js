@@ -194,8 +194,8 @@ export const orderbookWidgetTemplate = html`
             )}`
           )}
         `)}
-        <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
+      <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
     </div>
   </template>

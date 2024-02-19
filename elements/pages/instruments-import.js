@@ -486,6 +486,37 @@ export class InstrumentsImportPage extends Page {
     return instruments;
   }
 
+  async [INSTRUMENT_DICTIONARY.ALOR_MOEX_FX_METALS]() {
+    const rInstruments = await fetch(
+      'https://api.alor.ru/md/v2/Securities?exchange=MOEX&sector=CURR&limit=5000&offset=0',
+      {
+        cache: 'reload'
+      }
+    );
+
+    await maybeFetchError(
+      rInstruments,
+      'Не удалось загрузить список инструментов.'
+    );
+
+    const securities = await rInstruments.json();
+
+    return securities.map((s) => {
+      return {
+        symbol: s.symbol,
+        exchange: EXCHANGE.MOEX,
+        broker: BROKERS.ALOR,
+        fullName: s.description,
+        minPriceIncrement: s.minstep,
+        type: 'currency',
+        currency: s.currency,
+        forQualInvestorFlag: false,
+        classCode: s.board,
+        lot: s.lotsize
+      };
+    });
+  }
+
   async #tinkoffSecurities(security = 'Shares', token) {
     try {
       return (

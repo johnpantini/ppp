@@ -131,8 +131,8 @@ export const timelineWidgetTemplate = html`
             )}
           </div>
         </div>
-        <ppp-widget-notifications-area></ppp-widget-notifications-area>
       </div>
+      <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
     </div>
   </template>
@@ -301,11 +301,15 @@ export class TimelineWidget extends WidgetWithInstrument {
   getLogoFallback(operations) {
     const [firstOperation] = operations;
 
+    if (!firstOperation) {
+      return '';
+    }
+
     switch (firstOperation.type) {
       case OperationType.OPERATION_TYPE_BUY:
       case OperationType.OPERATION_TYPE_SELL:
         return (
-          firstOperation.instrument.symbol?.[0] ?? firstOperation.symbol[0]
+          firstOperation.instrument?.symbol?.[0] ?? firstOperation.symbol[0]
         );
 
       default:
@@ -315,6 +319,10 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   formatCardAmount(operations) {
     const [firstOperation] = operations;
+
+    if (!firstOperation?.instrument) {
+      return '';
+    }
 
     let totalAmount = 0;
     let negative = false;
@@ -347,6 +355,10 @@ export class TimelineWidget extends WidgetWithInstrument {
 
   formatCardTitle(operations) {
     const [firstOperation] = operations;
+
+    if (!firstOperation?.instrument) {
+      return '';
+    }
 
     let totalQuantity = 0;
 
