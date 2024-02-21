@@ -177,7 +177,11 @@ export const listWidgetTemplate = html`
         ${widgetStackSelectorTemplate()} ${(x) => x?.extraControls}
         ${when(
           (x) => !x?.document?.listSource?.length,
-          html` ${html.partial(widgetEmptyStateTemplate('Список пуст.'))} `
+          html`
+            ${html.partial(
+              widgetEmptyStateTemplate('Нет данных для отображения.')
+            )}
+          `
         )}
         <div
           class="widget-table list-table"
@@ -285,6 +289,7 @@ export class ListWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
+    // Prevent attachShadow() duplicate calls. See below.
     if (this.tableBody.shadowRoot) {
       return;
     }
@@ -377,7 +382,7 @@ export class ListWidget extends WidgetWithInstrument {
       console.error(e);
 
       return this.notificationsArea.error({
-        text: 'Не удалось загрузить список.',
+        text: 'Не удалось загрузить содержимое.',
         keep: true
       });
     }
@@ -499,6 +504,10 @@ export class ListWidget extends WidgetWithInstrument {
       index = fallbackIndex ?? this.maxSeenIndex + 1;
 
       payload.index = index;
+    }
+
+    if (!payload.symbol) {
+      return;
     }
 
     const tr = document.createElement('div');

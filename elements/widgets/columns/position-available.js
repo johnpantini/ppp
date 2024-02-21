@@ -45,6 +45,10 @@ export class PositionAvailableColumn extends Column {
   size;
 
   get value() {
+    if (this.instrument) {
+      return this.size * this.instrument.lot;
+    }
+
     return this.size;
   }
 
