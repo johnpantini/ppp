@@ -14,6 +14,7 @@ import {
   repeat,
   when
 } from '../../vendor/fast-element.min.js';
+import { formatPriceWithoutCurrency } from '../../lib/intl.js';
 import { COLUMN_SOURCE, WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
 import { WidgetColumns } from '../widget-columns.js';
@@ -63,6 +64,15 @@ export const balancesWidgetTemplate = html`
                           )}
                       </span>
                       <span
+                        title="${(x, c) => {
+                          const avgPrice = c.parent.balancesMap?.get(
+                            x.symbol
+                          )?.averagePrice;
+
+                          return avgPrice
+                            ? `Средняя: ${formatPriceWithoutCurrency(avgPrice)}`
+                            : '';
+                        }}"
                         :trader="${(x, c) => c.parent.balancesTrader}"
                         :payload="${(x) => x}"
                         :column="${(x, c) => {
@@ -175,10 +185,6 @@ export class BalancesWidget extends Widget {
       this.balancesMap = new Map();
       this.columns = new WidgetColumns({
         columns: [
-          {
-            source: COLUMN_SOURCE.LAST_PRICE,
-            highlightChanges: this.document.highlightLastPriceChanges
-          },
           {
             source: COLUMN_SOURCE.INSTRUMENT
           },

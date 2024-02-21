@@ -8,6 +8,7 @@ import {
   ref
 } from '../../../vendor/fast-element.min.js';
 import {
+  BROKERS,
   COLUMN_SOURCE,
   OPERATION_TYPE,
   TRADER_DATUM,
@@ -165,7 +166,7 @@ export class IntradayStats {
 
   positionChanged(oldValue, newValue) {
     if (!newValue.isBalance) {
-      const currency = newValue.instrument.currency;
+      const currency = newValue.instrument?.currency;
 
       if (!this.positions.has(currency)) {
         this.positions.set(currency, new Map());
@@ -187,6 +188,13 @@ export class IntradayStats {
   timelineItem;
 
   isTradeEligibleForStats(trade = {}) {
+    if (
+      trade?.instrument.broker === BROKERS.ALOR &&
+      trade?.instrument.type === 'currency'
+    ) {
+      return;
+    }
+
     if (typeof trade.operationId === 'undefined') {
       return;
     }

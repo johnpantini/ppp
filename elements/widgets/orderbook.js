@@ -1227,10 +1227,10 @@ export async function widgetDefinition() {
     defaultWidth: 280,
     defaultHeight: 350,
     settings: html`
-      <ppp-tabs activeid="main">
-        <ppp-tab id="main">Основные настройки</ppp-tab>
+      <ppp-tabs activeid="traders">
+        <ppp-tab id="traders">Трейдеры</ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
-        <ppp-tab-panel id="main-panel">
+        <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Трейдер книги заявок</h5>

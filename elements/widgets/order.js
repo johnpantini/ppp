@@ -541,7 +541,7 @@ export const orderWidgetTemplate = html`
                         }
 
                         x.calculateTotalAmount();
-                        x.saveLastPriceValueDelayed();
+                        x.saveLastPriceValueWithDebounce();
                       }}"
                       @keydown=${(x, { event }) => {
                         x.handleHotkeys(event);
@@ -561,7 +561,7 @@ export const orderWidgetTemplate = html`
                         }
 
                         x.calculateTotalAmount();
-                        x.saveLastPriceValueDelayed();
+                        x.saveLastPriceValueWithDebounce();
                       }}
                       ${ref('price')}
                     ></ppp-widget-trifecta-field>
@@ -581,7 +581,7 @@ export const orderWidgetTemplate = html`
                       value="${(x) => x.document?.lastQuantity || ''}"
                       @pppstep="${(x) => {
                         x.calculateTotalAmount(false);
-                        x.saveLastQuantityValue();
+                        x.saveLastQuantityValueWithDebounce();
                       }}"
                       @keydown=${(x, { event }) => {
                         x.handleHotkeys(event);
@@ -590,7 +590,7 @@ export const orderWidgetTemplate = html`
                       }}
                       @input=${(x) => {
                         x.calculateTotalAmount(false);
-                        x.saveLastQuantityValue();
+                        x.saveLastQuantityValueWithDebounce();
                       }}
                       ${ref('quantity')}
                     ></ppp-widget-trifecta-field>
@@ -616,7 +616,7 @@ export const orderWidgetTemplate = html`
                               x.document.changePriceQuantityViaMouseWheel}"
                             value="${(x) => x.document?.lastDisplaySize || ''}"
                             @pppstep="${(x) => {
-                              x.saveLastDisplaySizeValue();
+                              x.saveLastDisplaySizeValueWithDebounce();
                             }}"
                             @keydown=${(x, { event }) => {
                               x.handleHotkeys(event);
@@ -624,7 +624,7 @@ export const orderWidgetTemplate = html`
                               return true;
                             }}
                             @input=${(x) => {
-                              x.saveLastDisplaySizeValue();
+                              x.saveLastDisplaySizeValueWithDebounce();
                             }}
                             ${ref('displaySize')}
                           ></ppp-widget-trifecta-field>
@@ -1336,16 +1336,16 @@ export class OrderWidget extends WidgetWithInstrument {
       this.#calculateCommission.bind(this),
       250
     );
-    this.saveLastPriceValueDelayed = $debounce(
-      this.#calculateEstimate.bind(this),
+    this.saveLastPriceValueWithDebounce = $debounce(
+      this.saveLastPriceValue.bind(this),
       250
     );
-    this.saveLastQuantityValue = $debounce(
-      this.#calculateEstimate.bind(this),
+    this.saveLastQuantityValueWithDebounce = $debounce(
+      this.saveLastQuantityValue.bind(this),
       250
     );
-    this.saveLastDisplaySizeValue = $debounce(
-      this.#calculateEstimate.bind(this),
+    this.saveLastDisplaySizeValueWithDebounce = $debounce(
+      this.saveLastDisplaySizeValue.bind(this),
       250
     );
 
@@ -2070,11 +2070,7 @@ export class OrderWidget extends WidgetWithInstrument {
     });
   }
 
-  #saveLastPriceValueDelayed() {
-    return this.saveLastPriceValue();
-  }
-
-  #saveLastQuantityValue() {
+  saveLastQuantityValue() {
     return this.updateDocumentFragment({
       $set: {
         'widgets.$.lastQuantity': stringToFloat(this.quantity.value)
@@ -2082,7 +2078,7 @@ export class OrderWidget extends WidgetWithInstrument {
     });
   }
 
-  #saveLastDisplaySizeValue() {
+  saveLastDisplaySizeValue() {
     return this.updateDocumentFragment({
       $set: {
         'widgets.$.lastDisplaySize': stringToFloat(this.displaySize.value)
