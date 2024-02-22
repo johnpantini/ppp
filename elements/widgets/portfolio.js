@@ -82,9 +82,7 @@ export class PortfolioWidget extends ListWidget {
           ] ?? true
         )
       ) {
-        this.document.listSource = [];
-
-        return Observable.notify(this, 'document');
+        return;
       }
 
       const size = newValue.size;
@@ -112,15 +110,15 @@ export class PortfolioWidget extends ListWidget {
           row.remove();
         }
       }
-
-      if (this.positions.size) {
-        this.document.listSource = [{}];
-      } else {
-        this.document.listSource = [];
-      }
-
-      Observable.notify(this, 'document');
     }
+
+    if (this.positions.size) {
+      this.document.listSource = [{}];
+    } else {
+      this.document.listSource = [];
+    }
+
+    Observable.notify(this, 'document');
   }
 
   async connectedCallback() {
