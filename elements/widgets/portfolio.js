@@ -70,44 +70,41 @@ export class PortfolioWidget extends ListWidget {
 
     if (!newValue?.isBalance && type) {
       if (
-        !(
-          this.document[
-            {
-              stock: 'showStocksFlag',
-              bond: 'showBondsFlag',
-              etf: 'showEtfsFlag',
-              future: 'showFuturesFlag',
-              cryptocurrency: 'showCryptoFlag'
-            }[type]
-          ] ?? true
-        )
+        this.document[
+          {
+            stock: 'showStocksFlag',
+            bond: 'showBondsFlag',
+            etf: 'showEtfsFlag',
+            future: 'showFuturesFlag',
+            cryptocurrency: 'showCryptoFlag'
+          }[type]
+        ] ??
+        true
       ) {
-        return;
-      }
+        const size = newValue.size;
+        const symbol = newValue.symbol;
+        const currency = newValue.instrument.currency;
 
-      const size = newValue.size;
-      const symbol = newValue.symbol;
-      const currency = newValue.instrument.currency;
+        if (size) this.positions.set(symbol, newValue);
+        else this.positions.delete(symbol);
 
-      if (size) this.positions.set(symbol, newValue);
-      else this.positions.delete(symbol);
+        let row = this.rowsCache.get(`${symbol}:${currency}`);
 
-      let row = this.rowsCache.get(`${symbol}:${currency}`);
+        if (typeof row === 'undefined') {
+          if (size) {
+            row = this.appendRow({
+              symbol,
+              traderId: this.document.portfolioTraderId
+            });
 
-      if (typeof row === 'undefined') {
-        if (size) {
-          row = this.appendRow({
-            symbol,
-            traderId: this.document.portfolioTraderId
-          });
-
-          row.setAttribute('currency', currency);
-          this.rowsCache.set(`${symbol}:${currency}`, row);
-        }
-      } else {
-        if (!size) {
-          this.rowsCache.delete(`${symbol}:${currency}`);
-          row.remove();
+            row.setAttribute('currency', currency);
+            this.rowsCache.set(`${symbol}:${currency}`, row);
+          }
+        } else {
+          if (!size) {
+            this.rowsCache.delete(`${symbol}:${currency}`);
+            row.remove();
+          }
         }
       }
     }
