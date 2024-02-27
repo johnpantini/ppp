@@ -162,7 +162,7 @@ export const timeAndSalesWidgetStyles = css`
 
   .column-content.highlighted {
     color: ${themeConditional(paletteGrayBase, darken(paletteGrayLight2, 10))};
-    font-weight: 500;
+    font-weight: 600;
   }
 
   ${normalize()}
@@ -231,7 +231,7 @@ export const timeAndSalesWidgetStyles = css`
   .rows-holder {
     position: absolute;
     z-index: -1;
-    top: 0;
+    top: 1px;
     cursor: pointer;
     width: 100%;
     overflow: hidden;
@@ -467,6 +467,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
 
     this.#rowsHolder = this.grid.querySelector('div.rows-holder');
+
+    if ('MozAppearance' in document.documentElement.style) {
+      this.#rowsHolder.style.top = '2px';
+    }
 
     let rowsLayout = '';
 

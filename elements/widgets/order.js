@@ -2162,9 +2162,9 @@ export class OrderWidget extends WidgetWithInstrument {
 
         if (
           type === ORDERS.CUSTOM &&
-          typeof payload.order.baseUrl === 'string'
+          typeof this.conditionalOrder?.order.baseUrl === 'string'
         ) {
-          implUrl = `${payload.order.baseUrl}/impl.js`;
+          implUrl = `${this.conditionalOrder?.order.baseUrl}/impl.js`;
         }
 
         if (this.ordersTrader.document.runtime === 'url') {

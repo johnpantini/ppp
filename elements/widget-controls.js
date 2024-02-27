@@ -2027,7 +2027,7 @@ export class WidgetHeaderButtons extends PPPElement {
 
       try {
         const container = this.widget.container;
-        // For copy.
+        // For copying.
         const { widgets } = await ppp.user.functions.findOne(
           { collection: 'workspaces' },
           {
@@ -2043,11 +2043,11 @@ export class WidgetHeaderButtons extends PPPElement {
             ) !== 'disabled'
               ? ppp.app.widgetClipboard
               : {
-                  // Normalized one from MongoDB
+                  // A normalized one from MongoDB.
                   savedDocument: widgets?.find(
                     (w) => w.uniqueID === this.widget.document.uniqueID
                   ),
-                  // Denormalized one, used for placement
+                  // A denormalized one, used for placement.
                   liveDocument: Object.assign({}, this.widget.document)
                 };
 
@@ -2204,6 +2204,8 @@ export class WidgetHeaderButtons extends PPPElement {
                     ordered: false
                   }
                 );
+
+                placedWidget.syncEnsemble();
               } finally {
                 container.locked = false;
               }

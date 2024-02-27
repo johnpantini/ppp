@@ -601,7 +601,8 @@ export class WorkspacePage extends Page {
             $project: {
               _id: 1,
               widgets: 1,
-              name: 1
+              name: 1,
+              ensembleMode: 1
             }
           },
           {
@@ -789,6 +790,7 @@ export class WorkspacePage extends Page {
     return {
       _id: this.document._id,
       name: this.document.name,
+      ensembleMode: this.document.ensembleMode ?? 'default',
       widgets
     };
   }

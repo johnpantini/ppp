@@ -9,6 +9,7 @@ import {
 } from '../page.js';
 import '../badge.js';
 import '../button.js';
+import '../radio-group.js';
 import '../text-field.js';
 
 export const workspaceManagePageTemplate = html`
@@ -31,6 +32,27 @@ export const workspaceManagePageTemplate = html`
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Ансамбли виджетов</h5>
+          <p class="description">
+            Укажите режим синхронизации ансамблей виджетов для этого терминала.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-radio-group
+            orientation="vertical"
+            value="${(x) => x.document.ensembleMode ?? 'default'}"
+            ${ref('ensembleMode')}
+          >
+            <ppp-radio value="default">По умолчанию</ppp-radio>
+            <ppp-radio value="group">
+              Синхронизировать по виджетам группы
+            </ppp-radio>
+            <ppp-radio value="all">Синхронизировать по всем виджетам</ppp-radio>
+          </ppp-radio-group>
         </div>
       </section>
       ${documentPageFooterPartial()}
@@ -94,6 +116,7 @@ export class WorkspaceManagePage extends Page {
     return {
       $set: {
         name: this.name.value.trim(),
+        ensembleMode: this.ensembleMode.value,
         updatedAt: new Date()
       },
       $setOnInsert: {

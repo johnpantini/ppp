@@ -172,64 +172,9 @@ export const widgetStackSelectorTemplate = () => html`
     <ppp-widget-tabs
       ${ref('stackSelectorTabs')}
       activeid="${(x) => x.document.activeWidgetLink}"
-      @change="${(self) => {
-        self.document.activeWidgetLink = self.stackSelectorTabs.activeid;
-
-        const bulkWritePayload = [
-          {
-            updateOne: {
-              filter: {
-                _id: self.container.document._id,
-                'widgets.uniqueID': self.document.uniqueID
-              },
-              update: {
-                $set: {
-                  'widgets.$.activeWidgetLink': self.document.activeWidgetLink
-                }
-              }
-            }
-          }
-        ];
-
-        for (const link of self.document.linkedWidgets ?? []) {
-          const w = self.container.widgets.find(
-            (w) => w.document.uniqueID === link
-          );
-
-          if (w) {
-            w.document.activeWidgetLink = self.document.activeWidgetLink;
-
-            Observable.notify(w, 'document');
-
-            w.restack();
-
-            bulkWritePayload.push({
-              updateOne: {
-                filter: {
-                  _id: w.container.document._id,
-                  'widgets.uniqueID': w.document.uniqueID
-                },
-                update: {
-                  $set: {
-                    'widgets.$.activeWidgetLink': self.document.activeWidgetLink
-                  }
-                }
-              }
-            });
-          }
-        }
-
-        self.restack();
-
-        return ppp.user.functions.bulkWrite(
-          {
-            collection: 'workspaces'
-          },
-          bulkWritePayload,
-          {
-            ordered: false
-          }
-        );
+      @change="${(x) => {
+        x.switchEnsemble();
+        x.syncEnsemble();
       }}"
     >
       ${repeat(
@@ -1016,6 +961,103 @@ export class Widget extends PPPElement {
           title.style.color = createThemed(color).createCSS();
         }
       }
+    }
+  }
+
+  switchEnsemble() {
+    this.document.activeWidgetLink = this.stackSelectorTabs.activeid;
+
+    const bulkWritePayload = [
+      {
+        updateOne: {
+          filter: {
+            _id: this.container.document._id,
+            'widgets.uniqueID': this.document.uniqueID
+          },
+          update: {
+            $set: {
+              'widgets.$.activeWidgetLink': this.document.activeWidgetLink
+            }
+          }
+        }
+      }
+    ];
+
+    for (const link of this.document.linkedWidgets ?? []) {
+      const w = this.container.widgets.find(
+        (w) => w.document.uniqueID === link
+      );
+
+      if (w) {
+        w.document.activeWidgetLink = this.document.activeWidgetLink;
+
+        Observable.notify(w, 'document');
+
+        w.restack();
+
+        bulkWritePayload.push({
+          updateOne: {
+            filter: {
+              _id: w.container.document._id,
+              'widgets.uniqueID': w.document.uniqueID
+            },
+            update: {
+              $set: {
+                'widgets.$.activeWidgetLink': this.document.activeWidgetLink
+              }
+            }
+          }
+        });
+      }
+    }
+
+    this.restack();
+
+    return ppp.user.functions.bulkWrite(
+      {
+        collection: 'workspaces'
+      },
+      bulkWritePayload,
+      {
+        ordered: false
+      }
+    );
+  }
+
+  syncEnsemble() {
+    const container = this.container;
+
+    if (container.document.ensembleMode !== 'default') {
+      container.widgets.forEach((w) => {
+        if (container.document.ensembleMode === 'group') {
+          const g1 = this.groupControl?.selection ?? '';
+          const g2 = w.groupControl?.selection ?? '';
+
+          if (g1 !== g2) {
+            return;
+          }
+        }
+
+        if (w !== this && !w.hasAttribute('hidden')) {
+          const tabs = w.stackSelectorTabs;
+
+          if (tabs && !tabs.parentNode.hasAttribute('hidden')) {
+            const neededIndex = this.stackSelectorTabs.tabs.findIndex((t) => {
+              return t.id === this.stackSelectorTabs.activeid;
+            });
+
+            if (
+              neededIndex > -1 &&
+              w.stackSelectorTabs.tabs.length >= neededIndex + 1
+            ) {
+              w.stackSelectorTabs.activeid =
+                w.stackSelectorTabs.tabs[neededIndex].id;
+
+              w.switchEnsemble();
+            }
+          }
+        }
+      });
     }
   }
 
