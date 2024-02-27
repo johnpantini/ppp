@@ -107,6 +107,7 @@ export default function (i18n) {
         [TRADERS.FINAM_TRADE_API]: 'Finam Trade API',
         [TRADERS.IB]: 'Interactive Brokers',
         [TRADERS.CAPITALCOM]: 'Capital.com',
+        [TRADERS.PAPER_TRADE]: 'paperTrade',
         [TRADERS.CUSTOM]: 'По ссылке'
       },
       traderCaps: {

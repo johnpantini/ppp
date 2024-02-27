@@ -24,6 +24,21 @@ import {
   formatNumber,
   getInstrumentPrecision
 } from '../../../lib/intl.js';
+import { invalidate } from '../../../lib/ppp-errors.js';
+import { Tmpl } from '../../../lib/tmpl.js';
+import { ValidationError } from '../../../lib/ppp-exceptions.js';
+import '../../snippet.js';
+
+export const exampleVirtualCommFunctionCode = `/**
+* Функция, возвращающая абсолютное значение комиссии за балансирующую сделку.
+*
+* @param price - Цена исполнения.
+* @param quantity - Количество лотов инструмента.
+* @param instrument - Торговый инструмент.
+*/
+
+return 0;
+`;
 
 export const DEFAULT_COLUMNS = [
   {
@@ -420,7 +435,11 @@ export class IntradayStats {
               (stats.buyQuantity - stats.sellQuantity) *
               referencePrice *
               instrument.lot;
-
+            stats.commission += this.commFunc(
+              referencePrice,
+              stats.buyQuantity - stats.sellQuantity,
+              instrument
+            );
             stats.gross = stats.sells - stats.buys + stats.virtualSells;
           } else {
             // Short position.
@@ -428,7 +447,11 @@ export class IntradayStats {
               (stats.sellQuantity - stats.buyQuantity) *
               referencePrice *
               instrument.lot;
-
+            stats.commission += this.commFunc(
+              referencePrice,
+              stats.sellQuantity - stats.buyQuantity,
+              instrument
+            );
             stats.gross = stats.sells - stats.buys - stats.virtualBuys;
           }
         } else {
@@ -446,7 +469,11 @@ export class IntradayStats {
                   (stats.sellQuantity - stats.buyQuantity) *
                   referencePrice *
                   instrument.lot;
-
+                stats.commission += this.commFunc(
+                  referencePrice,
+                  stats.sellQuantity - stats.buyQuantity,
+                  instrument
+                );
                 stats.gross = stats.sells - stats.buys - stats.virtualBuys;
               } else {
                 // Covered existing shorts today.
@@ -484,6 +511,11 @@ export class IntradayStats {
                 if (diff > absImbalance) {
                   stats.virtualSells =
                     (diff - absImbalance) * referencePrice * instrument.lot;
+                  stats.commission += this.commFunc(
+                    referencePrice,
+                    diff - absImbalance,
+                    instrument
+                  );
                 }
 
                 stats.gross = stats.sells - stats.buys + stats.virtualSells;
@@ -496,7 +528,11 @@ export class IntradayStats {
                   (stats.buyQuantity - stats.sellQuantity) *
                   referencePrice *
                   instrument.lot;
-
+                stats.commission += this.commFunc(
+                  referencePrice,
+                  stats.buyQuantity - stats.sellQuantity,
+                  instrument
+                );
                 stats.gross = stats.sells - stats.buys + stats.virtualSells;
               } else {
                 // Liquidated existing longs today.
@@ -534,6 +570,11 @@ export class IntradayStats {
                 if (diff > absImbalance) {
                   stats.virtualBuys =
                     (diff - absImbalance) * referencePrice * instrument.lot;
+                  stats.commission += this.commFunc(
+                    referencePrice,
+                    diff - absImbalance,
+                    instrument
+                  );
                 }
 
                 stats.gross = stats.sells - stats.buys - stats.virtualBuys;
@@ -813,6 +854,17 @@ export class IntradayStats {
   async connectedCallback(widget) {
     this.widget = widget;
     this.rebuildStats = $throttle(this.rebuildStatsInternal.bind(this), 1000);
+    this.commFunc = new Function(
+      'price',
+      'quantity',
+      'instrument',
+      await new Tmpl().render(
+        this.widget,
+        this.widget.document.virtualTradesCommFunctionCode ??
+          exampleVirtualCommFunctionCode,
+        {}
+      )
+    );
 
     if (!this.widget.document.trader) {
       return this.widget.notificationsArea.error({
@@ -911,13 +963,51 @@ export async function listDefinition() {
         return widget.stats.disconnectedCallback();
       }
     },
-    validate: async () => {},
+    validate: async (widget) => {
+      try {
+        const commission = new Function(
+          'price',
+          'quantity',
+          'instrument',
+          await new Tmpl().render(
+            widget,
+            widget.container.virtualTradesCommFunctionCode.value,
+            {}
+          )
+        )(1, 567.35, {
+          symbol: 'ROSN',
+          exchange: 'MOEX',
+          broker: 'alor',
+          fullName: 'ПАО НК Роснефть',
+          minPriceIncrement: 0.05,
+          type: 'stock',
+          currency: 'RUB',
+          forQualInvestorFlag: false,
+          classCode: 'TQBR',
+          lot: 1,
+          isin: 'RU000A0J2Q06'
+        });
+
+        if (isNaN(commission) || typeof commission !== 'number') {
+          throw new ValidationError();
+        }
+      } catch (e) {
+        console.dir(e);
+
+        invalidate(widget.container.virtualTradesCommFunctionCode, {
+          errorMessage: 'Исходный код не может быть использован.',
+          raiseException: true
+        });
+      }
+    },
     submit: async (widget) => {
       return {
         traderId: widget.container.traderId.value,
         level1TraderId: widget.container.level1TraderId.value,
         extraLevel1TraderId: widget.container.extraLevel1TraderId.value,
-        extraLevel1Trader2Id: widget.container.extraLevel1Trader2Id.value
+        extraLevel1Trader2Id: widget.container.extraLevel1Trader2Id.value,
+        virtualTradesCommFunctionCode:
+          widget.container.virtualTradesCommFunctionCode.value
       };
     },
     settings: html`
@@ -1111,6 +1201,25 @@ export async function listDefinition() {
             +
           </ppp-button>
         </div>
+      </div>
+      <div class="widget-settings-section">
+        <div class="widget-settings-label-group">
+          <h5>Расчёт комиссии виртуальных сделок</h5>
+        </div>
+        <div class="spacing2"></div>
+        <ppp-snippet
+          style="height: 200px;"
+          revertable
+          @revert="${(x) => {
+            x.virtualTradesCommFunctionCode.updateCode(
+              exampleVirtualCommFunctionCode
+            );
+          }}"
+          :code="${(x) =>
+            x.document.virtualTradesCommFunctionCode ??
+            exampleVirtualCommFunctionCode}"
+          ${ref('virtualTradesCommFunctionCode')}
+        ></ppp-snippet>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">

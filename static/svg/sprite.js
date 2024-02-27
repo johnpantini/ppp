@@ -178,6 +178,14 @@ export const cloudFunctions = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="
 </svg>
 `;
 
+export const paperTrade = `<svg xmlns="http://www.w3.org/2000/svg" width="66" height="34" viewBox="0 0 66 34" fill="none">
+<rect x="1" y="1" width="64" height="32" rx="4" stroke="var(--palette-black-with-palette-gray-light-2)"/>
+<circle cx="33" cy="17" r="16" fill="var(--palette-green-base)" stroke="var(--palette-black-with-palette-gray-light-2)"/>
+<path d="M38 9.85714H31.7313C29.9403 9.85714 28.4478 11.3723 28.4478 13.1905C28.4478 15.0087 29.9403 16.5238 31.7313 16.5238H34.4179C36.209 16.5238 37.7015 18.039 37.7015 19.8571C37.7015 21.6753 36.209 23.1905 34.4179 23.1905H28M33 7V27" stroke="var(--palette-black-with-palette-gray-light-2)" stroke-miterlimit="10"/>
+<circle cx="7" cy="6" r="1" fill="var(--palette-black-with-palette-gray-light-2)"/>
+<circle cx="59" cy="28" r="1" fill="var(--palette-black-with-palette-gray-light-2)"/>
+</svg>`;
+
 export const buySell = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 57" fill="none">
 <circle cx="20" cy="20" r="19" fill="var(--palette-red-light-2)" stroke="var(--palette-black-with-palette-gray-base)"/>
 <path d="M25 13H18.7313C16.9403 13 15.4478 14.5909 15.4478 16.5C15.4478 18.4091 16.9403 20 18.7313 20H21.4179C23.209 20 24.7015 21.5909 24.7015 23.5C24.7015 25.4091 23.209 27 21.4179 27H15M20 10V30" stroke="var(--palette-black)" stroke-miterlimit="10"/>

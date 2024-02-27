@@ -30,10 +30,14 @@ import '../text-field.js';
 
 await ppp.i18n(import.meta.url);
 
-export const dictionarySelectorTemplate = () => html`
+export const dictionarySelectorTemplate = (options = {}) => html`
   <ppp-select
-    value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}"
+    value="${() => options.value ?? INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}"
     @change="${(x) => {
+      if (options.silent) {
+        return;
+      }
+
       ppp.app.setURLSearchParams({
         dictionary: encodeURIComponent(x.dictionary.value)
       });
