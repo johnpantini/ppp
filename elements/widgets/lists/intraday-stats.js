@@ -1206,7 +1206,6 @@ export async function listDefinition() {
         <div class="widget-settings-label-group">
           <h5>Расчёт комиссии виртуальных сделок</h5>
         </div>
-        <div class="spacing2"></div>
         <ppp-snippet
           style="height: 200px;"
           revertable
