@@ -234,6 +234,10 @@ export class IntradayStats {
             trade.price *
             trade.instrument.lot) /
           100;
+
+        if (trade.price < 8) {
+          trade.commission += 0.003 * trade.quantity;
+        }
       }
 
       const date = new Date(trade.createdAt);
@@ -1039,6 +1043,9 @@ export async function listDefinition() {
                       $or: [
                         {
                           type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.ALOR_OPENAPI_V2%]`
+                        },
+                        {
+                          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.PAPER_TRADE%]`
                         },
                         {
                           type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.IB%]`

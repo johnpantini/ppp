@@ -46,7 +46,7 @@ export class IframeModalPage extends Page {
   generateHtml(html) {
     const styles = `
       * {
-        font-family: -apple-system, BlinkMacSystemFont, Roboto, Segoe UI, "Trebuchet MS", Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Icons16, sans-serif;
+        font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
         color: ${ppp.darkMode ? paletteGrayLight3.$value : paletteBlack.$value};
       }
 

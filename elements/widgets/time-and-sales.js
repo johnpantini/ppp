@@ -231,7 +231,7 @@ export const timeAndSalesWidgetStyles = css`
   .rows-holder {
     position: absolute;
     z-index: -1;
-    top: 1px;
+    top: 0;
     cursor: pointer;
     width: 100%;
     overflow: hidden;

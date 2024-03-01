@@ -1,7 +1,7 @@
 export default {
   // Types
   bodyFont:
-    '-apple-system, BlinkMacSystemFont, Roboto, Segoe UI, "Trebuchet MS", Oxygen, Ubuntu, Cantarell, Open Sans, Helvetica Neue, Icons16, sans-serif',
+    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
   monospaceFont: `'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace`,
   // Widget
   fontSizeWidget: '12px',
