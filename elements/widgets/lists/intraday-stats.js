@@ -960,11 +960,11 @@ export async function listDefinition() {
       async connectedCallback(widget) {
         widget.stats = new IntradayStats(widget);
 
-        return widget.stats.connectedCallback(widget);
+        return widget.stats?.connectedCallback(widget);
       }
 
       async disconnectedCallback(widget) {
-        return widget.stats.disconnectedCallback();
+        return widget.stats?.disconnectedCallback();
       }
     },
     validate: async (widget) => {

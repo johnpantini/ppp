@@ -2129,6 +2129,20 @@ export class OrderWidget extends WidgetWithInstrument {
           });
         }
 
+        if (!this.price.value) {
+          return this.notificationsArea.error({
+            title: 'Ошибка заявки',
+            text: 'Цена должна быть положительной.'
+          });
+        }
+
+        if (!this.quantity.value) {
+          return this.notificationsArea.error({
+            title: 'Ошибка заявки',
+            text: 'Количество должно быть положительным.'
+          });
+        }
+
         await this.ordersTrader.placeLimitOrder({
           instrument: this.instrument,
           price: this.price.value,
@@ -2143,6 +2157,13 @@ export class OrderWidget extends WidgetWithInstrument {
           return this.notificationsArea.error({
             title: 'Ошибка заявки',
             text: 'Трейдер не поддерживает выставление рыночных заявок.'
+          });
+        }
+
+        if (!this.quantity.value) {
+          return this.notificationsArea.error({
+            title: 'Ошибка заявки',
+            text: 'Количество должно быть положительным.'
           });
         }
 
@@ -2196,11 +2217,11 @@ export class OrderWidget extends WidgetWithInstrument {
 
       return this.notificationsArea.error({
         title: 'Заявка не выставлена',
-        text: await this.ordersTrader?.formatError?.(
-          this.instrument,
-          e,
-          e.message
-        )
+        text: await this.ordersTrader?.formatError?.({
+          instrument: this.instrument,
+          error: e,
+          defaultErrorMessage: e.message
+        })
       });
     } finally {
       this.topLoader.stop();

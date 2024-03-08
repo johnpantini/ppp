@@ -282,11 +282,11 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
 
             this.notificationsArea.error({
               title: 'Скальперские кнопки',
-              text: await this.ordersTrader?.formatError?.(
-                this.instrument,
-                e,
-                'Не удалось переставить заявки.'
-              )
+              text: await this.ordersTrader?.formatError?.({
+                instrument: this.instrument,
+                error: e,
+                defaultErrorMessage: 'Не удалось переставить заявки.'
+              })
             });
           } finally {
             if (coolDown > 0) {

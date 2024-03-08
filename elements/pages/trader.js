@@ -3,7 +3,7 @@ import { html, css, ref, repeat, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { TRADERS, TRADER_CAPS } from '../../lib/const.js';
 import { validate, invalidate, ValidationError } from '../../lib/ppp-errors.js';
-import { cloudFunctions, search } from '../../static/svg/sprite.js';
+import { cloudFunctions, paperTrade, search } from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import { designTokens } from '../../design/design-tokens.js';
 import { checkmark } from '../../static/svg/sprite.js';
@@ -773,6 +773,43 @@ export const traderPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.BINANCE_V3}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <div class="picture" slot="logo">${html.partial(paperTrade)}</div>
+          <div slot="title">paperTrade</div>
+          <span slot="description">Торговля на виртуальном счёте.</span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
+              </li>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
+              </li>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.PAPER_TRADE}`
               })}"
           >
             Продолжить
