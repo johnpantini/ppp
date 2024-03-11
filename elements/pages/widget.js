@@ -72,7 +72,7 @@ export const colorSelectorTemplate = ({
     ${ref(refName)}
     value="${() => value ?? 'default'}"
   >
-    <span slot="label">${isDark ? 'Тёмная тема' : 'Светлая тема'}</span>
+    <span slot="description">${isDark ? 'Тёмная тема' : 'Светлая тема'}</span>
     <ppp-option value="default">По умолчанию</ppp-option>
     <ppp-option value="palette-white">Белый</ppp-option>
     <ppp-option value="palette-black">Чёрный</ppp-option>
@@ -432,7 +432,7 @@ export const widgetPageTemplate = html`
                                 value="${(x) => x.document.headerBgOpacity}"
                                 ${ref('headerBgOpacity')}
                               >
-                                <span slot="label">Прозрачность, %</span>
+                                <span slot="description">Прозрачность, %</span>
                               </ppp-text-field>
                             </div>
                           </div>
@@ -495,6 +495,7 @@ export const widgetPageTemplate = html`
                               </div>
                               <div class="widget-settings-input-group">
                                 <ppp-text-field
+                                  standalone
                                   ?disabled="${(x) =>
                                     !(
                                       x.document.type === 'custom' &&
@@ -879,7 +880,7 @@ export const widgetPageStyles = css`
     max-width: 268px;
   }
 
-  .widget-settings-label-group {
+  .widget-settings-label-group > .description {
     margin-bottom: ${spacing2};
   }
 
@@ -893,7 +894,7 @@ export const widgetPageStyles = css`
   }
 
   .widget-settings-label-group .description {
-    margin-top: ${spacing1};
+    margin-top: ${spacing2};
     padding-right: 20px;
   }
 

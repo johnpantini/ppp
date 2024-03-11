@@ -68,6 +68,7 @@ export const widgetColumnListItemTemplate = html`
           html`
             <ppp-text-field
               ${ref('valueKey')}
+              standalone
               placeholder="Ключ"
               value="${(x) => x.column.valueKey}"
             ></ppp-text-field>

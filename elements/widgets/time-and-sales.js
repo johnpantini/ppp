@@ -945,6 +945,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-snippet
+                standalone
                 :code="${(x) => x.document.threshold ?? '0'}"
                 ${ref('threshold')}
               ></ppp-snippet>
@@ -956,6 +957,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Формат отображения в заголовке</h5>
             </div>
+            <div class="spacing2"></div>
             <div class="widget-settings-input-group">
               <ppp-radio-group
                 orientation="vertical"
@@ -978,6 +980,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 type="number"
                 placeholder="100"
                 value="${(x) => x.document.depth ?? 100}"
@@ -994,6 +997,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 type="number"
                 placeholder="Нет"
                 value="${(x) => x.document.highlightedVolumeThreshold ?? ''}"

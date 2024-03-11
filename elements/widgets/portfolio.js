@@ -276,6 +276,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Типы инструментов для отображения</h5>
             </div>
+            <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showStocksFlag ?? true}"
               ${ref('showStocksFlag')}

@@ -1119,6 +1119,7 @@ export async function listDefinition() {
         <div class="widget-settings-label-group">
           <h5>Дополнительный трейдер L1 #1</h5>
         </div>
+        <div class="spacing2"></div>
         <div class="control-line flex-start">
           <ppp-query-select
             ${ref('extraLevel1TraderId')}
@@ -1166,6 +1167,7 @@ export async function listDefinition() {
         <div class="widget-settings-label-group">
           <h5>Дополнительный трейдер L1 #2</h5>
         </div>
+        <div class="spacing2"></div>
         <div class="control-line flex-start">
           <ppp-query-select
             ${ref('extraLevel1Trader2Id')}
@@ -1213,7 +1215,9 @@ export async function listDefinition() {
         <div class="widget-settings-label-group">
           <h5>Расчёт комиссии виртуальных сделок</h5>
         </div>
+        <div class="spacing2"></div>
         <ppp-snippet
+          standalone
           style="height: 200px;"
           revertable
           @revert="${(x) => {

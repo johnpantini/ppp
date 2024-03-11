@@ -132,6 +132,7 @@ export async function widgetDefinition() {
         <div class="widget-settings-label-group">
           <h5>Интерфейс</h5>
         </div>
+        <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.displayTimeInHeader ?? true}"
           ${ref('displayTimeInHeader')}
@@ -143,6 +144,7 @@ export async function widgetDefinition() {
         <div class="widget-settings-label-group">
           <h5>Формат отображения в заголовке</h5>
         </div>
+        <div class="spacing2"></div>
         <div class="widget-settings-input-group">
           <ppp-radio-group
             orientation="vertical"

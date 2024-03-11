@@ -676,6 +676,7 @@ export async function widgetDefinition() {
         <div class="widget-settings-label-group">
           <h5>Тип списка</h5>
         </div>
+        <div class="spacing2"></div>
         <div class="widget-settings-input-group">
           <ppp-radio-group
             class="widget-ignore-changes"

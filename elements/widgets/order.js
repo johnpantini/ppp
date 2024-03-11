@@ -2588,6 +2588,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 optional
                 placeholder="1;10;100;1k;~100;~500;~1k"
                 value="${(x) => x.document.fastVolumes}"
@@ -2609,6 +2610,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Интерфейс</h5>
             </div>
+            <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.displaySizeInUnits}"
               ${ref('displaySizeInUnits')}
@@ -2632,6 +2634,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Наполнение</h5>
             </div>
+            <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showLastPriceInHeader ?? true}"
               ${ref('showLastPriceInHeader')}
@@ -2688,6 +2691,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 optional
                 placeholder="Не задана"
                 value="${(x) => x.document.buyShortcut}"
@@ -2722,6 +2726,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 optional
                 placeholder="Не задана"
                 value="${(x) => x.document.sellShortcut}"
@@ -2757,6 +2762,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 optional
                 placeholder="Не задана"
                 value="${(x) => x.document.searchShortcut}"
@@ -2793,6 +2799,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 optional
                 placeholder="Не задана"
                 value="${(x) => x.document.cancelAllOrdersShortcut}"

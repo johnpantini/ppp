@@ -1332,6 +1332,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Дополнительный трейдер книги заявок #1</h5>
             </div>
+            <div class="spacing2"></div>
             <div class="control-line">
               <ppp-checkbox
                 standalone
@@ -1386,6 +1387,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Дополнительный трейдер книги заявок #2</h5>
             </div>
+            <div class="spacing2"></div>
             <div class="control-line">
               <ppp-checkbox
                 standalone
@@ -1440,6 +1442,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Дополнительный трейдер книги заявок #3</h5>
             </div>
+            <div class="spacing2"></div>
             <div class="control-line">
               <ppp-checkbox
                 standalone
@@ -1517,6 +1520,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Тип отображения</h5>
             </div>
+            <div class="spacing2"></div>
             <div class="widget-settings-input-group">
               <ppp-radio-group
                 orientation="vertical"
@@ -1537,6 +1541,7 @@ export async function widgetDefinition() {
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
+                standalone
                 type="number"
                 placeholder="20"
                 value="${(x) => x.document.depth ?? 20}"
@@ -1548,6 +1553,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Интерфейс</h5>
             </div>
+            <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showPools ?? true}"
               ${ref('showPools')}

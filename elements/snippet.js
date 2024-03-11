@@ -40,6 +40,7 @@ import {
   paletteRedLight3,
   paletteWhite,
   spacing1,
+  spacing2,
   themeConditional,
   toColorComponents
 } from '../design/design-tokens.js';
@@ -169,7 +170,7 @@ export const snippetStyles = css`
 
   .label,
   .description {
-    padding-bottom: ${spacing1};
+    padding-bottom: ${spacing2};
   }
 
   .root {

@@ -517,27 +517,25 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Прилипание к краю окна</h5>
             </div>
-            <div class="widget-settings-input-group">
-              <div class="control-stack">
-                <ppp-checkbox
-                  ?checked="${(x) => x.document.snapToLeft}"
-                  ${ref('snapToLeft')}
-                >
-                  Слева
-                </ppp-checkbox>
-                <ppp-checkbox
-                  ?checked="${(x) => x.document.snapToRight}"
-                  ${ref('snapToRight')}
-                >
-                  Справа
-                </ppp-checkbox>
-              </div>
-            </div>
+            <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.snapToLeft}"
+              ${ref('snapToLeft')}
+            >
+              Слева
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.snapToRight}"
+              ${ref('snapToRight')}
+            >
+              Справа
+            </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Интерфейс</h5>
             </div>
+            <div class="spacing2"></div>
             <div class="widget-settings-input-group">
               <div class="control-stack">
                 <ppp-checkbox

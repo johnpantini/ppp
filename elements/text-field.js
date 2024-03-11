@@ -32,6 +32,7 @@ import {
   paletteRedLight1,
   paletteWhite,
   spacing1,
+  spacing2,
   themeConditional
 } from '../design/design-tokens.js';
 import {
@@ -197,7 +198,7 @@ export const textFieldStyles = css`
 
   .label,
   .description {
-    padding-bottom: ${spacing1};
+    padding-bottom: ${spacing2};
   }
 
   .root {

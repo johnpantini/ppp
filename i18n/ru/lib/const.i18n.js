@@ -108,6 +108,8 @@ export default function (i18n) {
         [TRADERS.IB]: 'Interactive Brokers',
         [TRADERS.CAPITALCOM]: 'Capital.com',
         [TRADERS.PAPER_TRADE]: 'paperTrade',
+        [TRADERS.COMBINED_L1]: 'L1-комбинация',
+        [TRADERS.COMBINED_ORDERBOOK]: 'Комбинация книг заявок',
         [TRADERS.CUSTOM]: 'По ссылке'
       },
       traderCaps: {

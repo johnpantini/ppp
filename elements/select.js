@@ -40,6 +40,7 @@ import {
   paletteRedLight1,
   paletteWhite,
   spacing1,
+  spacing2,
   themeConditional
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
@@ -158,7 +159,7 @@ export const selectStyles = css`
 
   .label,
   .description {
-    padding-bottom: ${spacing1};
+    padding-bottom: ${spacing2};
   }
 
   .root {

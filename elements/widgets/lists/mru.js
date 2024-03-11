@@ -168,6 +168,7 @@ export async function listDefinition() {
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field
+            standalone
             type="number"
             placeholder="100"
             value="${(x) => x.document.depth ?? 100}"

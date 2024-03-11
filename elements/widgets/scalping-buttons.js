@@ -403,6 +403,7 @@ export async function widgetDefinition() {
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field
+            standalone
             optional
             type="number"
             placeholder="1000"
@@ -423,6 +424,7 @@ export async function widgetDefinition() {
         </div>
         <div class="widget-settings-input-group">
           <ppp-snippet
+            standalone
             :code="${(x) =>
               x.document.buySideButtonsTemplate ??
               defaultBuySideButtonsTemplate}"
@@ -436,6 +438,7 @@ export async function widgetDefinition() {
         </div>
         <div class="widget-settings-input-group">
           <ppp-snippet
+            standalone
             :code="${(x) =>
               x.document.sellSideButtonsTemplate ??
               defaultSellSideButtonsTemplate}"
@@ -447,6 +450,7 @@ export async function widgetDefinition() {
         <div class="widget-settings-label-group">
           <h5>Наполнение</h5>
         </div>
+        <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.showAllTab ?? true}"
           ${ref('showAllTab')}
