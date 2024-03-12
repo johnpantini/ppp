@@ -960,7 +960,7 @@ export class InstrumentsImportPage extends Page {
   async connectedCallback() {
     await super.connectedCallback();
 
-    let { dictionary = INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES, symbol } =
+    let { dictionary = INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES } =
       ppp.app.params() ?? {};
 
     if (Object.values(INSTRUMENT_DICTIONARY).indexOf(dictionary) === -1) {
@@ -987,7 +987,8 @@ export class InstrumentsImportPage extends Page {
           },
           {
             exchange: exchangeForDBRequest,
-            broker
+            broker,
+            dictionary: this.dictionary.value
           },
           {
             symbol: 1,
@@ -1003,7 +1004,8 @@ export class InstrumentsImportPage extends Page {
           },
           {
             exchange: exchangeForDBRequest,
-            broker
+            broker,
+            dictionary: this.dictionary.value
           }
         );
 
@@ -1062,6 +1064,8 @@ export class InstrumentsImportPage extends Page {
             if (typeof i.symbol === 'string') {
               i.symbol = i.symbol.toUpperCase();
             }
+
+            i.dictionary = this.dictionary.value;
 
             if (existingInstruments) {
               const existingInstrument = existingInstruments.find(

@@ -12,7 +12,8 @@ import {
   EXCHANGE,
   COLUMN_SOURCE,
   ORDERS,
-  TRADING_STATUS
+  TRADING_STATUS,
+  TRADER_DATUM
 } from '../../../lib/const.js';
 
 export default function (i18n) {
@@ -67,6 +68,20 @@ export default function (i18n) {
         [COLUMN_SOURCE.DAY_VOLUME]: 'Объём',
         [COLUMN_SOURCE.TRADING_STATUS]: 'Торговый статус',
         [COLUMN_SOURCE.FORMATTED_VALUE]: 'Значение'
+      },
+      datum: {
+        [TRADER_DATUM.LAST_PRICE]: 'Цена',
+        [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены, %',
+        [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены',
+        [TRADER_DATUM.BEST_BID]: 'Bid',
+        [TRADER_DATUM.BEST_ASK]: 'Ask',
+        [TRADER_DATUM.MIDPOINT]: 'Mid',
+        [TRADER_DATUM.EXTENDED_LAST_PRICE]: 'Цена+',
+        [TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены+, %',
+        [TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены+',
+        [TRADER_DATUM.STATUS]: 'Статус',
+        [TRADER_DATUM.TRADING_STATUS]: 'Торговый статус',
+        [TRADER_DATUM.DAY_VOLUME]: 'Объём'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

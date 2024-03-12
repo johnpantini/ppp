@@ -26,6 +26,7 @@ const path = require('node:path');
     '/ppp/lib/traders/finam-trade-api.js',
     '/ppp/lib/traders/ib.js',
     '/ppp/lib/traders/paper-trade.js',
+    '/ppp/lib/traders/combined-l1.js',
     '/ppp/lib/traders/tinkoff-grpc-web.js',
     '/ppp/lib/traders/utex-margin-stocks.js'
   ]) {

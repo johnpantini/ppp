@@ -3,7 +3,12 @@ import { html, css, ref, repeat, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { TRADERS, TRADER_CAPS } from '../../lib/const.js';
 import { validate, invalidate, ValidationError } from '../../lib/ppp-errors.js';
-import { cloudFunctions, paperTrade, search } from '../../static/svg/sprite.js';
+import {
+  cloudFunctions,
+  combination,
+  paperTrade,
+  search
+} from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import { designTokens } from '../../design/design-tokens.js';
 import { checkmark } from '../../static/svg/sprite.js';
@@ -810,6 +815,27 @@ export const traderPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `trader-${TRADERS.PAPER_TRADE}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <div class="picture" slot="logo">${html.partial(combination)}</div>
+          <div slot="title">L1-комбинация</div>
+          <span slot="description">Настраиваемый источник данных L1.</span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LEVEL1}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.COMBINED_L1}`
               })}"
           >
             Продолжить

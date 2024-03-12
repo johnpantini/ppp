@@ -46,7 +46,6 @@ export const orderStopLossTakeProfitTemplate = html`
             style="height: 128px"
             :code="${(x) =>
               `Трейдер #1 - источник данных L1.\nТрейдер #2 - источник данных L1.\nТрейдер #3 - источник данных L1.\nТрейдер #4 - источник данных L1.`}"
-            ${ref('ycPrivateKey')}
           ></ppp-snippet>
         </div>
       </section>

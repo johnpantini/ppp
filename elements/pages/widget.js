@@ -13,7 +13,10 @@ import {
   repeat
 } from '../../vendor/fast-element.min.js';
 import { documentPageHeaderPartial, Page, pageStyles } from '../page.js';
-import { Denormalization } from '../../lib/ppp-denormalize.js';
+import {
+  Denormalization,
+  extractEverything
+} from '../../lib/ppp-denormalize.js';
 import { debounce, later } from '../../lib/ppp-decorators.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -33,7 +36,6 @@ import {
   paletteGreenLight3,
   paletteWhite,
   positive,
-  spacing1,
   spacing2,
   spacing3,
   spacing5,
@@ -1705,171 +1707,17 @@ export class WidgetPage extends Page {
 
   // Needed when there is no document _id. Use  _id: '@settings' to retrieve lookups.
   async requestManualDenormalization() {
-    const lines = ((context) => {
-      return context.services
-        .get('mongodb-atlas')
-        .db('ppp')
-        .collection('app')
-        .aggregate([
-          {
-            $match: {
-              _id: '@settings'
-            }
-          },
-          {
-            $lookup: {
-              from: 'apis',
-              pipeline: [
-                {
-                  $match: {
-                    isolated: { $ne: true }
-                  }
-                },
-                {
-                  $project: {
-                    updatedAt: 0,
-                    createdAt: 0,
-                    version: 0
-                  }
-                }
-              ],
-              as: 'apis'
-            }
-          },
-          {
-            $lookup: {
-              from: 'traders',
-              pipeline: [
-                {
-                  $match: {
-                    isolated: { $ne: true }
-                  }
-                },
-                {
-                  $project: {
-                    updatedAt: 0,
-                    createdAt: 0,
-                    version: 0
-                  }
-                }
-              ],
-              as: 'traders'
-            }
-          },
-          {
-            $lookup: {
-              from: 'brokers',
-              pipeline: [
-                {
-                  $match: {
-                    isolated: { $ne: true }
-                  }
-                },
-                {
-                  $project: {
-                    updatedAt: 0,
-                    createdAt: 0,
-                    version: 0
-                  }
-                }
-              ],
-              as: 'brokers'
-            }
-          },
-          {
-            $lookup: {
-              from: 'bots',
-              pipeline: [
-                {
-                  $match: {
-                    isolated: { $ne: true }
-                  }
-                },
-                {
-                  $project: {
-                    updatedAt: 0,
-                    createdAt: 0,
-                    version: 0,
-                    webhook: 0,
-                    type: 0
-                  }
-                }
-              ],
-              as: 'bots'
-            }
-          },
-          {
-            $lookup: {
-              from: 'orders',
-              pipeline: [
-                {
-                  $match: {
-                    isolated: { $ne: true }
-                  }
-                },
-                {
-                  $project: {
-                    updatedAt: 0,
-                    createdAt: 0,
-                    version: 0
-                  }
-                }
-              ],
-              as: 'orders'
-            }
-          },
-          {
-            $lookup: {
-              from: 'services',
-              pipeline: [
-                {
-                  $match: {
-                    isolated: { $ne: true }
-                  }
-                },
-                {
-                  $project: {
-                    updatedAt: 0,
-                    createdAt: 0,
-                    version: 0,
-                    constsCode: 0,
-                    formatterCode: 0,
-                    instrumentsCode: 0,
-                    symbolsCode: 0,
-                    environmentCode: 0,
-                    environmentCodeSecret: 0,
-                    sourceCode: 0,
-                    parsingCode: 0,
-                    versioningUrl: 0,
-                    useVersioning: 0,
-                    tableSchema: 0,
-                    insertTriggerCode: 0,
-                    deleteTriggerCode: 0
-                  }
-                }
-              ],
-              as: 'services'
-            }
-          }
-        ]);
-    })
-      .toString()
-      .split(/\r?\n/);
+    const refs = await extractEverything();
 
-    lines.pop();
-    lines.shift();
-
-    const [evalRequest] = await ppp.user.functions.eval(lines.join('\n'));
-
-    this.denormalization.fillRefs(evalRequest);
+    this.denormalization.fillRefs(refs);
 
     return {
-      apis: evalRequest.apis,
-      traders: evalRequest.traders,
-      brokers: evalRequest.brokers,
-      bots: evalRequest.bots,
-      orders: evalRequest.orders,
-      services: evalRequest.services
+      apis: refs.apis,
+      traders: refs.traders,
+      brokers: refs.brokers,
+      bots: refs.bots,
+      orders: refs.orders,
+      services: refs.services
     };
   }
 
