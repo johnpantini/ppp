@@ -974,19 +974,19 @@ export class InstrumentsImportPage extends Page {
     this.beginOperation();
 
     try {
-      const { exchange, exchangeForDBRequest, broker } =
-        getInstrumentDictionaryMeta(this.dictionary.value);
+      const { exchange, broker } = getInstrumentDictionaryMeta(
+        this.dictionary.value
+      );
 
       let existingInstruments;
 
-      if (exchange && broker && exchangeForDBRequest) {
+      if (exchange && broker) {
         // Use this to preserve user field values
         existingInstruments = await ppp.user.functions.find(
           {
             collection: 'instruments'
           },
           {
-            exchange: exchangeForDBRequest,
             broker,
             dictionary: this.dictionary.value
           },
@@ -1003,7 +1003,6 @@ export class InstrumentsImportPage extends Page {
             collection: 'instruments'
           },
           {
-            exchange: exchangeForDBRequest,
             broker,
             dictionary: this.dictionary.value
           }

@@ -87,6 +87,20 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
+          <h5>Хост</h5>
+          <p class="description">Хост для подключения к базе данных.</p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="url"
+            placeholder="*.supabase.com"
+            value="${(x) => x.document.hostname ?? ''}"
+            ${ref('hostname')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Порт</h5>
           <p class="description">Порт для подключения к базе данных.</p>
         </div>
@@ -183,11 +197,10 @@ export const apiSupabasePageStyles = css`
 `;
 
 export async function checkSupabaseCredentials({ url, key }) {
-  return ppp.fetch(new URL('rest/v1/rpc/get_size_by_bucket', url).toString(), {
-    method: 'POST',
+  return ppp.fetch(new URL('rest/v1/', url).toString(), {
     headers: {
-      apiKey: key,
-      'Content-Profile': 'storage'
+      apikey: key,
+      Authorization: `Bearer ${key}`
     }
   });
 }
@@ -216,6 +229,7 @@ export class ApiSupabasePage extends Page {
     await validate(this.url);
     await validate(this.key);
     await validate(this.db);
+    await validate(this.hostname);
     await validate(this.port);
     await validate(this.user);
     await validate(this.password);
@@ -235,7 +249,6 @@ export class ApiSupabasePage extends Page {
       });
     }
 
-    const { hostname } = new URL(this.url.value);
     const connector = this.connectorServiceId.datum();
     const connectorUrl = await getAspirantWorkerBaseUrl(connector);
 
@@ -245,7 +258,7 @@ export class ApiSupabasePage extends Page {
           connectorUrl,
           connectionString: `postgres://${this.user.value.trim()}:${encodeURIComponent(
             this.password.value
-          )}@db.${hostname}:${this.port.value.trim()}/${this.db.value.trim()}`
+          )}@${this.hostname.value.trim()}:${this.port.value.trim()}/${this.db.value.trim()}`
         })
       ).ok
     ) {
@@ -302,6 +315,7 @@ export class ApiSupabasePage extends Page {
         url: this.url.value.trim(),
         key: this.key.value.trim(),
         db: this.db.value.trim(),
+        hostname: this.hostname.value.trim(),
         port: +Math.abs(this.port.value),
         user: this.user.value.trim(),
         password: this.password.value.trim(),

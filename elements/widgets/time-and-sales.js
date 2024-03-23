@@ -955,7 +955,7 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Формат отображения в заголовке</h5>
+              <h5>Формат отображения времени</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">

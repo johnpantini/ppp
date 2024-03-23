@@ -1023,653 +1023,1244 @@ function parseXml(data, options = {}) {
   return new XMLParser(options).parse(data);
 }
 
-console.log(
-  parseXml(
-    '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Do not forget me this weekend!</body></note>'
-  )
-);
+// console.log(
+//   parseXml(
+//     '<?xml version="1.0" encoding="UTF-8"?><note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Do not forget me this weekend!</body></note>'
+//   )
+// );
 
 // The Fly
 const html = `
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="/cdn-cgi/apps/head/ndvGCjKj1YsAx8OwosHePwqIQmc.js"></script><style>
+
+
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NVM4XFS');</script>
+<!-- End Google Tag Manager -->
+
+<!-- CONFIGURACIÓN DE SOCIAL MEDIA -->
+<script>
+  const GOOGLE_SIGNIN_CLIENTID = '271806115842-ivr99kbfuv959pbun0104kamk9vgt6o6.apps.googleusercontent.com';
+  const FACEBOOK_SIGNIN_CLIENTID = '241853041812724';
+</script>
+
+<!-- IMPORTAR SCRIPT DE FACEBOOK -->
+      <script src="https://accounts.google.com/gsi/client"></script>
+
+
+<style>
 #wrapper, #wrapper.no_sidebar {
-\tpadding: 0;
-\tposition: relative;
-\tbox-shadow: 0 -50px 56px rgba(0, 0, 0, 0.50);
-\t-moz-box-shadow: 0 -50px 56px rgba(0, 0, 0, 0.50);
-\t-webkit-box-shadow: 0 -50px 56px rgba(0, 0, 0, 0.50);
-\tvertical-align: top;
-\tbackground: #254B82;
-margin: 147px auto 0 auto;\t}
+padding: 0;
+position: relative;
+box-shadow: 0 -50px 56px rgba(0, 0, 0, 0.50);
+-moz-box-shadow: 0 -50px 56px rgba(0, 0, 0, 0.50);
+-webkit-box-shadow: 0 -50px 56px rgba(0, 0, 0, 0.50);
+vertical-align: top;
+background: #254B82;
+margin: 113px auto 0 auto;	}
 </style>
-<meta name="title" content="Breaking News - The Fly">
+<!-- Google --><meta name="title" content="Breaking News - The Fly">
 <meta name="description" content="Breaking News - The Fly. The Fly team scours all sources of company news, from mainstream to cutting edge,then filters out the noise to deliver shortform stories consisting of only market moving content.">
 <meta name="keywords" content="stock market news, financial investment news, live stock market news, live stock market feeds, stock market alerts">
-<meta property="twitter:card" content="summary_large_image">
+<!-- Twitter --><meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:site" content="@theflynews">
 <meta property="twitter:title" content="Breaking News - The Fly">
 <meta property="twitter:description" content="Breaking News - The Fly. The Fly team scours all sources of company news, from mainstream to cutting edge,then filters out the noise to deliver shortform stories consisting of only market moving content.">
 <meta property="twitter:image" content="https://thefly.com/images/meta/metatags.jpg">
-<meta property="og:type" content="website">
+<!-- Open Graph - Facebook --><meta property="og:type" content="website">
 <meta property="og:title" content="Breaking News - The Fly">
 <meta property="og:description" content="Breaking News - The Fly. The Fly team scours all sources of company news, from mainstream to cutting edge,then filters out the noise to deliver shortform stories consisting of only market moving content.">
 <meta property="og:image" content="https://thefly.com/images/meta/metatags.jpg">
-<link rel="alternate" href="https://m.thefly.com/news-feed"><title>Breaking News - The Fly</title>
+<link rel="alternate" media="only screen and (max-width: 640px)" href="https://m.thefly.com/news-feed"><title>Breaking News - The Fly</title>
 <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 <meta http-equiv="Content-type" content="text/html; charset=UTF-8" />
-<meta name="Googlebot-News" content="noindex, nofollow"><script type="text/javascript" src="/js/log.js?lastUpdate=202206173423888144"></script><script type="text/javascript" src="/js/jquery-1.7.2.js?lastUpdate=202206173423888144"></script>
+<meta name="Googlebot-News" content="noindex, nofollow"><script type="text/javascript" src="/js/log.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/jquery-1.7.2.js?lastUpdate=20240323104"></script> 
 <script>
-\t//#1067 Algunos plugins generan llamados a undefined page siempre que haya un input con el nombre "search". Esto lo debería apagar.
-\twindow.suggestmeyes_loaded = true;
-//\tVariable global que indica en qué página está
-\tvar page = 'news';
-\tvar loggedin = 0;
-\tvar esGrandfathered = 0;
-\tvar snf = 0;
-\tvar fts = 'https://thefly.com//free_trial.php';
-\tvar sfd = 'https://thefly.com/';
-\tvar logJs = false;
-\tvar sessionNotify = {};
-\tsessionNotify.title = "";
-\tsessionNotify.message = "";
-\tsessionNotify.redirect = "";
+//#1067 Algunos plugins generan llamados a undefined page siempre que haya un input con el nombre "search". Esto lo debería apagar.
+window.suggestmeyes_loaded = true;
+//	Variable global que indica en qué página está
+var page = 'news';
+var loggedin = 0;
+var esGrandfathered = 0;
+var snf = 0;
+var subs = 0;
+var fts = 'https://thefly.com//free_trial.php';
+var sfd = 'https://thefly.com/';
+var logJs = false;
+var sessionNotify = {};
+sessionNotify.title = "";
+sessionNotify.message = "";
+sessionNotify.redirect = "";
+
+/* Free user */
+var esFreeUser = 0; 
+var freeUserFTDone = 0; 
+var fu_quota_news = 1;
+var fu_quota_syndicate = 1;
+var fu_quota_events = 1;
+
+// social Media Ints
+var sm_goog_enabled = 1;
+var sm_fb_enabled = 0;
+var sm_li_enabled = 1;
+
+
 </script>
+
 <!--[if lt IE 9]>
 <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
+<!-- <link rel="icon" href="< ?php echo $site_root; ? >/theflyFav.png" type="image/png" />  -->
 <link rel="icon" href="/flyfavicon.png" />
 <link rel="shortcut icon" href="/flyfavicon.png" />
+
+<!--
+<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon.png"/>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"/>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"/>
+<link rel="manifest" href="/manifest.json"/>
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"/>
+<meta name="msapplication-TileColor" content="#2d89ef"/>
+<meta name="theme-color" content="#5d8dd6"/>-->
+
 
 <link rel="stylesheet" href="/js/plugins/uniform/css/uniform.css">
 <link rel="stylesheet" href="/js/plugins/uniform/css/uniform.fotw.css">
 <link rel="stylesheet" href="/js/plugins/fancybox/jquery.fancybox-1.3.4.css">
 <link rel="stylesheet" href="/css/blue.monday/jplayer.thefly.css">
-<link rel="stylesheet" href="/css/todos.css?lastUpdate=202206173423888144">
+
+<link rel="stylesheet" href="/css/todos.css?lastUpdate=20240323104">
 <!--[if gte IE 9]>
 <link rel="stylesheet" href="/css/ie_9up.css">
 <![endif]-->
 <!--[if lt IE 9]>
 <link rel="stylesheet" href="/css/ie_old.css">
 <![endif]-->
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q8C51VDZZ2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Q8C51VDZZ2', {
+          'custom_map': {'dimension1': 'loginStatus'}});
+        
+        //gtag('set', 'loginStatus', 'notlogged');
 
+  </script>
+
+        
+<!-- Global Site Tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-57334935-1"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('set', 'loginStatus', 'notlogged');
-  gtag('set', 'dimension1', 'notlogged');
-  gtag('config', 'UA-57334935-1');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('set', 'loginStatus', 'notlogged');
+gtag('set', 'dimension1', 'notlogged');
+gtag('config', 'UA-57334935-1');
+var gtagId = "G-Q8C51VDZZ2";
+var ga_client_id = false;
+
+gtag('get', gtagId, 'client_id', (clientID) => {
+    ga_client_id = clientID;
+});
+
 </script>
-<script>
-\t\t\t/* Wrappers para analytics
-\t\t\t\t\t- Modificaciones: el parametro fieldsObject se elimino porque no se usa. Para implementarlo en la nueva version hay que agergar para los casos especificos el config. Ver la doc sobre este punto en Google
-\t\t\t*/
-\t\t\tfunction aTrackEvent(eventCategory, eventAction, eventLabel, eventValue, fieldsObject){
-\t\t\t\t\t\t\t\t\t\t// Le paso la dmiension a cada evento por si no lo toma de la sesion
-\t\t\t\t\t\tgtag('event', eventAction, {
-\t  \t\t\t\t\t'event_category': eventCategory,
-\t  \t\t\t\t\t'event_label': eventLabel,
-\t  \t\t\t\t\t'value': eventValue,
-\t  \t\t\t\t\t'loginStatus': 'notlogged'
-\t\t\t\t\t\t});
-\t\t\t\t\t\t\t\tlog("aTrackEvent('"+eventCategory+"','"+eventAction+"','"+eventLabel+"','"+eventValue+"')");
-\t\t\t\t//console.log("aTrackEvent('"+eventCategory+"','"+eventAction+"','"+eventLabel+"','"+eventValue+"')");
-\t\t\t\treturn true;
-\t\t\t}
 
-\t\t\tfunction trackTiming(category, timingVar, timingValue, timingLabel ){
-\t\t\t\t// Le paso la dmiension a cada evento por si no lo toma de la sesion
-\t\t\t\tgtag('event', 'timing_complete', {
-\t\t\t\t\t  'name': timingVar,
-\t\t\t\t\t  'value': timingValue,
-\t\t\t\t\t  'event_category': category,
-\t\t\t\t\t  'event_label': timingLabel,
-\t\t\t\t\t  'loginStatus': 'notlogged'
-\t\t\t\t\t});
+    
+  
+  <script>
+    /* Wrappers para analytics 
+        - Modificaciones: el parametro fieldsObject se elimino porque no se usa. Para implementarlo en la nueva version hay que agergar para los casos especificos el config. Ver la doc sobre este punto en Google
+    */
+    function aTrackEvent(eventCategory, eventAction, eventLabel, eventValue, fieldsObject){
+                  // Le paso la dmiension a cada evento por si no lo toma de la sesion
+          gtag('event', eventAction, {
+            'event_category': eventCategory,
+            'event_label': eventLabel,
+            'value': eventValue,
+            'loginStatus': 'notlogged'
+          });
+              log("aTrackEvent('"+eventCategory+"','"+eventAction+"','"+eventLabel+"','"+eventValue+"')");
+      //console.log("aTrackEvent('"+eventCategory+"','"+eventAction+"','"+eventLabel+"','"+eventValue+"')");
+      return true;
+    }
 
-\t\t\t\tlog("trackTiming('"+category+"','"+timingVar+"','"+timingValue+"','"+timingLabel+"')");
-\t\t\t}
+    function trackTiming(category, timingVar, timingValue, timingLabel ){
+      // Le paso la dmiension a cada evento por si no lo toma de la sesion
+      gtag('event', 'timing_complete', {
+          'name': timingVar,
+          'value': timingValue,
+          'event_category': category,
+          'event_label': timingLabel,
+          'loginStatus': 'notlogged'
+        });
 
-\t\t</script>
-<script>
+      log("trackTiming('"+category+"','"+timingVar+"','"+timingValue+"','"+timingLabel+"')");
+    }
 
-\t\t\t$("document").ready(function(){
-\t\t\t\t\t/* No esto y seguro cual de las dos esta funcionando, dejo las dos formas */
-\t\t\t\t\tgtag('set', 'loginStatus', 'notlogged');
-\t\t\t\t\tgtag('set', 'dimension1', 'notlogged');
-\t\t\t});
-\t\t\t</script>
-<script type='application/ld+json'>
-{"@context":"http:\\/\\/schema.org","@type":"Organization","url":"https:\\/\\/thefly.com","logo":"https:\\/\\/thefly.com\\/images\\/logo_thefly_small.png","contactPoint":[{"@type":"ContactPoint","telephone":"+1 908 273 6397","contactType":"customer support","areaServed":"US","availableLanguage":"English"}],"sameAs":[]}</script><script type='application/ld+json'>
-{"@context":"http:\\/\\/schema.org","@type":"WebSite","name":"TheFly.com","alternateName":"First site in stock news.","url":"https:\\/\\/thefly.com"}</script>
-<script async src="https://u5.investingchannel.com/static/uat.js"></script>
-<script>
-         InvestingChannelQueue = window.InvestingChannelQueue || [];
-         InvestingChannelQueue.push(function() {
-             InvestingChannel.UAT.Run("0e5c08ae-fecf-41c6-8671-93ae635c67af");
-         });
-</script>
+  </script>
+
+  
+    
+    <script>
+
+    $("document").ready(function(){
+        /* No esto y seguro cual de las dos esta funcionando, dejo las dos formas */
+        gtag('set', 'loginStatus', 'notlogged');
+        gtag('set', 'dimension1', 'notlogged');
+    });
+    </script>
+  <script type='application/ld+json'>
+{"@context":"http:\/\/schema.org","@type":"Organization","url":"https:\/\/thefly.com","logo":"https:\/\/thefly.com\/images\/logo_thefly_small.png","contactPoint":[{"@type":"ContactPoint","telephone":"+1 908 273 6397","contactType":"customer support","areaServed":"US","availableLanguage":"English"}],"sameAs":[]}</script><script type='application/ld+json'>
+{"@context":"http:\/\/schema.org","@type":"WebSite","name":"TheFly.com","alternateName":"First site in stock news.","url":"https:\/\/thefly.com"}</script>
+
+
+<script src="/c3650cdf-216a-4ba2-80b0-9d6c540b105e58d2670b-ea0f-484e-b88c-0e2c1499ec9bd71e4b42-8570-44e3-89b6-845326fa43b6" type="text/javascript"></script>
+
 </head>
 <body class=" ">
-<div class="cookie-banner" style="display:none">
-<div class="exclamation-icon">
-<img src="/images/exclamation_icon.png" />
-</div>
-<div class="consent-message">
-<div class="consent-title">We use cookies to improve user experience, and analyze website traffic.
-</div>
-<div class="consent-text">
-For these reasons, we may share your site usage data with our analytics partners. By clicking "Accept Cookies" you consent to store on your device all the technologies described in our <a href="/overlays/disclaimer.php?h=Privacy%20Policy&#priv" class='open_disclaimer_overlay'>Cookie Policy.</a>
-</div>
-</div>
-<div class="consent-accept">
-<button class="cookie-accept gold">ACCEPT COOKIES</button>
-</div>
-</div><header id="site_header" style='height: 100px;' class="gradient site_header_back">
-<div class="container">
-<dl id='site_logo'>&nbsp;</dl>
-<div id='ic_728x90_1' class='ad_wrapper ad_header'></div> <form action="login.php" onsubmit="javascript:return false;" id="login_form" method="post">
-<input name="username" id="username" type="text" class="textinput not_uniform" size="28" maxlength="50" placeholder="Email/Username">
-<input name="password" id="password" type="password" class="textinput not_uniform" size="28" maxlength="50" placeholder="Password">
-<input type="image" src="/images/buttons/login_new.png">
-<a href="#" class="button gold open_free_trial">Get Free Trial</a>
-<div class='links_abajo_login'>
-<a href="overlays/forgotPassword.php" class="forgot_password">Forgot password</a><br>
-<label for="remember_me">Remember me</label>&nbsp;<input name="remember_me" id="remember_me" type="checkbox" />
-</div>
-</form>
-</div>
-</header>
-<nav id="site_header_nav" style='top:100px' class="gradient">
-<div class="container">
-<ul class="sf-menu">
-<li><a href="/">Home</a></li>
-<li class="active"><a href="#">News &amp; Analysis</a>
-<ul style="display: none;">
-<li><a href="news.php">Breaking&nbsp;News</a></li>
-<li><a href="news.php?onthefly=on&h=6">On The Fly</a></li>
-<li><a href="#" onClick="javascript:openRadioWindow(this);return false;">Fly cast</a></li>
-</ul>
-</li>
-<li><a href="portfolios.php">My Portfolios</a></li>
-<li><a id='link_calendar_menu' href="#">Calendars</a>
-<ul class='ul_menu_dentro_calendar' style="display: none;">
-<li><a href="events.php">Events</a></li>
-<li><a href="syndicate.php">Syndicate</a></li>
-<li><a href="streetResearch.php">Street&nbsp;Research</a></li>
-</ul>
-</li>
-<li><a id='link_about_menu' href="#">About The Fly</a>
-<ul style="display: none;" id="menu_about_list">
-<li><a href="services.php">Services</a></li>
-<li><a href="about_the_fly.php">About&nbsp;Us</a></li>
-<li><a href="faq.php">HELP/FAQ</a></li>
-<li><a href="contact.php">Contact Us</a></li>
-<li><a href='/rates.php' class='open_subscriptions_overlay '>Subscriptions</a></li>
-<li><a href="/overlays/disclaimer.php" class='open_disclaimer_overlay'>Disclaimer and Terms of Use</a></li>
-<li><a href="/overlays/disclaimer.php?h=Privacy%20Policy&#priv" class='open_disclaimer_overlay'>Privacy Policy</a></li>
-<li><a href="/ads_app.php" class='open_donotsellinfo'>Do Not Sell My Personal Information</a></li>
-</ul>
-</li>
 
-</ul>
-<form action="news.php" method="get" id="nav_search">
-<input id='input_nav_search' name="symbol" type="text" class="textinput" size="10" maxlength="50" placeholder="Enter Symbol">
-<input type="image" src="/images/buttons/search_nav.png">
-</form>
-</div>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-NVM4XFS"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+
+
+<div class="cookie-banner" style="display:none">
+        <div class="exclamation-icon">
+          <img src="/images/exclamation_icon.png"/>
+        </div>
+        <div class="consent-message">
+          <div class="consent-title">We use cookies to improve user experience, and analyze website traffic.
+          </div>
+          <div class="consent-text">
+          For these reasons, we may share your site usage data with our analytics partners. By clicking "Accept Cookies" you consent to store on your device all the technologies described in our <a href="/overlays/disclaimer.php?h=Privacy%20Policy&go=priv" class='open_disclaimer_overlay'>Cookie Policy.</a>
+          </div>
+        </div>
+        <div class="consent-accept">
+          <button class="cookie-accept gold">ACCEPT COOKIES</button>
+        </div>
+         </div><header id="site_header"  class="gradient site_header_back">
+<div class="container">
+  <dl id='site_logo'>&nbsp;</dl> 
+  <input type='button' class="send go_free_trial logo_button" value='Start Free Trial' name='start_account'>
+  <div id="header-login-wrapper">
+<nav
+id="utility-new-login"
+class="login-form"
+>
+<input
+  type="checkbox"
+  name="login_switcher"
+  id="login_switcher"
+  class="not_uniform"
+>
+<label
+  id="login_label"
+  for="login_switcher"
+>
+  <span>
+    Login
+  </span>
+</label>
+<span>
+  |
+</span>
+<a id="#login_form_free_signup" href="/free_sign_up.php">
+  Join
+</a>
+<nav
+  id="login_nav"
+>
+  <div>
+    <span>
+      Sign In with:
+    </span>
+    <ul>
+              <li>
+        <!--
+        <div
+          id="google-login"
+        ></div>
+        -->
+        
+        <div id="google-login" ></div>
+        <button id="google-login-alternative" data-href="g_red.php?cb=news.php&a=2" style='display:none !important'>
+          <i>
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="LgbsSe-Bz112c"><g><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path><path fill="none" d="M0 0h48v48H0z"></path></g></svg>
+          </i>
+          <span>
+          Google
+          </span>
+          </button>
+          <div id="g_id_onload"
+               data-client_id="271806115842-ivr99kbfuv959pbun0104kamk9vgt6o6.apps.googleusercontent.com"
+               data-context="use" 
+               data-auto_select="true"
+               data-itp_support="true"
+               >
+          </div>
+                    
+      </li>
+                                <li>
+          <button
+          id="linkedin-sign-up"
+          class="linkedin-login-button"
+          data-href="ld_red.php?cb=news.php&a=2"
+        >
+          <i>
+            <img width='25px' src="images/sm_ln_logo.png" />
+          </i>
+          <span>
+            LinkedIn
+          </span>
+        </button>					</li>
+            </ul>
+  </div>
+  <hr
+    text="OR"
+  >
+  <form action="login.php" id="login_form" class="form-login" method="post">
+    <label>
+      <input name="username" id="username" type="text" class="textinput not_uniform" size="28" maxlength="50" placeholder="Email/Username">
+    </label>
+    <label>
+      <input name="password" id="password" type="password" class="textinput not_uniform" size="28" maxlength="50" placeholder="Password">
+    </label>
+    <label>
+      <input name="remember_me" id="remember_me" type="checkbox" />&nbsp;Remember me			</label>
+    <label>
+      <input
+        type="submit"
+        value="LOGIN"
+        id="submit_login"
+      />
+    </label>
+          <input type="hidden" name='ga_client_id' value=''>
+    <input type="hidden" name='platform_id' value=''>
+    <input type="hidden" name='credentials' value=''>
+    <input type="hidden" name='state' value=''>
+    <span>
+      Forgot your password?
+      <a href="overlays/forgotPassword.php" class="forgot_password">Click here</a>
+      </a>
+    </span>
+  </form>
+  <hr>
+  <span>
+    Not registered yet?
+    <a
+      href="/free_sign_up.php"
+    >
+      Join Now
+    </a>
+  </span>
 </nav>
+</nav><!-- /utility-new -->
+</div>	</div><!-- /container -->
+</header><!-- /site_header -->
+<nav id="site_header_nav"  class="gradient">
+<div class="container">
+  <ul class="sf-menu">
+    <li><a href="/">Home</a></li>
+    <li class="active"><a href="#">News &amp; Analysis</a>
+      <ul style="display: none;">
+        <li><a href="news.php">Breaking&nbsp;News</a></li>
+        <li><a href="news.php?onthefly=on&h=6">On The Fly</a></li>
+        <li><a href="#" onClick="javascript:openRadioWindow(this);return false;">Fly cast</a></li>
+      </ul>
+    </li>
+    
+            <li><a href="portfolios.php">My Portfolios</a></li>
+            <li ><a id='link_calendar_menu' href="#">Calendars & Tools</a>
+      <ul class='ul_menu_dentro_calendar' style="display: none;">
+                    <li><a href="events.php">Events</a></li>
+                            <li><a href="syndicate.php">Syndicate</a></li>
+                  <li><a href="streetResearch.php">Street&nbsp;Research</a></li>
+        <li><a href="dividend_calculator.php">Dividend Calculator</a></li>
+      </ul>			
+    </li>
+    <li ><a id='link_about_menu' href="#">About The Fly</a>
+      <ul style="display: none;" id="menu_about_list">
+        <li><a href="services.php">Services</a></li>
+        <li><a href="about_the_fly.php">About&nbsp;Us</a></li>
+        <li><a href="faq.php">HELP/FAQ</a></li>
+        <li><a href="contact.php">Contact Us</a></li>
+        <li><a href='/rates.php' class='open_subscriptions_overlay ' >Subscriptions</a></li>
+        <li><a href="/overlays/disclaimer.php" class='open_disclaimer_overlay'>Disclaimer and Terms of Use</a></li>
+        <!--<li><a href="/overlays/disclaimer.php?h=Privacy%20Policy&go=priv" class='open_disclaimer_overlay'>Privacy Policy</a></li>-->
+        <li><a href="/disclaimer.php?h=Privacy%20Policy&go=priv">Privacy Policy</a>					<li class='wrap_menu'><a href="/ads_app.php" class='open_donotsellinfo'>Limit the use of my sensitive personal information</a></li>
+      </ul>
+    </li>
+    <li><a class='no-upercase' href="apis.php">APIs</a></li>
+
+
+  
+    <!--			<li ><a href="mailto:support@thefly.com">Contact</a></li>
+       <li><a href="#" class="disabled">Calendars</a></li>-->
+  </ul>
+      
+  <form action="news.php" method="get" id="nav_search">
+    <input id='input_nav_search' name="symbol" type="text" class="textinput" size="10" maxlength="50" placeholder="Enter Symbol">
+    <input type="image" src="/images/buttons/search_nav.png">
+  </form>
+  
+</div><!-- /container -->
+</nav><!-- site_header_nav -->
+
 <div id="wrapper" class="no_sidebar">
 <div id="content_wrapper" class="no_sidebar">
+  
+
+
+
 <header>
-<h1 class="breaking_news">Breaking News</h1>
-<ul id="view_options">
-<li id="view_label">View</li>
-<li><a href="#" id="hide_sidebar" class="active" title="Hide sidebar">Hide Sidebar</a></li>
-<li><a href="#" id="show_sidebar" title="Show sidebar">Show Sidebar</a></li>
-<li><a href="#" id="open_popup" class='open_popup_link' title="Open popup">Open Popup</a></li>
-</ul>
+  <h1 class="breaking_news">Breaking News</h1>
+  <ul id="view_options">
+    <li id="view_label">View</li>
+    <li><a href="#" id="hide_sidebar" class="active" title="Hide sidebar">Hide Sidebar</a></li>
+    <li><a href="#" id="show_sidebar"  title="Show sidebar">Show Sidebar</a></li>
+    <li><a href="#" id="open_popup" class='open_popup_link' title="Open popup">Open Popup</a></li>
+  </ul>
 </header>
+
 <div id="search_news" class="clearfix">
 <form action="news.php" method="get" id="search_filter_stories_news">
-<fieldset class="news_filters collapsed gradient" id="portfolio_timeframe">
-<input id="input_symbol_search_news" name="symbol" type="text" class="textinput" size="25" maxlength="50" placeholder="Enter Symbols">
-<input type="image" src="/images/buttons/search_nav.png"> <div id='ic_88x31_1' class='ad_wrapper trade_now_button'></div><div id='ic_234x20_1' class='ad_wrapper ad_junto_titulo_news'></div> </fieldset>
-<fieldset class="news_filters  hidden  collapsed clearfix gradient" id="category_filters">
-<legend>Filters</legend>
-<ul id="ul_all_filters">
-<li id="market_story_filters" class="heading">
-<input name="market_stories" id="market_stories" class="heading_checkbox" type="checkbox" checked="true"> <label for="market_stories">Market Stories</label>
-<ul>
-<li><input name="hot_stocks_filter" id="hot_stocks_filter" type="checkbox" checked="true"> <label for="hot_stocks_filter">Hot Stocks</label></li>
-<li><input name="rumors_filter" id="rumors_filter" type="checkbox" checked="true"> <label for="rumors_filter" checked="true">Rumors</label></li>
-<li><input name="general_news_filter" id="general_news_filter" type="checkbox" checked="true"> <label for="general_news_filter">General News</label></li>
-<li><input name="periodicals_filter" id="periodicals_filter" type="checkbox" checked="true"> <label for="periodicals_filter">Periodicals</label></li>
-<li><input name="earnings_filter" id="earnings_filter" type="checkbox" checked="true"> <label for="earnings_filter">Earnings</label></li>
-<li><input name="technical_analysis_filter" id="technical_analysis_filter" type="checkbox" checked="true"> <label for="technical_analysis_filter">Tech Analysis</label></li>
-<li><input name="options_filter" id="options_filter" type="checkbox" checked="true"> <label for="options_filter">Options</label></li>
-<li><input name="syndicates_filter" id="syndicates_filter" type="checkbox" checked="true"> <label for="syndicates_filter">Syndicate</label></li>
-</ul>
-</li>
-<li id="onthefly_filters" class="heading">
-<input name="onthefly" id="onthefly" class="heading_checkbox" type="checkbox" checked="true"> <label for="onthefly">On The Fly</label>
-<ul>
-<li><input name="insight_filter" id="insight_filter" type="checkbox" checked="true"> <label for="insight_filter">Insights</label></li>
-<li><input name="market_mover_filter" id="market_mover_filter" type="checkbox" checked="true"> <label for="market_mover_filter">Mkt. Movers</label></li>
-</ul>
-</li>
-<li id="recommendations_filters" class="heading">
-<input name="analyst_recommendations" id="analyst_recommendations" class="heading_checkbox" type="checkbox" checked="true"> <label for="analyst_recommendations">Street&nbsp;Research</label>
-<ul>
-<li><input name="upgrade_filter" id="upgrade_filter" type="checkbox" checked="true"> <label for="upgrade_filter">Upgrade</label></li>
-<li><input name="downgrade_filter" id="downgrade_filter" type="checkbox" checked="true"> <label for="downgrade_filter">Downgrade</label></li>
-<li><input name="initiate_filter" id="initiate_filter" type="checkbox" checked="true"> <label for="initiate_filter">Initiation</label></li>
-<li><input name="no_change_filter" id="no_change_filter" type="checkbox" checked="true"> <label for="no_change_filter">No Change</label></li>
-</ul>
-</li>
-<li id="events_filters" class="heading">
-<input name="events" id="events" class="heading_checkbox" type="checkbox" checked="true"> <label for="events">Events</label>
-</li>
-</ul>
-<a href="#" id="show_more_filters">Show More</a>
-<a href="#" id="show_less_filters">Show Less</a>
-</fieldset> </form>
-<div class='newsFeedWidget'>
-<table class="first_table" style='margin: 0;'>
-<tbody> </table><table class='news_table today first_table'> <tr class='dateDivisionRow firstRowClass' data-date='2022-06-17'> <td colspan=5 class='dateDivision'>Today<span id='calendarioEnDivisionTiempo' class='calendario'><input type='text' name='fecha' style='display:none;' /> </span><div id='toggle_stories'><a href='#' class='fpo_overlay' id='show_full_stories_bloqueado'>Show Full Stories</a><div id='show_full_stories_not_logged'> <p class="candado_chico"> <span class="cerrarBoton" style="float: right;">X</span> </p>To view all stories in expanded form, please subscribe.<div class='footer_show_full_stories_bloqueado'><a href='#' class='button gold open_free_trial'>Get Free Trial</a></div></div><a class='send_info_link' href='contact.php?send=1'> Send Info </a></div></td> </tr><tr id="news_3532709_20220617103542" data-id="3532709" data-timeOffset="9" data-storytype="" data-topic="hot_stocks" data-datetime="20220617103542" data-unlockdate="2022-06-17 10:45:42" class="tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1655477142" data-datenews="2022-06-17 10:35:42"> <td class="story_type">
-<span class="icon_story_type hot_stocks" data-name="Hot Stocks">
-<div class="fpo_overlay_ticker">Hot Stocks</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532709/SGEN-Seattle-Genetics-trading-resumes'><span>Seattle Genetics trading resumes</span></a>&nbsp;
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:35<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:35</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:35</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='SGEN'>SGEN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Seagen</p></section><section class="statsCompany"> <dl> <dt>$153.00 / <p class="companyPrice gain">+6.34<small class="smallWithoutIcon"> (+4.32%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'> <dd class="">&nbsp;</dd></div><div class='elementosRelacionadosWrapper  noMoreContent '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.00 / <p class="companyPrice gain">+6.34<small class="smallWithoutIcon"> (+4.32%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3532707" data-sd="2022-06-17 10:33:25"> <dt>10:33 Today</dt> <dd>Seagen jumps 10% to $161.79 after WSJ report of Merck interest</dd></dl><dl class="hot related" data-id="3532704" data-sd="2022-06-17 10:30:42"> <dt>10:30 Today</dt> <dd>Seattle Genetics trading halted, volatility trading pause</dd></dl><dl class="hot related" data-id="3526694" data-sd="2022-06-06 11:04:52"> <dt> 06/06/22</dt> <dd>Seagen, Genmab present data from tisotumab vedotin clinical development program</dd></dl><dl class="hot related" data-id="3526107" data-sd="2022-06-03 15:14:45"> <dt> 06/03/22</dt> <dd>Seagen says trial data show Adcetris, AVE-PC combo was well tolerated</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.00 / <p class="companyPrice gain">+6.34<small class="smallWithoutIcon"> (+4.32%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3491492" data-sd="2022-04-08 14:46:24"> <dt> 04/08/22 Roth Capital</dt> <dd>Bicycle reported &#039;very strong&#039; side-effect profile, says Roth Capital</dd></dl><dl class="no_change relatedRec" data-id="3491490" data-sd="2022-04-08 14:40:24"> <dt> 04/08/22 Cantor Fitzgerald</dt> <dd>Bicycle Therapeutics&#039; BT8009 abstract &#039;very positive,&#039; says Cantor Fitzgerald</dd></dl><dl class="no_change relatedRec" data-id="3465922" data-sd="2022-02-24 11:04:16"> <dt> 02/24/22 Piper Sandler</dt> <dd>Seagen&#039;s tisotumab vedotin shows &#039;modest signal of activity,&#039; says Piper Sandler</dd></dl><dl class="no_change relatedRec" data-id="3460254" data-sd="2022-02-16 07:24:58"> <dt> 02/16/22 JMP Securities</dt> <dd>Seagen price target lowered to $142 from $201 at JMP Securities</dd></dl></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.00 / <p class="companyPrice gain">+6.34<small class="smallWithoutIcon"> (+4.32%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="ear related" data-id="3502681" data-sd="2022-04-28 16:06:56"> <dt> 04/28/22</dt> <dd>Seagen sees FY22 total revenue $1.665B-$1.745B, consensus $1.78B</dd></dl><dl class="ear related" data-id="3502676" data-sd="2022-04-28 16:06:05"> <dt> 04/28/22</dt> <dd>Seagen reports Q1 EPS (74c), consensus ($1.00)</dd></dl><dl class="ear related" data-id="3456759" data-sd="2022-02-10 07:29:32"> <dt> 02/10/22</dt> <dd>Seagen sees FY22 total revenue $1.67B-$1.75B, consensus $2.16B</dd></dl><dl class="ear related" data-id="3456235" data-sd="2022-02-09 16:03:20"> <dt> 02/09/22</dt> <dd>Seagen reports Q4 EPS (95c), consensus (83c)</dd></dl></section></div><div class='relTopic3' id='rel_3_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.00 / <p class="companyPrice gain">+6.34<small class="smallWithoutIcon"> (+4.32%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="period related" data-id="3532706" data-sd="2022-06-17 10:32:57"> <dt>10:32 Today</dt> <dd>Merck considering acquisition of Seagen, WSJ reports</dd></dl></section></div><div class='relTopic4' id='rel_4_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.00 / <p class="companyPrice gain">+6.34<small class="smallWithoutIcon"> (+4.32%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="otf related" data-id="3457387" data-sd="2022-02-10 16:26:03"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists for Thursday</dd></dl><dl class="otf related" data-id="3457132" data-sd="2022-02-10 12:13:49"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists at Midday</dd></dl><dl class="otf related" data-id="3456468" data-sd="2022-02-09 18:36:25"> <dt> 02/09/22</dt> <dd>Fly Intel: After-Hours Movers</dd></dl></section></div> </div></div> </td></tr><tr id="news_3532708_20220617103503" data-id="3532708" data-timeOffset="9" data-storytype="" data-topic="options" data-datetime="20220617103503" data-unlockdate="2022-06-18 10:35:03" class="tr_noticia options Options " data-unlockdateUTC="1655562903" data-datenews="2022-06-17 10:35:03"> <td class="story_type">
-<span class="icon_story_type options" data-name="Options">
-<div class="fpo_overlay_ticker">Options</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532708/F-Ford-put-volume-heavy-and-directionally-bearish'><span>Ford put volume heavy and directionally bearish</span></a>&nbsp;<span class='flechitaflechita'>»</span>
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:35<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:35</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:35</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='F'>F<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Ford</p></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'><dd class='clickeable blocked'>
-<p class='abstract'>Bearish flow noted in&hellip; <div class="candado"><div id="free_promo"><p class="open_free_trial"><strong>Story temporarily locked.</strong><br>To read stories as they happen please subscribe, Login above, or return <span class='tiempo_faltante'>tomorrow</span></p><a href="#" class="button gold open_free_trial">Get Free Trial</a></div></div></p></dd></div><div class='elementosRelacionadosWrapper '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li> <li class='linkRelatedEvents'> <a href='#rel_ev_tab'>Events </a></li> <li class='linkRelTopic_5'> <a href='#rel_5_tab'>Options</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="F">F</span> <span class="infoCompany">Ford</span></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3531779" data-sd="2022-06-16 06:42:15"> <dt> 06/16/22</dt> <dd>EU passenger car registrations down 11.2% in May</dd></dl><dl class="hot related" data-id="3531429" data-sd="2022-06-15 10:33:52"> <dt> 06/15/22</dt> <dd>Ford Credit seeing delinquencies start to increase, says CFO Lawler</dd></dl><dl class="hot related" data-id="3531427" data-sd="2022-06-15 10:32:57"> <dt> 06/15/22</dt> <dd>Ford CFO John Lawler says demand continues to be &#039;very robust&#039;</dd></dl><dl class="hot related" data-id="3525317" data-sd="2022-06-02 09:19:11"> <dt> 06/02/22</dt> <dd>Ford reports May U.S. vehicle sales 154,461, down 4.5%</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="F">F</span> <span class="infoCompany">Ford</span></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3524441" data-sd="2022-06-01 08:31:37"> <dt> 06/01/22 Goldman Sachs</dt> <dd>Ford price target lowered to $14 from $18 at Goldman Sachs</dd></dl><dl class="no_change relatedRec" data-id="3524199" data-sd="2022-06-01 06:16:22"> <dt> 06/01/22 Citi</dt> <dd>Citi lowers Ford tagret but opens &#039;90-Day Upside Catalyst Watch&#039;</dd></dl><dl class="no_change relatedRec" data-id="3519686" data-sd="2022-05-20 13:04:32"> <dt> 05/20/22 Tigress Financial</dt> <dd>Ford price target raised to $22 from $20 at Tigress Financial</dd></dl><dl class="upgrade relatedRec" data-id="3515292" data-sd="2022-05-13 07:58:17"> <dt> 05/13/22 Morgan Stanley</dt> <dd>Ford upgraded to Equal Weight at Morgan Stanley following selloff</dd></dl></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="F">F</span> <span class="infoCompany">Ford</span></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="ear related" data-id="3501378" data-sd="2022-04-27 16:07:24"> <dt> 04/27/22</dt> <dd>Ford reports Q1 adjusted EPS 38c, consensus 37c</dd></dl><dl class="ear related" data-id="3501222" data-sd="2022-04-27 13:31:39"> <dt> 04/27/22</dt> <dd>Notable companies reporting after market close</dd></dl><dl class="ear related" data-id="3452822" data-sd="2022-02-03 16:07:14"> <dt> 02/03/22</dt> <dd>Ford reports Q4 adjusted EPS 26c, consensus 45c</dd></dl><dl class="ear related" data-id="3452702" data-sd="2022-02-03 13:09:18"> <dt> 02/03/22</dt> <dd>Notable companies reporting after market close</dd></dl></section></div><div class='relTopic3' id='rel_3_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="F">F</span> <span class="infoCompany">Ford</span></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="period related" data-id="3532354" data-sd="2022-06-16 16:38:48"> <dt> 06/16/22</dt> <dd>Ford recalls 2.9M vehicles due to gear shift issue, NY Times says</dd></dl><dl class="period related" data-id="3530683" data-sd="2022-06-14 10:38:00"> <dt> 06/14/22</dt> <dd>Ford tells dealers to stop selling electric Mustang Mach-E crossovers, CNBC says</dd></dl><dl class="period related" data-id="3530041" data-sd="2022-06-13 12:00:49"> <dt> 06/13/22</dt> <dd>U.S. car makers urge congress to lift cap on EV tax credits, Reuters says</dd></dl><dl class="period related" data-id="3526191" data-sd="2022-06-04 09:46:06"> <dt> 06/04/22</dt> <dd>Stellantis now an overlooked star, Barron&#039;s says</dd></dl></section></div><div class='relTopic4' id='rel_4_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="F">F</span> <span class="infoCompany">Ford</span></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="otf related" data-id="3530877" data-sd="2022-06-14 16:28:22"> <dt> 06/14/22</dt> <dd>What You Missed On Wall Street On Tuesday</dd></dl><dl class="otf related" data-id="3530753" data-sd="2022-06-14 12:23:48"> <dt> 06/14/22</dt> <dd>What You Missed On Wall Street This Morning</dd></dl><dl class="otf related" data-id="3530003" data-sd="2022-06-13 10:30:40"> <dt> 06/13/22</dt> <dd>What You Missed This Week in EVs and Clean Energy</dd></dl><dl class="otf related" data-id="3526187" data-sd="2022-06-04 09:23:43"> <dt> 06/04/22</dt> <dd>Opening Day: Zhong Yang rises 240% in market debut</dd></dl></section></div><div class='evRelated' id='rel_ev_tab'><div class='related-evs'><div class="related-ev-wrapper"><dl class="ev_t_conference_calls eventDateCalendar"> <dt> 06/22/22</dt> <dd>Ford - F</dd></dl><div id="ev420037_4" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="420037" data-tipoEventoId="0"></div></div><div class="related-ev-wrapper"><dl class="ev_t_conference_calls eventDateCalendar"> <dt> 07/27/22</dt> <dd>Ford - F</dd></dl><div id="ev419904_5" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="419904" data-tipoEventoId="0"></div></div></div></div><div class='relTopic5' id='rel_5_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="F">F</span> <span class="infoCompany">Ford</span></section><section class="statsCompany"> <dl> <dt>$11.09 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-1.47%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="opt related" data-id="3527799" data-sd="2022-06-08 07:35:03"> <dt> 06/08/22</dt> <dd>Unusual call flow in option market yesterday</dd></dl><dl class="opt related" data-id="3527534" data-sd="2022-06-07 16:20:11"> <dt> 06/07/22</dt> <dd>Early call buyers in Ford see 100% gains</dd></dl><dl class="opt related" data-id="3525259" data-sd="2022-06-02 08:55:07"> <dt> 06/02/22</dt> <dd>Notable open interest changes for June 2nd</dd></dl><dl class="opt related" data-id="3524493" data-sd="2022-06-01 08:55:04"> <dt> 06/01/22</dt> <dd>Notable open interest changes for June 1st</dd></dl></section></div> </div></div> </td></tr><tr id="news_3532707_20220617103325" data-id="3532707" data-timeOffset="9" data-storytype="" data-topic="hot_stocks" data-datetime="20220617103325" data-unlockdate="2022-06-17 10:43:25" class="tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1655477005" data-datenews="2022-06-17 10:33:25"> <td class="story_type">
-<span class="icon_story_type hot_stocks" data-name="Hot Stocks">
-<div class="fpo_overlay_ticker">Hot Stocks</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532707/SGEN;MRK-Seagen-jumps--to--after-WSJ-report-of-Merck-interest'><span>Seagen jumps 10% to $161.79 after WSJ report of Merck interest</span></a>&nbsp;
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:33<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:33</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:33</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='SGEN'>SGEN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Seagen</p></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='MRK'>MRK<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Merck</p></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'> <dd class="">&nbsp;</dd></div><div class='elementosRelacionadosWrapper  noMoreContent '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li> <li class='linkRelatedEvents'> <a href='#rel_ev_tab'>Events </a></li> <li class='linkRelTopic_5'> <a href='#rel_5_tab'>Options</a></li></ul><div class='relTopic1' id='rel_1_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_1_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_1_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_1_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="hot related" data-id="3532704" data-sd="2022-06-17 10:30:42"> <dt>10:30 Today</dt> <dd>Seattle Genetics trading halted, volatility trading pause</dd></dl><dl class="hot related" data-id="3526694" data-sd="2022-06-06 11:04:52"> <dt> 06/06/22</dt> <dd>Seagen, Genmab present data from tisotumab vedotin clinical development program</dd></dl><dl class="hot related" data-id="3526107" data-sd="2022-06-03 15:14:45"> <dt> 06/03/22</dt> <dd>Seagen says trial data show Adcetris, AVE-PC combo was well tolerated</dd></dl><dl class="hot related" data-id="3520202" data-sd="2022-05-23 08:36:48"> <dt> 05/23/22</dt> <dd>Seagen gives topline results of Phase 2 trial of tucatinib/trastuzumab combo</dd></dl></div><div class='div_tab' id='tab_rel_noti_1_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="hot related" data-id="3532585" data-sd="2022-06-17 08:03:08"> <dt>08:03 Today</dt> <dd>Codexis announces publication of research on bioconjugation of native peptides</dd></dl><dl class="hot related" data-id="3532272" data-sd="2022-06-16 15:30:14"> <dt> 06/16/22</dt> <dd>FTC says to ramp up enforcement against illegal drug rebate schemes</dd></dl><dl class="hot related" data-id="3529711" data-sd="2022-06-13 06:46:50"> <dt> 06/13/22</dt> <dd>Merck announces FDA approval of sBLA for KEYTRUDA</dd></dl><dl class="hot related" data-id="3527026" data-sd="2022-06-07 06:47:55"> <dt> 06/07/22</dt> <dd>Merck and Ridgeback announce additional data from Phase 3 MOVe-OUT trial</dd></dl></div></div></div><div id='rel_rec_tab'><div class='story_details_tabs'><ul><li><a href='#tab_1'><span>SGEN</span></a></li><li><a href='#tab_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3491492" data-sd="2022-04-08 14:46:24"> <dt> 04/08/22 Roth Capital</dt> <dd>Bicycle reported &#039;very strong&#039; side-effect profile, says Roth Capital</dd></dl><dl class="no_change relatedRec" data-id="3491490" data-sd="2022-04-08 14:40:24"> <dt> 04/08/22 Cantor Fitzgerald</dt> <dd>Bicycle Therapeutics&#039; BT8009 abstract &#039;very positive,&#039; says Cantor Fitzgerald</dd></dl><dl class="no_change relatedRec" data-id="3465922" data-sd="2022-02-24 11:04:16"> <dt> 02/24/22 Piper Sandler</dt> <dd>Seagen&#039;s tisotumab vedotin shows &#039;modest signal of activity,&#039; says Piper Sandler</dd></dl><dl class="no_change relatedRec" data-id="3460254" data-sd="2022-02-16 07:24:58"> <dt> 02/16/22 JMP Securities</dt> <dd>Seagen price target lowered to $142 from $201 at JMP Securities</dd></dl></div></section><div class='div_tab' id='tab_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3492541" data-sd="2022-04-12 07:12:50"> <dt> 04/12/22 Barclays</dt> <dd>Merck price target raised to $97 from $94 at Barclays</dd></dl><dl class="no_change relatedRec" data-id="3491720" data-sd="2022-04-11 06:42:59"> <dt> 04/11/22 H.C. Wainwright</dt> <dd>Rubius Therapeutics price target lowered to $15 from $40 at H.C. Wainwright</dd></dl><dl class="initiate relatedRec" data-id="3489662" data-sd="2022-04-06 07:35:29"> <dt> 04/06/22 Morgan Stanley</dt> <dd>Merck assumed with an Equal Weight at Morgan Stanley</dd></dl><dl class="no_change relatedRec" data-id="3489294" data-sd="2022-04-05 14:55:00"> <dt> 04/05/22 BMO Capital</dt> <dd>Merck targets &#039;ambitious&#039; $10B revenue from cardiovascular franchise, says BMO</dd></dl></div></section></div></div><div class='relTopic2' id='rel_2_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_2_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_2_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_2_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="ear related" data-id="3502681" data-sd="2022-04-28 16:06:56"> <dt> 04/28/22</dt> <dd>Seagen sees FY22 total revenue $1.665B-$1.745B, consensus $1.78B</dd></dl><dl class="ear related" data-id="3502676" data-sd="2022-04-28 16:06:05"> <dt> 04/28/22</dt> <dd>Seagen reports Q1 EPS (74c), consensus ($1.00)</dd></dl><dl class="ear related" data-id="3456759" data-sd="2022-02-10 07:29:32"> <dt> 02/10/22</dt> <dd>Seagen sees FY22 total revenue $1.67B-$1.75B, consensus $2.16B</dd></dl><dl class="ear related" data-id="3456235" data-sd="2022-02-09 16:03:20"> <dt> 02/09/22</dt> <dd>Seagen reports Q4 EPS (95c), consensus (83c)</dd></dl></div><div class='div_tab' id='tab_rel_noti_2_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="ear related" data-id="3501783" data-sd="2022-04-28 06:34:23"> <dt> 04/28/22</dt> <dd>Merck raises FY22 adjusted EPS view to $7.24-$7.36, consensus $7.24</dd></dl><dl class="ear related" data-id="3501774" data-sd="2022-04-28 06:30:33"> <dt> 04/28/22</dt> <dd>Merck reports Q1 adjusted EPS $2.14, consensus $1.83</dd></dl><dl class="ear related" data-id="3501224" data-sd="2022-04-27 20:25:00"> <dt> 04/27/22</dt> <dd>Notable companies reporting before tomorrow&#039;s open</dd></dl><dl class="ear related" data-id="3501224" data-sd="2022-04-27 13:38:15"> <dt> 04/27/22</dt> <dd>Notable companies reporting before tomorrow&#039;s open</dd></dl></div></div></div><div class='relTopic3' id='rel_3_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_3_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_3_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_3_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="period related" data-id="3532706" data-sd="2022-06-17 10:32:57"> <dt>10:32 Today</dt> <dd>Merck considering acquisition of Seagen, WSJ reports</dd></dl></div><div class='div_tab' id='tab_rel_noti_3_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="period related" data-id="3532706" data-sd="2022-06-17 10:32:57"> <dt>10:32 Today</dt> <dd>Merck considering acquisition of Seagen, WSJ reports</dd></dl><dl class="period related" data-id="3523532" data-sd="2022-05-31 06:18:19"> <dt> 05/31/22</dt> <dd>Pfizer&#039;s Paxlovid becomes leading pandemic pill, WSJ reports</dd></dl><dl class="period related" data-id="3520717" data-sd="2022-05-24 06:35:04"> <dt> 05/24/22</dt> <dd>COVID-19 vaccine, drug sales plateau, WSJ reports</dd></dl><dl class="period related" data-id="3499576" data-sd="2022-04-26 06:31:58"> <dt> 04/26/22</dt> <dd>Biden administration to make Covid pills more widely available, WSJ reports</dd></dl></div></div></div><div class='relTopic4' id='rel_4_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_4_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_4_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_4_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="otf related" data-id="3457387" data-sd="2022-02-10 16:26:03"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists for Thursday</dd></dl><dl class="otf related" data-id="3457132" data-sd="2022-02-10 12:13:49"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists at Midday</dd></dl><dl class="otf related" data-id="3456468" data-sd="2022-02-09 18:36:25"> <dt> 02/09/22</dt> <dd>Fly Intel: After-Hours Movers</dd></dl></div><div class='div_tab' id='tab_rel_noti_4_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="otf related" data-id="3521146" data-sd="2022-05-24 12:29:43"> <dt> 05/24/22</dt> <dd>What You Missed On Wall Street This Morning</dd></dl><dl class="otf related" data-id="3502890" data-sd="2022-04-28 16:49:41"> <dt> 04/28/22</dt> <dd>What You Missed On Wall Street On Thursday</dd></dl><dl class="otf related" data-id="3502523" data-sd="2022-04-28 12:23:15"> <dt> 04/28/22</dt> <dd>What You Missed On Wall Street This Morning</dd></dl><dl class="otf related" data-id="3502329" data-sd="2022-04-28 09:09:08"> <dt> 04/28/22</dt> <dd>Fly Intel: Pre-market Movers</dd></dl></div></div></div><div class='evRelated' id='rel_ev_tab'><div class='related-evs'><div class="related-ev-wrapper"><dl class="ev_t_conference_calls eventDateCalendar"> <dt> 07/28/22</dt> <dd>Merck - MRK</dd></dl><div id="ev418759_8" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="418759" data-tipoEventoId="0"></div></div><div class="related-ev-wrapper"><dl class="ev_t_government_events eventDateCalendar"> <dt> 07/01/22</dt> <dd>Extended PDUFA Date for Vaxneuvance</dd></dl><div id="ev83261_9" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="83261" data-tipoEventoId="5"></div></div><div class="related-ev-wrapper"><dl class="ev_t_government_events eventDateCalendar"> <dt> 01/29/23</dt> <dd>PDUFA Date for new sBLA for KEYTRUDA</dd></dl><div id="ev83830_10" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="83830" data-tipoEventoId="5"></div></div><div class="related-ev-wrapper"><dl class="ev_t_company_events eventDateCalendar"> <dt> 10/04/22</dt> <dd>Merck</dd></dl><div id="ev221374_11" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="221374" data-tipoEventoId="2"></div></div></div></div><div class='relTopic5' id='rel_5_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_5_1'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_5_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="opt related" data-id="3524591" data-sd="2022-06-01 10:15:03"> <dt> 06/01/22</dt> <dd>Merck put volume heavy and directionally bearish</dd></dl><dl class="opt related" data-id="3523878" data-sd="2022-05-31 11:15:03"> <dt> 05/31/22</dt> <dd>Merck put volume heavy and directionally bearish</dd></dl><dl class="opt related" data-id="3518180" data-sd="2022-05-18 11:35:03"> <dt> 05/18/22</dt> <dd>Merck put volume heavy and directionally bearish</dd></dl><dl class="opt related" data-id="3488171" data-sd="2022-04-04 08:00:03"> <dt> 04/04/22</dt> <dd>Merck call buyer realizes 64% same-day gains</dd></dl></div></div></div> </div></div> </td></tr><tr id="news_3532706_20220617103257" data-id="3532706" data-timeOffset="9" data-storytype="" data-topic="periodicals" data-datetime="20220617103257" data-unlockdate="2022-06-18 10:32:57" class="tr_noticia periodicals Periodicals  tr_noticia_prioridad " data-unlockdateUTC="1655562777" data-datenews="2022-06-17 10:32:57"> <td class="story_type">
-<span class="icon_story_type periodicals" data-name="Periodicals">
-<div class="fpo_overlay_ticker">Periodicals</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532706/SGEN;MRK-Merck-considering-acquisition-of-Seagen-WSJ-reports'><span class="importantHeadline"><span>Merck considering acquisition of Seagen, WSJ reports</span></span></a>&nbsp;
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:32<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:32</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:32</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='SGEN'>SGEN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Seagen</p></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='MRK'>MRK<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Merck</p></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'> <dd class="">&nbsp;</dd></div><div class='elementosRelacionadosWrapper  noMoreContent '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li> <li class='linkRelatedEvents'> <a href='#rel_ev_tab'>Events </a></li> <li class='linkRelTopic_5'> <a href='#rel_5_tab'>Options</a></li></ul><div class='relTopic1' id='rel_1_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_1_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_1_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_1_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="hot related" data-id="3532704" data-sd="2022-06-17 10:30:42"> <dt>10:30 Today</dt> <dd>Seattle Genetics trading halted, volatility trading pause</dd></dl><dl class="hot related" data-id="3526694" data-sd="2022-06-06 11:04:52"> <dt> 06/06/22</dt> <dd>Seagen, Genmab present data from tisotumab vedotin clinical development program</dd></dl><dl class="hot related" data-id="3526107" data-sd="2022-06-03 15:14:45"> <dt> 06/03/22</dt> <dd>Seagen says trial data show Adcetris, AVE-PC combo was well tolerated</dd></dl><dl class="hot related" data-id="3520202" data-sd="2022-05-23 08:36:48"> <dt> 05/23/22</dt> <dd>Seagen gives topline results of Phase 2 trial of tucatinib/trastuzumab combo</dd></dl></div><div class='div_tab' id='tab_rel_noti_1_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="hot related" data-id="3532585" data-sd="2022-06-17 08:03:08"> <dt>08:03 Today</dt> <dd>Codexis announces publication of research on bioconjugation of native peptides</dd></dl><dl class="hot related" data-id="3532272" data-sd="2022-06-16 15:30:14"> <dt> 06/16/22</dt> <dd>FTC says to ramp up enforcement against illegal drug rebate schemes</dd></dl><dl class="hot related" data-id="3529711" data-sd="2022-06-13 06:46:50"> <dt> 06/13/22</dt> <dd>Merck announces FDA approval of sBLA for KEYTRUDA</dd></dl><dl class="hot related" data-id="3527026" data-sd="2022-06-07 06:47:55"> <dt> 06/07/22</dt> <dd>Merck and Ridgeback announce additional data from Phase 3 MOVe-OUT trial</dd></dl></div></div></div><div id='rel_rec_tab'><div class='story_details_tabs'><ul><li><a href='#tab_1'><span>SGEN</span></a></li><li><a href='#tab_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3491492" data-sd="2022-04-08 14:46:24"> <dt> 04/08/22 Roth Capital</dt> <dd>Bicycle reported &#039;very strong&#039; side-effect profile, says Roth Capital</dd></dl><dl class="no_change relatedRec" data-id="3491490" data-sd="2022-04-08 14:40:24"> <dt> 04/08/22 Cantor Fitzgerald</dt> <dd>Bicycle Therapeutics&#039; BT8009 abstract &#039;very positive,&#039; says Cantor Fitzgerald</dd></dl><dl class="no_change relatedRec" data-id="3465922" data-sd="2022-02-24 11:04:16"> <dt> 02/24/22 Piper Sandler</dt> <dd>Seagen&#039;s tisotumab vedotin shows &#039;modest signal of activity,&#039; says Piper Sandler</dd></dl><dl class="no_change relatedRec" data-id="3460254" data-sd="2022-02-16 07:24:58"> <dt> 02/16/22 JMP Securities</dt> <dd>Seagen price target lowered to $142 from $201 at JMP Securities</dd></dl></div></section><div class='div_tab' id='tab_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3492541" data-sd="2022-04-12 07:12:50"> <dt> 04/12/22 Barclays</dt> <dd>Merck price target raised to $97 from $94 at Barclays</dd></dl><dl class="no_change relatedRec" data-id="3491720" data-sd="2022-04-11 06:42:59"> <dt> 04/11/22 H.C. Wainwright</dt> <dd>Rubius Therapeutics price target lowered to $15 from $40 at H.C. Wainwright</dd></dl><dl class="initiate relatedRec" data-id="3489662" data-sd="2022-04-06 07:35:29"> <dt> 04/06/22 Morgan Stanley</dt> <dd>Merck assumed with an Equal Weight at Morgan Stanley</dd></dl><dl class="no_change relatedRec" data-id="3489294" data-sd="2022-04-05 14:55:00"> <dt> 04/05/22 BMO Capital</dt> <dd>Merck targets &#039;ambitious&#039; $10B revenue from cardiovascular franchise, says BMO</dd></dl></div></section></div></div><div class='relTopic2' id='rel_2_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_2_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_2_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_2_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="ear related" data-id="3502681" data-sd="2022-04-28 16:06:56"> <dt> 04/28/22</dt> <dd>Seagen sees FY22 total revenue $1.665B-$1.745B, consensus $1.78B</dd></dl><dl class="ear related" data-id="3502676" data-sd="2022-04-28 16:06:05"> <dt> 04/28/22</dt> <dd>Seagen reports Q1 EPS (74c), consensus ($1.00)</dd></dl><dl class="ear related" data-id="3456759" data-sd="2022-02-10 07:29:32"> <dt> 02/10/22</dt> <dd>Seagen sees FY22 total revenue $1.67B-$1.75B, consensus $2.16B</dd></dl><dl class="ear related" data-id="3456235" data-sd="2022-02-09 16:03:20"> <dt> 02/09/22</dt> <dd>Seagen reports Q4 EPS (95c), consensus (83c)</dd></dl></div><div class='div_tab' id='tab_rel_noti_2_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="ear related" data-id="3501783" data-sd="2022-04-28 06:34:23"> <dt> 04/28/22</dt> <dd>Merck raises FY22 adjusted EPS view to $7.24-$7.36, consensus $7.24</dd></dl><dl class="ear related" data-id="3501774" data-sd="2022-04-28 06:30:33"> <dt> 04/28/22</dt> <dd>Merck reports Q1 adjusted EPS $2.14, consensus $1.83</dd></dl><dl class="ear related" data-id="3501224" data-sd="2022-04-27 20:25:00"> <dt> 04/27/22</dt> <dd>Notable companies reporting before tomorrow&#039;s open</dd></dl><dl class="ear related" data-id="3501224" data-sd="2022-04-27 13:38:15"> <dt> 04/27/22</dt> <dd>Notable companies reporting before tomorrow&#039;s open</dd></dl></div></div></div><div class='relTopic3' id='rel_3_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_3_1'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_3_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="period related" data-id="3523532" data-sd="2022-05-31 06:18:19"> <dt> 05/31/22</dt> <dd>Pfizer&#039;s Paxlovid becomes leading pandemic pill, WSJ reports</dd></dl><dl class="period related" data-id="3520717" data-sd="2022-05-24 06:35:04"> <dt> 05/24/22</dt> <dd>COVID-19 vaccine, drug sales plateau, WSJ reports</dd></dl><dl class="period related" data-id="3499576" data-sd="2022-04-26 06:31:58"> <dt> 04/26/22</dt> <dd>Biden administration to make Covid pills more widely available, WSJ reports</dd></dl><dl class="period related" data-id="3498547" data-sd="2022-04-23 10:35:12"> <dt> 04/23/22</dt> <dd>Merck, CVS among dividend stocks to help whip inflation now, Barron&#039;s says</dd></dl></div></div></div><div class='relTopic4' id='rel_4_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_4_1'><span>SGEN</span></a></li><li><a href='#tab_rel_noti_4_2'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_4_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$152.27 / <p class="companyPrice gain">+5.61<small class="smallWithoutIcon"> (+3.83%)</small></p></dt> </dl></section><dl class="otf related" data-id="3457387" data-sd="2022-02-10 16:26:03"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists for Thursday</dd></dl><dl class="otf related" data-id="3457132" data-sd="2022-02-10 12:13:49"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists at Midday</dd></dl><dl class="otf related" data-id="3456468" data-sd="2022-02-09 18:36:25"> <dt> 02/09/22</dt> <dd>Fly Intel: After-Hours Movers</dd></dl></div><div class='div_tab' id='tab_rel_noti_4_2'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="otf related" data-id="3521146" data-sd="2022-05-24 12:29:43"> <dt> 05/24/22</dt> <dd>What You Missed On Wall Street This Morning</dd></dl><dl class="otf related" data-id="3502890" data-sd="2022-04-28 16:49:41"> <dt> 04/28/22</dt> <dd>What You Missed On Wall Street On Thursday</dd></dl><dl class="otf related" data-id="3502523" data-sd="2022-04-28 12:23:15"> <dt> 04/28/22</dt> <dd>What You Missed On Wall Street This Morning</dd></dl><dl class="otf related" data-id="3502329" data-sd="2022-04-28 09:09:08"> <dt> 04/28/22</dt> <dd>Fly Intel: Pre-market Movers</dd></dl></div></div></div><div class='evRelated' id='rel_ev_tab'><div class='related-evs'><div class="related-ev-wrapper"><dl class="ev_t_conference_calls eventDateCalendar"> <dt> 07/28/22</dt> <dd>Merck - MRK</dd></dl><div id="ev418759_8" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="418759" data-tipoEventoId="0"></div></div><div class="related-ev-wrapper"><dl class="ev_t_government_events eventDateCalendar"> <dt> 07/01/22</dt> <dd>Extended PDUFA Date for Vaxneuvance</dd></dl><div id="ev83261_9" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="83261" data-tipoEventoId="5"></div></div><div class="related-ev-wrapper"><dl class="ev_t_government_events eventDateCalendar"> <dt> 01/29/23</dt> <dd>PDUFA Date for new sBLA for KEYTRUDA</dd></dl><div id="ev83830_10" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="83830" data-tipoEventoId="5"></div></div><div class="related-ev-wrapper"><dl class="ev_t_company_events eventDateCalendar"> <dt> 10/04/22</dt> <dd>Merck</dd></dl><div id="ev221374_11" class="muestraEvento eventoPagEventos" style="display: none; width:361; height:294; position: absolute;" data-id="221374" data-tipoEventoId="2"></div></div></div></div><div class='relTopic5' id='rel_5_tab'><div class='story_details_tabs'><ul><li><a href='#tab_rel_noti_5_1'><span>MRK</span></a></li></ul><div class='div_tab' id='tab_rel_noti_5_1'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="MRK">MRK</span> <span class="infoCompany">Merck</span></section><section class="statsCompany"> <dl> <dt>$85.29 / <p class="companyPrice gain">+0.39<small class="smallWithoutIcon"> (+0.46%)</small></p></dt> </dl></section><dl class="opt related" data-id="3524591" data-sd="2022-06-01 10:15:03"> <dt> 06/01/22</dt> <dd>Merck put volume heavy and directionally bearish</dd></dl><dl class="opt related" data-id="3523878" data-sd="2022-05-31 11:15:03"> <dt> 05/31/22</dt> <dd>Merck put volume heavy and directionally bearish</dd></dl><dl class="opt related" data-id="3518180" data-sd="2022-05-18 11:35:03"> <dt> 05/18/22</dt> <dd>Merck put volume heavy and directionally bearish</dd></dl><dl class="opt related" data-id="3488171" data-sd="2022-04-04 08:00:03"> <dt> 04/04/22</dt> <dd>Merck call buyer realizes 64% same-day gains</dd></dl></div></div></div> </div></div> </td></tr><tr id="news_3532705_20220617103127" data-id="3532705" data-timeOffset="9" data-storytype="" data-topic="technical_analysis" data-datetime="20220617103127" data-unlockdate="2022-06-17 10:41:27" class="tr_noticia technical_analysis Technical Analysis " data-unlockdateUTC="1655476887" data-datenews="2022-06-17 10:31:27"> <td class="story_type">
-<span class="icon_story_type technical_analysis" data-name="Technical Analysis">
-<div class="fpo_overlay_ticker">Technical Analysis</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532705/$DJT-DJ-Transportation-Average-Pivot-points'><span>DJ Transportation Average: Pivot points</span></a>&nbsp;<span class='flechitaflechita'>»</span>
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:31<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:31</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:31</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='$DJT'>$DJT<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">DJ Transportation Average</p></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'><dd class='clickeable blocked'>
-<p class='abstract'>The following are the&hellip; <div class="candado"><div id="free_promo"><p class="open_free_trial"><strong>Story temporarily locked.</strong><br>To read stories as they happen please subscribe, Login above, or return <span class='tiempo_faltante'> in 9 minutes</span></p><a href="#" class="button gold open_free_trial">Get Free Trial</a></div></div></p></dd></div><div class='elementosRelacionadosWrapper '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Technical Analysis</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$DJT">$DJT</span> <span class="infoCompany">DJ Transportation Average</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3527467" data-sd="2022-06-07 13:55:25"> <dt> 06/07/22</dt> <dd>Global growth to fall to 2.9% in 2022 from 5.7% in 2021, World Bank says</dd></dl></section></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$DJT">$DJT</span> <span class="infoCompany">DJ Transportation Average</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="tech related" data-id="3532117" data-sd="2022-06-16 10:31:49"> <dt> 06/16/22</dt> <dd>DJ Transportation Average: Pivot points</dd></dl><dl class="tech related" data-id="3531425" data-sd="2022-06-15 10:30:29"> <dt> 06/15/22</dt> <dd>DJ Transportation Average: Pivot points</dd></dl><dl class="tech related" data-id="3530681" data-sd="2022-06-14 10:30:42"> <dt> 06/14/22</dt> <dd>DJ Transportation Average: Pivot points</dd></dl><dl class="tech related" data-id="3530002" data-sd="2022-06-13 10:30:22"> <dt> 06/13/22</dt> <dd>DJ Transportation Average: Pivot points</dd></dl></section></div> </div></div> </td></tr>
-</tbody>
-</table><div class='ad_wrapper wrapper_ad_entre_noticias'><div id='ic_728x90_2' class='ad_individual_entre_noticia ad_AdInvestigatingChannelLeaderboard'></div></div>
-<table class="today news_table first_table">
-<tbody>
-<tr id="news_3532704_20220617103042" data-id="3532704" data-timeOffset="9" data-storytype="" data-topic="hot_stocks" data-datetime="20220617103042" data-unlockdate="2022-06-18 10:30:42" class="tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1655562642" data-datenews="2022-06-17 10:30:42"> <td class="story_type">
-<span class="icon_story_type hot_stocks" data-name="Hot Stocks">
-<div class="fpo_overlay_ticker">Hot Stocks</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532704/SGEN-Seattle-Genetics-trading-halted-volatility-trading-pause'><span>Seattle Genetics trading halted, volatility trading pause</span></a>&nbsp;
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:30<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:30</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:30</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='SGEN'>SGEN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Seagen</p></section><section class="statsCompany"> <dl> <dt>$153.02 / <p class="companyPrice gain">+6.36<small class="smallWithoutIcon"> (+4.34%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'> <dd class="">&nbsp;</dd></div><div class='elementosRelacionadosWrapper  noMoreContent '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>On The Fly</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.02 / <p class="companyPrice gain">+6.36<small class="smallWithoutIcon"> (+4.34%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3526694" data-sd="2022-06-06 11:04:52"> <dt> 06/06/22</dt> <dd>Seagen, Genmab present data from tisotumab vedotin clinical development program</dd></dl><dl class="hot related" data-id="3526107" data-sd="2022-06-03 15:14:45"> <dt> 06/03/22</dt> <dd>Seagen says trial data show Adcetris, AVE-PC combo was well tolerated</dd></dl><dl class="hot related" data-id="3520202" data-sd="2022-05-23 08:36:48"> <dt> 05/23/22</dt> <dd>Seagen gives topline results of Phase 2 trial of tucatinib/trastuzumab combo</dd></dl><dl class="hot related" data-id="3515836" data-sd="2022-05-16 06:04:39"> <dt> 05/16/22</dt> <dd>Seagen CEO Clay Siegall resigns, Roger Dansey to continue as interim CEO</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.02 / <p class="companyPrice gain">+6.36<small class="smallWithoutIcon"> (+4.34%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3491492" data-sd="2022-04-08 14:46:24"> <dt> 04/08/22 Roth Capital</dt> <dd>Bicycle reported &#039;very strong&#039; side-effect profile, says Roth Capital</dd></dl><dl class="no_change relatedRec" data-id="3491490" data-sd="2022-04-08 14:40:24"> <dt> 04/08/22 Cantor Fitzgerald</dt> <dd>Bicycle Therapeutics&#039; BT8009 abstract &#039;very positive,&#039; says Cantor Fitzgerald</dd></dl><dl class="no_change relatedRec" data-id="3465922" data-sd="2022-02-24 11:04:16"> <dt> 02/24/22 Piper Sandler</dt> <dd>Seagen&#039;s tisotumab vedotin shows &#039;modest signal of activity,&#039; says Piper Sandler</dd></dl><dl class="no_change relatedRec" data-id="3460254" data-sd="2022-02-16 07:24:58"> <dt> 02/16/22 JMP Securities</dt> <dd>Seagen price target lowered to $142 from $201 at JMP Securities</dd></dl></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.02 / <p class="companyPrice gain">+6.36<small class="smallWithoutIcon"> (+4.34%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="ear related" data-id="3502681" data-sd="2022-04-28 16:06:56"> <dt> 04/28/22</dt> <dd>Seagen sees FY22 total revenue $1.665B-$1.745B, consensus $1.78B</dd></dl><dl class="ear related" data-id="3502676" data-sd="2022-04-28 16:06:05"> <dt> 04/28/22</dt> <dd>Seagen reports Q1 EPS (74c), consensus ($1.00)</dd></dl><dl class="ear related" data-id="3456759" data-sd="2022-02-10 07:29:32"> <dt> 02/10/22</dt> <dd>Seagen sees FY22 total revenue $1.67B-$1.75B, consensus $2.16B</dd></dl><dl class="ear related" data-id="3456235" data-sd="2022-02-09 16:03:20"> <dt> 02/09/22</dt> <dd>Seagen reports Q4 EPS (95c), consensus (83c)</dd></dl></section></div><div class='relTopic3' id='rel_3_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="SGEN">SGEN</span> <span class="infoCompany">Seagen</span></section><section class="statsCompany"> <dl> <dt>$153.02 / <p class="companyPrice gain">+6.36<small class="smallWithoutIcon"> (+4.34%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="otf related" data-id="3457387" data-sd="2022-02-10 16:26:03"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists for Thursday</dd></dl><dl class="otf related" data-id="3457132" data-sd="2022-02-10 12:13:49"> <dt> 02/10/22</dt> <dd>Wall Street in Fives - Must Read Lists at Midday</dd></dl><dl class="otf related" data-id="3456468" data-sd="2022-02-09 18:36:25"> <dt> 02/09/22</dt> <dd>Fly Intel: After-Hours Movers</dd></dl></section></div> </div></div> </td></tr><tr id="news_3532703_20220617103004" data-id="3532703" data-timeOffset="9" data-storytype="" data-topic="general_news" data-datetime="20220617103004" data-unlockdate="2022-06-17 10:40:04" class="tr_noticia general_news General news " data-unlockdateUTC="1655476804" data-datenews="2022-06-17 10:30:04"> <td class="story_type">
-<span class="icon_story_type general_news" data-name="General news">
-<div class="fpo_overlay_ticker">General news</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532703/$ECON-European-Fixed-Income-Summary'><span>European Fixed Income Summary:</span></a>&nbsp;<span class='flechitaflechita'>»</span>
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:30<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:30</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:30</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='$ECON'>$ECON<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Economic Data</p></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'><dd class='clickeable blocked'>
-<p class='abstract'>European Fixed Income&hellip; <div class="candado"><div id="free_promo"><p class="open_free_trial"><strong>Story temporarily locked.</strong><br>To read stories as they happen please subscribe, Login above, or return <span class='tiempo_faltante'> in 9 minutes</span></p><a href="#" class="button gold open_free_trial">Get Free Trial</a></div></div></p></dd></div><div class='elementosRelacionadosWrapper '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3518967" data-sd="2022-05-19 11:04:04"> <dt> 05/19/22</dt> <dd>Could crypto crash be good for U.S. economy? Probably.</dd></dl><dl class="hot related" data-id="3514629" data-sd="2022-05-12 13:16:36"> <dt> 05/12/22</dt> <dd>Miller calls out Taylor Morrison, GM as names that may work in this environment</dd></dl><dl class="hot related" data-id="3497670" data-sd="2022-04-21 13:25:57"> <dt> 04/21/22</dt> <dd>Powell says 50 basis point hike on table for May meeting</dd></dl><dl class="hot related" data-id="3458072" data-sd="2022-02-11 12:59:13"> <dt> 02/11/22</dt> <dd>Gundlach thinks 10-year note yield can &#039;make a move toward 2.50&#039;</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class="recsCompany"></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="ear related" data-id="3530836" data-sd="2022-06-14 15:50:37"> <dt> 06/14/22</dt> <dd>Ackman says 100 point hike tomorrow &#039;would be better&#039; than 75</dd></dl><dl class="ear related" data-id="3458062" data-sd="2022-02-11 12:43:26"> <dt> 02/11/22</dt> <dd>Gundlach sees five interest rate raises in 2022</dd></dl></section></div><div class='relTopic3' id='rel_3_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="period related" data-id="3530132" data-sd="2022-06-13 16:04:55"> <dt> 06/13/22</dt> <dd>Fed more likely to consider 0.75 point hike given recent data, WSJ says</dd></dl><dl class="period related" data-id="3511869" data-sd="2022-05-10 09:24:47"> <dt> 05/10/22</dt> <dd>Tepper says covered Nasdaq short, CNBC reports</dd></dl><dl class="period related" data-id="3474674" data-sd="2022-03-09 13:51:23"> <dt> 03/09/22</dt> <dd>U.S. funding bill hits snag over COVID-relief money, WSJ reports</dd></dl><dl class="period related" data-id="3462712" data-sd="2022-02-18 12:43:40"> <dt> 02/18/22</dt> <dd>U.S. officials see Russian invasion of Ukraine as &#039;imminent,&#039; WSJ says</dd></dl></section></div><div class='relTopic4' id='rel_4_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="otf related" data-id="3531632" data-sd="2022-06-15 16:23:54"> <dt> 06/15/22</dt> <dd>What You Missed On Wall Street On Wednesday</dd></dl><dl class="otf related" data-id="3514908" data-sd="2022-05-12 16:37:26"> <dt> 05/12/22</dt> <dd>What You Missed On Wall Street On Thursday</dd></dl><dl class="otf related" data-id="3507290" data-sd="2022-05-04 16:48:57"> <dt> 05/04/22</dt> <dd>What You Missed On Wall Street On Wednesday</dd></dl><dl class="otf related" data-id="3496921" data-sd="2022-04-20 16:25:36"> <dt> 04/20/22</dt> <dd>What You Missed On Wall Street On Wednesday</dd></dl></section></div> </div></div> </td></tr><tr id="news_3532702_20220617103002" data-id="3532702" data-timeOffset="9" data-storytype="" data-topic="general_news" data-datetime="20220617103002" data-unlockdate="2022-06-18 10:30:02" class="tr_noticia general_news General news " data-unlockdateUTC="1655562602" data-datenews="2022-06-17 10:30:02"> <td class="story_type">
-<span class="icon_story_type general_news" data-name="General news">
-<div class="fpo_overlay_ticker">General news</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532702/$ECON-Feds-George-explained-her-dissent-for-a--bp-hike'><span>Fed&#039;s George explained her dissent for a 50 bp hike</span></a>&nbsp;<span class='flechitaflechita'>»</span>
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:30<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:30</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:30</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='$ECON'>$ECON<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Economic Data</p></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'><dd class='clickeable blocked'>
-<p class='abstract'>Fed&#039;s George&hellip; <div class="candado"><div id="free_promo"><p class="open_free_trial"><strong>Story temporarily locked.</strong><br>To read stories as they happen please subscribe, Login above, or return <span class='tiempo_faltante'>tomorrow</span></p><a href="#" class="button gold open_free_trial">Get Free Trial</a></div></div></p></dd></div><div class='elementosRelacionadosWrapper '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3518967" data-sd="2022-05-19 11:04:04"> <dt> 05/19/22</dt> <dd>Could crypto crash be good for U.S. economy? Probably.</dd></dl><dl class="hot related" data-id="3514629" data-sd="2022-05-12 13:16:36"> <dt> 05/12/22</dt> <dd>Miller calls out Taylor Morrison, GM as names that may work in this environment</dd></dl><dl class="hot related" data-id="3497670" data-sd="2022-04-21 13:25:57"> <dt> 04/21/22</dt> <dd>Powell says 50 basis point hike on table for May meeting</dd></dl><dl class="hot related" data-id="3458072" data-sd="2022-02-11 12:59:13"> <dt> 02/11/22</dt> <dd>Gundlach thinks 10-year note yield can &#039;make a move toward 2.50&#039;</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class="recsCompany"></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="ear related" data-id="3530836" data-sd="2022-06-14 15:50:37"> <dt> 06/14/22</dt> <dd>Ackman says 100 point hike tomorrow &#039;would be better&#039; than 75</dd></dl><dl class="ear related" data-id="3458062" data-sd="2022-02-11 12:43:26"> <dt> 02/11/22</dt> <dd>Gundlach sees five interest rate raises in 2022</dd></dl></section></div><div class='relTopic3' id='rel_3_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="period related" data-id="3530132" data-sd="2022-06-13 16:04:55"> <dt> 06/13/22</dt> <dd>Fed more likely to consider 0.75 point hike given recent data, WSJ says</dd></dl><dl class="period related" data-id="3511869" data-sd="2022-05-10 09:24:47"> <dt> 05/10/22</dt> <dd>Tepper says covered Nasdaq short, CNBC reports</dd></dl><dl class="period related" data-id="3474674" data-sd="2022-03-09 13:51:23"> <dt> 03/09/22</dt> <dd>U.S. funding bill hits snag over COVID-relief money, WSJ reports</dd></dl><dl class="period related" data-id="3462712" data-sd="2022-02-18 12:43:40"> <dt> 02/18/22</dt> <dd>U.S. officials see Russian invasion of Ukraine as &#039;imminent,&#039; WSJ says</dd></dl></section></div><div class='relTopic4' id='rel_4_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="$ECON">$ECON</span> <span class="infoCompany">Economic Data</span></section><section class="statsCompany"> <dl> <dt> / <p class="companyPrice gain">+</p></dt> </dl></section><section class='recsCompany'><dl class="otf related" data-id="3531632" data-sd="2022-06-15 16:23:54"> <dt> 06/15/22</dt> <dd>What You Missed On Wall Street On Wednesday</dd></dl><dl class="otf related" data-id="3514908" data-sd="2022-05-12 16:37:26"> <dt> 05/12/22</dt> <dd>What You Missed On Wall Street On Thursday</dd></dl><dl class="otf related" data-id="3507290" data-sd="2022-05-04 16:48:57"> <dt> 05/04/22</dt> <dd>What You Missed On Wall Street On Wednesday</dd></dl><dl class="otf related" data-id="3496921" data-sd="2022-04-20 16:25:36"> <dt> 04/20/22</dt> <dd>What You Missed On Wall Street On Wednesday</dd></dl></section></div> </div></div> </td></tr><tr id="news_3532701_20220617102720" data-id="3532701" data-timeOffset="8" data-storytype="" data-topic="hot_stocks" data-datetime="20220617102720" data-unlockdate="2022-06-17 10:37:20" class="tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1655476640" data-datenews="2022-06-17 10:27:20"> <td class="story_type">
-<span class="icon_story_type hot_stocks" data-name="Hot Stocks">
-<div class="fpo_overlay_ticker">Hot Stocks</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532701/FERG-Ferguson-up--following-mention-of-rumor-in-Betaville'><span>Ferguson up 4% following mention of rumor in Betaville</span></a>&nbsp;<span class='flechitaflechita'>»</span>
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:27<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:27</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:27</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='FERG'>FERG<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Ferguson</p></section><section class="statsCompany"> <dl> <dt>$109.50 / <p class="companyPrice gain">+3.55<small class="smallWithoutIcon"> (+3.35%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'><dd class='clickeable blocked'>
-<p class='abstract'>A rumor related to&hellip; <div class="candado"><div id="free_promo"><p class="open_free_trial"><strong>Story temporarily locked.</strong><br>To read stories as they happen please subscribe, Login above, or return <span class='tiempo_faltante'> in 9 minutes</span></p><a href="#" class="button gold open_free_trial">Get Free Trial</a></div></div></p></dd></div><div class='elementosRelacionadosWrapper '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Options</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="FERG">FERG</span> <span class="infoCompany">Ferguson</span></section><section class="statsCompany"> <dl> <dt>$109.50 / <p class="companyPrice gain">+3.55<small class="smallWithoutIcon"> (+3.35%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3527036" data-sd="2022-06-07 06:57:33"> <dt> 06/07/22</dt> <dd>Ferguson releases ESG report</dd></dl><dl class="hot related" data-id="3515725" data-sd="2022-05-14 14:43:02"> <dt> 05/14/22</dt> <dd>Trian exits Comcast position, increases stake in Invesco</dd></dl><dl class="hot related" data-id="3513802" data-sd="2022-05-12 06:13:04"> <dt> 05/12/22</dt> <dd>Ferguson announces primary listing now on NYSE</dd></dl><dl class="hot related" data-id="3493503" data-sd="2022-04-13 09:18:11"> <dt> 04/13/22</dt> <dd>Trian Partners takes 5.2% passive stake in Ferguson</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="FERG">FERG</span> <span class="infoCompany">Ferguson</span></section><section class="statsCompany"> <dl> <dt>$109.50 / <p class="companyPrice gain">+3.55<small class="smallWithoutIcon"> (+3.35%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3532226" data-sd="2022-06-16 13:41:36"> <dt> 06/16/22 Societe Generale</dt> <dd>Ferguson price target lowered to 14,500 GBp from 19,000 GBp at Societe Generale</dd></dl><dl class="no_change relatedRec" data-id="3531831" data-sd="2022-06-16 07:13:24"> <dt> 06/16/22 Truist</dt> <dd>Ferguson price target lowered to $140 from $165 at Truist</dd></dl><dl class="no_change relatedRec" data-id="3531749" data-sd="2022-06-16 06:15:39"> <dt> 06/16/22 Barclays</dt> <dd>Ferguson price target lowered to $160 from $194 at Barclays</dd></dl><dl class="no_change relatedRec" data-id="3531544" data-sd="2022-06-15 14:10:45"> <dt> 06/15/22 RBC Capital</dt> <dd>Ferguson price target lowered to 9,800 GBp from 12,200 GBp at RBC Capital</dd></dl></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="FERG">FERG</span> <span class="infoCompany">Ferguson</span></section><section class="statsCompany"> <dl> <dt>$109.50 / <p class="companyPrice gain">+3.55<small class="smallWithoutIcon"> (+3.35%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="opt related" data-id="3496494" data-sd="2022-04-20 08:30:03"> <dt> 04/20/22</dt> <dd>Five new option listings and one option delisting on April 20th</dd></dl></section></div> </div></div> </td></tr><tr id="news_3532700_20220617102503" data-id="3532700" data-timeOffset="8" data-storytype="" data-topic="options" data-datetime="20220617102503" data-unlockdate="2022-06-18 10:25:03" class="tr_noticia options Options " data-unlockdateUTC="1655562303" data-datenews="2022-06-17 10:25:03"> <td class="story_type">
-<span class="icon_story_type options" data-name="Options">
-<div class="fpo_overlay_ticker">Options</div>
-</span>
-</td> <td><div class="story_header">
-<a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3532700/X-US-Steel-call-volume-above-normal-and-directionally-bullish'><span>US Steel call volume above normal and directionally bullish</span></a>&nbsp;<span class='flechitaflechita'>»</span>
-<span class="time_date">
-<small class="timeType"><span class="fpo_overlay soloHora">10:25<div class="fpo_overlay_ticker">06/17/22</div></span><span class="fpo_overlay fecha">06/17<div class="fpo_overlay_ticker">10:25</div></span><span class="fpo_overlay fechaConAnio">06/17/22<div class="fpo_overlay_ticker">10:25</div></span></small>
-</span> <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='X'>X<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">U.S. Steel</p></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section></div></span></div>
-</div><div class='newsContent'><dd class='clickeable blocked'>
-<p class='abstract'>Bullish option flow&hellip; <div class="candado"><div id="free_promo"><p class="open_free_trial"><strong>Story temporarily locked.</strong><br>To read stories as they happen please subscribe, Login above, or return <span class='tiempo_faltante'>tomorrow</span></p><a href="#" class="button gold open_free_trial">Get Free Trial</a></div></div></p></dd></div><div class='elementosRelacionadosWrapper '> <div class='clickeable toggleRelated'> <span class='showWord'>Show</span><span class='hideWord'>Hide</span> Related Items&nbsp;<span class='showWord'>>></span><span class='hideWord'><<</span> </div> <div class='relatedContent'> <ul class='globalRelated'> <li class='linkRelTopic_1'> <a href='#rel_1_tab'>Company News</a></li> <li class='linkRelatedRecs'> <a href='#rel_rec_tab'>Street Research </a></li> <li class='linkRelTopic_2'> <a href='#rel_2_tab'>Earnings</a></li> <li class='linkRelTopic_3'> <a href='#rel_3_tab'>Periodicals</a></li> <li class='linkRelTopic_4'> <a href='#rel_4_tab'>On The Fly</a></li> <li class='linkRelTopic_5'> <a href='#rel_5_tab'>Options</a></li></ul><div class='relTopic1' id='rel_1_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="X">X</span> <span class="infoCompany">U.S. Steel</span></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="hot related" data-id="3532310" data-sd="2022-06-16 16:14:51"> <dt> 06/16/22</dt> <dd>U.S. Steel jumps 5.9% to $20.75 after Q2 earnings guidance</dd></dl><dl class="hot related" data-id="3532306" data-sd="2022-06-16 16:13:47"> <dt> 06/16/22</dt> <dd>U.S. Steel says $210M remaining under $800M buyback authorization</dd></dl><dl class="hot related" data-id="3530432" data-sd="2022-06-14 07:30:43"> <dt> 06/14/22</dt> <dd>U.S. Steel appoints Jessica Graziano as CFO</dd></dl><dl class="hot related" data-id="3510570" data-sd="2022-05-09 11:29:59"> <dt> 05/09/22</dt> <dd>United States temporarily suspends 232 tariffs on Ukrainian steel</dd></dl></section></div><div id='rel_rec_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="X">X</span> <span class="infoCompany">U.S. Steel</span></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section><section class="recsCompany"><dl class="no_change relatedRec" data-id="3532603" data-sd="2022-06-17 08:27:09"> <dt>08:27 Today BMO Capital</dt> <dd>U.S. Steel price target lowered to $23 from $30 at BMO Capital</dd></dl><dl class="no_change relatedRec" data-id="3532527" data-sd="2022-06-17 07:08:08"> <dt>07:08 Today Credit Suisse</dt> <dd>U.S. Steel price target lowered to $44 from $49 at Credit Suisse</dd></dl><dl class="no_change relatedRec" data-id="3530557" data-sd="2022-06-14 08:42:05"> <dt> 06/14/22 JPMorgan</dt> <dd>U.S. Steel price target lowered to $28 from $34 at JPMorgan</dd></dl><dl class="no_change relatedRec" data-id="3523444" data-sd="2022-05-31 04:41:55"> <dt> 05/31/22 Goldman Sachs</dt> <dd>U.S. Steel price target lowered to $22 from $36 at Goldman Sachs</dd></dl></div><div class='relTopic2' id='rel_2_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="X">X</span> <span class="infoCompany">U.S. Steel</span></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="ear related" data-id="3532302" data-sd="2022-06-16 16:13:01"> <dt> 06/16/22</dt> <dd>U.S. Steel sees Q2 EPS $3.83-$3.88, consensus $3.20</dd></dl><dl class="ear related" data-id="3502876" data-sd="2022-04-28 16:43:38"> <dt> 04/28/22</dt> <dd>U.S. Steel reports Q1 adjusted EPS $3.05, consensus $2.95</dd></dl><dl class="ear related" data-id="3479869" data-sd="2022-03-17 16:18:04"> <dt> 03/17/22</dt> <dd>U.S. Steel sees Q1 EPS $2.96-$3.00, consensus $3.77</dd></dl><dl class="ear related" data-id="3448397" data-sd="2022-01-27 16:18:10"> <dt> 01/27/22</dt> <dd>U.S. Steel reports Q4 adjusted EPS $3.64, consensus $4.41</dd></dl></section></div><div class='relTopic3' id='rel_3_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="X">X</span> <span class="infoCompany">U.S. Steel</span></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="period related" data-id="3454231" data-sd="2022-02-07 10:25:09"> <dt> 02/07/22</dt> <dd>U.S., Japan reach deal to end steel tariffs, Bloomberg reports</dd></dl><dl class="period related" data-id="3448276" data-sd="2022-01-27 14:51:03"> <dt> 01/27/22</dt> <dd>WTO panel authorizes China to impose tariffs on U.S. imports, WSJ says</dd></dl></section></div><div class='relTopic4' id='rel_4_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="X">X</span> <span class="infoCompany">U.S. Steel</span></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="otf related" data-id="3532625" data-sd="2022-06-17 08:52:05"> <dt>08:52 Today</dt> <dd>Fly Intel: Pre-market Movers</dd></dl><dl class="otf related" data-id="3532368" data-sd="2022-06-16 17:25:08"> <dt> 06/16/22</dt> <dd>Fly Intel: After-Hours Movers</dd></dl><dl class="otf related" data-id="3480425" data-sd="2022-03-18 16:07:09"> <dt> 03/18/22</dt> <dd>What You Missed On Wall Street On Friday</dd></dl><dl class="otf related" data-id="3480376" data-sd="2022-03-18 12:02:51"> <dt> 03/18/22</dt> <dd>What You Missed On Wall Street This Morning</dd></dl></section></div><div class='relTopic5' id='rel_5_tab'><section class="infoCompany"> <span class="ticker symbolInsideNews" data-ticker="X">X</span> <span class="infoCompany">U.S. Steel</span></section><section class="statsCompany"> <dl> <dt>$20.30 / <p class="companyPrice gain">+0.7<small class="smallWithoutIcon"> (+3.57%)</small></p></dt> </dl></section><section class='recsCompany'><dl class="opt related" data-id="3513226" data-sd="2022-05-11 09:40:03"> <dt> 05/11/22</dt> <dd>Unusually active option classes on open May 11th</dd></dl><dl class="opt related" data-id="3502561" data-sd="2022-04-28 13:49:03"> <dt> 04/28/22</dt> <dd>US Steel options imply 6.7% move in share price post-earnings</dd></dl><dl class="opt related" data-id="3494402" data-sd="2022-04-14 10:45:03"> <dt> 04/14/22</dt> <dd>US Steel call volume above normal and directionally bullish</dd></dl><dl class="opt related" data-id="3483137" data-sd="2022-03-24 11:05:03"> <dt> 03/24/22</dt> <dd>US Steel call volume above normal and directionally bullish</dd></dl></section></div> </div></div> </td></tr>
-</tbody>
-</table><div class='ad_wrapper wrapper_ad_entre_noticias'><div id='ic_728x90_3' class='ad_individual_entre_noticia ad_AdInvestigatingChannelLeaderboard'></div></div>
-<table class="today news_table first_table">
-<tbody>
-</tbody>
-</table>
-</div>
-<div class="moreNewsTriggers">
-<a class="storiesEarlier" href="#" id="see_older_stories"></a>
-</div>
-</div>
-</div>
-<aside id="main_sidebar" style="display:none;">
-<div class='ad_wrapper wrapper_ad_columna_derecha'><div id='ic_300x250_1' class='ad_individual_columna_derecha ad_AdInvestigatingChannelSquare'></div></div>
-<section id="on_the_fly_sidebar">
-<h3 class="logged_out"><a href='news.php?onthefly=on&h=6' class='link'>On The Fly</a></h3>
-<p>News and insights, exclusive to thefly.com</p>
-<table>
-<tbody>
-<tr><td>No On The Fly News for your search</td></tr>
-</tbody>
-</table>
-<p><a href='news.php?onthefly=on&h=6' class='view_all'>View all On The Fly Stories &raquo;</a></p>
-</section><div class='ad_wrapper wrapper_ad_columna_derecha'><div id='ic_300x250_2' class='ad_individual_columna_derecha ad_AdInvestigatingChannelSquare'></div></div>  <section id="todays_events">
-<h3>Upcoming<br>Events (10)</h3>
-<table>
-<tbody>
-<tr class="event_opener" data-id-tipo-evento="4" data-id-evento="51083"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=HSBC">HSBC</a></div></th> <td>Inaugural Conference on the International Roles of the U.S. Dollar</td></tr><tr class="event_opener" data-id-tipo-evento="4" data-id-evento="51015"> <th scope="row"></th> <td>EHA 2022</td></tr><tr class="event_opener" data-id-tipo-evento="2" data-id-evento="224299"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=FSFG">FSFG</a></div></th> <td>First Savings Financial Group</td></tr><tr class="event_opener" data-id-tipo-evento="2" data-id-evento="224388"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=IRTC">IRTC</a></div></th> <td>iRhythm</td></tr><tr class="event_opener" data-id-tipo-evento="2" data-id-evento="222689"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=UNFI">UNFI</a></div></th> <td>United Natural Foods</td></tr><tr class="event_opener" data-id-tipo-evento="2" data-id-evento="224213"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=GWRE">GWRE</a></div></th> <td>Guidewire</td></tr><tr class="event_opener" data-id-tipo-evento="1" data-id-evento="126249"> <th scope="row"></th> <td>Homebuilding</td></tr><tr class="event_opener" data-id-tipo-evento="0" data-id-evento="419947"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=JT">JT</a></div></th> <td>Jianpu Technology - JT</td></tr><tr class="event_opener" data-id-tipo-evento="2" data-id-evento="223647"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=CDAK">CDAK</a></div></th> <td>Codiak BioSciences, Inc.</td></tr><tr class="event_opener" data-id-tipo-evento="2" data-id-evento="224710"> <th scope="row"><div class="symbol_wrapper"><a href="news.php?symbol=CNC">CNC</a></div></th> <td>Centene</td></tr>
-</tbody>
-</table>
-<p><a href='events.php' class='view_all'>View all of today&rsquo;s events &raquo;</a></p>
-</section> <section id="todays_syndicate">
-<h3>Today&rsquo;s<br>Syndicate (1)</h3>
-<table>
-<tbody>
-<tr class="syndicate_opener" data-id-syndicate="21705"><th scope="row"><a href="news.php?symbol=ACLX">ACLX</a></th><td>Secondary</td></tr>
-</tbody>
-</table>
-<p><a href='syndicate.php' class='view_all'>View this week&rsquo;s syndicate &raquo;</a></p>
-</section><div class='ad_wrapper wrapper_ad_columna_derecha'><div id='ic_120x750_1' class='ad_individual_columna_derecha ad_AdInvestigatingChannelContentPack'></div></div>
-</aside>
-</div>
-<div class='ad_wrapper ad_footer'><div id='ic_728x90_4'></div></div>
+      
+    <fieldset class="news_filters collapsed gradient" id="portfolio_timeframe">
+      <input id="input_symbol_search_news" name="symbol" type="text" class="textinput" size="25" maxlength="50" placeholder="Enter Symbols">
+      <input type="image" src="/images/buttons/search_nav.png"> 			</fieldset>
+         
+    <fieldset class="news_filters  hidden  collapsed clearfix gradient" id="category_filters">
+      <legend>Filters</legend>
+      <ul id="ul_all_filters">
+        <li id="market_story_filters" class="heading">
+          <input name="market_stories" id="market_stories" class="heading_checkbox" type="checkbox" checked="true"> <label for="market_stories">Market Stories</label>
+          <ul>
+            <li><input name="hot_stocks_filter" id="hot_stocks_filter" type="checkbox" checked="true"> <label for="hot_stocks_filter">Hot Stocks</label></li>
+            <li><input name="rumors_filter" id="rumors_filter" type="checkbox" checked="true"> <label for="rumors_filter" checked="true">Rumors</label></li>
+            <li><input name="general_news_filter" id="general_news_filter" type="checkbox" checked="true"> <label for="general_news_filter">General News</label></li>
+            <li><input name="periodicals_filter" id="periodicals_filter" type="checkbox" checked="true"> <label for="periodicals_filter">Periodicals</label></li>
+            <li><input name="earnings_filter" id="earnings_filter" type="checkbox" checked="true"> <label for="earnings_filter">Earnings</label></li>
+            <li><input name="technical_analysis_filter" id="technical_analysis_filter" type="checkbox" checked="true"> <label for="technical_analysis_filter">Tech Analysis</label></li>
+            <li><input name="options_filter" id="options_filter" type="checkbox" checked="true"> <label for="options_filter">Options</label></li>
+            <li><input name="syndicates_filter" id="syndicates_filter" type="checkbox" checked="true"> <label for="syndicates_filter">Syndicate</label></li>
+          </ul>
+        </li>
+        <li id="onthefly_filters" class="heading">
+          <input name="onthefly" id="onthefly" class="heading_checkbox" type="checkbox" checked="true"> <label for="onthefly">On The Fly</label>
+          <ul>
+            <li><input name="insight_filter" id="insight_filter" type="checkbox" checked="true"> <label for="insight_filter">Insights</label></li>
+            <li><input name="market_mover_filter" id="market_mover_filter" type="checkbox" checked="true"> <label for="market_mover_filter">Mkt. Movers</label></li>
+            
+            <li><input name="e_inter_filter" id="e_inter_filter" type="checkbox" checked="true"> <label for="e_inter_filter">Exclusive Interview</label></li>
+            
+            <li><input name="mid_wrap_filter" id="mid_wrap_filter" type="checkbox" checked="true"> <label for="mid_wrap_filter">Mid/Close Wrap</label></li>
+            
+            <li><input name="sec_wrap_filter" id="sec_wrap_filter" type="checkbox" checked="true"> <label for="sec_wrap_filter">Sector Wrap</label></li>
+            
+            <li><input name="analyst_wrap_filter" id="analyst_wrap_filter" type="checkbox" checked="true"> <label for="analyst_wrap_filter">Analyst Wrap</label></li>
+          </ul>
+        </li>
+        <li id="recommendations_filters" class="heading">
+          <input name="analyst_recommendations" id="analyst_recommendations" class="heading_checkbox" type="checkbox" checked="true"> <label for="analyst_recommendations">Street&nbsp;Research</label>
+          <ul>
+            <li><input name="upgrade_filter" id="upgrade_filter" type="checkbox" checked="true"> <label for="upgrade_filter">Upgrade</label></li>
+            <li><input name="downgrade_filter" id="downgrade_filter" type="checkbox" checked="true"> <label for="downgrade_filter">Downgrade</label></li>
+            <li><input name="initiate_filter" id="initiate_filter" type="checkbox" checked="true"> <label for="initiate_filter">Initiation</label></li>
+            <li><input name="no_change_filter" id="no_change_filter" type="checkbox" checked="true"> <label for="no_change_filter">No Change</label></li>
+          </ul>
+        </li>
+        <li id="events_filters" class="heading">
+          <input name="events" id="events" class="heading_checkbox" type="checkbox" checked="true"> <label for="events">Events</label>
+        </li>					
+      </ul>
+      <a href="#" id="show_more_filters">Show More</a>
+      <a href="#" id="show_less_filters">Show Less</a>
+    </fieldset>					</form>
+  <div class='newsFeedWidget'>
+    <table class="first_table" style='margin: 0;'>
+      <tbody> </table><table class='news_table yesterday first_table'>  <tr class='dateDivisionRow firstRowClass' data-date='2024-03-22'>    <td colspan=5 class='dateDivision'>Yesterday<span id='calendarioEnDivisionTiempo' class='calendario'><input type='text' name='fecha' style='display:none;' /> </span><div id='toggle_stories'><a href='#' class='fpo_overlay' id='show_full_stories_bloqueado'>Show Full Stories</a><div id='show_full_stories_not_logged'> <p class="candado_chico">	<span class="cerrarBoton" style="float: right;">X</span> </p>To view all stories in expanded form, please subscribe.<div class='footer_show_full_stories_bloqueado'><a href='#' class='button gold open_free_trial'>Get Free Trial</a></div></div><a class='send_info_link' href='contact.php?send=1'> Send Info </a></div></td>  </tr><tr id="news_3886746_20240322195000" data-id="3886746"  data-timeOffset="39" data-storytype="" data-topic="hot_stocks" data-datetime="20240322195000" data-unlockdate="2026-12-17 19:50:00" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797555000" data-datenews="2024-03-22 19:50:00">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886746/INTZ-Intrusion-Inc-trading-halted-news-pending'>Intrusion Inc trading halted, news pending</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">19:50
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">19:50
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">19:50</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='INTZ'>INTZ<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Intrusion</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886745_20240322190135" data-id="3886745"  data-timeOffset="39" data-storytype="" data-topic="hot_stocks" data-datetime="20240322190135" data-unlockdate="2026-12-17 19:01:35" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797552095" data-datenews="2024-03-22 19:01:35">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886745/OGI-Organigram-receives-Health-Canadas-final-redetermination-on-Jolts'>Organigram receives Health Canada&#039;s final redetermination on Jolts</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">19:01
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">19:01
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">19:01</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='OGI'>OGI<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Organigram</p></section><section class="statsCompany">		  	<dl>		  		<dt>$2.72 / <p class="companyPrice gain">+0.22<small class="smallWithoutIcon"> (+8.80%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Organigram announced&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886744_20240322175504" data-id="3886744"  data-timeOffset="39" data-storytype="" data-topic="hot_stocks" data-datetime="20240322175504" data-unlockdate="2026-12-17 17:55:04" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797548104" data-datenews="2024-03-22 17:55:04">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886744/DWAC-Digital-World-Acquisition-holders-approve-proposed-merger-with-TMTG'>Digital World Acquisition holders approve proposed merger with TMTG</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">17:55
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">17:55
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">17:55</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='DWAC'>DWAC<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Digital World Acquisition</p></section><section class="statsCompany">		  	<dl>		  		<dt>$36.85 / <p class="companyPrice loss">-5.64<small class="smallWithoutIcon"> (-13.27%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Digital World Acquisition&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886743_20240322173430" data-id="3886743"  data-timeOffset="39" data-storytype="" data-topic="events" data-datetime="20240322173430" data-unlockdate="2026-12-17 17:34:30" class=" tr_noticia events Conference/Events " data-unlockdateUTC="1797546870" data-datenews="2024-03-22 17:34:30">  
+           <td class="story_type">
+              <span class="icon_story_type events" data-name="Conference/Events">
+              <div class="fpo_overlay_ticker">Conference/Events</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886743/LANC-Lancaster-Colony-management-to-meet-with-Stephens'>Lancaster Colony management to meet with Stephens</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">17:34
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">17:34
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">17:34</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='LANC'>LANC<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Lancaster Colony</p></section><section class="statsCompany">		  	<dl>		  		<dt>$205.89 / <p class="companyPrice gain">+0.33<small class="smallWithoutIcon"> (+0.16%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Meeting to be held in New&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886742_20240322173026" data-id="3886742"  data-timeOffset="39" data-storytype="" data-topic="syndic" data-datetime="20240322173026" data-unlockdate="2026-12-17 17:30:26" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797546626" data-datenews="2024-03-22 17:30:26">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886742/UUUU-Energy-Fuels-files-automatic-mixed-securities-shelf'>Energy Fuels files automatic mixed securities shelf</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">17:30
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">17:30
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">17:30</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='UUUU'>UUUU<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Energy Fuels</p></section><section class="statsCompany">		  	<dl>		  		<dt>$6.17 / <p class="companyPrice loss">-0.055<small class="smallWithoutIcon"> (-0.88%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886741_20240322172529" data-id="3886741"  data-timeOffset="39" data-storytype="" data-topic="syndic" data-datetime="20240322172529" data-unlockdate="2026-12-17 17:25:29" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797546329" data-datenews="2024-03-22 17:25:29">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886741/CNXC-Concentrix-files-to-sell-M-shares-of-common-stock-for-holders'>Concentrix files to sell 13.17M shares of common stock for holders</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">17:25
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">17:25
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">17:25</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='CNXC'>CNXC<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Concentrix</p></section><section class="statsCompany">		  	<dl>		  		<dt>$61.30 / <p class="companyPrice loss">-1.725<small class="smallWithoutIcon"> (-2.74%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886740_20240322171318" data-id="3886740"  data-timeOffset="39" data-storytype="" data-topic="syndic" data-datetime="20240322171318" data-unlockdate="2026-12-17 17:13:18" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797545598" data-datenews="2024-03-22 17:13:18">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886740/AEMD-Aethlon-Medical-files-to-sell-common-stock-warrants-no-amount-given'>Aethlon Medical files to sell common stock, warrants, no amount given</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">17:13
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">17:13
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">17:13</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='AEMD'>AEMD<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Aethlon Medical</p></section><section class="statsCompany">		  	<dl>		  		<dt>$1.69 / <p class="companyPrice gain">+0.03<small class="smallWithoutIcon"> (+1.81%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Maxim Group is acting as&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886739_20240322171235" data-id="3886739"  data-timeOffset="39" data-storytype="" data-topic="events" data-datetime="20240322171235" data-unlockdate="2026-12-17 17:12:35" class=" tr_noticia events Conference/Events " data-unlockdateUTC="1797545555" data-datenews="2024-03-22 17:12:35">  
+           <td class="story_type">
+              <span class="icon_story_type events" data-name="Conference/Events">
+              <div class="fpo_overlay_ticker">Conference/Events</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886739/CRNX-JMP-Securities-biotech-analysts-to-hold-an-analystindustry-conference-call'>JMP Securities biotech analysts to hold an analyst/industry conference call</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">17:12
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">17:12
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">17:12</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='CRNX'>CRNX<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Crinetics</p></section><section class="statsCompany">		  	<dl>		  		<dt>$44.28 / <p class="companyPrice loss">-0.7<small class="smallWithoutIcon"> (-1.56%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Biotechnology Analysts&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886738_20240322164758" data-id="3886738"  data-timeOffset="39" data-storytype="" data-topic="syndic" data-datetime="20240322164758" data-unlockdate="2026-12-17 16:47:58" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797544078" data-datenews="2024-03-22 16:47:58">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886738/NEE-NextEra-Energy-files-automatic-mixed-securities-shelf'>NextEra Energy files automatic mixed securities shelf</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:47
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:47
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:47</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='NEE'>NEE<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">NextEra Energy</p></section><section class="statsCompany">		  	<dl>		  		<dt>$61.78 / <p class="companyPrice gain">+0.43<small class="smallWithoutIcon"> (+0.70%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886737_20240322164705" data-id="3886737"  data-timeOffset="39" data-storytype="" data-topic="hot_stocks" data-datetime="20240322164705" data-unlockdate="2026-12-17 16:47:05" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797544025" data-datenews="2024-03-22 16:47:05">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886737/CC-Chemours-names-Denise-Dignam-as-CEO'>Chemours names Denise Dignam as CEO</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:47
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:47
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:47</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='CC'>CC<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Chemours</p></section><section class="statsCompany">		  	<dl>		  		<dt>$27.87 / <p class="companyPrice gain">+0.62<small class="smallWithoutIcon"> (+2.28%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>The Chemours Company&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr>
+          </tbody>
+        </table>
+        <table class="yesterday news_table first_table">
+          <tbody>
+      <tr id="news_3886736_20240322163317" data-id="3886736"  data-timeOffset="39" data-storytype="" data-topic="syndic" data-datetime="20240322163317" data-unlockdate="2026-12-17 16:33:17" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797543197" data-datenews="2024-03-22 16:33:17">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886736/APLT-Applied-Therapeutics-files-to-sell-M-shares-of-common-stock-for-holders'>Applied Therapeutics files to sell 14.29M shares of common stock for holders</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:33
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:33
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:33</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='APLT'>APLT<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Applied Therapeutics</p></section><section class="statsCompany">		  	<dl>		  		<dt>$6.76 / <p class="companyPrice loss">-0.065<small class="smallWithoutIcon"> (-0.95%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886735_20240322163149" data-id="3886735"  data-timeOffset="39" data-storytype="" data-topic="hot_stocks" data-datetime="20240322163149" data-unlockdate="2026-12-17 16:31:49" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797543109" data-datenews="2024-03-22 16:31:49">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886735/RILY-B-Riley-Financial-receives-Nasdaq-notice-of-noncompliance'>B. Riley Financial receives Nasdaq notice of non-compliance</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:31
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:31
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:31</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='RILY'>RILY<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">B. Riley Financial</p></section><section class="statsCompany">		  	<dl>		  		<dt>$19.48 / <p class="companyPrice loss">-1.4<small class="smallWithoutIcon"> (-6.70%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>B. Riley Financial&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886734_20240322163100" data-id="3886734"  data-timeOffset="39" data-storytype="" data-topic="options" data-datetime="20240322163100" data-unlockdate="2026-12-17 16:31:00" class=" tr_noticia options Options " data-unlockdateUTC="1797543060" data-datenews="2024-03-22 16:31:00">  
+           <td class="story_type">
+              <span class="icon_story_type options" data-name="Options">
+              <div class="fpo_overlay_ticker">Options</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886734/-Preliminary-option-volume-of-M-today'>Preliminary option volume of 43.1M today</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:31
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:31
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:31</div></span></small>  </span> 
+          <div class="simbolos_wrapper"></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Preliminary option volume&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886733_20240322162428" data-id="3886733"  data-timeOffset="38" data-storytype="" data-topic="hot_stocks" data-datetime="20240322162428" data-unlockdate="2026-12-17 16:24:28" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797542668" data-datenews="2024-03-22 16:24:28">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886733/GAME-GameSquare-announces-voluntary-delisting-from-TSXV'>GameSquare announces voluntary delisting from TSXV</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:24
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:24
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:24</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='GAME'>GAME<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">GameSquare</p></section><section class="statsCompany">		  	<dl>		  		<dt>$1.36 / <p class="companyPrice loss">-0.12<small class="smallWithoutIcon"> (-8.11%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>GameSquare Holdings&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886732_20240322162303" data-id="3886732"  data-timeOffset="38" data-storytype="" data-topic="syndic" data-datetime="20240322162303" data-unlockdate="2026-12-17 16:23:03" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797542583" data-datenews="2024-03-22 16:23:03">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886732/MOTS-Motus-GI-Holdings-files-to-sell-M-shares-of-common-stock-for-holders'>Motus GI Holdings files to sell 4.4M shares of common stock for holders</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:23
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:23
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:23</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='MOTS'>MOTS<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Motus GI Holdings</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886731_20240322162101" data-id="3886731"  data-timeOffset="38" data-storytype="" data-topic="options" data-datetime="20240322162101" data-unlockdate="2026-12-17 16:21:01" class=" tr_noticia options Options " data-unlockdateUTC="1797542461" data-datenews="2024-03-22 16:21:01">  
+           <td class="story_type">
+              <span class="icon_story_type options" data-name="Options">
+              <div class="fpo_overlay_ticker">Options</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886731/VIX-Closing-CBOE-SPX-and-VIX-Index-summary-for-March-nd'>Closing CBOE SPX and VIX Index summary for March 22nd</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:21
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:21
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:21</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='VIX'>VIX<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Volatility Index S&P 500 Options</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>The CBOE Volatility Index&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886730_20240322162014" data-id="3886730"  data-timeOffset="38" data-storytype="" data-topic="syndic" data-datetime="20240322162014" data-unlockdate="2026-12-17 16:20:14" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797542414" data-datenews="2024-03-22 16:20:14">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886730/NTR-Nutrien-files-automatic-mixed-securities-shelf'>Nutrien files automatic mixed securities shelf</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:20
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:20
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:20</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='NTR'>NTR<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Nutrien</p></section><section class="statsCompany">		  	<dl>		  		<dt>$52.22 / <p class="companyPrice loss">-1.41<small class="smallWithoutIcon"> (-2.63%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886729_20240322161831" data-id="3886729"  data-timeOffset="38" data-storytype="" data-topic="hot_stocks" data-datetime="20240322161831" data-unlockdate="2026-12-17 16:18:31" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797542311" data-datenews="2024-03-22 16:18:31">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886729/SWX-Southwest-Gas-Centuri-files-public-registration-statement'>Southwest Gas: Centuri files public registration statement</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:18
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:18
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:18</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='SWX'>SWX<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Southwest Gas</p></section><section class="statsCompany">		  	<dl>		  		<dt>$71.68 / <p class="companyPrice loss">-0.18<small class="smallWithoutIcon"> (-0.25%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Southwest Gas Holdings&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886728_20240322161307" data-id="3886728"  data-timeOffset="37" data-storytype="" data-topic="hot_stocks" data-datetime="20240322161307" data-unlockdate="2026-12-17 16:13:07" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797541987" data-datenews="2024-03-22 16:13:07">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886728/RBT-Rubicon-Technologies-receives-noncompliance-notice-from-NYSE'>Rubicon Technologies receives noncompliance notice from NYSE</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:13
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:13
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:13</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='RBT'>RBT<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Rubicon Technologies</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Rubicon Technologies&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886727_20240322161200" data-id="3886727"  data-timeOffset="37" data-storytype="" data-topic="on_the_fly" data-datetime="20240322161200" data-unlockdate="" class=" tr_noticia on_the_fly OnTheFly  subt_mid_wrap" data-unlockdateUTC="1711181592" data-datenews="2024-03-22 16:12:00">  
+           <td class="story_type">
+              <span class="icon_story_type on_the_fly" data-name="On The Fly">
+              <div class="fpo_overlay_ticker">On The Fly</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886727/STVN;NKTX;NKE;FDX;AAPL;BIDU;TSLA;LULU;BBY;FL;SCHW;SEDG;HUMA;HOOK;HYZN;PROK;AMPX;STLA;EADSY;BA;WMT;TGT;AMZN;RSI;CGC;TLRY;GRFS;STEM-What-You-Missed-On-Wall-Street-On-Friday'>What You Missed On Wall Street On Friday</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:12
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:12
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:12</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='STVN'>STVN<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Stevanato Group</p></section><section class="statsCompany">		  	<dl>		  		<dt>$31.10 / <p class="companyPrice gain">+2.69<small class="smallWithoutIcon"> (+9.47%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='NKTX'>NKTX<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Nkarta</p></section><section class="statsCompany">		  	<dl>		  		<dt>$8.84 / <p class="companyPrice loss">-4.13<small class="smallWithoutIcon"> (-31.84%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='NKE'>NKE<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Nike</p></section><section class="statsCompany">		  	<dl>		  		<dt>$94.04 / <p class="companyPrice loss">-6.775<small class="smallWithoutIcon"> (-6.72%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='FDX'>FDX<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">FedEx</p></section><section class="statsCompany">		  	<dl>		  		<dt>$284.38 / <p class="companyPrice gain">+19.5<small class="smallWithoutIcon"> (+7.36%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='AAPL'>AAPL<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Apple</p></section><section class="statsCompany">		  	<dl>		  		<dt>$172.35 / <p class="companyPrice gain">+0.96<small class="smallWithoutIcon"> (+0.56%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='BIDU'>BIDU<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Baidu</p></section><section class="statsCompany">		  	<dl>		  		<dt>$102.26 / <p class="companyPrice gain">+0.6<small class="smallWithoutIcon"> (+0.59%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='TSLA'>TSLA<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Tesla</p></section><section class="statsCompany">		  	<dl>		  		<dt>$170.95 / <p class="companyPrice loss">-1.85<small class="smallWithoutIcon"> (-1.07%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='LULU'>LULU<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Lululemon</p></section><section class="statsCompany">		  	<dl>		  		<dt>$403.87 / <p class="companyPrice loss">-75.4<small class="smallWithoutIcon"> (-15.73%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='BBY'>BBY<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Best Buy</p></section><section class="statsCompany">		  	<dl>		  		<dt>$81.71 / <p class="companyPrice gain">+1.28<small class="smallWithoutIcon"> (+1.59%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='FL'>FL<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Foot Locker</p></section><section class="statsCompany">		  	<dl>		  		<dt>$24.45 / <p class="companyPrice gain">+0.785<small class="smallWithoutIcon"> (+3.32%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='SCHW'>SCHW<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Charles Schwab</p></section><section class="statsCompany">		  	<dl>		  		<dt>$71.79 / <p class="companyPrice loss">-0.06<small class="smallWithoutIcon"> (-0.08%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='SEDG'>SEDG<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">SolarEdge</p></section><section class="statsCompany">		  	<dl>		  		<dt>$64.80 / <p class="companyPrice loss">-1.93<small class="smallWithoutIcon"> (-2.89%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='HUMA'>HUMA<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Humacyte</p></section><section class="statsCompany">		  	<dl>		  		<dt>$3.35 / <p class="companyPrice loss">-0.26<small class="smallWithoutIcon"> (-7.21%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='HOOK'>HOOK<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Hookipa Pharma</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='HYZN'>HYZN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Hyzon Motors</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='PROK'>PROK<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">ProKidney</p></section><section class="statsCompany">		  	<dl>		  		<dt>$1.40 / <p class="companyPrice gain">+0.04<small class="smallWithoutIcon"> (+2.94%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='AMPX'>AMPX<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Amprius Technologies</p></section><section class="statsCompany">		  	<dl>		  		<dt>$2.75 / <p class="companyPrice loss">-0.195<small class="smallWithoutIcon"> (-6.63%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='STLA'>STLA<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Stellantis</p></section><section class="statsCompany">		  	<dl>		  		<dt>$29.21 / <p class="companyPrice gain">+0.01<small class="smallWithoutIcon"> (+0.03%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='EADSY'>EADSY<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Airbus</p></section><section class="statsCompany">		  	<dl>		  		<dt>$45.95 / <p class="companyPrice gain">+0.08<small class="smallWithoutIcon"> (+0.17%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='BA'>BA<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Boeing</p></section><section class="statsCompany">		  	<dl>		  		<dt>$188.93 / <p class="companyPrice gain">+1.16<small class="smallWithoutIcon"> (+0.62%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='WMT'>WMT<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Walmart</p></section><section class="statsCompany">		  	<dl>		  		<dt>$60.95 / <p class="companyPrice loss">-0.48<small class="smallWithoutIcon"> (-0.78%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='TGT'>TGT<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Target</p></section><section class="statsCompany">		  	<dl>		  		<dt>$168.74 / <p class="companyPrice loss">-1.43<small class="smallWithoutIcon"> (-0.84%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='AMZN'>AMZN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Amazon.com</p></section><section class="statsCompany">		  	<dl>		  		<dt>$179.04 / <p class="companyPrice gain">+0.85<small class="smallWithoutIcon"> (+0.48%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='RSI'>RSI<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Rush Street Interactive</p></section><section class="statsCompany">		  	<dl>		  		<dt>$6.56 / <p class="companyPrice gain">+0.195<small class="smallWithoutIcon"> (+3.06%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='CGC'>CGC<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Canopy Growth</p></section><section class="statsCompany">		  	<dl>		  		<dt>$7.74 / <p class="companyPrice gain">+3.18<small class="smallWithoutIcon"> (+69.74%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='TLRY'>TLRY<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Tilray</p></section><section class="statsCompany">		  	<dl>		  		<dt>$2.31 / <p class="companyPrice gain">+0.35<small class="smallWithoutIcon"> (+17.90%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='GRFS'>GRFS<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Grifols</p></section><section class="statsCompany">		  	<dl>		  		<dt>$6.19 / <p class="companyPrice loss">-0.595<small class="smallWithoutIcon"> (-8.78%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='STEM'>STEM<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Stem</p></section><section class="statsCompany">		  	<dl>		  		<dt>$1.99 / <p class="companyPrice loss">-0.255<small class="smallWithoutIcon"> (-11.38%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class="clickeable">
+                   <p class="abstract hayMasTexto">Get caught up quickly on&hellip;  </p><div class="completeText"><p><span class='open_new_overlay gold button'> <a class='open_onthefly_new_window' href='https://thefly.com/permalinks/entry.php/id3886727/STVN;NKTX;NKE;FDX;AAPL;BIDU;TSLA;LULU;BBY;FL;SCHW;SEDG;HUMA;HOOK;HYZN;PROK;AMPX;STLA;EADSY;BA;WMT;TGT;AMZN;RSI;CGC;TLRY;GRFS;STEM-What-You-Missed-On-Wall-Street-On-Friday'> Open Full Text  </a> </span> </p></div></dd> <!--dd.clickeable--></div>  </td></tr>
+          </tbody>
+        </table>
+        <table class="yesterday news_table first_table">
+          <tbody>
+      <tr id="news_3886726_20240322161127" data-id="3886726"  data-timeOffset="37" data-storytype="" data-topic="hot_stocks" data-datetime="20240322161127" data-unlockdate="2026-12-17 16:11:27" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797541887" data-datenews="2024-03-22 16:11:27">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886726/PFIS;FNCB-Peoples-Financial-FNCB-Bancorp-merger-approved-by-shareholders'>Peoples Financial, FNCB Bancorp merger approved by shareholders</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:11
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:11
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:11</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='PFIS'>PFIS<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Peoples Financial</p></section><section class="statsCompany">		  	<dl>		  		<dt>$40.33 / <p class="companyPrice loss">-1.97<small class="smallWithoutIcon"> (-4.66%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='FNCB'>FNCB<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">FNCB Bancorp</p></section><section class="statsCompany">		  	<dl>		  		<dt>$5.95 / <p class="companyPrice loss">-0.06<small class="smallWithoutIcon"> (-1.00%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Peoples Financial&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886725_20240322160843" data-id="3886725"  data-timeOffset="37" data-storytype="" data-topic="syndic" data-datetime="20240322160843" data-unlockdate="2026-12-17 16:08:43" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797541723" data-datenews="2024-03-22 16:08:43">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886725/DSP-Viant-files-to-sell-M-shares-of-Class-A-common-stock-for-holders'>Viant files to sell 10M shares of Class A common stock for holders</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:08
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:08
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:08</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='DSP'>DSP<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Viant</p></section><section class="statsCompany">		  	<dl>		  		<dt>$10.22 / <p class="companyPrice loss">-0.135<small class="smallWithoutIcon"> (-1.30%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886724_20240322160746" data-id="3886724"  data-timeOffset="37" data-storytype="" data-topic="syndic" data-datetime="20240322160746" data-unlockdate="2026-12-17 16:07:46" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797541666" data-datenews="2024-03-22 16:07:46">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886724/DSP-Viant-files-M-mixed-securities-shelf'>Viant files $100M mixed securities shelf</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:07
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:07
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:07</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='DSP'>DSP<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Viant</p></section><section class="statsCompany">		  	<dl>		  		<dt>$10.23 / <p class="companyPrice loss">-0.12<small class="smallWithoutIcon"> (-1.16%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886723_20240322160702" data-id="3886723"  data-timeOffset="37" data-storytype="" data-topic="hot_stocks" data-datetime="20240322160702" data-unlockdate="2026-12-17 16:07:02" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797541622" data-datenews="2024-03-22 16:07:02">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886723/MASI-Masimo-board-approves-evaluation-of-separation-of-consumer-business'>Masimo board approves evaluation of separation of consumer business</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:07
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:07
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:07</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='MASI'>MASI<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Masimo</p></section><section class="statsCompany">		  	<dl>		  		<dt>$134.90 / <p class="companyPrice gain">+1.75<small class="smallWithoutIcon"> (+1.31%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Masimo announced that its&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886722_20240322160353" data-id="3886722"  data-timeOffset="36" data-storytype="" data-topic="syndic" data-datetime="20240322160353" data-unlockdate="2026-12-17 16:03:53" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797541433" data-datenews="2024-03-22 16:03:53">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886722/INDO-Indonesia-Energy-files-M-mixed-securities-shelf'>Indonesia Energy files $50M mixed securities shelf</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:03
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:03
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:03</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='INDO'>INDO<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Indonesia Energy</p></section><section class="statsCompany">		  	<dl>		  		<dt>$2.15 / <p class="companyPrice loss">-0.04<small class="smallWithoutIcon"> (-1.83%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886721_20240322160328" data-id="3886721"  data-timeOffset="36" data-storytype="" data-topic="syndic" data-datetime="20240322160328" data-unlockdate="2026-12-17 16:03:28" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797541408" data-datenews="2024-03-22 16:03:28">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886721/DNLI-Denali-Therapeutics-files-to-sell-M-shares-of-common-stock-for-holders'>Denali Therapeutics files to sell 29.29M shares of common stock for holders</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:03
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:03
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:03</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='DNLI'>DNLI<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Denali Therapeutics</p></section><section class="statsCompany">		  	<dl>		  		<dt>$19.66 / <p class="companyPrice loss">-1.32<small class="smallWithoutIcon"> (-6.29%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886720_20240322160302" data-id="3886720"  data-timeOffset="36" data-storytype="" data-topic="syndic" data-datetime="20240322160302" data-unlockdate="2026-12-17 16:03:02" class=" tr_noticia syndic Syndicate " data-unlockdateUTC="1797541382" data-datenews="2024-03-22 16:03:02">  
+           <td class="story_type">
+              <span class="icon_story_type syndic" data-name="Syndicate">
+              <div class="fpo_overlay_ticker">Syndicate</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886720/HXL-Hexcel-files-automatic-mixed-securities-shelf'>Hexcel files automatic mixed securities shelf</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:03
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:03
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:03</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='HXL'>HXL<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Hexcel</p></section><section class="statsCompany">		  	<dl>		  		<dt>$72.11 / <p class="companyPrice gain">+0.235<small class="smallWithoutIcon"> (+0.33%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr><tr id="news_3886719_20240322160228" data-id="3886719"  data-timeOffset="36" data-storytype="" data-topic="hot_stocks" data-datetime="20240322160228" data-unlockdate="2026-12-17 16:02:28" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797541348" data-datenews="2024-03-22 16:02:28">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886719/AXNX;BSX-Axonics-shareholders-approve-merger-with-Boston-Scientific'>Axonics shareholders approve merger with Boston Scientific</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:02
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:02
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:02</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='AXNX'>AXNX<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Axonics</p></section><section class="statsCompany">		  	<dl>		  		<dt>$68.35 / <p class="companyPrice gain">+0.14<small class="smallWithoutIcon"> (+0.21%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='BSX'>BSX<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Boston Scientific</p></section><section class="statsCompany">		  	<dl>		  		<dt>$67.73 / <p class="companyPrice gain">+0.18<small class="smallWithoutIcon"> (+0.27%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class='clickeable blocked'>
+                      <div class='abstract'>Axonics (AXNX) announced&hellip; <div class='candado free_user'><div class="free_promo"><div class="text_1">Available to The Fly Members Only</div><div class='text_2'>Breaking content available to members only. Sign up or login for access.</div><a href="free_sign_up.php" class="button blue open_free_user">Create FREE Account</a></div></div> </div></dd></div>  </td></tr><tr id="news_3886718_20240322160058" data-id="3886718"  data-timeOffset="36" data-storytype="" data-topic="on_the_fly" data-datetime="20240322160058" data-unlockdate="" class=" tr_noticia on_the_fly OnTheFly  subt_sector_wrap" data-unlockdateUTC="1711180895" data-datenews="2024-03-22 16:00:58">  
+           <td class="story_type">
+              <span class="icon_story_type on_the_fly" data-name="On The Fly">
+              <div class="fpo_overlay_ticker">On The Fly</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886718/RSI;DKNG;GAMB;MGM;ELYS;SRAD;FLUT;PENN;ACEL;BALY;BYD;CZR;CHDN;GAN;GENI;LVS;SGHC;WYNN-Bet-On-It-Rush-Street-Interactive-said-to-explore-potential-sale'>Bet On It: Rush Street Interactive said to explore potential sale</a>&nbsp;<span class='flechitaflechita'>»</span>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:00
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:00
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:00</div></span></small>  </span> 
+          <div class="simbolos_wrapper"><span class='ticker fpo_overlay' data-ticker='RSI'>RSI<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Rush Street Interactive</p></section><section class="statsCompany">		  	<dl>		  		<dt>$6.56 / <p class="companyPrice gain">+0.19<small class="smallWithoutIcon"> (+2.99%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='DKNG'>DKNG<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">DraftKings</p></section><section class="statsCompany">		  	<dl>		  		<dt>$47.39 / <p class="companyPrice loss">-0.55<small class="smallWithoutIcon"> (-1.15%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='GAMB'>GAMB<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Gambling.com</p></section><section class="statsCompany">		  	<dl>		  		<dt>$8.88 / <p class="companyPrice gain">+0.065<small class="smallWithoutIcon"> (+0.74%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='MGM'>MGM<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">MGM Resorts</p></section><section class="statsCompany">		  	<dl>		  		<dt>$44.58 / <p class="companyPrice loss">-0.165<small class="smallWithoutIcon"> (-0.37%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='ELYS'>ELYS<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Elys Game Technology</p></section><section class="statsCompany">		  	<dl>		  		<dt> / <p class="companyPrice gain">+</p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='SRAD'>SRAD<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Sportradar</p></section><section class="statsCompany">		  	<dl>		  		<dt>$11.51 / <p class="companyPrice gain">+0.06<small class="smallWithoutIcon"> (+0.52%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='FLUT'>FLUT<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Flutter Entertainment</p></section><section class="statsCompany">		  	<dl>		  		<dt>$217.92 / <p class="companyPrice loss">-0.03<small class="smallWithoutIcon"> (-0.01%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='PENN'>PENN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Penn Entertainment</p></section><section class="statsCompany">		  	<dl>		  		<dt>$17.36 / <p class="companyPrice loss">-0.17<small class="smallWithoutIcon"> (-0.97%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='ACEL'>ACEL<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Accel Entertainment</p></section><section class="statsCompany">		  	<dl>		  		<dt>$11.75 / <p class="companyPrice loss">-0.225<small class="smallWithoutIcon"> (-1.88%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='BALY'>BALY<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Bally's</p></section><section class="statsCompany">		  	<dl>		  		<dt>$13.61 / <p class="companyPrice gain">+0.1<small class="smallWithoutIcon"> (+0.74%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='BYD'>BYD<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Boyd Gaming</p></section><section class="statsCompany">		  	<dl>		  		<dt>$63.03 / <p class="companyPrice loss">-0.675<small class="smallWithoutIcon"> (-1.06%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='CZR'>CZR<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Caesars</p></section><section class="statsCompany">		  	<dl>		  		<dt>$41.34 / <p class="companyPrice loss">-0.285<small class="smallWithoutIcon"> (-0.68%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='CHDN'>CHDN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Churchill Downs</p></section><section class="statsCompany">		  	<dl>		  		<dt>$117.79 / <p class="companyPrice loss">-0.85<small class="smallWithoutIcon"> (-0.72%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='GAN'>GAN<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Gan Limited</p></section><section class="statsCompany">		  	<dl>		  		<dt>$1.30 / <p class="companyPrice loss">-0.02<small class="smallWithoutIcon"> (-1.52%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='GENI'>GENI<div class="fpo_overlay_img overlayNotWide"><section class="infoCompany"><p class="infoCompany">Genius Sports</p></section><section class="statsCompany">		  	<dl>		  		<dt>$5.64 / <p class="companyPrice loss">-0.145<small class="smallWithoutIcon"> (-2.51%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='LVS'>LVS<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Las Vegas Sands</p></section><section class="statsCompany">		  	<dl>		  		<dt>$50.13 / <p class="companyPrice loss">-0.21<small class="smallWithoutIcon"> (-0.42%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='SGHC'>SGHC<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Super Group</p></section><section class="statsCompany">		  	<dl>		  		<dt>$3.44 / <p class="companyPrice loss">-0.155<small class="smallWithoutIcon"> (-4.31%)</small></p></dt>		  	</dl></section></div></span>, <span class='ticker fpo_overlay' data-ticker='WYNN'>WYNN<div class="fpo_overlay_img "><section class="infoCompany"><p class="infoCompany">Wynn Resorts</p></section><section class="statsCompany">		  	<dl>		  		<dt>$99.84 / <p class="companyPrice loss">-0.17<small class="smallWithoutIcon"> (-0.17%)</small></p></dt>		  	</dl></section></div></span></div>
+           </div><div class='newsContent'><dd class="clickeable">
+                   <p class="abstract hayMasTexto">Welcome to the latest&hellip;  </p><div class="completeText"><p><span class='open_new_overlay gold button'> <a class='open_onthefly_new_window' href='https://thefly.com/permalinks/entry.php/id3886718/RSI;DKNG;GAMB;MGM;ELYS;SRAD;FLUT;PENN;ACEL;BALY;BYD;CZR;CHDN;GAN;GENI;LVS;SGHC;WYNN-Bet-On-It-Rush-Street-Interactive-said-to-explore-potential-sale'> Open Full Text  </a> </span> </p></div></dd> <!--dd.clickeable--></div>  </td></tr><tr id="news_3886717_20240322160000" data-id="3886717"  data-timeOffset="36" data-storytype="" data-topic="hot_stocks" data-datetime="20240322160000" data-unlockdate="2026-12-17 16:00:00" class=" tr_noticia hot_stocks Hot Stocks " data-unlockdateUTC="1797541200" data-datenews="2024-03-22 16:00:00">  
+           <td class="story_type">
+              <span class="icon_story_type hot_stocks" data-name="Hot Stocks">
+              <div class="fpo_overlay_ticker">Hot Stocks</div>							
+            </span>
+            </td>  <td><div class="story_header">
+          <a class='newsTitleLink' onclick='javascript:return false;' href='https://thefly.com/permalinks/entry.php/id3886717/-Aspac-I-Acquisition-Corp-trading-resumes'>Aspac I Acquisition Corp. trading resumes</a>
+            <span class="time_date">  <small class="timeType"><span class="fpo_overlay soloHora">16:00
+            <div class="fpo_overlay_ticker">03/22/24</div>
+          </span><span class="fpo_overlay fecha">03/22
+            <div class="fpo_overlay_ticker">16:00
+            </div>
+          </span><span class="fpo_overlay fechaConAnio">03/22/24<div class="fpo_overlay_ticker">16:00</div></span></small>  </span> 
+          <div class="simbolos_wrapper"></div>
+           </div><div class='newsContent'>	      <dd class="">&nbsp;</dd></div>  </td></tr>
+          </tbody>
+        </table>
+        <table class="yesterday news_table first_table">
+          <tbody>
+              </tbody>
+    </table>
+  </div>			
+  <div class="moreNewsTriggers">	
+    <a class="storiesEarlier" href="#" id="see_older_stories"></a>
+  </div>
+  
+</div><!-- /search_news -->
+  </div><!-- /content_wrapper -->
 
+
+<aside id="main_sidebar" style="display:none;">
+
+
+
+<section id="on_the_fly_sidebar">
+  <h3 class="logged_out"><a href='news.php?onthefly=on&h=6' class='link'>On The Fly</a></h3>
+  <p>News and insights, exclusive to thefly.com</p>
+  <table>
+    <tbody>
+    <tr>  <th scope="row">16:12</th>  <td><a onClick="openNewInOverlay('3886727', '2024-03-22 16:12:00');return false;" href="#">What You Missed On Wall Street On Friday&raquo;</a></td></tr><tr>  <th scope="row">16:00</th>  <td><a onClick="openNewInOverlay('3886718', '2024-03-22 16:00:58');return false;" href="#">Bet On It: Rush Street Interactive said to explore potential sale&raquo;</a></td></tr><tr>  <th scope="row">15:24</th>  <td><a onClick="openNewInOverlay('3886707', '2024-03-22 15:24:46');return false;" href="#">Buy/Sell: Wall Street's top 10 stock calls this week&raquo;</a></td></tr><tr>  <th scope="row">12:14</th>  <td><a onClick="openNewInOverlay('3886639', '2024-03-22 12:14:53');return false;" href="#">What You Missed On Wall Street This Morning&raquo;</a></td></tr><tr>  <th scope="row">11:33</th>  <td><a onClick="openNewInOverlay('3886626', '2024-03-22 11:33:36');return false;" href="#">Biotech Alert: Searches spiking for these stocks today&raquo;</a></td></tr>
+    </tbody>
+  </table>
+  <p><a href='news.php?onthefly=on&h=6' class='view_all'>View all On The Fly Stories &raquo;</a></p>
+</section><!-- /on_the_fly_sidebar -->	<section id="todays_events">
+  <h3>Upcoming<br>Events (0)</h3>
+  <table>
+    <tbody>
+      <tr><td>No upcoming Events for your search</td></tr>
+    </tbody>
+  </table>
+  <p><a href='events.php' class='view_all'>View all of today&rsquo;s events &raquo;</a></p>
+</section><!-- /class="todays_events" -->	<section id="todays_syndicate">
+  <h3>Today&rsquo;s<br>Syndicate (0)</h3>
+  <table>
+    <tbody>
+      <tr><td><span class='empty_module'>No syndicate deals.</span></td></tr>
+    </tbody>
+  </table>
+  <p><a href='syndicate.php' class='view_all'>View this week&rsquo;s syndicate &raquo;</a></p>
+</section><!-- /class="todays_syndicate" -->
+
+
+</aside><!-- /main_sidebar -->
+
+</div><!-- /wrapper -->
+
+
+<!-- <footer class="gradient" id="site_footer"> -->
 <footer id="site_footer">
 <nav class="site_nav">
+  <!-- 
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="news.php">Breaking News</a></li>
+    <li><a href="onthefly.php">On The Fly</a></li>
+    <li><a href="portfolios.php" >My Portfolios</a></li>
+    <li><a href="events.php" >Events</a></li>
+    <li><a href="syndicate.php" >Syndicate</a></li>
+    <li><a href="about_the_fly.php">About The Fly</a></li>
+    <li><a href="disclaimer.php">Disclaimer</a></li>
+    <li><a href="contact.php">Contact</a></li>
+    <li><a href="careers.php">Careers</a></li>
+  </ul>
+   -->
+   <div class="footer_section">
+     <div class="footer_title"><span class="title">ABOUT THE FLY</span></div>
+    <ul>
+      <li><a href="services.php">Services</a></li>
+      <li><a href="about_the_fly.php">About Us</a></li>
+      <li><a href="faq.php">Help/FAQ</a></li>
+      <li><a href="careers.php">Careers</a></li>
+      <li><a href="/overlays/disclaimer.php" class='open_disclaimer_overlay'>Disclaimer and Terms of Use</a></li>
+      <li><a href="/disclaimer.php?h=Privacy%20Policy&go=priv">Privacy Policy</a></li>
+      <li><a href="/overlays/cancellationPolicy.php" class='open_overlay'>Cancellation Policy</a></li>
+      <li><a href="/ads_app.php" class='open_donotsellinfo'>Limit the use of my sensitive personal information</a></li>
+      <!-- <li><a href="#">Advertise</a></li> -->
+    </ul>
+  </div>
+   <div class="footer_section">
+     <div class="footer_title"><span class="title">SUBSCRIPTIONS</span></div>
+    <ul>
+      <li><a href="rates.php">Basic Plan</a></li>
+      <li><a href="rates.php">Full Access</a></li>
+    </ul>
+  </div>
+   <div class="footer_section">
+     <div class="footer_title"><span class="title">NEWS</span></div>
+    <ul>
+      <li><a href="news.php">Breaking News</a></li>
+      <li><a id="open_popup_button" href="#" class="open_popup_link slider_control pop_out_button">Breaking News Pop-out</a></li>
+      <li><a href="news.php?onthefly=on&h=6">On The Fly</a></li>
+      <li><span id="footerFlyCastLink" class="fly_cast_link">Fly Cast</span></li>
+    </ul>
+  </div>
+   <div class="footer_section">
+     <div class="footer_title"><span class="title">CALENDARS</span></div>
+    <ul>
+      <li><a href="events.php" >Events</a></li>
+      <li><a href="syndicate.php" >Syndicate</a></li>			
+      <li><a href="streetResearch.php" >Street Research</a></li>
+    </ul>
+  </div>
+   <div class="footer_section section_social">
+     <div class="footer_title"><span class="title">STAY CONNECTED</span></div>
+    <ul>
+      <li><a href="contact.php">Contact Us</a></li>
+      <li><a href="settings.php?notifications=1">Newsletters and Alerts</a></li>
+      <li><a class="social_link" href="https://www.twitter.com/theflynews" target="_blank"><img class="social twitter" src="/images/social/twitter.png"></a><a class="social_link" href="https://www.linkedin.com/company/theflynews" target="_blank"><img class="social linkedin" src="/images/social/linkedin.png"><a class="social_link" href="https://www.facebook.com/theflynews" target="_blank"><img class="social facebook" src="/images/social/facebook.png"></a></a></li>
+    </ul>
+    
+    
+  </div>
 
-<div class="footer_section">
-<div class="footer_title"><span class="title">ABOUT THE FLY</span></div>
-<ul>
-<li><a href="services.php">Services</a></li>
-<li><a href="about_the_fly.php">About Us</a></li>
-<li><a href="faq.php">Help/FAQ</a></li>
-<li><a href="careers.php">Careers</a></li>
-<li><a href="/overlays/disclaimer.php" class='open_disclaimer_overlay'>Disclaimer and Terms of Use</a></li>
-<li><a href="/overlays/disclaimer.php?h=Privacy%20Policy&#priv" class='open_disclaimer_overlay'>Privacy Policy</a></li>
-<li><a href="/overlays/cancellationPolicy.php" class='open_overlay'>Cancellation Policy</a></li>
-
-<li><a href="/ads_app.php" class='open_donotsellinfo'>Do Not Sell My Personal Information</a></li>
-
-</ul>
-</div>
-<div class="footer_section">
-<div class="footer_title"><span class="title">SUBSCRIPTIONS</span></div>
-<ul>
-<li><a href="rates.php">Basic Plan</a></li>
-<li><a href="rates.php">Full Access</a></li>
-</ul>
-</div>
-<div class="footer_section">
-<div class="footer_title"><span class="title">NEWS</span></div>
-<ul>
-<li><a href="news.php">Breaking News</a></li>
-<li><a id="open_popup_button" href="#" class="open_popup_link slider_control pop_out_button">Breaking News Pop-out</a></li>
-<li><a href="news.php?onthefly=on&h=6">On The Fly</a></li>
-<li><span id="footerFlyCastLink" class="fly_cast_link">Fly Cast</span></li>
-</ul>
-</div>
-<div class="footer_section">
-<div class="footer_title"><span class="title">CALENDARS</span></div>
-<ul>
-<li><a href="events.php">Events</a></li>
-<li><a href="syndicate.php">Syndicate</a></li>
-<li><a href="streetResearch.php">Street Research</a></li>
-</ul>
-</div>
-<div class="footer_section section_social">
-<div class="footer_title"><span class="title">STAY CONNECTED</span></div>
-<ul>
-<li><a href="contact.php">Contact Us</a></li>
-<li><a href="settings.php?notifications=1">Newsletters and Alerts</a></li>
-<li><a class="social_link" href="https://www.twitter.com/theflynews" target="_blank"><img class="social twitter" src="/images/social/twitter.png"></a><a class="social_link" href="https://www.linkedin.com/company/theflynews" target="_blank"><img class="social linkedin" src="/images/social/linkedin.png"><a class="social_link" href="https://www.facebook.com/theflynews" target="_blank"><img class="social facebook" src="/images/social/facebook.png"></a></a></li>
-</ul>
-</div>
-<div class="footer_section thefly_copyright">
-Copyright ©1998-2022 Thefly.com LLC </div>
+  <div class="footer_section thefly_copyright">
+    Copyright ©1998-2024 Thefly.com LLC		</div>
 </nav>
 </footer>
+
 <footer id="fixed_footer" class="gradient">
 <div class="container">
-<ul>
-<li><a href="#why_the_fly" class="slider_control">Why the Fly?</a></li>
-<li><a href="#" class="gold open_free_trial">Get Free Trial</a></li>
-<li class="pop_out_button"><a id="open_popup_button" href="#" class="open_popup_link slider_control pop_out_button">Breaking News Pop-out</a></li>
-</ul>
+  <ul>
+    <li><a href="#why_the_fly" class="slider_control">Why the Fly?</a></li>
+    <li><a href="free_sign_up.php" class="button blue open_free_user">Join Now</a></li>
+    <li id="open_synd_popup" class="open_synd_popup"><a id="open_synd_popup" href="#" class="pop_out_button"><img src='images/bottom_nav_pop_synd.svg' alt="Syndicate Pop Up"/> Syndicate Pop-out</a></li>
+    <li class="pop_out_button"><a id="open_popup_button" href="#" class="open_popup_link slider_control pop_out_button"><img src='images/bottom_nav_pop_news.svg' alt="Breaking News Pop Up"/>Breaking News Pop-out</a></li>
+  </ul>
+  <!--<div class="fly small_fly"></div>-->
+  <div class="fly_cast">
+  <!-- placeholder image: replace with Flash player -->
+    <div id="jquery_jplayer_1_deshabilitado" class="jp-jplayer"></div>
+    <div id="jp_container_1" class="jp-audio">
+      <div class="jp-type-single">
+        <div class="jp-gui jp-interface">
+          <div class="jp-controls-div">
+          <ul class="jp-controls">
+            <li><p class='fly-cast-title'>Fly Cast</p></li>
+            <li><img style='margin-top:3px;' src='/images/backgrounds/flecha_negra.png' alt='Launch Fly Cast'/></li>
+          </ul>
+        </div>
+        <div class="jp-no-solution">
+          <span>Update Required</span>
+          To play the media you will need to either update your browser to a recent version or update your <a href="https://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>.					</div>
+      </div>
+    </div>
+    <!-- /placeholder image -->
+  </div><!-- fly_cast -->
+  <div class="fly small_fly"></div>
+</div><!-- /container -->
+</footer><!-- /fixed_footer -->
 
-<div class="fly_cast">
-
-<div id="jquery_jplayer_1_deshabilitado" class="jp-jplayer"></div>
-<div id="jp_container_1" class="jp-audio">
-<div class="jp-type-single">
-<div class="jp-gui jp-interface">
-<div class="jp-controls-div">
-<ul class="jp-controls">
-<li><p>Fly Cast</p></li>
-<li><img style='margin-top:3px;' src='/images/backgrounds/flecha_negra.png' alt='Launch Fly Cast' /></li>
-</ul>
-</div>
-<div class="jp-no-solution">
-<span>Update Required</span>
-To play the media you will need to either update your browser to a recent version or update your <a href="https://get.adobe.com/flashplayer/" target="_blank">Flash plugin</a>. </div>
-</div>
-</div>
-
-</div>
-<div class="fly small_fly"></div>
-</div>
-</footer>
 <div class="slider gradient" id="why_the_fly">
-<div class="container">
-<h2>Get Full Fly Access</h2>
-<dl>
-<dt>Breaking market intelligence sent straight to you</dt>
-<dd>Our team of experts analyze every news story and filter out the noise to deliver real-time market moving news.</dd>
-</dl>
-<dl>
-<dt>Up-to-date information on important industry events</dt>
-<dd>Get real-time updates on events that are moving the market&mdash;from conferences and calls to syndicate announcements.</dd>
-</dl>
-<dl>
-<dt>News focused on the companies in your portfolio</dt>
-<dd>Create up to 12 portfolios with 150 stocks each, and see how active they are in market news.</dd>
-</dl>
-<div id="why_learn_more">
-<a href="#" class="open_free_trial free_trial_button gold">
-14 Day Free Trial
-</a>
-<p class="learn_more"><a href="about_the_fly.php">Learn more &raquo;</a></p>
-</div>
-<a href="#" class="close_slider"></a>
-<div class="fly big_fly"></div>
-</div>
-</div>
-<script type="text/javascript">var texts = {"busqueda":{"validadorSimbolos":{"oneRepeated":"This symbol is repeated: ","manyRepeated":"These symbols are repeated: ","oneInexistent":"This symbol is non-existent: ","manyInexistent":"These symbols are non-existent: "},"agregarSimbolosABusqueda":{"alert":"The input is empty."}},"dinamizarNoticia":{"cambiarTextoRecsDeshabilitadas":{"textoRecs":"To see Analyst Recommendations, <a href=# class=\\"open_free_trial\\">subscribe to Full Access Plan<\\/a>."},"actualizarNoticiaAbierta":{"msg":"<div class='mostrarContenidoEscondidoActualizado'>This article is now available. <span class='gold linkActualizarContenido'>Update Content<\\/span><\\/div>"}},"fotw":{"calcularTimeAgo":{"overHour":"Over an hour ago","overMin":"Over a minute ago","overManyMins":"Over %time mins ago","overDay":"Over a day ago"},"radioStream":{"title":"The Fly Radio"},"hayAlMenosUnoChequeado":{"alert":"At least one checkbox must be checked."},"clickAdvancedSearch":{"showAdvanceSearch":"Show advanced search","hideAdvanceSearch":"Hide advanced search"},"validarFormSearchNews":{"alert":"Check market commentary or Recommendation. Or select a portfolio (if logged in)."},"setearCambiosFiltros":[],"groupSelectorsFilters":{"mousedown":{"alert":"At least one filter must be checked."}},"profileSettings":{"noty":{"text":"To apply the changes on the site, we will refresh the page after the popup close"}}},"news":{"ponerNewsPagNews":{"noMoreNews":"No more news for the last year."},"moreNews":{"earlierStories":"Loading earlier stories","storiesSinceClose":"Loading stories since yesterday's close"}},"login":{"respuestaLogin":{"msg":"There was an error processing your request. Please try again"}},"portfolio":{"agregarSimbolosAPortfolio":{"alert":"Symbols field is empty."},"grabarPortfolio":{"alert":"You need to add a symbol to the portfolio to save it."},"borrarSimboloPortfolio":{"alert":"borrar simbolo => %simbolo \\n id_port %id_portfolio"}},"settings":{"settingsCheckUnsavedPortfolios":{"noty":{"text":"Do you want save your changes before leaving?"}},"settingsCheckUnsavedBilling":{"noty":{"text":"Your Subscription was not saved. Do you want to leave without saving?"}},"ready":{"delete_portfolio_button":{"click":{"noty":{"text":"Are you sure you want to delete your Portfolio %portName ?"}}},"delete_symbol_button":{"click":{"noty":{"text":"The portfolio should have at least one symbol"}}}},"portfolioInputValidate":{"portNameEmpty":{"noty":{"text":"Please complete portfolio's name"}},"portSymbolsEmpty":{"noty":{"text":"Please complete at least one symbol"}}},"actionSavePortfolio":[],"validarExistenciaSimbolos":{"invalidSymbol":"This symbol is invalid => %symbols","invalidSymbols":"These symbols are invalid => %symbols","dimissMsg":"<br>Click this message to dismiss."},"addSymbolAction":{"portfolioRow_new":{"noty":{"text":"Please type one or more symbols"}},"symbolInputValidate":{"noty":{"text":"Could not add more symbols. You've reached the maximum limit of %maxCantSimbolosPort symbols per portfolio"}}},"portfolioAjaxOK":{"portfolioAdded":"New portfolio was added","portfolioDeleted":"Portfolio was deleted","saveAlertSettings":"Alert's settings were modified"},"symbolInputValidate":{"noty":{"text":"The symbol %symbol is already in the list"}},"notificationsAjaxOK":{"notificationsSaved":"Notifications saved"},"updateSubscriptions":{"savingError":"Error saving the subscriptions changes, please try again"},"otroReady":{"noty":{"text":"Please fill all inputs. The new password and repeat password must be the same."}},"otroReadyMas":{"noty":{"text":"Please complete with a new email address"}},"changeEmailAjaxOK":{"reqError":"Request error. Please try again"}},"update":{"procesarActualizacion_q":{"mostrarMensajeFancy":{"title":"Sorry...","msg":"You have been disconnected because someone has logged in from another location."}},"procesarActualizacion":[]},"buttons":{"subscribe":"Subscribe","save":"Save","discard":"Discard","ok":"Ok","cancel":"Cancel","stay":"Stay"},"popups":{"radio":{"title":"TheFly Radio"}},"fancy":{"title":"The Fly"}};
+  <div class="container">
+    <h2>Get Full Fly Access</h2>
+    <dl>
+      <dt>Breaking market intelligence sent straight to you</dt>
+      <dd>Our team of experts analyze every news story and filter out the noise to deliver real-time market moving news.</dd>
+    </dl>
+    <dl>
+      <dt>Up-to-date information on important industry events</dt>
+      <dd>Get real-time updates on events that are moving the market&mdash;from conferences and calls to syndicate announcements.</dd>
+    </dl>
+    <dl>
+      <dt>News focused on the companies in your portfolio</dt>
+      <dd>Create up to 12 portfolios with 150 stocks each, and see how active they are in market news.</dd>
+    </dl>
+    <div id="why_learn_more">
+      <a href="#" class="open_free_trial free_trial_button gold">
+        14 Day Free Trial					<!-- <img src="images/buttons/30_day_free_trial.png" alt="14 Day Free Trial" width="168" height="41">-->
+      </a>
+      <p class="learn_more"><a href="about_the_fly.php">Learn more &raquo;</a></p>
+    </div>
+    <a href="#" class="close_slider"></a>
+    <div class="fly big_fly"></div>
+  </div><!-- /container -->
+</div><!-- /why_the_fly -->
 
-var ult_modifiedNews = '5042359';
+<script type="text/javascript">var texts = {"busqueda":{"validadorSimbolos":{"oneRepeated":"This symbol is repeated: ","manyRepeated":"These symbols are repeated: ","oneInexistent":"This symbol is non-existent: ","manyInexistent":"These symbols are non-existent: "},"agregarSimbolosABusqueda":{"alert":"The input is empty."}},"dinamizarNoticia":{"cambiarTextoRecsDeshabilitadas":{"textoRecs":"To see Analyst Recommendations, <a href=# class=\"open_free_trial\">subscribe to Full Access Plan<\/a>."},"actualizarNoticiaAbierta":{"msg":"<div class='mostrarContenidoEscondidoActualizado'>This article is now available. <span class='gold linkActualizarContenido'>Update Content<\/span><\/div>"}},"fotw":{"calcularTimeAgo":{"overHour":"Over an hour ago","overMin":"Over a minute ago","overManyMins":"Over %time mins ago","overDay":"Over a day ago"},"radioStream":{"title":"The Fly Radio"},"hayAlMenosUnoChequeado":{"alert":"At least one checkbox must be checked."},"clickAdvancedSearch":{"showAdvanceSearch":"Show advanced search","hideAdvanceSearch":"Hide advanced search"},"validarFormSearchNews":{"alert":"Check market commentary or Recommendation. Or select a portfolio (if logged in)."},"setearCambiosFiltros":[],"groupSelectorsFilters":{"mousedown":{"alert":"At least one filter must be checked."}},"profileSettings":{"noty":{"text":"To apply the changes on the site, we will refresh the page after the popup close"}}},"news":{"ponerNewsPagNews":{"noMoreNews":"No more news for the last year."},"moreNews":{"earlierStories":"Loading earlier stories","storiesSinceClose":"Loading stories since yesterday's close"}},"login":{"respuestaLogin":{"msg":"There was an error processing your request. Please try again"}},"portfolio":{"agregarSimbolosAPortfolio":{"alert":"Symbols field is empty."},"grabarPortfolio":{"alert":"You need to add a symbol to the portfolio to save it."},"borrarSimboloPortfolio":{"alert":"borrar simbolo => %simbolo \n id_port %id_portfolio"}},"settings":{"settingsCheckUnsavedPortfolios":{"noty":{"text":"Do you want save your changes before leaving?"}},"settingsCheckUnsavedBilling":{"noty":{"text":"Your Subscription was not saved. Do you want to leave without saving?"}},"ready":{"delete_portfolio_button":{"click":{"noty":{"text":"Are you sure you want to delete your Portfolio %portName ?"}}},"delete_symbol_button":{"click":{"noty":{"text":"The portfolio should have at least one symbol"}}}},"portfolioInputValidate":{"portNameEmpty":{"noty":{"text":"Please complete portfolio's name"}},"portSymbolsEmpty":{"noty":{"text":"Please complete at least one symbol"}}},"actionSavePortfolio":[],"validarExistenciaSimbolos":{"invalidSymbol":"This symbol is invalid => %symbols","invalidSymbols":"These symbols are invalid => %symbols","dimissMsg":"<br>Click this message to dismiss."},"addSymbolAction":{"portfolioRow_new":{"noty":{"text":"Please type one or more symbols"}},"symbolInputValidate":{"noty":{"text":"Could not add more symbols. You've reached the maximum limit of %maxCantSimbolosPort symbols per portfolio"}}},"portfolioAjaxOK":{"portfolioAdded":"New portfolio was added","portfolioDeleted":"Portfolio was deleted","saveAlertSettings":"Alert's settings were modified"},"symbolInputValidate":{"noty":{"text":"The symbol %symbol is already in the list"}},"notificationsAjaxOK":{"notificationsSaved":"Notifications saved"},"updateSubscriptions":{"savingError":"Error saving the subscriptions changes, please try again"},"otroReady":{"noty":{"text":"Please fill all inputs. The new password and repeat password must be the same."}},"otroReadyMas":{"noty":{"text":"Please complete with a new email address"}},"changeEmailAjaxOK":{"reqError":"Request error. Please try again"}},"update":{"procesarActualizacion_q":{"mostrarMensajeFancy":{"title":"Sorry...","msg":"You have been disconnected because someone has logged in from another location."}},"procesarActualizacion":[]},"buttons":{"subscribe":"Subscribe","save":"Save","discard":"Discard","ok":"Ok","cancel":"Cancel","stay":"Stay"},"popups":{"radio":{"title":"TheFly Radio"}},"fancy":{"title":"The Fly"}};
 
-var wid_versions = {"1":"10297"};
+var ult_modifiedNews = '5545944';
+
+var wid_versions = {"1":"15784"};
 
 var cookieConsentCfg = {"active":true,"cookie":{"name":"cookie_consent","expiry":30}};
 
-</script><script type="text/javascript" src="/js/todosE.js?lastUpdate=202206173423888144"></script><script type="text/javascript" src="/js/todosM.js?lastUpdate=202206173423888144"></script><script type="text/javascript" src="/js/todosN.js?lastUpdate=202206173423888144"></script><div id="searchAutocompleteWrapper" class="search_autocomplete_wrapper"></div>
+</script><script type="text/javascript" src="/js/jquery-ui.min-1.8.18.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.cycle.all.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/fancybox/jquery.fancybox-1.3.4.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.placeholder.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.form.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/uniform/jquery.uniform.min.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.dotdotdot-1.5.1.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/Loadingdotdot.mod.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/soundmanager2-jsmin.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.cookie.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.clock.min.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/superfish.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery-tiny-pubsub-master/dist/ba-tiny-pubsub.min.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/vallenato.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/plugins/jquery.noty.packaged.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/ajax.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/fotw.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/update.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/dinamizarNoticias.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/busqueda.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/alertas.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/forgot_password.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/login.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/tooltip.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/news.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/charts.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/overlays.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/analytics.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetOTFIndex.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetTrendingNews.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/site.events.handler.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetLanding.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/news_filters.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetNewsFeed.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetHubs.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/onShow.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetChartQuote.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/cookieConsent.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetFreeTrial.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetChangeCc.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/fu.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/syndicate.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/smJwt.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetFormFreeUser.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/smSignup.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetFreeTrialPromo.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/widgetPromoCode.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/modalMessage.js?lastUpdate=20240323104"></script><script type="text/javascript" src="/js/feed_filters.js?lastUpdate=20240323104"></script><div id="searchAutocompleteWrapper" class="search_autocomplete_wrapper"></div>
 <script type="text/javascript">
-\t$(document).ready(function() {
-\t\tinitSymbolAutocomplete ("#input_nav_search");
-\t\tinitSymbolAutocomplete ("#symbol_search_news_home");
-\t\tinitSymbolAutocomplete ("#input_symbol_search_news");
-\t\tinitSymbolAutocomplete ("#agregarSimbolosInput");\t
-\t\tinitSymbolAutocomplete ("div#search_events_n input:[name='symbol']");
-\t\tinitOnlyOneSymbolAutocomplete ("#symbol1");
-\t\tinitOnlyOneSymbolAutocomplete ("#symbol2");
-\t\tinitOnlyOneSymbolAutocomplete ("#symbol3");
-\t\tinitOnlyOneSymbolAutocomplete ("#symbol4");
-\t\tinitOnlyOneSymbolAutocomplete ("#symbol5");
-\t});
+$(document).ready(function() {
+  initSymbolAutocomplete ("#input_nav_search");
+  initSymbolAutocomplete ("#symbol_search_news_home");
+  initSymbolAutocomplete ("#input_symbol_search_news");
+  initSymbolAutocomplete ("#agregarSimbolosInput");	
+  initSymbolAutocomplete ("div#search_events_n input:[name='symbol']");
+  initOnlyOneSymbolAutocomplete ("#symbol1");
+  initOnlyOneSymbolAutocomplete ("#symbol2");
+  initOnlyOneSymbolAutocomplete ("#symbol3");
+  initOnlyOneSymbolAutocomplete ("#symbol4");
+  initOnlyOneSymbolAutocomplete ("#symbol5");
+});
 </script><script>
-\ttrackTiming('Page Requests', '/news.php', '122', 'Request /news.php')
+trackTiming('Page Requests', '/news.php', '186', 'Request /news.php')
 </script>
 </body>
 </html>
 <div class="pop_up_promo" style="display: none;">
 </div>
+
 <script type="text/javascript">
-\tvar buscaPorCalendario=0;
+var buscaPorCalendario=0;
 
-\tsetearUltimos(1655462142);
-\t
-\t\t\t//#653 Make ad Fixed
-\t\tvar fixmeTop = 0;
-\t
+setearUltimos(1711137000);
 
-\t//Filtros dinamicos
-    $(document).ready(function() {
-\t\tsetearCambiosFiltros("#search_filter_stories_news input[type='checkbox']");
-\t\t
-\t//TODO esto es copia de fotw.js linea 487 para actualizar
-\t// los checks grupales. Es muy parecido salvo que la seleccion
-\t// de las variables de los elementos ($groupElem, $elems) se hacen
-\t// en el fotw relativo al elemento que hace click.
-
-\t// Rta TODO Me parece que eso a lo que se refeire el todo ya no está
-\t// mas en el fotw.js. Copio todo para ese archivo para reutilizarlo
-\t// en el news popOut.
-\t
-\t\tinicializarBotonesShowHideFullStories();
-
-\t\tprepararFiltros();
-    \t
-    \tfixDateRow();
-    \t
-    \tprepararAutoload(getParametrosNews);
-
-    \t//Eventos busqueda: le pone el on click para que muestre la info
-    \t$("div.eventDateCalendar:not(.syndDateCalendar)", "div.search_results_bar").click(function (){abrirEventInfo($(this), "ev"); return false;});
-
-\t\t//Syndicate busqueda: le pone el onclick
-    \t$("div.search_results_bar div.syndDateCalendar").click(function (){abrirEventInfo($(this),"sy"); return false;});
-\t\t
-\t\t//Overlay de las recommendations en el header del resultado de busqueda
-\t\t$("div.search_results_bar .story_details dl").hover(
-\t\t\tfunction(){
-\t\t\t\t$(".fpo_overlay_img", this).each(function() {
-\t\t\t\t\tvar padre = $(this).parents("span.ticker");
-\t\t\t\t\t$(this).css("left",padre.width()+12);
-\t\t\t\t});
-\t\t\t\tvar overlay = $(".overlayRecNews", this);
-\t\t\t\tif(overlay.length > 0){
-\t\t\t\t\toverlay.show();
-\t\t\t\t\t//se fija que esté dentro de la pantalla en el pop
-\t\t\t\t\tacomodarEnPop(overlay);
-\t\t\t\t}
-\t\t\t}, //mouseover
-\t\t\tfunction(){
-\t\t\t\tvar overlay = $(".overlayRecNews", this);
-\t\t\t\tif(overlay.length > 0){
-\t\t\t\t\treestablecerEnPop(overlay);
-\t\t\t\t\toverlay.hide();
-\t\t\t\t}
-\t\t\t} //mouseout
-\t\t);
-
-\t\t$('#show_full_stories_bloqueado').click(
-\t\t\t\tfunction () { // mouseover
-\t\t\t\t\tif (loggedin){
-\t\t\t\t\t\t//TODO esto es temporal, si el usuario no está subscripto a news_feed
-\t\t\t\t\t\t//Show full stories está deshabilitado y mandaría a subscibirse a
-\t\t\t\t\t\t//news_feed.
-\t\t\t\t\t\tcambiarOpenFreeTrialASubscribe($(this).siblings('div'));
-\t\t\t\t\t}
-\t\t\t\t\t$(this).siblings('div').show();
-\t\t\t\t}
-\t\t\t);
-\t\t$('#show_full_stories_not_logged').click(function (){$(this).hide()});
-
-\t\tvar widNF = new WidgetNewsFeed("#search_news");
+    //#653 Make ad Fixed
+  var fixmeTop = 0;
 
 
-\t\t// Esto es para las related de las busquedas
-\t\t// Funciones para abrir lo pops cuando
-\t\t// los related recs estan bloqueadas
-\t\t$('div.linked dl.relatedRec').click(function (){
-\t\t\tvar id = $(this).attr("data-id");
-\t\t\tvar sd = $(this).attr("data-sd");
-\t\t\t
-\t\t\t//window.location.href ="landingPageNews.php?id="+id+"&sch_date="+sd;
-\t\t\twindow.location.href ="n.php?id="+id+"&sch_date="+sd;
-\t\t});
-\t\t
-\t\t$('div.open_subs dl.relatedRec').click(function(){abrirRelPopUpSubscribed(this)});
+//Filtros dinamicos 
+  $(document).ready(function() {
+   
+  setearCambiosFiltros("#search_filter_stories_news input[type='checkbox']");
+  
+//TODO esto es copia de fotw.js linea 487 para actualizar
+// los checks grupales. Es muy parecido salvo que la seleccion
+// de las variables de los elementos ($groupElem, $elems) se hacen
+// en el fotw relativo al elemento que hace click.
 
-\t\t$('div.open_free dl.relatedRec').click(function(){abrirRelPopUpNotLoggedIn(this)});
+// Rta TODO Me parece que eso a lo que se refeire el todo ya no está
+// mas en el fotw.js. Copio todo para ese archivo para reutilizarlo 
+// en el news popOut. 
+ 
+  inicializarBotonesShowHideFullStories();
 
-\t\t//Chequeo si hay que obtener los datos del simbolo diferido.
-\t\tif($('#uniq_sym_search.dlyd').length && $(".simboloBuscando.simboloUnico>section.ticker").length){
-\t\t\tvar sym = "symbol="+$(".simboloBuscando.simboloUnico>section.ticker").text();
-\t\t\thacerAjaxSolamente("/ajax/get_q.php", sym, function(res){  ret = JSON.parse(res); if(ret.return){$('#uniq_sym_search.dlyd').html(ret.data)} }, {"type":"post"}, function(){});
-\t\t}
-\t\t
-\t\t//#653 Make ad Fixed
-\t\tvar fixeableAdSelector = "div.wrapper_ad_fixed";
-\t\tif ($(fixeableAdSelector).length != 0){
-\t\t\tfixmeTop = 123+$(fixeableAdSelector).offset().top;   // get initial position of the element\t\t
-\t\t\tfixAds();
-\t\t}
+  prepararFiltros();
+    
+    fixDateRow();
+    
+    prepararAutoload(getParametrosNews);
+
+    //Eventos busqueda: le pone el on click para que muestre la info
+    $("div.eventDateCalendar:not(.syndDateCalendar)", "div.search_results_bar").click(function (){abrirEventInfo($(this), "ev"); return false;});
+
+  //Syndicate busqueda: le pone el onclick
+    $("div.search_results_bar div.syndDateCalendar").click(function (){abrirEventInfo($(this),"sy"); return false;});
+  
+  //Overlay de las recommendations en el header del resultado de busqueda
+  $("div.search_results_bar .story_details dl").hover(
+    function(){
+      $(".fpo_overlay_img", this).each(function() {
+        var padre = $(this).parents("span.ticker");
+        $(this).css("left",padre.width()+12);
+      });
+      var overlay = $(".overlayRecNews", this);
+      if(overlay.length > 0){
+        overlay.show();
+        //se fija que esté dentro de la pantalla en el pop
+        acomodarEnPop(overlay);
+      }
+    }, //mouseover
+    function(){
+      var overlay = $(".overlayRecNews", this);
+      if(overlay.length > 0){
+        reestablecerEnPop(overlay);
+        overlay.hide();
+      }
+    } //mouseout
+  );
+
+  $('#show_full_stories_bloqueado').click(
+      function () { // mouseover
+        if (loggedin){
+          //TODO esto es temporal, si el usuario no está subscripto a news_feed
+          //Show full stories está deshabilitado y mandaría a subscibirse a
+          //news_feed.
+          cambiarOpenFreeTrialASubscribe($(this).siblings('div'));
+        }
+        $(this).siblings('div').show();
+      }
+    );
+  $('#show_full_stories_not_logged').click(function (){$(this).hide()});
+
+  var widNF = new WidgetNewsFeed("#search_news");
+
+
+  // Esto es para las related de las busquedas
+  // Funciones para abrir lo pops cuando
+  // los related recs estan bloqueadas
+  $('div.linked dl.relatedRec').click(function (){
+    var id = $(this).attr("data-id");
+    var sd = $(this).attr("data-sd");
+    
+    //window.location.href ="landingPageNews.php?id="+id+"&sch_date="+sd;
+    window.location.href ="n.php?id="+id+"&sch_date="+sd;
+  });
+  
+  $('div.open_subs dl.relatedRec').click(function(){abrirRelPopUpSubscribed(this)});
+
+  $('div.open_free dl.relatedRec').click(function(){abrirRelPopUpNotLoggedIn(this)});
+
+  //Chequeo si hay que obtener los datos del simbolo diferido.
+  if($('#uniq_sym_search.dlyd').length && $(".simboloBuscando.simboloUnico>section.ticker").length){
+    var sym = "symbol="+$(".simboloBuscando.simboloUnico>section.ticker").text();
+    hacerAjaxSolamente("/ajax/get_q.php", sym, function(res){  ret = JSON.parse(res); if(ret.return){$('#uniq_sym_search.dlyd').html(ret.data)} }, {"type":"post"}, function(){});
+  }
+  
+  //#653 Make ad Fixed
+  var fixeableAdSelector = "div.wrapper_ad_fixed";
+  if ($(fixeableAdSelector).length != 0){
+    fixmeTop = 123+$(fixeableAdSelector).offset().top;   // get initial position of the element		
+    fixAds();
+  }
 });
 </script>
 `;
@@ -1700,25 +2291,22 @@ for (const m of html.matchAll(
   /(<tr id="news_[\s\S]+?)<div class='newsContent'>/gi
 )) {
   const story = m[1];
-
   const priority = /tr_noticia_prioridad/i.test(story);
-
   const [_, topic, link, title] = story
     .replace('<span class="importantHeadline">', '')
     .match(
-      /data-topic="(.+?)"[\s\S]+<a[\s\S]+href='([\s\S]+?)'><span>([\s\S]+?)<\/span>/i
+      /data-topic="(.+?)"[\s\S]+<a[\s\S]+href='([\s\S]+?)'>([\s\S]+?)<\/a>/i
     );
   const [__, time, date] = story.match(
     /soloHora">([\s\S]+?)<div class="fpo_overlay_ticker">([\s\S]+?)<\/div>/i
   );
-
   const tickers = [...story.matchAll(/data-ticker='([\s\S]+?)'/gi)].map(
     (i) => i[1]
   );
 
   if (tickers.some((t) => true))
     stories.push({
-      date: `${date} ${time} GMT-${isDST() ? '4' : '5'}`,
+      date: `${date} ${time.replace(/\s+/g, ' ')}GMT-${isDST() ? '4' : '5'}`,
       tickers: tickers.join(','),
       priority,
       topic,
@@ -1726,6 +2314,8 @@ for (const m of html.matchAll(
       title: title.replace(/&#039;/g, "'").replace(/&amp;#39;/g, "'")
     });
 }
+
+console.log(stories);
 
 function test() {
   /**

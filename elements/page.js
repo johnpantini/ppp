@@ -1437,11 +1437,9 @@ class PageWithSupabaseService {
   }
 
   getConnectionString(api) {
-    const { hostname } = new URL(api.url);
-
-    return `postgres://${api.user}:${encodeURIComponent(
-      api.password
-    )}@db.${hostname}:${api.port}/${api.db}`;
+    return `postgres://${api.user}:${encodeURIComponent(api.password)}@${
+      api.hostname
+    }:${api.port}/${api.db}`;
   }
 
   async executeSQL({ api, query }) {
