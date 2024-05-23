@@ -398,9 +398,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
         'sender.mjs',
         'websocket.mjs'
       ].map((file) => `/ppp/vendor/websocket/${file}`),
-      '/ppp/vendor/uWebSockets.js/uws_linux_arm64_111.node',
-      '/ppp/vendor/uWebSockets.js/uws_linux_arm_111.node',
-      '/ppp/vendor/uWebSockets.js/uws_linux_x64_111.node',
+      '/ppp/vendor/uWebSockets.js/uws_linux_arm64_115.node',
+      '/ppp/vendor/uWebSockets.js/uws_linux_arm_115.node',
+      '/ppp/vendor/uWebSockets.js/uws_linux_x64_115.node',
       '/ppp/vendor/uWebSockets.js/uws.js',
       '/ppp/vendor/ioredis.min.js'
     ].map(
@@ -495,9 +495,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
       // node
       'sudo mkdir -p /opt/ppp ;',
       'if [ $(uname -p) == "x86_64" ]; then cpuarch="x64"; else cpuarch="arm64"; fi ;',
-      'if [ ! -d /opt/ppp/node-v19.9.0-linux-${cpuarch} ]; then sudo wget -qO- https://nodejs.org/dist/v19.9.0/node-v19.9.0-linux-${cpuarch}.tar.xz | sudo tar -xJ -C /opt/ppp ; fi ;',
-      'sudo ln -fs /opt/ppp/node-v19.9.0-linux-${cpuarch}/bin/node /usr/local/bin/node ;',
-      'sudo ln -fs /opt/ppp/node-v19.9.0-linux-${cpuarch}/bin/npm /usr/local/bin/npm ;',
+      'if [ ! -d /opt/ppp/node-v20.13.1-linux-${cpuarch} ]; then sudo wget -qO- https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-${cpuarch}.tar.xz | sudo tar -xJ -C /opt/ppp ; fi ;',
+      'sudo ln -fs /opt/ppp/node-v20.13.1-linux-${cpuarch}/bin/node /usr/local/bin/node ;',
+      'sudo ln -fs /opt/ppp/node-v20.13.1-linux-${cpuarch}/bin/npm /usr/local/bin/npm ;',
       '/usr/local/bin/npm config set prefix /usr ;',
 
       // firewalld
