@@ -6,6 +6,7 @@ export default function (i18n) {
       E_DOCUMENT_NOT_FOUND: 'Документ не найден',
       E_FETCH_FAILED: 'Ошибка сетевого запроса, подробности в консоли браузера',
       E_BAD_FORM: 'Форма заполнена с ошибками или не полностью',
+      E_BAD_URL: 'Этот URL не может быть использован',
       E_UNKNOWN: 'Неизвестная ошибка'
     },
     $exceptions: {

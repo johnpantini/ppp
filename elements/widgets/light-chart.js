@@ -50,7 +50,6 @@ import {
   negative
 } from '../../design/design-tokens.js';
 import {
-  formatAbsoluteChange,
   formatAmount,
   formatPriceWithoutCurrency,
   formatRelativeChange,

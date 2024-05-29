@@ -98,12 +98,7 @@
   "compounds": [
     {
       "name": "ppp",
-      "configurations": [
-        "ppf",
-        "ib-gateway",
-        "local-connectors",
-        "local-trader-runtime"
-      ],
+      "configurations": ["ppf", "local-connectors", "local-trader-runtime"],
       "stopAll": false
     }
   ]
