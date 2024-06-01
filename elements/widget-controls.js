@@ -571,7 +571,8 @@ export const widgetSearchControlTemplate = html`
               !x.cryptocurrencies.length &&
               !x.currencies.length &&
               !x.commodities.length &&
-              !x.indices.length,
+              !x.indices.length &&
+              !x.special.length,
             html`
               ${html.partial(
                 widgetEmptyStateTemplate('Нет результатов для отображения.')
@@ -862,6 +863,31 @@ export const widgetSearchControlTemplate = html`
                               x
                             )})`}"
                         ></div>
+                        ${(x) => x.fullName[0]}
+                      </div>
+                    </div>
+                    <div class="menu-item-text">${(x) => x.fullName}</div>
+                    <div class="menu-item-tag">
+                      <span>${(x) => x.symbol}</span>
+                    </div>
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
+            (x) => x.special.length,
+            html`
+              <div class="menu-title">Специальные инструменты</div>
+              ${repeat(
+                (x) => x.special,
+                html`
+                  <div
+                    class="menu-item"
+                    @click="${(x, c) => c.parent.chooseInstrument(x)}"
+                  >
+                    <div class="menu-item-icon-holder">
+                      <div class="menu-item-icon-fallback">
                         ${(x) => x.fullName[0]}
                       </div>
                     </div>
@@ -1256,6 +1282,9 @@ export class WidgetSearchControl extends PPPOffClickElement {
   @observable
   indices;
 
+  @observable
+  special;
+
   constructor() {
     super();
 
@@ -1273,6 +1302,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
     this.currencies = [];
     this.commodities = [];
     this.indices = [];
+    this.special = [];
     this.activeItem = null;
     this.ticker = null;
   }
@@ -1408,6 +1438,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
             else if (i.type === 'currency') this.currencies.push(i);
             else if (i.type === 'commodity') this.commodities.push(i);
             else if (i.type === 'index') this.indices.push(i);
+            else if (i.type === 'special') this.special.push(i);
 
             seen[i.symbol] = true;
           }

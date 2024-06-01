@@ -289,16 +289,30 @@ export class WorkspacePage extends Page {
 
   onPointerDown(event) {
     let resizeControls;
+    let isFromHeader = false;
+    let isFromHeaderControl = false;
     const cp = event.composedPath();
 
-    if (
-      cp.find((n) => n?.classList?.contains('widget-header')) &&
-      !cp.find((n) =>
-        /modal|ppp-widget-group-control|ppp-widget-search-control|ppp-widget-header-buttons/.test(
-          n?.tagName?.toLowerCase?.()
+    for (const n of cp) {
+      const cl = n?.classList;
+
+      if (cl?.contains('widget-header')) {
+        isFromHeader = true;
+      }
+
+      if (
+        cl?.contains('widget-header-control') ||
+        /modal|ppp-widget-group-control|ppp-widget-search-control|ppp-widget-header-buttons/i.test(
+          n?.tagName
         )
-      )
-    ) {
+      ) {
+        isFromHeaderControl = true;
+
+        break;
+      }
+    }
+
+    if (isFromHeader && !isFromHeaderControl) {
       this.dragging = true;
     } else if (
       (resizeControls = cp.find(

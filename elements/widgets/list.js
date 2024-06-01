@@ -174,7 +174,7 @@ export const listWidgetTemplate = html`
         </div>
       </div>
       <div class="widget-body">
-        ${widgetStackSelectorTemplate()} ${(x) => x?.extraControls}
+        ${widgetStackSelectorTemplate()}${(x) => x?.extraControls}
         ${when(
           (x) => !x?.document?.listSource?.length,
           html`

@@ -465,6 +465,31 @@ export const widgetCommonColors = () => css`
 
 export const widgetCommonContentStyles = () => css`
   ${widgetCommonColors()}
+  .header-search-input {
+    cursor: text;
+    padding: 0 10px;
+    font-family: ${bodyFont};
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    line-height: ${lineHeightWidget};
+    text-align: left;
+    width: 120px;
+    margin: 0 8px;
+    height: 20px;
+    border-radius: 2px;
+    background-color: ${themeConditional(paletteWhite, paletteBlack)};
+    border: 1px solid ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
+    color: ${themeConditional(paletteBlack, paletteGrayLight1)};
+    ${ellipsis()};
+  }
+
+  .header-search-input::placeholder {
+    color: ${themeConditional(
+      paletteGrayLight1,
+      darken(paletteGrayLight1, 60)
+    )};
+  }
+
   .dot-line {
     align-items: center;
     justify-content: right;
