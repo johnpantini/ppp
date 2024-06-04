@@ -95,40 +95,42 @@ export class BrokerPsinaPage extends Page {
     await validate(this.password);
     await validate(this.gateway);
 
-    let json;
+    if (this.gateway.value !== '-') {
+      let json;
 
-    try {
-      const response = await maybeFetchError(
-        await fetch(
-          new URL('check_credentials', this.gateway.value).toString(),
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              login: parseInt(this.login.value),
-              password: this.password.value.trim()
-            })
-          }
-        )
-      );
+      try {
+        const response = await maybeFetchError(
+          await fetch(
+            new URL('check_credentials', this.gateway.value).toString(),
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                login: parseInt(this.login.value),
+                password: this.password.value.trim()
+              })
+            }
+          )
+        );
 
-      json = await response.json();
-    } catch (e) {
-      console.error(e);
+        json = await response.json();
+      } catch (e) {
+        console.error(e);
 
-      invalidate(this.gateway, {
-        errorMessage: 'Этот URL не может быть использован',
-        raiseException: true
-      });
-    }
+        invalidate(this.gateway, {
+          errorMessage: 'Этот URL не может быть использован',
+          raiseException: true
+        });
+      }
 
-    if (!json.psina?.result) {
-      invalidate(this.password, {
-        errorMessage: 'Неверный логин или пароль',
-        raiseException: true
-      });
+      if (!json.psina?.result) {
+        invalidate(this.password, {
+          errorMessage: 'Неверный логин или пароль',
+          raiseException: true
+        });
+      }
     }
   }
 
@@ -159,7 +161,10 @@ export class BrokerPsinaPage extends Page {
         name: this.name.value.trim(),
         login: parseInt(this.login.value),
         password: this.password.value.trim(),
-        gateway: new URL(this.gateway.value).toString(),
+        gateway:
+          this.gateway.value === '-'
+            ? '-'
+            : new URL(this.gateway.value).toString(),
         version: 1,
         type: BROKERS.PSINA,
         updatedAt: new Date()
