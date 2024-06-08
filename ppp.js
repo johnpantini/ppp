@@ -497,10 +497,12 @@ class PPP {
   }
 
   async i18n(url) {
+    const { origin } = new URL(url);
+
     (
       await import(
         `./i18n/${this.locale}${url
-          .split(ppp.rootUrl)[1]
+          .split(origin)[1]
           .replace('.js', '.i18n.js')}`
       )
     ).default(this.dict);
@@ -764,6 +766,8 @@ class PPP {
 }
 
 /** @global */
-globalThis.ppp = new PPP(document.documentElement.getAttribute('ppp-app-type'));
+globalThis.ppp ??= new PPP(
+  document.documentElement.getAttribute('ppp-app-type')
+);
 
 export default globalThis.ppp;
