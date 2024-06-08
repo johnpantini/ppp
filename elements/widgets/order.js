@@ -341,7 +341,10 @@ export const orderWidgetTemplate = html`
                   style="cursor: pointer"
                   @click="${(x) => x.setPrice(x.positionAverage ?? 0)}"
                 >
-                  Средняя: ${(x) => x.formatPrice(x.positionAverage ?? 0)}
+                  ${(x) =>
+                    `${ppp.t('$g.average')}: ${x.formatPrice(
+                      x.positionAverage ?? 0
+                    )}`}
                 </span>
               </div>
             </div>
@@ -945,7 +948,7 @@ export const orderWidgetTemplate = html`
                     }}"
                     @click="${(x) => x.placeOrder('buy')}"
                   >
-                    Покупка
+                    ${() => ppp.t('$g.buyButtonText')}
                   </ppp-widget-button>
                   <ppp-widget-button
                     appearance="danger"
@@ -972,7 +975,7 @@ export const orderWidgetTemplate = html`
                     }}"
                     @click="${(x) => x.placeOrder('sell')}"
                   >
-                    Продажа
+                    ${() => ppp.t('$g.sellButtonText')}
                   </ppp-widget-button>
                   <ppp-widget-button
                     appearance="primary"

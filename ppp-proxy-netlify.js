@@ -25,6 +25,7 @@ export default async function (req) {
   }
 
   const host = req.headers.get('X-Host');
+  const port = req.headers.get('X-Port') ?? 443;
 
   if (!host) {
     return new Response(null, {
@@ -37,6 +38,7 @@ export default async function (req) {
     const url = new URL(req.url);
 
     url.hostname = host;
+    url.port = port;
 
     const newHeaders = new Headers();
     const mandatoryHeaders = [

@@ -194,7 +194,7 @@ class PPP {
   @observable
   darkMode;
 
-  locales = ['ru'];
+  locales = ['ru', 'en'];
 
   locale =
     localStorage.getItem('ppp-locale') ??
@@ -405,7 +405,7 @@ class PPP {
           localStorage.setItem('ppp-dark-mode', '2');
         }
 
-        const locale = this.settings.get('locale');
+        const locale = this.settings.get('language');
 
         if (this.locales.includes(locale)) {
           this.locale = locale;
@@ -738,11 +738,12 @@ class PPP {
 
       options.headers ??= {};
       options.headers['X-Host'] = urlObject.hostname;
+      options.headers['X-Port'] = urlObject.port;
 
       for (const h of Object.keys(options.headers)) {
         const lower = h.toLowerCase();
 
-        if (lower === 'x-host') {
+        if (lower === 'x-host' || lower === 'x-port') {
           continue;
         }
 
@@ -753,6 +754,7 @@ class PPP {
 
       options.headers['X-Allowed-Headers'] = allowedHeaders.join(',');
       urlObject.hostname = new URL(globalProxy).hostname;
+      urlObject.port = 443;
 
       return fetch(urlObject.toString(), options);
     } else {

@@ -1052,6 +1052,9 @@ export async function listDefinition() {
                         },
                         {
                           type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.UTEX_MARGIN_STOCKS%]`
+                        },
+                        {
+                          type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.CUSTOM%]`
                         }
                       ]
                     })

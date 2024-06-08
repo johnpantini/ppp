@@ -38,6 +38,8 @@ import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
 
+await ppp.i18n(import.meta.url);
+
 const listWidgetThCellTemplate = html`
   <template sort="${(x) => x.sort}" source="${(x) => x.source}">
     <div class="sort-holder" ?hidden="${(x) => !x.sort}">
@@ -179,7 +181,7 @@ export const listWidgetTemplate = html`
           (x) => !x?.document?.listSource?.length,
           html`
             ${html.partial(
-              widgetEmptyStateTemplate('Нет данных для отображения.')
+              widgetEmptyStateTemplate(ppp.t('$widget.noDataToDisplay'))
             )}
           `
         )}

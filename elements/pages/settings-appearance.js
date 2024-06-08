@@ -586,12 +586,16 @@ export class SettingsAppearancePage extends Page {
             @input="${(x) => x.updateExampleColor()}}"
             ${ref('control')}
           >
-      <span slot="label">
-        <slot></slot>
-      </span>
+            <span slot="label">
+              <slot></slot>
+            </span>
             <span slot="end">
-        <span ${ref('example')} class="example"
-              style="background-color: ${(x) => x.color}"</span>
+              <span
+                ${ref('example')}
+                class="example"
+                style="background-color: ${(x) => x.color}"
+              >
+              </span>
             </span>
           </ppp-text-field>
         </template>

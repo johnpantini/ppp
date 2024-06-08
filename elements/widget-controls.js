@@ -118,6 +118,8 @@ import {
 } from './widget.js';
 import { endSlotTemplate, startSlotTemplate } from '../vendor/fast-patterns.js';
 
+await ppp.i18n(import.meta.url);
+
 export const widgetGroupControlTemplate = html`
   <template @click="${(x, c) => x.handleClick(c)}">
     <div class="toggle">${(x) => x.selection ?? ''}</div>
@@ -493,7 +495,7 @@ export const widgetSearchControlTemplate = html`
       readonly
       class="popup-trigger"
       type="text"
-      placeholder="Тикер"
+      placeholder="${() => ppp.t('$g.symbol')}"
       maxlength="20"
       autocomplete="off"
       value="${(x) => x.widget?.instrument?.symbol ?? ''}"

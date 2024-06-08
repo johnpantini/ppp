@@ -64,6 +64,8 @@ import { uuidv4 } from '../lib/ppp-crypto.js';
 import { WidgetColumns } from './widget-columns.js';
 import { $debounce } from '../lib/ppp-decorators.js';
 
+await ppp.i18n(import.meta.url);
+
 window.Observable = Observable;
 
 export const importInstrumentsSuggestionTemplate = (e) => html`
@@ -119,7 +121,7 @@ export const widgetUnsupportedInstrumentTemplate = () => html`
     (x) =>
       x.instrument?.symbol && x.instrumentTrader && x.unsupportedInstrument,
     html`${html.partial(
-      widgetEmptyStateTemplate('Инструмент не поддерживается.')
+      widgetEmptyStateTemplate(ppp.t('$widget.unsupportedInstrument'))
     )}`
   )}
 `;
@@ -131,7 +133,9 @@ export const widgetWithInstrumentBodyTemplate = (
   ${when(
     (x) => !x.instrument?.symbol,
     html`${html.partial(
-      widgetEmptyStateTemplate(options.emptyStateText ?? 'Выберите инструмент.')
+      widgetEmptyStateTemplate(
+        options.emptyStateText ?? ppp.t('$widget.selectInstrument')
+      )
     )}`
   )}
   ${widgetUnsupportedInstrumentTemplate()}

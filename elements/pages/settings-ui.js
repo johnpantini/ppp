@@ -3,11 +3,30 @@ import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import '../button.js';
 import '../checkbox.js';
+import '../select.js';
 
 export const settingsUiPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
+      <section>
+        <div class="label-group">
+          <h5>Язык приложения</h5>
+          <p class="description">Выберите язык приложения.</p>
+        </div>
+        <div class="input-group">
+          <div class="control-stack">
+            <ppp-select
+              value="${(x) => x.document.language ?? ppp.locale}"
+              placeholder="Выберите язык"
+              ${ref('languageSelector')}
+            >
+              <ppp-option value="ru">Русский</ppp-option>
+              <ppp-option value="en">English</ppp-option>
+            </ppp-select>
+          </div>
+        </div>
+      </section>
       <section>
         <div class="label-group">
           <h5>Флаги</h5>
@@ -44,6 +63,15 @@ export const settingsUiPageStyles = css`
 export class SettingsUiPage extends Page {
   collection = 'app';
 
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (sessionStorage.getItem('ppp-show-success-notification') === '1') {
+      sessionStorage.removeItem('ppp-show-success-notification');
+      this.showSuccessNotification();
+    }
+  }
+
   getDocumentId() {
     return {
       _id: '@settings'
@@ -56,14 +84,31 @@ export class SettingsUiPage extends Page {
 
   async submit() {
     const closeModalsOnEsc = this.closeModalsOnEsc.checked;
+    const language = this.languageSelector.value;
 
     ppp.settings.set('closeModalsOnEsc', closeModalsOnEsc);
+    ppp.settings.set('language', language);
 
     return {
       $set: {
-        closeModalsOnEsc
+        closeModalsOnEsc,
+        language
       }
     };
+  }
+
+  async submitDocument(options = {}) {
+    try {
+      await super.submitDocument(
+        Object.assign(options, { silent: true, raiseException: true })
+      );
+      sessionStorage.setItem('ppp-show-success-notification', '1');
+      location.reload();
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
   }
 }
 

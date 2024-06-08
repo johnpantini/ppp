@@ -3,11 +3,11 @@ export default function (i18n) {
     $loadingErrors: {
       E_NO_PROXY_CONNECTION: 'Нет связи с прокси',
       E_NO_MONGODB_CONNECTION:
-        'Нет связи с базой данных. Нажмите Enter для переключения на облачную MongoDB.',
+        'Нет связи с базой данных. Нажмите Enter для переключения на облачную MongoDB',
       E_BROKEN_ATLAS_REALM_LINK:
         'Отсутствует связь между базой данных и приложением MongoDB',
       E_OFFLINE_REALM:
-        'Приложение MongoDB Realm не в сети или отключено за неактивность',
+        'Приложение MongoDB не в сети или отключено за неактивность',
       E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT:
         'Сбой настройки облачных сервисов, пожалуйста, подождите...',
       E_UNKNOWN: 'Ошибка загрузки. Подробности в консоли браузера'
