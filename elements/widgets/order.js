@@ -403,12 +403,11 @@ export const orderWidgetTemplate = html`
 
                           const settingsPage =
                             await x.headerButtons.showWidgetSettings();
+                          const widgetSettings = settingsPage.widgetSettings;
 
                           observer = new MutationObserver(() => {
                             const tabs =
-                              settingsPage.widgetSettings.querySelector(
-                                'ppp-tabs'
-                              );
+                              widgetSettings?.querySelector?.('ppp-tabs');
 
                             if (tabs) {
                               tabs.activeid = 'conditionals';

@@ -497,7 +497,12 @@ class PPP {
   }
 
   async i18n(url) {
-    const { origin } = new URL(url);
+    let { origin } = new URL(url);
+    const rootUrl = window.location.origin;
+
+    if (rootUrl.endsWith('.github.io')) {
+      origin += '/ppp';
+    }
 
     (
       await import(
