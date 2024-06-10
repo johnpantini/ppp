@@ -153,6 +153,23 @@ export const serviceSystemdPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
+          <h5>Версия node.js</h5>
+          <p class="description">
+            Выберите, какую версию node.js следует установить.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-select
+            value="${(x) => x.document.nodeVersion ?? '22'}"
+            ${ref('nodeVersion')}
+          >
+            <ppp-option value="20">20.13.1</ppp-option>
+            <ppp-option value="22">22.2.0</ppp-option>
+          </ppp-select>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Домен глобальной сети</h5>
           <p class="description">
             Опциональный домен, чтобы сгенерировать сертификаты.
@@ -398,9 +415,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
         'sender.mjs',
         'websocket.mjs'
       ].map((file) => `/ppp/vendor/websocket/${file}`),
-      '/ppp/vendor/uWebSockets.js/uws_linux_arm64_115.node',
-      '/ppp/vendor/uWebSockets.js/uws_linux_arm_115.node',
-      '/ppp/vendor/uWebSockets.js/uws_linux_x64_115.node',
+      `/ppp/vendor/uWebSockets.js/uws_linux_arm64_${uwsNodeVersion}.node`,
+      `/ppp/vendor/uWebSockets.js/uws_linux_arm_${uwsNodeVersion}.node`,
+      `/ppp/vendor/uWebSockets.js/uws_linux_x64_${uwsNodeVersion}.node`,
       '/ppp/vendor/uWebSockets.js/uws.js',
       '/ppp/vendor/ioredis.min.js'
     ].map(
@@ -454,6 +471,15 @@ export class ServiceSystemdPppAspirantPage extends Page {
       ]
     );
 
+    const nodeVersion = {
+      20: '20.13.1',
+      22: '22.2.0'
+    }[+this.nodeVersion.value];
+    const uwsNodeVersion = {
+      20: '115',
+      22: '127'
+    }[+this.nodeVersion.value];
+
     const commands = [
       // Users
       'sudo groupadd -f ppp ;',
@@ -495,9 +521,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
       // node
       'sudo mkdir -p /opt/ppp ;',
       'if [ $(uname -p) == "x86_64" ]; then cpuarch="x64"; else cpuarch="arm64"; fi ;',
-      'if [ ! -d /opt/ppp/node-v20.13.1-linux-${cpuarch} ]; then sudo wget -qO- https://nodejs.org/dist/v20.13.1/node-v20.13.1-linux-${cpuarch}.tar.xz | sudo tar -xJ -C /opt/ppp ; fi ;',
-      'sudo ln -fs /opt/ppp/node-v20.13.1-linux-${cpuarch}/bin/node /usr/local/bin/node ;',
-      'sudo ln -fs /opt/ppp/node-v20.13.1-linux-${cpuarch}/bin/npm /usr/local/bin/npm ;',
+      `if [ ! -d /opt/ppp/node-v${nodeVersion}-linux-\${cpuarch} ]; then sudo wget -qO- https://nodejs.org/dist/v${nodeVersion}/node-v${nodeVersion}-linux-\${cpuarch}.tar.xz | sudo tar -xJ -C /opt/ppp ; fi ;`,
+      `sudo ln -fs /opt/ppp/node-v${nodeVersion}-linux-\${cpuarch}/bin/node /usr/local/bin/node ;`,
+      `sudo ln -fs /opt/ppp/node-v${nodeVersion}-linux-\${cpuarch}/bin/npm /usr/local/bin/npm ;`,
       '/usr/local/bin/npm config set prefix /usr ;',
 
       // firewalld
@@ -586,6 +612,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
           name: this.name.value.trim(),
           redisApiId: this.redisApiId.value,
           serverId: this.serverId.value,
+          nodeVersion: this.nodeVersion.value,
           domain: this.domain.value,
           tailnetDomain: this.tailnetDomain.value.trim(),
           version: 1,
