@@ -9,7 +9,7 @@ import {
   when
 } from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
-import { hotkey, normalize, typography } from '../design/styles.js';
+import { ellipsis, hotkey, normalize, typography } from '../design/styles.js';
 import {
   bodyFont,
   fontSizeBody1,
@@ -17,31 +17,12 @@ import {
   lineHeightBody1,
   linkColor,
   paletteBlack,
-  paletteBlueDark1,
-  paletteBlueDark2,
-  paletteBlueLight2,
-  paletteBlueLight3,
-  paletteGrayBase,
-  paletteGrayDark1,
   paletteGrayDark2,
   paletteGrayDark3,
   paletteGrayDark4,
   paletteGrayLight2,
   paletteGrayLight3,
-  paletteGreenBase,
-  paletteGreenDark2,
-  paletteGreenDark3,
-  paletteGreenLight2,
-  paletteGreenLight3,
-  paletteRedDark2,
-  paletteRedDark3,
-  paletteRedLight2,
-  paletteRedLight3,
   paletteWhite,
-  paletteYellowDark2,
-  paletteYellowDark3,
-  paletteYellowLight2,
-  paletteYellowLight3,
   spacing1,
   themeConditional
 } from '../design/design-tokens.js';
@@ -110,6 +91,7 @@ export const tableTemplate = html`
 
 export const tableStyles = css`
   ${normalize()}
+  ${typography()}
   ${hotkey()}
   ${display('block')}
   table {
@@ -227,6 +209,12 @@ export const tableStyles = css`
     flex-direction: column;
     align-items: start;
     gap: 4px;
+  }
+
+  .control-stack .description {
+    max-width: 256px;
+    font-size: calc(${fontSizeBody1} - 1px);
+    ${ellipsis()}
   }
 `;
 

@@ -51,7 +51,7 @@ export const timelineWidgetTemplate = html`
           ${when(
             (x) => x.empty,
             html`${html.partial(
-              widgetEmptyStateTemplate('Нет операций для отображения.')
+              widgetEmptyStateTemplate('No operations to display.')
             )}`
           )}
           <div class="widget-card-list-inner">

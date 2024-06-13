@@ -203,6 +203,13 @@ class PPP {
     }) ??
     this.locales[0];
 
+  get i18nLocale() {
+    return {
+      en: 'en-US',
+      ru: 'ru-RU'
+    }[this.locale];
+  }
+
   crypto = new PPPCrypto();
 
   pusherConnections = new Map();

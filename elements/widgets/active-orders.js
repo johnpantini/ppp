@@ -90,19 +90,19 @@ export const activeOrdersWidgetTemplate = html`
                 ?hidden="${(x) => allTabHidden(x)}"
                 value="all"
               >
-                Все
+                All
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 ?hidden="${(x) => limitTabHidden(x)}"
                 value="real"
               >
-                Биржевые
+                Exchange
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 ?hidden="${(x) => conditionalTabHidden(x)}"
                 value="conditional"
               >
-                Условные
+                Conditional
               </ppp-widget-box-radio>
             </ppp-widget-box-radio-group>
           </div>
@@ -153,9 +153,7 @@ export const activeOrdersWidgetTemplate = html`
         <div class="widget-card-list">
           ${when(
             (x) => !x.orders?.length,
-            html`${html.partial(
-              widgetEmptyStateTemplate('Активных заявок нет.')
-            )}`
+            html`${html.partial(widgetEmptyStateTemplate('No active orders.'))}`
           )}
           <div class="widget-card-list-inner">
             ${repeat(
@@ -215,14 +213,14 @@ export const activeOrdersWidgetTemplate = html`
                                       (o.quantity - o.filled),
                                     o.instrument
                                   )
-                                : 'По рынку'}
+                                : 'At Market'}
                           </span>
                           <span
                             slot="subtitle-left"
                             class="${(o) =>
                               o.side === 'buy' ? 'positive' : 'negative'}"
                           >
-                            ${(o) => (o.side === 'buy' ? 'Покупка' : 'Продажа')}
+                            ${(o) => (o.side === 'buy' ? 'Buy' : 'Sell')}
                           </span>
                           <div class="dot-divider-line" slot="subtitle-right">
                             ${when(
@@ -237,7 +235,7 @@ export const activeOrdersWidgetTemplate = html`
                             ${(o) =>
                               o.price
                                 ? formatPrice(o.price, o.instrument)
-                                : 'По рынку'}
+                                : 'At Market'}
                           </div>
                           <button
                             class="widget-action-button"
@@ -575,7 +573,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   formatRestQuantity(order) {
     if (order.filled === 0) return formatQuantity(order.quantity);
     else
-      return `${formatQuantity(order.filled)} из ${formatQuantity(
+      return `${formatQuantity(order.filled)} of ${formatQuantity(
         order.quantity
       )}`;
   }

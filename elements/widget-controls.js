@@ -3018,7 +3018,7 @@ export class WidgetTrifectaField extends WidgetTextField {
     this.input.value = this.input.value
       .replaceAll('.', decSeparator)
       .replaceAll(/^00/gi, '0')
-      .replace(new RegExp(decSeparator, 'g'), (val, index, str) =>
+      .replace(new RegExp('\\' + decSeparator, 'g'), (val, index, str) =>
         index === str.indexOf(decSeparator) ? val : ''
       );
 

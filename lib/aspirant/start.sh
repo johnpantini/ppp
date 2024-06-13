@@ -18,6 +18,10 @@ echo 'Starting up Consul...'
 consul agent -dev -config-file=/etc/consul/server.json &
 P2=$!
 
+# Nomad 1.8.0 fix.
+mkdir -p /var/lib/alloc_mounts
+chown -R ppp /var/lib/alloc_mounts
+
 echo 'Starting up Nomad...'
 runuser -u ppp -- nomad agent -dev -config=/etc/nomad.d/server.hcl &
 P3=$!

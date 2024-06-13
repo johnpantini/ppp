@@ -19,7 +19,6 @@ import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
 import '../table.js';
-
 await ppp.i18n(import.meta.url);
 
 export const servicesPageTemplate = html`
@@ -152,20 +151,30 @@ export const servicesPageTemplate = html`
                   return {
                     datum,
                     cells: [
-                      html`<a
-                        class="link"
-                        @click="${() => {
-                          ppp.app.navigate({
-                            page: `service-${datum.type}`,
-                            document: datum._id
-                          });
+                      html`
+                        <div class="control-stack">
+                          <a
+                            class="link"
+                            @click="${() => {
+                              ppp.app.navigate({
+                                page: `service-${datum.type}`,
+                                document: datum._id
+                              });
 
-                          return false;
-                        }}"
-                        href="?page=service-${datum.type}&document=${datum._id}"
-                      >
-                        ${datum.name}
-                      </a>`,
+                              return false;
+                            }}"
+                            href="?page=service-${datum.type}&document=${datum._id}"
+                          >
+                            ${datum.name}
+                          </a>
+                          <span
+                            class="description"
+                            title="${datum.description}"
+                          >
+                            ${datum.description}
+                          </span>
+                        </div>
+                      `,
                       ppp.t(`$const.service.${datum.type}`),
                       formatDate(datum.createdAt),
                       formatDate(datum.updatedAt ?? datum.createdAt),

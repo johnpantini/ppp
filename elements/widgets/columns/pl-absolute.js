@@ -77,7 +77,7 @@ export class PLAbsoluteColumn extends LastPriceColumn {
     await super.connectedCallback();
 
     if (!this.isBalance) {
-      await this.defaultTrader.subscribeFields?.({
+      await this.defaultTrader?.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
           averagePrice: TRADER_DATUM.POSITION_AVERAGE
@@ -95,7 +95,7 @@ export class PLAbsoluteColumn extends LastPriceColumn {
 
   async disconnectedCallback() {
     if (!this.isBalance) {
-      await this.defaultTrader.unsubscribeFields?.({
+      await this.defaultTrader?.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
           averagePrice: TRADER_DATUM.POSITION_AVERAGE

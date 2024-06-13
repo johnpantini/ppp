@@ -69,6 +69,8 @@ import '../text-field.js';
 import '../widget-controls.js';
 import '../widget-order-list.js';
 
+await ppp.i18n(import.meta.url);
+
 const DEFAULT_CONDITIONAL_ORDERS = [
   {
     name: 'Stop Loss',
@@ -213,9 +215,15 @@ export const orderWidgetTemplate = html`
             }}"
             ${ref('orderTypeTabs')}
           >
-            <ppp-widget-tab id="market">Рыночная</ppp-widget-tab>
-            <ppp-widget-tab id="limit">Лимитная</ppp-widget-tab>
-            <ppp-widget-tab id="conditional">Условная</ppp-widget-tab>
+            <ppp-widget-tab id="market">
+              ${() => ppp.t('$orderWidget.orderTypeTabs.market')}
+            </ppp-widget-tab>
+            <ppp-widget-tab id="limit">
+              ${() => ppp.t('$orderWidget.orderTypeTabs.limit')}
+            </ppp-widget-tab>
+            <ppp-widget-tab id="conditional">
+              ${() => ppp.t('$orderWidget.orderTypeTabs.conditional')}
+            </ppp-widget-tab>
             <ppp-tab-panel id="market-panel"></ppp-tab-panel>
             <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
             <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
@@ -335,7 +343,7 @@ export const orderWidgetTemplate = html`
                   style="cursor: pointer"
                   @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
                 >
-                  В портфеле: ${(x) => x.formatPositionSize()}
+                  Position: ${(x) => x.formatPositionSize()}
                 </span>
                 <span
                   style="cursor: pointer"
@@ -520,7 +528,7 @@ export const orderWidgetTemplate = html`
                       ?hidden="${(x) => isBestBidAndAskHidden(x)}"
                       class="widget-text-label"
                     >
-                      Цена исполнения
+                      ${() => ppp.t('$orderWidget.executionPrice')}
                     </div>
                     <ppp-widget-trifecta-field
                       kind="price"
@@ -573,7 +581,7 @@ export const orderWidgetTemplate = html`
                       ?hidden="${(x) => isBestBidAndAskHidden(x)}"
                       class="widget-text-label"
                     >
-                      Количество
+                      ${() => ppp.t('$g.quantity')}
                     </div>
                     <ppp-widget-trifecta-field
                       kind="quantity"
@@ -773,6 +781,12 @@ export const orderWidgetTemplate = html`
                                 <ppp-widget-option value="IOC">
                                   IOC
                                 </ppp-widget-option>
+                                <ppp-widget-option value="OPG">
+                                  OPG
+                                </ppp-widget-option>
+                                <ppp-widget-option value="FOK">
+                                  FOK
+                                </ppp-widget-option>
                               </ppp-widget-select>
                             </div>
                           </div>
@@ -830,7 +844,7 @@ export const orderWidgetTemplate = html`
               >
                 <div class="widget-summary">
                   <div class="widget-summary-line">
-                    <span>Стоимость</span>
+                    <span>Total amount</span>
                     <span class="widget-summary-line-price">
                       ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
@@ -839,7 +853,7 @@ export const orderWidgetTemplate = html`
                     </span>
                   </div>
                   <div class="widget-summary-line">
-                    <span>Комиссия</span>
+                    <span>Fees</span>
                     <span>
                       ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
@@ -866,7 +880,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>Доступно</span>
+                    <span>Available</span>
                     <span class="positive">
                       ${(x) => x.buyingPowerQuantity ?? '—'}
                     </span>
@@ -879,7 +893,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>С плечом</span>
+                    <span>Margin</span>
                     <span class="positive">
                       ${(x) => x.marginBuyingPowerQuantity ?? '—'}
                     </span>
@@ -894,7 +908,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>Доступно</span>
+                    <span>Available</span>
                     <span class="negative">
                       ${(x) => x.sellingPowerQuantity ?? '—'}
                     </span>
@@ -907,7 +921,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>С плечом</span>
+                    <span>Margin</span>
                     <span class="negative">
                       ${(x) => x.marginSellingPowerQuantity ?? '—'}
                     </span>
@@ -2090,7 +2104,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
   formatPositionSize() {
     let size = 0;
-    let suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
+    let suffix = this.document.displaySizeInUnits ? 'шт.' : 'l.';
 
     if (this.instrument) {
       size = this.positionSize ?? 0;
@@ -2212,13 +2226,13 @@ export class OrderWidget extends WidgetWithInstrument {
       }
 
       return this.notificationsArea.success({
-        title: 'Заявка выставлена'
+        title: 'Order submitted'
       });
     } catch (e) {
       console.log(e);
 
       return this.notificationsArea.error({
-        title: 'Заявка не выставлена',
+        title: 'Error submitting order',
         text: await this.ordersTrader?.formatError?.({
           instrument: this.instrument,
           error: e,

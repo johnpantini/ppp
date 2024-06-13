@@ -340,7 +340,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
   }
 
   async #deployOnServer() {
-    const domain = this.domain.value.trim();
+    const domain = this.domain.value?.trim?.();
     const tailnetDomain = this.tailnetDomain.value.trim();
     const sslReplacement = [];
 
@@ -361,6 +361,15 @@ export class ServiceSystemdPppAspirantPage extends Page {
     sslReplacement.push('ssl_stapling_verify on;');
     sslReplacement.push(`allow 100.0.0.0/8;`);
     sslReplacement.push('deny all;');
+
+    const nodeVersion = {
+      20: '20.13.1',
+      22: '22.2.0'
+    }[+this.nodeVersion.value];
+    const uwsNodeVersion = {
+      20: '115',
+      22: '127'
+    }[+this.nodeVersion.value];
 
     const rootUrl = ppp.rootUrl.replace('github.io.dev', 'pages.dev');
     const vendorCopyCommands = [
@@ -471,15 +480,6 @@ export class ServiceSystemdPppAspirantPage extends Page {
       ]
     );
 
-    const nodeVersion = {
-      20: '20.13.1',
-      22: '22.2.0'
-    }[+this.nodeVersion.value];
-    const uwsNodeVersion = {
-      20: '115',
-      22: '127'
-    }[+this.nodeVersion.value];
-
     const commands = [
       // Users
       'sudo groupadd -f ppp ;',
@@ -543,7 +543,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
       'sudo chown consul /etc/consul.d/server.json ;',
       'sudo systemctl disable consul ;',
 
-      // Nomad
+      // Nomad. Use v1.7.7 or lower!
       `sudo dnf -y install nomad ;`,
       'sudo rm -f /etc/nomad.d/nomad.hcl ;',
       `sudo wget -q -O /etc/nomad.d/server.hcl ${rootUrl}/lib/aspirant/etc/nomad.d/server.hcl ;`,
@@ -567,6 +567,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
       'cd /usr/src && sudo git clone https://github.com/nginx/njs.git ;',
       `sudo /bin/sh -c 'cd /usr/src/nginx && ./configure --prefix=/usr/lib/nginx --sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --pid-path=/usr/lib/nginx/nginx.pid --with-http_ssl_module --with-stream --with-pcre --with-compat --add-dynamic-module=/ppp/lib/nginx/ngx-unzip --add-dynamic-module=/usr/src/njs/nginx' ;`,
       `sudo /bin/sh -c 'cd /usr/src/nginx && make -j$(nproc)' ;`,
+      'sudo mkdir -p /usr/lib/nginx/modules ;',
       `sudo /bin/cp -f /usr/src/nginx/objs/ngx_http_js_module.so /usr/lib/nginx/modules/ngx_http_js_module.so ;`,
       `sudo /bin/cp -f /usr/src/nginx/objs/ngx_stream_js_module.so /usr/lib/nginx/modules/ngx_stream_js_module.so ;`,
       `sudo /bin/cp -f /usr/src/nginx/objs/ngx_http_unzip_module.so /usr/lib/nginx/modules/ngx_http_unzip_module.so ;`,

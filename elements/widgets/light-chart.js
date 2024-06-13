@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widgetStyles,
   widgetEmptyStateTemplate,
@@ -526,7 +527,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       localization: {
         priceFormatter: this.priceFormatter.bind(this),
         timeFormatter: (t) =>
-          new Intl.DateTimeFormat('ru-RU', {
+          new Intl.DateTimeFormat(ppp.i18nLocale, {
             year: 'numeric',
             month: 'short',
             day: 'numeric',

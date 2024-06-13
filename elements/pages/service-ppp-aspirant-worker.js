@@ -449,6 +449,19 @@ export const servicePppAspirantWorkerPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
+          <h5>Описание сервиса</h5>
+          <p class="description">Любые заметки о сервисе.</p>
+        </div>
+        <div class="input-group">
+          <ppp-snippet
+            standalone
+            :code="${(x) => x.document.description ?? ''}"
+            ${ref('description')}
+          ></ppp-snippet>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Тип сервиса</h5>
           <p class="description">
             Сервис можно развернуть в Aspirant, а можно сразу указать URL уже
@@ -988,6 +1001,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.useVersioning.checked = true;
 
         this.document.name = this.name.value;
+        this.document.description = this.description.value;
         this.document.aspirantServiceId = this.aspirantServiceId.value;
         this.document.ycApiId = this.ycApiId.value;
         this.document.sourceCode = this.sourceCode.value;
@@ -1420,6 +1434,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       return {
         $set: {
           name: this.name.value.trim(),
+          description: this.description.value,
           workerPredefinedTemplate: this.urlWorkerPredefinedTemplate.value,
           url: new URL(this.serviceUrl.value).toString(),
           useVersioning: false,
@@ -1437,6 +1452,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         {
           $set: {
             name: this.name.value.trim(),
+            description: this.description.value,
             aspirantServiceId: this.aspirantServiceId.value,
             ycApiId: this.ycApiId.value,
             sourceCode: this.sourceCode.value,
@@ -1515,6 +1531,7 @@ export class ServicePppAspirantWorkerPage extends Page {
     this.useVersioning.checked = true;
 
     this.document.name = this.name.value;
+    this.document.description = this.description.value;
     this.document.aspirantServiceId = this.aspirantServiceId.value;
     this.document.ycApiId = this.ycApiId.value;
     this.document.sourceCode = this.sourceCode.value;
