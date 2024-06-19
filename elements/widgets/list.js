@@ -178,17 +178,27 @@ export const listWidgetTemplate = html`
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}${(x) => x?.extraControls}
         ${when(
-          (x) => !x?.document?.listSource?.length,
+          (x) => !x.initialized,
+          html`${html.partial(
+            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+              extraClass: 'loading-animation'
+            })
+          )}`
+        )}
+        ${when(
+          (x) => x.initialized && !x?.document?.listSource?.length,
           html`
             ${html.partial(
-              widgetEmptyStateTemplate(ppp.t('$widget.noDataToDisplay'))
+              widgetEmptyStateTemplate(
+                ppp.t('$widget.emptyState.noDataToDisplay')
+              )
             )}
           `
         )}
         <div
           class="widget-table list-table"
           ${ref('table')}
-          ?hidden="${(x) => !x?.document?.listSource?.length}"
+          ?hidden="${(x) => !x.initialized || !x?.document?.listSource?.length}"
         >
           <div class="thead">
             <div
@@ -238,6 +248,7 @@ export const listWidgetTemplate = html`
           </div>
           <div
             class="tbody"
+            ?hidden="${(x) => !x.initialized}"
             @click="${(x, c) => x.handleListTableClick(c)}"
             ${ref('tableBody')}
           ></div>
@@ -293,11 +304,15 @@ export class ListWidget extends WidgetWithInstrument {
 
     // Prevent attachShadow() duplicate calls. See below.
     if (this.tableBody.shadowRoot) {
+      this.initialized = true;
+
       return;
     }
 
     if (this.preview) {
       if (this.document.listType === 'url' && !this.document.listWidgetUrl) {
+        this.initialized = true;
+
         return;
       }
     }
@@ -314,6 +329,8 @@ export class ListWidget extends WidgetWithInstrument {
       const mod = await import(url);
 
       if (typeof mod.listDefinition !== 'function') {
+        this.initialized = true;
+
         return this.notificationsArea.error({
           text: 'Не удалось загрузить список.',
           keep: true
@@ -380,7 +397,11 @@ export class ListWidget extends WidgetWithInstrument {
 
         needSort && this.internalSort();
       }, 500);
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       console.error(e);
 
       return this.notificationsArea.error({

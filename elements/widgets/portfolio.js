@@ -121,9 +121,12 @@ export class PortfolioWidget extends ListWidget {
   async connectedCallback() {
     await super.connectedCallback();
 
+    this.initialized = false;
     this.deletionAvailable = false;
 
     if (!this.document.portfolioTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует портфельный трейдер.',
         keep: true
@@ -152,7 +155,11 @@ export class PortfolioWidget extends ListWidget {
           position: TRADER_DATUM.POSITION
         }
       });
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }
@@ -168,19 +175,6 @@ export class PortfolioWidget extends ListWidget {
     }
 
     return super.disconnectedCallback();
-  }
-
-  #arePositionsEqual(p1 = {}, p2 = {}) {
-    return (
-      p1.accountId === p2.accountId &&
-      p1.averagePrice === p2.averagePrice &&
-      p1.exchange === p2.exchange &&
-      p1.isBalance === p2.isBalance &&
-      p1.isCurrency === p2.isCurrency &&
-      p1.size === p2.size &&
-      p1.lot === p2.lot &&
-      p1.symbol === p2.symbol
-    );
   }
 
   async validate() {

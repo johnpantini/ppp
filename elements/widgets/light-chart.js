@@ -70,15 +70,26 @@ export const lightChartWidgetTemplate = html`
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         ${when(
-          (x) => !x.instrument?.symbol,
+          (x) => !x.initialized,
           html`${html.partial(
-            widgetEmptyStateTemplate('Выберите инструмент.')
+            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+              extraClass: 'loading-animation'
+            })
+          )}`
+        )}
+        ${when(
+          (x) => x.initialized && !x.instrument?.symbol,
+          html`${html.partial(
+            widgetEmptyStateTemplate(
+              ppp.t('$widget.emptyState.selectInstrument')
+            )
           )}`
         )}
         ${widgetUnsupportedInstrumentTemplate()}
         <div
           class="chart-holder"
           ?hidden="${(x) =>
+            !x.initialized ||
             !x.instrument?.symbol ||
             (x.instrument && x.instrumentTrader && x.unsupportedInstrument)}"
         >
@@ -333,6 +344,8 @@ export class LightChartWidget extends WidgetWithInstrument {
     super.connectedCallback();
 
     if (!this.document.chartTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер котировок.',
         keep: true
@@ -340,6 +353,8 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
 
     if (!this.document.tradesTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер ленты сделок.',
         keep: true
@@ -423,7 +438,11 @@ export class LightChartWidget extends WidgetWithInstrument {
           traderEvent: TRADER_DATUM.TRADER
         }
       });
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }

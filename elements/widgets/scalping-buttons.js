@@ -5,7 +5,8 @@ import {
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetUnsupportedInstrumentTemplate,
-  widgetStackSelectorTemplate
+  widgetStackSelectorTemplate,
+  widgetEmptyStateTemplate
 } from '../widget.js';
 import {
   html,
@@ -50,11 +51,20 @@ export const scalpingButtonsWidgetTemplate = html`
         ${widgetStackSelectorTemplate()}
         ${widgetUnsupportedInstrumentTemplate()}
         ${when(
+          (x) => !x.initialized,
+          html`${html.partial(
+            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+              extraClass: 'loading-animation'
+            })
+          )}`
+        )}
+        ${when(
           (x) =>
-            !x.instrument?.symbol ||
-            (x.instrument?.symbol &&
-              x.instrumentTrader &&
-              !x.unsupportedInstrument),
+            x.initialized &&
+            (!x.instrument?.symbol ||
+              (x.instrument?.symbol &&
+                x.instrumentTrader &&
+                !x.unsupportedInstrument)),
           html`
             <div class="toolbar">
               <div
@@ -226,6 +236,8 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
     super.connectedCallback();
 
     if (!this.document.ordersTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер для модификации заявок.',
         keep: true
@@ -239,7 +251,11 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
       this.instrumentTrader = this.ordersTrader;
 
       this.selectInstrument(this.document.symbol, { isolate: true });
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }

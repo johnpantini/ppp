@@ -134,7 +134,9 @@ export const timeAndSalesWidgetTemplate = html`
           ${when(
             (x) => x.empty || !x.columns?.length,
             html`${html.partial(
-              widgetEmptyStateTemplate('Нет сделок для отображения.')
+              widgetEmptyStateTemplate(
+                ppp.t('$widget.emptyState.noTradesToDisplay')
+              )
             )}`
           )}
         `)}
@@ -342,6 +344,99 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     this.clear();
   }
 
+  async connectedCallback() {
+    super.connectedCallback();
+
+    this.timeColumnOptions = {
+      default: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      },
+      'day-1': {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric'
+      },
+      compact: {
+        hour: 'numeric',
+        minute: 'numeric'
+      },
+      'day-2': {
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      }
+    }[this.document.timeColumnOptions ?? 'default'];
+
+    this.highlightedVolumeThreshold = Math.abs(
+      stringToFloat(this.document.highlightedVolumeThreshold)
+    );
+
+    if (this.highlightedVolumeThreshold > 0) {
+      this.classList.add('highlighted-volume-enabled');
+    }
+
+    if (!Array.isArray(this.document?.columns)) {
+      this.document.columns = DEFAULT_COLUMNS;
+    }
+
+    this.columns = this.document.columns.filter((c) => !c.hidden);
+
+    if (!this.document.tradesTrader) {
+      this.initialized = true;
+
+      return this.notificationsArea.error({
+        text: 'Отсутствует трейдер ленты.',
+        keep: true
+      });
+    }
+
+    try {
+      this.tradesTrader = await ppp.getOrCreateTrader(
+        this.document.tradesTrader
+      );
+      this.instrumentTrader = this.tradesTrader;
+
+      this.selectInstrument(this.document.symbol, { isolate: true });
+      ppp.app.rafEnqueue(this.rafLoop);
+      await this.tradesTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
+
+      this.initialized = true;
+    } catch (e) {
+      this.initialized = true;
+
+      return this.catchException(e);
+    }
+  }
+
+  async disconnectedCallback() {
+    ppp.app.rafDequeue(this.rafLoop);
+    this.#rowsHolder?.removeEventListener(
+      'pointerdown',
+      this.onRowsHolderPointerDown
+    );
+
+    if (this.tradesTrader) {
+      await this.tradesTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
+    }
+
+    return super.disconnectedCallback();
+  }
+
   clear() {
     this.#stillGrowing = void 0;
     this.#inflyQueue = [];
@@ -512,93 +607,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
       this.#repaint();
     }
-  }
-
-  async connectedCallback() {
-    super.connectedCallback();
-
-    this.timeColumnOptions = {
-      default: {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-      },
-      'day-1': {
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-      },
-      compact: {
-        hour: 'numeric',
-        minute: 'numeric'
-      },
-      'day-2': {
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric'
-      }
-    }[this.document.timeColumnOptions ?? 'default'];
-
-    this.highlightedVolumeThreshold = Math.abs(
-      stringToFloat(this.document.highlightedVolumeThreshold)
-    );
-
-    if (this.highlightedVolumeThreshold > 0) {
-      this.classList.add('highlighted-volume-enabled');
-    }
-
-    if (!Array.isArray(this.document?.columns)) {
-      this.document.columns = DEFAULT_COLUMNS;
-    }
-
-    this.columns = this.document.columns.filter((c) => !c.hidden);
-
-    if (!this.document.tradesTrader) {
-      return this.notificationsArea.error({
-        text: 'Отсутствует трейдер ленты.',
-        keep: true
-      });
-    }
-
-    try {
-      this.tradesTrader = await ppp.getOrCreateTrader(
-        this.document.tradesTrader
-      );
-      this.instrumentTrader = this.tradesTrader;
-
-      this.selectInstrument(this.document.symbol, { isolate: true });
-      ppp.app.rafEnqueue(this.rafLoop);
-      await this.tradesTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
-        }
-      });
-    } catch (e) {
-      return this.catchException(e);
-    }
-  }
-
-  async disconnectedCallback() {
-    ppp.app.rafDequeue(this.rafLoop);
-    this.#rowsHolder?.removeEventListener(
-      'pointerdown',
-      this.onRowsHolderPointerDown
-    );
-
-    if (this.tradesTrader) {
-      await this.tradesTrader.unsubscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
-        }
-      });
-    }
-
-    return super.disconnectedCallback();
   }
 
   #repaint() {

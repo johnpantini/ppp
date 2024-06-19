@@ -457,6 +457,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
     );
 
     if (!this.document.bookTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует основной трейдер книги заявок.',
         keep: true
@@ -538,7 +540,11 @@ export class OrderbookWidget extends WidgetWithInstrument {
           }
         });
       }
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }

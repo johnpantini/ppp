@@ -577,7 +577,9 @@ export const widgetSearchControlTemplate = html`
               !x.special.length,
             html`
               ${html.partial(
-                widgetEmptyStateTemplate('Нет результатов для отображения.')
+                widgetEmptyStateTemplate(
+                  ppp.t('$widget.emptyState.noResultsToDisplay')
+                )
               )}
             `
           )}

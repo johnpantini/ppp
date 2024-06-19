@@ -38,7 +38,16 @@ export const balancesWidgetTemplate = html`
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         ${when(
-          (x) => x?.balances?.length,
+          (x) => !x.initialized,
+          html`${html.partial(
+            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+              extraClass: 'loading-animation',
+              hideGlyph: true
+            })
+          )}`
+        )}
+        ${when(
+          (x) => x.initialized && x?.balances?.length,
           html`
             <div class="spacing1"></div>
             <div class="widget-section">
@@ -98,11 +107,17 @@ export const balancesWidgetTemplate = html`
                 )}
               </div>
             </div>
-          `,
+          `
+        )}
+        ${when(
+          (x) => x.initialized && !x?.balances?.length,
           html`${html.partial(
-            widgetEmptyStateTemplate('Нет балансов для отображения.', {
-              hideGlyph: true
-            })
+            widgetEmptyStateTemplate(
+              ppp.t('$widget.emptyState.noBalancesToDisplay'),
+              {
+                hideGlyph: true
+              }
+            )
           )}`
         )}
       </div>
@@ -125,6 +140,9 @@ export const balancesWidgetStyles = css`
 export class BalancesWidget extends Widget {
   @observable
   balancesTrader;
+
+  @observable
+  initialized;
 
   @observable
   position;
@@ -178,6 +196,8 @@ export class BalancesWidget extends Widget {
         emptyStateText.textContent = 'Не задан портфельный трейдер.';
       }
 
+      this.initialized = true;
+
       return;
     }
 
@@ -210,7 +230,11 @@ export class BalancesWidget extends Widget {
           position: TRADER_DATUM.POSITION
         }
       });
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }

@@ -47,11 +47,21 @@ export const timelineWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        <div class="widget-card-list">
+        ${when(
+          (x) => !x.initialized,
+          html`${html.partial(
+            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+              extraClass: 'loading-animation'
+            })
+          )}`
+        )}
+        <div class="widget-card-list" ?hidden="${(x) => !x.initialized}">
           ${when(
             (x) => x.empty,
             html`${html.partial(
-              widgetEmptyStateTemplate('No operations to display.')
+              widgetEmptyStateTemplate(
+                ppp.t('$widget.emptyState.noOperationsToDisplay')
+              )
             )}`
           )}
           <div class="widget-card-list-inner">
@@ -241,6 +251,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     super.connectedCallback();
 
     if (!this.document.timelineTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер ленты операций.',
         keep: true
@@ -265,7 +277,11 @@ export class TimelineWidget extends WidgetWithInstrument {
           timelineItem: TRADER_DATUM.TIMELINE_ITEM
         }
       });
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }

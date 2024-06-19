@@ -343,7 +343,7 @@ export const orderWidgetTemplate = html`
                   style="cursor: pointer"
                   @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
                 >
-                  Position: ${(x) => x.formatPositionSize()}
+                  ${(x) => `${ppp.t('$g.position')}: ${x.formatPositionSize()}`}
                 </span>
                 <span
                   style="cursor: pointer"
@@ -844,7 +844,7 @@ export const orderWidgetTemplate = html`
               >
                 <div class="widget-summary">
                   <div class="widget-summary-line">
-                    <span>Total amount</span>
+                    <span>Стоимость</span>
                     <span class="widget-summary-line-price">
                       ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
@@ -853,7 +853,7 @@ export const orderWidgetTemplate = html`
                     </span>
                   </div>
                   <div class="widget-summary-line">
-                    <span>Fees</span>
+                    <span>Комиссия</span>
                     <span>
                       ${(x) =>
                         x.orderTypeTabs.activeid === 'market'
@@ -880,7 +880,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>Available</span>
+                    <span>Доступно</span>
                     <span class="positive">
                       ${(x) => x.buyingPowerQuantity ?? '—'}
                     </span>
@@ -893,7 +893,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>Margin</span>
+                    <span>С плечом</span>
                     <span class="positive">
                       ${(x) => x.marginBuyingPowerQuantity ?? '—'}
                     </span>
@@ -908,7 +908,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>Available</span>
+                    <span>Доступно</span>
                     <span class="negative">
                       ${(x) => x.sellingPowerQuantity ?? '—'}
                     </span>
@@ -921,7 +921,7 @@ export const orderWidgetTemplate = html`
                         force: true
                       })}"
                   >
-                    <span>Margin</span>
+                    <span>С плечом</span>
                     <span class="negative">
                       ${(x) => x.marginSellingPowerQuantity ?? '—'}
                     </span>
@@ -1370,6 +1370,8 @@ export class OrderWidget extends WidgetWithInstrument {
     );
 
     if (!this.document.ordersTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер для выставления заявок.',
         keep: true
@@ -1381,6 +1383,8 @@ export class OrderWidget extends WidgetWithInstrument {
       !this.document.extraLevel1Trader &&
       !this.document.extraLevel1Trader2
     ) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер данных L1.',
         keep: true
@@ -1512,7 +1516,11 @@ export class OrderWidget extends WidgetWithInstrument {
       }
 
       this.calculateTotalAmount();
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }
@@ -2104,7 +2112,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
   formatPositionSize() {
     let size = 0;
-    let suffix = this.document.displaySizeInUnits ? 'шт.' : 'l.';
+    let suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
 
     if (this.instrument) {
       size = this.positionSize ?? 0;

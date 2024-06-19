@@ -384,7 +384,11 @@ export class MarqueeWidget extends WidgetWithInstrument {
 
         this.marquee.push(denormalized);
       }
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }

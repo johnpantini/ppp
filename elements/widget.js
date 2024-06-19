@@ -119,9 +119,14 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
 export const widgetUnsupportedInstrumentTemplate = () => html`
   ${when(
     (x) =>
-      x.instrument?.symbol && x.instrumentTrader && x.unsupportedInstrument,
+      x.initialized &&
+      x.instrument?.symbol &&
+      x.instrumentTrader &&
+      x.unsupportedInstrument,
     html`${html.partial(
-      widgetEmptyStateTemplate(ppp.t('$widget.unsupportedInstrument'))
+      widgetEmptyStateTemplate(
+        ppp.t('$widget.emptyState.unsupportedInstrument')
+      )
     )}`
   )}
 `;
@@ -129,22 +134,34 @@ export const widgetUnsupportedInstrumentTemplate = () => html`
 export const widgetWithInstrumentBodyTemplate = (
   widgetBodyLayout,
   options = {}
-) => html`
-  ${when(
-    (x) => !x.instrument?.symbol,
-    html`${html.partial(
-      widgetEmptyStateTemplate(
-        options.emptyStateText ?? ppp.t('$widget.selectInstrument')
-      )
-    )}`
-  )}
-  ${widgetUnsupportedInstrumentTemplate()}
-  ${when(
-    (x) =>
-      x.instrument?.symbol && x.instrumentTrader && !x.unsupportedInstrument,
-    widgetBodyLayout
-  )}
-`;
+) =>
+  html`
+    ${when(
+      (x) => !x.initialized,
+      html`${html.partial(
+        widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+          extraClass: 'loading-animation'
+        })
+      )}`,
+      html` ${when(
+        (x) => !x.instrument?.symbol,
+        html`${html.partial(
+          widgetEmptyStateTemplate(
+            options.emptyStateText ??
+              ppp.t('$widget.emptyState.selectInstrument')
+          )
+        )}`
+      )}
+      ${widgetUnsupportedInstrumentTemplate()}
+      ${when(
+        (x) =>
+          x.instrument?.symbol &&
+          x.instrumentTrader &&
+          !x.unsupportedInstrument,
+        widgetBodyLayout
+      )}`
+    )}
+  `;
 
 export const widgetDefaultHeaderTemplate = () => html`
   <div class="widget-header">
@@ -214,12 +231,32 @@ export const widgetStackSelectorTemplate = () => html`
 `;
 
 export const widgetEmptyStateTemplate = (text, options = {}) => `
-  <div class="widget-empty-state-holder">
+  <div class="widget-empty-state-holder${
+    options.extraClass ? ` ${options.extraClass}` : ''
+  }">
     ${options.hideGlyph ? '' : emptyWidgetState}
     <span>${text}</span>
   </div>`;
 
 export const widgetEmptyStateStyles = () => css`
+  @keyframes widget-empty-state-loading {
+    0% {
+      transform: scale(1, 1) translateY(0);
+    }
+    10% {
+      transform: scale(1.05, 0.9) translateY(0);
+    }
+    30% {
+      transform: scale(0.9, 1.1) translateY(-8px);
+    }
+    50% {
+      transform: scale(1.05, 0.95) translateY(0);
+    }
+    100% {
+      transform: scale(1, 1) translateY(0);
+    }
+  }
+
   .widget-empty-state-holder {
     width: 100%;
     height: 95%;
@@ -238,6 +275,13 @@ export const widgetEmptyStateStyles = () => css`
     max-width: 80px;
     max-height: 80px;
     margin-left: 16px;
+  }
+
+  .widget-empty-state-holder.loading-animation > svg {
+    animation-name: widget-empty-state-loading;
+    animation-timing-function: ease;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
   }
 
   .widget-empty-state-holder > span {
@@ -1346,6 +1390,9 @@ export class Widget extends PPPElement {
 export class WidgetWithInstrument extends Widget {
   @observable
   instrument;
+
+  @observable
+  initialized;
 
   @observable
   instrumentTrader;

@@ -74,7 +74,15 @@ export const activeOrdersWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        <div class="widget-toolbar">
+        ${when(
+          (x) => !x.initialized,
+          html`${html.partial(
+            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
+              extraClass: 'loading-animation'
+            })
+          )}`
+        )}
+        <div class="widget-toolbar" ?hidden="${(x) => !x.initialized}">
           <div class="tabs">
             <ppp-widget-box-radio-group
               ?hidden="${(x) =>
@@ -90,19 +98,19 @@ export const activeOrdersWidgetTemplate = html`
                 ?hidden="${(x) => allTabHidden(x)}"
                 value="all"
               >
-                All
+                Все
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 ?hidden="${(x) => limitTabHidden(x)}"
                 value="real"
               >
-                Exchange
+                Биржевые
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 ?hidden="${(x) => conditionalTabHidden(x)}"
                 value="conditional"
               >
-                Conditional
+                Условные
               </ppp-widget-box-radio>
             </ppp-widget-box-radio-group>
           </div>
@@ -150,10 +158,14 @@ export const activeOrdersWidgetTemplate = html`
             </button>
           </div>
         </div>
-        <div class="widget-card-list">
+        <div class="widget-card-list" ?hidden="${(x) => !x.initialized}">
           ${when(
             (x) => !x.orders?.length,
-            html`${html.partial(widgetEmptyStateTemplate('No active orders.'))}`
+            html`${html.partial(
+              widgetEmptyStateTemplate(
+                ppp.t('$widget.emptyState.noActiveOrders')
+              )
+            )}`
           )}
           <div class="widget-card-list-inner">
             ${repeat(
@@ -235,7 +247,7 @@ export const activeOrdersWidgetTemplate = html`
                             ${(o) =>
                               o.price
                                 ? formatPrice(o.price, o.instrument)
-                                : 'At Market'}
+                                : ppp.t('$g.atMarket')}
                           </div>
                           <button
                             class="widget-action-button"
@@ -377,6 +389,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     super.connectedCallback();
 
     if (!this.document.ordersTrader) {
+      this.initialized = true;
+
       return this.notificationsArea.error({
         text: 'Отсутствует трейдер активных заявок.',
         keep: true
@@ -410,7 +424,11 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       );
 
       this.#rebuildOrdersArray();
+
+      this.initialized = true;
     } catch (e) {
+      this.initialized = true;
+
       return this.catchException(e);
     }
   }
@@ -573,9 +591,9 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   formatRestQuantity(order) {
     if (order.filled === 0) return formatQuantity(order.quantity);
     else
-      return `${formatQuantity(order.filled)} of ${formatQuantity(
-        order.quantity
-      )}`;
+      return `${formatQuantity(order.filled)} ${ppp.t(
+        '$g.of'
+      )} ${formatQuantity(order.quantity)}`;
   }
 
   async cancelOrder(order) {
