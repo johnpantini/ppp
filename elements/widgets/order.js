@@ -2234,13 +2234,13 @@ export class OrderWidget extends WidgetWithInstrument {
       }
 
       return this.notificationsArea.success({
-        title: 'Order submitted'
+        title: 'Заявка выставлена'
       });
     } catch (e) {
       console.log(e);
 
       return this.notificationsArea.error({
-        title: 'Error submitting order',
+        title: 'Ошибка заявки',
         text: await this.ordersTrader?.formatError?.({
           instrument: this.instrument,
           error: e,

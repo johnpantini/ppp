@@ -8,7 +8,7 @@ import {
   repeat,
   observable
 } from '../../vendor/fast-element.min.js';
-import { ValidationError, validate } from '../../lib/ppp-errors.js';
+import { ValidationError, invalidate, validate } from '../../lib/ppp-errors.js';
 import {
   pageStyles,
   documentPageHeaderPartial,
@@ -27,6 +27,7 @@ import {
   dragControlsTemplate
 } from '../clonable-list.js';
 import { dictionarySelectorTemplate } from './instruments-manage.js';
+import { Tmpl } from '../../lib/tmpl.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -138,6 +139,22 @@ export class OrderbookTraderClonableList extends ClonableList {
       this.dragList.querySelectorAll('[processor-func-code]')
     )) {
       await validate(field);
+
+      try {
+        new Function(
+          'trader',
+          'prices',
+          'isBidSide',
+          await new Tmpl().render(this, field.value, {})
+        );
+      } catch (e) {
+        console.dir(e);
+
+        invalidate(field, {
+          errorMessage: 'Код содержит ошибки.',
+          raiseException: true
+        });
+      }
     }
 
     const value = this.value;
