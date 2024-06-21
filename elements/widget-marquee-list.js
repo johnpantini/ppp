@@ -48,7 +48,10 @@ export const widgetMarqueeListTemplate = html`
                       .db('ppp')
                       .collection('traders')
                       .find({
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`,
+                        type: {
+                          $ne: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.COMBINED_L1%]`
+                        }
                       })
                       .sort({ updatedAt: -1 });
                   };

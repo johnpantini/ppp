@@ -842,6 +842,30 @@ export const traderPageTemplate = html`
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
+          <div class="picture" slot="logo">${html.partial(combination)}</div>
+          <div slot="title">Комбинация книг заявок</div>
+          <span slot="description">
+            Трейдер, позволяющий комбинировать книги заявок.
+          </span>
+          <div slot="description" class="caps-list">
+            <ul>
+              <li>
+                ${() =>
+                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ORDERBOOK}`)}
+              </li>
+            </ul>
+          </div>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `trader-${TRADERS.COMBINED_ORDERBOOK}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(cloudFunctions)}</div>
           <div slot="title">По ссылке</div>
           <span slot="description">

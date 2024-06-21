@@ -32,7 +32,7 @@ await ppp.i18n(import.meta.url);
 
 export const dictionarySelectorTemplate = (options = {}) => html`
   <ppp-select
-    value="${() => options.value ?? INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}"
+    value="${() => options.value ?? INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}"
     @change="${(x) => {
       if (options.silent) {
         return;

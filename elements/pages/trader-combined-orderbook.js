@@ -26,7 +26,7 @@ import {
   defaultDragEndHandler,
   dragControlsTemplate
 } from '../clonable-list.js';
-import { FLAG_TO_DATUM_MAP } from '../../lib/traders/combined-l1.js';
+import { dictionarySelectorTemplate } from './instruments-manage.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -35,7 +35,17 @@ import '../radio-group.js';
 import '../snippet.js';
 import '../text-field.js';
 
-export const levelOneTraderClonableListTemplate = html`
+export const defaultProcessorFuncCode = `/**
+* Функция обработки книги заявок трейдера.
+*
+* @param {object} trader - Экземпляр трейдера PPP.
+* @param {array} prices - Массив цен (bid или ask) книги заявок.
+* @param {boolean} isBidSide - Тип массива цен, переданного на обработку.
+*/
+
+return prices;`;
+
+export const orderbookTraderClonableListTemplate = html`
   <template>
     <ppp-draggable-stack
       style="flex-flow: row wrap; gap: 24px 16px;"
@@ -60,7 +70,7 @@ export const levelOneTraderClonableListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
                 }}"
-                placeholder="Трейдер L1"
+                placeholder="Трейдер-источник"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -70,9 +80,9 @@ export const levelOneTraderClonableListTemplate = html`
                       .db('ppp')
                       .collection('traders')
                       .find({
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`,
+                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ORDERBOOK%]`,
                         type: {
-                          $ne: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.COMBINED_L1%]`
+                          $ne: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.COMBINED_ORDERBOOK%]`
                         }
                       })
                       .sort({ updatedAt: -1 });
@@ -80,73 +90,21 @@ export const levelOneTraderClonableListTemplate = html`
                 }}"
                 :transform="${() => ppp.decryptDocumentsTransformation()}"
               ></ppp-query-select>
-              <div class="control-line checkboxes">
+              <div class="control-stack">
                 <ppp-checkbox
-                  value="1"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('1')}"
+                  ?disabled="${(x) => x.hidden}"
+                  use-processor-func
+                  ?checked="${(x) => x.useProcessorFunc ?? false}"
                 >
-                  1
+                  Трейдер будет обрабатывать книгу заявок функцией:
                 </ppp-checkbox>
-                <ppp-checkbox
-                  value="2"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('2')}"
-                >
-                  2
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="3"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('3')}"
-                >
-                  3
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="4"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('4')}"
-                >
-                  4
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="5"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('5')}"
-                >
-                  5
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="6"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('6')}"
-                >
-                  6
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="7"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('7')}"
-                >
-                  7
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="8"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('8')}"
-                >
-                  8
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="9"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('9')}"
-                >
-                  9
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="A"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('A')}"
-                >
-                  A
-                </ppp-checkbox>
-                <ppp-checkbox
-                  value="B"
-                  ?checked="${(x) => !x.flags?.length || x.flags.includes('B')}"
-                >
-                  B
-                </ppp-checkbox>
+                <ppp-snippet
+                  ?disabled="${(x) => x.hidden}"
+                  processor-func-code
+                  style="width:50%;min-width:512px; height:220px"
+                  :code="${(x) =>
+                    x.processorFuncCode ?? defaultProcessorFuncCode}"
+                ></ppp-snippet>
               </div>
             </div>
           </div>
@@ -156,7 +114,7 @@ export const levelOneTraderClonableListTemplate = html`
   </template>
 `;
 
-export class LevelOneTraderClonableList extends ClonableList {
+export class OrderbookTraderClonableList extends ClonableList {
   async validate() {
     const duplicates = new Set();
 
@@ -173,6 +131,13 @@ export class LevelOneTraderClonableList extends ClonableList {
       } else {
         duplicates.add(field.value);
       }
+    }
+
+    // Snippets.
+    for (const field of Array.from(
+      this.dragList.querySelectorAll('[processor-func-code]')
+    )) {
+      await validate(field);
     }
 
     const value = this.value;
@@ -195,11 +160,8 @@ export class LevelOneTraderClonableList extends ClonableList {
 
       result.push({
         traderId,
-        flags: Array.from(
-          line.querySelector('.checkboxes').querySelectorAll('ppp-checkbox')
-        )
-          .filter((c) => c.checked)
-          .map((c) => c.getAttribute('value')),
+        useProcessorFunc: line.querySelector('[use-processor-func]').checked,
+        processorFuncCode: line.querySelector('[processor-func-code]').value,
         hidden: !line.querySelector('[visibility-toggle]').checked
       });
     }
@@ -208,7 +170,7 @@ export class LevelOneTraderClonableList extends ClonableList {
   }
 }
 
-export const traderCombinedL1Template = html`
+export const traderCombinedOrderbookTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -218,44 +180,51 @@ export const traderCombinedL1Template = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Список трейдеров-источников L1</h5>
+          <h5>Словарь</h5>
           <p class="description">
-            Выбранные трейдеры будут объединены в один комбинированный источник
-            данных L1. Цифробуквенные флаги контролируют возможность поставки
-            данных в соотвествии с документацией:
+            Словарь инструментов, который будет назначен трейдеру.
           </p>
-          <div class>
-            <ppp-snippet
-              style="width:50%;min-width:400px;height:260px"
-              readonly
-              :code="${() =>
-                Object.entries(FLAG_TO_DATUM_MAP)
-                  .map(
-                    ([key, datum]) =>
-                      `${key}: ${ppp.t(`$const.datum.${datum}`)}`
-                  )
-                  .join('\n')}"
-            ></ppp-snippet>
-          </div>
         </div>
         <div class="input-group">
-          <ppp-level-one-trader-clonable-list
+          ${(x) =>
+            dictionarySelectorTemplate({
+              silent: true,
+              value: x.document.dictionary
+            })}
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Список трейдеров-поставщиков</h5>
+          <p class="description">
+            Данные выбранных трейдеров будут объединены в одну комбинированную
+            книгу заявок.
+          </p>
+          <div class="spacing2"></div>
+          <ppp-banner class="inline" appearance="warning">
+            Можно указать до 10 трейдеров.
+          </ppp-banner>
+        </div>
+        <div class="input-group">
+          <ppp-orderbook-trader-clonable-list
             ${ref('traderList')}
             :stencil="${() => {
               return {
                 traderId: void 0,
-                flags: []
+                useProcessorFunc: false,
+                processorFuncCode: defaultProcessorFuncCode
               };
             }}"
             :list="${(x) =>
               x.document.traderList ?? [
                 {
                   traderId: void 0,
-                  flags: []
+                  useProcessorFunc: false,
+                  processorFuncCode: defaultProcessorFuncCode
                 }
               ]}"
             :traders="${(x) => x.traders}"
-          ></ppp-level-one-trader-clonable-list>
+          ></ppp-orderbook-trader-clonable-list>
         </div>
       </section>
       ${documentPageFooterPartial()}
@@ -263,11 +232,11 @@ export const traderCombinedL1Template = html`
   </template>
 `;
 
-export const traderCombinedL1Styles = css`
+export const traderCombinedOrderbookStyles = css`
   ${pageStyles}
 `;
 
-export class TraderCombinedL1Page extends TraderCommonPage {
+export class TraderCombinedOrderbookPage extends TraderCommonPage {
   collection = 'traders';
 
   @observable
@@ -280,7 +249,7 @@ export class TraderCombinedL1Page extends TraderCommonPage {
   }
 
   getDefaultCaps() {
-    return [TRADER_CAPS.CAPS_LEVEL1];
+    return [TRADER_CAPS.CAPS_ORDERBOOK];
   }
 
   async connectedCallback() {
@@ -308,7 +277,7 @@ export class TraderCombinedL1Page extends TraderCommonPage {
           {
             $match: {
               _id: new BSON.ObjectId('[%#payload.documentId%]'),
-              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.COMBINED_L1%]`
+              type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.COMBINED_ORDERBOOK%]`
             }
           }
         ]);
@@ -317,7 +286,7 @@ export class TraderCombinedL1Page extends TraderCommonPage {
 
   async find() {
     return {
-      type: TRADERS.COMBINED_L1,
+      type: TRADERS.COMBINED_ORDERBOOK,
       name: this.name.value.trim(),
       removed: { $ne: true }
     };
@@ -325,9 +294,10 @@ export class TraderCombinedL1Page extends TraderCommonPage {
 
   async submit() {
     const sup = await super.submit();
-    const traderList = this.traderList.value;
+    const traderList = this.traderList.value.slice(0, 10);
 
     for (const t of traderList) {
+      // Full documents for remote traders!
       t.document = await this.denormalization.denormalize(
         this.traders.find((x) => x._id === t.traderId)
       );
@@ -335,9 +305,10 @@ export class TraderCombinedL1Page extends TraderCommonPage {
 
     sup.$set = {
       ...sup.$set,
+      dictionary: this.dictionary.value,
       traderList,
       version: 1,
-      type: TRADERS.COMBINED_L1
+      type: TRADERS.COMBINED_ORDERBOOK
     };
 
     return sup;
@@ -345,13 +316,12 @@ export class TraderCombinedL1Page extends TraderCommonPage {
 }
 
 export default {
-  TraderCombinedL1PageComposition: TraderCombinedL1Page.compose({
-    name: 'ppp-trader-combined-l1-page',
-    template: traderCombinedL1Template,
-    styles: traderCombinedL1Styles
+  TraderCombinedL1PageComposition: TraderCombinedOrderbookPage.compose({
+    template: traderCombinedOrderbookTemplate,
+    styles: traderCombinedOrderbookStyles
   }).define(),
-  LevelOneTraderClonableListComposition: LevelOneTraderClonableList.compose({
-    template: levelOneTraderClonableListTemplate,
+  OrderbookTraderClonableListComposition: OrderbookTraderClonableList.compose({
+    template: orderbookTraderClonableListTemplate,
     styles: clonableListStyles
   }).define()
 };

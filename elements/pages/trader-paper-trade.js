@@ -114,7 +114,7 @@ export const traderPaperTradeTemplate = html`
         <div class="label-group">
           <h5>Словарь</h5>
           <p class="description">
-            Трейдер получит инструменты словаря в своё распоряжение.
+            Словарь инструментов, который будет назначен трейдеру.
           </p>
         </div>
         <div class="input-group">
