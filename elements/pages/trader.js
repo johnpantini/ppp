@@ -74,7 +74,9 @@ export class TraderCommonPage extends Page {
 
     // Always initialize Aspirant Worker traders.
     if (this.runtime.value === 'url') {
-      await ppp.getOrCreateTrader(this.document);
+      const trader = await ppp.getOrCreateTrader(this.document);
+
+      await trader.trinity();
     }
 
     return result;

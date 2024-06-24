@@ -139,6 +139,7 @@ export class TraderCustomPage extends TraderCommonPage {
           }
         }
       } catch (e) {
+        console.error(e);
         invalidate(this.url, {
           errorMessage: 'Этот URL не может быть загружен',
           raiseException: true

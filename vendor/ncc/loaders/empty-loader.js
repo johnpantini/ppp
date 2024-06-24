@@ -43,5 +43,9 @@ module.exports = function (input, map) {
     input = globalThis.removeDecorators?.(input) ?? input;
   }
 
+  if (typeof globalThis.pppPreprocessor === 'function') {
+    input = globalThis.pppPreprocessor(input, pkgBase);
+  }
+
   this.callback(null, input, map);
 };
