@@ -411,7 +411,8 @@ export class Select extends ListboxElement {
       this.setSelectedOptions();
 
       this.displayValue = this.firstSelectedOption
-        ? this.firstSelectedOption.pppContent ??
+        ? this.firstSelectedOption.displayValue ??
+          this.firstSelectedOption.pppContent ??
           this.firstSelectedOption.textContent ??
           this.firstSelectedOption.value
         : this.placeholder;

@@ -39,6 +39,7 @@ export const instrumentsImportPageTemplate = html`
       ${when(
         (x) =>
           x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS ||
+          x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
           x.dictionary.value === INSTRUMENT_DICTIONARY.IB,
         html`
           <section>
@@ -287,6 +288,43 @@ export class InstrumentsImportPage extends Page {
           symbol: s.symbol.replace('-', ' '),
           exchange: EXCHANGE.US,
           broker: BROKERS.IB,
+          fullName: s.fullName,
+          minPriceIncrement: 0,
+          type:
+            s.fullName.toUpperCase().endsWith(' ETF') ||
+            /Invesco|ProShares|iShares/i.test(s.fullName)
+              ? 'etf'
+              : 'stock',
+          currency: 'USD',
+          forQualInvestorFlag: false,
+          lot: 1
+        };
+      });
+  }
+
+  async [INSTRUMENT_DICTIONARY.ALPACA]() {
+    await validate(this.dictionaryUrl);
+
+    const rStocks = await ppp.fetch(this.dictionaryUrl.value);
+
+    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
+
+    const stocks = await rStocks.json();
+    const psinaSkipOTC = this.psinaSkipOTC.checked;
+
+    return stocks
+      .filter((s) => {
+        if (psinaSkipOTC) {
+          return !s.realExchange?.startsWith('OTC');
+        } else {
+          return true;
+        }
+      })
+      .map((s) => {
+        return {
+          symbol: s.symbol.replace('-', ' '),
+          exchange: EXCHANGE.US,
+          broker: BROKERS.ALPACA,
           fullName: s.fullName,
           minPriceIncrement: 0,
           type:

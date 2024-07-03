@@ -58,7 +58,9 @@ import {
   ConnectionLimitExceededError,
   NoInstrumentsError,
   TraderTrinityError,
-  StaleInstrumentCacheError
+  StaleInstrumentCacheError,
+  ValidationError,
+  FetchError
 } from '../lib/ppp-errors.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
 import { WidgetColumns } from './widget-columns.js';
@@ -920,6 +922,9 @@ export class Widget extends PPPElement {
   dragging;
 
   @attr({ mode: 'boolean' })
+  loading;
+
+  @attr({ mode: 'boolean' })
   resizing;
 
   @attr({ attribute: 'column-resizing', mode: 'boolean' })
@@ -1307,6 +1312,16 @@ export class Widget extends PPPElement {
     } else if (e instanceof TraderTrinityError) {
       return this.notificationsArea.error({
         text: 'Трейдер не загружается (проверьте URL).',
+        keep: true
+      });
+    } else if (e instanceof ValidationError) {
+      return this.notificationsArea.error({
+        text: 'Ошибка валидации данных.',
+        keep: true
+      });
+    } else if (e instanceof FetchError) {
+      return this.notificationsArea.error({
+        text: 'Ошибка сетевого запроса.',
         keep: true
       });
     } else {

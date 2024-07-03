@@ -56,8 +56,14 @@ export const dictionarySelectorTemplate = (options = {}) => html`
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}">
       UTEX Margin (акции и ETF, US)
     </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
+      Interactive Brokers (акции и ETF, US)
+    </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
       Psina (акции и ETF, US)
+    </ppp-option>
+    <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALPACA}">
+      Alpaca (акции и ETF, US)
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
       Alor (СПБ Биржа)
@@ -76,9 +82,6 @@ export const dictionarySelectorTemplate = (options = {}) => html`
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
       Finam
-    </ppp-option>
-    <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
-      Interactive Brokers (акции и ETF, US)
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.CAPITALCOM}">
       Capital.com

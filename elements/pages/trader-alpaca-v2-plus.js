@@ -47,10 +47,13 @@ export const traderAlpacaV2PlusTemplate = html`
                       {
                         $or: [
                           {
-                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.UTEX%]`
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.ALPACA%]`
                           },
                           {
                             type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.PSINA%]`
+                          },
+                          {
+                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.UTEX%]`
                           }
                         ]
                       },
@@ -364,6 +367,12 @@ export class TraderAlpacaV2PlusPage extends TraderCommonPage {
       // Use user-provided caps for unknown ports.
       return PSINA_CAPS[port] ?? super.getCaps();
     } else if (brokerType === BROKERS.UTEX) {
+      return [
+        TRADER_CAPS.CAPS_MIC,
+        TRADER_CAPS.CAPS_ORDERBOOK,
+        TRADER_CAPS.CAPS_TIME_AND_SALES
+      ];
+    } else if (brokerType === BROKERS.ALPACA) {
       return [
         TRADER_CAPS.CAPS_MIC,
         TRADER_CAPS.CAPS_ORDERBOOK,

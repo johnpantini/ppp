@@ -39,7 +39,7 @@ export const widgetColumnListItemTemplate = html`
           standalone
           ?disabled="${(x) => {
             return (
-              x.column.hidden || x.mainTraderColumns.includes(x.column.source)
+              x.column.hidden || x.mainTraderColumns.includes(x.source?.value)
             );
           }}"
           value="${(x) => x.column.traderId}"
@@ -113,7 +113,7 @@ export const widgetColumnListItemTemplate = html`
           deselectable
           standalone
           ?disabled="${(x) =>
-            x.column.hidden || x.mainTraderColumns.includes(x.column.source)}"
+            x.column.hidden || x.mainTraderColumns.includes(x.source?.value)}"
           value="${(x) => x.column.extraTraderId}"
           :preloaded="${(x) => {
             return x.traders?.find((t) => t._id === x.column.extraTraderId);

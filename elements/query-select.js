@@ -75,6 +75,7 @@ export const querySelectTemplate = html`
             title="${(x) => (x.removed ? 'Этот элемент был удалён' : null)}"
             ?removed="${(x) => x.removed}"
             :value="${(x) => x.value}"
+            :displayValue="${(x) => x.displayValue}"
           >
             ${(x) => x.displayValue}
           </ppp-option>
@@ -136,6 +137,12 @@ export class QuerySelect extends PPPAppearanceElement {
   @observable
   options;
 
+  @observable
+  formatter;
+
+  @observable
+  displayValueFormatter;
+
   @attr({ mode: 'boolean' })
   deselectable;
 
@@ -196,7 +203,10 @@ export class QuerySelect extends PPPAppearanceElement {
             return {
               datum: item,
               value: item._id,
-              displayValue: item.name,
+              displayValue:
+                typeof this.displayValueFormatter == 'function'
+                  ? this.displayValueFormatter(item)
+                  : item.name,
               removed: item.removed
             };
           });
@@ -204,7 +214,10 @@ export class QuerySelect extends PPPAppearanceElement {
           return {
             datum: data,
             value: data._id,
-            displayValue: data.name,
+            displayValue:
+              typeof this.displayValueFormatter == 'function'
+                ? this.displayValueFormatter(data)
+                : data.name,
             removed: data.removed
           };
         }

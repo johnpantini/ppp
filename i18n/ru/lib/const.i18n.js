@@ -33,8 +33,9 @@ export default function (i18n) {
         [APIS.YC]: 'Yandex Cloud'
       },
       broker: {
+        [BROKERS.ALPACA]: 'Alpaca',
         [BROKERS.ALOR]: 'Alor',
-        [BROKERS.TINKOFF]: 'Tinkoff',
+        [BROKERS.TINKOFF]: 'T-Bank',
         [BROKERS.FINAM]: 'Finam',
         [BROKERS.IB]: 'Interactive Brokers',
         [BROKERS.UTEX]: 'UTEX',

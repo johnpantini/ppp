@@ -27,7 +27,7 @@ import {
   defaultDragEndHandler,
   dragControlsTemplate
 } from '../clonable-list.js';
-import { normalize } from '../../design/styles.js';
+import { normalize, getTraderSelectOptionColor } from '../../design/styles.js';
 import { PPPElement } from '../../lib/ppp-element.js';
 import { formatDate } from '../../lib/intl.js';
 import { fontWeightWidget } from '../../design/design-tokens.js';
@@ -67,6 +67,12 @@ export const tccWidgetTraderListTemplate = html`
               placeholder="Трейдер"
               variant="compact"
               :context="${(x) => x}"
+              :displayValueFormatter="${() => (item) =>
+                html`
+                  <span style="color:${getTraderSelectOptionColor(item)}">
+                    ${item?.name}
+                  </span>
+                `}"
               :query="${() => {
                 return (context) => {
                   return context.services

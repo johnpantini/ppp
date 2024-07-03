@@ -38,7 +38,13 @@ import {
   toColorComponents,
   paletteGrayLight3,
   positive,
-  negative
+  negative,
+  paletteBlueDark2,
+  paletteBlueLight2,
+  palettePurpleLight2,
+  palettePurpleDark2,
+  paletteYellowLight2,
+  paletteYellowDark2
 } from './design-tokens.js';
 
 export const normalize = () => css`
@@ -386,3 +392,16 @@ export const typography = () => css`
     color: ${themeConditional(paletteGrayDark1, paletteGrayBase)};
   }
 `;
+
+export function getTraderSelectOptionColor(trader) {
+  switch (trader?.runtime) {
+    case 'main-thread':
+      return themeConditional(paletteBlueDark2, paletteBlueLight2).$value;
+    case 'shared-worker':
+      return themeConditional(paletteYellowDark2, paletteYellowLight2).$value;
+    case 'url':
+      return themeConditional(palettePurpleDark2, palettePurpleLight2).$value;
+    default:
+      return 'inherit';
+  }
+}

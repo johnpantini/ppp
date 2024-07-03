@@ -137,7 +137,7 @@ export const brokerPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="UTEX"
+            alt="Psina"
             style="height: 42px"
             src="${() => ppp.brandSvg('psina')}"
           />
@@ -148,6 +148,26 @@ export const brokerPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `broker-${BROKERS.PSINA}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <img
+            slot="logo"
+            draggable="false"
+            alt="Alpaca"
+            style="height: 32px"
+            src="${() => ppp.brandSvg('alpaca')}"
+          />
+          <span slot="title">Alpaca</span>
+          <span slot="description">Рыночные данные брокера Alpaca.</span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `broker-${BROKERS.ALPACA}`
               })}"
           >
             Продолжить

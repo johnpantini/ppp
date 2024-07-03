@@ -164,7 +164,7 @@ export const serviceSystemdPppAspirantTemplate = html`
             ${ref('nodeVersion')}
           >
             <ppp-option value="20">20.13.1</ppp-option>
-            <ppp-option value="22">22.2.0</ppp-option>
+            <ppp-option value="22">22.4.0</ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -364,7 +364,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
 
     const nodeVersion = {
       20: '20.13.1',
-      22: '22.2.0'
+      22: '22.4.0'
     }[+this.nodeVersion.value];
     const uwsNodeVersion = {
       20: '115',
