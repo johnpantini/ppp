@@ -63,7 +63,7 @@ export const brokerPsinaPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Шлюз Psina</h5>
+          <h5>Шлюз администратора Psina</h5>
           <p class="description">
             Будет использован для проверки учётных данных.
           </p>
@@ -125,7 +125,7 @@ export class BrokerPsinaPage extends Page {
         });
       }
 
-      if (!json.psina?.result) {
+      if (!json.result) {
         invalidate(this.password, {
           errorMessage: 'Неверный логин или пароль',
           raiseException: true

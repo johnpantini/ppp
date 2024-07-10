@@ -189,7 +189,7 @@ export const traderAlpacaV2PlusStyles = css`
   ${pageStyles}
 `;
 
-const checkConnection = async (control, login, password) => {
+export const checkConnection = async (control, login, password) => {
   try {
     new URL(control.value);
   } catch (e) {

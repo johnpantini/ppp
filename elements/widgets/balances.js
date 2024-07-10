@@ -174,6 +174,8 @@ export class BalancesWidget extends Widget {
 
   columnsBySource = new Map();
 
+  balancesMap;
+
   constructor() {
     super();
 

@@ -114,7 +114,7 @@ export default function (i18n) {
       },
       trader: {
         [TRADERS.ALOR_OPENAPI_V2]: 'Alor Open API V2',
-        [TRADERS.TINKOFF_GRPC_WEB]: 'Tinkoff gRPC-Web',
+        [TRADERS.TINKOFF_GRPC_WEB]: 'T-Bank gRPC-Web',
         [TRADERS.ALPACA_V2_PLUS]: 'Alpaca API V2',
         [TRADERS.BINANCE_V3]: 'Binance API V3',
         [TRADERS.MEXC_V3]: 'MEXC API V3',

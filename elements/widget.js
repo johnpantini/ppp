@@ -48,7 +48,10 @@ import {
   paletteRedDark2,
   paletteRedLight2,
   toColorComponents,
-  createThemed
+  createThemed,
+  lineHeightBody1,
+  fontWeightBody1,
+  fontSizeBody1
 } from '../design/design-tokens.js';
 import { emptyWidgetState } from '../static/svg/sprite.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
@@ -914,6 +917,23 @@ export const widgetStyles = () => css`
     padding: 4px 8px;
     max-width: 134px;
     white-space: nowrap;
+  }
+
+  .widget-section-h1 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .widget-section-h1 > span {
+    word-wrap: break-word;
+    font-size: ${fontSizeBody1};
+    line-height: ${lineHeightBody1};
+    font-weight: ${fontWeightBody1};
+    letter-spacing: 0;
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
+    margin-right: 8px;
+    ${ellipsis()};
   }
 `;
 

@@ -59,7 +59,7 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">Tinkoff</span>
           <span slot="description">
-            Торговля и рыночные данные через Tinkoff Invest API.&nbsp;<a
+            Торговля и рыночные данные через T‑Bank Invest API.&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
