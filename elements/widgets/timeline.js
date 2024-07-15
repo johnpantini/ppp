@@ -23,7 +23,11 @@ import {
   formatDateWithOptions,
   formatPrice
 } from '../../lib/intl.js';
-import { normalize, scrollbars } from '../../design/styles.js';
+import {
+  normalize,
+  scrollbars,
+  getTraderSelectOptionColor
+} from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
   fontSizeWidget,
@@ -185,6 +189,16 @@ export class TimelineWidget extends WidgetWithInstrument {
   timelineItemChanged(oldValue, newValue) {
     if (typeof newValue.operationId === 'undefined') {
       return;
+    }
+
+    // Special case - clear the timeline.
+    if (newValue.operationId === '@CLEAR') {
+      this.timelineMap.clear();
+      this.emptyIndicatorMap.clear();
+
+      this.timeline = [];
+
+      return Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
     }
 
     const date = new Date(newValue.createdAt);
@@ -608,6 +622,12 @@ export async function widgetDefinition() {
             value="${(x) => x.document.timelineTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.timelineTrader ?? ''}"
+            :displayValueFormatter="${() => (item) =>
+              html`
+                <span style="color:${getTraderSelectOptionColor(item)}">
+                  ${item?.name}
+                </span>
+              `}"
             :query="${() => {
               return (context) => {
                 return context.services

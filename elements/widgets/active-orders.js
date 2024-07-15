@@ -20,7 +20,11 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { staticallyCompose } from '../../vendor/fast-utilities.js';
 import { TRADER_DATUM, WIDGET_TYPES, ORDERS } from '../../lib/const.js';
-import { normalize, spacing } from '../../design/styles.js';
+import {
+  normalize,
+  spacing,
+  getTraderSelectOptionColor
+} from '../../design/styles.js';
 import { cancelOrders, refresh, trash } from '../../static/svg/sprite.js';
 import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
 import { Tmpl } from '../../lib/tmpl.js';
@@ -363,6 +367,25 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   @observable
   realOrder;
 
+  realOrderChanged(oldValue, newValue) {
+    if (newValue?.orderId) {
+      if (newValue.orderId === '@CLEAR') {
+        this.realOrdersById.clear();
+      } else {
+        if (
+          newValue.quantity === newValue.filled ||
+          newValue.status !== 'working'
+        ) {
+          this.realOrdersById.delete(newValue.orderId);
+        } else if (newValue.status === 'working') {
+          this.realOrdersById.set(newValue.orderId, newValue);
+        }
+      }
+
+      return this.#rebuildOrdersArray();
+    }
+  }
+
   @observable
   conditionalOrder;
 
@@ -445,21 +468,6 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
 
     return super.disconnectedCallback();
-  }
-
-  realOrderChanged(oldValue, newValue) {
-    if (newValue?.orderId) {
-      if (
-        newValue.quantity === newValue.filled ||
-        newValue.status !== 'working'
-      ) {
-        this.realOrdersById.delete(newValue.orderId);
-      } else if (newValue.status === 'working') {
-        this.realOrdersById.set(newValue.orderId, newValue);
-      }
-
-      return this.#rebuildOrdersArray();
-    }
   }
 
   conditionalOrderChanged(oldValue, newValue) {
@@ -810,6 +818,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.ordersTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services

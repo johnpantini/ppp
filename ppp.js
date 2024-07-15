@@ -394,6 +394,8 @@ class PPP {
           }
         }
 
+        await import(`${this.rootUrl}/lib/debug.js`);
+
         const storedDarkMode = this.settings.get('darkMode');
 
         if (storedDarkMode === '1') {

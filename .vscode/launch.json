@@ -43,6 +43,8 @@
       "name": "local-trader-runtime",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppp-trader-runtime\\ppp-trader-runtime.mjs",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
       "env": {
         "REDIS_HOST": "${env:REDIS_HOST}",
         "REDIS_PORT": "${env:REDIS_PORT}",
@@ -53,7 +55,8 @@
         "PPP_ROOT_URL": "${env:PPP_ROOT_URL}",
         "GLOBAL_PROXY_URL": "${env:GLOBAL_PROXY_URL}",
         "ASPIRANT_ID": "${env:ASPIRANT_ID}",
-        "PPP_WORKER_ID": "${env:PPP_TRADER_RUNTIME_WORKER_ID}"
+        "PPP_WORKER_ID": "${env:PPP_TRADER_RUNTIME_WORKER_ID}",
+        "DEBUG": "*"
       }
     },
     {

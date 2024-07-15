@@ -10,6 +10,7 @@ import {
   ref
 } from '../../vendor/fast-element.min.js';
 import { COLUMN_SOURCE, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import { getTraderSelectOptionColor } from '../../design/styles.js';
 import '../badge.js';
 import '../button.js';
 import '../checkbox.js';
@@ -68,7 +69,13 @@ export class PortfolioWidget extends ListWidget {
   positionChanged(oldValue, newValue) {
     const type = newValue?.instrument?.type;
 
-    if (!newValue?.isBalance && type) {
+    if (newValue?.oid === '@CLEAR') {
+      this.positions.clear();
+
+      for (const [, row] of this.rowsCache) {
+        row.remove();
+      }
+    } else if (!newValue?.isBalance && type) {
       if (
         this.document[
           {
@@ -232,6 +239,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.portfolioTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services

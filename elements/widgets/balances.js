@@ -16,7 +16,11 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { formatPriceWithoutCurrency } from '../../lib/intl.js';
 import { COLUMN_SOURCE, WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
-import { normalize, spacing } from '../../design/styles.js';
+import {
+  normalize,
+  spacing,
+  getTraderSelectOptionColor
+} from '../../design/styles.js';
 import { WidgetColumns } from '../widget-columns.js';
 import '../button.js';
 import '../query-select.js';
@@ -309,6 +313,12 @@ export async function widgetDefinition() {
             value="${(x) => x.document.balancesTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.balancesTrader ?? ''}"
+            :displayValueFormatter="${() => (item) =>
+              html`
+                <span style="color:${getTraderSelectOptionColor(item)}">
+                  ${item?.name}
+                </span>
+              `}"
             :query="${() => {
               return (context) => {
                 return context.services

@@ -112,6 +112,31 @@ export const settingsWorkspacePageTemplate = html`
           </ppp-checkbox>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>Параметры отладки</h5>
+          <p class="description">
+            Чтобы включить отладочный режим для всего приложения, следует
+            использовать пространство имён *
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            placeholder="*"
+            value="${(x) => x.document.debugEnvVar ?? ''}"
+            ${ref('debugEnvVar')}
+          >
+            <span slot="label">Пространства имён для отладки</span>
+          </ppp-text-field>
+          <div class="spacing2"></div>
+          <ppp-checkbox
+            ?checked="${(x) => x.document.useDebugColors ?? true}"
+            ${ref('useDebugColors')}
+          >
+            Использовать цвета в сообщениях
+          </ppp-checkbox>
+        </div>
+      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -181,6 +206,8 @@ export class SettingsWorkspacePage extends Page {
     const workspaceSnapMargin = Math.trunc(this.workspaceSnapMargin.value);
     const confirmWidgetClosing = this.confirmWidgetClosing.checked;
     const hideEmptyWorkspaceGizmo = this.hideEmptyWorkspaceGizmo.checked;
+    const debugEnvVar = this.debugEnvVar.value.trim();
+    const useDebugColors = this.useDebugColors.checked;
     const widgetNotificationTimeout = Math.abs(
       Math.trunc(this.widgetNotificationTimeout.value)
     );
@@ -192,6 +219,8 @@ export class SettingsWorkspacePage extends Page {
     ppp.settings.set('widgetNotificationTimeout', widgetNotificationTimeout);
     ppp.settings.set('psinaBaseUrl', psinaBaseUrl);
     ppp.settings.set('hideEmptyWorkspaceGizmo', hideEmptyWorkspaceGizmo);
+    ppp.settings.set('debugEnvVar', debugEnvVar);
+    ppp.settings.set('useDebugColors', useDebugColors);
 
     return {
       $set: {
@@ -200,7 +229,9 @@ export class SettingsWorkspacePage extends Page {
         confirmWidgetClosing,
         widgetNotificationTimeout,
         psinaBaseUrl,
-        hideEmptyWorkspaceGizmo
+        hideEmptyWorkspaceGizmo,
+        debugEnvVar,
+        useDebugColors
       }
     };
   }

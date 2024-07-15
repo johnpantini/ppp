@@ -167,14 +167,17 @@ export const traderNameAndRuntimePartial = ({
         value="${(x) => x.document.runtime ?? 'main-thread'}"
         ${ref('runtime')}
       >
-        <ppp-radio value="main-thread">Основной поток, браузер</ppp-radio>
+        <ppp-radio value="main-thread" ${ref('mainThreadRadio')}>
+          Основной поток, браузер
+        </ppp-radio>
         <ppp-radio
           ?disabled="${() => sharedWorker === false}"
           value="shared-worker"
+          ${ref('sharedWorkerRadio')}
         >
           Разделяемый поток, браузер
         </ppp-radio>
-        <ppp-radio value="url">По ссылке</ppp-radio>
+        <ppp-radio value="url" ${ref('urlRadio')}>По ссылке</ppp-radio>
       </ppp-radio-group>
       <div
         class="runtime-selector"

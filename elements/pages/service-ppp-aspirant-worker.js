@@ -155,6 +155,10 @@ uWS
       {
         url: '/lib/aspirant-worker/utils.mjs',
         path: 'lib/aspirant-worker/utils.mjs'
+      },
+      {
+        url: '/lib/debug.js',
+        path: 'lib/debug.js'
       }
     ]
   },

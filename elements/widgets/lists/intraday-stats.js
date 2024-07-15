@@ -203,6 +203,10 @@ export class IntradayStats {
   timelineItem;
 
   isTradeEligibleForStats(trade = {}) {
+    if (!trade?.instrument) {
+      return false;
+    }
+
     if (
       trade?.instrument.broker === BROKERS.ALOR &&
       trade?.instrument.type === 'currency'
@@ -267,6 +271,25 @@ export class IntradayStats {
   }
 
   timelineItemChanged(oldValue, newValue) {
+    if (newValue?.operationId === '@CLEAR') {
+      for (const [, totalRowData] of this.totalsCache) {
+        totalRowData.tr.remove();
+      }
+
+      this.widget.tableBody.replaceChildren();
+      this.positions.clear();
+      this.timeline.clear();
+      this.stats.clear();
+      this.rowsCache.clear();
+      this.totalsCache.clear();
+
+      this.widget.document.listSource = void 0;
+
+      Observable.notify(this.widget, 'document');
+
+      return this.rebuildStats();
+    }
+
     if (!this.isTradeEligibleForStats(newValue)) {
       return;
     }
@@ -727,6 +750,8 @@ export class IntradayStats {
 
           tr.setAttribute('currency', currency);
           tr.setAttribute('class', 'tr total');
+
+          totalRowData.tr = tr;
 
           for (const col of this.widget.columnsArray) {
             const th = document.createElement('div');

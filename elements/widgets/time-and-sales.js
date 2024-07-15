@@ -27,7 +27,12 @@ import {
   getInstrumentPrecision,
   formatNumber
 } from '../../lib/intl.js';
-import { ellipsis, normalize, scrollbars } from '../../design/styles.js';
+import {
+  ellipsis,
+  normalize,
+  scrollbars,
+  getTraderSelectOptionColor
+} from '../../design/styles.js';
 import {
   fontSizeWidget,
   paletteGrayBase,
@@ -892,6 +897,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.tradesTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.tradesTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services

@@ -2675,7 +2675,6 @@ export const widgetTrifectaFieldTemplate = html`
       precision="${(x) => getInstrumentPrecision(x?.instrument)}"
       ?disabled="${(x) => x.market || x.disabled}"
       maxlength="${(x) => (x.kind === 'quantity' ? 8 : 12)}"
-      @wheel="${(x, c) => x.handleWheel(c)}"
       @input="${(x) => x.handleInput()}"
       @keydown="${(x, c) => x.handleKeydown(c)}"
       @paste="${(x, c) => x.handlePaste(c)}"
@@ -2884,6 +2883,10 @@ export class WidgetTrifectaField extends WidgetTextField {
   connectedCallback() {
     super.connectedCallback();
 
+    this.handleWheel = this.handleWheel.bind(this);
+
+    this.addEventListener('wheel', this.handleWheel, { passive: true });
+
     Observable.getNotifier(this.input).subscribe(
       this.onInputValueChanged,
       'value'
@@ -2891,6 +2894,8 @@ export class WidgetTrifectaField extends WidgetTextField {
   }
 
   disconnectedCallback() {
+    this.removeEventListener('wheel', this.handleWheel, { passive: true });
+
     Observable.getNotifier(this.input).unsubscribe(
       this.onInputValueChanged,
       'value'
@@ -2977,7 +2982,7 @@ export class WidgetTrifectaField extends WidgetTextField {
     }, 250);
   }
 
-  handleWheel({ event }) {
+  handleWheel(event) {
     if (this.changeViaMouseWheel) {
       if (event.deltaY < 0) this.stepUp();
       else this.stepDown();

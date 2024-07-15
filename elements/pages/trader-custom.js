@@ -136,6 +136,15 @@ export class TraderCustomPage extends TraderCommonPage {
                 await TraderCommonPage.prototype.submit.call(this)
               );
             };
+
+            if (
+              typeof this.traderPageDefinition.pageClass.prototype
+                .loadedCallback === 'function'
+            ) {
+              await this.traderPageDefinition.pageClass.prototype.loadedCallback.call(
+                this
+              );
+            }
           }
         }
       } catch (e) {
