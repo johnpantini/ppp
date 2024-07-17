@@ -257,7 +257,11 @@ class PPP {
     }
   }
 
-  #showLoadingError({ errorText, shouldShowGlobalProxyUrlInput }) {
+  #showLoadingError({
+    errorText,
+    shouldShowGlobalProxyUrlInput,
+    shouldShowSwitchToCloudDBButton
+  }) {
     document.querySelector('.splashscreen-loader').classList.add('error');
     document.querySelector('.loading-text').classList.add('error');
 
@@ -265,6 +269,10 @@ class PPP {
 
     if (shouldShowGlobalProxyUrlInput) {
       document.querySelector('.global-proxy-url').removeAttribute('hidden');
+    }
+
+    if (shouldShowSwitchToCloudDBButton) {
+      document.querySelector('.switch-to-cloud-db').removeAttribute('hidden');
     }
   }
 
@@ -315,19 +323,23 @@ class PPP {
           if (/Failed to fetch/i.test(e?.message)) {
             if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
               this.#showLoadingError({
-                errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
+                errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION'),
+                shouldShowSwitchToCloudDBButton: true
               });
 
-              const listener = function (event) {
-                if (event.key === 'Enter') {
-                  localStorage.removeItem('ppp-use-alternative-mongo');
-                  window.location.reload();
-                }
+              const listener = function () {
+                localStorage.removeItem('ppp-use-alternative-mongo');
+                window.location.reload();
 
-                document.removeEventListener('keydown', listener);
+                const button = document.querySelector('.switch-to-cloud-db');
+
+                button.setAttribute('hidden', '');
+                button.removeEventListener('click', listener);
               };
 
-              document.addEventListener('keydown', listener);
+              document
+                .querySelector('.switch-to-cloud-db')
+                .addEventListener('click', listener);
             } else {
               this.#showLoadingError({
                 errorText: this.t('$loadingErrors.E_NO_PROXY_CONNECTION'),
@@ -421,7 +433,6 @@ class PPP {
         }
 
         await this.#rebuildDictionary();
-
         localStorage.setItem('ppp-locale', this.locale);
       } catch (e) {
         console.error(e);
@@ -429,19 +440,23 @@ class PPP {
         if (/Failed to fetch/i.test(e?.message)) {
           if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
             this.#showLoadingError({
-              errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION')
+              errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION'),
+              shouldShowSwitchToCloudDBButton: true
             });
 
-            const listener = function (event) {
-              if (event.key === 'Enter') {
-                localStorage.removeItem('ppp-use-alternative-mongo');
-                window.location.reload();
-              }
+            const listener = function () {
+              localStorage.removeItem('ppp-use-alternative-mongo');
+              window.location.reload();
 
-              document.removeEventListener('keydown', listener);
+              const button = document.querySelector('.switch-to-cloud-db');
+
+              button.setAttribute('hidden', '');
+              button.removeEventListener('click', listener);
             };
 
-            document.addEventListener('keydown', listener);
+            document
+              .querySelector('.switch-to-cloud-db')
+              .addEventListener('click', listener);
           } else {
             this.#showLoadingError({
               errorText: this.t('$loadingErrors.E_NO_PROXY_CONNECTION'),
@@ -463,7 +478,7 @@ class PPP {
           this.#showLoadingError({
             errorText: this.t('$loadingErrors.E_OFFLINE_REALM')
           });
-        } else if (/function not found: 'eval'/i.test(e?.message)) {
+        } else if (/function not found/i.test(e?.message)) {
           this.#showLoadingError({
             errorText: this.t(
               '$loadingErrors.E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT'
@@ -473,7 +488,6 @@ class PPP {
           setTimeout(() => {
             localStorage.removeItem('ppp-mongo-app-id');
             localStorage.removeItem('ppp-tag');
-
             window.location.reload();
           }, 5000);
         } else {

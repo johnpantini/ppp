@@ -99,6 +99,44 @@
         text-transform: inherit;
       }
 
+      button.switch-to-cloud-db {
+        display: flex;
+        margin-top: 16px;
+        appearance: none;
+        padding: 0px;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: stretch;
+        border-radius: 6px;
+        position: relative;
+        text-decoration: none;
+        cursor: pointer;
+        z-index: 0;
+        height: 36px;
+        font-size: 13px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+        background-color: var(--critical-default-color);
+        border: 1px solid var(--critical-border-color);
+        color: var(--critical-default-inverse-color);
+      }
+
+      button.switch-to-cloud-db > div {
+        display: grid;
+        grid-auto-flow: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+        pointer-events: none;
+        position: relative;
+        z-index: 0;
+        padding: 0px 15px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+
       .loading-text {
         display: flex;
         color: var(--danger-color);
@@ -238,6 +276,9 @@
         class="global-proxy-url"
         placeholder="https://example.deno.dev"
       />
+      <button hidden class="switch-to-cloud-db">
+        <div>➡️ MongoDB Atlas</div>
+      </button>
     </div>
     <ppp-design-system-canvas>
       <div

@@ -191,7 +191,7 @@ export const cloudServicesPageTemplate = html`
         </div>
         <div class="input-group">
           <ppp-text-field
-            type="url"
+            type="password"
             placeholder="https://example.deno.dev"
             value="${() => ppp.keyVault.getKey('global-proxy-url')}"
             @input="${(x) =>
