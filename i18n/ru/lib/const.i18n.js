@@ -82,7 +82,8 @@ export default function (i18n) {
         [TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены+',
         [TRADER_DATUM.STATUS]: 'Статус',
         [TRADER_DATUM.TRADING_STATUS]: 'Торговый статус',
-        [TRADER_DATUM.DAY_VOLUME]: 'Объём'
+        [TRADER_DATUM.DAY_VOLUME]: 'Объём',
+        [TRADER_DATUM.SPRINT]: 'Спринт'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

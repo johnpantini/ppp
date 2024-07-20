@@ -71,18 +71,19 @@ export default function (i18n) {
         [COLUMN_SOURCE.FORMATTED_VALUE]: 'Значение'
       },
       datum: {
-        [TRADER_DATUM.LAST_PRICE]: 'Цена',
+        [TRADER_DATUM.LAST_PRICE]: 'Price',
         [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены, %',
         [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены',
         [TRADER_DATUM.BEST_BID]: 'Bid',
         [TRADER_DATUM.BEST_ASK]: 'Ask',
         [TRADER_DATUM.MIDPOINT]: 'Mid',
-        [TRADER_DATUM.EXTENDED_LAST_PRICE]: 'Цена+',
+        [TRADER_DATUM.EXTENDED_LAST_PRICE]: 'Price+',
         [TRADER_DATUM.EXTENDED_LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены+, %',
         [TRADER_DATUM.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены+',
-        [TRADER_DATUM.STATUS]: 'Статус',
-        [TRADER_DATUM.TRADING_STATUS]: 'Торговый статус',
-        [TRADER_DATUM.DAY_VOLUME]: 'Объём'
+        [TRADER_DATUM.STATUS]: 'Status',
+        [TRADER_DATUM.TRADING_STATUS]: 'Trading status',
+        [TRADER_DATUM.DAY_VOLUME]: 'Volume',
+        [TRADER_DATUM.SPRINT]: 'Sprint'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

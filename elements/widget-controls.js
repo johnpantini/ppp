@@ -2408,11 +2408,6 @@ export class WidgetHeaderButtons extends PPPElement {
 export const widgetTabsStyles = css`
   ${normalize()}
   ${display('grid')}
-  :host {
-    border-bottom: 1px solid
-      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
-  }
-
   .tablist {
     display: flex;
     position: relative;
@@ -2421,6 +2416,11 @@ export const widgetTabsStyles = css`
     flex: 0 0 auto;
     margin: 0;
     padding: 0;
+  }
+
+  ::slotted(ppp-widget-tab) {
+    border-bottom: 1px solid
+      ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 `;
 

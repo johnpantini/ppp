@@ -131,9 +131,8 @@ export const orderStopLossTakeProfitTemplate = html`
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Здесь и далее ценовое расстояние можно задавать в процентах
-            (добавьте знак % после числа) или шагах цены инструмента (добавьте
-            знак +).
+            Ценовое расстояние можно задавать в процентах (добавьте знак % после
+            числа) или шагах цены инструмента (добавьте знак +).
           </ppp-banner>
         </div>
         <div class="input-group">

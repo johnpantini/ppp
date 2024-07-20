@@ -854,6 +854,13 @@ export const widgetStyles = () => css`
     overflow: auto;
   }
 
+  .widget-body-inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
+
   .widget-header ppp-widget-group-control {
     flex: 0 0 16px;
   }

@@ -1044,12 +1044,6 @@ export const orderWidgetStyles = css`
     bottom: 55px;
   }
 
-  .widget-body-inner {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
   .no-conditional-orders-holder {
     display: flex;
     align-items: center;
