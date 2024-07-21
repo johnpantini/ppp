@@ -20,6 +20,7 @@ import {
   paletteBlueLight1,
   paletteGrayBase,
   paletteGrayDark2,
+  paletteGrayLight1,
   paletteGrayLight2,
   paletteWhite,
   themeConditional
@@ -124,12 +125,15 @@ export const checkboxStyles = css`
   }
 
   :host([disabled]) .checked-indicator path {
+    stroke: ${themeConditional(paletteGrayLight1, paletteGrayBase)} !important;
   }
 
   :host([disabled]) .control {
+    border: 2px solid ${themeConditional(paletteGrayLight1, paletteGrayBase)};
   }
 
-  :host([disabled][checked]) .control {
+  :host([disabled]) .label {
+    color: ${themeConditional(paletteGrayLight1, paletteGrayBase)} !important;
   }
 `;
 

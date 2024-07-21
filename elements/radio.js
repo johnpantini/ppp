@@ -14,13 +14,16 @@ import { whitespaceFilter } from '../vendor/fast-utilities.js';
 import {
   bodyFont,
   fontSizeBody1,
+  fontWeightBody1,
   lineHeightBody1,
   paletteBlack,
   paletteBlueBase,
   paletteBlueLight1,
   paletteGrayBase,
+  paletteGrayDark1,
   paletteGrayDark2,
   paletteGrayDark3,
+  paletteGrayLight1,
   paletteGrayLight2,
   paletteGrayLight3,
   paletteWhite,
@@ -87,7 +90,7 @@ export const radioStyles = css`
     font-family: ${bodyFont};
     font-size: ${fontSizeBody1};
     line-height: ${lineHeightBody1};
-    font-weight: 700;
+    font-weight: ${fontWeightBody1};
     cursor: pointer;
     color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
@@ -132,7 +135,6 @@ export const radioStyles = css`
 
   :host([disabled]) {
     cursor: not-allowed;
-    pointer-events: none;
   }
 
   :host([disabled]) .control,
@@ -142,16 +144,20 @@ export const radioStyles = css`
 
   :host([disabled]) .checked-indicator {
     pointer-events: none;
-    border-color: ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
-    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark3)};
+    border-color: ${themeConditional(paletteGrayLight1, paletteGrayDark1)};
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
   }
 
   :host([disabled][aria-checked='true']) .checked-indicator {
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark3)};
+    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
   }
 
-  :host([disabled][aria-checked='true']) .checked-indicator:after {
-    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
+  :host([disabled][aria-checked='true']) .checked-indicator::after {
+    background-color: ${themeConditional(paletteGrayLight1, paletteGrayDark2)};
+  }
+
+  :host([disabled]) .label {
+    color: ${themeConditional(paletteGrayLight1, paletteGrayBase)} !important;
   }
 `;
 
