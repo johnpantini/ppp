@@ -21,8 +21,7 @@ import {
   currencyName,
   formatAbsoluteChange,
   formatAmount,
-  formatNumber,
-  getInstrumentPrecision
+  formatNumber
 } from '../../../lib/intl.js';
 import { invalidate } from '../../../lib/ppp-errors.js';
 import { Tmpl } from '../../../lib/tmpl.js';
@@ -179,9 +178,25 @@ export class IntradayStats {
 
   #duplicates = new Set();
 
+  positions = new Map();
+
+  timeline = new Map();
+
+  stats = new Map();
+
+  referencePrices = new Map();
+
+  rowsCache = new Map();
+
+  totalsCache = new Map();
+
   positionChanged(oldValue, newValue) {
     if (!newValue.isBalance) {
       const currency = newValue.instrument?.currency;
+
+      if (!currency) {
+        return;
+      }
 
       if (!this.positions.has(currency)) {
         this.positions.set(currency, new Map());
@@ -277,7 +292,6 @@ export class IntradayStats {
       }
 
       this.widget.tableBody.replaceChildren();
-      this.positions.clear();
       this.timeline.clear();
       this.stats.clear();
       this.rowsCache.clear();
@@ -328,18 +342,6 @@ export class IntradayStats {
 
     return this.rebuildStats();
   }
-
-  positions = new Map();
-
-  timeline = new Map();
-
-  stats = new Map();
-
-  referencePrices = new Map();
-
-  rowsCache = new Map();
-
-  totalsCache = new Map();
 
   async #referencePriceNeeded(currency, symbol, instrument) {
     if (typeof this.referencePrices.get(currency) === 'undefined') {
@@ -660,8 +662,11 @@ export class IntradayStats {
             if (row) this.rowsCache.set(`${symbol}:${currency}`, row);
           }
 
-          const precision =
-            getInstrumentPrecision(stats.instrument, stats.referencePrice) + 1;
+          // const precision = getInstrumentPrecision(
+          //   stats.instrument,
+          //   stats.referencePrice
+          // );
+          const precision = 2;
           const pnlFormatter = (value) =>
             html`
               <span
@@ -857,9 +862,15 @@ export class IntradayStats {
             `th cell${gross > 0 ? ' positive' : gross < 0 ? ' negative' : ''}`
           );
 
-          totalRowData.gross.textContent = formatAbsoluteChange(gross, {
-            currency
-          });
+          totalRowData.gross.textContent = formatAbsoluteChange(
+            gross,
+            {
+              currency
+            },
+            {
+              maximumFractionDigits: 2
+            }
+          );
         }
 
         if (totalRowData.net) {
@@ -870,9 +881,15 @@ export class IntradayStats {
             `th cell${net > 0 ? ' positive' : net < 0 ? ' negative' : ''}`
           );
 
-          totalRowData.net.textContent = formatAbsoluteChange(net, {
-            currency
-          });
+          totalRowData.net.textContent = formatAbsoluteChange(
+            net,
+            {
+              currency
+            },
+            {
+              maximumFractionDigits: 2
+            }
+          );
         }
       }
 
