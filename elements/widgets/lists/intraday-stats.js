@@ -191,6 +191,12 @@ export class IntradayStats {
   totalsCache = new Map();
 
   positionChanged(oldValue, newValue) {
+    if (newValue?.oid === '@CLEAR') {
+      this.positions.clear();
+
+      return this.rebuildStats();
+    }
+
     if (!newValue.isBalance) {
       const currency = newValue.instrument?.currency;
 
