@@ -75,6 +75,8 @@ export class PortfolioWidget extends ListWidget {
       for (const [, row] of this.rowsCache) {
         row.remove();
       }
+
+      this.rowsCache.clear();
     } else if (!newValue?.isBalance && type) {
       if (
         this.document[

@@ -293,17 +293,31 @@ export class IntradayStats {
 
   timelineItemChanged(oldValue, newValue) {
     if (newValue?.operationId === '@CLEAR') {
+      for (const [, innerMap] of this.timeline) {
+        innerMap.clear();
+      }
+
+      this.timeline.clear();
+      this.#duplicates.clear();
+
+      for (const [, innerMap] of this.stats) {
+        innerMap.clear();
+      }
+
+      this.stats.clear();
+
       for (const [, totalRowData] of this.totalsCache) {
         totalRowData.tr.remove();
       }
 
-      this.widget.tableBody.replaceChildren();
-      this.timeline.clear();
-      this.stats.clear();
+      for (const [, row] of this.rowsCache) {
+        row.remove();
+      }
+
       this.rowsCache.clear();
       this.totalsCache.clear();
 
-      this.widget.document.listSource = void 0;
+      this.widget.document.listSource = null;
 
       Observable.notify(this.widget, 'document');
 
