@@ -1973,6 +1973,10 @@ export class OrderWidget extends WidgetWithInstrument {
 
         this.price.value = formatPriceWithoutCurrency(price, this.instrument);
 
+        if (this.price.value.includes(',') && this.price.value.includes('.')) {
+          this.price.value = this.price.value.replaceAll(/,/gi, '');
+        }
+
         this.calculateTotalAmount();
         this.price.input.$emit('input');
         this.price.focus();

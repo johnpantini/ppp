@@ -2681,6 +2681,7 @@ export const widgetTrifectaFieldTemplate = html`
       @beforeinput="${(x, c) => x.handleBeforeInput(c)}"
       value="${(x) => x?.value}"
       placeholder="${(x) => x.placeholder}"
+      autocomplete="off"
       ${ref('input')}
     >
       <span class="control-line" slot="end">
