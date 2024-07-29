@@ -1634,7 +1634,7 @@ export class OrderWidget extends WidgetWithInstrument {
       typeof order?.order.baseUrl === 'string'
     ) {
       this.conditionalOrderDefinition = await import(
-        `${order.order.baseUrl}/element.js`
+        `${new URL(order.order.baseUrl)}element.js`
       );
     } else {
       this.conditionalOrderDefinition = void 0;
@@ -1921,16 +1921,16 @@ export class OrderWidget extends WidgetWithInstrument {
       if (volume > 0) {
         if (isInMoney && this.ordersTrader) {
           this.setQuantity(
-            +volume /
+            volume /
               this.instrument.lot /
-              +this.ordersTrader.fixPrice(this.instrument, this.price.value),
+              this.ordersTrader.fixPrice(this.instrument, this.price.value),
             {
               focusOnQuantity: false
             }
           );
         } else {
           this.setQuantity(
-            +volume.toFixed(getInstrumentQuantityPrecision(this.instrument)),
+            volume.toFixed(getInstrumentQuantityPrecision(this.instrument)),
             {
               focusOnQuantity: false
             }
@@ -2207,7 +2207,7 @@ export class OrderWidget extends WidgetWithInstrument {
           type === ORDERS.CUSTOM &&
           typeof this.conditionalOrder?.order.baseUrl === 'string'
         ) {
-          implUrl = `${this.conditionalOrder?.order.baseUrl}/impl.js`;
+          implUrl = `${new URL(this.conditionalOrder.order.baseUrl)}impl.js`;
         }
 
         if (this.ordersTrader.document.runtime === 'url') {

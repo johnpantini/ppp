@@ -6,6 +6,41 @@ import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
 
+export class OrderCommonPage extends Page {
+  async validate() {
+    await validate(this.name);
+    await validate(this.baseUrl);
+
+    try {
+      await import(`${new URL(this.baseUrl).toString()}page.js`);
+    } catch (e) {
+      console.error(e);
+
+      invalidate(this.baseUrl, {
+        errorMessage: 'Этот URL не может быть использован',
+        raiseException: true
+      });
+    }
+  }
+
+  async submit() {
+    return {
+      $set: {
+        name: this.name.value.trim(),
+        baseUrl: new URL(
+          this.baseUrl.value.endsWith('/')
+            ? this.baseUrl.value
+            : `${this.baseUrl.value}/`
+        ).toString(),
+        updatedAt: new Date()
+      },
+      $setOnInsert: {
+        createdAt: new Date()
+      }
+    };
+  }
+}
+
 export const orderPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -46,7 +81,6 @@ export const orderPageTemplate = html`
             Собственная реализация заявки, загружаемая по ссылке.
           </span>
           <ppp-button
-            disabled
             slot="action"
             @click="${() =>
               ppp.app.navigate({

@@ -502,9 +502,9 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
         if (
           type === ORDERS.CUSTOM &&
-          typeof payload.order.baseUrl === 'string'
+          typeof order.payload.order.baseUrl === 'string'
         ) {
-          cardUrl = `${payload.order.baseUrl}/card.js`;
+          cardUrl = `${new URL(order.payload.order.baseUrl).toString()}card.js`;
         }
 
         try {

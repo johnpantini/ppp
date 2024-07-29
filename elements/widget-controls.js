@@ -3206,7 +3206,7 @@ export class WidgetBoxRadio extends BoxRadio {}
 
 export const widgetCardTemplate = html`
   <template>
-    <div class="card">
+    <div class="card" ${ref('card')}>
       <slot name="indicator"></slot>
       <div class="payload">
         <div class="icon">
