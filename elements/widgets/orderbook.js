@@ -943,9 +943,9 @@ export class OrderbookWidget extends WidgetWithInstrument {
         const bestAsk = orderbook.asks[0]?.price;
 
         this.spreadString = `${formatPriceWithoutCurrency(
-          bestAsk - bestBid,
+          Math.abs(bestAsk - bestBid),
           this.instrument
-        )} (${formatPercentage((bestAsk - bestBid) / bestBid)})`;
+        )} (${formatPercentage(Math.abs(bestAsk - bestBid) / bestBid)})`;
       }
 
       let max = Math.max(

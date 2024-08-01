@@ -122,6 +122,20 @@ export const traderAlorOpenApiV2Template = html`
       </section>
       <section>
         <div class="label-group">
+          <h5>Глубина книги заявок</h5>
+          <p class="description">По умолчанию 20 уровней.</p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            optional
+            placeholder="20"
+            value="${(x) => x.document.orderbookDepth}"
+            ${ref('orderbookDepth')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Комиссия плоского тарифа</h5>
           <p class="description">
             Укажите в % комиссию вашего тарифа, если он отличается от
@@ -187,9 +201,16 @@ export class TraderAlorOpenApiV2Page extends TraderCommonPage {
     await validate(this.brokerId);
     await validate(this.portfolio);
 
+    if (this.orderbookDepth.value.trim()) {
+      await validate(this.orderbookDepth, {
+        hook: async (value) => +value > 0 && +value <= 50,
+        errorMessage: 'Введите значение в диапазоне от 1 до 50'
+      });
+    }
+
     if (this.flatCommissionRate.value.trim()) {
       await validate(this.flatCommissionRate, {
-        hook: async (value) => +value > 0 + value <= 100,
+        hook: async (value) => +value >= 0 && +value <= 100,
         errorMessage: 'Введите значение в диапазоне от 0 до 100'
       });
     }
@@ -277,6 +298,9 @@ export class TraderAlorOpenApiV2Page extends TraderCommonPage {
       exchange: this.exchange.value,
       reconnectTimeout: this.reconnectTimeout.value
         ? Math.abs(this.reconnectTimeout.value)
+        : void 0,
+      orderbookDepth: this.orderbookDepth.value
+        ? Math.abs(parseInt(this.orderbookDepth.value))
         : void 0,
       flatCommissionRate: this.flatCommissionRate.value
         ? Math.abs(parseFloat(this.flatCommissionRate.value.replace(',', '.')))

@@ -53,11 +53,11 @@ export const brokerPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="Tinkoff"
+            alt="T-Bank"
             style="height: 32px"
             src="${() => ppp.brandSvg('tinkoff')}"
           />
-          <span slot="title">Tinkoff</span>
+          <span slot="title">T-Bank</span>
           <span slot="description">
             Торговля и рыночные данные через T‑Bank Invest API.&nbsp;<a
               class="link"

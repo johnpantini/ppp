@@ -78,7 +78,7 @@ export const dictionarySelectorTemplate = (options = {}) => html`
       Alor (MOEX), валюта и драг. металлы
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
-      Tinkoff
+      T-Bank
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
       Finam

@@ -71,7 +71,7 @@ export const instrumentsImportPageTemplate = html`
         html`
           <section>
             <div class="label-group">
-              <h5>Брокерский профиль Tinkoff</h5>
+              <h5>Брокерский профиль T-Bank</h5>
               <p class="description">Необходим для формирования словаря.</p>
             </div>
             <div class="input-group">
@@ -106,7 +106,7 @@ export const instrumentsImportPageTemplate = html`
                   })}"
                 appearance="primary"
               >
-                Добавить профиль Tinkoff
+                Добавить профиль T-Bank
               </ppp-button>
             </div>
           </section>

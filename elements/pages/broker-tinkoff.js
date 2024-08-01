@@ -50,7 +50,7 @@ export const brokerTinkoffPageTemplate = html`
               class="link"
               rel="noopener"
               target="_blank"
-              href="https://www.tinkoff.ru/invest/settings/api/"
+              href="https://www.tbank.ru/invest/settings/api/"
               >ссылке</a
             >.
           </p>

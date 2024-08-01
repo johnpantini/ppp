@@ -294,6 +294,10 @@ export const textFieldStyles = css`
     padding-right: 30px;
   }
 
+  :host(.error[optional]) .optional-text {
+    margin-right: 30px;
+  }
+
   :host(.error) .end,
   :host(.error) ::slotted(span[slot='end']) {
     color: ${themeConditional(paletteRedBase, paletteRedLight1)};

@@ -504,7 +504,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
       if (source === 'price' || source === 'amount') {
         layout.push([
-          `<div class="column" source="${source}"><div class="column-content positive"></div><div class="column-content negative"></div></div>`
+          `<div class="column" source="${source}"><div class="column-content neutral"></div><div class="column-content positive"></div><div class="column-content negative"></div></div>`
         ]);
       } else if (source === 'time' || source === 'pool') {
         layout.push([
@@ -523,6 +523,9 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     this.grid.insertAdjacentHTML('beforeend', layout.join(''));
 
     if (!this.#refs.price.hidden) {
+      this.#refs.price.neutral = this.grid.querySelector(
+        'div[source="price"] div.neutral'
+      );
       this.#refs.price.positive = this.grid.querySelector(
         'div[source="price"] div.positive'
       );
@@ -543,6 +546,9 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
 
     if (!this.#refs.amount.hidden) {
+      this.#refs.amount.neutral = this.grid.querySelector(
+        'div[source="amount"] div.neutral'
+      );
       this.#refs.amount.positive = this.grid.querySelector(
         'div[source="amount"] div.positive'
       );
@@ -622,10 +628,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.#rowsHolder.style.height = `${this.#trades.length * 20}px`;
     }
 
+    let neutralPriceValues = '';
     let positivePriceValues = '';
     let negativePriceValues = '';
     let regularVolumeValues = '';
     let highlightedVolumeValues = '';
+    let neutralAmountValues = '';
     let positiveAmountValues = '';
     let negativeAmountValues = '';
     let timeValues = '';
@@ -638,9 +646,15 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         if (trade.side === 'buy') {
           positivePriceValues += `${trade.price}\n`;
           negativePriceValues += '\n';
-        } else {
+          neutralPriceValues += '\n';
+        } else if (trade.side === 'sell') {
           positivePriceValues += '\n';
           negativePriceValues += `${trade.price}\n`;
+          neutralPriceValues += '\n';
+        } else {
+          neutralPriceValues += `${trade.price}\n`;
+          positivePriceValues += '\n';
+          negativePriceValues += '\n';
         }
       }
 
@@ -662,9 +676,15 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         if (trade.side === 'buy') {
           positiveAmountValues += `${trade.amount}\n`;
           negativeAmountValues += '\n';
-        } else {
+          neutralAmountValues += '\n';
+        } else if (trade.side === 'sell') {
           positiveAmountValues += '\n';
           negativeAmountValues += `${trade.amount}\n`;
+          neutralAmountValues += '\n';
+        } else {
+          neutralAmountValues += `${trade.amount}\n`;
+          positiveAmountValues += '\n';
+          negativeAmountValues += '\n';
         }
       }
 
@@ -678,6 +698,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
 
     if (!this.#refs.price.hidden) {
+      this.#refs.price.neutral.textContent = neutralPriceValues;
       this.#refs.price.positive.textContent = positivePriceValues;
       this.#refs.price.negative.textContent = negativePriceValues;
     }
@@ -688,6 +709,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
 
     if (!this.#refs.amount.hidden) {
+      this.#refs.amount.neutral.textContent = neutralAmountValues;
       this.#refs.amount.positive.textContent = positiveAmountValues;
       this.#refs.amount.negative.textContent = negativeAmountValues;
     }
