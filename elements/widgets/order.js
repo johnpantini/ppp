@@ -1625,19 +1625,14 @@ export class OrderWidget extends WidgetWithInstrument {
     // Rebuild DOM node.
     this.conditionalOrderDefinition = void 0;
 
-    if (type === ORDERS.STOP_LOSS_TAKE_PROFIT) {
-      this.conditionalOrderDefinition = await import(
-        `${ppp.rootUrl}/lib/orders/stop-loss-take-profit/element.js`
-      );
-    } else if (
-      type === ORDERS.CUSTOM &&
-      typeof order?.order.baseUrl === 'string'
-    ) {
+    if (type === ORDERS.CUSTOM && typeof order?.order.baseUrl === 'string') {
       this.conditionalOrderDefinition = await import(
         `${new URL(order.order.baseUrl)}element.js`
       );
     } else {
-      this.conditionalOrderDefinition = void 0;
+      this.conditionalOrderDefinition = await import(
+        `${ppp.rootUrl}/lib/orders/${type}/element.js`
+      );
     }
   }
 
@@ -2201,13 +2196,15 @@ export class OrderWidget extends WidgetWithInstrument {
         await this.conditionalOrderHolder?.firstElementChild?.validate?.();
 
         const type = this.conditionalOrder?.order?.type;
-        let implUrl = `${ppp.rootUrl}/lib/orders/stop-loss-take-profit/impl.js`;
+        let implUrl;
 
         if (
           type === ORDERS.CUSTOM &&
           typeof this.conditionalOrder?.order.baseUrl === 'string'
         ) {
           implUrl = `${new URL(this.conditionalOrder.order.baseUrl)}impl.js`;
+        } else {
+          implUrl = `${ppp.rootUrl}/lib/orders/${type}/impl.js`;
         }
 
         if (this.ordersTrader.document.runtime === 'url') {

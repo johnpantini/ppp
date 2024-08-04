@@ -58,6 +58,15 @@ export const cloud =
 export const pin =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M10 8.5V3.3h.683a.65.65 0 1 0 0-1.3H5.317a.65.65 0 1 0 0 1.3H6v5.2L4.383 9.55a.843.843 0 0 0 .46 1.55h2.624v3.367a.533.533 0 0 0 1.066 0V11.1h2.624a.843.843 0 0 0 .46-1.55L10 8.5Z"></path></svg>';
 
+export const pause =
+  '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="3" width="3" height="10" rx="2" fill="currentColor"></rect><rect x="3" y="3" width="3" height="10" rx="2" fill="currentColor"></rect></svg>';
+
+export const play =
+  '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M13.779 6.704a1.5 1.5 0 0 1 0 2.592l-7.523 4.388A1.5 1.5 0 0 1 4 12.388V3.612a1.5 1.5 0 0 1 2.256-1.296l7.523 4.388Z"></path></svg>';
+
+export const stop =
+  '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" x="3" y="3" fill="currentColor" rx="1"></rect></svg>';
+
 export const plus =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8 2C7.44772 2 7 2.44772 7 3V7H3C2.44772 7 2 7.44772 2 8C2 8.55228 2.44772 9 3 9H7V13C7 13.5523 7.44772 14 8 14C8.55228 14 9 13.5523 9 13V9H13C13.5523 9 14 8.55228 14 8C14 7.44772 13.5523 7 13 7H9V3C9 2.44772 8.55228 2 8 2Z"/></svg>';
 
@@ -196,6 +205,12 @@ export const buySell = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 
 <path d="M25 13H18.7313C16.9403 13 15.4478 14.5909 15.4478 16.5C15.4478 18.4091 16.9403 20 18.7313 20H21.4179C23.209 20 24.7015 21.5909 24.7015 23.5C24.7015 25.4091 23.209 27 21.4179 27H15M20 10V30" stroke="var(--palette-black)" stroke-miterlimit="10"/>
 <circle cx="46" cy="37" r="19" fill="var(--palette-green-light-2)" stroke="var(--palette-black-with-palette-gray-base)"/>
 <path d="M51 30H44.7313C42.9403 30 41.4478 31.5909 41.4478 33.5C41.4478 35.4091 42.9403 37 44.7313 37H47.4179C49.209 37 50.7015 38.5909 50.7015 40.5C50.7015 42.4091 49.209 44 47.4179 44H41M46 27V47" stroke="var(--palette-black)" stroke-miterlimit="10"/>
+</svg>`;
+
+export const scale = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 58 58" fill="none">
+<path d="M19.6745 1.93335L42.3288 27.1761C43.2235 28.2172 43.2235 29.7707 42.3288 30.8118L19.6665 56.0667" stroke="var(--palette-black-with-palette-gray-light-2)" stroke-miterlimit="10"/>
+<path d="M33.6745 1.93335L56.3288 27.1761C57.2235 28.2172 57.2235 29.7707 56.3288 30.8118L33.6665 56.0667" stroke="var(--palette-black-with-palette-gray-light-2)" stroke-miterlimit="10"/>
+<path d="M28.3089 27.1637L4.9917 1.69349C4.56828 1.26673 3.98042 1 3.335 1C2.04417 1 1 2.04228 1 3.33077C1 3.33487 1 3.33898 1 3.34308L1.01233 54.4312C1.00411 54.5092 1 54.5913 1 54.6692C1 55.9536 2.04417 57 3.335 57C3.98042 57 4.56417 56.7374 4.98759 56.3147L28.313 30.8322C29.2297 29.7817 29.2297 28.2142 28.3089 27.1637Z" fill="var(--palette-green-light-2)" stroke="var(--palette-black-with-palette-gray-light-2)" stroke-miterlimit="10"/>
 </svg>`;
 
 export const dragAndDrop = `<svg xmlns="http://www.w3.org/2000/svg" width="62" height="65" viewBox="0 0 62 65" fill="none">

@@ -2,13 +2,14 @@ export default function (i18n) {
   i18n.extend({
     $conditionalOrder: {
       status: {
-        inactive: 'Не активна',
-        working: 'Активна',
-        executing: 'На исполнении',
-        executed: 'Исполнена',
-        failed: 'Не исполнена',
-        unknown: 'Статус неизвестен',
-        pending: 'В ожидании'
+        inactive: 'Inactive',
+        working: 'Active',
+        executing: 'Executing',
+        executed: 'Executed',
+        failed: 'Failed',
+        unknown: 'Unknown',
+        paused: 'Paused',
+        pending: 'Pending'
       }
     }
   });

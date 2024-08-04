@@ -1,7 +1,12 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { ORDERS } from '../../lib/const.js';
-import { buySell, cloudFunctions, search } from '../../static/svg/sprite.js';
+import {
+  buySell,
+  scale,
+  cloudFunctions,
+  search
+} from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
@@ -69,6 +74,22 @@ export const orderPageTemplate = html`
             @click="${() =>
               ppp.app.navigate({
                 page: `order-${ORDERS.STOP_LOSS_TAKE_PROFIT}`
+              })}"
+          >
+            Продолжить
+          </ppp-button>
+        </ppp-generic-card>
+        <ppp-generic-card>
+          <div class="picture buy-sell" slot="logo">${html.partial(scale)}</div>
+          <span slot="title">Запись сделок и котировок</span>
+          <span slot="description">
+            Записывает изменения рыночных данных в облачное хранилище.
+          </span>
+          <ppp-button
+            slot="action"
+            @click="${() =>
+              ppp.app.navigate({
+                page: `order-${ORDERS.MARKET_DATA_RECORDER}`
               })}"
           >
             Продолжить

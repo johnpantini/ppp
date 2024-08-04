@@ -111,6 +111,7 @@ export default function (i18n) {
       },
       order: {
         [ORDERS.STOP_LOSS_TAKE_PROFIT]: 'Stop Loss/Take Profit',
+        [ORDERS.MARKET_DATA_RECORDER]: 'Market Data Recorder',
         [ORDERS.CUSTOM]: 'Custom'
       },
       trader: {

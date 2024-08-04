@@ -12,7 +12,8 @@ import {
   when,
   slotted,
   Updates,
-  Observable
+  Observable,
+  nullableNumberConverter
 } from '../vendor/fast-element.min.js';
 import {
   display,
@@ -117,6 +118,8 @@ import {
   widgetCommonColors
 } from './widget.js';
 import { endSlotTemplate, startSlotTemplate } from '../vendor/fast-patterns.js';
+import { Checkbox, checkboxStyles, checkboxTemplate } from './checkbox.js';
+import './progress.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -3204,6 +3207,18 @@ export const widgetBoxRadioStyles = css`
 
 export class WidgetBoxRadio extends BoxRadio {}
 
+export const widgetCheckboxStyles = css`
+  ${checkboxStyles}
+  .label {
+    margin-left: 10px;
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    line-height: ${lineHeightWidget};
+  }
+`;
+
+export class WidgetCheckbox extends Checkbox {}
+
 export const widgetCardTemplate = html`
   <template>
     <div class="card" ${ref('card')}>
@@ -3251,6 +3266,20 @@ export const widgetCardTemplate = html`
         <slot name="actions" ${slotted('slottedActions')}></slot>
       </div>
     </div>
+    ${when(
+      (x) => x.progress > 0,
+      html`
+        <div class="progress-container">
+          <ppp-progress
+            ${ref('progressBar')}
+            min="0"
+            max="100"
+            value="${(x) => x.progress}"
+          >
+          </ppp-progress>
+        </div>
+      `
+    )}
   </template>
 `;
 
@@ -3275,6 +3304,35 @@ export const widgetCardStyles = css`
     align-items: center;
     overflow: hidden;
     cursor: default;
+  }
+
+  :host([progress]) .card {
+    border-radius: 0 0 4px 4px;
+  }
+
+  slot[name='indicator']::slotted(div) {
+    height: 100%;
+    border-radius: 8px 0 0 8px;
+    position: absolute;
+    width: 4px;
+    left: 0;
+    top: 0;
+    z-index: 1;
+  }
+
+  :host([progress]) slot[name='indicator']::slotted(div) {
+    border-radius: 0 0 0 8px;
+  }
+
+  .progress-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    width: 100%;
+    background-color: ${themeConditional(paletteGrayLight3, paletteGrayDark2)};
+    overflow: hidden;
   }
 
   :host(.new) .card {
@@ -3310,15 +3368,6 @@ export const widgetCardStyles = css`
 
   :host(:last-child) {
     padding-bottom: 8px;
-  }
-
-  slot[name='indicator']::slotted(div) {
-    height: 100%;
-    border-radius: 8px 0 0 8px;
-    position: absolute;
-    width: 4px;
-    left: 0;
-    top: 0;
   }
 
   :host(.multiline) slot[name='title-left']::slotted(span) {
@@ -3374,6 +3423,7 @@ export const widgetCardStyles = css`
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 0 4px;
     background: linear-gradient(
       90deg,
       rgba(
@@ -3505,6 +3555,9 @@ export const widgetCardStyles = css`
 `;
 
 export class WidgetCard extends PPPElement {
+  @attr({ converter: nullableNumberConverter })
+  progress;
+
   @observable
   slottedActions;
 
@@ -3580,6 +3633,10 @@ export default {
   WidgetBoxRadioComposition: WidgetBoxRadio.compose({
     template: boxRadioTemplate,
     styles: widgetBoxRadioStyles
+  }).define(),
+  WidgetCheckboxComposition: WidgetCheckbox.compose({
+    template: checkboxTemplate,
+    styles: widgetCheckboxStyles
   }).define(),
   WidgetCardComposition: WidgetCard.compose({
     template: widgetCardTemplate,

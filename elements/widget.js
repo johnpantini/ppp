@@ -708,6 +708,21 @@ export const widgetCommonContentStyles = () => css`
     height: 16px;
   }
 
+  .widget-action-button.positive svg rect,
+  .widget-action-button.positive svg path {
+    fill: ${positive};
+  }
+
+  .widget-action-button.negative svg rect,
+  .widget-action-button.negative svg path {
+    fill: ${negative};
+  }
+
+  .widget-action-button.earth svg rect,
+  .widget-action-button.earth svg path {
+    fill: ${themeConditional(paletteYellowDark2, paletteYellowLight2)};
+  }
+
   .control-line {
     display: flex;
     flex-direction: row;

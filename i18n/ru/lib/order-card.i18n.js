@@ -8,6 +8,7 @@ export default function (i18n) {
         executed: 'Исполнена',
         failed: 'Не исполнена',
         unknown: 'Статус неизвестен',
+        paused: 'Пауза',
         pending: 'В ожидании'
       }
     }

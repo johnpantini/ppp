@@ -498,13 +498,15 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
         const order = this.#conditionalOrdersQueue.shift();
         const type = order.payload.order.type;
-        let cardUrl = `${ppp.rootUrl}/lib/orders/stop-loss-take-profit/card.js`;
+        let cardUrl;
 
         if (
           type === ORDERS.CUSTOM &&
           typeof order.payload.order.baseUrl === 'string'
         ) {
           cardUrl = `${new URL(order.payload.order.baseUrl).toString()}card.js`;
+        } else {
+          cardUrl = `${ppp.rootUrl}/lib/orders/${type}/card.js`;
         }
 
         try {
@@ -630,11 +632,11 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
   }
 
-  async cancelConditionalOrder(order) {
+  async cancelConditionalOrder(order, payload = {}) {
     this.topLoader.start();
 
     try {
-      await this.ordersTrader?.cancelConditionalOrder?.(order.orderId);
+      await this.ordersTrader?.cancelConditionalOrder?.(order.orderId, payload);
 
       this.notificationsArea.note({
         title: 'Условная заявка отменена'
@@ -644,6 +646,30 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
       this.notificationsArea.error({
         text: 'Не удалось отменить условную заявку.'
+      });
+    } finally {
+      this.topLoader.stop();
+    }
+  }
+
+  async performConditionalOrderAction({ order, action, payload = {} } = {}) {
+    this.topLoader.start();
+
+    try {
+      await this.ordersTrader?.performConditionalOrderAction?.(
+        order.orderId,
+        action,
+        payload
+      );
+
+      this.notificationsArea.note({
+        title: 'Запрос на действие отправлен'
+      });
+    } catch (e) {
+      console.log(e);
+
+      this.notificationsArea.error({
+        text: 'Не удалось выполнить действие.'
       });
     } finally {
       this.topLoader.stop();

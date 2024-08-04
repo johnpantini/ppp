@@ -47,7 +47,10 @@ const path = require('node:path');
     }
   }
 
-  for (const orderPath of ['/ppp/lib/orders/stop-loss-take-profit/impl.js']) {
+  for (const orderPath of [
+    '/ppp/lib/orders/stop-loss-take-profit/impl.js',
+    '/ppp/lib/orders/market-data-recorder/impl.js'
+  ]) {
     const { code } = await ncc(orderPath, {
       cache: false,
       minify: true,
