@@ -15,18 +15,16 @@ import {
   when,
   ref,
   observable,
-  repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { staticallyCompose } from '../../vendor/fast-utilities.js';
 import { TRADER_DATUM, WIDGET_TYPES, ORDERS } from '../../lib/const.js';
 import {
   normalize,
   spacing,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
-import { cancelOrders, refresh, trash } from '../../static/svg/sprite.js';
-import { formatAmount, formatPrice, formatQuantity } from '../../lib/intl.js';
+import { cancelOrders, refresh } from '../../static/svg/sprite.js';
+import { formatQuantity } from '../../lib/intl.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import {
   themeConditional,
@@ -50,6 +48,7 @@ import '../snippet.js';
 import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
+import '../widget-real-order-card.js';
 
 export const defaultOrderProcessorFunc = `/**
 * Функция обработки списка активных заявок.
@@ -58,8 +57,7 @@ export const defaultOrderProcessorFunc = `/**
 * @param {array} orders - Массив заявок.
 */
 
-return orders.sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));
-`;
+return orders.sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));`;
 
 const allTabHidden = (x) =>
   typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
@@ -171,107 +169,7 @@ export const activeOrdersWidgetTemplate = html`
               )
             )}`
           )}
-          <div class="widget-card-list-inner">
-            ${repeat(
-              (x) => x.orders,
-              html`
-                <div class="widget-card-holder">
-                  <div class="widget-card-holder-inner">
-                    ${when(
-                      (x) => x.isConditionalOrder,
-                      html`
-                        <div
-                          class="widget-card-order-payload-holder"
-                          :order="${(o) => o}"
-                        >
-                          ${(o) => html`
-                            ${staticallyCompose(
-                              `<${o.cardDefinition.name}></${o.cardDefinition.name}>`
-                            )}
-                          `}
-                        </div>
-                      `,
-                      html`
-                        <ppp-widget-card
-                          ?selectable="${(x, c) =>
-                            c.parent.document.disableInstrumentFiltering}"
-                          side="${(x) => x.side}"
-                          @click="${(o, c) => {
-                            if (c.parent.document.disableInstrumentFiltering) {
-                              c.parent.selectInstrument(o.instrument.symbol);
-                            }
-
-                            return true;
-                          }}"
-                        >
-                          <div slot="indicator" class="${(x) => x.side}"></div>
-                          <div
-                            slot="icon"
-                            style="${(o, c) =>
-                              `background-image:url(${c.parent.searchControl.getInstrumentIconUrl(
-                                o.instrument
-                              )})`}"
-                          ></div>
-                          <span slot="icon-fallback">
-                            ${(o) =>
-                              o.instrument?.fullName?.[0] ??
-                              o.instrument?.symbol[0]}
-                          </span>
-                          <span slot="title-left">
-                            ${(o) => o.instrument?.fullName ?? o.symbol}
-                          </span>
-                          <span slot="title-right">
-                            ${(o) =>
-                              o.price
-                                ? formatAmount(
-                                    o.instrument?.lot *
-                                      o.price *
-                                      (o.quantity - o.filled),
-                                    o.instrument
-                                  )
-                                : 'At Market'}
-                          </span>
-                          <span
-                            slot="subtitle-left"
-                            class="${(o) =>
-                              o.side === 'buy' ? 'positive' : 'negative'}"
-                          >
-                            ${(o) => (o.side === 'buy' ? 'Buy' : 'Sell')}
-                          </span>
-                          <div class="dot-divider-line" slot="subtitle-right">
-                            ${when(
-                              (o) => typeof o.destination === 'string',
-                              html`
-                                ${(o) => o.destination.toUpperCase()}
-                                <span class="dot-divider">•</span>
-                              `
-                            )}
-                            ${(o, c) => c.parent.formatRestQuantity(o)}
-                            <span class="dot-divider">•</span>
-                            ${(o) =>
-                              o.price
-                                ? formatPrice(o.price, o.instrument)
-                                : ppp.t('$g.atMarket')}
-                          </div>
-                          <button
-                            class="widget-action-button"
-                            slot="actions"
-                            @click="${(o, c) => {
-                              c.event.preventDefault();
-                              c.event.stopPropagation();
-                              c.parent.cancelOrder(o);
-                            }}"
-                          >
-                            <span>${html.partial(trash)}</span>
-                          </button>
-                        </ppp-widget-card>
-                      `
-                    )}
-                  </div>
-                </div>
-              `
-            )}
-          </div>
+          <div class="widget-card-list-inner" ${ref('cardList')}></div>
         </div>
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
@@ -367,18 +265,101 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   @observable
   realOrder;
 
-  realOrderChanged(oldValue, newValue) {
-    if (newValue?.orderId) {
-      if (newValue.orderId === '@CLEAR') {
+  onClick(e) {
+    for (const node of e.composedPath()) {
+      if (
+        node?.hasAttribute?.('action') &&
+        node.classList.contains('widget-action-button')
+      ) {
+        const action = node.getAttribute('action');
+
+        if (node.parentNode.hasAttribute('real')) {
+          if (action === 'cancel') {
+            this.cancelOrder(
+              this.realOrdersById.get(node.parentNode.getAttribute('oid'))
+            );
+          }
+        } else {
+          this.conditionalOrdersById
+            .get(node.parentNode.getAttribute('oid'))
+            .domElement.firstElementChild.firstElementChild.firstElementChild.performCardAction(
+              action,
+              e
+            );
+        }
+
+        // Stop propagation.
+        break;
+      }
+
+      if (
+        node?.hasAttribute?.('selectable') &&
+        this.document.disableInstrumentFiltering
+      ) {
+        if (node.hasAttribute('real')) {
+          this.selectInstrument(
+            this.realOrdersById.get(node.getAttribute('oid')).symbol
+          );
+        } else {
+          const order = this.conditionalOrdersById.get(
+            node.getAttribute('oid')
+          );
+
+          if (order.instrument) {
+            this.selectInstrument(order.instrument.symbol);
+          }
+        }
+
+        break;
+      }
+    }
+  }
+
+  realOrderChanged(oldValue, order) {
+    if (order?.orderId) {
+      const oid = order.orderId.toString();
+
+      if (oid === '@CLEAR') {
+        for (const [, node] of this.realOrdersRefsById) {
+          node.remove();
+        }
+
         this.realOrdersById.clear();
+        this.realOrdersRefsById.clear();
       } else {
-        if (
-          newValue.quantity === newValue.filled ||
-          newValue.status !== 'working'
-        ) {
-          this.realOrdersById.delete(newValue.orderId);
-        } else if (newValue.status === 'working') {
-          this.realOrdersById.set(newValue.orderId, newValue);
+        if (order.quantity === order.filled || order.status !== 'working') {
+          this.realOrdersRefsById.get(oid)?.remove();
+          this.realOrdersRefsById.delete(oid);
+          this.realOrdersById.delete(oid);
+        } else if (order.status === 'working') {
+          this.realOrdersById.set(oid, order);
+
+          if (!this.realOrdersRefsById.has(oid)) {
+            const cardHolder = document.createElement('div');
+
+            cardHolder.classList.add('widget-card-holder');
+            this.realOrdersRefsById.set(oid, cardHolder);
+
+            const innerHolder = document.createElement('div');
+
+            innerHolder.classList.add('widget-card-holder-inner');
+            cardHolder.appendChild(innerHolder);
+
+            const realOrderCardElement = document.createElement(
+              'ppp-widget-real-order-card'
+            );
+
+            realOrderCardElement.order = order;
+            realOrderCardElement.disableInstrumentFiltering =
+              this.document.disableInstrumentFiltering;
+
+            innerHolder.appendChild(realOrderCardElement);
+            this.cardList.appendChild(cardHolder);
+          } else {
+            this.realOrdersRefsById.get(
+              oid
+            ).firstElementChild.firstElementChild.order = order;
+          }
         }
       }
 
@@ -394,7 +375,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   realOrdersById = new Map();
 
+  // DOM nodes.
+  realOrdersRefsById = new Map();
+
   conditionalOrdersById = new Map();
+
+  // DOM nodes.
+  conditionalOrdersRefsById = new Map();
 
   #conditionalOrdersQueue = [];
 
@@ -402,14 +389,19 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   orderProcessorFunc;
 
+  slot;
+
   constructor() {
     super();
 
+    this.onClick = this.onClick.bind(this);
     this.orders = [];
   }
 
   async connectedCallback() {
     super.connectedCallback();
+
+    this.addEventListener('click', this.onClick);
 
     if (!this.document.ordersTrader) {
       this.initialized = true;
@@ -446,6 +438,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         )
       );
 
+      this.cardList.attachShadow({ mode: 'open', slotAssignment: 'manual' });
+
+      this.slot = document.createElement('slot');
+
+      this.cardList.shadowRoot.append(this.slot);
+
       this.#rebuildOrdersArray();
 
       this.initialized = true;
@@ -457,6 +455,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
+    this.removeEventListener('click', this.onClick);
+
     if (this.ordersTrader) {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
@@ -479,10 +479,44 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   #conditionalOrderLoadedAndChanged(order) {
     if (order.orderId) {
-      if (order.status === 'canceled')
-        this.conditionalOrdersById.delete(order.orderId);
-      else {
-        this.conditionalOrdersById.set(order.orderId, order);
+      const oid = order.orderId.toString();
+
+      if (order.status === 'canceled') {
+        this.conditionalOrdersRefsById.get(oid)?.remove();
+        this.conditionalOrdersRefsById.delete(oid);
+        this.conditionalOrdersById.delete(oid);
+      } else {
+        this.conditionalOrdersById.set(oid, order);
+
+        if (!this.conditionalOrdersRefsById.has(oid)) {
+          const cardHolder = document.createElement('div');
+
+          cardHolder.classList.add('widget-card-holder');
+          this.conditionalOrdersRefsById.set(oid, cardHolder);
+
+          const innerHolder = document.createElement('div');
+
+          innerHolder.classList.add('widget-card-holder-inner');
+          cardHolder.appendChild(innerHolder);
+
+          const payloadHolder = document.createElement('div');
+
+          payloadHolder.classList.add('widget-card-order-payload-holder');
+
+          payloadHolder.order = order;
+
+          const orderCardDefinitionElement = document.createElement(
+            order.cardDefinition.name
+          );
+
+          payloadHolder.appendChild(orderCardDefinitionElement);
+          innerHolder.appendChild(payloadHolder);
+          this.cardList.appendChild(cardHolder);
+        } else {
+          this.conditionalOrdersRefsById.get(
+            oid
+          ).firstElementChild.firstElementChild.firstElementChild.order = order;
+        }
       }
 
       return this.#rebuildOrdersArray();
@@ -540,8 +574,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     const typeSelectorValue = this.orderTypeSelector.value;
 
     if (typeSelectorValue === 'all' || typeSelectorValue === 'real') {
-      for (const [_, order] of this.realOrdersById ?? []) {
+      for (const [orderId, order] of this.realOrdersById ?? []) {
         if (order.status !== 'working') continue;
+
+        order.domElement = this.realOrdersRefsById.get(orderId);
 
         if (
           this.instrument?.symbol &&
@@ -562,8 +598,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
 
     if (typeSelectorValue === 'all' || typeSelectorValue === 'conditional') {
-      for (const [_, order] of this.conditionalOrdersById ?? []) {
+      for (const [orderId, order] of this.conditionalOrdersById ?? []) {
         if (order.status === 'canceled') continue;
+
+        order.domElement = this.conditionalOrdersRefsById.get(orderId);
 
         if (
           this.instrument?.symbol &&
@@ -584,6 +622,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
 
     this.orders = this.orderProcessorFunc.call(this, this.ordersTrader, orders);
+
+    this.slot.assign(...this.orders.map((o) => o.domElement));
   }
 
   handleOrderTypeChange() {

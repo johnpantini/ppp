@@ -661,28 +661,23 @@ export const widgetCommonContentStyles = () => css`
     width: 100%;
     position: relative;
     overflow-x: hidden;
+    margin-bottom: 8px;
   }
 
-  ${scrollbars('.widget-card-list')};
+  ${scrollbars('.widget-card-list')}
 
   .widget-card-list-inner {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
     position: absolute;
     top: 0;
+    gap: 8px;
   }
 
   .widget-card-holder {
-    padding-top: 6px;
     margin: 0 8px;
-  }
-
-  .widget-card-holder:first-child {
-    padding-top: 0;
-  }
-
-  .widget-card-holder:last-child {
-    padding-bottom: 8px;
   }
 
   .widget-card-holder-inner {
@@ -1543,7 +1538,7 @@ export class WidgetWithInstrument extends Widget {
                 );
 
                 w.instrument = adoptedInstrument;
-                w.unsupportedInstrument = adoptedInstrument.notSupported;
+                w.unsupportedInstrument = adoptedInstrument?.notSupported;
 
                 bulkWritePayload.push({
                   updateOne: {

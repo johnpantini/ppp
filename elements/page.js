@@ -444,7 +444,7 @@ export const pageStyles = css`
     margin-left: ${spacing1};
   }
 
-  ${scrollbars('.table-with-selector .table-holder')};
+  ${scrollbars('.table-with-selector .table-holder')}
 `;
 
 class ScratchMap extends Map {
