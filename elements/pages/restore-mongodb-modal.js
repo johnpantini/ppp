@@ -11,8 +11,9 @@ import {
 import { Page, pageStyles } from '../page.js';
 import { maybeFetchError } from '../../lib/ppp-errors.js';
 import { HMAC, sha256 } from '../../lib/ppp-crypto.js';
-import { getYCPsinaFolder, generateYCAWSSigningKey } from './api-yc.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from '../../lib/yc.js';
 import { formatDateWithOptions, formatFileSize } from '../../lib/intl.js';
+import * as jose from '../../vendor/jose.min.js';
 import '../../vendor/zip-full.min.js';
 import '../banner.js';
 import '../button.js';
@@ -387,6 +388,7 @@ export class RestoreMongodbModalPage extends Page {
       ycStaticKeySecret
     } = this.ycApiId.datum();
     const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+      jose,
       ycServiceAccountID,
       ycPublicKeyID,
       ycPrivateKey

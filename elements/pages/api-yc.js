@@ -8,6 +8,10 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { HMAC, sha256 } from '../../lib/ppp-crypto.js';
+import {
+  generateYCAWSSigningKey,
+  generateYandexIAMToken
+} from '../../lib/yc.js';
 import { APIS } from '../../lib/const.js';
 import * as jose from '../../vendor/jose.min.js';
 import '../badge.js';
@@ -119,126 +123,6 @@ export const apiYcPageStyles = css`
   ${pageStyles}
 `;
 
-export async function generateYandexIAMToken({
-  ycServiceAccountID,
-  ycPublicKeyID,
-  ycPrivateKey
-}) {
-  const now = Math.floor(new Date().getTime() / 1000);
-  const payload = {
-    aud: 'https://iam.api.cloud.yandex.net/iam/v1/tokens',
-    iss: ycServiceAccountID,
-    iat: now,
-    exp: now + 300
-  };
-
-  const key = await jose.importPKCS8(ycPrivateKey, 'PS256');
-
-  return await new jose.CompactSign(
-    new TextEncoder().encode(JSON.stringify(payload))
-  )
-    .setProtectedHeader({
-      alg: 'PS256',
-      kid: ycPublicKeyID
-    })
-    .sign(key);
-}
-
-export async function generateYCAWSSigningKey({ ycStaticKeySecret, date }) {
-  const dateKey = await HMAC(`AWS4${ycStaticKeySecret}`, date);
-  const regionKey = await HMAC(dateKey, 'ru-central1');
-  const serviceKey = await HMAC(regionKey, 's3');
-
-  return HMAC(serviceKey, 'aws4_request');
-}
-
-export async function getYCPsinaFolder({
-  ycServiceAccountID,
-  ycPublicKeyID,
-  ycPrivateKey
-}) {
-  let jwt;
-
-  try {
-    jwt = await generateYandexIAMToken({
-      ycServiceAccountID,
-      ycPublicKeyID,
-      ycPrivateKey
-    });
-  } catch (e) {
-    invalidate(ppp.app.toast, {
-      errorMessage: 'Не удалось сгенерировать JWT-токен.',
-      raiseException: true
-    });
-  }
-
-  const iamTokenRequest = await ppp.fetch(
-    'https://iam.api.cloud.yandex.net/iam/v1/tokens',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ jwt })
-    }
-  );
-
-  await maybeFetchError(
-    iamTokenRequest,
-    'Не удалось получить IAM-токен. Проверьте правильность ключей Yandex Cloud.'
-  );
-
-  const { iamToken } = await iamTokenRequest.json();
-  const rCloudList = await maybeFetchError(
-    await ppp.fetch(
-      'https://resource-manager.api.cloud.yandex.net/resource-manager/v1/clouds',
-      {
-        headers: {
-          Authorization: `Bearer ${iamToken}`
-        }
-      }
-    ),
-    'Не удалось получить список облачных ресурсов Yandex Cloud.'
-  );
-
-  const { clouds } = await rCloudList.json();
-  const pppCloud = clouds?.find((c) => c.name === 'ppp');
-
-  if (!pppCloud) {
-    invalidate(ppp.app.toast, {
-      errorMessage: 'Облако под названием ppp не найдено в Yandex Cloud.',
-      raiseException: true
-    });
-  }
-
-  const rFolderList = await maybeFetchError(
-    await ppp.fetch(
-      `https://resource-manager.api.cloud.yandex.net/resource-manager/v1/folders?cloudId=${pppCloud.id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${iamToken}`
-        }
-      }
-    ),
-    'Не удалось получить список каталогов облака ppp Yandex Cloud.'
-  );
-
-  const { folders } = await rFolderList.json();
-  const psinaFolder = folders?.find(
-    (f) => f.name === 'psina' && f.status === 'ACTIVE'
-  );
-
-  if (!psinaFolder) {
-    invalidate(ppp.app.toast, {
-      errorMessage:
-        'Каталог psina не найден либо неактивен в облаке ppp Yandex Cloud.',
-      raiseException: true
-    });
-  }
-
-  return { psinaFolderId: psinaFolder.id, iamToken };
-}
-
 export class ApiYcPage extends Page {
   collection = 'apis';
 
@@ -254,6 +138,7 @@ export class ApiYcPage extends Page {
 
     try {
       jwt = await generateYandexIAMToken({
+        jose,
         ycServiceAccountID: this.ycServiceAccountID.value.trim(),
         ycPublicKeyID: this.ycPublicKeyID.value.trim(),
         ycPrivateKey: this.ycPrivateKey.value.trim()

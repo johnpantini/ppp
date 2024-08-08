@@ -319,6 +319,13 @@ export const tccWidgetStyles = css`
   .tabs ppp-widget-box-radio-group:not([hidden]) {
     margin-top: 10px;
   }
+
+  .widget-card-list {
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    gap: 8px;
+  }
 `;
 
 export class TccWidget extends Widget {

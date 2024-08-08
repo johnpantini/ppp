@@ -5,7 +5,8 @@ import { html, css, ref, attr } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import { HMAC, uuidv4, sha256 } from '../../lib/ppp-crypto.js';
-import { getYCPsinaFolder, generateYCAWSSigningKey } from './api-yc.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from '../../lib/yc.js';
+import * as jose from '../../vendor/jose.min.js';
 import '../../vendor/zip-full.min.js';
 import '../button.js';
 import '../checkbox.js';
@@ -134,6 +135,7 @@ export class BackupMongodbModalPage extends Page {
         ycStaticKeySecret
       } = this.ycApiId.datum();
       const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+        jose,
         ycServiceAccountID,
         ycPublicKeyID,
         ycPrivateKey
@@ -191,10 +193,6 @@ export class BackupMongodbModalPage extends Page {
       const key = `backup-of-${
         this.cloud ? 'cloud' : 'alternative'
       }-mongodb-${now}.zip`;
-      const reader = new FileReader();
-
-      reader.readAsArrayBuffer(zipBlob);
-
       const host = `${backupsBucket.name}.storage.yandexcloud.net`;
       const xAmzDate =
         new Date()

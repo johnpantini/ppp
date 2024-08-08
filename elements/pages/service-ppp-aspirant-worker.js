@@ -25,7 +25,8 @@ import {
 import { APIS, BROKERS, SERVICE_STATE, SERVICES } from '../../lib/const.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import { HMAC, uuidv4, sha256 } from '../../lib/ppp-crypto.js';
-import { getYCPsinaFolder, generateYCAWSSigningKey } from './api-yc.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from '../../lib/yc.js';
+import * as jose from '../../vendor/jose.min.js';
 import { later } from '../../lib/ppp-decorators.js';
 import { parsePPPScript } from '../../lib/ppp-script.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
@@ -155,6 +156,14 @@ uWS
       {
         url: '/lib/aspirant-worker/utils.mjs',
         path: 'lib/aspirant-worker/utils.mjs'
+      },
+      {
+        url: '/vendor/zip-full.min.js',
+        path: 'vendor/zip-full.min.js'
+      },
+      {
+        url: '/vendor/jose.min.mjs',
+        path: 'vendor/jose.min.mjs'
       },
       {
         url: '/lib/debug.js',
@@ -1289,6 +1298,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         ycStaticKeySecret
       } = this.ycApiId.datum();
       const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+        jose,
         ycServiceAccountID,
         ycPublicKeyID,
         ycPrivateKey
@@ -1343,10 +1353,6 @@ export class ServicePppAspirantWorkerPage extends Page {
       }
 
       const key = `${this.document._id}.zip`;
-      const reader = new FileReader();
-
-      reader.readAsArrayBuffer(zipBlob);
-
       const host = `${artifactsBucket.name}.storage.yandexcloud.net`;
       const xAmzDate =
         new Date()
@@ -1561,6 +1567,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       ycStaticKeySecret
     } = this.ycApiId.datum();
     const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+      jose,
       ycServiceAccountID,
       ycPublicKeyID,
       ycPrivateKey

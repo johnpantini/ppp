@@ -54,7 +54,12 @@ const path = require('node:path');
     const { code } = await ncc(orderPath, {
       cache: false,
       minify: true,
-      quiet: true
+      quiet: true,
+      externals: [
+        '../../../vendor/zip-full.min.js',
+        '../../../vendor/jose.min.js',
+        '../../../elements/pages/api-yc.js'
+      ]
     });
 
     if (code) {

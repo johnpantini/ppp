@@ -1332,6 +1332,8 @@ export class Widget extends PPPElement {
         keep: true
       });
     } else if (e instanceof AuthorizationError) {
+      console.dir(e);
+
       return this.notificationsArea.error({
         text: 'Ошибка авторизации в источнике данных.',
         keep: true
