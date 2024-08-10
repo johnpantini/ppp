@@ -34,6 +34,7 @@ export const exampleVirtualCommFunctionCode = `/**
 * @param price - Цена исполнения.
 * @param quantity - Количество лотов инструмента.
 * @param instrument - Торговый инструмент.
+* @param {boolean} isBuySide - Направление сделки.
 */
 
 return 0;
@@ -499,7 +500,8 @@ export class IntradayStats {
             stats.commission += this.commFunc(
               referencePrice,
               stats.sellQuantity - stats.buyQuantity,
-              instrument
+              instrument,
+              true
             );
             stats.gross = stats.sells - stats.buys - stats.virtualBuys;
           }
@@ -521,7 +523,8 @@ export class IntradayStats {
                 stats.commission += this.commFunc(
                   referencePrice,
                   stats.sellQuantity - stats.buyQuantity,
-                  instrument
+                  instrument,
+                  true
                 );
                 stats.gross = stats.sells - stats.buys - stats.virtualBuys;
               } else {
@@ -622,7 +625,8 @@ export class IntradayStats {
                   stats.commission += this.commFunc(
                     referencePrice,
                     diff - absImbalance,
-                    instrument
+                    instrument,
+                    true
                   );
                 }
 
@@ -924,6 +928,7 @@ export class IntradayStats {
       'price',
       'quantity',
       'instrument',
+      'isBuySide',
       await new Tmpl().render(
         this.widget,
         this.widget.document.virtualTradesCommFunctionCode ??
@@ -1035,6 +1040,7 @@ export async function listDefinition() {
           'price',
           'quantity',
           'instrument',
+          'isBuySide',
           await new Tmpl().render(
             widget,
             widget.container.virtualTradesCommFunctionCode.value,

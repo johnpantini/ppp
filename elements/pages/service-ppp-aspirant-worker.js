@@ -10,7 +10,12 @@ import {
   repeat,
   when
 } from '../../vendor/fast-element.min.js';
-import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
+import {
+  AllocationNotFoundError,
+  invalidate,
+  maybeFetchError,
+  validate
+} from '../../lib/ppp-errors.js';
 import {
   documentPageFooterPartial,
   documentPageHeaderPartial,
@@ -47,6 +52,7 @@ import '../radio-group.js';
 import '../select.js';
 import '../snippet.js';
 import '../text-field.js';
+import '../terminal.js';
 
 export const predefinedWorkerData = {
   default: {
@@ -415,12 +421,22 @@ export const servicePppAspirantWorkerPageTemplate = html`
         pageUrl: import.meta.url,
         extraControls: html`
           <ppp-button
-            ?hidden="${(x) => x.document?.url || !x.frameUrl}"
+            ?hidden="${(x) =>
+              x.document?.url || !x.frameUrl || x.shouldShowFrame}"
             appearance="primary"
             slot="controls"
             @click="${(x) => (x.shouldShowFrame = true)}"
           >
             Показать сервис в Nomad
+          </ppp-button>
+          <ppp-button
+            ?hidden="${(x) =>
+              x.document?.url || !x.frameUrl || x.shouldShowLogs}"
+            appearance="primary"
+            slot="controls"
+            @click="${(x) => (x.shouldShowLogs = true)}"
+          >
+            Показать логи
           </ppp-button>
           ${servicePageHeaderExtraControls}
         `
@@ -440,6 +456,33 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 Глобальная ссылка сервиса:
               </ppp-banner>
               <ppp-copyable> ${(x) => x.url}</ppp-copyable>
+            </div>
+          </section>
+        `
+      )}
+      ${when(
+        (x) => x.shouldShowLogs,
+        html`
+          <section style="gap: 0 8px;">
+            <div class="label-group">
+              <h5 class="positive">stdout</h5>
+              <p class="description">Поток стандартного вывода.</p>
+              <div class="spacing2"></div>
+              <ppp-terminal
+                font-size="12"
+                cols="120"
+                ${ref('stdoutTerminal')}
+              ></ppp-terminal>
+            </div>
+            <div class="label-group">
+              <h5 class="negative">stderr</h5>
+              <p class="description">Поток стандартного вывода ошибок.</p>
+              <div class="spacing2"></div>
+              <ppp-terminal
+                font-size="12"
+                cols="120"
+                ${ref('stderrTerminal')}
+              ></ppp-terminal>
             </div>
           </section>
         `
@@ -858,6 +901,11 @@ export const servicePppAspirantWorkerPageStyles = css`
     border-radius: 4px;
     border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
   }
+
+  ppp-terminal {
+    display: inline-flex;
+    border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
+  }
 `;
 
 export class ServicePppAspirantWorkerPage extends Page {
@@ -873,6 +921,15 @@ export class ServicePppAspirantWorkerPage extends Page {
 
   @observable
   shouldShowFrame;
+
+  @observable
+  shouldShowLogs;
+
+  shouldShowLogsChanged() {
+    if (this.shouldShowLogs) {
+      return this.startLogStreaming();
+    }
+  }
 
   async connectedCallback() {
     await super.connectedCallback();
@@ -899,6 +956,94 @@ export class ServicePppAspirantWorkerPage extends Page {
 
         this.frameUrl = `${aspirantUrl}/ui/jobs/worker-${this.document._id}@default`;
       }
+    }
+  }
+
+  async #readLogChunk(reader, decoder, terminal) {
+    const result = await reader.read();
+    const chunk = decoder.decode(result.value || new Uint8Array(), {
+      stream: !result.done
+    });
+
+    if (chunk.length) {
+      const string = chunk.toString();
+
+      try {
+        const parsed = JSON.parse(string).Data;
+
+        if (parsed) {
+          terminal.write(atob(parsed));
+        }
+      } catch (e) {
+        // No-op.
+      }
+    }
+
+    if (!result.done) {
+      return this.#readLogChunk(reader, decoder, terminal);
+    }
+  }
+
+  async startLogStreaming() {
+    try {
+      if (
+        !this.document.url &&
+        this.document._id &&
+        this.document.aspirantService
+      ) {
+        if (this.document?.state !== SERVICE_STATE.ACTIVE) {
+          return;
+        }
+
+        const aspirantUrl = await getAspirantBaseUrl(
+          this.document.aspirantService
+        );
+
+        const allocationsResponse = await maybeFetchError(
+          await fetch(`${aspirantUrl}/v1/allocations?task_states=false`),
+          'Не удалось получить список размещений.'
+        );
+
+        const alloc = (await allocationsResponse.json()).find(
+          (a) => a.JobID === `worker-${this.document._id}`
+        );
+
+        if (!alloc?.ID) {
+          throw new AllocationNotFoundError();
+        }
+
+        const stdoutResponse = await maybeFetchError(
+          await fetch(
+            `${aspirantUrl}/v1/client/fs/logs/${alloc.ID}?follow=true&offset=50000&origin=end&task=worker&type=stdout`
+          ),
+          'Ошибка чтения потока stdout.'
+        );
+
+        const stderrResponse = await maybeFetchError(
+          await fetch(
+            `${aspirantUrl}/v1/client/fs/logs/${alloc.ID}?follow=true&offset=50000&origin=end&task=worker&type=stderr`
+          ),
+          'Ошибка чтения потока srderr.'
+        );
+
+        this.stdoutTerminal.terminal.clear();
+        this.stdoutTerminal.terminal.reset();
+        this.stderrTerminal.terminal.clear();
+        this.stderrTerminal.terminal.reset();
+
+        this.#readLogChunk(
+          stdoutResponse.body.getReader(),
+          new TextDecoder(),
+          this.stdoutTerminal.terminal
+        );
+        this.#readLogChunk(
+          stderrResponse.body.getReader(),
+          new TextDecoder(),
+          this.stderrTerminal.terminal
+        );
+      }
+    } catch (e) {
+      this.failOperation(e);
     }
   }
 
@@ -1429,6 +1574,8 @@ export class ServicePppAspirantWorkerPage extends Page {
         }),
         'Не удалось запланировать сервис на исполнение.'
       );
+
+      this.document.state = SERVICE_STATE.ACTIVE;
 
       await this.#generateLinks();
     } else {

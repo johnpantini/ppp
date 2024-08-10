@@ -12,7 +12,7 @@ import {
   Updates,
   when
 } from '../vendor/fast-element.min.js';
-import { display, staticallyCompose } from '../vendor/fast-utilities.js';
+import { display } from '../vendor/fast-utilities.js';
 import {
   ellipsis,
   normalize,
@@ -29,7 +29,9 @@ import {
   spacing1,
   spacing2,
   spacing4,
-  spacing3
+  spacing3,
+  positive,
+  negative
 } from '../design/design-tokens.js';
 import {
   PAGE_STATUS,
@@ -442,6 +444,14 @@ export const pageStyles = css`
     border-left: none;
     border-right: none;
     margin-left: ${spacing1};
+  }
+
+  .positive {
+    color: ${positive};
+  }
+
+  .negative {
+    color: ${negative};
   }
 
   ${scrollbars('.table-with-selector .table-holder')}
@@ -941,6 +951,10 @@ class Page extends PPPElement {
     }
 
     switch (errorName) {
+      case 'AllocationNotFoundError':
+        return invalidate(ppp.app.toast, {
+          errorMessage: 'Размещение не найдено.'
+        });
       case 'ValidationError':
         return invalidate(ppp.app.toast, {
           errorMessage: e?.message ?? ppp.t('$pppErrors.E_BAD_FORM')

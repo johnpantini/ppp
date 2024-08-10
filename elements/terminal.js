@@ -1,5 +1,13 @@
+/** @decorator */
+
 import { PPPElement } from '../lib/ppp-element.js';
-import { css, html, ref } from '../vendor/fast-element.min.js';
+import {
+  attr,
+  css,
+  html,
+  nullableNumberConverter,
+  ref
+} from '../vendor/fast-element.min.js';
 import { display } from '../vendor/fast-utilities.js';
 import { normalize, scrollbars, typography } from '../design/styles.js';
 import {
@@ -202,13 +210,19 @@ export const terminalStyles = css`
 `;
 
 export class Terminal extends PPPElement {
+  @attr({ converter: nullableNumberConverter })
+  cols;
+
+  @attr({ attribute: 'font-size', converter: nullableNumberConverter })
+  fontSize;
+
   connectedCallback() {
     super.connectedCallback();
 
     if (!this.holder.childElementCount) {
       this.terminal = new window.Terminal({
         fontFamily: monospaceFont.$value,
-        fontSize: fontSizeCode1.$value,
+        fontSize: this.fontSize ?? fontSizeCode1.$value,
         theme: {
           foreground: themeConditional(paletteBlack, paletteGrayLight2).$value,
           background: themeConditional(paletteWhite, paletteBlack).$value,
@@ -237,7 +251,7 @@ export class Terminal extends PPPElement {
           white: themeConditional(paletteWhite, paletteBlack).$value,
           brightWhite: themeConditional(paletteWhite, paletteBlack).$value
         },
-        cols: 120,
+        cols: this.cols ?? 120,
         convertEol: true,
         allowTransparency: true,
         bellStyle: 'none'

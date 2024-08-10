@@ -129,9 +129,10 @@ export const activeOrdersWidgetTemplate = html`
               ?hidden="${(x) => !x.document.showCancelAllBuyOrdersButton}"
               class="cancel-buy-orders"
               title="Отменить все заявки на покупку"
-              @click="${(x) =>
+              @click="${(x, c) =>
                 x.cancelAllOrders({
-                  filter: 'buy'
+                  filter: 'buy',
+                  force: c.event.shiftKey
                 })}"
             >
               <span>${html.partial(cancelOrders)}</span>
@@ -140,9 +141,10 @@ export const activeOrdersWidgetTemplate = html`
               ?hidden="${(x) => !x.document.showCancelAllBuyOrdersButton}"
               class="cancel-sell-orders"
               title="Отменить все заявки на продажу"
-              @click="${(x) =>
+              @click="${(x, c) =>
                 x.cancelAllOrders({
-                  filter: 'sell'
+                  filter: 'sell',
+                  force: c.event.shiftKey
                 })}"
             >
               <span>${html.partial(cancelOrders)}</span>
@@ -154,7 +156,8 @@ export const activeOrdersWidgetTemplate = html`
                   : !x.document.showCancelAllOrdersButton}"
               class="cancel-orders"
               title="Отменить все заявки"
-              @click="${(x) => x.cancelAllOrders()}"
+              @click="${(x, c) =>
+                x.cancelAllOrders({ force: c.event.shiftKey })}"
             >
               <span>${html.partial(cancelOrders)}</span>
             </button>
@@ -780,7 +783,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       if (typeSelectorValue === 'all' || typeSelectorValue === 'conditional') {
         await this.ordersTrader?.cancelAllConditionalOrders?.({
           instrument: this.instrument,
-          filter: options.filter
+          filter: options.filter,
+          payload: {
+            force: options.force
+          }
         });
       }
 

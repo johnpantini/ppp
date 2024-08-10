@@ -139,7 +139,8 @@ self.addEventListener('fetch', async (event) => {
   if (
     event.request.destination &&
     event.request.method === 'GET' &&
-    (/\.js$/i.test(event.request.url) || /\?page=/i.test(event.request.url))
+    (new URL(event.request.url).pathname.endsWith('.js') ||
+      /\?page=/i.test(event.request.url))
   ) {
     return event.respondWith(
       (async () => {

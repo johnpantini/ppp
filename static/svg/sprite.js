@@ -58,6 +58,9 @@ export const cloud =
 export const pin =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" d="M10 8.5V3.3h.683a.65.65 0 1 0 0-1.3H5.317a.65.65 0 1 0 0 1.3H6v5.2L4.383 9.55a.843.843 0 0 0 .46 1.55h2.624v3.367a.533.533 0 0 0 1.066 0V11.1h2.624a.843.843 0 0 0 .46-1.55L10 8.5Z"></path></svg>';
 
+export const filter =
+  '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M13 3H3L7 7.73V12L9 13V7.73L13 3ZM11 13C11 14.4868 9.43537 15.4538 8.10557 14.7889L6.10557 13.7889C5.428 13.4501 5 12.7575 5 12V8.46229L1.47286 4.29145C0.373541 2.99151 1.29754 1 3 1H13C14.7025 1 15.6265 2.99151 14.5271 4.29145L11 8.46229V13Z" fill="currentColor"></path></svg>';
+
 export const pause =
   '<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="9" y="3" width="3" height="10" rx="2" fill="currentColor"></rect><rect x="3" y="3" width="3" height="10" rx="2" fill="currentColor"></rect></svg>';
 
