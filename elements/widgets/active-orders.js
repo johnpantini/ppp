@@ -15,7 +15,8 @@ import {
   when,
   ref,
   observable,
-  Updates
+  Updates,
+  Observable
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES, ORDERS } from '../../lib/const.js';
 import {
@@ -23,7 +24,7 @@ import {
   spacing,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
-import { cancelOrders, refresh } from '../../static/svg/sprite.js';
+import { cancelOrders, refresh, filter } from '../../static/svg/sprite.js';
 import { formatQuantity } from '../../lib/intl.js';
 import { Tmpl } from '../../lib/tmpl.js';
 import {
@@ -38,7 +39,9 @@ import {
   paletteGreenBase,
   paletteGreenLight3,
   paletteRedBase,
-  paletteRedLight3
+  paletteRedLight3,
+  paletteBlueLight2,
+  paletteBlueBase
 } from '../../design/design-tokens.js';
 import '../button.js';
 import '../checkbox.js';
@@ -47,6 +50,7 @@ import '../radio-group.js';
 import '../snippet.js';
 import '../tabs.js';
 import '../text-field.js';
+import '../widget-allowed-order-list.js';
 import '../widget-controls.js';
 import '../widget-real-order-card.js';
 
@@ -117,6 +121,20 @@ export const activeOrdersWidgetTemplate = html`
             </ppp-widget-box-radio-group>
           </div>
           <div class="buttons">
+            <button
+              ?hidden="${(x) => {
+                return typeof x.document.showConditionalOrdersFilterButton ===
+                  'undefined'
+                  ? false
+                  : !x.document.showConditionalOrdersFilterButton;
+              }}"
+              ?active="${(x) => x.document.isConditionalOrdersFilterActive}"
+              class="conditional-orders-filter"
+              title="Фильтр условных заявок"
+              @click="${(x) => x.handleConditionalFilterButtonClick()}"
+            >
+              <span>${html.partial(filter)}</span>
+            </button>
             <button
               ?hidden="${(x) => !x.document.showRefreshOrdersButton}"
               class="refresh-orders"
@@ -201,6 +219,7 @@ export const activeOrdersWidgetStyles = css`
   }
 
   .refresh-orders,
+  .conditional-orders-filter,
   .cancel-sell-orders,
   .cancel-buy-orders,
   .cancel-orders {
@@ -231,7 +250,12 @@ export const activeOrdersWidgetStyles = css`
     color: ${themeConditional(paletteRedBase, paletteRedLight3)};
   }
 
+  .conditional-orders-filter[active] {
+    color: ${themeConditional(paletteBlueBase, paletteBlueLight2)};
+  }
+
   .refresh-orders:hover,
+  .conditional-orders-filter:hover,
   .cancel-sell-orders:hover,
   .cancel-buy-orders:hover,
   .cancel-orders:hover {
@@ -242,6 +266,7 @@ export const activeOrdersWidgetStyles = css`
   }
 
   .refresh-orders span,
+  .conditional-orders-filter span,
   .cancel-sell-orders span,
   .cancel-buy-orders span,
   .cancel-orders span {
@@ -253,6 +278,7 @@ export const activeOrdersWidgetStyles = css`
   }
 
   .refresh-orders span svg,
+  .conditional-orders-filter span svg,
   .cancel-sell-orders span svg,
   .cancel-buy-orders span svg,
   .cancel-orders span svg {
@@ -394,6 +420,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   slot;
 
+  allowedConditionalOrders = new Set();
+
   constructor() {
     super();
 
@@ -446,6 +474,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       this.slot = document.createElement('slot');
 
       this.cardList.shadowRoot.append(this.slot);
+
+      for (const { orderId, hidden } of this.document
+        .allowedConditionalOrders ?? []) {
+        if (orderId && !hidden) {
+          this.allowedConditionalOrders.add(orderId);
+        }
+      }
 
       this.#rebuildOrdersArray();
 
@@ -604,6 +639,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       for (const [orderId, order] of this.conditionalOrdersById ?? []) {
         if (order.status === 'canceled') continue;
 
+        if (
+          this.document.isConditionalOrdersFilterActive &&
+          !this.allowedConditionalOrders.has(order.payload.orderId)
+        ) {
+          continue;
+        }
+
         order.domElement = this.conditionalOrdersRefsById.get(orderId);
 
         if (
@@ -627,6 +669,22 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     this.orders = this.orderProcessorFunc.call(this, this.ordersTrader, orders);
 
     this.slot.assign(...this.orders.map((o) => o.domElement));
+  }
+
+  handleConditionalFilterButtonClick() {
+    this.document.isConditionalOrdersFilterActive =
+      !this.document.isConditionalOrdersFilterActive;
+
+    this.#rebuildOrdersArray();
+
+    Observable.notify(this, 'document');
+
+    return this.updateDocumentFragment({
+      $set: {
+        'widgets.$.isConditionalOrdersFilterActive':
+          this.document.isConditionalOrdersFilterActive
+      }
+    });
   }
 
   handleOrderTypeChange() {
@@ -821,6 +879,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
           {}
         )
       );
+
+      await this.container.allowedConditionalOrders.validate();
     } catch (e) {
       console.dir(e);
 
@@ -847,7 +907,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         showCancelAllBuyOrdersButton:
           this.container.showCancelAllBuyOrdersButton.checked,
         showCancelAllSellOrdersButton:
-          this.container.showCancelAllSellOrdersButton.checked
+          this.container.showCancelAllSellOrdersButton.checked,
+        showConditionalOrdersFilterButton:
+          this.container.showConditionalOrdersFilterButton.checked,
+        isConditionalOrdersFilterActive:
+          this.container.isConditionalOrdersFilterActive.checked,
+        allowedConditionalOrders: this.container.allowedConditionalOrders.value
       }
     };
   }
@@ -865,7 +930,7 @@ export async function widgetDefinition() {
       template: activeOrdersWidgetTemplate,
       styles: activeOrdersWidgetStyles
     }).define(),
-    defaultWidth: 280,
+    defaultWidth: 300,
     minHeight: 120,
     minWidth: 140,
     defaultHeight: 350,
@@ -873,6 +938,7 @@ export async function widgetDefinition() {
       <ppp-tabs activeid="main">
         <ppp-tab id="main">Основные настройки</ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
+        <ppp-tab id="conditional">Условные заявки</ppp-tab>
         <ppp-tab-panel id="main-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
@@ -986,7 +1052,7 @@ export async function widgetDefinition() {
               Показывать вкладку «Условные»
             </ppp-checkbox>
             <ppp-checkbox
-              ?checked="${(x) => x.document.showRefreshOrdersButton ?? true}"
+              ?checked="${(x) => x.document.showRefreshOrdersButton ?? false}"
               ${ref('showRefreshOrdersButton')}
             >
               Показывать кнопку «Переставить все заявки»
@@ -1011,6 +1077,49 @@ export async function widgetDefinition() {
             >
               Показывать кнопку «Отменить все заявки»
             </ppp-checkbox>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="conditional-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интерфейс</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) =>
+                x.document.showConditionalOrdersFilterButton ?? true}"
+              ${ref('showConditionalOrdersFilterButton')}
+            >
+              Показывать кнопку фильтра условных заявок
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) =>
+                x.document.isConditionalOrdersFilterActive ?? false}"
+              ${ref('isConditionalOrdersFilterActive')}
+            >
+              Включить фильтр
+            </ppp-checkbox>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Разрешённые условные заявки</h5>
+              <p class="description">
+                Список условных заявок, которые будут отображаться при активном
+                фильтре.
+              </p>
+            </div>
+            <div class="widget-settings-input-group">
+              <div class="spacing2"></div>
+              <ppp-widget-allowed-order-list
+                ${ref('allowedConditionalOrders')}
+                :stencil="${() => {
+                  return {};
+                }}"
+                :list="${(x) =>
+                  x.document.allowedConditionalOrders ?? [{ hidden: true }]}"
+                :orders="${(x) => x.document.orders}"
+              ></ppp-widget-allowed-order-list>
+            </div>
           </div>
         </ppp-tab-panel>
       </ppp-tabs>
