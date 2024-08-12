@@ -1005,7 +1005,9 @@ export class ServicePppAspirantWorkerPage extends Page {
         );
 
         const alloc = (await allocationsResponse.json()).find(
-          (a) => a.JobID === `worker-${this.document._id}`
+          (a) =>
+            a.JobID === `worker-${this.document._id}` &&
+            a.ClientStatus === 'running'
         );
 
         if (!alloc?.ID) {
@@ -1578,6 +1580,10 @@ export class ServicePppAspirantWorkerPage extends Page {
       this.document.state = SERVICE_STATE.ACTIVE;
 
       await this.#generateLinks();
+
+      if (this.shouldShowLogs) {
+        return this.startLogStreaming();
+      }
     } else {
       invalidate(ppp.app.toast, {
         errorMessage: 'Отсутствует архив с файлами сервиса.',

@@ -335,6 +335,8 @@ export const snippetStyles = css`
   }
 
   .pre {
+    width: 100%;
+    height: calc(100% - 10px);
     font-family: ${monospaceFont};
     font-size: ${fontSizeCode1};
     line-height: ${lineHeightCode1};
@@ -345,7 +347,7 @@ export const snippetStyles = css`
     position: absolute;
     top: 0;
     left: 0;
-    overflow: auto;
+    overflow: hidden;
     margin: 0 !important;
     outline: none;
     text-align: left;
@@ -502,6 +504,8 @@ export class Snippet extends PPPAppearanceElement {
     const e = c.event;
 
     this.pre.style.transform = `translate3d(-${e.target.scrollLeft}px, -${e.target.scrollTop}px, 0)`;
+    this.pre.style.width = `calc(100% + ${e.target.scrollLeft}px)`;
+    this.pre.style.height = `calc(100% + ${e.target.scrollTop - 10}px)`;
   }
 
   updateCode(code = '') {
