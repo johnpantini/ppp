@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widgetStyles,
   WidgetWithInstrument,
@@ -296,13 +297,23 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
           } catch (e) {
             console.error(e);
 
+            let key = await this.ordersTrader?.getErrorI18nKey?.({
+              instrument: this.instrument,
+              error: e
+            });
+            let options = {};
+
+            if (typeof key === 'object' && typeof key?.key !== 'undefined') {
+              options = key.options ?? {};
+              key = key.key;
+            }
+
+            if (!key) {
+              key = 'E_UNKNOWN';
+            }
+
             this.notificationsArea.error({
-              title: 'Скальперские кнопки',
-              text: await this.ordersTrader?.formatError?.({
-                instrument: this.instrument,
-                error: e,
-                defaultErrorMessage: 'Не удалось переставить заявки.'
-              })
+              text: ppp.t(`$traderErrors.${key}`, options)
             });
           } finally {
             if (coolDown > 0) {

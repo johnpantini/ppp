@@ -287,7 +287,7 @@ class PPP {
       locale: this.locale
     });
 
-    (await import(`./i18n/${this.locale}/loading-errors.i18n.js`)).default(
+    (await import(`./i18n/${this.locale}/lib/ppp-errors.i18n.js`)).default(
       this.dict
     );
 
@@ -323,7 +323,7 @@ class PPP {
           if (/Failed to fetch/i.test(e?.message)) {
             if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
               this.#showLoadingError({
-                errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION'),
+                errorText: this.t('$pppErrors.E_NO_MONGODB_CONNECTION'),
                 shouldShowSwitchToCloudDBButton: true
               });
 
@@ -342,13 +342,13 @@ class PPP {
                 .addEventListener('click', listener);
             } else {
               this.#showLoadingError({
-                errorText: this.t('$loadingErrors.E_NO_PROXY_CONNECTION'),
+                errorText: this.t('$pppErrors.E_NO_PROXY_CONNECTION'),
                 shouldShowGlobalProxyUrlInput: true
               });
             }
           } else {
             this.#showLoadingError({
-              errorText: this.t('$loadingErrors.E_UNKNOWN')
+              errorText: this.t('$pppErrors.E_UNKNOWN')
             });
           }
 
@@ -440,7 +440,7 @@ class PPP {
         if (/Failed to fetch/i.test(e?.message)) {
           if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
             this.#showLoadingError({
-              errorText: this.t('$loadingErrors.E_NO_MONGODB_CONNECTION'),
+              errorText: this.t('$pppErrors.E_NO_MONGODB_CONNECTION'),
               shouldShowSwitchToCloudDBButton: true
             });
 
@@ -459,7 +459,7 @@ class PPP {
               .addEventListener('click', listener);
           } else {
             this.#showLoadingError({
-              errorText: this.t('$loadingErrors.E_NO_PROXY_CONNECTION'),
+              errorText: this.t('$pppErrors.E_NO_PROXY_CONNECTION'),
               shouldShowGlobalProxyUrlInput: true
             });
           }
@@ -468,7 +468,7 @@ class PPP {
           window.location.reload();
         } else if (/Cannot access member 'db' of undefined/i.test(e?.message)) {
           this.#showLoadingError({
-            errorText: this.t('$loadingErrors.E_BROKEN_ATLAS_REALM_LINK')
+            errorText: this.t('$pppErrors.E_BROKEN_ATLAS_REALM_LINK')
           });
         } else if (
           /error resolving cluster hostname/i.test(e?.message) ||
@@ -476,12 +476,12 @@ class PPP {
           /server selection error/i.test(e?.message)
         ) {
           this.#showLoadingError({
-            errorText: this.t('$loadingErrors.E_OFFLINE_REALM')
+            errorText: this.t('$pppErrors.E_OFFLINE_MONGODB_APP')
           });
         } else if (/function not found/i.test(e?.message)) {
           this.#showLoadingError({
             errorText: this.t(
-              '$loadingErrors.E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT'
+              '$pppErrors.E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT'
             )
           });
 
@@ -492,7 +492,7 @@ class PPP {
           }, 5000);
         } else {
           this.#showLoadingError({
-            errorText: this.t('$loadingErrors.E_UNKNOWN')
+            errorText: this.t('$pppErrors.E_UNKNOWN')
           });
         }
 
@@ -514,7 +514,7 @@ class PPP {
       console.error(e);
 
       this.#showLoadingError({
-        errorText: this.t('$loadingErrors.E_UNKNOWN')
+        errorText: this.t('$pppErrors.E_UNKNOWN')
       });
     }
   }

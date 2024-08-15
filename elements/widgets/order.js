@@ -673,81 +673,31 @@ export const orderWidgetTemplate = html`
                                     }
                                   });
                                 }}"
-                                value="${(x) =>
-                                  x.document.lastDestination ?? 'SMART'}"
+                                value="${(x) => {
+                                  let destination = x.document.lastDestination;
+
+                                  if (
+                                    !destination ||
+                                    !x.destinationList?.find(
+                                      (t) => t.value === destination
+                                    )
+                                  ) {
+                                    destination = x.destinationList?.[0]?.value;
+                                  }
+
+                                  return destination;
+                                }}"
                               >
-                                <ppp-widget-option value="SMART">
-                                  SMART
-                                </ppp-widget-option>
-                                <ppp-widget-option value="AMEX">
-                                  AMEX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="ARCA">
-                                  ARCA
-                                </ppp-widget-option>
-                                <ppp-widget-option value="BATS">
-                                  BATS
-                                </ppp-widget-option>
-                                <ppp-widget-option value="BEX">
-                                  BEX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="BYX">
-                                  BYX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="CBOE">
-                                  CBOE
-                                </ppp-widget-option>
-                                <ppp-widget-option value="CHX">
-                                  CHX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="DRCTEDGE">
-                                  DRCTEDGE
-                                </ppp-widget-option>
-                                <ppp-widget-option value="EDGEA">
-                                  EDGEA
-                                </ppp-widget-option>
-                                <ppp-widget-option value="EDGX">
-                                  EDGX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="IBKRATS">
-                                  IBKRATS
-                                </ppp-widget-option>
-                                <ppp-widget-option value="IEX">
-                                  IEX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="ISE">
-                                  ISE
-                                </ppp-widget-option>
-                                <ppp-widget-option value="NASDAQ">
-                                  NASDAQ
-                                </ppp-widget-option>
-                                <ppp-widget-option value="LTSE">
-                                  LTSE
-                                </ppp-widget-option>
-                                <ppp-widget-option value="MEMX">
-                                  MEMX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="NYSE">
-                                  NYSE
-                                </ppp-widget-option>
-                                <ppp-widget-option value="NYSENAT">
-                                  NYSENAT
-                                </ppp-widget-option>
-                                <ppp-widget-option value="OVERNIGHT">
-                                  OVERNIGHT
-                                </ppp-widget-option>
-                                <ppp-widget-option value="PEARL">
-                                  PEARL
-                                </ppp-widget-option>
-                                <ppp-widget-option value="PHLX">
-                                  PHLX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="PSX">
-                                  PSX
-                                </ppp-widget-option>
-                                <ppp-widget-option value="TPLUS1">
-                                  TPLUS1
-                                </ppp-widget-option>
+                                ${repeat(
+                                  (x) => x.destinationList ?? [],
+                                  html`
+                                    <ppp-widget-option
+                                      value="${(x) => x.value}"
+                                    >
+                                      ${(x) => x.label}
+                                    </ppp-widget-option>
+                                  `
+                                )}
                               </ppp-widget-select>
                             </div>
                           </div>
@@ -770,23 +720,29 @@ export const orderWidgetTemplate = html`
                                     }
                                   });
                                 }}"
-                                value="${(x) => x.document.lastTif ?? 'DAY'}"
+                                value="${(x) => {
+                                  let tif = x.document.lastTif;
+
+                                  if (
+                                    !tif ||
+                                    !x.tifList?.find((t) => t.value === tif)
+                                  ) {
+                                    tif = x.tifList?.[0]?.value;
+                                  }
+
+                                  return tif;
+                                }}"
                               >
-                                <ppp-widget-option value="DAY">
-                                  DAY
-                                </ppp-widget-option>
-                                <ppp-widget-option value="GTC">
-                                  GTC
-                                </ppp-widget-option>
-                                <ppp-widget-option value="IOC">
-                                  IOC
-                                </ppp-widget-option>
-                                <ppp-widget-option value="OPG">
-                                  OPG
-                                </ppp-widget-option>
-                                <ppp-widget-option value="FOK">
-                                  FOK
-                                </ppp-widget-option>
+                                ${repeat(
+                                  (x) => x.tifList ?? [],
+                                  html`
+                                    <ppp-widget-option
+                                      value="${(x) => x.value}"
+                                    >
+                                      ${(x) => x.label}
+                                    </ppp-widget-option>
+                                  `
+                                )}
                               </ppp-widget-select>
                             </div>
                           </div>
@@ -1338,6 +1294,12 @@ export class OrderWidget extends WidgetWithInstrument {
   @observable
   conditionalOrders;
 
+  @observable
+  tifList;
+
+  @observable
+  destinationList;
+
   async connectedCallback() {
     super.connectedCallback();
 
@@ -1410,6 +1372,11 @@ export class OrderWidget extends WidgetWithInstrument {
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
+
+      if (this.ordersTrader) {
+        this.tifList = this.ordersTrader.getTIFList() ?? [];
+        this.destinationList = this.ordersTrader.getDestinationList() ?? [];
+      }
 
       if (this.document.level1Trader) {
         this.level1Trader = await ppp.getOrCreateTrader(
@@ -2234,13 +2201,24 @@ export class OrderWidget extends WidgetWithInstrument {
     } catch (e) {
       console.log(e);
 
+      let key = await this.ordersTrader?.getErrorI18nKey?.({
+        instrument: this.instrument,
+        error: e
+      });
+      let options = {};
+
+      if (typeof key === 'object' && typeof key?.key !== 'undefined') {
+        options = key.options ?? {};
+        key = key.key;
+      }
+
+      if (!key) {
+        key = 'E_UNKNOWN';
+      }
+
       return this.notificationsArea.error({
         title: 'Ошибка заявки',
-        text: await this.ordersTrader?.formatError?.({
-          instrument: this.instrument,
-          error: e,
-          defaultErrorMessage: e.message
-        })
+        text: ppp.t(`$traderErrors.${key}`, options)
       });
     } finally {
       this.topLoader.stop();
