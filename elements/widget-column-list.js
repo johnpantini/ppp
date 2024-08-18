@@ -16,6 +16,7 @@ import {
   defaultDragEndHandler,
   dragControlsTemplate
 } from './clonable-list.js';
+import { getTraderSelectOptionColor } from '../design/styles.js';
 import './draggable-stack.js';
 import './query-select.js';
 import './select.js';
@@ -46,6 +47,12 @@ export const widgetColumnListItemTemplate = html`
           :preloaded="${(x) => {
             return x.traders?.find((t) => t._id === x.column.traderId);
           }}"
+          :displayValueFormatter="${() => (item) =>
+            html`
+              <span style="color:${getTraderSelectOptionColor(item)}">
+                ${item?.name}
+              </span>
+            `}"
           placeholder="Трейдер #1"
           variant="compact"
           :context="${(x) => x}"
@@ -118,6 +125,12 @@ export const widgetColumnListItemTemplate = html`
           :preloaded="${(x) => {
             return x.traders?.find((t) => t._id === x.column.extraTraderId);
           }}"
+          :displayValueFormatter="${() => (item) =>
+            html`
+              <span style="color:${getTraderSelectOptionColor(item)}">
+                ${item?.name}
+              </span>
+            `}"
           placeholder="Трейдер #2"
           variant="compact"
           :context="${(x) => x}"

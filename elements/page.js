@@ -557,6 +557,7 @@ class Page extends PPPElement {
         this.documents = [];
       }
     } else {
+      this.transformCalled = true;
       this.status = PAGE_STATUS.READY;
     }
   }

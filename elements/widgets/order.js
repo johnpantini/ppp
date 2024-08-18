@@ -39,7 +39,8 @@ import {
   ellipsis,
   normalize,
   spacing,
-  typography
+  typography,
+  getTraderSelectOptionColor
 } from '../../design/styles.js';
 import { emptyWidgetState } from '../../static/svg/sprite.js';
 import {
@@ -94,10 +95,18 @@ const isRelativeChangeInHeaderHidden = (x) =>
   typeof x.document.showRelativeChangeInHeader === 'undefined'
     ? false
     : !x.document.showRelativeChangeInHeader;
+const isCompanyCardHidden = (x) =>
+  typeof x.document.showCompanyCard === 'undefined'
+    ? false
+    : !x.document.showCompanyCard;
 const isBestBidAndAskHidden = (x) =>
   typeof x.document.showBestBidAndAsk === 'undefined'
     ? false
     : !x.document.showBestBidAndAsk;
+const isConditionalOrderToolbarHidden = (x) =>
+  typeof x.document.showConditionalOrderToolbar === 'undefined'
+    ? false
+    : !x.document.showConditionalOrderToolbar;
 const isEstimateSectionHidden = (x) => {
   if (
     x.orderTypeTabs.activeid === 'conditional' &&
@@ -229,7 +238,10 @@ export const orderWidgetTemplate = html`
             <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
           </ppp-widget-tabs>
           <div class="widget-body-inner">
-            <div class="company-card">
+            <div
+              class="company-card"
+              ?hidden="${(x) => isCompanyCardHidden(x)}"
+            >
               <div class="company-card-item">
                 <span
                   title="${(x) => x.instrument?.fullName}"
@@ -442,7 +454,10 @@ export const orderWidgetTemplate = html`
                 x.orderTypeTabs.activeid === 'conditional' &&
                 x.conditionalOrders?.length,
               html`
-                <div class="toolbar">
+                <div
+                  class="toolbar"
+                  ?hidden="${(x) => isConditionalOrderToolbarHidden(x)}"
+                >
                   <div class="tabs">
                     <ppp-widget-box-radio-group
                       ${ref('conditionalOrderSelector')}
@@ -2276,7 +2291,10 @@ export class OrderWidget extends WidgetWithInstrument {
       showRelativeChangeInHeader:
         this.container.showRelativeChangeInHeader.checked,
       showOrderTypeTabs: this.container.showOrderTypeTabs.checked,
+      showCompanyCard: this.container.showCompanyCard.checked,
       showBestBidAndAsk: this.container.showBestBidAndAsk.checked,
+      showConditionalOrderToolbar:
+        this.container.showConditionalOrderToolbar.checked,
       showAmountSection: this.container.showAmountSection.checked,
       showEstimateSection: this.container.showEstimateSection.checked,
       conditionalOrders: this.container.conditionalOrderList.value
@@ -2304,7 +2322,7 @@ export async function widgetDefinition() {
       styles: orderWidgetStyles
     }).define(),
     minWidth: 230,
-    minHeight: 120,
+    minHeight: 112,
     defaultWidth: 290,
     defaultHeight: 420,
     settings: html`
@@ -2331,6 +2349,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.ordersTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -2384,6 +2408,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.level1TraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.level1Trader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -2433,6 +2463,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.extraLevel1TraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -2484,6 +2520,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.extraLevel1Trader2Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -2657,11 +2699,24 @@ export async function widgetDefinition() {
               Показывать вкладки с типом заявки
             </ppp-checkbox>
             <ppp-checkbox
+              ?checked="${(x) => x.document.showCompanyCard ?? true}"
+              ${ref('showCompanyCard')}
+            >
+              Показывать наименование инструмента с ценой
+            </ppp-checkbox>
+            <ppp-checkbox
               ?checked="${(x) => x.document.showBestBidAndAsk ?? true}"
               ${ref('showBestBidAndAsk')}
             >
               Показывать лучшие цены <span class="positive">bid</span> и
               <span class="negative">ask</span>
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) =>
+                x.document.showConditionalOrderToolbar ?? true}"
+              ${ref('showConditionalOrderToolbar')}
+            >
+              Показывать панель условных заявок
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showAmountSection ?? true}"

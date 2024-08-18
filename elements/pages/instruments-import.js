@@ -250,13 +250,19 @@ export class InstrumentsImportPage extends Page {
         );
       })
       .map((s) => {
+        const fullName = s.tagetCurrencyInfo.description;
+
         return {
           symbol: s.tagetCurrencyInfo.code.split('M_')[1].replace('/', ' '),
           exchange: EXCHANGE.UTEX_MARGIN_STOCKS,
           broker: BROKERS.UTEX,
-          fullName: s.tagetCurrencyInfo.description,
+          fullName,
           minPriceIncrement: s.priceStep / 1e8,
-          type: 'stock',
+          type:
+            /ETF|ETN/.test(fullName) ||
+            /Invesco|ProShares|iShares|Direxion|SPDR/i.test(fullName)
+              ? 'etf'
+              : 'stock',
           currency: s.baseCurrencyInfo.code.split('M_')[1],
           forQualInvestorFlag: false,
           utexSymbolID: s.id,
@@ -265,7 +271,7 @@ export class InstrumentsImportPage extends Page {
       });
   }
 
-  async [INSTRUMENT_DICTIONARY.IB]() {
+  async psinaStocks(broker) {
     await validate(this.dictionaryUrl);
 
     const rStocks = await ppp.fetch(this.dictionaryUrl.value);
@@ -278,7 +284,9 @@ export class InstrumentsImportPage extends Page {
     return stocks
       .filter((s) => {
         if (psinaSkipOTC) {
-          return !s.realExchange?.startsWith('OTC');
+          return (
+            !s.realExchange?.startsWith('OTC') && s.realExchange !== 'EXMKT'
+          );
         } else {
           return true;
         }
@@ -287,93 +295,27 @@ export class InstrumentsImportPage extends Page {
         return {
           symbol: s.symbol.replace('-', ' '),
           exchange: EXCHANGE.US,
-          broker: BROKERS.IB,
+          broker,
           fullName: s.fullName,
           minPriceIncrement: 0,
-          type:
-            s.fullName.toUpperCase().endsWith(' ETF') ||
-            /Invesco|ProShares|iShares/i.test(s.fullName)
-              ? 'etf'
-              : 'stock',
+          type: s.type ?? 'stock',
           currency: 'USD',
           forQualInvestorFlag: false,
           lot: 1
         };
       });
+  }
+
+  async [INSTRUMENT_DICTIONARY.IB]() {
+    return this.psinaStocks(BROKERS.IB);
   }
 
   async [INSTRUMENT_DICTIONARY.ALPACA]() {
-    await validate(this.dictionaryUrl);
-
-    const rStocks = await ppp.fetch(this.dictionaryUrl.value);
-
-    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
-
-    const stocks = await rStocks.json();
-    const psinaSkipOTC = this.psinaSkipOTC.checked;
-
-    return stocks
-      .filter((s) => {
-        if (psinaSkipOTC) {
-          return !s.realExchange?.startsWith('OTC');
-        } else {
-          return true;
-        }
-      })
-      .map((s) => {
-        return {
-          symbol: s.symbol.replace('-', ' '),
-          exchange: EXCHANGE.US,
-          broker: BROKERS.ALPACA,
-          fullName: s.fullName,
-          minPriceIncrement: 0,
-          type:
-            s.fullName.toUpperCase().endsWith(' ETF') ||
-            /Invesco|ProShares|iShares/i.test(s.fullName)
-              ? 'etf'
-              : 'stock',
-          currency: 'USD',
-          forQualInvestorFlag: false,
-          lot: 1
-        };
-      });
+    return this.psinaStocks(BROKERS.ALPACA);
   }
 
   async [INSTRUMENT_DICTIONARY.PSINA_US_STOCKS]() {
-    await validate(this.dictionaryUrl);
-
-    const rStocks = await ppp.fetch(this.dictionaryUrl.value);
-
-    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
-
-    const stocks = await rStocks.json();
-    const psinaSkipOTC = this.psinaSkipOTC.checked;
-
-    return stocks
-      .filter((s) => {
-        if (psinaSkipOTC) {
-          return !s.realExchange?.startsWith('OTC');
-        } else {
-          return true;
-        }
-      })
-      .map((s) => {
-        return {
-          symbol: s.symbol.replace('-', ' '),
-          exchange: EXCHANGE.US,
-          broker: BROKERS.PSINA,
-          fullName: s.fullName,
-          minPriceIncrement: 0,
-          type:
-            s.fullName.toUpperCase().endsWith(' ETF') ||
-            /Invesco|ProShares|iShares/i.test(s.fullName)
-              ? 'etf'
-              : 'stock',
-          currency: 'USD',
-          forQualInvestorFlag: false,
-          lot: 1
-        };
-      });
+    return this.psinaStocks(BROKERS.PSINA);
   }
 
   async [INSTRUMENT_DICTIONARY.ALOR_SPBX]() {

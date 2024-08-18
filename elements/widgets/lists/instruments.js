@@ -220,6 +220,7 @@ export async function listDefinition() {
                   x.topLoader.stop();
                 }
               }}"
+              8
             >
               <span class="icon" slot="end">${html.partial(search)}</span>
               Выбрать инструмент

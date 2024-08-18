@@ -8,6 +8,7 @@ import {
   defaultDragEndHandler,
   dragControlsTemplate
 } from './clonable-list.js';
+import { getTraderSelectOptionColor } from '../design/styles.js';
 import './draggable-stack.js';
 import './query-select.js';
 
@@ -40,6 +41,12 @@ export const widgetOrderListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.trader1Id);
                 }}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 placeholder="Трейдер #1"
                 variant="compact"
                 :context="${(x) => x}"
@@ -64,6 +71,12 @@ export const widgetOrderListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.trader3Id);
                 }}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 placeholder="Трейдер #3"
                 variant="compact"
                 :context="${(x) => x}"
@@ -114,6 +127,12 @@ export const widgetOrderListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.trader2Id);
                 }}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 placeholder="Трейдер #2"
                 variant="compact"
                 :context="${(x) => x}"
@@ -138,6 +157,12 @@ export const widgetOrderListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.trader4Id);
                 }}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 placeholder="Трейдер #4"
                 variant="compact"
                 :context="${(x) => x}"

@@ -19,7 +19,7 @@ import {
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
-import { scrollbars } from '../../design/styles.js';
+import { scrollbars, getTraderSelectOptionColor } from '../../design/styles.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { later } from '../../lib/ppp-decorators.js';
 import '../button.js';
@@ -281,7 +281,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
         if (value !== 0) {
           this.#buttons =
             this.#buttons ??
-            Array.from(this.querySelectorAll('ppp-widget-button'));
+            Array.from(this.shadowRoot.querySelectorAll('ppp-widget-button'));
 
           const coolDown = Math.abs(this.document.coolDown);
 
@@ -388,6 +388,12 @@ export async function widgetDefinition() {
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+            :displayValueFormatter="${() => (item) =>
+              html`
+                <span style="color:${getTraderSelectOptionColor(item)}">
+                  ${item?.name}
+                </span>
+              `}"
             :query="${() => {
               return (context) => {
                 return context.services

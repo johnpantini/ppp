@@ -3265,21 +3265,21 @@ export const widgetCardTemplate = html`
       >
         <slot name="actions" ${slotted('slottedActions')}></slot>
       </div>
+      ${when(
+        (x) => x.progress > 0,
+        html`
+          <div class="progress-container">
+            <ppp-progress
+              ${ref('progressBar')}
+              min="0"
+              max="100"
+              value="${(x) => x.progress}"
+            >
+            </ppp-progress>
+          </div>
+        `
+      )}
     </div>
-    ${when(
-      (x) => x.progress > 0,
-      html`
-        <div class="progress-container">
-          <ppp-progress
-            ${ref('progressBar')}
-            min="0"
-            max="100"
-            value="${(x) => x.progress}"
-          >
-          </ppp-progress>
-        </div>
-      `
-    )}
   </template>
 `;
 

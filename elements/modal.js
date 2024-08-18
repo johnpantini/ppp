@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import { PPPElement } from '../lib/ppp-element.js';
 import {
   css,
@@ -25,7 +26,6 @@ import {
   toColorComponents
 } from '../design/design-tokens.js';
 import { display } from '../vendor/fast-utilities.js';
-import ppp from '../ppp.js';
 
 export const modalTemplate = html`
   <template>

@@ -23,6 +23,7 @@ import {
   formatAmount,
   formatNumber
 } from '../../../lib/intl.js';
+import { getTraderSelectOptionColor } from '../../../design/styles.js';
 import { invalidate } from '../../../lib/ppp-errors.js';
 import { Tmpl } from '../../../lib/tmpl.js';
 import { ValidationError } from '../../../lib/ppp-exceptions.js';
@@ -1101,6 +1102,12 @@ export async function listDefinition() {
               value="${(x) => x.document.traderId}"
               :context="${(x) => x}"
               :preloaded="${(x) => x.document.trader ?? ''}"
+              :displayValueFormatter="${() => (item) =>
+                html`
+                  <span style="color:${getTraderSelectOptionColor(item)}">
+                    ${item?.name}
+                  </span>
+                `}"
               :query="${() => {
                 return (context) => {
                   return context.services
@@ -1154,6 +1161,12 @@ export async function listDefinition() {
             value="${(x) => x.document.level1TraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.level1Trader ?? ''}"
+            :displayValueFormatter="${() => (item) =>
+              html`
+                <span style="color:${getTraderSelectOptionColor(item)}">
+                  ${item?.name}
+                </span>
+              `}"
             :query="${() => {
               return (context) => {
                 return context.services
@@ -1200,6 +1213,12 @@ export async function listDefinition() {
             value="${(x) => x.document.extraLevel1TraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
+            :displayValueFormatter="${() => (item) =>
+              html`
+                <span style="color:${getTraderSelectOptionColor(item)}">
+                  ${item?.name}
+                </span>
+              `}"
             :query="${() => {
               return (context) => {
                 return context.services
@@ -1248,6 +1267,12 @@ export async function listDefinition() {
             value="${(x) => x.document.extraLevel1Trader2Id}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
+            :displayValueFormatter="${() => (item) =>
+              html`
+                <span style="color:${getTraderSelectOptionColor(item)}">
+                  ${item?.name}
+                </span>
+              `}"
             :query="${() => {
               return (context) => {
                 return context.services

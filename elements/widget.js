@@ -629,9 +629,15 @@ export const widgetCommonContentStyles = () => css`
   .widget-summary-line {
     height: 24px;
     display: flex;
+    gap: 0 ${spacing2};
     align-items: center;
     justify-content: space-between;
     position: relative;
+  }
+
+  .widget-summary-line span {
+    overflow: hidden;
+    white-space: nowrap;
   }
 
   .widget-summary-line::after {
@@ -793,6 +799,8 @@ export const widgetStyles = () => css`
   ${widgetTableStyles()}  
   ${widgetCommonContentStyles()}
   .widget-root {
+    display: flex;
+    flex-direction: column;
     position: relative;
     background: ${themeConditional(paletteWhite, paletteBlack)};
     border: 1px solid ${themeConditional(paletteGrayLight2, paletteGrayDark2)};
@@ -821,7 +829,6 @@ export const widgetStyles = () => css`
     display: flex;
     position: relative;
     width: 100%;
-    height: 30px;
     cursor: move;
     flex-shrink: 0;
     padding: 0 5px;
@@ -860,7 +867,7 @@ export const widgetStyles = () => css`
     position: relative;
     flex-direction: column;
     flex-shrink: 1;
-    height: calc(100% - 30px);
+    height: 100%;
     overflow: auto;
   }
 
@@ -869,6 +876,17 @@ export const widgetStyles = () => css`
     flex-direction: column;
     width: 100%;
     height: 100%;
+    overflow: auto;
+  }
+
+  ${scrollbars('.widget-body-inner')}
+
+  .widget-flex-column-content {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
   }
 
   .widget-header ppp-widget-group-control {

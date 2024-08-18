@@ -851,11 +851,13 @@ export class App extends PPPElement {
 
       let importPath = `${ppp.rootUrl}/elements/pages/${page}.js`;
 
-      if (options.importPath) {
+      if ('importPath' in options) {
         importPath = options.importPath;
       }
 
-      await import(importPath);
+      if (typeof importPath === 'string') {
+        await import(importPath);
+      }
 
       const pageElement = document.createElement(`ppp-${page}-page`);
 
@@ -863,6 +865,10 @@ export class App extends PPPElement {
 
       if (!options.autoRead) {
         pageElement.setAttribute('disable-auto-read', '');
+      }
+
+      if (options.document) {
+        pageElement.document = options.document;
       }
 
       if (options.documentId) {
@@ -887,7 +893,7 @@ export class App extends PPPElement {
 
       result.setAttribute('mounted', '');
 
-      const header = pageElement.shadowRoot.querySelector('ppp-page-header');
+      const header = pageElement.shadowRoot?.querySelector('ppp-page-header');
 
       if (header) {
         header.style.display = 'none';
