@@ -20,6 +20,7 @@ import {
 import { BROKERS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import {
   formatAmount,
+  formatCommission,
   formatDateWithOptions,
   formatPrice
 } from '../../lib/intl.js';
@@ -136,6 +137,22 @@ export const timelineWidgetTemplate = html`
                                 }
                               )}
                           </div>
+                          <span
+                            class="earth"
+                            slot="subtitle-left-extra"
+                            ?hidden=${(x, c) =>
+                              !c.parent.document.showCommissions}
+                          >
+                            Комиссия
+                          </span>
+                          <span
+                            class="earth"
+                            slot="subtitle-right-extra"
+                            ?hidden=${(x, c) =>
+                              !c.parent.document.showCommissions}
+                          >
+                            ${(x, c) => c.parent.formatCardCommission(x)}
+                          </span>
                         </ppp-widget-card>
                       </div>
                     </div>
@@ -345,6 +362,24 @@ export class TimelineWidget extends WidgetWithInstrument {
       default:
         return '';
     }
+  }
+
+  formatCardCommission(operations) {
+    const [firstOperation] = operations;
+
+    if (!firstOperation?.instrument) {
+      return 0;
+    }
+
+    let total = 0;
+
+    for (const item of operations) {
+      if (isNaN(item.commission)) item.commission = 0;
+
+      total += item.commission ?? 0;
+    }
+
+    return formatCommission(total, firstOperation.instrument);
   }
 
   formatCardAmount(operations) {
@@ -583,7 +618,8 @@ export class TimelineWidget extends WidgetWithInstrument {
         depth: Math.abs(this.container.depth.value),
         highlightTrades: this.container.highlightTrades.checked,
         disableInstrumentFiltering:
-          this.container.disableInstrumentFiltering.checked
+          this.container.disableInstrumentFiltering.checked,
+        showCommissions: this.container.showCommissions.checked
       }
     };
   }
@@ -693,6 +729,12 @@ export async function widgetDefinition() {
           ${ref('disableInstrumentFiltering')}
         >
           Не фильтровать содержимое по выбранному инструменту
+        </ppp-checkbox>
+        <ppp-checkbox
+          ?checked="${(x) => x.document.showCommissions}"
+          ${ref('showCommissions')}
+        >
+          Показывать комиссии
         </ppp-checkbox>
       </div>
     `

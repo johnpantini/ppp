@@ -24,6 +24,7 @@ export const exampleCommFunctionCode = `/**
 * @param trade.instrument - Торговый инструмент.
 * @param trade.quantity - Количество лотов инструмента.
 * @param trade.price - Цена исполнения.
+* @param {(buy|sell)} trade.side - Направление сделки.
 */
 
 // 0,05 %
@@ -212,16 +213,6 @@ export class TraderPaperTradePage extends TraderCommonPage {
         'trade',
         await new Tmpl().render(this, this.commFunctionCode.value, {})
       )({
-        operationId: '9707755758',
-        accruedInterest: 0,
-        commission: 0.39694,
-        parentId: '43918678167',
-        symbol: 'ROSN',
-        type: 15,
-        exchange: 'MOEX',
-        quantity: 1,
-        price: 567.35,
-        createdAt: '2024-02-27T19:44:39.6018010Z',
         instrument: {
           symbol: 'ROSN',
           exchange: 'MOEX',
@@ -234,7 +225,18 @@ export class TraderPaperTradePage extends TraderCommonPage {
           classCode: 'TQBR',
           lot: 1,
           isin: 'RU000A0J2Q06'
-        }
+        },
+        operationId: '9707755758',
+        accruedInterest: 0,
+        parentId: '43918678167',
+        symbol: 'ROSN',
+        // Non-standard field.
+        side: 'buy',
+        type: 15,
+        exchange: 'MOEX',
+        quantity: 1,
+        price: 567.35,
+        createdAt: '2024-02-27T19:44:39.6018010Z'
       });
 
       if (isNaN(commission) || typeof commission !== 'number') {

@@ -3519,6 +3519,7 @@ export const widgetCardStyles = css`
     justify-content: space-between;
     word-wrap: break-word;
     font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
     letter-spacing: 0;
   }
 
