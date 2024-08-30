@@ -247,7 +247,7 @@ export const widgetPageTemplate = html`
       <div class="content">
         <nav>
           <div class="nav-inner">
-            <div class="widget-settings" ${ref('widgetSettings')}>
+            <div class="widget-settings" ${ref('widgetSettingsDomElement')}>
               <form novalidate>
                 <div>
                   <div class="drawer" ?hidden="${(x) => x.document._id}">

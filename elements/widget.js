@@ -1003,6 +1003,7 @@ export class Widget extends PPPElement {
     this.canChangeInstrument = true;
     this.document = {};
     this.saveColumns = $debounce(this.#saveColumns.bind(this), 250);
+    this.$$debug = ppp.$debug('widget');
   }
 
   connectedCallback() {
@@ -1337,6 +1338,8 @@ export class Widget extends PPPElement {
   }
 
   catchException(e) {
+    this.$$debug('[%s] catchException -> %o', this.document.name, e);
+
     if (e instanceof NoInstrumentsError) {
       return this.notificationsArea.note({
         title: e.trader.document.name,
@@ -1350,8 +1353,6 @@ export class Widget extends PPPElement {
         keep: true
       });
     } else if (e instanceof AuthorizationError) {
-      console.dir(e);
-
       return this.notificationsArea.error({
         text: 'Ошибка авторизации в источнике данных.',
         keep: true
@@ -1381,9 +1382,13 @@ export class Widget extends PPPElement {
         text: 'Ошибка сетевого запроса.',
         keep: true
       });
+    } else if (e.name === 'ConflictError') {
+      if (e.message === 'E_TRADER_IS_CLOSED') {
+        return this.notificationsArea.error({
+          text: 'Трейдер сейчас не работает.'
+        });
+      }
     } else {
-      console.error(e);
-
       return this.notificationsArea.error({
         text: 'Неизвестная ошибка, подробности в консоли.'
       });

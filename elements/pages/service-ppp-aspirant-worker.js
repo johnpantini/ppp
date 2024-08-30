@@ -154,11 +154,15 @@ uWS
     ]
   },
   pppTraderRuntime: {
-    env: '{}',
+    env: "{\n  USER_AGENT: '[%#navigator.userAgent%]'\n}",
     envSecret: '{}',
     url: '/lib/aspirant-worker/ppp-trader-runtime/ppp-trader-runtime.mjs',
     enableHttp: true,
     fileList: [
+      {
+        url: '/lib/aspirant-worker/ppp-trader-runtime/runtime-classes.mjs',
+        path: 'lib/aspirant-worker/ppp-trader-runtime/runtime-classes.mjs'
+      },
       {
         url: '/lib/aspirant-worker/utils.mjs',
         path: 'lib/aspirant-worker/utils.mjs'
@@ -451,11 +455,13 @@ export const servicePppAspirantWorkerPageTemplate = html`
         (x) => x.url,
         html`
           <section>
-            <div class="control-stack">
-              <ppp-banner class="inline" appearance="warning">
-                Глобальная ссылка сервиса:
-              </ppp-banner>
-              <ppp-copyable> ${(x) => x.url}</ppp-copyable>
+            <div class="control-line">
+              <div class="control-stack">
+                <ppp-banner class="inline" appearance="warning">
+                  Глобальная ссылка сервиса:
+                </ppp-banner>
+                <ppp-copyable> ${(x) => x.url}</ppp-copyable>
+              </div>
             </div>
           </section>
         `
@@ -483,6 +489,37 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 cols="120"
                 ${ref('stderrTerminal')}
               ></ppp-terminal>
+            </div>
+          </section>
+          <section ?hidden="${(x) => !x.url}">
+            <div class="label-group">
+              <h5>Отладочные пространства имён</h5>
+              <p class="description">
+                Задаются через запятую. Префикс "-" отключает пространство имён.
+                Используйте *, чтобы включить все отладочные сообщения.
+              </p>
+              <div class="spacing2"></div>
+              <ppp-button
+                appearance="danger"
+                @click="${(x) => x.enableDebug()}"
+              >
+                Отключить отладочные сообщения
+              </ppp-button>
+            </div>
+            <div class="input-group">
+              <ppp-text-field
+                placeholder="*"
+                value="*"
+                ${ref('debugNamespaces')}
+              >
+              </ppp-text-field>
+              <div class="spacing2"></div>
+              <ppp-button
+                appearance="primary"
+                @click="${(x) => x.enableDebug(x.debugNamespaces.value)}"
+              >
+                Сохранить пространства имён
+              </ppp-button>
             </div>
           </section>
         `
@@ -934,6 +971,44 @@ export class ServicePppAspirantWorkerPage extends Page {
   async connectedCallback() {
     await super.connectedCallback();
     await this.#generateLinks();
+  }
+
+  async enableDebug(namespaces = '') {
+    let url;
+
+    this.beginOperation();
+
+    try {
+      if (this.document.url) {
+        url = this.document.url;
+      } else if (this.document._id && this.document.aspirantService) {
+        const aspirantUrl = await getAspirantBaseUrl(
+          this.document.aspirantService
+        );
+
+        url = `${aspirantUrl}/workers/${this.document._id}/`;
+      }
+
+      if (url) {
+        if (!url.endsWith('/')) {
+          url += '/';
+        }
+
+        await maybeFetchError(
+          await fetch(`${url}debug`, {
+            method: 'POST',
+            body: JSON.stringify({ namespaces })
+          }),
+          'Сервис не поддерживает эту функцию.'
+        );
+
+        this.showSuccessNotification();
+      }
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
+    }
   }
 
   async #generateLinks() {

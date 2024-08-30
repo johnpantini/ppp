@@ -68,7 +68,6 @@ export const textFieldTemplate = html`
         <input
           class="control"
           part="control"
-          id="control"
           @input="${(x) => x.handleTextInput()}"
           @change="${(x) => x.handleChange()}"
           ?autofocus="${(x) => x.autofocus}"

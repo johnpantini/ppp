@@ -1,8 +1,14 @@
 import ppp from '../../ppp.js';
 import { html, css, ref, repeat, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
-import { TRADERS, TRADER_CAPS } from '../../lib/const.js';
-import { validate, invalidate, ValidationError } from '../../lib/ppp-errors.js';
+import { TRADERS, TRADER_CAPS, APIS } from '../../lib/const.js';
+import {
+  validate,
+  invalidate,
+  ValidationError,
+  maybeFetchError,
+  TraderTrinityError
+} from '../../lib/ppp-errors.js';
 import {
   cloudFunctions,
   combination,
@@ -13,6 +19,15 @@ import { filterCards } from '../generic-card.js';
 import { designTokens } from '../../design/design-tokens.js';
 import { checkmark } from '../../static/svg/sprite.js';
 import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
+import { HMAC, uuidv4, sha256 } from '../../lib/ppp-crypto.js';
+import { getYCPsinaFolder, generateYCAWSSigningKey } from '../../lib/yc.js';
+import * as jose from '../../vendor/jose.min.js';
+import {
+  Denormalization,
+  extractEverything
+} from '../../lib/ppp-denormalize.js';
+import { later } from '../../lib/ppp-decorators.js';
+import '../../vendor/zip-full.min.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
@@ -22,8 +37,19 @@ import '../text-field.js';
 await ppp.i18n(import.meta.url);
 
 export class TraderCommonPage extends Page {
+  denormalization = new Denormalization();
+
   async connectedCallback() {
     await super.connectedCallback();
+
+    if (this.document?.ycApiId) {
+      const refs = await extractEverything();
+
+      this.denormalization.fillRefs(refs);
+
+      this.document = await this.denormalization.denormalize(this.document);
+    }
+
     this.setCaps(this.document?.caps);
   }
 
@@ -50,6 +76,7 @@ export class TraderCommonPage extends Page {
 
     if (this.runtime.value === 'url') {
       await validate(this.runtimeUrl);
+      await validate(this.ycApiId);
 
       try {
         const response = await fetch(new URL(this.runtimeUrl.value).toString());
@@ -70,49 +97,214 @@ export class TraderCommonPage extends Page {
   }
 
   async submitDocument(options = {}) {
-    const result = await super.submitDocument(options);
+    try {
+      const result = await super.submitDocument({
+        ...options,
+        raiseException: true
+      });
 
-    // Always initialize Aspirant Worker traders.
-    if (this.runtime.value === 'url') {
-      const trader = await ppp.getOrCreateTrader(this.document);
+      this.beginOperation();
 
-      await trader.trinity();
+      // Stage 2. Prepare trinity bucket.
+      if (this.runtime.value === 'url') {
+        const {
+          ycServiceAccountID,
+          ycPublicKeyID,
+          ycPrivateKey,
+          ycStaticKeyID,
+          ycStaticKeySecret
+        } = this.ycApiId.datum();
+        const { psinaFolderId, iamToken } = await getYCPsinaFolder({
+          jose,
+          ycServiceAccountID,
+          ycPublicKeyID,
+          ycPrivateKey
+        });
+
+        const rBucketList = await maybeFetchError(
+          await ppp.fetch(
+            `https://storage.api.cloud.yandex.net/storage/v1/buckets?folderId=${psinaFolderId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${iamToken}`
+              }
+            }
+          ),
+          'Не удалось получить список бакетов. Проверьте права доступа.'
+        );
+
+        const bucketList = await rBucketList.json();
+        let trinityBucket = bucketList?.buckets?.find((b) =>
+          /^ppp-trinity-/.test(b.name)
+        );
+
+        if (!trinityBucket) {
+          // Create new bucket.
+          const rNewBucket = await maybeFetchError(
+            await ppp.fetch(
+              `https://storage.api.cloud.yandex.net/storage/v1/buckets`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${iamToken}`
+                },
+                body: JSON.stringify({
+                  name: `ppp-trinity-${uuidv4()}`,
+                  folderId: psinaFolderId,
+                  defaultStorageClass: 'STANDARD',
+                  // 1 GB
+                  maxSize: 1024 ** 3,
+                  anonymousAccessFlags: {
+                    read: true,
+                    list: false,
+                    configRead: false
+                  }
+                })
+              }
+            ),
+            'Не удалось создать бакет для документов Trinity.'
+          );
+
+          trinityBucket = (await rNewBucket.json()).response;
+        }
+
+        const host = `${trinityBucket.name}.storage.yandexcloud.net`;
+        const trinityUrl = `https://${host}/${this.document._id}.zip`;
+
+        // Stage 3. Initialize the trader, frontend only.
+        const traderFrontend = await ppp.getOrCreateTrader(this.document, {
+          doNotStartWorker: true
+        });
+        const urlParts = traderFrontend.url.split('/');
+
+        urlParts.splice(-1, 0, 'build');
+        urlParts[urlParts.length - 1] = urlParts[urlParts.length - 1].replace(
+          /\.js$/,
+          '.min.js'
+        );
+
+        const codeResponse = await fetch(urlParts.join('/'), {
+          cache: 'reload'
+        });
+
+        if (codeResponse.ok) {
+          // Stage 4. Upload trinity document.
+          const zip = globalThis.zip;
+          const zipWriter = new zip.ZipWriter(
+            new zip.BlobWriter('application/zip')
+          );
+
+          const trinityPayload = {
+            document: {
+              ...this.document,
+              trinityUrl
+            },
+            instruments: Array.from(traderFrontend.instruments.entries()),
+            code: await codeResponse.text()
+          };
+
+          await zipWriter.add(
+            'trinity.json',
+            new zip.TextReader(JSON.stringify(trinityPayload))
+          );
+
+          const zipBlob = await zipWriter.close();
+          const key = `${this.document._id}.zip`;
+          const xAmzDate =
+            new Date()
+              .toISOString()
+              .replaceAll('-', '')
+              .replaceAll(':', '')
+              .split('.')[0] + 'Z';
+          const date = xAmzDate.split('T')[0];
+          const signingKey = await generateYCAWSSigningKey({
+            ycStaticKeySecret,
+            date
+          });
+          const hashBuffer = await crypto.subtle.digest(
+            'SHA-256',
+            await zipBlob.arrayBuffer()
+          );
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashedPayload = hashArray
+            .map((b) => b.toString(16).padStart(2, '0'))
+            .join('');
+          const canonicalRequest = `PUT\n/${encodeURIComponent(
+            key
+          )}\n\nhost:${host}\nx-amz-content-sha256:${hashedPayload}\nx-amz-date:${xAmzDate}\n\nhost;x-amz-content-sha256;x-amz-date\n${hashedPayload}`;
+          const scope = `${date}/ru-central1/s3/aws4_request`;
+          const stringToSign = `AWS4-HMAC-SHA256\n${xAmzDate}\n${scope}\n${await sha256(
+            canonicalRequest
+          )}`;
+          const signature = await HMAC(signingKey, stringToSign, {
+            format: 'hex'
+          });
+          const Authorization = `AWS4-HMAC-SHA256 Credential=${ycStaticKeyID}/${date}/ru-central1/s3/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=${signature}`;
+
+          await maybeFetchError(
+            await ppp.fetch(`https://${host}/${key}`, {
+              method: 'PUT',
+              headers: {
+                Authorization,
+                'x-amz-date': xAmzDate,
+                'x-amz-content-sha256': hashedPayload
+              },
+              body: zipBlob
+            }),
+            'Не удалось загрузить документ Trinity в облако.'
+          );
+
+          // Stage 5. Send trinity link.
+          ppp.traders.runtimes.delete(this.document._id);
+          await ppp.getOrCreateTrader(this.document, {
+            trinityUrl
+          });
+        } else {
+          throw new TraderTrinityError({
+            message: codeResponse.statusText,
+            details: codeResponse
+          });
+        }
+      }
+
+      this.showSuccessNotification();
+
+      return result;
+    } catch (e) {
+      this.failOperation(e);
+    } finally {
+      this.endOperation();
     }
-
-    return result;
   }
 
   async submit() {
     // Enforce checked values.
     this.setCaps();
 
-    try {
-      let bailOutTimer;
-
-      await new Promise(async (resolve, reject) => {
-        bailOutTimer = setTimeout(() => {
-          reject(new Error());
-        }, 10000);
-
-        // Terminate the trader if runtime was modified.
-        if (this.document._id && this.document.runtime !== this.runtime.value) {
-          switch (this.document.runtime) {
-            case 'shared-worker':
-            case 'url':
+    // Stage 1. Terminate old trader if needed.
+    if (this.document._id) {
+      if (
+        this.document.runtime !== this.runtime.value ||
+        this.document.runtimeUrl !== this.runtimeUrl.value
+      ) {
+        switch (this.document.runtime) {
+          case 'shared-worker':
+          case 'url':
+            try {
               const trader = await ppp.getOrCreateTrader(this.document);
+
+              await later(1000);
 
               trader.terminate();
               ppp.traders.runtimes.delete(this.document._id);
+            } catch (e) {
+              // No-op.
+            }
 
-              clearTimeout(bailOutTimer);
-              resolve();
-          }
-        } else {
-          resolve();
+            break;
         }
-      });
-    } catch (e) {
-      ppp.traders.runtimes.delete(this.document._id);
+      }
     }
 
     return {
@@ -123,7 +315,8 @@ export class TraderCommonPage extends Page {
         updatedAt: new Date(),
         runtimeUrl: this.runtimeUrl.value
           ? new URL(this.runtimeUrl.value).toString()
-          : null
+          : null,
+        ycApiId: this.ycApiId.value ? this.ycApiId.value : null
       },
       $setOnInsert: {
         createdAt: new Date()
@@ -191,16 +384,16 @@ export const traderNameAndRuntimePartial = ({
             ${ref('runtimeUrl')}
           ></ppp-text-field>
         </div>
-        <div class="spacing2"></div>
+        <div class="spacing3"></div>
         <p class="description">
           Cформировать ссылку по шаблону Aspirant Worker «Среда выполнения
           трейдеров»:
         </p>
+        <div class="spacing2"></div>
         <ppp-query-select
           ${ref('runtimeServiceId')}
-          value="${(x) => x.document.runtimeServiceId}"
+          standalone
           :context="${(x) => x}"
-          :preloaded="${(x) => x.document.runtimeService ?? ''}"
           :query="${() => {
             return (context) => {
               return context.services
@@ -213,12 +406,7 @@ export const traderNameAndRuntimePartial = ({
                       type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.PPP_ASPIRANT_WORKER%]`
                     },
                     { workerPredefinedTemplate: 'pppTraderRuntime' },
-                    {
-                      $or: [
-                        { removed: { $ne: true } },
-                        { _id: `[%#this.document.runtimeServiceId ?? ''%]` }
-                      ]
-                    }
+                    { removed: { $ne: true } }
                   ]
                 })
                 .sort({ updatedAt: -1 });
@@ -239,6 +427,47 @@ export const traderNameAndRuntimePartial = ({
           }}"
         >
           Вставить ссылку по шаблону
+        </ppp-button>
+        <div class="spacing3"></div>
+        <p class="description">
+          API Yandex Cloud для хранения данных трейдера (Trinity):
+        </p>
+        <div class="spacing2"></div>
+        <ppp-query-select
+          ${ref('ycApiId')}
+          standalone
+          value="${(x) => x.document.ycApiId}"
+          :context="${(x) => x}"
+          :preloaded="${(x) => x.document.ycApi ?? ''}"
+          :query="${() => {
+            return (context) => {
+              return context.services
+                .get('mongodb-atlas')
+                .db('ppp')
+                .collection('apis')
+                .find({
+                  $and: [
+                    {
+                      type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).APIS.YC%]`
+                    },
+                    { removed: { $ne: true } }
+                  ]
+                })
+                .sort({ updatedAt: -1 });
+            };
+          }}"
+          :transform="${() => ppp.decryptDocumentsTransformation()}"
+        ></ppp-query-select>
+        <div class="spacing2"></div>
+        <ppp-button
+          @click="${() =>
+            ppp.app.mountPage(`api-${APIS.YC}`, {
+              size: 'xlarge',
+              adoptHeader: true
+            })}"
+          appearance="primary"
+        >
+          Добавить API Yandex Cloud
         </ppp-button>
       </div>
     </div>

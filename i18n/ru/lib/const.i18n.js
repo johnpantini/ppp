@@ -83,7 +83,8 @@ export default function (i18n) {
         [TRADER_DATUM.STATUS]: 'Статус',
         [TRADER_DATUM.TRADING_STATUS]: 'Торговый статус',
         [TRADER_DATUM.DAY_VOLUME]: 'Объём',
-        [TRADER_DATUM.SPRINT]: 'Спринт'
+        [TRADER_DATUM.SPRINT]: 'Спринт',
+        [TRADER_DATUM.LOCATE]: 'Locate'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

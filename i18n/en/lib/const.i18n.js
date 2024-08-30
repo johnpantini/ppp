@@ -72,8 +72,8 @@ export default function (i18n) {
       },
       datum: {
         [TRADER_DATUM.LAST_PRICE]: 'Price',
-        [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены, %',
-        [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены',
+        [TRADER_DATUM.LAST_PRICE_RELATIVE_CHANGE]: 'Price ch., %',
+        [TRADER_DATUM.LAST_PRICE_ABSOLUTE_CHANGE]: 'Price ch.',
         [TRADER_DATUM.BEST_BID]: 'Bid',
         [TRADER_DATUM.BEST_ASK]: 'Ask',
         [TRADER_DATUM.MIDPOINT]: 'Mid',
@@ -83,7 +83,8 @@ export default function (i18n) {
         [TRADER_DATUM.STATUS]: 'Status',
         [TRADER_DATUM.TRADING_STATUS]: 'Trading status',
         [TRADER_DATUM.DAY_VOLUME]: 'Volume',
-        [TRADER_DATUM.SPRINT]: 'Sprint'
+        [TRADER_DATUM.SPRINT]: 'Sprint',
+        [TRADER_DATUM.LOCATE]: 'Locate'
       },
       exchange: {
         [EXCHANGE.BINANCE]: 'Binance',

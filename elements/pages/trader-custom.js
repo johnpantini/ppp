@@ -163,10 +163,18 @@ export class TraderCustomPage extends TraderCommonPage {
 
   async connectedCallback() {
     // Get the URL first.
-    await this.readDocument();
+    const documentId = await this.documentId();
+    const rawDocument = await ppp.decrypt(
+      await ppp.user.functions.findOne(
+        { collection: this.collection },
+        {
+          _id: documentId
+        }
+      )
+    );
 
-    if (this.document.url) {
-      await this.loadTraderPageDefinition(this.document.url);
+    if (rawDocument.url) {
+      await this.loadTraderPageDefinition(rawDocument.url);
     }
 
     return super.connectedCallback();

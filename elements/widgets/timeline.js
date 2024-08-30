@@ -379,7 +379,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       total += item.commission ?? 0;
     }
 
-    return formatCommission(total, firstOperation.instrument);
+    return formatCommission(Math.abs(total), firstOperation.instrument);
   }
 
   formatCardAmount(operations) {

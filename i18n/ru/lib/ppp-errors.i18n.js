@@ -79,7 +79,8 @@ export default function (i18n) {
       E_QUANTITY_MUST_BE_GE_$VALUE: 'Количество должно быть не менее %{value}.',
       E_PRICE_MUST_BE_GE_$VALUE: 'Цена должна быть не ниже %{value}.',
       E_PRICE_MUST_BE_LE_$VALUE: 'Цена должна быть не выше %{value}.',
-      E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.'
+      E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.',
+      E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.'
     }
   });
 }

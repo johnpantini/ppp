@@ -609,8 +609,8 @@ class PPP {
     return `static/brand/${ppp.darkMode ? 'dark' : 'light'}/${svg}.svg`;
   }
 
-  async getOrCreateTrader(document) {
-    return this.traders.getOrCreateTrader(document);
+  async getOrCreateTrader(document, options) {
+    return this.traders.getOrCreateTrader(document, options);
   }
 
   async getOrCreatePusherConnection(document) {

@@ -423,7 +423,8 @@ export const orderWidgetTemplate = html`
 
                           const settingsPage =
                             await x.headerButtons.showWidgetSettings();
-                          const widgetSettings = settingsPage.widgetSettings;
+                          const widgetSettings =
+                            settingsPage.widgetSettingsDomElement;
 
                           observer = new MutationObserver(() => {
                             const tabs =
@@ -436,7 +437,7 @@ export const orderWidgetTemplate = html`
                             }
                           });
 
-                          observer.observe(settingsPage.widgetSettings, {
+                          observer.observe(widgetSettings, {
                             childList: true,
                             subtree: true
                           });
@@ -1316,6 +1317,7 @@ export class OrderWidget extends WidgetWithInstrument {
   destinationList;
 
   async connectedCallback() {
+    this.$$placeOrder = this.$$debug.extend('placeOrder');
     super.connectedCallback();
 
     this.calculateEstimate = $debounce(this.#calculateEstimate.bind(this), 250);
@@ -2214,7 +2216,7 @@ export class OrderWidget extends WidgetWithInstrument {
         title: 'Заявка выставлена'
       });
     } catch (e) {
-      console.log(e);
+      this.$$placeOrder('[%s] exception: %o', this.document.name, e);
 
       let key = await this.ordersTrader?.getErrorI18nKey?.({
         instrument: this.instrument,
