@@ -372,6 +372,8 @@ export class ListWidget extends WidgetWithInstrument {
 
       this.tableBody.shadowRoot.append(this.slot);
 
+      await this.control?.preRegisterColumnsCallback?.(this);
+
       this.columns = new WidgetColumns({
         columns: this.document.columns ?? defaultColumns
       });

@@ -279,7 +279,7 @@ export const widgetColumns = () => css`
     color: ${negative};
   }
 
-  .capitalize {
+  .capitalize:not(.capitalize-off) {
     text-transform: capitalize;
   }
 `;

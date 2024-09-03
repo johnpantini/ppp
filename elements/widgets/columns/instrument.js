@@ -97,6 +97,14 @@ export default (class extends Column {
 
     return url || 'static/instruments/unknown.svg';
   }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (this.column.capitalize === false) {
+      this.shadowRoot.firstElementChild.classList.add('capitalize-off');
+    }
+  }
 }
   .compose({
     name: `ppp-${uuidv4()}`,
