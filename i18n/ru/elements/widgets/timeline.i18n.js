@@ -17,7 +17,8 @@ export default function (i18n) {
         '%{smart_count} лот |||| %{smart_count} лота |||| %{smart_count} лотов',
       lotAtPrice: '%{lotCount} по цене %{price}',
       buyOperation: 'Покупка %{tradedCount} %{instrumentFullName}',
-      sellOperation: 'Продажа %{tradedCount} %{instrumentFullName}'
+      sellOperation: 'Продажа %{tradedCount} %{instrumentFullName}',
+      locateFeeOperation: 'Займ %{tradedCount} %{instrumentFullName}'
     }
   });
 }

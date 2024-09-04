@@ -15,7 +15,8 @@ export default function (i18n) {
       lotCount: '%{smart_count} lot |||| %{smart_count} lots',
       lotAtPrice: '%{lotCount} @ %{price}',
       buyOperation: 'Bought %{tradedCount} %{instrumentFullName}',
-      sellOperation: 'Sold %{tradedCount} %{instrumentFullName}'
+      sellOperation: 'Sold %{tradedCount} %{instrumentFullName}',
+      locateFeeOperation: 'Located %{tradedCount} %{instrumentFullName}'
     }
   });
 }

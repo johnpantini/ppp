@@ -193,7 +193,7 @@ export class IntradayStats {
   totalsCache = new Map();
 
   positionChanged(oldValue, newValue) {
-    if (newValue?.oid === '@CLEAR') {
+    if (newValue?.operationId === '@CLEAR') {
       this.positions.clear();
 
       return this.rebuildStats();
@@ -328,6 +328,11 @@ export class IntradayStats {
 
     if (!this.isTradeEligibleForStats(newValue)) {
       return;
+    }
+
+    if (newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE) {
+      newValue.price = 0;
+      newValue.quantity = 0;
     }
 
     const currency = newValue.instrument.currency;

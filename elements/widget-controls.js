@@ -3362,6 +3362,15 @@ export const widgetCardStyles = css`
     );
   }
 
+  :host(.earth) .card {
+    background-color: rgba(
+      ${toColorComponents(
+        themeConditional(paletteYellowLight2, paletteYellowDark2)
+      )},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+  }
+
   :host(:first-child) {
     padding-top: 8px;
   }

@@ -69,7 +69,7 @@ export class PortfolioWidget extends ListWidget {
   positionChanged(oldValue, newValue) {
     const type = newValue?.instrument?.type;
 
-    if (newValue?.oid === '@CLEAR') {
+    if (newValue?.operationId === '@CLEAR') {
       this.positions.clear();
 
       for (const [, row] of this.rowsCache) {
@@ -77,6 +77,7 @@ export class PortfolioWidget extends ListWidget {
       }
 
       this.rowsCache.clear();
+      this.$$debug('portfolio is clear (@CLEAR)');
     } else if (!newValue?.isBalance && type) {
       if (
         this.document[

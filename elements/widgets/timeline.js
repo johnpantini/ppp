@@ -17,7 +17,12 @@ import {
   repeat,
   Updates
 } from '../../vendor/fast-element.min.js';
-import { BROKERS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import {
+  BROKERS,
+  OPERATION_TYPE,
+  TRADER_DATUM,
+  WIDGET_TYPES
+} from '../../lib/const.js';
 import {
   formatAmount,
   formatCommission,
@@ -215,6 +220,8 @@ export class TimelineWidget extends WidgetWithInstrument {
 
       this.timeline = [];
 
+      this.$$debug('timeline is clear (@CLEAR)');
+
       return Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
     }
 
@@ -336,6 +343,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     switch (firstOperation.type) {
       case OperationType.OPERATION_TYPE_BUY:
       case OperationType.OPERATION_TYPE_SELL:
+      case OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE:
         return `background-image:url(${this.searchControl.getInstrumentIconUrl(
           firstOperation.instrument
         )}`;
@@ -355,6 +363,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     switch (firstOperation.type) {
       case OperationType.OPERATION_TYPE_BUY:
       case OperationType.OPERATION_TYPE_SELL:
+      case OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE:
         return (
           firstOperation.instrument?.symbol?.[0] ?? firstOperation.symbol[0]
         );
@@ -395,7 +404,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     for (const item of operations) {
       if (
         item.type === OperationType.OPERATION_TYPE_SELL ||
-        item.type === OperationType.OPERATION_TYPE_BUY
+        item.type === OperationType.OPERATION_TYPE_BUY ||
+        item.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
       ) {
         if (item.type === OperationType.OPERATION_TYPE_BUY) negative = true;
 
@@ -430,7 +440,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     for (const item of operations) {
       if (
         item.type === OperationType.OPERATION_TYPE_SELL ||
-        item.type === OperationType.OPERATION_TYPE_BUY
+        item.type === OperationType.OPERATION_TYPE_BUY ||
+        item.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
       ) {
         totalQuantity += item.quantity;
       }
@@ -464,6 +475,18 @@ export class TimelineWidget extends WidgetWithInstrument {
             firstOperation.instrument?.fullName ??
             firstOperation.instrument.symbol
         });
+      case OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE:
+        return ppp.dict.t('$timeLineWidget.locateFeeOperation', {
+          tradedCount: ppp.dict.t(
+            `$timeLineWidget.${firstOperation.instrument.type ?? 'other'}Count`,
+            {
+              smart_count: totalQuantity
+            }
+          ),
+          instrumentFullName:
+            firstOperation.instrument?.fullName ??
+            firstOperation.instrument.symbol
+        });
     }
 
     return '';
@@ -478,7 +501,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     for (const item of operations) {
       if (
         item.type === OperationType.OPERATION_TYPE_SELL ||
-        item.type === OperationType.OPERATION_TYPE_BUY
+        item.type === OperationType.OPERATION_TYPE_BUY ||
+        item.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
       ) {
         totalQuantity += item.quantity;
         totalAmount += item.price * item.quantity;
@@ -488,6 +512,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     switch (firstOperation.type) {
       case OperationType.OPERATION_TYPE_SELL:
       case OperationType.OPERATION_TYPE_BUY:
+      case OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE:
         return ppp.dict.t('$timeLineWidget.lotAtPrice', {
           lotCount: ppp.dict.t('$timeLineWidget.lotCount', {
             smart_count: totalQuantity
@@ -536,6 +561,11 @@ export class TimelineWidget extends WidgetWithInstrument {
 
       case OperationType.OPERATION_TYPE_SELL:
         if (this.document.highlightTrades) classList.push('negative');
+
+        break;
+
+      case OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE:
+        if (this.document.highlightTrades) classList.push('earth');
 
         break;
     }
