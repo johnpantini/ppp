@@ -490,9 +490,18 @@ export const orderWidgetTemplate = html`
                       value="${(x) => x.orderTypeTabs.activeid}"
                     >
                       ${repeat(
-                        (x) => x.conditionalOrders,
+                        (x) =>
+                          x.conditionalOrders
+                            ?.map((o, i) => {
+                              o.databaseIndex = i;
+
+                              return o;
+                            })
+                            ?.filter((o) => !o.hidden),
                         html`
-                          <ppp-widget-box-radio value="${(x, c) => c.index}">
+                          <ppp-widget-box-radio
+                            value="${(x) => x.databaseIndex}"
+                          >
                             ${(x) => x.name}
                           </ppp-widget-box-radio>
                         `,
@@ -1339,7 +1348,7 @@ export class OrderWidget extends WidgetWithInstrument {
     );
 
     this.conditionalOrders = (this.document.conditionalOrders ?? []).filter(
-      (o) => !o.hidden && o.orderId
+      (o) => o.orderId
     );
 
     if (!this.document.ordersTrader) {

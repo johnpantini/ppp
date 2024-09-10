@@ -291,18 +291,10 @@ export class TraderCommonPage extends Page {
         switch (this.document.runtime) {
           case 'shared-worker':
           case 'url':
-            try {
-              const trader = await ppp.getOrCreateTrader(this.document);
-
-              await later(1000);
-
+            ppp.getOrCreateTrader(this.document).then((trader) => {
               trader.terminate();
               ppp.traders.runtimes.delete(this.document._id);
-            } catch (e) {
-              // No-op.
-            }
-
-            break;
+            });
         }
       }
     }
