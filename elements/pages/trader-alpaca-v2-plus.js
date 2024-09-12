@@ -28,7 +28,7 @@ export const traderAlpacaV2PlusTemplate = html`
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль UTEX или Psina.</p>
+          <p class="description">Брокерский профиль UTEX, Alpaca или Psina.</p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -81,6 +81,16 @@ export const traderAlpacaV2PlusTemplate = html`
               appearance="primary"
             >
               Добавить профиль UTEX
+            </ppp-button>
+            <ppp-button
+              @click="${() =>
+                ppp.app.mountPage('broker-alpaca', {
+                  size: 'xlarge',
+                  adoptHeader: true
+                })}"
+              appearance="primary"
+            >
+              Добавить профиль Alpaca
             </ppp-button>
             <ppp-button
               @click="${() =>
