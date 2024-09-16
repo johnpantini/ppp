@@ -168,7 +168,7 @@ export const widgetWithInstrumentBodyTemplate = (
     )}
   `;
 
-export const widgetDefaultHeaderTemplate = () => html`
+export const widgetDefaultHeaderTemplate = (options = {}) => html`
   <div class="widget-header">
     <div class="widget-header-inner">
       <ppp-widget-group-control
@@ -184,7 +184,9 @@ export const widgetDefaultHeaderTemplate = () => html`
       <span class="widget-title">
         <span class="title">${(x) => x.document?.name ?? ''}</span>
       </span>
-      <ppp-widget-header-buttons></ppp-widget-header-buttons>
+      <ppp-widget-header-buttons>
+        ${options.buttons}
+      </ppp-widget-header-buttons>
     </div>
   </div>
 `;

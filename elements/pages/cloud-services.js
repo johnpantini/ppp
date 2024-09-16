@@ -96,8 +96,8 @@ export const cloudServicesPageTemplate = html`
                   html`
                     <span>
                       Чтобы получить компактное представление, необходимо
-                      соединиться с облачной базой данных MongoDB Realm хотя бы
-                      1 раз.
+                      соединиться с облачной базой данных MongoDB Cloud Services
+                      хотя бы 1 раз.
                     </span>
                   `
                 )}
@@ -233,7 +233,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(4))}</div>
         <div class="label-group">
-          <h6>Публичный ключ MongoDB Realm</h6>
+          <h6>Публичный ключ MongoDB Cloud Services</h6>
           <p class="description">
             <a
               class="link"
@@ -241,7 +241,7 @@ export const cloudServicesPageTemplate = html`
               rel="noopener"
               href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/mongodb-realm-keys"
             >
-              MongoDB Realm
+              MongoDB Cloud Services
             </a>
             обеспечивает приложение базой данных (хранилищем) и облачными
             функциями.
@@ -263,7 +263,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
         <div class="label-group">
-          <h6>Приватный ключ MongoDB Realm</h6>
+          <h6>Приватный ключ MongoDB Cloud Services</h6>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -365,7 +365,10 @@ export async function checkGitHubToken({ token }) {
   });
 }
 
-export async function checkMongoDBRealmCredentials({ publicKey, privateKey }) {
+export async function checkMongoDBCloudServicesCredentials({
+  publicKey,
+  privateKey
+}) {
   return ppp.fetch(
     'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
     {
@@ -640,7 +643,7 @@ export class CloudServicesPage extends Page {
 
   generateCloudCredentialsString() {
     if (!ppp.keyVault.getKey('mongo-location-url'))
-      return 'Соединитесь с облачной базой MongoDB Realm';
+      return 'Соединитесь с облачной базой MongoDB Cloud Services';
 
     return btoa(
       JSON.stringify({
@@ -777,7 +780,7 @@ export class CloudServicesPage extends Page {
     });
   }
 
-  async #setUpMongoDBRealmApp({ mongoDBRealmAccessToken }) {
+  async #setUpMongoDBCloudServicesApp({ mongoDBRealmAccessToken }) {
     // 1. Get Group (Project) ID.
     const rProjectId = await ppp.fetch(
       'https://realm.mongodb.com/api/admin/v3.0/auth/profile',
@@ -790,9 +793,9 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rProjectId,
-      'Не удалось получить ID проекта PPP в MongoDB Realm.'
+      'Не удалось получить ID проекта PPP в MongoDB Cloud Services.'
     );
-    this.progressOperation(5, 'Поиск проекта PPP в MongoDB Realm');
+    this.progressOperation(5, 'Поиск проекта PPP в MongoDB Cloud Services');
 
     const { roles } = await rProjectId.json();
 
@@ -803,7 +806,7 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-group-id', groupId);
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Проект ppp не найден в MongoDB Realm.',
+        errorMessage: 'Проект ppp не найден в MongoDB Cloud Services.',
         raiseException: true
       });
     }
@@ -820,7 +823,7 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rAppId,
-      'Не удалось получить ID приложения PPP в MongoDB Realm.'
+      'Не удалось получить ID приложения PPP в MongoDB Cloud Services.'
     );
     this.progressOperation(10);
 
@@ -832,7 +835,7 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-app-id', pppApp._id);
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Приложение PPP не найдено в MongoDB Realm.',
+        errorMessage: 'Приложение PPP не найдено в MongoDB Cloud Services.',
         raiseException: true
       });
     }
@@ -849,11 +852,11 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rAuthProviders,
-      'Не удалось получить список провайдеров авторизации MongoDB Realm.'
+      'Не удалось получить список провайдеров авторизации MongoDB Cloud Services.'
     );
     this.progressOperation(
       15,
-      'Создание API-ключа пользователя в MongoDB Realm'
+      'Создание API-ключа пользователя в MongoDB Cloud Services'
     );
 
     const providers = await rAuthProviders.json();
@@ -873,7 +876,7 @@ export class CloudServicesPage extends Page {
 
       await maybeFetchError(
         rEnableAPIKeyProvider,
-        'Не удалось активировать провайдера API-ключей MongoDB Realm.'
+        'Не удалось активировать провайдера API-ключей MongoDB Cloud Services.'
       );
     }
 
@@ -896,7 +899,7 @@ export class CloudServicesPage extends Page {
 
       await maybeFetchError(
         rCreateAPIKeyProvider,
-        'Не удалось подключить провайдера API-ключей MongoDB Realm.'
+        'Не удалось подключить провайдера API-ключей MongoDB Cloud Services.'
       );
     }
 
@@ -917,7 +920,7 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rCreateAPIKey,
-      'Не удалось создать API-ключ нового пользователя MongoDB Realm.'
+      'Не удалось создать API-ключ нового пользователя MongoDB Cloud Services.'
     );
     this.progressOperation(25, 'Запись облачных функций');
     ppp.keyVault.setKey('mongo-api-key', (await rCreateAPIKey.json()).key);
@@ -1006,14 +1009,15 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('github-token', this.gitHubToken.value.trim());
 
       // 2. Check MongoDB Realm admin credentials, get the access_token.
-      const rMongoDBRealmCredentials = await checkMongoDBRealmCredentials({
-        publicKey: this.mongoPublicKey.value.trim(),
-        privateKey: this.mongoPrivateKey.value.trim()
-      });
+      const rMongoDBRealmCredentials =
+        await checkMongoDBCloudServicesCredentials({
+          publicKey: this.mongoPublicKey.value.trim(),
+          privateKey: this.mongoPrivateKey.value.trim()
+        });
 
       if (!rMongoDBRealmCredentials.ok) {
         invalidate(this.mongoPrivateKey, {
-          errorMessage: 'Неверная пара ключей MongoDB Realm',
+          errorMessage: 'Неверная пара ключей MongoDB Cloud Services',
           raiseException: true
         });
       }
@@ -1036,10 +1040,10 @@ export class CloudServicesPage extends Page {
       const { access_token: mongoDBRealmAccessToken } =
         await rMongoDBRealmCredentials.json();
 
-      this.progressOperation(0, 'Настройка приложения MongoDB Realm');
+      this.progressOperation(0, 'Настройка приложения MongoDB Cloud Services');
 
-      // 3. Create a MongoDB realm API key, set up cloud functions.
-      await this.#setUpMongoDBRealmApp({
+      // 3. Create a MongoDB Cloud Services API key, set up cloud functions.
+      await this.#setUpMongoDBCloudServicesApp({
         mongoDBRealmAccessToken
       });
 

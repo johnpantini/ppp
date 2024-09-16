@@ -59,6 +59,9 @@ export const widgetTimeAndSalesColumnListTemplate = html`
               <ppp-option value="pool">
                 ${() => ppp.t('$timeAndSalesWidget.columns.pool')}
               </ppp-option>
+              <ppp-option value="condition">
+                ${() => ppp.t('$timeAndSalesWidget.columns.condition')}
+              </ppp-option>
             </ppp-select>
           </div>
         `

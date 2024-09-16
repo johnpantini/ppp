@@ -80,6 +80,10 @@ const DEFAULT_COLUMNS = [
   {
     source: 'pool',
     width: 48
+  },
+  {
+    source: 'condition',
+    width: 48
   }
 ].map((column) => {
   column.name = ppp.t(`$timeAndSalesWidget.columns.${column.source}`);
@@ -278,6 +282,9 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     },
     pool: {
       hidden: true
+    },
+    condition: {
+      hidden: true
     }
   };
 
@@ -314,7 +321,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   async printChanged(oldValue, trade) {
     const threshold = await this.getThreshold(trade);
 
-    if (this.instrumentTrader.getSymbol(this.instrument) !== trade.symbol) {
+    if (this.instrument.symbol !== trade.symbol) {
       return;
     }
 
@@ -476,7 +483,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         )
       }),
       time: formatDateWithOptions(trade.timestamp, this.timeColumnOptions),
-      pool: trade.pool
+      pool: trade.pool,
+      condition: Array.isArray(trade.condition)
+        ? trade.condition.join(' ').trim()
+        : ''
     };
   }
 
@@ -506,7 +516,11 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         layout.push([
           `<div class="column" source="${source}"><div class="column-content neutral"></div><div class="column-content positive"></div><div class="column-content negative"></div></div>`
         ]);
-      } else if (source === 'time' || source === 'pool') {
+      } else if (
+        source === 'time' ||
+        source === 'pool' ||
+        source === 'condition'
+      ) {
         layout.push([
           `<div class="column" source="${source}"><div class="column-content"></div></div>`
         ]);
@@ -570,6 +584,15 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         'div[source="pool"] div.column-content'
       );
       this.#refs.pool.th = this.table.querySelector('th[source="pool"]');
+    }
+
+    if (!this.#refs.condition.hidden) {
+      this.#refs.condition.content = this.grid.querySelector(
+        'div[source="condition"] div.column-content'
+      );
+      this.#refs.condition.th = this.table.querySelector(
+        'th[source="condition"]'
+      );
     }
 
     this.#rowsHolder = this.grid.querySelector('div.rows-holder');
@@ -638,6 +661,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     let negativeAmountValues = '';
     let timeValues = '';
     let poolValues = '';
+    let conditionValues = '';
 
     for (let i = 0; i < this.#trades.length; i++) {
       const trade = this.#trades[i];
@@ -695,6 +719,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       if (!this.#refs.pool.hidden) {
         poolValues += `${trade.pool}\n`;
       }
+
+      if (!this.#refs.condition.hidden) {
+        conditionValues += `${trade.condition}\n`;
+      }
     }
 
     if (!this.#refs.price.hidden) {
@@ -720,6 +748,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
     if (!this.#refs.pool.hidden) {
       this.#refs.pool.content.textContent = poolValues;
+    }
+
+    if (!this.#refs.condition.hidden) {
+      this.#refs.condition.content.textContent = conditionValues;
     }
   }
 

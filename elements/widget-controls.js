@@ -2416,9 +2416,12 @@ export const widgetTabsStyles = css`
     position: relative;
     align-items: center;
     border: none;
-    flex: 0 0 auto;
     margin: 0;
     padding: 0;
+  }
+
+  :host([variant='compact']) .tablist {
+    width: max-content;
   }
 
   ::slotted(ppp-widget-tab) {
@@ -2427,7 +2430,10 @@ export const widgetTabsStyles = css`
   }
 `;
 
-export class WidgetTabs extends Tabs {}
+export class WidgetTabs extends Tabs {
+  @attr
+  variant;
+}
 
 export const widgetTabStyles = css`
   ${normalize()}

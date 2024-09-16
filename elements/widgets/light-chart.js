@@ -16,10 +16,15 @@ import {
   ref,
   observable,
   attr,
-  Updates
+  Updates,
+  repeat
 } from '../../vendor/fast-element.min.js';
 import { TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
-import { normalize, spacing } from '../../design/styles.js';
+import {
+  normalize,
+  spacing,
+  getTraderSelectOptionColor
+} from '../../design/styles.js';
 import { createChart, CrosshairMode, LineStyle } from '../../lib/ppp-charts.js';
 import {
   bodyFont,
@@ -50,6 +55,7 @@ import {
   positive,
   negative
 } from '../../design/design-tokens.js';
+import { arrowRight } from '../../static/svg/sprite.js';
 import {
   formatAmount,
   formatPriceWithoutCurrency,
@@ -57,16 +63,38 @@ import {
   formatVolume,
   getInstrumentPrecision
 } from '../../lib/intl.js';
-import { CandleInterval } from '../../vendor/tinkoff/definitions/market-data.js';
 import '../button.js';
 import '../query-select.js';
+import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
+import '../widget-timeframe-list.js';
+
+export const DEFAULT_TIMEFRAMES = [
+  {
+    name: '1D',
+    unit: 'Day',
+    value: 1,
+    hidden: false
+  }
+];
 
 export const lightChartWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      ${widgetDefaultHeaderTemplate()}
+      ${widgetDefaultHeaderTemplate({
+        buttons: html`
+          <div
+            ?hidden="${(x) => !x.ready}"
+            title="Перейти в конец графика"
+            class="button"
+            slot="start"
+            @click="${(x) => x.scrollToEnd()}"
+          >
+            ${html.partial(arrowRight)}
+          </div>
+        `
+      })}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         ${when(
@@ -93,6 +121,34 @@ export const lightChartWidgetTemplate = html`
             !x.instrument?.symbol ||
             (x.instrument && x.instrumentTrader && x.unsupportedInstrument)}"
         >
+          <ppp-widget-tabs
+            ${ref('tfSelector')}
+            activeid="${(x) => x.getActiveTimeframeTab()}"
+            variant="compact"
+            ?hidden="${(x) => !(x.document.showToolbar ?? true)}"
+            @change="${(x, { event }) => {
+              const activeTimeFrameTab = +event.detail.id;
+
+              x.timeframeChanged(x.timeframes[activeTimeFrameTab - 1]);
+
+              return x.updateDocumentFragment({
+                $set: {
+                  'widgets.$.activeTimeFrameTab': activeTimeFrameTab
+                }
+              });
+            }}"
+          >
+            ${repeat(
+              (x) => x.timeframes,
+              html`
+                <ppp-widget-tab id="${(x, c) => c.index + 1}">
+                  ${(x) => x.name}
+                </ppp-widget-tab>
+                <ppp-tab-panel id="${(x, c) => c.index + 1}"></ppp-tab-panel>
+              `,
+              { positioning: true }
+            )}
+          </ppp-widget-tabs>
           <div class="chart-holder-inner">
             <div class="toolbar"></div>
             <div class="chart">
@@ -275,6 +331,10 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   volumeSeries;
 
+  hasMore = true;
+
+  ohlcv = [];
+
   @observable
   chartTrader;
 
@@ -297,11 +357,10 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   lastCandle;
 
-  // Previous candle for timeframe.
-  prev;
+  cursor;
 
-  // Next candle for timeframe.
-  next;
+  @observable
+  timeframes;
 
   @observable
   openPrice;
@@ -335,8 +394,14 @@ export class LightChartWidget extends WidgetWithInstrument {
     return value;
   }
 
-  async connectedCallback() {
+  constructor() {
+    super();
+
+    this.timeframes = [];
     this.ready = false;
+  }
+
+  async connectedCallback() {
     this.onCrosshairMove = this.onCrosshairMove.bind(this);
     this.onVisibleLogicalRangeChanged =
       this.onVisibleLogicalRangeChanged.bind(this);
@@ -362,6 +427,11 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
 
     try {
+      this.timeframes = (this.document.timeframes ?? DEFAULT_TIMEFRAMES).filter(
+        (t) => !t.hidden
+      );
+
+      this.tfSelector.activeid = this.getActiveTimeframeTab();
       this.chartTrader = await ppp.getOrCreateTrader(this.document.chartTrader);
       this.instrumentTrader = this.chartTrader;
 
@@ -434,7 +504,6 @@ export class LightChartWidget extends WidgetWithInstrument {
       await this.chartTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          candle: TRADER_DATUM.CANDLE,
           traderEvent: TRADER_DATUM.TRADER
         }
       });
@@ -461,7 +530,6 @@ export class LightChartWidget extends WidgetWithInstrument {
       await this.chartTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          candle: TRADER_DATUM.CANDLE,
           traderEvent: TRADER_DATUM.TRADER
         }
       });
@@ -483,14 +551,19 @@ export class LightChartWidget extends WidgetWithInstrument {
     Updates.enqueue(() => {
       if (this.chart) {
         const { width, height } = getComputedStyle(this);
+        const toolbarOffset = this.document.showToolbar ?? true ? 28 : 0;
 
         if (this.stackSelector.hasAttribute('hidden')) {
-          this.chart.resize(parseInt(width) - 2, parseInt(height) - 32);
+          this.chart.resize(
+            parseInt(width) - 2,
+            parseInt(height) - 32 - toolbarOffset
+          );
         } else {
           this.chart.resize(
             parseInt(width) - 2,
             parseInt(height) -
               32 -
+              toolbarOffset -
               parseInt(getComputedStyle(this.stackSelector).height)
           );
         }
@@ -515,7 +588,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     const info = this.mainSeries.barsInLogicalRange(newRange);
 
     if (info !== null && info.barsBefore < 50) {
-      // TODO.
+      this.ready && this.loadHistory();
     }
   }
 
@@ -537,6 +610,12 @@ export class LightChartWidget extends WidgetWithInstrument {
       }
     } else {
       this.shouldShowPriceInfo = false;
+    }
+  }
+
+  scrollToEnd() {
+    if (this.ready && this.chart?.timeScale) {
+      this.chart.timeScale().scrollToPosition(3);
     }
   }
 
@@ -570,7 +649,13 @@ export class LightChartWidget extends WidgetWithInstrument {
       .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
     this.resizeChart();
 
-    this.mainSeries = this.chart.addCandlestickSeries({
+    let seriesKind = this.document.seriesKind;
+
+    if (!['Candlestick', 'Bar', 'Line'].includes(seriesKind)) {
+      seriesKind = 'Candlestick';
+    }
+
+    this.mainSeries = this.chart[`add${seriesKind}Series`]({
       downColor: chartDownColor.$value,
       upColor: chartUpColor.$value,
       borderDownColor: chartBorderDownColor.$value,
@@ -606,7 +691,7 @@ export class LightChartWidget extends WidgetWithInstrument {
           isMain: true
         });
       } catch (e) {
-        console.error(e);
+        this.$$debug('setupChart failed: %o', e);
 
         return this.notificationsArea.error({
           text: 'Не удалось загрузить историю котировок.'
@@ -616,11 +701,11 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   // Older quotes come first.
-  setData(quotes) {
-    this.mainSeries.setData(quotes.map(this.traderQuoteToChartQuote));
+  setData(ohlcv) {
+    this.mainSeries.setData(ohlcv);
 
     this.volumeSeries.setData(
-      quotes.map((c) => {
+      ohlcv.map((c) => {
         return {
           time: new Date(c.time).valueOf(),
           value: c.volume,
@@ -636,34 +721,66 @@ export class LightChartWidget extends WidgetWithInstrument {
       })
     );
 
-    this.lastCandle = quotes[quotes.length - 1];
+    this.lastCandle = ohlcv[ohlcv.length - 1];
   }
 
   async traderEventChanged(oldValue, newValue) {
     if (typeof newValue === 'object' && newValue?.event === 'reconnect') {
-      await this.loadHistory();
+      if (this.ready) {
+        this.cursor = void 0;
+        this.ohlcv = [];
+        this.hasMore = true;
+
+        this.loadHistory();
+      }
     }
   }
 
   async loadHistory() {
+    if (!this.hasMore) {
+      return;
+    }
+
+    const shouldScroll = !this.ohlcv.length;
+
     if (typeof this.chartTrader.historicalCandles === 'function') {
       this.ready = false;
 
       try {
-        const { candles, prev, next } =
-          await this.chartTrader.historicalCandles({
-            instrument: this.instrument,
-            tf: CandleInterval.CANDLE_INTERVAL_5_MIN
-          });
+        for (const tab of this.tfSelector.tabs) {
+          tab.setAttribute('disabled', '');
+        }
 
-        this.prev = prev;
-        this.next = next;
+        const { unit, value } = this.getCurentTimeframe();
+        const { candles, cursor } = await this.chartTrader.historicalCandles({
+          instrument: this.instrument,
+          unit,
+          value,
+          cursor: this.cursor
+        });
 
-        this.setData(candles);
+        this.cursor = cursor;
+
+        if (!cursor || !candles.length) {
+          this.hasMore = false;
+        }
+
+        if (candles.length) {
+          this.ohlcv = [
+            ...candles.map(this.traderQuoteToChartQuote),
+            ...this.ohlcv
+          ];
+        }
+
+        this.setData(this.ohlcv);
       } finally {
         this.ready = true;
 
-        this.chart.timeScale().scrollToPosition(3);
+        shouldScroll && this.chart.timeScale().scrollToPosition(3);
+
+        for (const tab of this.tfSelector.tabs) {
+          tab.removeAttribute('disabled');
+        }
       }
     }
   }
@@ -673,7 +790,49 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     if (this.chartTrader) {
       if (this.instrument?.symbol) {
-        await this.loadHistory();
+        this.cursor = void 0;
+        this.ohlcv = [];
+        this.hasMore = true;
+
+        this.loadHistory();
+      }
+    }
+  }
+
+  getActiveTimeframeTab() {
+    // From 1 to this.timeframes.length.
+    const activeTimeFrameTab = +this.document.activeTimeFrameTab;
+
+    if (
+      !isNaN(activeTimeFrameTab) &&
+      activeTimeFrameTab > 0 &&
+      activeTimeFrameTab <= this.timeframes.length
+    ) {
+      return activeTimeFrameTab.toString();
+    } else {
+      return '1';
+    }
+  }
+
+  getCurentTimeframe() {
+    return (
+      this.timeframes[+this.tfSelector?.activeid - 1] ??
+      this.timeframes[this.document.activeTimeFrameTab - 1] ??
+      this.timeframes[0] ?? {
+        unit: 'Day',
+        value: 1
+      }
+    );
+  }
+
+  async timeframeChanged() {
+    if (this.chartTrader) {
+      if (this.instrument?.symbol) {
+        this.cursor = void 0;
+        this.ohlcv = [];
+        this.hasMore = true;
+
+        this.loadHistory();
       }
     }
   }
@@ -687,9 +846,15 @@ export class LightChartWidget extends WidgetWithInstrument {
     return quote;
   }
 
-  roundTimestampForTimeframe(timestamp, tf = 1) {
+  /**
+   *
+   * @param {*} timestamp
+   * @param {number} tf - timeframe in seconds.
+   * @returns {number}
+   */
+  roundTimestampForTimeframe(timestamp, tf) {
     const printTime = new Date(timestamp);
-    const coefficient = 1000 * 60 * tf;
+    const coefficient = 1000 * tf;
     const roundedTime = new Date(
       Math.floor(printTime.getTime() / coefficient) * coefficient
     );
@@ -700,14 +865,75 @@ export class LightChartWidget extends WidgetWithInstrument {
     );
   }
 
+  // Update the last candle here.
   printChanged(oldValue, newValue) {
     if (this.ready && newValue?.price) {
-      if (newValue.timestamp < Date.now() - 3600 * 1000) {
-        return;
+      if (Array.isArray(newValue.condition)) {
+        // https://alpaca.markets/learn/stock-minute-bars/
+        for (const condition of newValue.condition) {
+          if (
+            [
+              'B',
+              'W',
+              '4',
+              '7',
+              '9',
+              'C',
+              'G',
+              'H',
+              'M',
+              'N',
+              'P',
+              'Q',
+              'R',
+              'U',
+              'V',
+              'Z'
+            ].includes(condition)
+          ) {
+            return;
+          }
+        }
       }
 
-      // Update the last candle here.
-      const time = this.roundTimestampForTimeframe(newValue.timestamp, 5);
+      const { unit, value } = this.getCurentTimeframe();
+      let tf = 1;
+
+      switch (unit) {
+        case 'Sec':
+          tf = value;
+
+          break;
+        case 'Min':
+          tf = value * 60;
+
+          break;
+        case 'Hour':
+          tf = value * 3600;
+
+          break;
+        case 'Day':
+          tf = value * 3600 * 24;
+
+          break;
+        case 'Week':
+          tf = value * 3600 * 24 * 7;
+
+          break;
+        case 'Month':
+          const now = new Date();
+          const daysInMonth = new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0
+          ).getDate();
+
+          tf = value * 3600 * 24 * daysInMonth;
+
+          break;
+      }
+
+      const time = this.roundTimestampForTimeframe(newValue.timestamp, tf);
 
       if (
         typeof this.lastCandle === 'undefined' ||
@@ -736,41 +962,6 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
-  candleChanged(oldValue, newValue) {
-    if (this.ready && newValue?.close) {
-      const roundedTime = this.roundTimestampForTimeframe(
-        new Date(newValue.time).valueOf(),
-        5
-      );
-
-      if (
-        typeof this.lastCandle === 'undefined' ||
-        this.lastCandle.time < roundedTime
-      ) {
-        this.lastCandle = {
-          open: newValue.open,
-          high: newValue.high,
-          low: newValue.low,
-          close: newValue.price,
-          time: roundedTime,
-          volume: newValue.volume
-        };
-      } else {
-        const { open, high, low, volume } = this.lastCandle;
-
-        // TODO - volume
-        this.lastCandle = {
-          open,
-          high: Math.max(high, newValue.high),
-          low: Math.min(low, newValue.low),
-          close: newValue.close,
-          time: roundedTime,
-          volume
-        };
-      }
-    }
-  }
-
   lastCandleChanged(oldValue, newValue) {
     if (newValue?.close) {
       try {
@@ -790,21 +981,24 @@ export class LightChartWidget extends WidgetWithInstrument {
                 ).$value.createCSS()}, 0.56)`
         });
       } catch (e) {
-        // Suppress TV errors
+        // Suppress TV errors.
         void 0;
       }
     }
   }
 
   async validate() {
-    // No-op.
+    await this.container.timeframeList.validate();
   }
 
   async submit() {
     return {
       $set: {
         chartTraderId: this.container.chartTraderId.value,
-        tradesTraderId: this.container.tradesTraderId.value
+        tradesTraderId: this.container.tradesTraderId.value,
+        timeframes: this.container.timeframeList.value,
+        showToolbar: this.container.showToolbar.checked,
+        seriesKind: this.container.seriesKind.value
       }
     };
   }
@@ -827,103 +1021,186 @@ export async function widgetDefinition() {
     minWidth: 140,
     defaultHeight: 350,
     settings: html`
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер графика</h5>
-          <p class="description">
-            Трейдер, который будет являться источником для отрисовки графика.
-          </p>
-        </div>
-        <div class="control-line flex-start">
-          <ppp-query-select
-            ${ref('chartTraderId')}
-            deselectable
-            standalone
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.chartTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.chartTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_CHARTS%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.chartTraderId ?? ''%]` }
+      <ppp-tabs activeid="traders">
+        <ppp-tab id="traders">Трейдеры</ppp-tab>
+        <ppp-tab id="tf">Таймфреймы</ppp-tab>
+        <ppp-tab id="ui">UI</ppp-tab>
+        <ppp-tab-panel id="traders-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер графика</h5>
+              <p class="description">
+                Трейдер, который будет являться источником для отрисовки
+                графика.
+              </p>
+            </div>
+            <div class="control-line flex-start">
+              <ppp-query-select
+                ${ref('chartTraderId')}
+                deselectable
+                standalone
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.chartTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.chartTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_CHARTS%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.chartTraderId ?? ''%]` }
+                            ]
+                          }
                         ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+                @change="${async (x) => {
+                  const datum = x.chartTraderId.datum();
+
+                  if (datum) {
+                    const trader = await ppp.getOrCreateTrader(
+                      await x.denormalization.denormalize(datum),
+                      {
+                        doNotStartWorker: true
                       }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
-      <div class="widget-settings-section">
-        <div class="widget-settings-label-group">
-          <h5>Трейдер ленты сделок</h5>
-          <p class="description">
-            Лента сделок используется для формирования графика в режиме
-            реального времени.
-          </p>
-        </div>
-        <div class="control-line flex-start">
-          <ppp-query-select
-            ${ref('tradesTraderId')}
-            deselectable
-            standalone
-            placeholder="Опционально, нажмите для выбора"
-            value="${(x) => x.document.tradesTraderId}"
-            :context="${(x) => x}"
-            :preloaded="${(x) => x.document.tradesTrader ?? ''}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('traders')
-                  .find({
-                    $and: [
-                      {
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
-                      },
-                      {
-                        $or: [
-                          { removed: { $ne: true } },
-                          { _id: `[%#this.document.tradesTraderId ?? ''%]` }
+                    );
+
+                    x.timeframeList.allowedTimeframeList =
+                      trader.getTimeframeList() ?? [];
+                  } else {
+                    x.timeframeList.allowedTimeframeList = [];
+                  }
+                }}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Трейдер ленты сделок</h5>
+              <p class="description">
+                Лента сделок используется для формирования графика по последним
+                сделкам.
+              </p>
+            </div>
+            <div class="control-line flex-start">
+              <ppp-query-select
+                ${ref('tradesTraderId')}
+                deselectable
+                standalone
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.tradesTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.tradesTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_TIME_AND_SALES%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              { _id: `[%#this.document.tradesTraderId ?? ''%]` }
+                            ]
+                          }
                         ]
-                      }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <ppp-button
-            appearance="default"
-            @click="${() => window.open('?page=trader', '_blank').focus()}"
-          >
-            +
-          </ppp-button>
-        </div>
-      </div>
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="tf-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Таймфреймы для отображения</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-widget-timeframe-list
+              ${ref('timeframeList')}
+              :stencil="${() => {
+                return {};
+              }}"
+              :list="${(x) => x.document.timeframes ?? DEFAULT_TIMEFRAMES}"
+            ></ppp-widget-timeframe-list>
+          </div>
+        </ppp-tab-panel>
+        <ppp-tab-panel id="ui-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интерфейс</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showToolbar ?? true}"
+              ${ref('showToolbar')}
+            >
+              Показывать панель выбора таймфрейма
+            </ppp-checkbox>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Вид графика</h5>
+            </div>
+            <div class="spacing2"></div>
+            <div class="widget-settings-input-group">
+              <ppp-radio-group
+                orientation="vertical"
+                value="${(x) => x.document.seriesKind ?? 'Candlestick'}"
+                ${ref('seriesKind')}
+              >
+                <ppp-radio value="Candlestick">Японские свечи</ppp-radio>
+                <ppp-radio value="Bar">Бары</ppp-radio>
+                <ppp-radio value="Line">Линия</ppp-radio>
+              </ppp-radio-group>
+            </div>
+          </div>
+        </ppp-tab-panel>
+      </ppp-tabs>
     `
   };
 }

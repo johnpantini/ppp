@@ -202,6 +202,14 @@ export default function (i18n) {
         [SERVICES.PPP_ASPIRANT_WORKER]: 'Aspirant Worker',
         [SERVICES.CLOUDFLARE_WORKER]: 'Cloudflare Worker'
       },
+      timeframeLabel: {
+        Sec: 'Second',
+        Min: 'Minute',
+        Hour: 'Hour',
+        Day: 'Day',
+        Week: 'Week',
+        Month: 'Month'
+      },
       versioningStatus: {
         [VERSIONING_STATUS.OLD]: 'Требуется обновление',
         [VERSIONING_STATUS.OFF]: 'Версия не отслеживается',

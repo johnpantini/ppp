@@ -285,6 +285,30 @@ export var CandleInterval;
   /** CANDLE_INTERVAL_DAY - 1 день. */
   CandleInterval[(CandleInterval['CANDLE_INTERVAL_DAY'] = 5)] =
     'CANDLE_INTERVAL_DAY';
+  /** CANDLE_INTERVAL_2_MIN - 2 минуты. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_2_MIN'] = 6)] =
+    'CANDLE_INTERVAL_2_MIN';
+  /** CANDLE_INTERVAL_3_MIN - 3 минуты. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_3_MIN'] = 7)] =
+    'CANDLE_INTERVAL_3_MIN';
+  /** CANDLE_INTERVAL_10_MIN - 10 минут. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_10_MIN'] = 8)] =
+    'CANDLE_INTERVAL_10_MIN';
+  /** CANDLE_INTERVAL_30_MIN - 30 минут. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_30_MIN'] = 9)] =
+    'CANDLE_INTERVAL_30_MIN';
+  /** CANDLE_INTERVAL_2_HOUR - 2 часа. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_2_HOUR'] = 10)] =
+    'CANDLE_INTERVAL_2_HOUR';
+  /** CANDLE_INTERVAL_4_HOUR - 4 часа. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_4_HOUR'] = 11)] =
+    'CANDLE_INTERVAL_4_HOUR';
+  /** CANDLE_INTERVAL_WEEK - 1 неделя. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_WEEK'] = 12)] =
+    'CANDLE_INTERVAL_WEEK';
+  /** CANDLE_INTERVAL_MONTH - 1 месяц. */
+  CandleInterval[(CandleInterval['CANDLE_INTERVAL_MONTH'] = 13)] =
+    'CANDLE_INTERVAL_MONTH';
   CandleInterval[(CandleInterval['UNRECOGNIZED'] = -1)] = 'UNRECOGNIZED';
 })(CandleInterval || (CandleInterval = {}));
 

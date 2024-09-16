@@ -6,7 +6,8 @@ export default function (i18n) {
         volume: 'Объём',
         amount: 'Сумма',
         time: 'Время',
-        pool: 'Пул'
+        pool: 'Пул',
+        condition: 'SC'
       }
     }
   });
