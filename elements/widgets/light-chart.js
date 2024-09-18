@@ -619,30 +619,42 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
-  async setupChart() {
+  applyChartOptions() {
+    const tf = this.getCurentTimeframe();
+
     this.chart.applyOptions({
       timeframe: '5',
       localization: {
         priceFormatter: this.priceFormatter.bind(this),
-        timeFormatter: (t) =>
-          new Intl.DateTimeFormat(ppp.i18nLocale, {
+        timeFormatter: (t) => {
+          const options = {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
             hour: 'numeric',
             minute: 'numeric',
             hour12: false
-          }).format(
+          };
+
+          if (tf.unit === 'Sec') {
+            options.second = 'numeric';
+          }
+
+          return new Intl.DateTimeFormat(ppp.i18nLocale, options).format(
             new Date(
               t * 1000 + ((3600 * new Date().getTimezoneOffset()) / 60) * 1000
             )
-          )
+          );
+        }
       },
       rightPriceScale: {
         alignLabels: true
       }
     });
+  }
 
+  async setupChart() {
+    this.applyChartOptions();
     this.chart.subscribeCrosshairMove(this.onCrosshairMove);
     this.chart
       .timeScale()
@@ -832,18 +844,31 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.ohlcv = [];
         this.hasMore = true;
 
-        this.loadHistory();
+        await this.loadHistory();
+        this.applyChartOptions();
       }
     }
   }
 
   traderQuoteToChartQuote(quote) {
-    quote.time = new Date(quote.time).valueOf();
-    quote.time =
-      Math.floor(quote.time / 1000) -
+    const cloned = {
+      open: quote.open,
+      high: quote.high,
+      low: quote.low,
+      close: quote.close,
+      volume: quote.volume
+    };
+
+    if (typeof quote.vw === 'number') {
+      cloned.vw = quote.vw;
+    }
+
+    cloned.time = new Date(quote.time).valueOf();
+    cloned.time =
+      Math.floor(cloned.time / 1000) -
       (3600 * new Date().getTimezoneOffset()) / 60;
 
-    return quote;
+    return cloned;
   }
 
   /**
@@ -1030,7 +1055,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Трейдер графика</h5>
               <p class="description">
-                Трейдер, который будет являться источником для отрисовки
+                Трейдер, который будет являться источником исторических данных
                 графика.
               </p>
             </div>
@@ -1102,8 +1127,8 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>Трейдер ленты сделок</h5>
               <p class="description">
-                Лента сделок используется для формирования графика по последним
-                сделкам.
+                Будет использован как источник последних сделок для формирования
+                графика в режиме реального времени.
               </p>
             </div>
             <div class="control-line flex-start">
