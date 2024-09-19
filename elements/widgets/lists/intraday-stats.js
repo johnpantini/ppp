@@ -929,7 +929,7 @@ export class IntradayStats {
 
   async connectedCallback(widget) {
     this.widget = widget;
-    this.rebuildStats = $throttle(this.rebuildStatsInternal.bind(this), 1000);
+    this.rebuildStats = $throttle(this.rebuildStatsInternal.bind(this), 250);
     this.commFunc = new Function(
       'price',
       'quantity',
