@@ -140,14 +140,13 @@ export class OrderCustomPage extends Page {
             OrderCustomPage.prototype.find =
               this.orderPageDefinition.pageClass.prototype.find;
 
-            OrderCustomPage.prototype.validate ==
-              async function () {
-                await OrderCommonPage.prototype.validate.call(this);
+            OrderCustomPage.prototype.validate = async function () {
+              await OrderCommonPage.prototype.validate.call(this);
 
-                return this.traderPageDefinition.pageClass.prototype.validate.call(
-                  this
-                );
-              };
+              return this.orderPageDefinition.pageClass.prototype.validate.call(
+                this
+              );
+            };
 
             OrderCustomPage.prototype.submit = async function () {
               return this.orderPageDefinition.pageClass.prototype.submit.call(

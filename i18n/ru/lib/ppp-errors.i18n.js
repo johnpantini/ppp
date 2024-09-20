@@ -47,6 +47,7 @@ export default function (i18n) {
       E_ROUTING_ERROR: 'Ошибка выбора маршрута исполнения.',
       E_INSTRUMENT_NOT_TRADEABLE: 'Инструмент сейчас не торгуется.',
       E_MARKET_ORDERS_NOT_SUPPORTED: 'Рыночные заявки не поддерживаются.',
+      E_LOCATE_FAILED: 'Не удалось запросить акции в займ.',
       E_LIMIT_ORDERS_ONLY:
         'В настоящий момент возможно выставление только лимитных заявок.',
       E_COMMISSION_CALCULATION_ERROR: 'Не удалось рассчитать комиссию.',
@@ -78,6 +79,8 @@ export default function (i18n) {
       E_ORDER_REJECTED_BY_EXCHANGE: 'Заявка была отменена биржей.',
       E_QUANTITY_MUST_BE_GE_$VALUE: 'Количество должно быть не менее %{value}.',
       E_PRICE_MUST_BE_GE_$VALUE: 'Цена должна быть не ниже %{value}.',
+      E_QUANTITY_MUST_BE_DIVISIBLE_BY_$VALUE:
+        'Количество должно быть кратным %{value}.',
       E_PRICE_MUST_BE_LE_$VALUE: 'Цена должна быть не выше %{value}.',
       E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.',
       E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.'

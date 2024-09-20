@@ -177,7 +177,13 @@ export default function (i18n) {
         [TRADING_STATUS.AFTER_HOURS]: 'После закрытия',
         [TRADING_STATUS.TRADING_SUSPENDED]: 'Торговая пауза',
         [TRADING_STATUS.DELISTED]: 'Делистинг',
-        [TRADING_STATUS.IPO_TODAY]: 'Сегодня IPO'
+        [TRADING_STATUS.IPO_TODAY]: 'Сегодня IPO',
+        [TRADING_STATUS.QUOTATION_RESUMPTION]: 'Возобновление приёма заявок',
+        [TRADING_STATUS.SHORT_SALE_RESTRICTION]: 'SSR',
+        [TRADING_STATUS.MARKET_IMBALANCE]: 'Дисбаланс',
+        [TRADING_STATUS.MARKET_CLOSE_IMBALANCE]: 'Дисбаланс (закрытие)',
+        [TRADING_STATUS.PRICE_INDICATION]: 'Price indication',
+        [TRADING_STATUS.TRADING_RANGE_INDICATION]: 'Trading range indication'
       },
       server: {
         [SERVER_TYPES.PASSWORD]: 'Вход по паролю',

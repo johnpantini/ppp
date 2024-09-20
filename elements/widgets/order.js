@@ -273,6 +273,8 @@ export const orderWidgetTemplate = html`
                               return (
                                 {
                                   [TRADING_STATUS.PREMARKET]: 'dot-1',
+                                  [TRADING_STATUS.QUOTATION_RESUMPTION]:
+                                    'dot-1',
                                   [TRADING_STATUS.IPO_TODAY]: 'dot-3',
                                   [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
                                   [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
@@ -1261,10 +1263,11 @@ export class OrderWidget extends WidgetWithInstrument {
     }
 
     if (
-      !(this.extendedLastPrice > 0) &&
-      [TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
-        this.securityStatus
-      )
+      this.securityStatus === TRADING_STATUS.UNSPECIFIED ||
+      (!(this.extendedLastPrice > 0) &&
+        [TRADING_STATUS.PREMARKET, TRADING_STATUS.AFTER_HOURS].includes(
+          this.securityStatus
+        ))
     ) {
       this.securityStatus = '';
     }
@@ -2186,7 +2189,14 @@ export class OrderWidget extends WidgetWithInstrument {
           displaySize
         });
       } else if (this.orderTypeTabs?.activeid === 'conditional') {
-        await this.conditionalOrderHolder?.firstElementChild?.validate?.();
+        try {
+          await this.conditionalOrderHolder?.firstElementChild?.validate?.();
+        } catch (e) {
+          return this.notificationsArea.error({
+            title: 'Ошибка валидации',
+            text: e.message
+          });
+        }
 
         const type = this.conditionalOrder?.order?.type;
         let implUrl;

@@ -218,7 +218,8 @@ export const widgetTypeRadioStyles = css`
   }
 
   :host([disabled]) {
-    display: none !important;
+    pointer-events: none;
+    opacity: 0.42;
   }
 `;
 
@@ -588,6 +589,7 @@ export const widgetPageTemplate = html`
               )}
               <div class="control-line">
                 <ppp-button
+                  ${ref('saveWidgetButton')}
                   appearance="primary"
                   class="save-widget"
                   @click="${(x) => x.submitDocument()}"
@@ -633,6 +635,7 @@ export const widgetPageTemplate = html`
                     Применять настройки по мере редактирования
                   </ppp-checkbox>
                   <ppp-button
+                    ${ref('autoApplyWidgetModificationsButton')}
                     appearance="primary"
                     class="xsmall"
                     @click="${(x) => x.applyModifications()}"
@@ -1515,6 +1518,10 @@ export class WidgetPage extends Page {
       }
 
       try {
+        this.widgetTypeSelector.setAttribute('disabled', '');
+        this.autoApplyWidgetModificationsButton.setAttribute('disabled', '');
+        this.saveWidgetButton.setAttribute('disabled', '');
+
         const module = await import(url);
         const wUrl = new URL(url);
         const baseWidgetUrl = wUrl.href.slice(0, wUrl.href.lastIndexOf('/'));
@@ -1541,6 +1548,9 @@ export class WidgetPage extends Page {
       } catch (e) {
         this.failOperation(e);
       } finally {
+        this.widgetTypeSelector.removeAttribute('disabled');
+        this.autoApplyWidgetModificationsButton.removeAttribute('disabled');
+        this.saveWidgetButton.removeAttribute('disabled');
         this.endOperation();
       }
     }

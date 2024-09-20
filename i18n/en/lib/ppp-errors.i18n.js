@@ -48,6 +48,7 @@ export default function (i18n) {
       E_ROUTING_ERROR: 'Routing error.',
       E_INSTRUMENT_NOT_TRADEABLE: 'Инструмент сейчас не торгуется.',
       E_MARKET_ORDERS_NOT_SUPPORTED: 'Market orders are not supported.',
+      E_LOCATE_FAILED: 'Stock locate request failed.',
       E_LIMIT_ORDERS_ONLY:
         'В настоящий момент возможно выставление только лимитных заявок.',
       E_COMMISSION_CALCULATION_ERROR: 'Не удалось рассчитать комиссию.',
@@ -78,6 +79,8 @@ export default function (i18n) {
       E_UNSUPPORTED_INSTRUMENT: 'Инструмент не поддерживается.',
       E_ORDER_REJECTED_BY_EXCHANGE: 'Order rejected by exchange.',
       E_QUANTITY_MUST_BE_GE_$VALUE: 'Количество должно быть не менее %{value}.',
+      E_QUANTITY_MUST_BE_DIVISIBLE_BY_$VALUE:
+        'Количество должно быть кратным %{value}.',
       E_PRICE_MUST_BE_GE_$VALUE: 'Цена должна быть не ниже %{value}.',
       E_PRICE_MUST_BE_LE_$VALUE: 'Цена должна быть не выше %{value}.',
       E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.',

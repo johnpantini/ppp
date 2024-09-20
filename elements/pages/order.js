@@ -1,4 +1,5 @@
 import { html, css, ref } from '../../vendor/fast-element.min.js';
+import { validate, invalidate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import { ORDERS } from '../../lib/const.js';
 import {
@@ -17,7 +18,7 @@ export class OrderCommonPage extends Page {
     await validate(this.baseUrl);
 
     try {
-      await import(`${new URL(this.baseUrl).toString()}page.js`);
+      await import(`${new URL(this.baseUrl.value).toString()}page.js`);
     } catch (e) {
       console.error(e);
 
