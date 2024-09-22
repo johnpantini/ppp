@@ -2235,7 +2235,12 @@ export class OrderWidget extends WidgetWithInstrument {
         title: 'Заявка выставлена'
       });
     } catch (e) {
-      this.$$placeOrder('[%s] exception: %o', this.document.name, e);
+      this.$$placeOrder(
+        '[%s] exception -> %s: %o',
+        this.document.name,
+        e.name,
+        e.details ?? {}
+      );
 
       let key = await this.ordersTrader?.getErrorI18nKey?.({
         instrument: this.instrument,

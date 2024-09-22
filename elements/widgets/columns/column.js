@@ -66,6 +66,7 @@ class Column extends PPPElement {
       this.column.defaultTraderId = this.parentNode.trader;
     }
 
+    // Populate trader and extraTrader fields to the column here.
     const column = await this.widget?.container.denormalization.denormalize(
       this.column
     );
