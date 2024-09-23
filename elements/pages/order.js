@@ -86,15 +86,19 @@ export const orderPageTemplate = html`
           <span slot="description">
             Записывает изменения рыночных данных в облачное хранилище.
           </span>
-          <ppp-button
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `order-${ORDERS.MARKET_DATA_RECORDER}`
-              })}"
-          >
-            Продолжить
-          </ppp-button>
+          <div slot="action" class="control-line">
+            <ppp-button
+              @click="${() =>
+                ppp.app.navigate({
+                  page: `order-${ORDERS.MARKET_DATA_RECORDER}`
+                })}"
+            >
+              Продолжить
+            </ppp-button>
+            <ppp-button @click="${(x) => x.showRecordingsWindow()}">
+              Управление записями
+            </ppp-button>
+          </div>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(cloudFunctions)}</div>
@@ -130,7 +134,22 @@ export const orderPageStyles = css`
   }
 `;
 
-export class OrderPage extends Page {}
+export class OrderPage extends Page {
+  async showRecordingsWindow() {
+    this.beginOperation();
+
+    try {
+      await ppp.app.mountPage('recordings-modal', {
+        title: 'Управление записями',
+        size: 'medium'
+      });
+    } catch (e) {
+      this.failOperation(e, 'Управление записями');
+    } finally {
+      this.endOperation();
+    }
+  }
+}
 
 export default OrderPage.compose({
   template: orderPageTemplate,

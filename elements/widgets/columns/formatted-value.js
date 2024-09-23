@@ -9,7 +9,8 @@ import {
   formatDateWithOptions,
   stringToFloat,
   formatAmount,
-  formatQuantity
+  formatQuantity,
+  formatPrice
 } from '../../../lib/intl.js';
 import { Column, columnStyles } from './column.js';
 
@@ -34,6 +35,12 @@ export class FormattedValueColumn extends Column {
   formatValue() {
     if (typeof this.formatter === 'function') {
       return this.formatter(this.value);
+    } else if (this.formatter === 'price') {
+      return formatPrice(
+        stringToFloat(this.value),
+        this.instrument,
+        this.formatterOptions
+      );
     } else if (this.formatter === 'percent') {
       return formatPercentage(stringToFloat(this.value));
     } else if (this.formatter === 'change') {
