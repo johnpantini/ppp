@@ -1,6 +1,11 @@
 /** @decorator */
 
-import { html, observable, when } from '../../../vendor/fast-element.min.js';
+import {
+  html,
+  observable,
+  when,
+  Observable
+} from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import {
   formatPercentage,
@@ -77,6 +82,8 @@ export class FormattedValueColumn extends Column {
       this.value = entry.value ?? '—';
       this.formatter = entry.formatter;
       this.formatterOptions = entry.formatterOptions;
+
+      Observable.notify(this, 'value');
     }
   }
 
