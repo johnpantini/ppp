@@ -293,7 +293,7 @@ export class InstrumentsImportPage extends Page {
       })
       .map((s) => {
         return {
-          symbol: s.symbol.replace('-', ' '),
+          symbol: s.symbol,
           exchange: EXCHANGE.US,
           broker,
           fullName: s.fullName,
