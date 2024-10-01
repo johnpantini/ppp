@@ -134,6 +134,7 @@ export default function (i18n) {
       traderCaps: {
         [TRADER_CAPS.CAPS_LIMIT_ORDERS]: 'Лимитные заявки',
         [TRADER_CAPS.CAPS_MARKET_ORDERS]: 'Рыночные заявки',
+        [TRADER_CAPS.CAPS_CONDITIONAL_ORDERS]: 'Условные заявки',
         [TRADER_CAPS.CAPS_ACTIVE_ORDERS]: 'Активные заявки',
         [TRADER_CAPS.CAPS_ORDERBOOK]: 'Книга заявок',
         [TRADER_CAPS.CAPS_TIME_AND_SALES]: 'Лента всех сделок',

@@ -1229,7 +1229,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
       if (newValue) {
         this.widget.style.overflow = 'visible';
       } else {
-        this.widget.style.overflow = 'hidden';
+        this.widget.style.overflow = 'initial';
       }
 
       if (this.widget.preview) {
@@ -2548,6 +2548,10 @@ export const widgetTextFieldStyles = css`
   .description {
     padding: unset;
   }
+
+  .helper {
+    font-size: ${fontSizeWidget};
+  }
 `;
 
 export class WidgetTextField extends TextField {}
@@ -2557,7 +2561,7 @@ export const widgetTrifectaFieldStyles = css`
   :host {
     width: 100%;
     flex-direction: row;
-    align-items: stretch;
+    align-items: flex-start;
   }
 
   ppp-widget-text-field {
@@ -2572,7 +2576,6 @@ export const widgetTrifectaFieldStyles = css`
     border-radius: 0 4px 4px 0;
     align-items: stretch;
     flex-direction: column;
-    vertical-align: top;
   }
 
   .step-controls button,
@@ -2791,6 +2794,24 @@ export class WidgetTrifectaField extends WidgetTextField {
   @attr
   placeholder;
 
+  @attr
+  appearance;
+
+  appearanceChanged(oldValue, newValue) {
+    if (this.$fastController.isConnected) {
+      this.input.appearance = newValue;
+    }
+  }
+
+  @observable
+  errorMessage;
+
+  errorMessageChanged(oldValue, newValue) {
+    if (this.$fastController.isConnected) {
+      this.input.errorMessage = newValue;
+    }
+  }
+
   get distanceString() {
     if (this.kind === 'distance') {
       const value = stringToFloat(this.value);
@@ -2895,7 +2916,7 @@ export class WidgetTrifectaField extends WidgetTextField {
 
     this.handleWheel = this.handleWheel.bind(this);
 
-    this.addEventListener('wheel', this.handleWheel, { passive: true });
+    this.addEventListener('wheel', this.handleWheel);
 
     Observable.getNotifier(this.input).subscribe(
       this.onInputValueChanged,
@@ -2904,7 +2925,7 @@ export class WidgetTrifectaField extends WidgetTextField {
   }
 
   disconnectedCallback() {
-    this.removeEventListener('wheel', this.handleWheel, { passive: true });
+    this.removeEventListener('wheel', this.handleWheel);
 
     Observable.getNotifier(this.input).unsubscribe(
       this.onInputValueChanged,
@@ -2917,6 +2938,10 @@ export class WidgetTrifectaField extends WidgetTextField {
   valueChanged(oldValue, newValue) {
     if (this.$fastController.isConnected) {
       this.input.value = newValue;
+
+      if (this.input.appearance === 'error') {
+        this.input.appearance = 'default';
+      }
     }
   }
 
@@ -2997,6 +3022,8 @@ export class WidgetTrifectaField extends WidgetTextField {
       if (event.deltaY < 0) this.stepUp();
       else this.stepDown();
     }
+
+    event.returnValue = false;
   }
 
   handleKeydown({ event }) {

@@ -2239,7 +2239,9 @@ export class OrderWidget extends WidgetWithInstrument {
         '[%s] exception -> %s: %o',
         this.document.name,
         e.name,
-        e.details ?? {}
+        e.details ?? {
+          message: e.message
+        }
       );
 
       let key = await this.ordersTrader?.getErrorI18nKey?.({
@@ -2391,9 +2393,10 @@ export async function widgetDefinition() {
                         $and: [
                           {
                             caps: {
-                              $all: [
+                              $in: [
                                 `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LIMIT_ORDERS%]`,
-                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`
+                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_MARKET_ORDERS%]`,
+                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_CONDITIONAL_ORDERS%]`
                               ]
                             }
                           },

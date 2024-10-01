@@ -134,6 +134,7 @@ export default function (i18n) {
       traderCaps: {
         [TRADER_CAPS.CAPS_LIMIT_ORDERS]: 'Limit orders',
         [TRADER_CAPS.CAPS_MARKET_ORDERS]: 'Market orders',
+        [TRADER_CAPS.CAPS_CONDITIONAL_ORDERS]: 'Conditional orders',
         [TRADER_CAPS.CAPS_ACTIVE_ORDERS]: 'Active orders',
         [TRADER_CAPS.CAPS_ORDERBOOK]: 'Orderbook',
         [TRADER_CAPS.CAPS_TIME_AND_SALES]: 'Лента всех сделок',

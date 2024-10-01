@@ -971,7 +971,12 @@ export async function widgetDefinition() {
                       .find({
                         $and: [
                           {
-                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`
+                            caps: {
+                              $in: [
+                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_ACTIVE_ORDERS%]`,
+                                `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_CONDITIONAL_ORDERS%]`
+                              ]
+                            }
                           },
                           {
                             $or: [

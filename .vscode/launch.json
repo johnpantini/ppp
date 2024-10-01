@@ -101,7 +101,7 @@
   "compounds": [
     {
       "name": "ppp",
-      "configurations": ["local-trader-runtime", "local-connectors", "ppf"],
+      "configurations": ["local-connectors", "ppf"],
       "stopAll": false
     }
   ]

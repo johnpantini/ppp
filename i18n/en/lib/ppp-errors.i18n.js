@@ -10,11 +10,12 @@ export default function (i18n) {
       E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT:
         'Cloud services configuration failure, please wait...',
       E_REQUIRED_FIELD: 'This field is required',
-      E_DOCUMENT_CONFLICT: 'Документ не может быть записан ',
+      E_DOCUMENT_CONFLICT: 'The document cannot be saved',
       E_DOCUMENT_NOT_FOUND: 'Document not found',
-      E_FETCH_FAILED: 'Ошибка сетевого запроса, подробности в консоли браузера',
-      E_BAD_FORM: 'Форма заполнена с ошибками или не полностью',
-      E_BAD_URL: 'Этот URL не может быть использован',
+      E_FETCH_FAILED: 'Failed to fetch, see browser developer tools console',
+      E_BAD_FORM: 'Form filled with errors or not completely filled',
+      E_BAD_URL: 'This URL cannot be used',
+      E_BAD_DATE: 'Invalid date format',
       E_UNKNOWN:
         'Unknown error. See browser developer tools console for details'
     },
@@ -84,7 +85,9 @@ export default function (i18n) {
       E_PRICE_MUST_BE_GE_$VALUE: 'Цена должна быть не ниже %{value}.',
       E_PRICE_MUST_BE_LE_$VALUE: 'Цена должна быть не выше %{value}.',
       E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.',
-      E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.'
+      E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.',
+      E_TRADER_IS_NOT_COMPATIBLE: 'Трейдер не поддерживается для этой заявки.',
+      E_ORDER_EXISTS: 'Заявка уже существует.'
     }
   });
 }

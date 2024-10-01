@@ -798,7 +798,6 @@ export class App extends PPPElement {
 
   connectedCallback() {
     super.connectedCallback();
-
     this.addEventListener('pppdragend', this.onDragEnd);
 
     const that = this;

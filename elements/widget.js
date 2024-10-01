@@ -578,7 +578,7 @@ export const widgetCommonContentStyles = () => css`
   .widget-subsection {
     display: flex;
     width: 100%;
-    align-items: end;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
   }

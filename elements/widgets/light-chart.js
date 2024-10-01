@@ -764,12 +764,13 @@ export class LightChartWidget extends WidgetWithInstrument {
         }
 
         const { unit, value } = this.getCurentTimeframe();
-        const { candles, cursor } = await this.chartTrader.historicalCandles({
-          instrument: this.instrument,
-          unit,
-          value,
-          cursor: this.cursor
-        });
+        const { candles, cursor } =
+          (await this.chartTrader.historicalCandles({
+            instrument: this.instrument,
+            unit,
+            value,
+            cursor: this.cursor
+          })) ?? {};
 
         this.cursor = cursor;
 
@@ -777,7 +778,7 @@ export class LightChartWidget extends WidgetWithInstrument {
           this.hasMore = false;
         }
 
-        if (candles.length) {
+        if (candles?.length) {
           this.ohlcv = [
             ...candles.map(this.traderQuoteToChartQuote),
             ...this.ohlcv

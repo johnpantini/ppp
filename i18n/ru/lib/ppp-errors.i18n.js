@@ -15,6 +15,7 @@ export default function (i18n) {
       E_FETCH_FAILED: 'Ошибка сетевого запроса, подробности в консоли браузера',
       E_BAD_FORM: 'Форма заполнена с ошибками или не полностью',
       E_BAD_URL: 'Этот URL не может быть использован',
+      E_BAD_DATE: 'Неверный формат даты',
       E_UNKNOWN: 'Неизвестная ошибка. Подробности в консоли браузера'
     },
     $exceptions: {
@@ -83,7 +84,9 @@ export default function (i18n) {
         'Количество должно быть кратным %{value}.',
       E_PRICE_MUST_BE_LE_$VALUE: 'Цена должна быть не выше %{value}.',
       E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.',
-      E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.'
+      E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.',
+      E_TRADER_IS_NOT_COMPATIBLE: 'Трейдер не поддерживается для этой заявки.',
+      E_ORDER_EXISTS: 'Заявка уже существует.'
     }
   });
 }
