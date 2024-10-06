@@ -292,6 +292,10 @@ export class InstrumentsImportPage extends Page {
         }
       })
       .map((s) => {
+        if (s.type === 'preipo' || s.type === 'ipo') {
+          s.type = 'stock';
+        }
+
         return {
           symbol: s.symbol,
           exchange: EXCHANGE.US,
