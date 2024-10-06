@@ -154,7 +154,8 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_BLUEATS]: 'Blue Ocean ATS',
         [TRADER_CAPS.CAPS_DIRECTEDGE_BOOK]: 'NYSE Openbook',
         [TRADER_CAPS.CAPS_NYSE_OPENBOOK]: 'Direct Edge Book',
-        [TRADER_CAPS.CAPS_BZX_BOOK]: 'BATS BZX Book'
+        [TRADER_CAPS.CAPS_BZX_BOOK]: 'BATS BZX Book',
+        [TRADER_CAPS.CAPS_PAPER]: 'Paper trading'
       },
       tradingStatus: {
         [TRADING_STATUS.UNSPECIFIED]: 'Нет',

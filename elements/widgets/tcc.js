@@ -20,7 +20,7 @@ import {
   attr
 } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
-import { TRADERS, WIDGET_TYPES } from '../../lib/const.js';
+import { TRADER_CAPS, TRADERS, WIDGET_TYPES } from '../../lib/const.js';
 import {
   ClonableList,
   clonableListStyles,
@@ -31,7 +31,7 @@ import { normalize, getTraderSelectOptionColor } from '../../design/styles.js';
 import { PPPElement } from '../../lib/ppp-element.js';
 import { formatDate } from '../../lib/intl.js';
 import { fontWeightWidget } from '../../design/design-tokens.js';
-import { disconnect } from '../../static/svg/sprite.js';
+import { disconnect, trash } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
@@ -153,7 +153,7 @@ export const tccWidgetCardTemplate = html`
               x.widget.topLoader.start();
 
               try {
-                await x.traderRuntime.terminate();
+                await x.traderRuntime?.terminate();
 
                 x.status = 'terminated';
               } finally {
@@ -162,6 +162,32 @@ export const tccWidgetCardTemplate = html`
             }}"
           >
             <span>${html.partial(disconnect)}</span>
+          </button>
+        `
+      )}
+      ${when(
+        (x) => x.trader.caps?.includes?.(TRADER_CAPS.CAPS_PAPER),
+        html`
+          <button
+            title="Выполнить сброс"
+            class="widget-action-button"
+            slot="actions"
+            @click="${async (x, c) => {
+              c.event.preventDefault();
+              c.event.stopPropagation();
+
+              x.widget.topLoader.start();
+
+              try {
+                await x.traderRuntime?.call({
+                  method: 'clear'
+                });
+              } finally {
+                x.widget.topLoader.stop();
+              }
+            }}"
+          >
+            <span>${html.partial(trash)}</span>
           </button>
         `
       )}

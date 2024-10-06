@@ -524,7 +524,8 @@ export const traderNameAndRuntimePartial = ({
               TRADER_CAPS.CAPS_NYSE_OPENBOOK,
               TRADER_CAPS.CAPS_DIRECTEDGE_BOOK,
               TRADER_CAPS.CAPS_BZX_BOOK,
-              TRADER_CAPS.CAPS_NOII
+              TRADER_CAPS.CAPS_NOII,
+              TRADER_CAPS.CAPS_PAPER
             ],
             html`
               <ppp-checkbox

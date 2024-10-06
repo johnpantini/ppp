@@ -55,7 +55,7 @@ import {
   positive,
   negative
 } from '../../design/design-tokens.js';
-import { arrowRight } from '../../static/svg/sprite.js';
+import { arrowRight, trash } from '../../static/svg/sprite.js';
 import {
   formatAmount,
   formatPriceWithoutCurrency,
@@ -84,6 +84,17 @@ export const lightChartWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate({
         buttons: html`
+          <div
+            ?hidden="${(x) => !x.document.showResetButton}"
+            title="Очистить виджет"
+            class="button"
+            slot="start"
+            @click="${(x) => {
+              x.setData([]);
+            }}"
+          >
+            ${html.partial(trash)}
+          </div>
           <div
             ?hidden="${(x) => !x.ready}"
             title="Перейти в конец графика"
@@ -1024,6 +1035,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         tradesTraderId: this.container.tradesTraderId.value,
         timeframes: this.container.timeframeList.value,
         showToolbar: this.container.showToolbar.checked,
+        showResetButton: this.container.showResetButton.checked,
         seriesKind: this.container.seriesKind.value
       }
     };
@@ -1206,6 +1218,12 @@ export async function widgetDefinition() {
               ${ref('showToolbar')}
             >
               Показывать панель выбора таймфрейма
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showResetButton ?? false}"
+              ${ref('showResetButton')}
+            >
+              Показывать кнопку очистки
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">

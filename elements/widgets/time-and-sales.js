@@ -33,6 +33,7 @@ import {
   scrollbars,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
+import { trash } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteGrayBase,
@@ -94,7 +95,21 @@ const DEFAULT_COLUMNS = [
 export const timeAndSalesWidgetTemplate = html`
   <template @columnresize="${(x) => x.recalculateGridDimensions()}}">
     <div class="widget-root">
-      ${widgetDefaultHeaderTemplate()}
+      ${widgetDefaultHeaderTemplate({
+        buttons: html`
+          <div
+            ?hidden="${(x) => !x.document.showResetButton}"
+            title="Очистить виджет"
+            class="button"
+            slot="start"
+            @click="${(x) => {
+              x.clear();
+            }}"
+          >
+            ${html.partial(trash)}
+          </div>
+        `
+      })}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         ${widgetWithInstrumentBodyTemplate(html`
@@ -900,6 +915,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         tradesTraderId: this.container.tradesTraderId.value,
         columns: this.container.columnList.value,
         threshold: this.container.threshold.value,
+        showResetButton: this.container.showResetButton.checked,
         timeColumnOptions: this.container.timeColumnOptions.value,
         depth: this.container.depth.value
           ? Math.trunc(Math.abs(this.container.depth.value))
@@ -1026,6 +1042,18 @@ export async function widgetDefinition() {
           </div>
         </ppp-tab-panel>
         <ppp-tab-panel id="ui-panel">
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интерфейс</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showResetButton ?? false}"
+              ${ref('showResetButton')}
+            >
+              Показывать кнопку очистки
+            </ppp-checkbox>
+          </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Формат отображения времени</h5>

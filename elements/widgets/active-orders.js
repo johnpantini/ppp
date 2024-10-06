@@ -719,11 +719,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     try {
       await this.ordersTrader?.cancelRealOrder?.(order);
 
-      this.notificationsArea.note({
-        title: 'Заявка отменена'
-      });
+      !this.document.onlyShowErrorNotifications &&
+        this.notificationsArea.note({
+          title: 'Заявка отменена'
+        });
     } catch (e) {
-      console.log(e);
+      this.$$debug('cancelOrder [%o] failed: %o', order, e);
 
       this.notificationsArea.error({
         text: 'Не удалось отменить заявку.'
@@ -739,11 +740,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     try {
       await this.ordersTrader?.cancelConditionalOrder?.(order.orderId, payload);
 
-      this.notificationsArea.note({
-        title: 'Условная заявка отменена'
-      });
+      !this.document.onlyShowErrorNotifications &&
+        this.notificationsArea.note({
+          title: 'Условная заявка отменена'
+        });
     } catch (e) {
-      console.log(e);
+      this.$$debug('cancelConditionalOrder [%o] failed: %o', order, e);
 
       this.notificationsArea.error({
         text: 'Не удалось отменить условную заявку.'
@@ -763,11 +765,18 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         payload
       );
 
-      this.notificationsArea.note({
-        title: 'Запрос на действие отправлен'
-      });
+      !this.document.onlyShowErrorNotifications &&
+        this.notificationsArea.note({
+          title: 'Запрос на действие отправлен'
+        });
     } catch (e) {
-      console.log(e);
+      this.$$debug(
+        'performConditionalOrderAction [%o, %s, %o] failed: %o',
+        order,
+        action,
+        payload,
+        e
+      );
 
       this.notificationsArea.error({
         text: 'Не удалось выполнить действие.'
@@ -779,9 +788,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   async refreshOrders() {
     if (this.orderTypeSelector.value === 'conditional') {
-      return this.notificationsArea.note({
-        text: 'Переставлять можно только биржевые заявки.'
-      });
+      !this.document.onlyShowErrorNotifications &&
+        this.notificationsArea.note({
+          text: 'Переставлять можно только биржевые заявки.'
+        });
+
+      return;
     }
 
     try {
@@ -793,17 +805,19 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         value: 0
       });
 
-      if (!this.instrument) {
-        this.notificationsArea.success({
-          title: 'Биржевые заявки переставлены по всем инструментам'
-        });
-      } else {
-        this.notificationsArea.success({
-          title: `Биржевые заявки переставлены по инструменту ${this.instrument.symbol}`
-        });
+      if (!this.document.onlyShowErrorNotifications) {
+        if (!this.instrument) {
+          this.notificationsArea.success({
+            title: 'Биржевые заявки переставлены по всем инструментам'
+          });
+        } else {
+          this.notificationsArea.success({
+            title: `Биржевые заявки переставлены по инструменту ${this.instrument.symbol}`
+          });
+        }
       }
     } catch (e) {
-      console.error(e);
+      this.$$debug('refreshOrders failed: %o', e);
 
       this.notificationsArea.error({
         text: 'Не удалось переставить биржевые заявки.'
@@ -848,17 +862,19 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         });
       }
 
-      if (!this.instrument) {
-        this.notificationsArea.note({
-          title: `${typeText} заявки${filterText}отменены по всем инструментам`
-        });
-      } else {
-        this.notificationsArea.note({
-          title: `${typeText} заявки${filterText}отменены по инструменту ${this.instrument.symbol}`
-        });
+      if (!this.document.onlyShowErrorNotifications) {
+        if (!this.instrument) {
+          this.notificationsArea.note({
+            title: `${typeText} заявки${filterText}отменены по всем инструментам`
+          });
+        } else {
+          this.notificationsArea.note({
+            title: `${typeText} заявки${filterText}отменены по инструменту ${this.instrument.symbol}`
+          });
+        }
       }
     } catch (e) {
-      console.log(e);
+      this.$$debug('cancelAllOrders [%o] failed: %o', options, e);
 
       this.notificationsArea.error({
         text: 'Не удалось отменить все или некоторые заявки.'
@@ -882,7 +898,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
       await this.container.allowedConditionalOrders.validate();
     } catch (e) {
-      console.dir(e);
+      this.$$debug('validate failed: %o', e);
 
       invalidate(this.container.orderProcessorFunc, {
         errorMessage: 'Код содержит ошибки.',
@@ -898,6 +914,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         orderProcessorFunc: this.container.orderProcessorFunc.value,
         disableInstrumentFiltering:
           this.container.disableInstrumentFiltering.checked,
+        onlyShowErrorNotifications:
+          this.container.onlyShowErrorNotifications.checked,
         showAllTab: this.container.showAllTab.checked,
         showLimitTab: this.container.showLimitTab.checked,
         showConditionalTab: this.container.showConditionalTab.checked,
@@ -1031,6 +1049,12 @@ export async function widgetDefinition() {
               ${ref('disableInstrumentFiltering')}
             >
               Не фильтровать содержимое по выбранному инструменту
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.onlyShowErrorNotifications}"
+              ${ref('onlyShowErrorNotifications')}
+            >
+              Показывать только уведомления об ошибках
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
