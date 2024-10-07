@@ -1004,7 +1004,9 @@ export const orderWidgetTemplate = html`
                     }}"
                     @click="${(x) => x.placeOrder()}"
                   >
-                    Разместить заявку
+                    ${(x) =>
+                      x.conditionalOrder?.order?.buttonText ??
+                      'Разместить заявку'}
                   </ppp-widget-button>
                 </div>
               </div>
