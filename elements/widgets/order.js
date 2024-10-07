@@ -2217,6 +2217,8 @@ export class OrderWidget extends WidgetWithInstrument {
             cache: 'reload'
           }).then((r) => r.text());
 
+          await this.conditionalOrderHolder?.firstElementChild?.onPlaceConditionalOrder?.();
+
           await this.ordersTrader.placeConditionalOrder({
             instrument: this.instrument,
             direction,
