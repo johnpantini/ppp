@@ -34,6 +34,7 @@ import '../query-select.js';
 import '../radio-group.js';
 import '../snippet.js';
 import '../text-field.js';
+import { dictionarySelectorTemplate } from './instruments-manage.js';
 
 export const levelOneTraderClonableListTemplate = html`
   <template>
@@ -218,6 +219,21 @@ export const traderCombinedL1Template = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
+          <h5>Словарь</h5>
+          <p class="description">
+            Словарь инструментов, который будет назначен трейдеру.
+          </p>
+        </div>
+        <div class="input-group">
+          ${(x) =>
+            dictionarySelectorTemplate({
+              silent: true,
+              value: x.document.dictionary
+            })}
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
           <h5>Список трейдеров-источников L1</h5>
           <p class="description">
             Выбранные трейдеры будут объединены в один комбинированный источник
@@ -335,6 +351,7 @@ export class TraderCombinedL1Page extends TraderCommonPage {
 
     sup.$set = {
       ...sup.$set,
+      dictionary: this.dictionary.value,
       traderList,
       version: 1,
       type: TRADERS.COMBINED_L1

@@ -44,7 +44,8 @@ export default function (i18n) {
         [BROKERS.HUOBI]: 'Huobi',
         [BROKERS.BYBIT]: 'Bybit',
         [BROKERS.MEXC]: 'MEXC',
-        [BROKERS.CAPITALCOM]: 'Capital.com'
+        [BROKERS.CAPITALCOM]: 'Capital.com',
+        [BROKERS.UNKNOWN]: 'Unknown'
       },
       columnSource: {
         [COLUMN_SOURCE.INSTRUMENT]: 'Инструмент',
