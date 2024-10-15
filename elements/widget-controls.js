@@ -2782,6 +2782,9 @@ export class WidgetTrifectaField extends WidgetTextField {
   @attr({ mode: 'boolean' })
   disabled;
 
+  @attr({ mode: 'boolean' })
+  zeroable;
+
   @attr
   kind;
 
@@ -2959,10 +2962,16 @@ export class WidgetTrifectaField extends WidgetTextField {
       Updates.enqueue(() => {
         this.input.control.type = 'number';
 
-        up
-          ? this.input.control.stepUp()
-          : stringToFloat(this.input.control.value) !== minIncrement &&
+        if (up) {
+          this.input.control.stepUp();
+        } else {
+          if (
+            this.zeroable ||
+            stringToFloat(this.input.control.value) !== minIncrement
+          ) {
             this.input.control.stepDown();
+          }
+        }
 
         this.input.control.type = 'text';
 
