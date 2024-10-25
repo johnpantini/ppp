@@ -87,7 +87,8 @@ export default function (i18n) {
       E_MIN_PRICE_STEP_MUST_BE_$VALUE: 'Минимальный шаг цены: %{value}.',
       E_TRADER_IS_CLOSED: 'Трейдер сейчас не работает.',
       E_TRADER_IS_NOT_COMPATIBLE: 'Трейдер не поддерживается для этой заявки.',
-      E_ORDER_EXISTS: 'Заявка уже существует.'
+      E_ORDER_EXISTS: 'Заявка уже существует.',
+      E_ORDER_NOT_FOUND: 'Order not found.'
     }
   });
 }

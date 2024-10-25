@@ -459,8 +459,10 @@ export class IntradayStats {
           imbalance: 0,
           gross: 0,
           commission: 0,
-          // Without commission.
-          net: 0
+          // Commission included.
+          net: 0,
+          bePriceGross: 0,
+          bePriceNet: 0
         };
 
         this.stats.get(currency).set(symbol, stats);
@@ -643,6 +645,14 @@ export class IntradayStats {
         }
 
         stats.net = stats.gross - stats.commission;
+
+        if (position !== 0) {
+          stats.bePriceGross = referencePrice - stats.gross / position;
+          stats.bePriceNet = referencePrice - stats.net / position;
+        } else {
+          stats.bePriceGross = 0;
+          stats.bePriceNet = 0;
+        }
       }
     }
 
@@ -743,6 +753,14 @@ export class IntradayStats {
             net: {
               value: +stats.net.toFixed(precision) || 0,
               formatter: pnlFormatter
+            },
+            bePriceGross: {
+              value: +stats.bePriceGross || 0,
+              formatter: 'price'
+            },
+            bePriceNet: {
+              value: +stats.bePriceNet || 0,
+              formatter: 'price'
             }
           };
 
