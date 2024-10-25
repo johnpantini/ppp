@@ -481,7 +481,8 @@ export class IntradayStats {
           stats.commission += trade.commission;
         }
 
-        stats.imbalance = stats.buyQuantity - stats.sellQuantity - position;
+        stats.imbalance =
+          stats.buyQuantity - stats.sellQuantity - position * instrument.lot;
 
         // Empty portfolio on the beginning of the day.
         if (stats.imbalance === 0) {
@@ -647,8 +648,10 @@ export class IntradayStats {
         stats.net = stats.gross - stats.commission;
 
         if (position !== 0) {
-          stats.bePriceGross = referencePrice - stats.gross / position;
-          stats.bePriceNet = referencePrice - stats.net / position;
+          stats.bePriceGross =
+            referencePrice - stats.gross / (position * instrument.lot);
+          stats.bePriceNet =
+            referencePrice - stats.net / (position * instrument.lot);
         } else {
           stats.bePriceGross = 0;
           stats.bePriceNet = 0;
