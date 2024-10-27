@@ -738,7 +738,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
-      await this.ordersTrader?.cancelConditionalOrder?.(order.orderId, payload);
+      await this.ordersTrader?.cco?.(order.orderId, payload);
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
@@ -759,11 +759,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
-      await this.ordersTrader?.performConditionalOrderAction?.(
-        order.orderId,
-        action,
-        payload
-      );
+      await this.ordersTrader?.pcoa?.(order.orderId, action, payload);
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({

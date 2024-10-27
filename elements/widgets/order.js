@@ -2212,6 +2212,12 @@ export class OrderWidget extends WidgetWithInstrument {
           implUrl = `${ppp.rootUrl}/lib/orders/${type}/impl.js`;
         }
 
+        this.$$placeOrder(
+          '[%s] placeConditionalOrder at %s',
+          this.document.name,
+          new Date().toISOString()
+        );
+
         if (this.ordersTrader.document.runtime === 'url') {
           const code = await fetch(implUrl.replace('impl.js', 'impl.min.js'), {
             cache: 'reload'

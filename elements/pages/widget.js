@@ -70,6 +70,7 @@ export const colorSelectorTemplate = ({
   variant
 }) => html`
   <ppp-select
+    ?disabled="${(x) => !x.isSteady()}"
     variant="${variant ?? 'tiny'}"
     ${ref(refName)}
     value="${() => value ?? 'default'}"
@@ -251,7 +252,12 @@ export const widgetPageTemplate = html`
             <div class="widget-settings" ${ref('widgetSettingsDomElement')}>
               <form novalidate>
                 <div>
-                  <div class="drawer" ?hidden="${(x) => x.document._id}">
+                  <div
+                    class="drawer"
+                    ?hidden="${(x) => {
+                      return x.mounted || x.document._id;
+                    }}"
+                  >
                     <div class="drawer-header">
                       <div class="drawer-header-inner">
                         <h3>Тип виджета</h3>
@@ -261,6 +267,7 @@ export const widgetPageTemplate = html`
                       <div class="drawer-body-inner">
                         <ppp-widget-type-radio-group
                           ${ref('widgetTypeSelector')}
+                          ?disabled="${(x) => !x.isSteady()}"
                           @change="${(x, { event }) =>
                             x.handleWidgetTypeChange(event.detail.group.value)}"
                         >
@@ -405,6 +412,7 @@ export const widgetPageTemplate = html`
                               standalone
                               placeholder="Название виджета"
                               value="${(x) => x.document.name}"
+                              ?disabled="${(x) => !x.isSteady()}"
                               ${ref('name')}
                             ></ppp-text-field>
                           </div>
@@ -433,6 +441,7 @@ export const widgetPageTemplate = html`
                                 max="100"
                                 type="number"
                                 value="${(x) => x.document.headerBgOpacity}"
+                                ?disabled="${(x) => !x.isSteady()}"
                                 ${ref('headerBgOpacity')}
                               >
                                 <span slot="description">Прозрачность, %</span>
@@ -592,6 +601,7 @@ export const widgetPageTemplate = html`
                   ${ref('saveWidgetButton')}
                   appearance="primary"
                   class="save-widget"
+                  ?disabled="${(x) => !x.isSteady()}"
                   @click="${(x) => x.submitDocument()}"
                 >
                   ${(x) =>
@@ -631,6 +641,7 @@ export const widgetPageTemplate = html`
                       )}"
                     ?checked="${() =>
                       ppp.settings.get('autoApplyWidgetModifications') ?? true}"
+                    ?disabled="${(x) => !x.isSteady()}"
                   >
                     Применять настройки по мере редактирования
                   </ppp-checkbox>
@@ -638,6 +649,7 @@ export const widgetPageTemplate = html`
                     ${ref('autoApplyWidgetModificationsButton')}
                     appearance="primary"
                     class="xsmall"
+                    ?disabled="${(x) => !x.isSteady()}"
                     @click="${(x) => x.applyModifications()}"
                   >
                     Применить текущие настройки
@@ -647,19 +659,16 @@ export const widgetPageTemplate = html`
               <div class="spacing3"></div>
               <h2 class="widget-name">
                 ${when(
-                  (x) => x.widgetDefinition.title,
+                  (x) => x.widgetDefinition.title && x.isSteady(),
                   html`
                     <span class="positive">
                       ${(x) => x.widgetDefinition.title}
                     </span>
                   `
                 )}
-                ${when(
-                  (x) => !x.widgetDefinition.title,
-                  html`
-                    <span class="positive">Идёт загрузка, подождите...</span>
-                  `
-                )}
+                <span ?hidden="${(x) => x.isSteady()}" class="positive">
+                  Идёт загрузка, подождите...
+                </span>
               </h2>
               ${when(
                 (x) => x.widgetDefinition.tags,
@@ -684,7 +693,9 @@ export const widgetPageTemplate = html`
                 html`
                   <hr class="divider" />
                   <div class="widget-area">
-                    <h5>Виджет загружается, подождите...</h5>
+                    <ppp-banner class="inline" appearance="warning">
+                      Виджет появится здесь после загрузки.
+                    </ppp-banner>
                   </div>
                 `
               )}
@@ -1318,7 +1329,7 @@ export class WidgetPage extends Page {
       this.document
     );
 
-    if (this.mounted && this.parentNode.widget) {
+    if (this.mounted && this.parentNode?.widget) {
       // From workspace, merge with template.
       const mergedDocument = {};
       const liveDocument = await this.denormalization.denormalize(
@@ -1518,10 +1529,6 @@ export class WidgetPage extends Page {
       }
 
       try {
-        this.widgetTypeSelector.setAttribute('disabled', '');
-        this.autoApplyWidgetModificationsButton.setAttribute('disabled', '');
-        this.saveWidgetButton.setAttribute('disabled', '');
-
         const module = await import(url);
         const wUrl = new URL(url);
         const baseWidgetUrl = wUrl.href.slice(0, wUrl.href.lastIndexOf('/'));
@@ -1548,9 +1555,6 @@ export class WidgetPage extends Page {
       } catch (e) {
         this.failOperation(e);
       } finally {
-        this.widgetTypeSelector.removeAttribute('disabled');
-        this.autoApplyWidgetModificationsButton.removeAttribute('disabled');
-        this.saveWidgetButton.removeAttribute('disabled');
         this.endOperation();
       }
     }
