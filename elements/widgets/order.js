@@ -974,7 +974,7 @@ export const orderWidgetTemplate = html`
                     ${() => ppp.t('$g.sellButtonText')}
                   </ppp-widget-button>
                   <ppp-widget-button
-                    appearance="primary"
+                    appearance="secondary"
                     ?hidden="${(x) => {
                       if (
                         x.orderTypeTabs.activeid !== 'conditional' ||
@@ -2777,7 +2777,7 @@ export async function widgetDefinition() {
               <h5>Горячая клавиша для покупки</h5>
               <p class="description">
                 Покупка сработает, если фокус ввода будет находиться в поле цены
-                или количества. Нажмите Esc, чтобы отменить эту функцию.
+                или количества. Нажмите Backspace, чтобы отменить эту функцию.
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2789,13 +2789,13 @@ export async function widgetDefinition() {
                 @keydown="${(x, { event }) => {
                   if (
                     +event.key === parseInt(event.key) ||
-                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Delete/i.test(
                       event.code
                     )
                   )
                     return false;
 
-                  if (event.key === 'Escape') {
+                  if (event.key === 'Backspace') {
                     x.buyShortcut.value = '';
                   } else {
                     x.buyShortcut.value = event.code;
@@ -2812,7 +2812,7 @@ export async function widgetDefinition() {
               <h5>Горячая клавиша для продажи</h5>
               <p class="description">
                 Продажа сработает, если фокус ввода будет находиться в любом
-                текстовом поле. Нажмите Esc, чтобы отменить эту функцию.
+                текстовом поле. Нажмите Backspace, чтобы отменить эту функцию.
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2824,13 +2824,13 @@ export async function widgetDefinition() {
                 @keydown="${(x, { event }) => {
                   if (
                     +event.key === parseInt(event.key) ||
-                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Delete/i.test(
                       event.code
                     )
                   )
                     return false;
 
-                  if (event.key === 'Escape') {
+                  if (event.key === 'Backspace') {
                     x.sellShortcut.value = '';
                   } else {
                     x.sellShortcut.value = event.code;
@@ -2847,8 +2847,8 @@ export async function widgetDefinition() {
               <h5>Горячая клавиша для поиска инструментов</h5>
               <p class="description">
                 Если фокус ввода будет находиться в любом текстовом поле, то
-                откроется окно поиска инструмента. Нажмите Esc, чтобы отменить
-                эту функцию.
+                откроется окно поиска инструмента. Нажмите Backspace, чтобы
+                отменить эту функцию.
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2860,13 +2860,13 @@ export async function widgetDefinition() {
                 @keydown="${(x, { event }) => {
                   if (
                     +event.key === parseInt(event.key) ||
-                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Delete/i.test(
                       event.code
                     )
                   )
                     return false;
 
-                  if (event.key === 'Escape') {
+                  if (event.key === 'Backspace') {
                     x.searchShortcut.value = '';
                   } else {
                     x.searchShortcut.value = event.code;
@@ -2885,7 +2885,7 @@ export async function widgetDefinition() {
                 Если фокус ввода будет находиться в любом текстовом поле, то
                 будут отменены активные заявки (лимитные или условные, в
                 зависимости от вкладки) по текущему инструменту виджета. Нажмите
-                Esc, чтобы отменить эту функцию.
+                Backspace, чтобы отменить эту функцию.
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2897,13 +2897,13 @@ export async function widgetDefinition() {
                 @keydown="${(x, { event }) => {
                   if (
                     +event.key === parseInt(event.key) ||
-                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Backspace|Delete/i.test(
+                    /Comma|Period|Tab|ArrowUp|ArrowDown|ArrowLeft|ArrowRight|Delete/i.test(
                       event.code
                     )
                   )
                     return false;
 
-                  if (event.key === 'Escape') {
+                  if (event.key === 'Backspace') {
                     x.cancelAllOrdersShortcut.value = '';
                   } else {
                     x.cancelAllOrdersShortcut.value = event.code;

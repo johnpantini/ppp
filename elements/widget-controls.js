@@ -1984,6 +1984,15 @@ export class WidgetNotificationsArea extends PPPElement {
       return;
     }
 
+    if (
+      text &&
+      !text.endsWith('.') &&
+      !text.endsWith('!') &&
+      !text.endsWith('?')
+    ) {
+      text += '.';
+    }
+
     this.status = status;
     this.title = title;
     this.text = text;

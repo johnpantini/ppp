@@ -296,21 +296,22 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   onClick(e) {
     for (const node of e.composedPath()) {
-      if (
-        node?.hasAttribute?.('action') &&
-        node.classList.contains('widget-action-button')
-      ) {
-        const action = node.getAttribute('action');
+      const actionButton = node?.closest?.('.widget-action-button[action');
 
-        if (node.parentNode.hasAttribute('real')) {
+      if (actionButton) {
+        const action = actionButton.getAttribute('action');
+
+        if (actionButton.parentNode.hasAttribute('real')) {
           if (action === 'cancel') {
             this.cancelOrder(
-              this.realOrdersById.get(node.parentNode.getAttribute('oid'))
+              this.realOrdersById.get(
+                actionButton.parentNode.getAttribute('oid')
+              )
             );
           }
         } else {
           this.conditionalOrdersById
-            .get(node.parentNode.getAttribute('oid'))
+            .get(actionButton.parentNode.getAttribute('oid'))
             .domElement.firstElementChild.firstElementChild.firstElementChild.performCardAction(
               action,
               e
@@ -318,7 +319,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         }
 
         // Stop propagation.
-        break;
+        return;
       }
 
       if (

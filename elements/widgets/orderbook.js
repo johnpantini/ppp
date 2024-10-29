@@ -1229,7 +1229,7 @@ export async function widgetDefinition() {
       styles: orderbookWidgetStyles
     }).define(),
     minWidth: 140,
-    minHeight: 120,
+    minHeight: 100,
     defaultWidth: 280,
     defaultHeight: 350,
     settings: html`
