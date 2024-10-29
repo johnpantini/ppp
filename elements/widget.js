@@ -726,6 +726,11 @@ export const widgetCommonContentStyles = () => css`
     fill: ${themeConditional(paletteYellowDark2, paletteYellowLight2)};
   }
 
+  .widget-action-button.ocean svg rect,
+  .widget-action-button.ocean svg path {
+    fill: ${themeConditional(paletteBlueDark2, paletteBlueLight2)};
+  }
+
   .control-line {
     display: flex;
     flex-direction: row;
