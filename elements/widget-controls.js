@@ -1985,7 +1985,7 @@ export class WidgetNotificationsArea extends PPPElement {
     }
 
     if (
-      text &&
+      typeof text === 'string' &&
       !text.endsWith('.') &&
       !text.endsWith('!') &&
       !text.endsWith('?')

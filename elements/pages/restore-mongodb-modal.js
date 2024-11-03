@@ -235,9 +235,21 @@ export class RestoreMongodbModalPage extends Page {
         for (const entry of entries) {
           const collection = entry.filename.split('.json')[0];
 
-          if (collections.indexOf(collection) > -1) {
+          if (collections.includes(collection)) {
             const parsed = JSON.parse(
-              await entry.getData(new zip.TextWriter())
+              await entry.getData(new zip.TextWriter()),
+              (key, value) => {
+                // Restore native dates.
+                if (
+                  key.endsWith('At') &&
+                  typeof value === 'string' &&
+                  value.endsWith('Z')
+                ) {
+                  return new Date(value);
+                }
+
+                return value;
+              }
             ).filter((d) => {
               return !(collection === 'app' && d?._id === 'settings');
             });
@@ -246,7 +258,7 @@ export class RestoreMongodbModalPage extends Page {
               await ppp.user.functions.deleteMany({ collection }, {});
 
               if (parsed.length > 2000) {
-                // Fix execution timeout errors
+                // Fix execution timeout errors.
                 const chunks = [];
 
                 for (let i = 0; i < parsed.length; i += 2000) {

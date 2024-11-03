@@ -818,6 +818,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.ohlcv = [];
         this.hasMore = true;
 
+        this.mainSeries && this.setData([]);
         this.loadHistory();
       }
     }
