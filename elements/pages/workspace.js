@@ -272,7 +272,7 @@ export class WorkspacePage extends Page {
   }
 
   async submitDocument() {
-    // No-op
+    // No-op.
   }
 
   draggingChanged(oldValue, newValue) {
@@ -324,67 +324,72 @@ export class WorkspacePage extends Page {
     }
 
     if (this.dragging || this.resizing) {
-      // Initial coordinates for deltas
-      this.clientX = event.clientX;
-      this.clientY = event.clientY;
-      // Side nav offset
-      this.x = this.getBoundingClientRect().x;
-
       const widget = cp.find((n) => n?.classList?.contains('widget'));
 
-      if (widget) {
-        widget.dragging = this.dragging;
-        widget.resizing = this.resizing;
+      if (widget?.locked) {
+        this.dragging = false;
+        this.resizing = false;
 
-        this.rectangles = this.widgets
-          .filter((w) => w !== widget)
-          .map((w) => {
-            const { width, height } = w.getBoundingClientRect();
-            let { left, top } = getComputedStyle(w);
+        return;
+      }
 
-            left = parseInt(left) + this.x;
-            top = parseInt(top);
+      // Initial coordinates for deltas.
+      this.clientX = event.clientX;
+      this.clientY = event.clientY;
+      // Side nav offset.
+      this.x = this.getBoundingClientRect().x;
 
-            return {
-              top,
-              right: left + width,
-              bottom: top + height,
-              left,
-              width,
-              height,
-              x: left,
-              y: top
-            };
-          });
+      widget.dragging = this.dragging;
+      widget.resizing = this.resizing;
 
-        this.rectangles.push({
-          top: 0,
-          right: this.x + this.workspace.scrollWidth,
-          bottom: this.workspace.scrollHeight,
-          left: this.x,
-          width: this.workspace.scrollWidth,
-          height: this.workspace.scrollHeight,
-          x: this.x,
-          y: 0
+      this.rectangles = this.widgets
+        .filter((w) => w !== widget)
+        .map((w) => {
+          const { width, height } = w.getBoundingClientRect();
+          let { left, top } = getComputedStyle(w);
+
+          left = parseInt(left) + this.x;
+          top = parseInt(top);
+
+          return {
+            top,
+            right: left + width,
+            bottom: top + height,
+            left,
+            width,
+            height,
+            x: left,
+            y: top
+          };
         });
 
-        if (this.dragging) {
-          this.draggedWidget = widget;
+      this.rectangles.push({
+        top: 0,
+        right: this.x + this.workspace.scrollWidth,
+        bottom: this.workspace.scrollHeight,
+        left: this.x,
+        width: this.workspace.scrollWidth,
+        height: this.workspace.scrollHeight,
+        x: this.x,
+        y: 0
+      });
 
-          const bcr = this.draggedWidget.getBoundingClientRect();
-          const styles = getComputedStyle(widget);
+      if (this.dragging) {
+        this.draggedWidget = widget;
 
-          widget.x = parseInt(styles.left);
-          widget.y = parseInt(styles.top);
-          widget.width = bcr.width;
-          widget.height = bcr.height;
+        const bcr = this.draggedWidget.getBoundingClientRect();
+        const styles = getComputedStyle(widget);
 
-          if (typeof this.draggedWidget.beforeDrag === 'function') {
-            this.draggedWidget.beforeDrag();
-          }
-        } else if (this.resizing) {
-          resizeControls.onPointerDown({ event, node: cp[0] });
+        widget.x = parseInt(styles.left);
+        widget.y = parseInt(styles.top);
+        widget.width = bcr.width;
+        widget.height = bcr.height;
+
+        if (typeof this.draggedWidget.beforeDrag === 'function') {
+          this.draggedWidget.beforeDrag();
         }
+      } else if (this.resizing) {
+        resizeControls.onPointerDown({ event, node: cp[0] });
       }
     }
   }
@@ -616,6 +621,7 @@ export class WorkspacePage extends Page {
               _id: 1,
               widgets: 1,
               name: 1,
+              allowLockedWidgets: 1,
               ensembleMode: 1
             }
           },
@@ -804,6 +810,7 @@ export class WorkspacePage extends Page {
     return {
       _id: this.document._id,
       name: this.document.name,
+      allowLockedWidgets: this.document.allowLockedWidgets ?? false,
       ensembleMode: this.document.ensembleMode ?? 'default',
       widgets
     };

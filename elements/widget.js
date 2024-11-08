@@ -989,6 +989,9 @@ export class Widget extends PPPElement {
   @attr({ mode: 'boolean' })
   resizing;
 
+  @attr({ mode: 'boolean' })
+  locked;
+
   @attr({ attribute: 'column-resizing', mode: 'boolean' })
   columnResizing;
 
@@ -1017,6 +1020,7 @@ export class Widget extends PPPElement {
     this.container = this.getRootNode().host;
     this.container.widgetElement = this;
     this.widgetDefinition ??= this.container.widgetDefinition;
+    this.locked = this.container.document.allowLockedWidgets;
 
     super.connectedCallback();
 

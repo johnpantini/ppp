@@ -8,7 +8,9 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import '../badge.js';
+import '../banner.js';
 import '../button.js';
+import '../checkbox.js';
 import '../radio-group.js';
 import '../text-field.js';
 
@@ -32,6 +34,25 @@ export const workspaceManagePageTemplate = html`
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>Флаги</h5>
+          <p class="description">Параметры, принимающие значение Да или Нет.</p>
+        </div>
+        <div class="input-group">
+          <div class="control-stack">
+            <ppp-checkbox
+              ${ref('allowLockedWidgets')}
+              ?checked="${(x) => x.document.allowLockedWidgets}"
+            >
+              Разрешить блокировку виджетов
+            </ppp-checkbox>
+            <ppp-banner class="inline" appearance="warning">
+              Заблокированные виджеты не могут перемещаться или изменять размер.
+            </ppp-banner>
+          </div>
         </div>
       </section>
       <section>
@@ -116,6 +137,7 @@ export class WorkspaceManagePage extends Page {
     return {
       $set: {
         name: this.name.value.trim(),
+        allowLockedWidgets: this.allowLockedWidgets.checked,
         ensembleMode: this.ensembleMode.value,
         updatedAt: new Date()
       },

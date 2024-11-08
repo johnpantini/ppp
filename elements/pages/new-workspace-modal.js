@@ -4,6 +4,7 @@ import { Page, pageStyles } from '../page.js';
 import { ConflictError, validate, invalidate } from '../../lib/ppp-errors.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import '../button.js';
+import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
 
@@ -44,6 +45,20 @@ export const newWorkspaceModalPageTemplate = html`
             }}"
             :transform="${() => ppp.decryptDocumentsTransformation()}"
           ></ppp-query-select>
+        </div>
+      </section>
+      <section>
+        <div class="label-group full">
+          <h5>Параметры</h5>
+          <p class="description">
+            Заблокированные виджеты не могут перемещаться или изменять размер.
+          </p>
+          <ppp-checkbox
+            ${ref('allowLockedWidgets')}
+            ?checked="${(x) => x.document.allowLockedWidgets}"
+          >
+            Разрешить блокировку виджетов
+          </ppp-checkbox>
         </div>
       </section>
       <section>
@@ -98,7 +113,10 @@ export class NewWorkspaceModalPage extends Page {
 
       this.document = {
         name: next.name,
-        workspaceId: this.workspaceId.value
+        workspaceId: this.workspaceId.value,
+        comment: this.comment.value,
+        allowLockedWidgets: this.allowLockedWidgets.checked,
+        ensembleMode: 'default'
       };
     }
   }
@@ -138,6 +156,8 @@ export class NewWorkspaceModalPage extends Page {
       $set: {
         name: this.name.value.trim(),
         comment: this.comment.value.trim(),
+        allowLockedWidgets: this.allowLockedWidgets.checked,
+        ensembleMode: 'default',
         widgets: workspaceToClone
           ? workspaceToClone.widgets?.map((w) => {
               // Change every uniqueID.

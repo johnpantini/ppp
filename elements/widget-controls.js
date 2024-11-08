@@ -89,7 +89,9 @@ import {
   notificationSuccess,
   notificationNote,
   upDown,
-  plus
+  plus,
+  lock,
+  unlock
 } from '../static/svg/sprite.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
 import {
@@ -2030,6 +2032,13 @@ export const widgetHeaderButtonsTemplate = html`
     >
       ${html.partial(plus)}
     </div>
+    <div
+      ?hidden="${(x) => !x.allowLockedState}"
+      class="button${(x) => (x.widget?.locked ? '' : ' positive')}"
+      @click="${(x) => x.toggleLockedState()}"
+    >
+      ${(x) => html`${html.partial(x.widget?.locked ? lock : unlock)}`}
+    </div>
     <div class="button" @click="${(x) => x.showWidgetSettings()}">
       ${html.partial(settings)}
     </div>
@@ -2050,16 +2059,28 @@ export const widgetHeaderButtonsStyles = css`
     cursor: pointer;
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
+
+  .button.positive {
+    color: ${positive} !important;
+  }
 `;
 
 export class WidgetHeaderButtons extends PPPElement {
   @attr
   ensemble;
 
+  @observable
+  widget;
+
+  @observable
+  allowLockedState;
+
   connectedCallback() {
     super.connectedCallback();
 
     this.widget = this.getRootNode().host;
+    this.allowLockedState =
+      !!this.widget.container.document?.allowLockedWidgets;
   }
 
   async stackWidget() {
@@ -2350,6 +2371,10 @@ export class WidgetHeaderButtons extends PPPElement {
 
       return page;
     }
+  }
+
+  toggleLockedState() {
+    this.widget.locked = !this.widget.locked;
   }
 
   async closeWidget() {
