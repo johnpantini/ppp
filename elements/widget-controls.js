@@ -1472,23 +1472,39 @@ export class WidgetSearchControl extends PPPOffClickElement {
 
 export const widgetResizeControlsTemplate = html`
   <template>
-    <div class="top" ?hidden="${(x) => x.ignoredHandles.includes('top')}"></div>
+    <div
+      class="top"
+      ?hidden="${(x) => x.ignoredHandles.includes('top') || x.widget?.locked}"
+    ></div>
     <div
       class="right"
-      ?hidden="${(x) => x.ignoredHandles.includes('right')}"
+      ?hidden="${(x) => x.ignoredHandles.includes('right') || x.widget?.locked}"
     ></div>
     <div
       class="bottom"
-      ?hidden="${(x) => x.ignoredHandles.includes('bottom')}"
+      ?hidden="${(x) =>
+        x.ignoredHandles.includes('bottom') || x.widget?.locked}"
     ></div>
     <div
       class="left"
-      ?hidden="${(x) => x.ignoredHandles.includes('left')}"
+      ?hidden="${(x) => x.ignoredHandles.includes('left') || x.widget?.locked}"
     ></div>
-    <div class="ne" ?hidden="${(x) => x.ignoredHandles.includes('ne')}"></div>
-    <div class="se" ?hidden="${(x) => x.ignoredHandles.includes('se')}"></div>
-    <div class="sw" ?hidden="${(x) => x.ignoredHandles.includes('sw')}"></div>
-    <div class="nw" ?hidden="${(x) => x.ignoredHandles.includes('nw')}"></div>
+    <div
+      class="ne"
+      ?hidden="${(x) => x.ignoredHandles.includes('ne') || x.widget?.locked}"
+    ></div>
+    <div
+      class="se"
+      ?hidden="${(x) => x.ignoredHandles.includes('se') || x.widget?.locked}"
+    ></div>
+    <div
+      class="sw"
+      ?hidden="${(x) => x.ignoredHandles.includes('sw') || x.widget?.locked}"
+    ></div>
+    <div
+      class="nw"
+      ?hidden="${(x) => x.ignoredHandles.includes('nw') || x.widget?.locked}"
+    ></div>
   </template>
 `;
 
@@ -1567,6 +1583,9 @@ export const widgetResizeControlsStyles = css`
 export class WidgetResizeControls extends PPPElement {
   @observable
   ignoredHandles;
+
+  @observable
+  widget;
 
   constructor() {
     super();

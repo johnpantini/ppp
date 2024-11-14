@@ -742,16 +742,17 @@ export const widgetCommonContentStyles = () => css`
   }
 
   .dot {
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
     position: relative;
   }
 
   .dot::before {
     content: '';
     position: absolute;
-    border-radius: 50%;
     display: inline-block;
+    border-radius: 50%;
     width: 5px;
     height: 5px;
     top: 0;
@@ -796,6 +797,23 @@ export const widgetCommonContentStyles = () => css`
     font-size: calc(${fontSizeWidget} - 1px);
     line-height: 14px;
     font-weight: ${fontWeightWidget};
+  }
+
+  .widget-section-h1 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .widget-section-h1 > span {
+    word-wrap: break-word;
+    font-size: ${fontSizeBody1};
+    line-height: ${lineHeightBody1};
+    font-weight: ${fontWeightBody1};
+    letter-spacing: 0;
+    color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
+    margin-right: 8px;
+    ${ellipsis()};
   }
 `;
 
@@ -845,7 +863,8 @@ export const widgetStyles = () => css`
     justify-content: space-between;
   }
 
-  :host([preview]) .widget-header {
+  :host([preview]) .widget-header,
+  :host([locked]) .widget-header {
     cursor: default;
   }
 
@@ -959,23 +978,6 @@ export const widgetStyles = () => css`
     padding: 4px 8px;
     max-width: 134px;
     white-space: nowrap;
-  }
-
-  .widget-section-h1 {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-
-  .widget-section-h1 > span {
-    word-wrap: break-word;
-    font-size: ${fontSizeBody1};
-    line-height: ${lineHeightBody1};
-    font-weight: ${fontWeightBody1};
-    letter-spacing: 0;
-    color: ${themeConditional(paletteGrayDark1, paletteGrayLight1)};
-    margin-right: 8px;
-    ${ellipsis()};
   }
 `;
 
@@ -1311,7 +1313,6 @@ export class Widget extends PPPElement {
         if (!isolatedResize) {
           w.width = parseInt(this.style.width);
           w.height = parseInt(this.style.height);
-
           w.style.width = this.style.width;
           w.style.height = this.style.height;
         }

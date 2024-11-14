@@ -333,63 +333,65 @@ export class WorkspacePage extends Page {
         return;
       }
 
-      // Initial coordinates for deltas.
-      this.clientX = event.clientX;
-      this.clientY = event.clientY;
-      // Side nav offset.
-      this.x = this.getBoundingClientRect().x;
+      if (widget) {
+        // Initial coordinates for deltas.
+        this.clientX = event.clientX;
+        this.clientY = event.clientY;
+        // Side nav offset.
+        this.x = this.getBoundingClientRect().x;
 
-      widget.dragging = this.dragging;
-      widget.resizing = this.resizing;
+        widget.dragging = this.dragging;
+        widget.resizing = this.resizing;
 
-      this.rectangles = this.widgets
-        .filter((w) => w !== widget)
-        .map((w) => {
-          const { width, height } = w.getBoundingClientRect();
-          let { left, top } = getComputedStyle(w);
+        this.rectangles = this.widgets
+          .filter((w) => w !== widget)
+          .map((w) => {
+            const { width, height } = w.getBoundingClientRect();
+            let { left, top } = getComputedStyle(w);
 
-          left = parseInt(left) + this.x;
-          top = parseInt(top);
+            left = parseInt(left) + this.x;
+            top = parseInt(top);
 
-          return {
-            top,
-            right: left + width,
-            bottom: top + height,
-            left,
-            width,
-            height,
-            x: left,
-            y: top
-          };
+            return {
+              top,
+              right: left + width,
+              bottom: top + height,
+              left,
+              width,
+              height,
+              x: left,
+              y: top
+            };
+          });
+
+        this.rectangles.push({
+          top: 0,
+          right: this.x + this.workspace.scrollWidth,
+          bottom: this.workspace.scrollHeight,
+          left: this.x,
+          width: this.workspace.scrollWidth,
+          height: this.workspace.scrollHeight,
+          x: this.x,
+          y: 0
         });
 
-      this.rectangles.push({
-        top: 0,
-        right: this.x + this.workspace.scrollWidth,
-        bottom: this.workspace.scrollHeight,
-        left: this.x,
-        width: this.workspace.scrollWidth,
-        height: this.workspace.scrollHeight,
-        x: this.x,
-        y: 0
-      });
+        if (this.dragging) {
+          this.draggedWidget = widget;
 
-      if (this.dragging) {
-        this.draggedWidget = widget;
+          const bcr = this.draggedWidget.getBoundingClientRect();
+          const styles = getComputedStyle(widget);
 
-        const bcr = this.draggedWidget.getBoundingClientRect();
-        const styles = getComputedStyle(widget);
+          widget.x = parseInt(styles.left);
+          widget.y = parseInt(styles.top);
+          widget.width = bcr.width;
+          widget.height = bcr.height;
 
-        widget.x = parseInt(styles.left);
-        widget.y = parseInt(styles.top);
-        widget.width = bcr.width;
-        widget.height = bcr.height;
-
-        if (typeof this.draggedWidget.beforeDrag === 'function') {
-          this.draggedWidget.beforeDrag();
+          if (typeof this.draggedWidget.beforeDrag === 'function') {
+            this.draggedWidget.beforeDrag();
+          }
+        } else if (this.resizing) {
+          resizeControls.onPointerDown({ event, node: cp[0] });
         }
-      } else if (this.resizing) {
-        resizeControls.onPointerDown({ event, node: cp[0] });
       }
     }
   }
