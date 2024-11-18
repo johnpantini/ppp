@@ -942,7 +942,8 @@ export const orderWidgetTemplate = html`
 
                       return false;
                     }}"
-                    @click="${(x) => x.placeOrder('buy')}"
+                    @click="${(x, { event }) =>
+                      x.placeOrder('buy', event.shiftKey)}"
                   >
                     ${() => ppp.t('$g.buyButtonText')}
                   </ppp-widget-button>
@@ -969,7 +970,8 @@ export const orderWidgetTemplate = html`
 
                       return false;
                     }}"
-                    @click="${(x) => x.placeOrder('sell')}"
+                    @click="${(x, { event }) =>
+                      x.placeOrder('sell', event.shiftKey)}"
                   >
                     ${() => ppp.t('$g.sellButtonText')}
                   </ppp-widget-button>
@@ -1002,7 +1004,8 @@ export const orderWidgetTemplate = html`
 
                       return false;
                     }}"
-                    @click="${(x) => x.placeOrder()}"
+                    @click="${(x, { event }) =>
+                      x.placeOrder(void 0, event.shiftKey)}"
                   >
                     ${(x) =>
                       x.conditionalOrder?.order?.buttonText ??
@@ -1684,12 +1687,12 @@ export class OrderWidget extends WidgetWithInstrument {
         this.document.buyShortcut &&
         event.code === this.document.buyShortcut
       ) {
-        return await this.placeOrder('buy');
+        return await this.placeOrder('buy', event.shiftKey);
       } else if (
         this.document.sellShortcut &&
         event.code === this.document.sellShortcut
       ) {
-        return await this.placeOrder('sell');
+        return await this.placeOrder('sell', event.shiftKey);
       }
     }
 
@@ -2114,7 +2117,7 @@ export class OrderWidget extends WidgetWithInstrument {
     return `${size} ${suffix}`;
   }
 
-  async placeOrder(direction) {
+  async placeOrder(direction, useCachedCode) {
     if (!this.ordersTrader) {
       return this.notificationsArea.error({
         title: 'Ошибка заявки',
@@ -2224,12 +2227,11 @@ export class OrderWidget extends WidgetWithInstrument {
           }).then((r) => r.text());
 
           await this.conditionalOrderHolder?.firstElementChild?.onPlaceConditionalOrder?.();
-
           await this.ordersTrader.placeConditionalOrder({
             instrument: this.instrument,
             direction,
             payload: this.conditionalOrder,
-            code
+            code: useCachedCode ? '' : code
           });
         } else {
           await this.ordersTrader.placeConditionalOrder({
