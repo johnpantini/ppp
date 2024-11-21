@@ -481,7 +481,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
         await this.ordersTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            currentOrder: TRADER_DATUM.ACTIVE_ORDER
+            currentOrder: TRADER_DATUM.REAL_ORDER
           }
         });
       }
@@ -563,7 +563,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.ACTIVE_ORDER
+          currentOrder: TRADER_DATUM.REAL_ORDER
         }
       });
     }

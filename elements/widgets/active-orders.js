@@ -455,7 +455,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       await this.ordersTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          realOrder: TRADER_DATUM.ACTIVE_ORDER,
+          realOrder: TRADER_DATUM.REAL_ORDER,
           conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
         }
       });
@@ -500,7 +500,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          realOrder: TRADER_DATUM.ACTIVE_ORDER,
+          realOrder: TRADER_DATUM.REAL_ORDER,
           conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
         }
       });
