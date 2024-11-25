@@ -7,21 +7,26 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "utex-alpaca",
+      "name": "ppf",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\utex-alpaca\\utex-alpaca.mjs"
+      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppf\\ppf.mjs",
+      "env": {
+        "REDIS_HOST": "${env:REDIS_HOST}",
+        "REDIS_PORT": "${env:REDIS_PORT}",
+        "REDIS_TLS": "${env:REDIS_TLS}",
+        "REDIS_USERNAME": "${env:REDIS_USERNAME}",
+        "REDIS_PASSWORD": "${env:REDIS_PASSWORD}",
+        "REDIS_DATABASE": "${env:REDIS_DATABASE}",
+        "PPP_ROOT_URL": "${env:PPP_ROOT_URL}",
+        "GLOBAL_PROXY_URL": "${env:GLOBAL_PROXY_URL}",
+        "ASPIRANT_ID": "${env:ASPIRANT_ID}",
+        "PPP_WORKER_ID": "${env:PPP_PPF_WORKER_ID}"
+      }
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "build-traders-and-orders",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\bin\\build-traders-and-orders.js"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "local-connectors",
+      "name": "connectors",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\lib\\aspirant-worker\\connectors\\connectors.mjs",
       "env": {
@@ -40,7 +45,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "local-trader-runtime",
+      "name": "ppp-trader-runtime",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppp-trader-runtime\\ppp-trader-runtime.mjs",
       "console": "integratedTerminal",
@@ -62,25 +67,6 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "ppf",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppf\\ppf.mjs",
-      "env": {
-        "REDIS_HOST": "${env:REDIS_HOST}",
-        "REDIS_PORT": "${env:REDIS_PORT}",
-        "REDIS_TLS": "${env:REDIS_TLS}",
-        "REDIS_USERNAME": "${env:REDIS_USERNAME}",
-        "REDIS_PASSWORD": "${env:REDIS_PASSWORD}",
-        "REDIS_DATABASE": "${env:REDIS_DATABASE}",
-        "PPP_ROOT_URL": "${env:PPP_ROOT_URL}",
-        "GLOBAL_PROXY_URL": "${env:GLOBAL_PROXY_URL}",
-        "ASPIRANT_ID": "${env:ASPIRANT_ID}",
-        "PPP_WORKER_ID": "${env:PPP_PPF_WORKER_ID}"
-      }
-    },
-    {
-      "type": "node",
-      "request": "launch",
       "name": "ib-gateway",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\lib\\aspirant-worker\\ib-gateway\\ib-gateway.mjs",
@@ -96,12 +82,26 @@
         "ASPIRANT_ID": "${env:ASPIRANT_ID}",
         "PPP_WORKER_ID": "${env:PPP_IB_GATEWAY_WORKER_ID}"
       }
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "utex-alpaca",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\lib\\aspirant-worker\\utex-alpaca\\utex-alpaca.mjs"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "build-traders-and-orders",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\bin\\build-traders-and-orders.js"
     }
   ],
   "compounds": [
     {
       "name": "ppp",
-      "configurations": ["local-connectors", "ppf"],
+      "configurations": ["ppf", "connectors"],
       "stopAll": false
     }
   ]
