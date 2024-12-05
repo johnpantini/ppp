@@ -2,7 +2,6 @@
 
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetWithInstrumentBodyTemplate,
@@ -155,14 +154,11 @@ export const timeAndSalesWidgetTemplate = html`
               <div class="trades-grid" ${ref('grid')}></div>
             </div>
           </div>
-          ${when(
-            (x) => x.empty || !x.columns?.length,
-            html`${html.partial(
-              widgetEmptyStateTemplate(
-                ppp.t('$widget.emptyState.noTradesToDisplay')
-              )
-            )}`
-          )}
+          <ppp-widget-empty-state-control
+            ?hidden="${(x) => !(x.empty || !x.columns?.length)}"
+          >
+            ${() => ppp.t('$widget.emptyState.noTradesToDisplay')}
+          </ppp-widget-empty-state-control>
         `)}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>

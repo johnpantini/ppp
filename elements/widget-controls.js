@@ -91,7 +91,8 @@ import {
   upDown,
   plus,
   lock,
-  unlock
+  unlock,
+  emptyWidgetState
 } from '../static/svg/sprite.js';
 import { uuidv4 } from '../lib/ppp-crypto.js';
 import {
@@ -114,11 +115,7 @@ import {
   listboxOptionStyles,
   listboxOptionTemplate
 } from './listbox-option.js';
-import {
-  widgetEmptyStateTemplate,
-  widgetEmptyStateStyles,
-  widgetCommonColors
-} from './widget.js';
+import { widgetCommonColors } from './widget.js';
 import { endSlotTemplate, startSlotTemplate } from '../vendor/fast-patterns.js';
 import { Checkbox, checkboxStyles, checkboxTemplate } from './checkbox.js';
 import './progress.js';
@@ -400,6 +397,117 @@ export const widgetGroupControlStyles = css`
   }
 `;
 
+export class WidgetEmptyStateControl extends PPPElement {
+  @attr({ mode: 'boolean' })
+  loading;
+
+  @attr({ mode: 'boolean' })
+  glyphless;
+
+  observer;
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    this.observer = new ResizeObserver((entries) => {
+      if (this.glyphless) {
+        return;
+      }
+
+      requestAnimationFrame(() => {
+        for (const entry of entries) {
+          const height = entry.contentRect.height;
+
+          if (height) {
+            if (height <= 100) {
+              this.glyph.setAttribute('hidden', '');
+            } else {
+              this.glyph.removeAttribute('hidden');
+            }
+          }
+        }
+      });
+    });
+
+    this.observer.observe(this);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.observer.disconnect();
+  }
+}
+
+export const widgetEmptyStateControlTemplate = html`
+  <template>
+    <svg class="glyph" ${ref('glyph')} ?hidden="${(x) => x.glyphless}">
+      ${html.partial(emptyWidgetState)}
+    </svg>
+    <div class="text">
+      <slot></slot>
+    </div>
+  </template>
+`;
+
+export const widgetEmptyStateControlStyles = css`
+  ${normalize()}
+  :host {
+    width: 100%;
+    height: 95%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  :host > svg {
+    color: ${themeConditional(paletteGrayLight2, paletteGrayLight1)};
+    width: 60%;
+    height: 60%;
+    min-width: 32px;
+    min-height: 32px;
+    max-width: 80px;
+    max-height: 80px;
+    margin-left: 16px;
+  }
+
+  @keyframes widget-empty-state-loading {
+    0% {
+      transform: scale(1, 1) translateY(0);
+    }
+    10% {
+      transform: scale(1.05, 0.9) translateY(0);
+    }
+    30% {
+      transform: scale(0.9, 1.1) translateY(-8px);
+    }
+    50% {
+      transform: scale(1.05, 0.95) translateY(0);
+    }
+    100% {
+      transform: scale(1, 1) translateY(0);
+    }
+  }
+
+  :host([loading]) > svg {
+    animation-name: widget-empty-state-loading;
+    animation-timing-function: ease;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+  }
+
+  .text {
+    color: ${paletteGrayLight1};
+    font-family: ${bodyFont};
+    font-size: ${fontSizeWidget};
+    font-weight: ${fontWeightWidget};
+    line-height: ${lineHeightWidget};
+    margin-top: ${spacing1};
+    padding: 0 10px;
+    text-align: center;
+  }
+`;
+
 export class WidgetGroupControl extends PPPOffClickElement {
   @attr({ mode: 'boolean' })
   open;
@@ -581,11 +689,9 @@ export const widgetSearchControlTemplate = html`
               !x.indices.length &&
               !x.special.length,
             html`
-              ${html.partial(
-                widgetEmptyStateTemplate(
-                  ppp.t('$widget.emptyState.noResultsToDisplay')
-                )
-              )}
+              <ppp-widget-empty-state-control>
+                ${() => ppp.t('$widget.emptyState.noResultsToDisplay')}
+              </ppp-widget-empty-state-control>
             `
           )}
           ${when(
@@ -917,7 +1023,6 @@ export const widgetSearchControlTemplate = html`
 
 export const widgetSearchControlStyles = css`
   ${normalize()}
-  ${widgetEmptyStateStyles()}
   ${scrollbars('.menu')}
   :host {
     width: 100%;
@@ -3674,6 +3779,10 @@ export class WidgetCard extends PPPElement {
 }
 
 export default {
+  WidgetEmptyStateControlComposition: WidgetEmptyStateControl.compose({
+    template: widgetEmptyStateControlTemplate,
+    styles: widgetEmptyStateControlStyles
+  }).define(),
   WidgetGroupControlComposition: WidgetGroupControl.compose({
     template: widgetGroupControlTemplate,
     styles: widgetGroupControlStyles

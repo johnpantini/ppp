@@ -3,7 +3,6 @@
 import ppp from '../../ppp.js';
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetUnsupportedInstrumentTemplate,
@@ -108,22 +107,18 @@ export const lightChartWidgetTemplate = html`
       })}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${when(
-          (x) => !x.initialized,
-          html`${html.partial(
-            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-              extraClass: 'loading-animation'
-            })
-          )}`
-        )}
-        ${when(
-          (x) => x.initialized && !x.instrument?.symbol,
-          html`${html.partial(
-            widgetEmptyStateTemplate(
-              ppp.t('$widget.emptyState.selectInstrument')
-            )
-          )}`
-        )}
+        <ppp-widget-empty-state-control
+          loading
+          ?hidden="${(x) => x.initialized}"
+        >
+          ${() => ppp.t('$widget.emptyState.loading')}
+        </ppp-widget-empty-state-control>
+
+        <ppp-widget-empty-state-control
+          ?hidden="${(x) => !(x.initialized && !x.instrument?.symbol)}"
+        >
+          ${() => ppp.t('$widget.emptyState.selectInstrument')}
+        </ppp-widget-empty-state-control>
         ${widgetUnsupportedInstrumentTemplate()}
         <div
           class="chart-holder"

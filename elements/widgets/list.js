@@ -3,7 +3,6 @@
 import {
   widgetStyles,
   WidgetWithInstrument,
-  widgetEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import { PPPElement } from '../../lib/ppp-element.js';
@@ -177,24 +176,18 @@ export const listWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}${(x) => x?.extraControls}
-        ${when(
-          (x) => !x.initialized,
-          html`${html.partial(
-            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-              extraClass: 'loading-animation'
-            })
-          )}`
-        )}
-        ${when(
-          (x) => x.initialized && !x?.document?.listSource?.length,
-          html`
-            ${html.partial(
-              widgetEmptyStateTemplate(
-                ppp.t('$widget.emptyState.noDataToDisplay')
-              )
-            )}
-          `
-        )}
+        <ppp-widget-empty-state-control
+          loading
+          ?hidden="${(x) => x.initialized}"
+        >
+          ${() => ppp.t('$widget.emptyState.loading')}
+        </ppp-widget-empty-state-control>
+        <ppp-widget-empty-state-control
+          ?hidden="${(x) =>
+            !(x.initialized && !x?.document?.listSource?.length)}"
+        >
+          ${() => ppp.t('$widget.emptyState.noDataToDisplay')}
+        </ppp-widget-empty-state-control>
         <div
           class="widget-table list-table"
           ${ref('table')}

@@ -2,7 +2,6 @@
 
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetStackSelectorTemplate
@@ -57,23 +56,16 @@ export const timelineWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${when(
-          (x) => !x.initialized,
-          html`${html.partial(
-            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-              extraClass: 'loading-animation'
-            })
-          )}`
-        )}
+        <ppp-widget-empty-state-control
+          loading
+          ?hidden="${(x) => x.initialized}"
+        >
+          ${() => ppp.t('$widget.emptyState.loading')}
+        </ppp-widget-empty-state-control>
         <div class="widget-card-list" ?hidden="${(x) => !x.initialized}">
-          ${when(
-            (x) => x.empty,
-            html`${html.partial(
-              widgetEmptyStateTemplate(
-                ppp.t('$widget.emptyState.noOperationsToDisplay')
-              )
-            )}`
-          )}
+          <ppp-widget-empty-state-control ?hidden="${(x) => !x.empty}">
+            ${() => ppp.t('$widget.emptyState.noOperationsToDisplay')}
+          </ppp-widget-empty-state-control>
           <div class="widget-card-list-inner">
             ${repeat(
               (x) => x.timeline,

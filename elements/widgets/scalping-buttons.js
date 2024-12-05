@@ -6,8 +6,7 @@ import {
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetUnsupportedInstrumentTemplate,
-  widgetStackSelectorTemplate,
-  widgetEmptyStateTemplate
+  widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
@@ -51,14 +50,12 @@ export const scalpingButtonsWidgetTemplate = html`
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         ${widgetUnsupportedInstrumentTemplate()}
-        ${when(
-          (x) => !x.initialized,
-          html`${html.partial(
-            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-              extraClass: 'loading-animation'
-            })
-          )}`
-        )}
+        <ppp-widget-empty-state-control
+          loading
+          ?hidden="${(x) => x.initialized}"
+        >
+          ${() => ppp.t('$widget.emptyState.loading')}
+        </ppp-widget-empty-state-control>
         ${when(
           (x) =>
             x.initialized &&

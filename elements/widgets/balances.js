@@ -3,7 +3,6 @@
 import {
   widgetStyles,
   Widget,
-  widgetEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
@@ -41,15 +40,12 @@ export const balancesWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${when(
-          (x) => !x.initialized,
-          html`${html.partial(
-            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-              extraClass: 'loading-animation',
-              hideGlyph: true
-            })
-          )}`
-        )}
+        <ppp-widget-empty-state-control
+          loading
+          ?hidden="${(x) => x.initialized}"
+        >
+          ${() => ppp.t('$widget.emptyState.loading')}
+        </ppp-widget-empty-state-control>
         ${when(
           (x) => x.initialized && x?.balances?.length,
           html`
@@ -113,17 +109,12 @@ export const balancesWidgetTemplate = html`
             </div>
           `
         )}
-        ${when(
-          (x) => x.initialized && !x?.balances?.length,
-          html`${html.partial(
-            widgetEmptyStateTemplate(
-              ppp.t('$widget.emptyState.noBalancesToDisplay'),
-              {
-                hideGlyph: true
-              }
-            )
-          )}`
-        )}
+        <ppp-widget-empty-state-control
+          ${ref('emptyStateControl')}
+          ?hidden="${(x) => !(x.initialized && !x?.balances?.length)}"
+        >
+          ${() => ppp.t('$widget.emptyState.noBalancesToDisplay')}
+        </ppp-widget-empty-state-control>
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -194,14 +185,7 @@ export class BalancesWidget extends Widget {
     super.connectedCallback();
 
     if (!this.document.balancesTrader) {
-      const emptyStateText = this.shadowRoot.querySelector(
-        '.widget-empty-state-holder span'
-      );
-
-      if (emptyStateText) {
-        emptyStateText.textContent = 'Не задан портфельный трейдер.';
-      }
-
+      this.emptyStateControl.textContent = 'Не задан портфельный трейдер.';
       this.initialized = true;
 
       return;

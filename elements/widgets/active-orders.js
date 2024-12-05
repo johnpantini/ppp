@@ -3,7 +3,6 @@
 import ppp from '../../ppp.js';
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetStackSelectorTemplate
@@ -82,11 +81,11 @@ export const activeOrdersWidgetTemplate = html`
         ${widgetStackSelectorTemplate()}
         ${when(
           (x) => !x.initialized,
-          html`${html.partial(
-            widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-              extraClass: 'loading-animation'
-            })
-          )}`
+          html`
+            <ppp-widget-empty-state-control loading>
+              ${() => ppp.t('$widget.emptyState.loading')}
+            </ppp-widget-empty-state-control>
+          `
         )}
         <div class="widget-toolbar" ?hidden="${(x) => !x.initialized}">
           <div class="tabs">
@@ -182,14 +181,9 @@ export const activeOrdersWidgetTemplate = html`
           </div>
         </div>
         <div class="widget-card-list" ?hidden="${(x) => !x.initialized}">
-          ${when(
-            (x) => !x.orders?.length,
-            html`${html.partial(
-              widgetEmptyStateTemplate(
-                ppp.t('$widget.emptyState.noActiveOrders')
-              )
-            )}`
-          )}
+          <ppp-widget-empty-state-control ?hidden="${(x) => x.orders?.length}">
+            ${() => ppp.t('$widget.emptyState.noActiveOrders')}
+          </ppp-widget-empty-state-control>
           <div class="widget-card-list-inner" ${ref('cardList')}></div>
         </div>
       </div>
@@ -1069,7 +1063,7 @@ export async function widgetDefinition() {
               ?checked="${(x) => x.document.showLimitTab ?? true}"
               ${ref('showLimitTab')}
             >
-              Показывать вкладку «Лимитные»
+              Показывать вкладку «Биржевые»
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showConditionalTab ?? true}"

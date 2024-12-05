@@ -5,7 +5,6 @@ import {
   widgetStyles,
   Widget,
   widgetDefaultHeaderTemplate,
-  widgetEmptyStateTemplate,
   widgetStackSelectorTemplate,
   widgetCommonContentStyles
 } from '../widget.js';
@@ -245,7 +244,7 @@ export class TccWidgetCard extends PPPElement {
         return ppp.brandSvg('tinkoff');
 
       default:
-        return '';
+        return 'static/svg/custom-trader.svg';
     }
   }
 
@@ -301,11 +300,11 @@ export const tccWidgetTemplate = html`
           </div>
         </div>
         <div class="widget-card-list">
+          <ppp-widget-empty-state-control ?hidden="${(x) => x?.traders.length}">
+            ${() => 'Нет трейдеров для отображения.'}
+          </ppp-widget-empty-state-control>
           ${when(
-            (x) => !x?.traders.length,
-            html`${html.partial(
-              widgetEmptyStateTemplate('Нет трейдеров для отображения.')
-            )}`,
+            (x) => x?.traders.length,
             html`
               ${repeat(
                 (x) => x?.traders ?? [],

@@ -2,7 +2,6 @@
 
 import {
   widgetStyles,
-  widgetEmptyStateTemplate,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
   widgetWithInstrumentBodyTemplate,
@@ -187,12 +186,11 @@ export const orderbookWidgetTemplate = html`
               )}
             </tbody>
           </table>
-          ${when(
-            (x) => !x.quoteLines.length,
-            html`${html.partial(
-              widgetEmptyStateTemplate('Книга заявок пуста.')
-            )}`
-          )}
+          <ppp-widget-empty-state-control
+            ?hidden="${(x) => x.quoteLines.length}"
+          >
+            ${() => 'Книга заявок пуста.'}
+          </ppp-widget-empty-state-control>
         `)}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>

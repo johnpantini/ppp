@@ -128,11 +128,11 @@ export const widgetUnsupportedInstrumentTemplate = () => html`
       x.instrument?.symbol &&
       x.instrumentTrader &&
       x.unsupportedInstrument,
-    html`${html.partial(
-      widgetEmptyStateTemplate(
-        ppp.t('$widget.emptyState.unsupportedInstrument')
-      )
-    )}`
+    html`
+      <ppp-widget-empty-state-control>
+        ${() => ppp.t('$widget.emptyState.unsupportedInstrument')}
+      </ppp-widget-empty-state-control>
+    `
   )}
 `;
 
@@ -141,30 +141,28 @@ export const widgetWithInstrumentBodyTemplate = (
   options = {}
 ) =>
   html`
+    <ppp-widget-empty-state-control loading ?hidden="${(x) => x.initialized}">
+      ${() => ppp.t('$widget.emptyState.loading')}
+    </ppp-widget-empty-state-control>
     ${when(
-      (x) => !x.initialized,
-      html`${html.partial(
-        widgetEmptyStateTemplate(ppp.t('$widget.emptyState.loading'), {
-          extraClass: 'loading-animation'
-        })
-      )}`,
-      html` ${when(
-        (x) => !x.instrument?.symbol,
-        html`${html.partial(
-          widgetEmptyStateTemplate(
+      (x) => x.initialized,
+      html`
+        <ppp-widget-empty-state-control
+          ?hidden="${(x) => x.instrument?.symbol}"
+        >
+          ${() =>
             options.emptyStateText ??
-              ppp.t('$widget.emptyState.selectInstrument')
-          )
-        )}`
-      )}
-      ${widgetUnsupportedInstrumentTemplate()}
-      ${when(
-        (x) =>
-          x.instrument?.symbol &&
-          x.instrumentTrader &&
-          !x.unsupportedInstrument,
-        widgetBodyLayout
-      )}`
+            ppp.t('$widget.emptyState.selectInstrument')}
+        </ppp-widget-empty-state-control>
+        ${widgetUnsupportedInstrumentTemplate()}
+        ${when(
+          (x) =>
+            x.instrument?.symbol &&
+            x.instrumentTrader &&
+            !x.unsupportedInstrument,
+          widgetBodyLayout
+        )}
+      `
     )}
   `;
 
@@ -235,72 +233,6 @@ export const widgetStackSelectorTemplate = () => html`
       )}
     </ppp-widget-tabs>
   </div>
-`;
-
-export const widgetEmptyStateTemplate = (text, options = {}) => `
-  <div class="widget-empty-state-holder${
-    options.extraClass ? ` ${options.extraClass}` : ''
-  }">
-    ${options.hideGlyph ? '' : emptyWidgetState}
-    <span>${text}</span>
-  </div>`;
-
-export const widgetEmptyStateStyles = () => css`
-  @keyframes widget-empty-state-loading {
-    0% {
-      transform: scale(1, 1) translateY(0);
-    }
-    10% {
-      transform: scale(1.05, 0.9) translateY(0);
-    }
-    30% {
-      transform: scale(0.9, 1.1) translateY(-8px);
-    }
-    50% {
-      transform: scale(1.05, 0.95) translateY(0);
-    }
-    100% {
-      transform: scale(1, 1) translateY(0);
-    }
-  }
-
-  .widget-empty-state-holder {
-    width: 100%;
-    height: 95%;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .widget-empty-state-holder > svg {
-    color: ${themeConditional(paletteGrayLight2, paletteGrayLight1)};
-    width: 60%;
-    height: 60%;
-    min-width: 32px;
-    min-height: 32px;
-    max-width: 80px;
-    max-height: 80px;
-    margin-left: 16px;
-  }
-
-  .widget-empty-state-holder.loading-animation > svg {
-    animation-name: widget-empty-state-loading;
-    animation-timing-function: ease;
-    animation-duration: 2s;
-    animation-iteration-count: infinite;
-  }
-
-  .widget-empty-state-holder > span {
-    color: ${paletteGrayLight1};
-    font-family: ${bodyFont};
-    font-size: ${fontSizeWidget};
-    font-weight: ${fontWeightWidget};
-    line-height: ${lineHeightWidget};
-    margin-top: ${spacing1};
-    padding: 0 10px;
-    text-align: center;
-  }
 `;
 
 export const widgetTableStyles = () => css`
@@ -820,7 +752,6 @@ export const widgetCommonContentStyles = () => css`
 export const widgetStyles = () => css`
   ${display('inline-flex')}
   ${scrollbars('.widget-body')}
-  ${widgetEmptyStateStyles()} 
   ${widgetTableStyles()}  
   ${widgetCommonContentStyles()}
   .widget-root {
