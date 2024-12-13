@@ -222,7 +222,6 @@ export const orderbookWidgetStyles = css`
   }
 
   .widget-content.compact {
-    height: 100%;
   }
 
   .holder {
@@ -231,7 +230,7 @@ export const orderbookWidgetStyles = css`
   }
 
   .compact-holder {
-    position: absolute;
+    position: relative;
     display: flex;
     z-index: 0;
     width: 100%;
