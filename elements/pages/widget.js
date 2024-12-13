@@ -67,15 +67,19 @@ export const colorSelectorTemplate = ({
   refName,
   value,
   isDark,
-  variant
+  variant,
+  hideDescription = false
 }) => html`
   <ppp-select
     ?disabled="${(x) => !x.isSteady()}"
     variant="${variant ?? 'tiny'}"
     ${ref(refName)}
     value="${() => value ?? 'default'}"
+    standalone="${hideDescription ? true : false}"
   >
-    <span slot="description">${isDark ? 'Тёмная тема' : 'Светлая тема'}</span>
+    <span ?hidden="${hideDescription}" slot="description"
+      >${isDark ? 'Тёмная тема' : 'Светлая тема'}</span
+    >
     <ppp-option value="default">По умолчанию</ppp-option>
     <ppp-option value="palette-white">Белый</ppp-option>
     <ppp-option value="palette-black">Чёрный</ppp-option>

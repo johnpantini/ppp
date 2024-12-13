@@ -41,7 +41,6 @@ export const clockWidgetTemplate = html`
 export const clockWidgetStyles = css`
   ${normalize()}
   ${widgetStyles()}
-
   .widget-header::after {
     border-bottom: none;
   }

@@ -5,13 +5,13 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
+  widgetDefaultEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import { invalidate } from '../../lib/ppp-errors.js';
 import {
   html,
   css,
-  when,
   ref,
   observable,
   Updates,
@@ -79,15 +79,7 @@ export const activeOrdersWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${when(
-          (x) => !x.initialized,
-          html`
-            <ppp-widget-empty-state-control loading>
-              ${() => ppp.t('$widget.emptyState.loading')}
-            </ppp-widget-empty-state-control>
-          `
-        )}
-        <div class="widget-toolbar" ?hidden="${(x) => !x.initialized}">
+        <div class="widget-toolbar" ?hidden="${(x) => !x.mayShowContent}">
           <div class="tabs">
             <ppp-widget-box-radio-group
               ?hidden="${(x) =>
@@ -103,19 +95,19 @@ export const activeOrdersWidgetTemplate = html`
                 ?hidden="${(x) => allTabHidden(x)}"
                 value="all"
               >
-                Все
+                ${() => ppp.t('$widget.tabs.allOrdersText')}
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 ?hidden="${(x) => limitTabHidden(x)}"
                 value="real"
               >
-                Биржевые
+                ${() => ppp.t('$widget.tabs.realOrdersText')}
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
                 ?hidden="${(x) => conditionalTabHidden(x)}"
                 value="conditional"
               >
-                Условные
+                ${() => ppp.t('$widget.tabs.conditionalOrdersText')}
               </ppp-widget-box-radio>
             </ppp-widget-box-radio-group>
           </div>
@@ -180,12 +172,15 @@ export const activeOrdersWidgetTemplate = html`
             </button>
           </div>
         </div>
-        <div class="widget-card-list" ?hidden="${(x) => !x.initialized}">
-          <ppp-widget-empty-state-control ?hidden="${(x) => x.orders?.length}">
+        <div class="widget-card-list" ?hidden="${(x) => !x.mayShowContent}">
+          <ppp-widget-empty-state-control
+            ?hidden="${(x) => x.orders?.length || !x.mayShowContent}"
+          >
             ${() => ppp.t('$widget.emptyState.noActiveOrders')}
           </ppp-widget-empty-state-control>
           <div class="widget-card-list-inner" ${ref('cardList')}></div>
         </div>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -282,6 +277,8 @@ export const activeOrdersWidgetStyles = css`
 `;
 
 export class ActiveOrdersWidget extends WidgetWithInstrument {
+  allowEmptyInstrument = true;
+
   @observable
   ordersTrader;
 

@@ -5,7 +5,7 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetUnsupportedInstrumentTemplate,
+  widgetDefaultEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
@@ -13,8 +13,7 @@ import {
   css,
   ref,
   observable,
-  repeat,
-  when
+  repeat
 } from '../../vendor/fast-element.min.js';
 import { WIDGET_TYPES } from '../../lib/const.js';
 import { normalize, spacing } from '../../design/styles.js';
@@ -49,123 +48,123 @@ export const scalpingButtonsWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${widgetUnsupportedInstrumentTemplate()}
-        <ppp-widget-empty-state-control
-          loading
-          ?hidden="${(x) => x.initialized}"
+        <div
+          class="toolbar"
+          ?hidden="${(x) => {
+            if (x.initialized && !x.instrument) {
+              return false;
+            }
+
+            return !x.mayShowContent;
+          }}"
         >
-          ${() => ppp.t('$widget.emptyState.loading')}
-        </ppp-widget-empty-state-control>
-        ${when(
-          (x) =>
-            x.initialized &&
-            (!x.instrument?.symbol ||
-              (x.instrument?.symbol &&
-                x.instrumentTrader &&
-                !x.unsupportedInstrument)),
-          html`
-            <div class="toolbar">
-              <div
-                class="tabs"
-                ?hidden="${(x) =>
-                  allTabHidden(x) &&
-                  realTabHidden(x) &&
-                  conditionalTabHidden(x)}"
+          <div
+            class="tabs"
+            ?hidden="${(x) =>
+              allTabHidden(x) && realTabHidden(x) && conditionalTabHidden(x)}"
+          >
+            <ppp-widget-box-radio-group
+              class="order-type-selector"
+              @change="${(x) => x.handleOrderTypeChange()}"
+              value="${(x) => x.document.activeTab ?? 'all'}"
+              ${ref('orderTypeSelector')}
+            >
+              <ppp-widget-box-radio
+                ?hidden="${(x) => allTabHidden(x)}"
+                value="all"
               >
-                <ppp-widget-box-radio-group
-                  class="order-type-selector"
-                  @change="${(x) => x.handleOrderTypeChange()}"
-                  value="${(x) => x.document.activeTab ?? 'all'}"
-                  ${ref('orderTypeSelector')}
-                >
-                  <ppp-widget-box-radio
-                    ?hidden="${(x) => allTabHidden(x)}"
-                    value="all"
-                  >
-                    Все
-                  </ppp-widget-box-radio>
-                  <ppp-widget-box-radio
-                    ?hidden="${(x) => realTabHidden(x)}"
-                    value="real"
-                  >
-                    Биржевые
-                  </ppp-widget-box-radio>
-                  <ppp-widget-box-radio
-                    ?hidden="${(x) => conditionalTabHidden(x)}"
-                    value="conditional"
-                    disabled
-                  >
-                    Условные
-                  </ppp-widget-box-radio>
-                </ppp-widget-box-radio-group>
-              </div>
-            </div>
-            <div class="holder">
-              <div
-                class="holder-buy"
-                @click="${(x, c) => x.handleBuySellButtonClick(c, 'buy')}"
+                ${() => ppp.t('$widget.tabs.allOrdersText')}
+              </ppp-widget-box-radio>
+              <ppp-widget-box-radio
+                ?hidden="${(x) => realTabHidden(x)}"
+                value="real"
               >
-                ${repeat(
-                  (x) =>
-                    (
-                      x.document.buySideButtonsTemplate ??
-                      defaultBuySideButtonsTemplate
-                    )?.split(/\r?\n/),
-                  html`
-                    <div class="${(x) => (x?.trim() ? '' : 'empty')}">
-                      ${repeat(
-                        (x) => x?.split(',').filter((i) => i),
-                        html`
-                          <ppp-widget-button appearance="primary">
-                            ${(x) => {
-                              const n = parseInt(x).toString();
-
-                              if (isNaN(n)) return '0';
-
-                              if (n > 0) return `+${n}`;
-                              else return n;
-                            }}
-                          </ppp-widget-button>
-                        `
-                      )}
-                    </div>
-                  `
-                )}
-              </div>
-              <div
-                class="holder-sell"
-                @click="${(x, c) => x.handleBuySellButtonClick(c, 'sell')}"
+                ${() => ppp.t('$widget.tabs.realOrdersText')}
+              </ppp-widget-box-radio>
+              <ppp-widget-box-radio
+                ?hidden="${(x) => conditionalTabHidden(x)}"
+                value="conditional"
+                disabled
               >
-                ${repeat(
-                  (x) =>
-                    (
-                      x.document.sellSideButtonsTemplate ??
-                      defaultSellSideButtonsTemplate
-                    )?.split(/\r?\n/),
-                  html`
-                    <div class="${(x) => (x?.trim() ? '' : 'empty')}">
-                      ${repeat(
-                        (x) => x?.split(',').filter((i) => i),
-                        html`
-                          <ppp-widget-button appearance="danger">
-                            ${(x) => {
-                              const n = parseInt(x).toString();
+                ${() => ppp.t('$widget.tabs.conditionalOrdersText')}
+              </ppp-widget-box-radio>
+            </ppp-widget-box-radio-group>
+          </div>
+        </div>
+        <div
+          class="holder"
+          ?hidden="${(x) => {
+            if (x.initialized && !x.instrument) {
+              return false;
+            }
 
-                              if (isNaN(n)) return '0';
+            return !x.mayShowContent;
+          }}"
+        >
+          <div
+            class="holder-buy"
+            @click="${(x, c) => x.handleBuySellButtonClick(c, 'buy')}"
+          >
+            ${repeat(
+              (x) =>
+                (
+                  x.document.buySideButtonsTemplate ??
+                  defaultBuySideButtonsTemplate
+                )?.split(/\r?\n/),
+              html`
+                <div class="${(x) => (x?.trim() ? '' : 'empty')}">
+                  ${repeat(
+                    (x) => x?.split(',').filter((i) => i),
+                    html`
+                      <ppp-widget-button appearance="primary">
+                        ${(x) => {
+                          const n = parseInt(x).toString();
 
-                              if (n > 0) return `+${n}`;
-                              else return n;
-                            }}
-                          </ppp-widget-button>
-                        `
-                      )}
-                    </div>
-                  `
-                )}
-              </div>
-            </div>
-          `
-        )}
+                          if (isNaN(n)) return '0';
+
+                          if (n > 0) return `+${n}`;
+                          else return n;
+                        }}
+                      </ppp-widget-button>
+                    `
+                  )}
+                </div>
+              `
+            )}
+          </div>
+          <div
+            class="holder-sell"
+            @click="${(x, c) => x.handleBuySellButtonClick(c, 'sell')}"
+          >
+            ${repeat(
+              (x) =>
+                (
+                  x.document.sellSideButtonsTemplate ??
+                  defaultSellSideButtonsTemplate
+                )?.split(/\r?\n/),
+              html`
+                <div class="${(x) => (x?.trim() ? '' : 'empty')}">
+                  ${repeat(
+                    (x) => x?.split(',').filter((i) => i),
+                    html`
+                      <ppp-widget-button appearance="danger">
+                        ${(x) => {
+                          const n = parseInt(x).toString();
+
+                          if (isNaN(n)) return '0';
+
+                          if (n > 0) return `+${n}`;
+                          else return n;
+                        }}
+                      </ppp-widget-button>
+                    `
+                  )}
+                </div>
+              `
+            )}
+          </div>
+        </div>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -225,6 +224,8 @@ export const scalpingButtonsWidgetStyles = css`
 `;
 
 export class ScalpingButtonsWidget extends WidgetWithInstrument {
+  allowEmptyInstrument = true;
+
   @observable
   ordersTrader;
 
@@ -292,7 +293,11 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
               value
             });
           } catch (e) {
-            console.error(e);
+            this.$$debug(
+              '[%s] handleBuySellButtonClick failed: %o',
+              this.document.name,
+              e
+            );
 
             let key = await this.ordersTrader?.getErrorI18nKey?.({
               instrument: this.instrument,

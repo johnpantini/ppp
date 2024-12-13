@@ -11,7 +11,13 @@ export default function (i18n) {
         noTradesToDisplay: 'No trades to display.',
         selectInstrument: 'Select an instrument.',
         unsupportedInstrument: 'Unsupported instrument.'
-      }
+      },
+      tabs: {
+        allOrdersText: 'All',
+        realOrdersText: 'Real',
+        conditionalOrdersText: 'Conditional'
+      },
+      unsupportedInstrumentFullName: 'Unsupported instrument'
     }
   });
 }

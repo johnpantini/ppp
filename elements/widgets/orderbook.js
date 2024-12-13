@@ -4,36 +4,36 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetWithInstrumentBodyTemplate,
+  widgetDefaultEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
   css,
-  when,
+  attr,
   ref,
-  repeat,
   observable
 } from '../../vendor/fast-element.min.js';
+import { BROKERS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
 import {
-  BROKERS,
-  EXCHANGE,
-  TRADER_CAPS,
-  TRADER_DATUM,
-  WIDGET_TYPES
-} from '../../lib/const.js';
-import {
+  formatAmount,
   formatPercentage,
   formatPriceWithoutCurrency,
+  formatQuantity,
   priceCurrencySymbol
 } from '../../lib/intl.js';
-import { ellipsis, normalize, spacing } from '../../design/styles.js';
+import {
+  normalize,
+  spacing,
+  getTraderSelectOptionColor,
+  ellipsis
+} from '../../design/styles.js';
+import { createThemed } from '../../design/design-tokens.js';
 import {
   buy,
   fontSizeWidget,
   lighten,
   lineHeightWidget,
-  negative,
   paletteBlack,
   paletteBlueBase,
   paletteGrayBase,
@@ -42,13 +42,16 @@ import {
   paletteGrayLight1,
   paletteGrayLight2,
   paletteWhite,
-  positive,
   sell,
+  spacing1,
+  spacing2,
   themeConditional,
   toColorComponents
 } from '../../design/design-tokens.js';
 import { Tmpl } from '../../lib/tmpl.js';
+import { colorSelectorTemplate } from '../pages/widget.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
+import '../banner.js';
 import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
@@ -75,123 +78,99 @@ export const orderbookWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${widgetWithInstrumentBodyTemplate(html`
-          <table class="orderbook-table">
-            <thead>
-              <tr>
-                <th colspan="2">
-                  <div class="bid-title">
-                    ${(x) => 'Bid, ' + priceCurrencySymbol(x.instrument)}
-                  </div>
-                  <div class="spread">${(x) => x.spreadString}</div>
-                  <div class="ask-title">
-                    ${(x) => 'Ask, ' + priceCurrencySymbol(x.instrument)}
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody @click="${(x, c) => x.handleTableClick(c)}">
-              ${repeat(
-                (x) => x.quoteLines,
-                html`
-                  <tr>
-                    <td
-                      price="${(x) => x.bid?.price}"
-                      style="${(x, c) =>
-                        `background: linear-gradient( to left, var(--orderbook-bid-color) 0%, var(--orderbook-bid-color) ${c.parent.calcGradientPercentage(
-                          x.bid?.volume
-                        )}%, transparent ${c.parent.calcGradientPercentage(
-                          x.bid?.volume
-                        )}%, transparent 100% )`}"
-                    >
-                      <div
-                        class="quote-line bid-line"
-                        price="${(x) => x.bid?.price}"
-                        pool="${(x) => x.bid?.pool || 'none'}"
-                      >
-                        <div class="volume">
-                          ${when(
-                            (x) => x.bid?.my > 0,
-                            html`
-                              <div class="my-order">
-                                <span>
-                                  <span>${(x) => x.bid.my}</span>
-                                </span>
-                              </div>
-                            `
-                          )}
-                          ${(x) =>
-                            x.bid?.pool === 'LD' ? '⬇️' : x.bid?.volume}
-                        </div>
-                        <div class="spacer"></div>
-                        <div class="price">
-                          ${(x, c) =>
-                            formatPriceWithoutCurrency(
-                              x.bid?.price,
-                              c.parent.instrument,
-                              c.parent.instrument.broker === BROKERS.UTEX
-                            )}
-                        </div>
-                        ${when(
-                          (x) => x.bid?.pool,
-                          html`<div class="pool">${(x) => x.bid?.pool}</div>`
-                        )}
-                      </div>
-                    </td>
-                    <td
-                      price="${(x) => x.ask?.price}"
-                      style="${(x, c) =>
-                        `background: linear-gradient( to right, var(--orderbook-ask-color) 0%, var(--orderbook-ask-color) ${c.parent.calcGradientPercentage(
-                          x.ask?.volume
-                        )}%, transparent ${c.parent.calcGradientPercentage(
-                          x.ask?.volume
-                        )}%, transparent 100% )`}"
-                    >
-                      <div
-                        class="quote-line ask-line"
-                        price="${(x) => x.ask?.price}"
-                        pool="${(x) => x.ask?.pool || 'none'}"
-                      >
-                        <div class="volume">
-                          ${(x) =>
-                            x.ask?.pool === 'LU' ? '⬆️' : x.ask?.volume}
-                          ${when(
-                            (x) => x.ask?.my > 0,
-                            html`
-                              <div class="my-order">
-                                <span>
-                                  <span>${(x) => x.ask.my}</span>
-                                </span>
-                              </div>
-                            `
-                          )}
-                        </div>
-                        <div class="spacer"></div>
-                        <div class="price">
-                          ${(x, c) =>
-                            formatPriceWithoutCurrency(
-                              x.ask?.price,
-                              c.parent.instrument,
-                              c.parent.instrument.broker === BROKERS.UTEX
-                            )}
-                        </div>
-                        ${when(
-                          (x) => x.ask?.pool,
-                          html` <div class="pool">${(x) => x.ask?.pool}</div> `
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                `
-              )}
-            </tbody>
-          </table>
-          <ppp-widget-empty-state-control
-            ?hidden="${(x) => x.quoteLines.length}"
-          >
-            ${() => 'Книга заявок пуста.'}
-          </ppp-widget-empty-state-control>
-        `)}
+        <div class="widget-content" ?hidden="${(x) => !x.mayShowContent}">
+          <div class="header">
+            <span class="title-left">
+              ${(x) => {
+                if (x.document.displayMode === '1-column') {
+                  return html`
+                    <span class="negative">Ask</span>/<span class="positive">
+                      Bid </span
+                    >, ${priceCurrencySymbol(x.instrument)}
+                  `;
+                } else if (x.document.displayMode === '2-columns') {
+                  return html`<span class="positive">Bid</span>`;
+                } else if (x.document.displayMode === 'compact') {
+                  return html`
+                    <span class="positive">Bid</span>,
+                    ${priceCurrencySymbol(x.instrument)}
+                  `;
+                }
+
+                return '';
+              }}
+            </span>
+            <span
+              class="title-center"
+              ?hidden="${(x) => x.document.displayMode === '1-column'}"
+            >
+              ${(x) => {
+                if (x.document.displayMode === '2-columns') {
+                  return `${ppp.t('$g.price')}, ${priceCurrencySymbol(
+                    x.instrument
+                  )}`;
+                } else if (
+                  x.document.displayMode === 'compact' &&
+                  (x.document.showSpread ?? true)
+                ) {
+                  return x.spreadString;
+                }
+
+                return '';
+              }}
+            </span>
+            <span
+              class="title-right"
+              ?hidden="${(x) => x.document.displayMode === '1-column'}"
+            >
+              ${(x) => {
+                if (x.document.displayMode === '2-columns') {
+                  return html`<span class="negative">Ask</span>`;
+                } else if (x.document.displayMode === 'compact') {
+                  return html`
+                    <span class="negative">Ask</span>,
+                    ${priceCurrencySymbol(x.instrument)}
+                  `;
+                }
+
+                return '';
+              }}
+            </span>
+          </div>
+          <div class="holder" ${ref('holder')} ?hidden="${(x) => x.empty}">
+            <div
+              ${ref('columnarAsks')}
+              class="asks columnar"
+              ?hidden="${(x) => x.document.displayMode === 'compact'}"
+            ></div>
+            <div
+              class="spread-bar"
+              ?hidden="${(x) =>
+                x.document.displayMode === 'compact' ||
+                !(x.document.showSpread ?? true)}"
+            >
+              <span class="title-center">${(x) => x.spreadString}</span>
+            </div>
+            <div
+              ${ref('columnarBids')}
+              class="bids columnar"
+              ?hidden="${(x) => x.document.displayMode === 'compact'}"
+            ></div>
+            <div
+              class="compact-holder"
+              ?hidden="${(x) => x.document.displayMode !== 'compact'}"
+            >
+              <div class="bids compact" ${ref('compactBids')}></div>
+              <div class="asks compact" ${ref('compactAsks')}></div>
+            </div>
+          </div>
+        </div>
+        <ppp-widget-empty-state-control
+          ?hidden="${(x) => !x.empty || !x.mayShowContent}"
+        >
+          ${() => ppp.t('$widget.emptyState.noDataToDisplay')}
+        </ppp-widget-empty-state-control>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -203,140 +182,149 @@ export const orderbookWidgetStyles = css`
   ${normalize()}
   ${widgetStyles()}
   ${spacing()}
-  .orderbook-table {
-    min-width: 140px;
-    width: 100%;
-    padding: 0;
-    user-select: none;
-    border-collapse: collapse;
+  .header, 
+  .spread-bar {
+    display: flex;
+    gap: 0 ${spacing1};
+    justify-content: space-between;
+    font-size: ${fontSizeWidget};
+    line-height: ${lineHeightWidget};
+    height: 26px;
+    border: 0 solid ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
+    border-bottom-width: 1px;
+    padding: 5px 8px 3px;
+    white-space: nowrap;
+    z-index: 4;
   }
 
-  .orderbook-table th {
+  .spread-bar {
+    border-top-width: 1px;
+    margin-top: 1px;
+    transform: translateY(-1px);
+    justify-content: center;
+  }
+
+  .header {
     position: sticky;
     top: 0;
-    z-index: 1;
-    width: 50%;
-    height: 28px;
-    padding: 4px 8px;
-    font-weight: 500;
-    font-size: ${fontSizeWidget};
-    line-height: 20px;
-    white-space: nowrap;
     background: ${themeConditional(paletteWhite, paletteBlack)};
   }
 
-  .orderbook-table th::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    display: block;
-    background-color: ${themeConditional(paletteGrayLight2, paletteGrayDark1)};
-  }
-
-  .bid-title {
-    left: 8px;
-    text-align: left;
-    position: absolute;
-    top: 4px;
-    color: ${positive};
-  }
-
-  .ask-title {
-    right: 8px;
-    text-align: right;
-    position: absolute;
-    top: 4px;
-    color: ${negative};
-  }
-
-  .bid-title,
-  .ask-title {
+  .title-left,
+  .title-right {
     font-weight: 500;
+    color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
 
-  .spread {
-    left: 50%;
-    transform: translateX(-50%);
+  .title-center {
     font-weight: 400;
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
-    position: absolute;
-    top: 4px;
   }
 
-  .orderbook-table td {
-    --orderbook-ask-color: rgba(
-      ${toColorComponents(sell)},
-      ${ppp.darkMode ? 0.4 : 0.3}
-    );
-    --orderbook-bid-color: rgba(
-      ${toColorComponents(buy)},
-      ${ppp.darkMode ? 0.4 : 0.3}
-    );
-    width: 50%;
-    padding: 0;
-    border: none;
-    border-bottom: 1px solid
-      ${themeConditional(lighten(paletteGrayLight2, 10), paletteGrayDark4)};
-    background: transparent;
-    cursor: pointer;
-    font-size: ${fontSizeWidget};
-    line-height: ${lineHeightWidget};
-    ${ellipsis()};
+  .widget-content.compact {
+    height: 100%;
   }
 
-  .ask-line,
-  .bid-line {
+  .holder {
+    position: relative;
     width: 100%;
+  }
+
+  .compact-holder {
+    position: absolute;
     display: flex;
-    padding: 2px 4px;
-    font-variant-numeric: tabular-nums;
+    z-index: 0;
+    width: 100%;
+    text-rendering: optimizeSpeed;
+    contain: layout;
   }
 
-  .quote-line[pool='LD'] {
-    background: rgba(
-      ${toColorComponents(paletteGrayBase)},
-      ${ppp.darkMode ? 0.7 : 0.3}
-    );
+  .bids.columnar,
+  .asks.columnar {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    text-rendering: optimizeSpeed;
+    contain: layout;
+    overflow: hidden;
+    cursor: pointer;
   }
 
-  .quote-line[pool='LU'] {
-    background: rgba(
-      ${toColorComponents(paletteGrayBase)},
-      ${ppp.darkMode ? 0.7 : 0.3}
-    );
+  .bids.compact,
+  .asks.compact {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: fit-content;
+    cursor: pointer;
   }
 
-  .ask-line:hover,
-  .bid-line:hover {
-    background-color: rgba(
-      ${themeConditional(
-        toColorComponents(paletteGrayLight2),
-        toColorComponents(paletteGrayDark1)
-      )},
-      0.7
-    );
+  .bids.compact .pool,
+  .bids.compact .price {
+    text-align: left;
   }
 
-  .bid-line {
-    flex-direction: row-reverse;
+  .bids.compact .volume {
+    text-align: right;
+    margin-right: ${spacing1};
   }
 
-  .my-order {
+  .asks.columnar > div:first-of-type,
+  .bids.columnar > div:first-of-type,
+  .bids.compact > div:first-of-type {
+    margin: 0 ${spacing2};
+  }
+
+  .asks.compact .pool,
+  .asks.compact .price {
+    text-align: right;
+  }
+
+  .asks.compact .volume {
+    text-align: left;
+    margin: 0 ${spacing2};
+  }
+
+  .asks.columnar .volume,
+  .bids.columnar .volume {
+    text-align: right;
+    margin: 0 ${spacing2};
+  }
+
+  .asks.compact > div:last-child {
+    margin: 0 ${spacing2};
+  }
+
+  .pool,
+  .price,
+  .volume {
+    color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
+    pointer-events: none;
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 20px;
+    position: relative;
+    overflow: hidden;
+    white-space: pre;
+    user-select: none;
+    cursor: pointer;
+    text-rendering: optimizeSpeed;
+    min-width: 40px;
+    z-index: 2;
+    transform: translateY(-1px);
+  }
+
+  .asks.columnar .volume,
+  .bids.columnar .volume {
+    min-width: 50px;
+  }
+
+  .my {
     display: inline-block;
-  }
-
-  .ask-line .my-order {
-    margin-left: 1px;
-  }
-
-  .bid-line .my-order {
-    margin-right: 1px;
-  }
-
-  .my-order > span {
     cursor: pointer;
     background-color: ${paletteBlueBase};
     color: ${paletteWhite};
@@ -346,51 +334,76 @@ export const orderbookWidgetStyles = css`
     min-height: 16px;
     min-width: 16px;
     padding: 1px 4px;
+    pointer-events: none;
   }
 
-  .my-order > span > span {
+  .my > span {
     min-height: 16px;
     margin: 0 4px;
     word-wrap: normal;
     ${ellipsis()};
   }
 
-  .spacer {
-    width: 0;
-    margin: 0 auto;
-    user-select: none;
+  svg {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+    width: 100%;
   }
 
-  .volume {
-    color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
-    display: flex;
-    gap: 0 4px;
+  polygon.border {
+    fill: ${themeConditional(lighten(paletteGrayLight2, 10), paletteGrayDark4)};
   }
 
-  .price,
-  .pool {
-    margin-right: 8px;
-    color: ${themeConditional(paletteGrayBase, lighten(paletteGrayLight1, 10))};
-    width: 33.33%;
-  }
-
-  .volume {
-    width: 33.33%;
-    max-width: 33.33%;
-  }
-
-  .ask-line .price,
-  .ask-line .pool,
-  .bid-line .volume {
-    text-align: right;
-  }
-
-  .bid-line .volume {
-    justify-content: flex-end;
+  polygon.level1 {
+    --orderbook-ask-color: rgba(
+      ${toColorComponents(sell)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
+    --orderbook-bid-color: rgba(
+      ${toColorComponents(buy)},
+      ${ppp.darkMode ? 0.4 : 0.3}
+    );
   }
 `;
 
 export class OrderbookWidget extends WidgetWithInstrument {
+  #refs = {
+    bids: {
+      holder: null,
+      svg: {
+        hover: null,
+        borders: null,
+        level1: null,
+        level2: null,
+        level3: null,
+        level4: null,
+        level5: null
+      },
+      pool: null,
+      price: null,
+      volume: null
+    },
+    asks: {
+      holder: null,
+      svg: {
+        borders: null,
+        hover: null,
+        level1: null,
+        level2: null,
+        level3: null,
+        level4: null,
+        level5: null
+      },
+      pool: null,
+      price: null,
+      volume: null
+    }
+  };
+
+  @attr({ mode: 'boolean' })
+  empty;
+
   @observable
   bookTrader;
 
@@ -398,7 +411,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
   ordersTrader;
 
   @observable
-  currentOrder;
+  realOrder;
 
   @observable
   montage;
@@ -415,14 +428,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
   @observable
   extraBook3;
 
-  // Use this when orders change.
-  #lastMontageValue;
-
-  @observable
-  orders;
-
-  @observable
-  quoteLines;
+  // By price, then by orderId.
+  orders = new Map();
 
   @observable
   spreadString;
@@ -431,17 +438,26 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
   bookProcessorFunc;
 
+  #updateNeeded = false;
+
   constructor() {
     super();
 
     this.spreadString = '—';
     this.maxSeenVolume = 0;
-    this.orders = new Map();
-    this.quoteLines = [];
+    this.rafLoop = this.rafLoop.bind(this);
   }
 
   async connectedCallback() {
     super.connectedCallback();
+
+    if (this.document.depth <= 0) {
+      this.document.depth = 10;
+    }
+
+    if (typeof this.document.levelColoring === 'undefined') {
+      this.document.levelColoring = 'volume';
+    }
 
     this.bookProcessorFunc = new Function(
       'trader',
@@ -467,7 +483,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       this.bookTrader = await ppp.getOrCreateTrader(this.document.bookTrader);
       this.instrumentTrader = this.bookTrader;
 
-      this.selectInstrument(this.document.symbol, { isolate: true });
+      this.#createDOM();
 
       if (this.document.ordersTrader) {
         this.ordersTrader = await ppp.getOrCreateTrader(
@@ -475,11 +491,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
         );
       }
 
+      ppp.app.rafEnqueue(this.rafLoop);
+      this.selectInstrument(this.document.symbol, { isolate: true });
+
       if (this.ordersTrader) {
         await this.ordersTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            currentOrder: TRADER_DATUM.REAL_ORDER
+            realOrder: TRADER_DATUM.REAL_ORDER
           }
         });
       }
@@ -538,8 +557,6 @@ export class OrderbookWidget extends WidgetWithInstrument {
           }
         });
       }
-
-      this.initialized = true;
     } catch (e) {
       this.initialized = true;
 
@@ -548,6 +565,10 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
+    this.#updateNeeded = false;
+
+    ppp.app.rafDequeue(this.rafLoop);
+
     if (this.bookTrader) {
       await this.bookTrader.unsubscribeFields?.({
         source: this,
@@ -561,7 +582,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       await this.ordersTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          currentOrder: TRADER_DATUM.REAL_ORDER
+          realOrder: TRADER_DATUM.REAL_ORDER
         }
       });
     }
@@ -596,87 +617,558 @@ export class OrderbookWidget extends WidgetWithInstrument {
     super.disconnectedCallback();
   }
 
+  #createDOM() {
+    const vectors = [
+      `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${
+        (this.document.depth ?? 1) * 20
+      }px" preserveAspectRatio="none" viewBox="0 0 100 ${
+        (this.document.depth ?? 1) * 20
+      }">`,
+      '<polygon class="level1" stroke="none"></polygon>',
+      '<polygon class="level2" stroke="none"></polygon>',
+      '<polygon class="level3" stroke="none"></polygon>',
+      '<polygon class="level4" stroke="none"></polygon>',
+      '<polygon class="level5" stroke="none"></polygon>',
+      '<polygon class="border" stroke="none"></polygon>',
+      '<rect x="0" y="-20" class="hover" width="100%" height="19px" stroke="none"></rect></svg>'
+    ];
+
+    if (this.document.displayMode === 'compact') {
+      this.shadowRoot.querySelector('.widget-content').classList.add('compact');
+
+      this.#refs.bids.holder = this.compactBids;
+      this.#refs.asks.holder = this.compactAsks;
+
+      this.#refs.bids.holder.insertAdjacentHTML(
+        'afterbegin',
+        [
+          '<div class="pool"></div><div class="price"></div><div class="volume"></div>',
+          ...vectors
+        ].join('')
+      );
+
+      this.#refs.asks.holder.insertAdjacentHTML(
+        'afterbegin',
+        [
+          ...vectors,
+          '<div class="volume"></div><div class="price"></div><div class="pool"></div>'
+        ].join('')
+      );
+    } else {
+      this.shadowRoot
+        .querySelector('.widget-content')
+        .classList.add('columnar');
+
+      this.#refs.bids.holder = this.columnarBids;
+      this.#refs.asks.holder = this.columnarAsks;
+
+      this.#refs.bids.holder.insertAdjacentHTML(
+        'afterbegin',
+        [
+          '<div class="pool"></div><div class="price"></div><div class="volume"></div>',
+          ...vectors
+        ].join('')
+      );
+
+      this.#refs.asks.holder.insertAdjacentHTML(
+        'afterbegin',
+        [
+          ...vectors,
+          '<div class="pool"></div><div class="price"></div><div class="volume"></div>'
+        ].join('')
+      );
+    }
+
+    [this.#refs.bids.holder, this.#refs.asks.holder].forEach((holder, i) => {
+      holder.addEventListener('pointerdown', (e) => {
+        const isBid = i === 0;
+        const rect = holder.getBoundingClientRect();
+        const win = holder.ownerDocument.defaultView;
+        const top = rect.top + win.pageYOffset;
+        const y = Math.trunc(e.clientY - top);
+        const index = Math.max(
+          0,
+          y % 20 === 0 ? y / 20 - 1 : Math.floor(y / 20)
+        );
+        const askCount = Math.min(
+          this.document.depth,
+          this.montage.asks.length ?? 0
+        );
+
+        if (
+          isBid &&
+          index < Math.min(this.document.depth, this.montage?.bids.length ?? 0)
+        ) {
+          const price = this.montage.bids[index].price;
+
+          if (!isNaN(price)) {
+            return this.broadcastPrice(price);
+          }
+        } else if (!isBid && index < askCount) {
+          const price =
+            this.document.displayMode === 'compact'
+              ? this.montage.asks[index].price
+              : this.montage.asks[askCount - index - 1].price;
+
+          if (!isNaN(price)) {
+            return this.broadcastPrice(price);
+          }
+        }
+      });
+
+      holder.addEventListener('pointermove', (e) => {
+        const isBid = i === 0;
+        const rect = holder.getBoundingClientRect();
+        const win = holder.ownerDocument.defaultView;
+        const top = rect.top + win.pageYOffset;
+        const y = Math.trunc(e.clientY - top);
+        const index = Math.max(
+          0,
+          y % 20 === 0 ? y / 20 - 1 : Math.floor(y / 20)
+        );
+
+        if (isBid) {
+          if (
+            index <
+            Math.min(this.document.depth, this.montage?.bids.length ?? 0)
+          ) {
+            this.#refs.bids.svg.hover.setAttribute('y', 20 * index);
+          } else {
+            this.#refs.bids.svg.hover.setAttribute('y', '-20');
+          }
+        } else {
+          if (
+            index <
+            Math.min(this.document.depth, this.montage?.asks.length ?? 0)
+          ) {
+            this.#refs.asks.svg.hover.setAttribute('y', 20 * index);
+          } else {
+            this.#refs.asks.svg.hover.setAttribute('y', '-20');
+          }
+        }
+      });
+
+      holder.addEventListener('pointerout', (e) => {
+        const isBid = i === 0;
+
+        if (isBid) {
+          this.#refs.bids.svg.hover.setAttribute('y', '-20');
+        } else {
+          this.#refs.asks.svg.hover.setAttribute('y', '-20');
+        }
+      });
+    });
+
+    this.#refs.bids.pool = this.#refs.bids.holder.querySelector('.pool');
+    this.#refs.bids.price = this.#refs.bids.holder.querySelector('.price');
+    this.#refs.bids.volume = this.#refs.bids.holder.querySelector('.volume');
+    this.#refs.bids.svg.borders =
+      this.#refs.bids.holder.querySelector('polygon.border');
+    this.#refs.bids.svg.hover =
+      this.#refs.bids.holder.querySelector('rect.hover');
+
+    this.#refs.asks.pool = this.#refs.asks.holder.querySelector('.pool');
+    this.#refs.asks.price = this.#refs.asks.holder.querySelector('.price');
+    this.#refs.asks.volume = this.#refs.asks.holder.querySelector('.volume');
+    this.#refs.asks.svg.borders =
+      this.#refs.asks.holder.querySelector('polygon.border');
+    this.#refs.asks.svg.hover =
+      this.#refs.asks.holder.querySelector('rect.hover');
+
+    [this.#refs.bids.svg.hover, this.#refs.asks.svg.hover].forEach((rect) =>
+      rect.setAttribute(
+        'fill',
+        `rgba(${themeConditional(
+          toColorComponents(paletteGrayLight2),
+          toColorComponents(paletteGrayDark1)
+        ).createCSS()},0.7)`
+      )
+    );
+
+    if (this.document.showPools === false) {
+      this.#refs.bids.pool.remove();
+      this.#refs.asks.pool.remove();
+
+      this.#refs.bids.pool = null;
+      this.#refs.asks.pool = null;
+    }
+
+    this.#refs.bids.svg.level1 =
+      this.#refs.bids.holder.querySelector('.level1');
+    this.#refs.asks.svg.level1 =
+      this.#refs.asks.holder.querySelector('.level1');
+    this.#refs.bids.svg.level2 =
+      this.#refs.bids.holder.querySelector('.level2');
+    this.#refs.asks.svg.level2 =
+      this.#refs.asks.holder.querySelector('.level2');
+    this.#refs.bids.svg.level3 =
+      this.#refs.bids.holder.querySelector('.level3');
+    this.#refs.asks.svg.level3 =
+      this.#refs.asks.holder.querySelector('.level3');
+    this.#refs.bids.svg.level4 =
+      this.#refs.bids.holder.querySelector('.level4');
+    this.#refs.asks.svg.level4 =
+      this.#refs.asks.holder.querySelector('.level4');
+    this.#refs.bids.svg.level5 =
+      this.#refs.bids.holder.querySelector('.level5');
+    this.#refs.asks.svg.level5 =
+      this.#refs.asks.holder.querySelector('.level5');
+
+    if (this.document.levelColoring === 'volume') {
+      this.#refs.bids.svg.level1.setAttribute(
+        'fill',
+        'var(--orderbook-bid-color)'
+      );
+      this.#refs.asks.svg.level1.setAttribute(
+        'fill',
+        'var(--orderbook-ask-color)'
+      );
+    } else if (this.document.levelColoring === 'ordinal') {
+      const DEFAULT_COLORS = {
+        Dark: [
+          'palette-green-base',
+          'palette-red-base',
+          'palette-yellow-base',
+          'palette-blue-base',
+          'palette-gray-base'
+        ],
+        Light: [
+          'palette-green-base',
+          'palette-red-base',
+          'palette-yellow-base',
+          'palette-blue-base',
+          'palette-gray-base'
+        ],
+        opacity: [20, 20, 20, 20, 0]
+      };
+
+      [1, 2, 3, 4, 5].forEach((L) => {
+        const theme = ppp.darkMode ? 'Dark' : 'Light';
+        let color = this.document[`level${L}Bg${theme}`];
+
+        if (color === 'default') {
+          color = DEFAULT_COLORS[theme][L - 1];
+        }
+
+        const opacity = parseInt(
+          this.document[`level${L}BgOpacity`] || DEFAULT_COLORS.opacity[L - 1]
+        );
+
+        this.#refs.bids.svg['level' + L].setAttribute(
+          'fill',
+          `rgba(${toColorComponents(createThemed(color)).createCSS()},${(
+            opacity / 100
+          ).toFixed(2)})`
+        );
+        this.#refs.asks.svg['level' + L].setAttribute(
+          'fill',
+          `rgba(${toColorComponents(createThemed(color)).createCSS()}, ${(
+            opacity / 100
+          ).toFixed(2)})`
+        );
+      });
+    }
+  }
+
+  rafLoop() {
+    if (
+      this.$fastController.isConnected &&
+      this.#updateNeeded &&
+      this.instrument
+    ) {
+      this.#updateNeeded = false;
+
+      this.#repaint();
+    }
+  }
+
+  #repaint() {
+    const montage = this.montage ?? {
+      bids: [],
+      asks: []
+    };
+
+    this.empty = !montage.bids?.length && !montage.asks?.length;
+
+    const bestBid = montage.bids[0]?.price ?? 0;
+    const bestAsk = montage.asks[0]?.price ?? 0;
+    // For my orders.
+    const seenPrices = new Set();
+
+    this.spreadString = `${formatAmount(
+      Math.max(0, bestAsk - bestBid),
+      this.instrument,
+
+      {
+        style: 'decimal',
+        minimumFractionDigits: 2
+      }
+    )} (${formatPercentage(Math.max(0, (bestAsk - bestBid) / bestBid))})`;
+
+    let maxSeenVolume = 0;
+
+    // Bid side.
+    let bidPoolValues = '';
+    let bidPriceValues = '';
+    let bidVolumeValues = '';
+    let bidBorderPoints = '';
+    let bidLevel = 0;
+    const bidLevels = ['', '', '', '', ''];
+    const bidCount = Math.min(this.document.depth, montage.bids.length);
+
+    for (let i = 0; i < bidCount; i++) {
+      const bid = montage.bids[i];
+
+      if (+bid.price === 0 || +bid.volume === 0) {
+        continue;
+      }
+
+      maxSeenVolume = Math.max(maxSeenVolume, bid.volume);
+
+      if (this.#refs.bids.pool) {
+        bidPoolValues += this.normalizePool(bid.pool, 'bid') + '\n';
+      }
+
+      let my = 0;
+
+      for (const [orderId, left] of this.orders.get(bid.price.toString()) ??
+        []) {
+        my += left;
+      }
+
+      bidPriceValues +=
+        formatPriceWithoutCurrency(
+          bid.price,
+          this.instrument,
+          this.instrument.broker === BROKERS.UTEX
+        ) + '\n';
+
+      const formattedVolume = formatQuantity(bid.volume, this.instrument);
+
+      if (my > 0 && !seenPrices.has(bid.price)) {
+        seenPrices.add(bid.price);
+
+        bidVolumeValues +=
+          `<span class="my"><span>${formatQuantity(
+            my,
+            this.instrument
+          )}</span></span>&nbsp;${formattedVolume}` + '\n';
+      } else {
+        bidVolumeValues += formattedVolume + '\n';
+      }
+
+      if (this.document.showBorders ?? true) {
+        bidBorderPoints += `0,${19 + i * 20} 100,${19 + i * 20} 100,${
+          20 + i * 20
+        } 0,${20 + i * 20} `;
+      }
+
+      if (this.document.levelColoring === 'ordinal') {
+        if (bidLevel === 0) {
+          bidLevel = 1;
+        } else if (bid.price !== montage.bids[i - 1].price) {
+          bidLevel = Math.min(5, bidLevel + 1);
+        }
+
+        bidLevels[bidLevel - 1] += `100,${i * 20} 0,${i * 20} 0,${
+          (i + 1) * 20
+        } 100,${(i + 1) * 20} `;
+      }
+    }
+
+    if (this.document.showPools ?? true) {
+      this.#refs.bids.pool.textContent = bidPoolValues;
+    }
+
+    this.#refs.bids.price.textContent = bidPriceValues;
+    this.#refs.bids.volume.innerHTML = bidVolumeValues;
+
+    // Ask side.
+    let askPoolValues = '';
+    let askPriceValues = '';
+    let askVolumeValues = '';
+    let askBorderPoints = '';
+    let askLevel = 0;
+    const askLevels = ['', '', '', '', ''];
+    const askCount = Math.min(this.document.depth, montage.asks.length);
+
+    for (let i = 0; i < askCount; i++) {
+      const ask =
+        this.document.displayMode === 'compact'
+          ? montage.asks[i]
+          : montage.asks[askCount - i - 1];
+
+      if (+ask.price === 0 || +ask.volume === 0) {
+        continue;
+      }
+
+      maxSeenVolume = Math.max(maxSeenVolume, ask.volume);
+
+      if (this.#refs.asks.pool) {
+        askPoolValues += this.normalizePool(ask.pool, 'ask') + '\n';
+      }
+
+      let my = 0;
+
+      for (const [orderId, left] of this.orders.get(ask.price.toString()) ??
+        []) {
+        my += left;
+      }
+
+      askPriceValues +=
+        formatPriceWithoutCurrency(
+          ask.price,
+          this.instrument,
+          this.instrument.broker === BROKERS.UTEX
+        ) + '\n';
+
+      const formattedVolume = formatQuantity(ask.volume, this.instrument);
+
+      if (my > 0 && !seenPrices.has(ask.price)) {
+        seenPrices.add(ask.price);
+
+        if (this.document.displayMode === 'compact') {
+          askVolumeValues +=
+            `${formattedVolume}&nbsp;<span class="my"><span>${formatQuantity(
+              my,
+              this.instrument
+            )}</span></span>` + '\n';
+        } else {
+          askVolumeValues +=
+            `<span class="my"><span>${formatQuantity(
+              my,
+              this.instrument
+            )}</span></span>&nbsp;${formattedVolume}` + '\n';
+        }
+      } else {
+        askVolumeValues += formattedVolume + '\n';
+      }
+
+      if (this.document.showBorders ?? true) {
+        askBorderPoints += `0,${19 + i * 20} 100,${19 + i * 20} 100,${
+          20 + i * 20
+        } 0,${20 + i * 20} `;
+      }
+
+      if (this.document.levelColoring === 'ordinal') {
+        if (askLevel === 0) {
+          askLevel = 1;
+        } else if (ask.price !== montage.asks[i - 1].price) {
+          askLevel = Math.min(5, askLevel + 1);
+        }
+
+        if (this.document.displayMode === 'compact') {
+          askLevels[askLevel - 1] += `0,${i * 20} 100,${i * 20} 100,${
+            (i + 1) * 20
+          } 0,${(i + 1) * 20} `;
+        } else {
+          askLevels[askLevel - 1] += `0,${(askCount - i - 1) * 20} 100,${
+            (askCount - i - 1) * 20
+          } 100,${(askCount - i) * 20} 0,${(askCount - i) * 20} `;
+        }
+      }
+    }
+
+    if (this.document.showPools ?? true) {
+      this.#refs.asks.pool.textContent = askPoolValues;
+    }
+
+    this.#refs.asks.price.textContent = askPriceValues;
+    this.#refs.asks.volume.innerHTML = askVolumeValues;
+
+    // Borders.
+    if (this.document.showBorders ?? true) {
+      if (bidBorderPoints) {
+        this.#refs.bids.svg.borders.setAttribute('points', bidBorderPoints);
+      } else {
+        this.#refs.bids.svg.borders.removeAttribute('points');
+      }
+
+      if (askBorderPoints) {
+        this.#refs.asks.svg.borders.setAttribute('points', askBorderPoints);
+      } else {
+        this.#refs.asks.svg.borders.removeAttribute('points');
+      }
+    }
+
+    // Coloring - RVol.
+    if (this.document.levelColoring === 'volume') {
+      if (this.document.displayMode === 'compact') {
+        for (let i = 0; i < bidCount; i++) {
+          const rvol = 100 - (100 * montage.bids[i].volume) / maxSeenVolume;
+
+          bidLevels[0] += `100,${i * 20} ${rvol},${i * 20} ${rvol},${
+            (i + 1) * 20
+          } 100,${(i + 1) * 20} `;
+        }
+      } else {
+        for (let i = 0; i < bidCount; i++) {
+          const rvol = (100 * montage.bids[i].volume) / maxSeenVolume;
+
+          bidLevels[0] += `0,${i * 20} ${rvol},${i * 20} ${rvol},${
+            (i + 1) * 20
+          } 0,${(i + 1) * 20} `;
+        }
+      }
+
+      if (bidLevels[0]) {
+        this.#refs.bids.svg.level1.setAttribute('points', bidLevels[0]);
+      } else {
+        this.#refs.bids.svg.level1.removeAttribute('points');
+      }
+
+      for (let i = 0; i < askCount; i++) {
+        const rvol = (100 * montage.asks[i].volume) / maxSeenVolume;
+
+        if (this.document.displayMode === 'compact') {
+          askLevels[0] += `0,${i * 20} ${rvol},${i * 20} ${rvol},${
+            (i + 1) * 20
+          } 0,${(i + 1) * 20} `;
+        } else {
+          askLevels[0] += `0,${(askCount - i - 1) * 20} ${rvol},${
+            (askCount - i - 1) * 20
+          } ${rvol},${(askCount - i) * 20} 0,${(askCount - i) * 20} `;
+        }
+      }
+
+      if (askLevels[0]) {
+        this.#refs.asks.svg.level1.setAttribute('points', askLevels[0]);
+      } else {
+        this.#refs.asks.svg.level1.removeAttribute('points');
+      }
+    } else if (this.document.levelColoring === 'ordinal') {
+      [1, 2, 3, 4, 5].forEach((i) => {
+        const B = bidLevels[i - 1];
+        const A = askLevels[i - 1];
+
+        if (B) {
+          this.#refs.bids.svg['level' + i].setAttribute('points', B);
+        } else {
+          this.#refs.bids.svg['level' + i].removeAttribute('points');
+        }
+
+        if (A) {
+          this.#refs.asks.svg['level' + i].setAttribute('points', A);
+        } else {
+          this.#refs.asks.svg['level' + i].removeAttribute('points');
+        }
+      });
+    }
+  }
+
+  async instrumentChanged(oldValue, newValue) {
+    this.orders.clear();
+    super.instrumentChanged(oldValue, newValue);
+
+    this.#updateNeeded = true;
+  }
+
   clearFields() {
     ['mainBook', 'extraBook1', 'extraBook2', 'extraBook3'].forEach(
       (f) => (this[f] = {})
     );
 
-    this.currentOrder = '—';
-  }
-
-  #cloneOrderbook2Times(orderbook) {
-    const result = [
-      {
-        bids: [],
-        asks: []
-      },
-      {
-        bids: [],
-        asks: []
-      }
-    ];
-
-    const iterationLength = Math.max(
-      orderbook?.bids?.length,
-      orderbook?.asks?.length
-    );
-
-    for (let i = 0; i < iterationLength; i++) {
-      const ask = orderbook.asks[i];
-      const bid = orderbook.bids[i];
-
-      if (typeof bid !== 'undefined') {
-        result[0].bids[i] = {};
-        result[1].bids[i] = {};
-
-        if (bid.pool) {
-          result[0].bids[i].pool = bid.pool;
-          result[1].bids[i].pool = bid.pool;
-        }
-
-        if (bid.condition) {
-          result[0].bids[i].condition = bid.condition;
-          result[1].bids[i].condition = bid.condition;
-        }
-
-        if (bid.timestamp) {
-          result[0].bids[i].timestamp = bid.timestamp;
-          result[1].bids[i].timestamp = bid.timestamp;
-        }
-
-        result[0].bids[i].price = +bid.price;
-        result[1].bids[i].price = +bid.price;
-        result[0].bids[i].volume = +bid.volume;
-        result[1].bids[i].volume = +bid.volume;
-      }
-
-      if (typeof ask !== 'undefined') {
-        result[0].asks[i] = {};
-        result[1].asks[i] = {};
-
-        if (ask.pool) {
-          result[0].asks[i].pool = ask.pool;
-          result[1].asks[i].pool = ask.pool;
-        }
-
-        if (ask.condition) {
-          result[0].asks[i].condition = ask.condition;
-          result[1].asks[i].condition = ask.condition;
-        }
-
-        if (ask.timestamp) {
-          result[0].asks[i].timestamp = ask.timestamp;
-          result[1].asks[i].timestamp = ask.timestamp;
-        }
-
-        result[0].asks[i].price = +ask.price;
-        result[1].asks[i].price = +ask.price;
-        result[0].asks[i].volume = +ask.volume;
-        result[1].asks[i].volume = +ask.volume;
-      }
-    }
-
-    return result;
+    this.realOrder = void 0;
   }
 
   #rebuildMontage() {
@@ -799,272 +1291,29 @@ export class OrderbookWidget extends WidgetWithInstrument {
     this.#rebuildMontage();
   }
 
-  montageChanged(oldValue, newValue) {
-    if (!Array.isArray(newValue?.bids)) {
-      newValue = {
-        bids: [],
-        asks: []
-      };
-    }
-
-    const clones = this.#cloneOrderbook2Times(newValue);
-
-    if (oldValue !== null && newValue) {
-      this.#lastMontageValue = clones[1];
-    }
-
-    const orderbook = clones[0];
-
-    if (orderbook && this.instrument) {
-      if (!Array.isArray(orderbook.bids)) orderbook.bids = [];
-
-      if (!Array.isArray(orderbook.asks)) orderbook.asks = [];
-
-      if (!orderbook.bids.length && !orderbook.asks.length) {
-        this.quoteLines = [];
-
-        return;
-      }
-
-      const { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes } =
-        this.#getMyOrdersPricesAndSizes();
-
-      // 1. Buy orders, descending
-      for (const [price, volume] of buyOrdersPricesAndSizes) {
-        let insertAtTheEnd = true;
-
-        for (let i = 0; i < orderbook.bids?.length; i++) {
-          const bookPriceAtThisLevel = orderbook.bids[i].price;
-
-          if (price === bookPriceAtThisLevel) {
-            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
-              orderbook.bids[i] = {
-                price,
-                volume: orderbook.bids[i].volume,
-                my: volume,
-                pool: orderbook.bids[i].pool
-              };
-            } else {
-              orderbook.bids[i].my = volume;
-
-              // if (orderbook.bids[i].volume < volume)
-              //   orderbook.bids[i].volume = volume + orderbook.bids[i].volume;
-            }
-
-            insertAtTheEnd = false;
-
-            break;
-          } else if (price > bookPriceAtThisLevel) {
-            orderbook.bids.splice(i, 0, {
-              price,
-              volume,
-              my: volume,
-              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                ? this.#getMyOrderPool()
-                : void 0
-            });
-
-            insertAtTheEnd = false;
-
-            break;
-          }
-        }
-
-        if (insertAtTheEnd) {
-          orderbook.bids.push({
-            price,
-            volume,
-            my: volume,
-            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-              ? this.#getMyOrderPool()
-              : void 0
-          });
-        }
-      }
-
-      // 2. Sell orders, ascending
-      for (const [price, volume] of sellOrdersPricesAndSizes) {
-        let insertAtTheEnd = true;
-
-        for (let i = 0; i < orderbook.asks?.length; i++) {
-          const bookPriceAtThisLevel = orderbook.asks[i].price;
-
-          if (price === bookPriceAtThisLevel) {
-            // Always display fake pool
-            if (this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)) {
-              orderbook.asks[i] = {
-                price,
-                volume: orderbook.asks[i].volume,
-                my: volume,
-                pool: orderbook.asks[i].pool
-              };
-            } else {
-              orderbook.asks[i].my = volume;
-
-              // if (orderbook.asks[i].volume < volume)
-              //   orderbook.asks[i].volume = volume + orderbook.asks[i].volume;
-            }
-
-            insertAtTheEnd = false;
-
-            break;
-          } else if (price < bookPriceAtThisLevel) {
-            orderbook.asks.splice(i, 0, {
-              price,
-              volume,
-              my: volume,
-              pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-                ? this.#getMyOrderPool()
-                : void 0
-            });
-
-            insertAtTheEnd = false;
-
-            break;
-          }
-        }
-
-        if (insertAtTheEnd) {
-          orderbook.asks.push({
-            price,
-            volume,
-            my: volume,
-            pool: this.bookTrader?.hasCap(TRADER_CAPS.CAPS_MIC)
-              ? this.#getMyOrderPool()
-              : void 0
-          });
-        }
-      }
-
-      if (orderbook.bids?.length && orderbook.asks?.length) {
-        const bestBid = orderbook.bids[0]?.price;
-        const bestAsk = orderbook.asks[0]?.price;
-
-        this.spreadString = `${formatPriceWithoutCurrency(
-          Math.abs(bestAsk - bestBid),
-          this.instrument
-        )} (${formatPercentage(Math.abs(bestAsk - bestBid) / bestBid)})`;
-      }
-
-      let max = Math.max(
-        orderbook.bids?.length ?? 0,
-        orderbook.asks?.length ?? 0
-      );
-
-      if (max > this.document.depth) max = this.document.depth;
-
-      this.quoteLines = [];
-      this.maxSeenVolume = 0;
-
-      for (let i = 0; i < max; i++) {
-        const bid = orderbook.bids[i] ?? null;
-        const ask = orderbook.asks[i] ?? null;
-
-        if (bid) {
-          bid.pool = this.normalizePool(bid.pool, 'bid');
-
-          this.maxSeenVolume = Math.max(this.maxSeenVolume, bid.volume);
-        }
-
-        if (ask) {
-          ask.pool = this.normalizePool(ask.pool, 'ask');
-
-          this.maxSeenVolume = Math.max(this.maxSeenVolume, ask.volume);
-        }
-
-        this.quoteLines.push({
-          bid,
-          ask
-        });
-      }
-    } else this.spreadString = '—';
+  montageChanged() {
+    this.#updateNeeded = true;
+    this.initialized = true;
   }
 
-  currentOrderChanged(oldValue, newValue) {
-    let needToChangeMontage;
-
+  realOrderChanged(oldValue, newValue) {
     if (newValue?.orderId) {
-      if (newValue.orderType === 'limit') {
-        if (
-          newValue.quantity === newValue.filled ||
-          newValue.status !== 'working'
-        ) {
-          if (this.orders.has(newValue.orderId)) {
-            this.orders.delete(newValue.orderId);
+      const price = newValue.price.toString();
 
-            needToChangeMontage = true;
-          }
-        } else if (newValue.status === 'working') {
-          this.orders.set(newValue.orderId, newValue);
-
-          needToChangeMontage = true;
-        }
-
-        if (
-          needToChangeMontage &&
-          this.instrument &&
-          this.instrumentTrader.instrumentsAreEqual(
-            newValue.instrument,
-            this.instrument
-          )
-        ) {
-          this.montageChanged(null, this.#lastMontageValue);
-        }
+      if (!this.orders.has(price.toString())) {
+        this.orders.set(price, new Map());
       }
-    }
-  }
 
-  #getMyOrdersPricesAndSizes() {
-    const buyOrdersPricesAndSizes = new Map();
-    const sellOrdersPricesAndSizes = new Map();
+      const left = newValue.quantity - newValue.filled;
 
-    if (this.instrument) {
-      for (const [, order] of this.orders) {
-        if (
-          order.status === 'working' &&
-          order.filled < order.quantity &&
-          // Discard market orders.
-          order.price > 0 &&
-          this.ordersTrader.instrumentsAreEqual(
-            order.instrument,
-            this.instrument
-          )
-        ) {
-          const map = {
-            buy: buyOrdersPricesAndSizes,
-            sell: sellOrdersPricesAndSizes
-          }[order.side];
-
-          const existingValue = map.get(order.price);
-
-          if (typeof existingValue !== 'number') {
-            map.set(order.price, order.quantity - order.filled);
-          } else {
-            map.set(order.price, existingValue + order.quantity - order.filled);
-          }
-        }
+      if (newValue.status === 'working' && left > 0) {
+        this.orders.get(price).set(newValue.orderId, left);
+      } else {
+        this.orders.get(price).delete(newValue.orderId);
       }
     }
 
-    return { buyOrdersPricesAndSizes, sellOrdersPricesAndSizes };
-  }
-
-  #getMyOrderPool() {
-    let result = this.instrument.exchange;
-
-    if (this.ordersTrader) {
-      const foreignInstrument = this.ordersTrader.adoptInstrument(
-        this.instrument
-      );
-
-      if (!foreignInstrument.notSupported) {
-        result = foreignInstrument.exchange;
-      }
-    }
-
-    if (result === EXCHANGE.UTEX_MARGIN_STOCKS) return 'UTEX';
-
-    return result;
+    this.#updateNeeded = true;
   }
 
   normalizePool(pool, type) {
@@ -1140,31 +1389,6 @@ export class OrderbookWidget extends WidgetWithInstrument {
     return mic;
   }
 
-  handleTableClick({ event }) {
-    const price = parseFloat(
-      event
-        .composedPath()
-        .find((n) => n?.hasAttribute?.('price'))
-        ?.getAttribute?.('price')
-    );
-
-    if (!isNaN(price)) {
-      return this.broadcastPrice(price);
-    }
-  }
-
-  calcGradientPercentage(volume) {
-    try {
-      if (volume > 0 && this.maxSeenVolume > 0) {
-        return ((volume * 100) / this.maxSeenVolume).toFixed(2);
-      }
-    } catch (e) {
-      return 0;
-    }
-
-    return 0;
-  }
-
   async validate() {
     await validate(this.container.depth);
     await validate(this.container.depth, {
@@ -1184,12 +1408,21 @@ export class OrderbookWidget extends WidgetWithInstrument {
         )
       );
     } catch (e) {
-      console.dir(e);
+      this.$$debug('[%s] validate failed: %o', this.document.name, e);
 
       invalidate(this.container.bookProcessorFunc, {
         errorMessage: 'Код содержит ошибки.',
         raiseException: true
       });
+    }
+
+    if (this.container.levelColoring.value === 'ordinal') {
+      for (const L of [1, 2, 3, 4, 5]) {
+        await validate(this.container[`level${L}BgOpacity`], {
+          hook: async (value) => +value >= 0 && +value <= 100,
+          errorMessage: 'Введите значение в диапазоне от 0 до 100'
+        });
+      }
     }
   }
 
@@ -1207,8 +1440,26 @@ export class OrderbookWidget extends WidgetWithInstrument {
         bookProcessorFunc: this.container.bookProcessorFunc.value,
         depth: Math.abs(this.container.depth.value),
         displayMode: this.container.displayMode.value,
+        showBorders: this.container.showBorders.checked,
+        levelColoring: this.container.levelColoring.value,
+        showSpread: this.container.showSpread.checked,
         showPools: this.container.showPools.checked,
-        useMicsForPools: this.container.useMicsForPools.checked
+        useMicsForPools: this.container.useMicsForPools.checked,
+        level1BgDark: this.container.level1BgDark.value,
+        level1BgLight: this.container.level1BgLight.value,
+        level1BgOpacity: this.container.level1BgOpacity.value,
+        level2BgDark: this.container.level2BgDark.value,
+        level2BgLight: this.container.level2BgLight.value,
+        level2BgOpacity: this.container.level2BgOpacity.value,
+        level3BgDark: this.container.level3BgDark.value,
+        level3BgLight: this.container.level3BgLight.value,
+        level3BgOpacity: this.container.level3BgOpacity.value,
+        level4BgDark: this.container.level4BgDark.value,
+        level4BgLight: this.container.level4BgLight.value,
+        level4BgOpacity: this.container.level4BgOpacity.value,
+        level5BgDark: this.container.level5BgDark.value,
+        level5BgLight: this.container.level5BgLight.value,
+        level5BgOpacity: this.container.level5BgOpacity.value
       }
     };
   }
@@ -1221,14 +1472,14 @@ export async function widgetDefinition() {
     title: html`Книга заявок`,
     tags: ['Биржевой стакан'],
     description: html`<span class="positive">Книга заявок</span> отображает
-      таблицу лимитных заявок финансового инструмента на покупку и продажу.`,
+      таблицу лимитных заявок инструмента на покупку и продажу.`,
     customElement: OrderbookWidget.compose({
       template: orderbookWidgetTemplate,
       styles: orderbookWidgetStyles
     }).define(),
     minWidth: 140,
     minHeight: 100,
-    defaultWidth: 280,
+    defaultWidth: 300,
     defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="traders">
@@ -1251,6 +1502,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.bookTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.bookTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -1300,6 +1557,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.ordersTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.ordersTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -1353,6 +1616,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.extraBookTrader1Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraBookTrader1 ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -1408,6 +1677,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.extraBookTrader2Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraBookTrader2 ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -1463,6 +1738,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.extraBookTrader3Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraBookTrader3 ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
                 :query="${() => {
                   return (context) => {
                     return context.services
@@ -1528,10 +1809,11 @@ export async function widgetDefinition() {
             <div class="widget-settings-input-group">
               <ppp-radio-group
                 orientation="vertical"
-                value="compact"
+                value="${(x) => x.document.displayMode ?? 'compact'}"
                 ${ref('displayMode')}
               >
                 <ppp-radio value="compact">Компактный</ppp-radio>
+                <ppp-radio value="1-column">1 колонка</ppp-radio>
               </ppp-radio-group>
             </div>
           </div>
@@ -1555,9 +1837,15 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>Наполнение</h5>
             </div>
             <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showSpread ?? true}"
+              ${ref('showSpread')}
+            >
+              Показывать спред
+            </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showPools ?? true}"
               ${ref('showPools')}
@@ -1570,6 +1858,192 @@ export async function widgetDefinition() {
             >
               Отображать пулы ликвидности кодами MIC
             </ppp-checkbox>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Ценовые уровни</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showBorders ?? true}"
+              ${ref('showBorders')}
+            >
+              Выделять границы ценовых уровней
+            </ppp-checkbox>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Раскраска ценовых уровней</h5>
+            </div>
+            <div class="spacing2"></div>
+            <div class="widget-settings-input-group">
+              <ppp-radio-group
+                orientation="vertical"
+                value="${(x) => x.document.levelColoring ?? 'volume'}"
+                ${ref('levelColoring')}
+              >
+                <ppp-radio value="off">Нет</ppp-radio>
+                <ppp-radio value="volume">По относительному объёму</ppp-radio>
+                <ppp-radio value="ordinal">По порядковому номеру</ppp-radio>
+              </ppp-radio-group>
+              <div class="spacing3"></div>
+              <div ?hidden="${(x) => x.levelColoring.value !== 'ordinal'}">
+                <ppp-banner class="inline" appearance="warning">
+                  Параметры слева направо: Тёмная тема, Светлая тема,
+                  Прозрачность.
+                </ppp-banner>
+                <div class="spacing3"></div>
+                <div class="control-stack" style="gap: 16px 0">
+                  <div class="control-line colors-line">
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level1BgDark',
+                        value: x.document.level1BgDark,
+                        isDark: true,
+                        hideDescription: true
+                      })}
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level1BgLight',
+                        value: x.document.level1BgLight,
+                        hideDescription: true
+                      })}
+                    <ppp-text-field
+                      standalone
+                      placeholder="20"
+                      min="0"
+                      step="1"
+                      max="100"
+                      type="number"
+                      value="${(x) => x.document.level1BgOpacity ?? 20}"
+                      ?disabled="${(x) => !x.isSteady()}"
+                      ${ref('level1BgOpacity')}
+                    ></ppp-text-field>
+                  </div>
+                  <div class="control-line colors-line">
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level2BgDark',
+                        value: x.document.level2BgDark,
+                        isDark: true,
+                        hideDescription: true
+                      })}
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level2BgLight',
+                        value: x.document.level2BgLight,
+                        hideDescription: true
+                      })}
+                    <ppp-text-field
+                      standalone
+                      placeholder="20"
+                      min="0"
+                      step="1"
+                      max="100"
+                      type="number"
+                      value="${(x) => x.document.level2BgOpacity ?? 20}"
+                      ?disabled="${(x) => !x.isSteady()}"
+                      ${ref('level2BgOpacity')}
+                    ></ppp-text-field>
+                  </div>
+                  <div class="control-line colors-line">
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level3BgDark',
+                        value: x.document.level3BgDark,
+                        isDark: true,
+                        hideDescription: true
+                      })}
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level3BgLight',
+                        value: x.document.level3BgLight,
+                        hideDescription: true
+                      })}
+                    <ppp-text-field
+                      standalone
+                      placeholder="20"
+                      min="0"
+                      step="1"
+                      max="100"
+                      type="number"
+                      value="${(x) => x.document.level3BgOpacity ?? 20}"
+                      ?disabled="${(x) => !x.isSteady()}"
+                      ${ref('level3BgOpacity')}
+                    ></ppp-text-field>
+                  </div>
+                  <div class="control-line colors-line">
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level4BgDark',
+                        value: x.document.level4BgDark,
+                        isDark: true,
+                        hideDescription: true
+                      })}
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level4BgLight',
+                        value: x.document.level4BgLight,
+                        hideDescription: true
+                      })}
+                    <ppp-text-field
+                      standalone
+                      placeholder="20"
+                      min="0"
+                      step="1"
+                      max="100"
+                      type="number"
+                      value="${(x) => x.document.level4BgOpacity ?? 20}"
+                      ?disabled="${(x) => !x.isSteady()}"
+                      ${ref('level4BgOpacity')}
+                    ></ppp-text-field>
+                  </div>
+                  <div class="control-line colors-line">
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level5BgDark',
+                        value: x.document.level5BgDark,
+                        isDark: true,
+                        hideDescription: true
+                      })}
+                    ${(x) =>
+                      colorSelectorTemplate({
+                        refName: 'level5BgLight',
+                        value: x.document.level5BgLight,
+                        hideDescription: true
+                      })}
+                    <ppp-text-field
+                      standalone
+                      placeholder="20"
+                      min="0"
+                      step="1"
+                      max="100"
+                      type="number"
+                      value="${(x) => x.document.level5BgOpacity ?? 0}"
+                      ?disabled="${(x) => !x.isSteady()}"
+                      ${ref('level5BgOpacity')}
+                    ></ppp-text-field>
+                  </div>
+                </div>
+                <div class="spacing4"></div>
+                <ppp-button
+                  appearance="primary"
+                  class="xsmall"
+                  ?disabled="${(x) => !x.isSteady()}"
+                  @click="${(x) => {
+                    for (const L of [1, 2, 3, 4, 5]) {
+                      x[`level${L}BgDark`].value = 'default';
+                      x[`level${L}BgLight`].value = 'default';
+                      x[`level${L}BgOpacity`].value = 20;
+                    }
+
+                    x.level5BgOpacity.value = 0;
+                  }}"
+                >
+                  ${() => ppp.t('$g.restoreDefaults')}
+                </ppp-button>
+              </div>
+            </div>
           </div>
         </ppp-tab-panel>
       </ppp-tabs>

@@ -4,6 +4,7 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
+  widgetDefaultEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
@@ -56,13 +57,16 @@ export const timelineWidgetTemplate = html`
       ${widgetDefaultHeaderTemplate()}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        <ppp-widget-empty-state-control
-          loading
-          ?hidden="${(x) => x.initialized}"
+        <div
+          class="widget-card-list"
+          ?hidden="${(x) => {
+            if (x.initialized && !x.instrument) {
+              return false;
+            }
+
+            return !x.mayShowContent;
+          }}"
         >
-          ${() => ppp.t('$widget.emptyState.loading')}
-        </ppp-widget-empty-state-control>
-        <div class="widget-card-list" ?hidden="${(x) => !x.initialized}">
           <ppp-widget-empty-state-control ?hidden="${(x) => !x.empty}">
             ${() => ppp.t('$widget.emptyState.noOperationsToDisplay')}
           </ppp-widget-empty-state-control>
@@ -159,6 +163,7 @@ export const timelineWidgetTemplate = html`
             )}
           </div>
         </div>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -194,6 +199,8 @@ export const timelineWidgetStyles = css`
 `;
 
 export class TimelineWidget extends WidgetWithInstrument {
+  allowEmptyInstrument = true;
+
   @observable
   timelineTrader;
 

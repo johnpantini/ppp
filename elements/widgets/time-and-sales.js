@@ -4,13 +4,12 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetWithInstrumentBodyTemplate,
+  widgetDefaultEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
   css,
-  when,
   ref,
   attr,
   repeat,
@@ -111,55 +110,59 @@ export const timeAndSalesWidgetTemplate = html`
       })}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${widgetWithInstrumentBodyTemplate(html`
-          <table class="widget-table trades-table" ${ref('table')}>
-            <thead>
-              <tr @pointerdown="${(x, c) => x.beginPossibleColumnResize(c)}">
-                ${repeat(
-                  (x) => x.columns,
-                  html`
-                    <th
-                      source="${(x) => x.source}"
-                      :column="${(x) => x}"
-                      title="${(x) => x.name}"
-                      style="width:${(x, c) => c.parent.getColumnWidth(x)}"
-                    >
-                      <div class="resize-handle"></div>
-                      <div>
-                        ${(x, c) => {
-                          if (x.source === 'price' || x.source === 'amount') {
-                            return `${x.name}, ${priceCurrencySymbol(
-                              c.parent.instrument
-                            )}`;
-                          }
+        <table
+          class="widget-table trades-table"
+          ?hidden="${(x) => !x.mayShowContent}"
+          ${ref('table')}
+        >
+          <thead>
+            <tr @pointerdown="${(x, c) => x.beginPossibleColumnResize(c)}">
+              ${repeat(
+                (x) => x.columns,
+                html`
+                  <th
+                    source="${(x) => x.source}"
+                    :column="${(x) => x}"
+                    title="${(x) => x.name}"
+                    style="width:${(x, c) => c.parent.getColumnWidth(x)}"
+                  >
+                    <div class="resize-handle"></div>
+                    <div>
+                      ${(x, c) => {
+                        if (x.source === 'price' || x.source === 'amount') {
+                          return `${x.name}, ${priceCurrencySymbol(
+                            c.parent.instrument
+                          )}`;
+                        }
 
-                          return x.name;
-                        }}
-                      </div>
-                    </th>
-                  `
-                )}
-                <th class="empty">
-                  <div class="resize-handle"></div>
-                  <div></div>
-                </th>
-              </tr>
-            </thead>
-          </table>
-          <div
-            class="trades-grid-holder"
-            ?hidden="${(x) => x.empty || !x.columns?.length}"
-          >
-            <div class="trades-grid-holder-inner">
-              <div class="trades-grid" ${ref('grid')}></div>
-            </div>
+                        return x.name;
+                      }}
+                    </div>
+                  </th>
+                `
+              )}
+              <th class="empty">
+                <div class="resize-handle"></div>
+                <div></div>
+              </th>
+            </tr>
+          </thead>
+        </table>
+        <div
+          class="trades-grid-holder"
+          ?hidden="${(x) => x.empty || !x.columns?.length || !x.mayShowContent}"
+        >
+          <div class="trades-grid-holder-inner">
+            <div class="trades-grid" ${ref('grid')}></div>
           </div>
-          <ppp-widget-empty-state-control
-            ?hidden="${(x) => !(x.empty || !x.columns?.length)}"
-          >
-            ${() => ppp.t('$widget.emptyState.noTradesToDisplay')}
-          </ppp-widget-empty-state-control>
-        `)}
+        </div>
+        <ppp-widget-empty-state-control
+          ?hidden="${(x) =>
+            !(x.empty || !x.columns?.length) || !x.mayShowContent}"
+        >
+          ${() => ppp.t('$widget.emptyState.noTradesToDisplay')}
+        </ppp-widget-empty-state-control>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -194,6 +197,7 @@ export const timeAndSalesWidgetStyles = css`
     z-index: 2;
     position: sticky;
     top: 0;
+    overflow: hidden;
   }
 
   .trades-table tr th {
@@ -309,8 +313,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   #updateNeeded = false;
 
-  #shouldCreateColumns = true;
-
   isWaitingForHistory = false;
 
   @attr({ mode: 'boolean' })
@@ -424,6 +426,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.tradesTrader;
 
+      this.#createDOM();
       this.selectInstrument(this.document.symbol, { isolate: true });
       ppp.app.rafEnqueue(this.rafLoop);
       await this.tradesTrader.subscribeFields?.({
@@ -511,13 +514,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
   }
 
-  #createDOMColumns() {
-    if (!this.#shouldCreateColumns) {
-      return;
-    }
-
-    this.#shouldCreateColumns = false;
-
+  #createDOM() {
     const layout = [];
 
     for (const { source } of this.columns) {
@@ -655,8 +652,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   #repaint() {
-    this.#createDOMColumns();
-
     if (this.#stillGrowing || typeof this.#stillGrowing === 'undefined') {
       this.grid.style.height = `${this.#trades.length * 20}px`;
       this.#rowsHolder.style.height = `${this.#trades.length * 20}px`;
@@ -846,7 +841,11 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
             this.#trades.pop();
           }
         } catch (e) {
-          console.error(e);
+          this.$$debug(
+            '[%s] instrumentChanged failed: %o',
+            this.document.name,
+            e
+          );
 
           return this.notificationsArea.error({
             title: 'Лента всех сделок',
@@ -895,7 +894,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
           });
         }
       } catch (e) {
-        console.dir(e);
+        this.$$debug('[%s] validate failed: %o', this.document.name, e);
 
         invalidate(this.container.threshold, {
           errorMessage: 'Код содержит ошибки.',

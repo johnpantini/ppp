@@ -4,8 +4,8 @@ import ppp from '../../ppp.js';
 import {
   widgetStyles,
   WidgetWithInstrument,
-  widgetWithInstrumentBodyTemplate,
-  widgetStackSelectorTemplate
+  widgetStackSelectorTemplate,
+  widgetDefaultEmptyStateTemplate
 } from '../widget.js';
 import { $debounce } from '../../lib/ppp-decorators.js';
 import {
@@ -197,825 +197,802 @@ export const orderWidgetTemplate = html`
       </div>
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        ${widgetWithInstrumentBodyTemplate(html`
-          <ppp-widget-tabs
-            ?hidden="${(x) =>
-              typeof x.document.showOrderTypeTabs === 'undefined'
-                ? false
-                : !x.document.showOrderTypeTabs}"
-            activeid="${(x) => x.getActiveWidgetTab()}"
-            @change="${(x, { event }) => {
-              const activeTab = event.detail.id;
+        <ppp-widget-tabs
+          ?hidden="${(x) => {
+            if (!x.mayShowContent) return true;
 
-              if (activeTab === 'limit') {
-                setTimeout(() => {
-                  x.price.input.focus();
-                  x.price.input.control.setSelectionRange(0, 0);
-                }, 25);
+            return typeof x.document.showOrderTypeTabs === 'undefined'
+              ? false
+              : !x.document.showOrderTypeTabs;
+          }}"
+          activeid="${(x) => x.getActiveWidgetTab()}"
+          @change="${(x, { event }) => {
+            const activeTab = event.detail.id;
+
+            if (activeTab === 'limit') {
+              setTimeout(() => {
+                x.price.input.focus();
+                x.price.input.control.setSelectionRange(0, 0);
+              }, 25);
+            }
+
+            x.calculateEstimate();
+
+            return x.updateDocumentFragment({
+              $set: {
+                'widgets.$.activeTab': activeTab
               }
-
-              x.calculateEstimate();
-
-              return x.updateDocumentFragment({
-                $set: {
-                  'widgets.$.activeTab': activeTab
-                }
-              });
-            }}"
-            ${ref('orderTypeTabs')}
-          >
-            <ppp-widget-tab id="market">
-              ${() => ppp.t('$orderWidget.orderTypeTabs.market')}
-            </ppp-widget-tab>
-            <ppp-widget-tab id="limit">
-              ${() => ppp.t('$orderWidget.orderTypeTabs.limit')}
-            </ppp-widget-tab>
-            <ppp-widget-tab id="conditional">
-              ${() => ppp.t('$orderWidget.orderTypeTabs.conditional')}
-            </ppp-widget-tab>
-            <ppp-tab-panel id="market-panel"></ppp-tab-panel>
-            <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
-            <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
-          </ppp-widget-tabs>
-          <div class="widget-body-inner">
-            <div
-              class="company-card"
-              ?hidden="${(x) => isCompanyCardHidden(x)}"
-            >
-              <div class="company-card-item">
-                <span
-                  title="${(x) => x.instrument?.fullName}"
-                  class="company-name"
-                >
-                  ${(x) => x.instrument?.fullName}
-                </span>
-                <span
-                  @click="${(x) => x.setPrice(x.lastPrice)}"
-                  class="company-last-price ${(x) =>
-                    x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
-                >
-                  ${(x) => x.formatPrice(x.lastPrice)}
-                </span>
-              </div>
-              ${when(
-                (x) =>
-                  x.extendedLastPrice > 0 ||
-                  (x.securityStatus &&
-                    x.securityStatus !== TRADING_STATUS.NORMAL_TRADING),
-                html`
-                  <div class="company-card-item extended-hours">
-                    ${when(
-                      (x) => x.securityStatus,
-                      html`
-                        <div class="control-line dot-line">
-                          <span
-                            class="dot ${(x) => {
-                              return (
-                                {
-                                  [TRADING_STATUS.PREMARKET]: 'dot-1',
-                                  [TRADING_STATUS.QUOTATION_RESUMPTION]:
-                                    'dot-1',
-                                  [TRADING_STATUS.IPO_TODAY]: 'dot-3',
-                                  [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
-                                  [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
-                                  [TRADING_STATUS.OPENING_AUCTION_PERIOD]:
-                                    'dot-4',
-                                  [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
-                                  [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
-                                  [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
-                                  [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
-                                  [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]:
-                                    'dot-5',
-                                  [TRADING_STATUS.DEALER_BREAK_IN_TRADING]:
-                                    'dot-5',
-                                  [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
-                                  [TRADING_STATUS.DELISTED]: 'dot-5',
-                                  [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
-                                    'dot-5'
-                                }[x.securityStatus] ?? ''
-                              );
-                            }}"
-                          ></span>
-                          <span
-                            title="${(x) =>
-                              x.securityStatus &&
-                              ppp.t(
-                                `$const.tradingStatus.${x.securityStatus}`
-                              )}"
-                          >
-                            ${(x) =>
-                              x.securityStatus &&
-                              ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
-                          </span>
-                        </div>
-                      `
-                    )}
-                    <span
-                      class="extended-last-price-line"
-                      ?hidden="${(x) => !(x.extendedLastPrice > 0)}"
-                    >
-                      <span
-                        style="cursor: pointer"
-                        @click="${(x) => x.setPrice(x.extendedLastPrice ?? 0)}"
-                        class="price ${(x) =>
-                          x.extendedLastPriceAbsoluteChange < 0
-                            ? 'negative'
-                            : 'positive'}"
-                      >
-                        ${(x) => x.formatPrice(x.extendedLastPrice)}
-                      </span>
-                      <span
-                        class="${(x) =>
-                          x.extendedLastPriceAbsoluteChange < 0
-                            ? 'negative'
-                            : 'positive'}"
-                      >
-                        ${(x) =>
-                          formatAbsoluteChange(
-                            x.extendedLastPriceAbsoluteChange,
-                            x.instrument
-                          )}
-                      </span>
-                      <span
-                        class="${(x) =>
-                          x.extendedLastPriceAbsoluteChange < 0
-                            ? 'negative'
-                            : 'positive'}"
-                      >
-                        ${(x) =>
-                          formatRelativeChange(
-                            x.extendedLastPriceRelativeChange / 100
-                          )}
-                      </span>
-                    </span>
-                  </div>
-                  <div class="spacing1"></div>
-                `
-              )}
-              <div class="company-card-item">
-                <span
-                  style="cursor: pointer"
-                  @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
-                >
-                  ${(x) => `${ppp.t('$g.position')}: ${x.formatPositionSize()}`}
-                </span>
-                <span
-                  style="cursor: pointer"
-                  @click="${(x) => x.setPrice(x.positionAverage ?? 0)}"
-                >
-                  ${(x) =>
-                    `${ppp.t('$g.average')}: ${x.formatPrice(
-                      x.positionAverage ?? 0
-                    )}`}
-                </span>
-              </div>
-            </div>
-            <div ?hidden="${(x) => isBestBidAndAskHidden(x)}" class="nbbo-line">
-              <div
-                class="nbbo-line-bid"
-                @click="${(x) => x.setPrice(x.bestBid)}"
+            });
+          }}"
+          ${ref('orderTypeTabs')}
+        >
+          <ppp-widget-tab id="market">
+            ${() => ppp.t('$orderWidget.orderTypeTabs.market')}
+          </ppp-widget-tab>
+          <ppp-widget-tab id="limit">
+            ${() => ppp.t('$orderWidget.orderTypeTabs.limit')}
+          </ppp-widget-tab>
+          <ppp-widget-tab id="conditional">
+            ${() => ppp.t('$orderWidget.orderTypeTabs.conditional')}
+          </ppp-widget-tab>
+          <ppp-tab-panel id="market-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="limit-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="conditional-panel"></ppp-tab-panel>
+        </ppp-widget-tabs>
+        <div class="widget-body-inner" ?hidden="${(x) => !x.mayShowContent}">
+          <div class="company-card" ?hidden="${(x) => isCompanyCardHidden(x)}">
+            <div class="company-card-item">
+              <span
+                title="${(x) => x.instrument?.fullName}"
+                class="company-name"
               >
-                Bid ${(x) => x.formatPrice(x.bestBid)}
-                <div
-                  @click="${(x, { event }) => event.stopPropagation()}"
-                  class="nbbo-line-icon-holder"
-                >
-                  <div class="nbbo-line-icon-fallback">
-                    <div
-                      class="nbbo-line-icon-logo"
-                      style="${(x) =>
-                        `background-image:url(${x.searchControl?.getInstrumentIconUrl(
-                          x.instrument
-                        )})`}"
-                    ></div>
-                    ${(x) => x.instrument?.fullName?.[0]}
-                  </div>
-                </div>
-              </div>
-              <div
-                class="nbbo-line-ask"
-                @click="${(x) => x.setPrice(x.bestAsk)}"
+                ${(x) => x.instrument?.fullName}
+              </span>
+              <span
+                @click="${(x) => x.setPrice(x.lastPrice)}"
+                class="company-last-price ${(x) =>
+                  x.lastPriceAbsoluteChange < 0 ? 'negative' : 'positive'}"
               >
-                Ask ${(x) => x.formatPrice(x.bestAsk)}
-              </div>
+                ${(x) => x.formatPrice(x.lastPrice)}
+              </span>
             </div>
             ${when(
-              (x) => isBestBidAndAskHidden(x),
-              html` <div class="widget-margin-spacer"></div>`
-            )}
-            ${when(
               (x) =>
-                x.orderTypeTabs.activeid === 'conditional' &&
-                !x.conditionalOrders?.length,
+                x.extendedLastPrice > 0 ||
+                (x.securityStatus &&
+                  x.securityStatus !== TRADING_STATUS.NORMAL_TRADING),
               html`
-                <div class="widget-empty-state-holder">
-                  ${staticallyCompose(emptyWidgetState)}
-                  <span>
-                    <div class="no-conditional-orders-holder">
-                      <span>Условные заявки не настроены.</span>
-                      <a
-                        class="link"
-                        href="javascript:void(0);"
-                        @click="${async (x) => {
-                          let observer;
-
-                          if (x.preview) {
-                            return true;
-                          }
-
-                          const settingsPage =
-                            await x.headerButtons.showWidgetSettings();
-                          const widgetSettings =
-                            settingsPage.widgetSettingsDomElement;
-
-                          observer = new MutationObserver(() => {
-                            const tabs =
-                              widgetSettings?.querySelector?.('ppp-tabs');
-
-                            if (tabs) {
-                              tabs.activeid = 'conditionals';
-
-                              observer.disconnect();
-                            }
-                          });
-
-                          observer.observe(widgetSettings, {
-                            childList: true,
-                            subtree: true
-                          });
-                        }}"
-                      >
-                        Открыть параметры.
-                      </a>
-                    </div>
-                  </span>
-                </div>
-              `
-            )}
-            ${when(
-              (x) =>
-                x.orderTypeTabs.activeid === 'conditional' &&
-                x.conditionalOrders?.length,
-              html`
-                <div
-                  class="toolbar"
-                  ?hidden="${(x) => isConditionalOrderToolbarHidden(x)}"
-                >
-                  <div class="tabs">
-                    <ppp-widget-box-radio-group
-                      ${ref('conditionalOrderSelector')}
-                      value=${(x) => x.document.lastConditionalOrderIndex}
-                      @change="${async (x) => {
-                        const index = parseInt(
-                          x.conditionalOrderSelector.value
-                        );
-
-                        const conditionalOrder = x.conditionalOrders[index];
-
-                        x.document.lastConditionalOrderIndex = index;
-
-                        if (conditionalOrder?.orderId) {
-                          x.conditionalOrder =
-                            await x.container.denormalization.denormalize(
-                              conditionalOrder
+                <div class="company-card-item extended-hours">
+                  ${when(
+                    (x) => x.securityStatus,
+                    html`
+                      <div class="control-line dot-line">
+                        <span
+                          class="dot ${(x) => {
+                            return (
+                              {
+                                [TRADING_STATUS.PREMARKET]: 'dot-1',
+                                [TRADING_STATUS.QUOTATION_RESUMPTION]: 'dot-1',
+                                [TRADING_STATUS.IPO_TODAY]: 'dot-3',
+                                [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
+                                [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
+                                [TRADING_STATUS.OPENING_AUCTION_PERIOD]:
+                                  'dot-4',
+                                [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
+                                [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
+                                [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
+                                [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
+                                [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]:
+                                  'dot-5',
+                                [TRADING_STATUS.DEALER_BREAK_IN_TRADING]:
+                                  'dot-5',
+                                [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
+                                [TRADING_STATUS.DELISTED]: 'dot-5',
+                                [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
+                                  'dot-5'
+                              }[x.securityStatus] ?? ''
                             );
-                        }
-
-                        x.calculateEstimate();
-
-                        return x.updateDocumentFragment({
-                          $set: {
-                            'widgets.$.lastConditionalOrderIndex': index
-                          }
-                        });
-                      }}"
-                      value="${(x) => x.orderTypeTabs.activeid}"
+                          }}"
+                        ></span>
+                        <span
+                          title="${(x) =>
+                            x.securityStatus &&
+                            ppp.t(`$const.tradingStatus.${x.securityStatus}`)}"
+                        >
+                          ${(x) =>
+                            x.securityStatus &&
+                            ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
+                        </span>
+                      </div>
+                    `
+                  )}
+                  <span
+                    class="extended-last-price-line"
+                    ?hidden="${(x) => !(x.extendedLastPrice > 0)}"
+                  >
+                    <span
+                      style="cursor: pointer"
+                      @click="${(x) => x.setPrice(x.extendedLastPrice ?? 0)}"
+                      class="price ${(x) =>
+                        x.extendedLastPriceAbsoluteChange < 0
+                          ? 'negative'
+                          : 'positive'}"
                     >
-                      ${repeat(
-                        (x) =>
-                          x.conditionalOrders
-                            ?.map((o, i) => {
-                              o.databaseIndex = i;
-
-                              return o;
-                            })
-                            ?.filter((o) => !o.hidden),
-                        html`
-                          <ppp-widget-box-radio
-                            value="${(x) => x.databaseIndex}"
-                          >
-                            ${(x) => x.name}
-                          </ppp-widget-box-radio>
-                        `,
-                        { positioning: true }
-                      )}
-                    </ppp-widget-box-radio-group>
-                  </div>
-                </div>
-                ${when(
-                  (x) => x.conditionalOrderDefinition?.default,
-                  html`
-                    <div
-                      class="conditional-order-holder"
-                      ${ref('conditionalOrderHolder')}
+                      ${(x) => x.formatPrice(x.extendedLastPrice)}
+                    </span>
+                    <span
+                      class="${(x) =>
+                        x.extendedLastPriceAbsoluteChange < 0
+                          ? 'negative'
+                          : 'positive'}"
                     >
                       ${(x) =>
-                        html`${staticallyCompose(
-                          `<${x.conditionalOrderDefinition.default.name}></${x.conditionalOrderDefinition.default.name}>`
-                        )}`}
-                    </div>
-                  `
-                )}
-              `
-            )}
-            ${when(
-              (x) =>
-                x.orderTypeTabs.activeid === 'conditional' &&
-                x.conditionalOrders?.length &&
-                !x.conditionalOrder,
-              html`
-                <div class="widget-empty-state-holder">
-                  ${staticallyCompose(emptyWidgetState)}
-                  <span>
-                    <div class="no-conditional-orders-holder">
-                      <span>Выберите условную заявку.</span>
-                    </div>
+                        formatAbsoluteChange(
+                          x.extendedLastPriceAbsoluteChange,
+                          x.instrument
+                        )}
+                    </span>
+                    <span
+                      class="${(x) =>
+                        x.extendedLastPriceAbsoluteChange < 0
+                          ? 'negative'
+                          : 'positive'}"
+                    >
+                      ${(x) =>
+                        formatRelativeChange(
+                          x.extendedLastPriceRelativeChange / 100
+                        )}
+                    </span>
                   </span>
                 </div>
+                <div class="spacing1"></div>
               `
             )}
-            <div
-              class="widget-price-quantity"
-              ?hidden="${(x) => isPriceAndQuantityHidden(x)}"
-            >
-              <div class="widget-section">
-                <div class="widget-subsection">
-                  <div class="widget-subsection-item">
-                    <div
-                      ?hidden="${(x) => isBestBidAndAskHidden(x)}"
-                      class="widget-text-label"
-                    >
-                      ${() => ppp.t('$orderWidget.executionPrice')}
-                    </div>
-                    <ppp-widget-trifecta-field
-                      kind="price"
-                      :instrument="${(x) => x.instrument}"
-                      :changeViaMouseWheel="${(x) =>
-                        x.document.changePriceQuantityViaMouseWheel}"
-                      ?market="${(x) => x.orderTypeTabs.activeid === 'market'}"
-                      value="${(x) =>
-                        formatPriceWithoutCurrency(x.document?.lastPrice)}"
-                      @pppstep="${(x) => {
-                        if (
-                          typeof x?.fastVolumeButtons?.value !== 'undefined'
-                        ) {
-                          const radio =
-                            x?.fastVolumeButtons.slottedRadioButtons.find(
-                              (b) => b.value === x.fastVolumeButtons.value
-                            );
+            <div class="company-card-item">
+              <span
+                style="cursor: pointer"
+                @click="${(x) => x.setQuantity(Math.abs(x.positionSize))}"
+              >
+                ${(x) => `${ppp.t('$g.position')}: ${x.formatPositionSize()}`}
+              </span>
+              <span
+                style="cursor: pointer"
+                @click="${(x) => x.setPrice(x.positionAverage ?? 0)}"
+              >
+                ${(x) =>
+                  `${ppp.t('$g.average')}: ${x.formatPrice(
+                    x.positionAverage ?? 0
+                  )}`}
+              </span>
+            </div>
+          </div>
+          <div ?hidden="${(x) => isBestBidAndAskHidden(x)}" class="nbbo-line">
+            <div class="nbbo-line-bid" @click="${(x) => x.setPrice(x.bestBid)}">
+              Bid ${(x) => x.formatPrice(x.bestBid)}
+              <div
+                @click="${(x, { event }) => event.stopPropagation()}"
+                class="nbbo-line-icon-holder"
+              >
+                <div class="nbbo-line-icon-fallback">
+                  <div
+                    class="nbbo-line-icon-logo"
+                    style="${(x) =>
+                      `background-image:url(${x.searchControl?.getInstrumentIconUrl(
+                        x.instrument
+                      )})`}"
+                  ></div>
+                  ${(x) => x.instrument?.fullName?.[0]}
+                </div>
+              </div>
+            </div>
+            <div class="nbbo-line-ask" @click="${(x) => x.setPrice(x.bestAsk)}">
+              Ask ${(x) => x.formatPrice(x.bestAsk)}
+            </div>
+          </div>
+          ${when(
+            (x) => isBestBidAndAskHidden(x),
+            html` <div class="widget-margin-spacer"></div>`
+          )}
+          ${when(
+            (x) =>
+              x.orderTypeTabs.activeid === 'conditional' &&
+              !x.conditionalOrders?.length,
+            html`
+              <div class="widget-empty-state-holder">
+                ${staticallyCompose(emptyWidgetState)}
+                <span>
+                  <div class="no-conditional-orders-holder">
+                    <span>Условные заявки не настроены.</span>
+                    <a
+                      class="link"
+                      href="javascript:void(0);"
+                      @click="${async (x) => {
+                        let observer;
 
-                          x.setQuantityFromFastButtonRadio(radio);
+                        if (x.preview) {
+                          return true;
                         }
 
-                        x.calculateTotalAmount();
-                        x.saveLastPriceValueWithDebounce();
+                        const settingsPage =
+                          await x.headerButtons.showWidgetSettings();
+                        const widgetSettings =
+                          settingsPage.widgetSettingsDomElement;
+
+                        observer = new MutationObserver(() => {
+                          const tabs =
+                            widgetSettings?.querySelector?.('ppp-tabs');
+
+                          if (tabs) {
+                            tabs.activeid = 'conditionals';
+
+                            observer.disconnect();
+                          }
+                        });
+
+                        observer.observe(widgetSettings, {
+                          childList: true,
+                          subtree: true
+                        });
                       }}"
-                      @keydown=${(x, { event }) => {
-                        x.handleHotkeys(event);
-
-                        return true;
-                      }}
-                      @input=${(x) => {
-                        if (
-                          typeof x?.fastVolumeButtons?.value !== 'undefined'
-                        ) {
-                          const radio =
-                            x?.fastVolumeButtons.slottedRadioButtons.find(
-                              (b) => b.value === x.fastVolumeButtons.value
-                            );
-
-                          x.setQuantityFromFastButtonRadio(radio);
-                        }
-
-                        x.calculateTotalAmount();
-                        x.saveLastPriceValueWithDebounce();
-                      }}
-                      ${ref('price')}
-                    ></ppp-widget-trifecta-field>
-                  </div>
-                  <div class="widget-subsection-item">
-                    <div
-                      ?hidden="${(x) => isBestBidAndAskHidden(x)}"
-                      class="widget-text-label"
                     >
-                      ${() => ppp.t('$g.quantity')}
-                    </div>
-                    <ppp-widget-trifecta-field
-                      kind="quantity"
-                      :instrument="${(x) => x.instrument}"
-                      :changeViaMouseWheel="${(x) =>
-                        x.document.changePriceQuantityViaMouseWheel}"
-                      value="${(x) => x.document?.lastQuantity || ''}"
-                      @pppstep="${(x) => {
-                        x.calculateTotalAmount(false);
-                        x.saveLastQuantityValueWithDebounce();
-                      }}"
-                      @keydown=${(x, { event }) => {
-                        x.handleHotkeys(event);
-
-                        return true;
-                      }}
-                      @input=${(x) => {
-                        x.calculateTotalAmount(false);
-                        x.saveLastQuantityValueWithDebounce();
-                      }}
-                      ${ref('quantity')}
-                    ></ppp-widget-trifecta-field>
+                      Открыть параметры.
+                    </a>
                   </div>
+                </span>
+              </div>
+            `
+          )}
+          ${when(
+            (x) =>
+              x.orderTypeTabs.activeid === 'conditional' &&
+              x.conditionalOrders?.length,
+            html`
+              <div
+                class="toolbar"
+                ?hidden="${(x) => isConditionalOrderToolbarHidden(x)}"
+              >
+                <div class="tabs">
+                  <ppp-widget-box-radio-group
+                    ${ref('conditionalOrderSelector')}
+                    value=${(x) => x.document.lastConditionalOrderIndex}
+                    @change="${async (x) => {
+                      const index = parseInt(x.conditionalOrderSelector.value);
+
+                      const conditionalOrder = x.conditionalOrders[index];
+
+                      x.document.lastConditionalOrderIndex = index;
+
+                      if (conditionalOrder?.orderId) {
+                        x.conditionalOrder =
+                          await x.container.denormalization.denormalize(
+                            conditionalOrder
+                          );
+                      }
+
+                      x.calculateEstimate();
+
+                      return x.updateDocumentFragment({
+                        $set: {
+                          'widgets.$.lastConditionalOrderIndex': index
+                        }
+                      });
+                    }}"
+                    value="${(x) => x.orderTypeTabs.activeid}"
+                  >
+                    ${repeat(
+                      (x) =>
+                        x.conditionalOrders
+                          ?.map((o, i) => {
+                            o.databaseIndex = i;
+
+                            return o;
+                          })
+                          ?.filter((o) => !o.hidden),
+                      html`
+                        <ppp-widget-box-radio value="${(x) => x.databaseIndex}">
+                          ${(x) => x.name}
+                        </ppp-widget-box-radio>
+                      `,
+                      { positioning: true }
+                    )}
+                  </ppp-widget-box-radio-group>
                 </div>
               </div>
               ${when(
-                (x) =>
-                  x.instrument &&
-                  x.ordersTrader?.hasCap(TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE),
+                (x) => x.conditionalOrderDefinition?.default,
                 html`
-                  <div class="widget-section">
-                    <div class="widget-margin-spacer"></div>
-                    <div class="widget-subsection">
-                      <div class="widget-subsection-item">
-                        <div class="widget-text-label">Отображаемый объём</div>
-                        <div class="widget-flex-line">
-                          <ppp-widget-trifecta-field
-                            kind="quantity"
-                            placeholder="Показывать весь объём"
-                            :instrument="${(x) => x.instrument}"
-                            :changeViaMouseWheel="${(x) =>
-                              x.document.changePriceQuantityViaMouseWheel}"
-                            value="${(x) => x.document?.lastDisplaySize || ''}"
-                            @pppstep="${(x) => {
-                              x.saveLastDisplaySizeValueWithDebounce();
-                            }}"
-                            @keydown=${(x, { event }) => {
-                              x.handleHotkeys(event);
+                  <div
+                    class="conditional-order-holder"
+                    ${ref('conditionalOrderHolder')}
+                  >
+                    ${(x) =>
+                      html`${staticallyCompose(
+                        `<${x.conditionalOrderDefinition.default.name}></${x.conditionalOrderDefinition.default.name}>`
+                      )}`}
+                  </div>
+                `
+              )}
+            `
+          )}
+          ${when(
+            (x) =>
+              x.orderTypeTabs.activeid === 'conditional' &&
+              x.conditionalOrders?.length &&
+              !x.conditionalOrder,
+            html`
+              <div class="widget-empty-state-holder">
+                ${staticallyCompose(emptyWidgetState)}
+                <span>
+                  <div class="no-conditional-orders-holder">
+                    <span>Выберите условную заявку.</span>
+                  </div>
+                </span>
+              </div>
+            `
+          )}
+          <div
+            class="widget-price-quantity"
+            ?hidden="${(x) => isPriceAndQuantityHidden(x)}"
+          >
+            <div class="widget-section">
+              <div class="widget-subsection">
+                <div class="widget-subsection-item">
+                  <div
+                    ?hidden="${(x) => isBestBidAndAskHidden(x)}"
+                    class="widget-text-label"
+                  >
+                    ${() => ppp.t('$orderWidget.executionPrice')}
+                  </div>
+                  <ppp-widget-trifecta-field
+                    kind="price"
+                    :instrument="${(x) => x.instrument}"
+                    :changeViaMouseWheel="${(x) =>
+                      x.document.changePriceQuantityViaMouseWheel}"
+                    ?market="${(x) => x.orderTypeTabs.activeid === 'market'}"
+                    value="${(x) =>
+                      formatPriceWithoutCurrency(x.document?.lastPrice)}"
+                    @pppstep="${(x) => {
+                      if (typeof x?.fastVolumeButtons?.value !== 'undefined') {
+                        const radio =
+                          x?.fastVolumeButtons.slottedRadioButtons.find(
+                            (b) => b.value === x.fastVolumeButtons.value
+                          );
 
-                              return true;
-                            }}
-                            @input=${(x) => {
-                              x.saveLastDisplaySizeValueWithDebounce();
-                            }}
-                            ${ref('displaySize')}
-                          ></ppp-widget-trifecta-field>
-                        </div>
+                        x.setQuantityFromFastButtonRadio(radio);
+                      }
+
+                      x.calculateTotalAmount();
+                      x.saveLastPriceValueWithDebounce();
+                    }}"
+                    @keydown=${(x, { event }) => {
+                      x.handleHotkeys(event);
+
+                      return true;
+                    }}
+                    @input=${(x) => {
+                      if (typeof x?.fastVolumeButtons?.value !== 'undefined') {
+                        const radio =
+                          x?.fastVolumeButtons.slottedRadioButtons.find(
+                            (b) => b.value === x.fastVolumeButtons.value
+                          );
+
+                        x.setQuantityFromFastButtonRadio(radio);
+                      }
+
+                      x.calculateTotalAmount();
+                      x.saveLastPriceValueWithDebounce();
+                    }}
+                    ${ref('price')}
+                  ></ppp-widget-trifecta-field>
+                </div>
+                <div class="widget-subsection-item">
+                  <div
+                    ?hidden="${(x) => isBestBidAndAskHidden(x)}"
+                    class="widget-text-label"
+                  >
+                    ${() => ppp.t('$g.quantity')}
+                  </div>
+                  <ppp-widget-trifecta-field
+                    kind="quantity"
+                    :instrument="${(x) => x.instrument}"
+                    :changeViaMouseWheel="${(x) =>
+                      x.document.changePriceQuantityViaMouseWheel}"
+                    value="${(x) => x.document?.lastQuantity || ''}"
+                    @pppstep="${(x) => {
+                      x.calculateTotalAmount(false);
+                      x.saveLastQuantityValueWithDebounce();
+                    }}"
+                    @keydown=${(x, { event }) => {
+                      x.handleHotkeys(event);
+
+                      return true;
+                    }}
+                    @input=${(x) => {
+                      x.calculateTotalAmount(false);
+                      x.saveLastQuantityValueWithDebounce();
+                    }}
+                    ${ref('quantity')}
+                  ></ppp-widget-trifecta-field>
+                </div>
+              </div>
+            </div>
+            ${when(
+              (x) =>
+                x.instrument &&
+                x.ordersTrader?.hasCap(TRADER_CAPS.CAPS_ORDER_DISPLAY_SIZE),
+              html`
+                <div class="widget-section">
+                  <div class="widget-margin-spacer"></div>
+                  <div class="widget-subsection">
+                    <div class="widget-subsection-item">
+                      <div class="widget-text-label">Отображаемый объём</div>
+                      <div class="widget-flex-line">
+                        <ppp-widget-trifecta-field
+                          kind="quantity"
+                          placeholder="Показывать весь объём"
+                          :instrument="${(x) => x.instrument}"
+                          :changeViaMouseWheel="${(x) =>
+                            x.document.changePriceQuantityViaMouseWheel}"
+                          value="${(x) => x.document?.lastDisplaySize || ''}"
+                          @pppstep="${(x) => {
+                            x.saveLastDisplaySizeValueWithDebounce();
+                          }}"
+                          @keydown=${(x, { event }) => {
+                            x.handleHotkeys(event);
+
+                            return true;
+                          }}
+                          @input=${(x) => {
+                            x.saveLastDisplaySizeValueWithDebounce();
+                          }}
+                          ${ref('displaySize')}
+                        ></ppp-widget-trifecta-field>
                       </div>
                     </div>
                   </div>
-                `
-              )}
-              ${when(
-                (x) =>
-                  x.instrument &&
-                  (x.ordersTrader?.hasCap(TRADER_CAPS.CAPS_ORDER_DESTINATION) ||
-                    x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF)),
-                html`
-                  <div class="widget-section">
-                    <div class="widget-margin-spacer"></div>
-                    <div class="widget-subsection">
-                      ${when(
-                        (x) =>
-                          x.ordersTrader.hasCap(
-                            TRADER_CAPS.CAPS_ORDER_DESTINATION
-                          ),
-                        html`
-                          <div class="widget-subsection-item">
-                            <div class="widget-text-label">Назначение</div>
-                            <div class="widget-flex-line">
-                              <ppp-widget-select
-                                ${ref('destination')}
-                                position="above"
-                                @change="${(x) => {
-                                  return x.updateDocumentFragment({
-                                    $set: {
-                                      'widgets.$.lastDestination':
-                                        x.destination.value
-                                    }
-                                  });
-                                }}"
-                                value="${(x) => {
-                                  let destination = x.document.lastDestination;
-
-                                  if (
-                                    !destination ||
-                                    !x.destinationList?.find(
-                                      (t) => t.value === destination
-                                    )
-                                  ) {
-                                    destination = x.destinationList?.[0]?.value;
-                                  }
-
-                                  return destination;
-                                }}"
-                              >
-                                ${repeat(
-                                  (x) => x.destinationList ?? [],
-                                  html`
-                                    <ppp-widget-option
-                                      value="${(x) => x.value}"
-                                    >
-                                      ${(x) => x.label}
-                                    </ppp-widget-option>
-                                  `
-                                )}
-                              </ppp-widget-select>
-                            </div>
-                          </div>
-                        `
-                      )}
-                      ${when(
-                        (x) =>
-                          x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF),
-                        html`
-                          <div class="widget-subsection-item">
-                            <div class="widget-text-label">TIF</div>
-                            <div class="widget-flex-line">
-                              <ppp-widget-select
-                                ${ref('tif')}
-                                position="above"
-                                @change="${(x) => {
-                                  return x.updateDocumentFragment({
-                                    $set: {
-                                      'widgets.$.lastTif': x.tif.value
-                                    }
-                                  });
-                                }}"
-                                value="${(x) => {
-                                  let tif = x.document.lastTif;
-
-                                  if (
-                                    !tif ||
-                                    !x.tifList?.find((t) => t.value === tif)
-                                  ) {
-                                    tif = x.tifList?.[0]?.value;
-                                  }
-
-                                  return tif;
-                                }}"
-                              >
-                                ${repeat(
-                                  (x) => x.tifList ?? [],
-                                  html`
-                                    <ppp-widget-option
-                                      value="${(x) => x.value}"
-                                    >
-                                      ${(x) => x.label}
-                                    </ppp-widget-option>
-                                  `
-                                )}
-                              </ppp-widget-select>
-                            </div>
-                          </div>
-                        `
-                      )}
-                    </div>
-                  </div>
-                `
-              )}
-              <div class="widget-margin-spacer"></div>
-              ${when(
-                (x) => x.document.fastVolumes,
-                html`
-                  <div class="widget-section">
-                    <ppp-widget-box-radio-group
-                      wrap
-                      readonly
-                      class="fast-volume-selector"
-                      value="${(x) =>
-                        x.document.doNotLockFastVolume
-                          ? void 0
-                          : x.document.selectedFastVolume}"
-                      @click="${(x, c) => x.handleFastVolumeClick(c)}"
-                      @dblclick="${(x, c) => x.handleFastVolumeDblClick(c)}"
-                      ${ref('fastVolumeButtons')}
-                    >
-                      ${repeat(
-                        (x) => x.getFastVolumeButtonsData(),
-                        html`
-                          <ppp-widget-box-radio
-                            class="xsmall"
-                            value="${(x, c) => c.index}"
-                            volume="${(x) => x.volume}"
-                            ?money="${(x) => x.isInMoney}"
-                          >
-                            <div class="fast-button-with-coin">
-                              ${when(
-                                (x) => x.isInMoney,
-                                html` <div class="coin-icon"></div> `
-                              )}
-                              ${(x) => x.text}
-                            </div>
-                          </ppp-widget-box-radio>
-                        `,
-                        { positioning: true }
-                      )}
-                    </ppp-widget-box-radio-group>
-                  </div>
+                </div>
+              `
+            )}
+            ${when(
+              (x) =>
+                x.instrument &&
+                (x.ordersTrader?.hasCap(TRADER_CAPS.CAPS_ORDER_DESTINATION) ||
+                  x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF)),
+              html`
+                <div class="widget-section">
                   <div class="widget-margin-spacer"></div>
-                `
-              )}
-              <div
-                ?hidden="${(x) => isAmountSectionHidden(x)}"
-                class="widget-section"
-              >
-                <div class="widget-summary">
-                  <div class="widget-summary-line">
-                    <span>Стоимость</span>
-                    <span class="widget-summary-line-price">
-                      ${(x) =>
-                        x.orderTypeTabs.activeid === 'market'
-                          ? 'по факту сделки'
-                          : formatAmount(x.totalAmount, x.instrument)}
-                    </span>
-                  </div>
-                  <div class="widget-summary-line">
-                    <span>Комиссия</span>
-                    <span>
-                      ${(x) =>
-                        x.orderTypeTabs.activeid === 'market'
-                          ? 'по факту сделки'
-                          : formatCommission(x.commission, x.instrument)}
-                    </span>
+                  <div class="widget-subsection">
+                    ${when(
+                      (x) =>
+                        x.ordersTrader.hasCap(
+                          TRADER_CAPS.CAPS_ORDER_DESTINATION
+                        ),
+                      html`
+                        <div class="widget-subsection-item">
+                          <div class="widget-text-label">Назначение</div>
+                          <div class="widget-flex-line">
+                            <ppp-widget-select
+                              ${ref('destination')}
+                              position="above"
+                              @change="${(x) => {
+                                return x.updateDocumentFragment({
+                                  $set: {
+                                    'widgets.$.lastDestination':
+                                      x.destination.value
+                                  }
+                                });
+                              }}"
+                              value="${(x) => {
+                                let destination = x.document.lastDestination;
+
+                                if (
+                                  !destination ||
+                                  !x.destinationList?.find(
+                                    (t) => t.value === destination
+                                  )
+                                ) {
+                                  destination = x.destinationList?.[0]?.value;
+                                }
+
+                                return destination;
+                              }}"
+                            >
+                              ${repeat(
+                                (x) => x.destinationList ?? [],
+                                html`
+                                  <ppp-widget-option value="${(x) => x.value}">
+                                    ${(x) => x.label}
+                                  </ppp-widget-option>
+                                `
+                              )}
+                            </ppp-widget-select>
+                          </div>
+                        </div>
+                      `
+                    )}
+                    ${when(
+                      (x) => x.ordersTrader.hasCap(TRADER_CAPS.CAPS_ORDER_TIF),
+                      html`
+                        <div class="widget-subsection-item">
+                          <div class="widget-text-label">TIF</div>
+                          <div class="widget-flex-line">
+                            <ppp-widget-select
+                              ${ref('tif')}
+                              position="above"
+                              @change="${(x) => {
+                                return x.updateDocumentFragment({
+                                  $set: {
+                                    'widgets.$.lastTif': x.tif.value
+                                  }
+                                });
+                              }}"
+                              value="${(x) => {
+                                let tif = x.document.lastTif;
+
+                                if (
+                                  !tif ||
+                                  !x.tifList?.find((t) => t.value === tif)
+                                ) {
+                                  tif = x.tifList?.[0]?.value;
+                                }
+
+                                return tif;
+                              }}"
+                            >
+                              ${repeat(
+                                (x) => x.tifList ?? [],
+                                html`
+                                  <ppp-widget-option value="${(x) => x.value}">
+                                    ${(x) => x.label}
+                                  </ppp-widget-option>
+                                `
+                              )}
+                            </ppp-widget-select>
+                          </div>
+                        </div>
+                      `
+                    )}
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-          <div class="widget-footer">
+              `
+            )}
+            <div class="widget-margin-spacer"></div>
+            ${when(
+              (x) => x.document.fastVolumes,
+              html`
+                <div class="widget-section">
+                  <ppp-widget-box-radio-group
+                    wrap
+                    readonly
+                    class="fast-volume-selector"
+                    value="${(x) =>
+                      x.document.doNotLockFastVolume
+                        ? void 0
+                        : x.document.selectedFastVolume}"
+                    @click="${(x, c) => x.handleFastVolumeClick(c)}"
+                    @dblclick="${(x, c) => x.handleFastVolumeDblClick(c)}"
+                    ${ref('fastVolumeButtons')}
+                  >
+                    ${repeat(
+                      (x) => x.getFastVolumeButtonsData(),
+                      html`
+                        <ppp-widget-box-radio
+                          class="xsmall"
+                          value="${(x, c) => c.index}"
+                          volume="${(x) => x.volume}"
+                          ?money="${(x) => x.isInMoney}"
+                        >
+                          <div class="fast-button-with-coin">
+                            ${when(
+                              (x) => x.isInMoney,
+                              html` <div class="coin-icon"></div> `
+                            )}
+                            ${(x) => x.text}
+                          </div>
+                        </ppp-widget-box-radio>
+                      `,
+                      { positioning: true }
+                    )}
+                  </ppp-widget-box-radio-group>
+                </div>
+                <div class="widget-margin-spacer"></div>
+              `
+            )}
             <div
-              ?hidden="${(x) => isEstimateSectionHidden(x)}"
+              ?hidden="${(x) => isAmountSectionHidden(x)}"
               class="widget-section"
             >
-              <div class="widget-subsection">
-                <div class="widget-summary">
-                  <div
-                    class="widget-summary-line"
-                    style="cursor:pointer;"
-                    @click="${(x) =>
-                      x.setQuantity(x.buyingPowerQuantity ?? 0, {
-                        force: true
-                      })}"
-                  >
-                    <span>Доступно</span>
-                    <span class="positive">
-                      ${(x) => x.buyingPowerQuantity ?? '—'}
-                    </span>
-                  </div>
-                  <div
-                    class="widget-summary-line"
-                    style="cursor:pointer;"
-                    @click="${(x) =>
-                      x.setQuantity(x.marginBuyingPowerQuantity ?? 0, {
-                        force: true
-                      })}"
-                  >
-                    <span>С плечом</span>
-                    <span class="positive">
-                      ${(x) => x.marginBuyingPowerQuantity ?? '—'}
-                    </span>
-                  </div>
-                </div>
-                <div class="widget-summary">
-                  <div
-                    class="widget-summary-line"
-                    style="cursor:pointer;"
-                    @click="${(x) =>
-                      x.setQuantity(x.sellingPowerQuantity ?? 0, {
-                        force: true
-                      })}"
-                  >
-                    <span>Доступно</span>
-                    <span class="negative">
-                      ${(x) => x.sellingPowerQuantity ?? '—'}
-                    </span>
-                  </div>
-                  <div
-                    class="widget-summary-line"
-                    style="cursor:pointer;"
-                    @click="${(x) =>
-                      x.setQuantity(x.marginSellingPowerQuantity ?? 0, {
-                        force: true
-                      })}"
-                  >
-                    <span>С плечом</span>
-                    <span class="negative">
-                      ${(x) => x.marginSellingPowerQuantity ?? '—'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div
-              ?hidden="${(x) => isEstimateSectionHidden(x)}"
-              class="widget-section-spacer"
-            ></div>
-            <div class="widget-section">
-              <div class="widget-subsection">
-                <div class="widget-button-line">
-                  <ppp-widget-button
-                    appearance="primary"
-                    ?hidden="${(x) => {
-                      if (
-                        x.orderTypeTabs.activeid === 'conditional' &&
-                        x.conditionalOrder &&
-                        x.conditionalOrder.order.sideAgnostic
-                      ) {
-                        return true;
-                      }
-
-                      return false;
-                    }}"
-                    ?disabled="${(x) => {
-                      if (
-                        x.orderTypeTabs.activeid === 'conditional' &&
-                        !x.conditionalOrder
-                      ) {
-                        return true;
-                      }
-
-                      return false;
-                    }}"
-                    @click="${(x, { event }) =>
-                      x.placeOrder('buy', event.shiftKey)}"
-                  >
-                    ${() => ppp.t('$g.buyButtonText')}
-                  </ppp-widget-button>
-                  <ppp-widget-button
-                    appearance="danger"
-                    ?hidden="${(x) => {
-                      if (
-                        x.orderTypeTabs.activeid === 'conditional' &&
-                        x.conditionalOrder &&
-                        x.conditionalOrder.order.sideAgnostic
-                      ) {
-                        return true;
-                      }
-
-                      return false;
-                    }}"
-                    ?disabled="${(x) => {
-                      if (
-                        x.orderTypeTabs.activeid === 'conditional' &&
-                        !x.conditionalOrder
-                      ) {
-                        return true;
-                      }
-
-                      return false;
-                    }}"
-                    @click="${(x, { event }) =>
-                      x.placeOrder('sell', event.shiftKey)}"
-                  >
-                    ${() => ppp.t('$g.sellButtonText')}
-                  </ppp-widget-button>
-                  <ppp-widget-button
-                    appearance="secondary"
-                    ?hidden="${(x) => {
-                      if (
-                        x.orderTypeTabs.activeid !== 'conditional' ||
-                        !x.conditionalOrder
-                      )
-                        return true;
-
-                      if (
-                        x.orderTypeTabs.activeid === 'conditional' &&
-                        x.conditionalOrder &&
-                        !x.conditionalOrder.order.sideAgnostic
-                      ) {
-                        return true;
-                      }
-
-                      return false;
-                    }}"
-                    ?disabled="${(x) => {
-                      if (
-                        x.orderTypeTabs.activeid === 'conditional' &&
-                        !x.conditionalOrder
-                      ) {
-                        return true;
-                      }
-
-                      return false;
-                    }}"
-                    @click="${(x, { event }) =>
-                      x.placeOrder(void 0, event.shiftKey)}"
-                  >
+              <div class="widget-summary">
+                <div class="widget-summary-line">
+                  <span>Стоимость</span>
+                  <span class="widget-summary-line-price">
                     ${(x) =>
-                      x.conditionalOrder?.order?.buttonText ??
-                      'Разместить заявку'}
-                  </ppp-widget-button>
+                      x.orderTypeTabs.activeid === 'market'
+                        ? 'по факту сделки'
+                        : formatAmount(x.totalAmount, x.instrument)}
+                  </span>
+                </div>
+                <div class="widget-summary-line">
+                  <span>Комиссия</span>
+                  <span>
+                    ${(x) =>
+                      x.orderTypeTabs.activeid === 'market'
+                        ? 'по факту сделки'
+                        : formatCommission(x.commission, x.instrument)}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        `)}
+        </div>
+        <div class="widget-footer" ?hidden="${(x) => !x.mayShowContent}">
+          <div
+            ?hidden="${(x) => isEstimateSectionHidden(x)}"
+            class="widget-section"
+          >
+            <div class="widget-subsection">
+              <div class="widget-summary">
+                <div
+                  class="widget-summary-line"
+                  style="cursor:pointer;"
+                  @click="${(x) =>
+                    x.setQuantity(x.buyingPowerQuantity ?? 0, {
+                      force: true
+                    })}"
+                >
+                  <span>Доступно</span>
+                  <span class="positive">
+                    ${(x) => x.buyingPowerQuantity ?? '—'}
+                  </span>
+                </div>
+                <div
+                  class="widget-summary-line"
+                  style="cursor:pointer;"
+                  @click="${(x) =>
+                    x.setQuantity(x.marginBuyingPowerQuantity ?? 0, {
+                      force: true
+                    })}"
+                >
+                  <span>С плечом</span>
+                  <span class="positive">
+                    ${(x) => x.marginBuyingPowerQuantity ?? '—'}
+                  </span>
+                </div>
+              </div>
+              <div class="widget-summary">
+                <div
+                  class="widget-summary-line"
+                  style="cursor:pointer;"
+                  @click="${(x) =>
+                    x.setQuantity(x.sellingPowerQuantity ?? 0, {
+                      force: true
+                    })}"
+                >
+                  <span>Доступно</span>
+                  <span class="negative">
+                    ${(x) => x.sellingPowerQuantity ?? '—'}
+                  </span>
+                </div>
+                <div
+                  class="widget-summary-line"
+                  style="cursor:pointer;"
+                  @click="${(x) =>
+                    x.setQuantity(x.marginSellingPowerQuantity ?? 0, {
+                      force: true
+                    })}"
+                >
+                  <span>С плечом</span>
+                  <span class="negative">
+                    ${(x) => x.marginSellingPowerQuantity ?? '—'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            ?hidden="${(x) => isEstimateSectionHidden(x)}"
+            class="widget-section-spacer"
+          ></div>
+          <div class="widget-section">
+            <div class="widget-subsection">
+              <div class="widget-button-line">
+                <ppp-widget-button
+                  appearance="primary"
+                  ?hidden="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      x.conditionalOrder &&
+                      x.conditionalOrder.order.sideAgnostic
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  ?disabled="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      !x.conditionalOrder
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  @click="${(x, { event }) =>
+                    x.placeOrder('buy', event.shiftKey)}"
+                >
+                  ${() => ppp.t('$g.buyButtonText')}
+                </ppp-widget-button>
+                <ppp-widget-button
+                  appearance="danger"
+                  ?hidden="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      x.conditionalOrder &&
+                      x.conditionalOrder.order.sideAgnostic
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  ?disabled="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      !x.conditionalOrder
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  @click="${(x, { event }) =>
+                    x.placeOrder('sell', event.shiftKey)}"
+                >
+                  ${() => ppp.t('$g.sellButtonText')}
+                </ppp-widget-button>
+                <ppp-widget-button
+                  appearance="secondary"
+                  ?hidden="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid !== 'conditional' ||
+                      !x.conditionalOrder
+                    )
+                      return true;
+
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      x.conditionalOrder &&
+                      !x.conditionalOrder.order.sideAgnostic
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  ?disabled="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      !x.conditionalOrder
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  @click="${(x, { event }) =>
+                    x.placeOrder(void 0, event.shiftKey)}"
+                >
+                  ${(x) =>
+                    x.conditionalOrder?.order?.buttonText ??
+                    'Разместить заявку'}
+                </ppp-widget-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>
@@ -1402,6 +1379,7 @@ export class OrderWidget extends WidgetWithInstrument {
         fieldDatumPairs: {
           // For estimate().
           traderEvent: TRADER_DATUM.TRADER,
+          position: TRADER_DATUM.POSITION,
           positionSize: TRADER_DATUM.POSITION_SIZE,
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
@@ -1525,6 +1503,7 @@ export class OrderWidget extends WidgetWithInstrument {
       source: this,
       fieldDatumPairs: {
         traderEvent: TRADER_DATUM.TRADER,
+        position: TRADER_DATUM.POSITION,
         positionSize: TRADER_DATUM.POSITION_SIZE,
         positionAverage: TRADER_DATUM.POSITION_AVERAGE
       }

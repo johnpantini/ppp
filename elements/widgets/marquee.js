@@ -275,6 +275,64 @@ export class MarqueeWidget extends WidgetWithInstrument {
     );
   }
 
+  async connectedCallback() {
+    try {
+      super.connectedCallback();
+
+      this.style.overflow = 'unset';
+
+      window.addEventListener('resize', this.onWindowResize);
+      this.recalculateDimensions();
+
+      this.columns = new WidgetColumns({
+        columns: [
+          {
+            source: COLUMN_SOURCE.LAST_PRICE,
+            highlightChanges: this.document.highlightLastPriceChanges
+          },
+          {
+            source: COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
+          },
+          {
+            source: COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
+          }
+        ]
+      });
+
+      await this.columns.registerColumns();
+
+      this.columns.array.forEach((column) => {
+        this.columnsBySource.set(column.source, column);
+      });
+
+      for (const m of this.document.marquee ?? []) {
+        if (m.hidden) {
+          continue;
+        }
+
+        const denormalized = await this.container.denormalization.denormalize(
+          m
+        );
+        const trader = await ppp.getOrCreateTrader(denormalized.trader);
+
+        denormalized.pppTrader = trader;
+
+        this.marquee.push(denormalized);
+      }
+
+      this.initialized = true;
+    } catch (e) {
+      this.initialized = true;
+
+      return this.catchException(e);
+    }
+  }
+
+  disconnectedCallback() {
+    window.removeEventListener('resize', this.onWindowResize);
+    super.disconnectedCallback();
+  }
+
   catchException(e) {
     if (e instanceof NoInstrumentsError) {
       this.traderError = e;
@@ -338,64 +396,6 @@ export class MarqueeWidget extends WidgetWithInstrument {
     }
 
     return always;
-  }
-
-  async connectedCallback() {
-    try {
-      super.connectedCallback();
-
-      this.style.overflow = 'unset';
-
-      window.addEventListener('resize', this.onWindowResize);
-      this.recalculateDimensions();
-
-      this.columns = new WidgetColumns({
-        columns: [
-          {
-            source: COLUMN_SOURCE.LAST_PRICE,
-            highlightChanges: this.document.highlightLastPriceChanges
-          },
-          {
-            source: COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE
-          },
-          {
-            source: COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE
-          }
-        ]
-      });
-
-      await this.columns.registerColumns();
-
-      this.columns.array.forEach((column) => {
-        this.columnsBySource.set(column.source, column);
-      });
-
-      for (const m of this.document.marquee ?? []) {
-        if (m.hidden) {
-          continue;
-        }
-
-        const denormalized = await this.container.denormalization.denormalize(
-          m
-        );
-        const trader = await ppp.getOrCreateTrader(denormalized.trader);
-
-        denormalized.pppTrader = trader;
-
-        this.marquee.push(denormalized);
-      }
-
-      this.initialized = true;
-    } catch (e) {
-      this.initialized = true;
-
-      return this.catchException(e);
-    }
-  }
-
-  disconnectedCallback() {
-    window.removeEventListener('resize', this.onWindowResize);
-    super.disconnectedCallback();
   }
 
   afterResize() {

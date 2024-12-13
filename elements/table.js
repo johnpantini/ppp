@@ -24,6 +24,7 @@ import {
   paletteGrayLight3,
   paletteWhite,
   spacing1,
+  spacing2,
   themeConditional
 } from '../design/design-tokens.js';
 
@@ -197,7 +198,7 @@ export const tableStyles = css`
   .control-line {
     display: flex;
     flex-direction: row;
-    gap: 8px;
+    gap: 0 ${spacing2};
   }
 
   .control-line.centered {

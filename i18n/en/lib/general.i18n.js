@@ -15,7 +15,8 @@ export default function (i18n) {
       yesterday: 'Yesterday',
       summary: 'Summary',
       buyButtonText: 'Buy',
-      sellButtonText: 'Sell'
+      sellButtonText: 'Sell',
+      restoreDefaults: 'Restore Defaults'
     }
   });
 }

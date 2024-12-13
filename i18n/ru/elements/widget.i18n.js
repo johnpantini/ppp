@@ -11,7 +11,13 @@ export default function (i18n) {
         noTradesToDisplay: 'Нет сделок для отображения.',
         selectInstrument: 'Выберите инструмент.',
         unsupportedInstrument: 'Инструмент не поддерживается.'
-      }
+      },
+      tabs: {
+        allOrdersText: 'Все',
+        realOrdersText: 'Биржевые',
+        conditionalOrdersText: 'Условные'
+      },
+      unsupportedInstrumentFullName: 'Инструмент не поддерживается'
     }
   });
 }

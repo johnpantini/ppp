@@ -8,7 +8,6 @@ import {
   html,
   Observable,
   observable,
-  when,
   ref,
   repeat
 } from '../vendor/fast-element.min.js';
@@ -53,7 +52,6 @@ import {
   fontWeightBody1,
   fontSizeBody1
 } from '../design/design-tokens.js';
-import { emptyWidgetState } from '../static/svg/sprite.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
 import {
   AuthorizationError,
@@ -121,51 +119,6 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
   </span>
 `;
 
-export const widgetUnsupportedInstrumentTemplate = () => html`
-  ${when(
-    (x) =>
-      x.initialized &&
-      x.instrument?.symbol &&
-      x.instrumentTrader &&
-      x.unsupportedInstrument,
-    html`
-      <ppp-widget-empty-state-control>
-        ${() => ppp.t('$widget.emptyState.unsupportedInstrument')}
-      </ppp-widget-empty-state-control>
-    `
-  )}
-`;
-
-export const widgetWithInstrumentBodyTemplate = (
-  widgetBodyLayout,
-  options = {}
-) =>
-  html`
-    <ppp-widget-empty-state-control loading ?hidden="${(x) => x.initialized}">
-      ${() => ppp.t('$widget.emptyState.loading')}
-    </ppp-widget-empty-state-control>
-    ${when(
-      (x) => x.initialized,
-      html`
-        <ppp-widget-empty-state-control
-          ?hidden="${(x) => x.instrument?.symbol}"
-        >
-          ${() =>
-            options.emptyStateText ??
-            ppp.t('$widget.emptyState.selectInstrument')}
-        </ppp-widget-empty-state-control>
-        ${widgetUnsupportedInstrumentTemplate()}
-        ${when(
-          (x) =>
-            x.instrument?.symbol &&
-            x.instrumentTrader &&
-            !x.unsupportedInstrument,
-          widgetBodyLayout
-        )}
-      `
-    )}
-  `;
-
 export const widgetDefaultHeaderTemplate = (options = {}) => html`
   <div class="widget-header">
     <div class="widget-header-inner">
@@ -175,10 +128,6 @@ export const widgetDefaultHeaderTemplate = (options = {}) => html`
       <ppp-widget-search-control
         ?hidden="${(x) => !x.instrumentTrader}"
       ></ppp-widget-search-control>
-      ${when(
-        (x) => !x.instrumentTrader,
-        html`<span class="no-spacing"></span>`
-      )}
       <span class="widget-title">
         <span class="title">${(x) => x.document?.name ?? ''}</span>
       </span>
@@ -233,6 +182,38 @@ export const widgetStackSelectorTemplate = () => html`
       )}
     </ppp-widget-tabs>
   </div>
+`;
+
+export const widgetDefaultEmptyStateTemplate = () => html`
+  <ppp-widget-empty-state-control loading ?hidden="${(x) => x.initialized}">
+    ${() => ppp.t('$widget.emptyState.loading')}
+  </ppp-widget-empty-state-control>
+  <ppp-widget-empty-state-control
+    ?hidden="${(x) => {
+      if (!x.instrumentTrader || !x.initialized) {
+        return true;
+      } else {
+        if (x.allowEmptyInstrument) {
+          return true;
+        }
+
+        return x.instrument;
+      }
+    }}"
+  >
+    ${() => ppp.t('$widget.emptyState.selectInstrument')}
+  </ppp-widget-empty-state-control>
+  <ppp-widget-empty-state-control
+    ?hidden="${(x) => {
+      if (!x.instrumentTrader || !x.initialized || !x.instrument) {
+        return true;
+      } else {
+        return !x.unsupportedInstrument;
+      }
+    }}"
+  >
+    ${() => ppp.t('$widget.emptyState.unsupportedInstrument')}
+  </ppp-widget-empty-state-control>
 `;
 
 export const widgetTableStyles = () => css`
@@ -666,7 +647,7 @@ export const widgetCommonContentStyles = () => css`
   .control-line {
     display: flex;
     flex-direction: row;
-    gap: 0 ${spacing2};
+    gap: ${spacing1} ${spacing2};
   }
 
   .control-line.centered {
@@ -787,11 +768,12 @@ export const widgetStyles = () => css`
     width: 100%;
     cursor: move;
     flex-shrink: 0;
-    padding: 0 5px;
+    padding: 0 ${spacing1};
     font-size: ${fontSizeWidget};
     background: ${themeConditional(darken(paletteGrayLight3, 5), paletteBlack)};
     align-items: center;
     justify-content: space-between;
+    z-index: 5;
   }
 
   :host([preview]) .widget-header,
@@ -817,6 +799,7 @@ export const widgetStyles = () => css`
     width: 100%;
     height: 30px;
     align-items: center;
+    gap: 0 ${spacing1};
   }
 
   .widget-body {
@@ -852,13 +835,12 @@ export const widgetStyles = () => css`
 
   .widget-header ppp-widget-search-control {
     height: 20px;
-    margin-left: 6px;
   }
 
   .widget-title {
     display: flex;
     align-items: center;
-    gap: 0 6px;
+    gap: 0 ${spacing2};
     font-size: ${fontSizeWidget};
     font-weight: 500;
     line-height: ${lineHeightWidget};
@@ -867,15 +849,6 @@ export const widgetStyles = () => css`
     overflow: hidden;
     flex-grow: 1;
     padding: 0 ${spacing1};
-    margin-right: 6px;
-  }
-
-  ppp-widget-group-control + .widget-title {
-    margin-left: 8px;
-  }
-
-  ppp-widget-search-control + .widget-title {
-    margin-left: 8px;
   }
 
   .widget-title > .title {
@@ -1411,60 +1384,6 @@ export class WidgetWithInstrument extends Widget {
   @observable
   instrument;
 
-  @observable
-  initialized;
-
-  @observable
-  instrumentTrader;
-
-  @observable
-  unsupportedInstrument;
-
-  instrumentTraderChanged(o, n) {
-    if (this.searchControl) this.searchControl.trader = n;
-  }
-
-  /**
-   * @description Isolated widget ignores instrumentChanged() callback.
-   */
-  isolated;
-
-  selectInstrument(symbol, options = {}) {
-    if (this.preview && this.container.savedInstrument) {
-      this.instrument = this.container.savedInstrument;
-
-      return this.instrument;
-    }
-
-    if (!symbol || !this.instrumentTrader) return;
-
-    let adoptedInstrument = unsupportedInstrument(symbol);
-
-    if (this.instrumentTrader.instruments.has(symbol)) {
-      adoptedInstrument = this.instrumentTrader.adoptInstrument(
-        this.instrumentTrader.instruments.get(symbol)
-      );
-    } else {
-      const [s, exchange] = symbol.split('~');
-      const i = this.instrumentTrader.instruments.get(s);
-
-      if (i?.exchange === exchange) {
-        adoptedInstrument = this.instrumentTrader.adoptInstrument(i);
-      }
-    }
-
-    if (options.isolate) {
-      this.isolated = true;
-      this.instrument = adoptedInstrument;
-      this.isolated = false;
-    } else {
-      this.isolated = false;
-      this.instrument = adoptedInstrument;
-    }
-
-    return adoptedInstrument;
-  }
-
   instrumentChanged(oldValue, newValue) {
     this.unsupportedInstrument =
       newValue?.notSupported &&
@@ -1475,6 +1394,8 @@ export class WidgetWithInstrument extends Widget {
     }
 
     this.clearFields?.();
+
+    this.mayShowContent = this.#updateMayShowContent();
 
     this.$emit('instrumentchange', {
       source: this,
@@ -1505,7 +1426,10 @@ export class WidgetWithInstrument extends Widget {
                   this.instrument
                 );
 
-                w.instrument = adoptedInstrument;
+                w.instrument =
+                  typeof this.instrument === 'undefined'
+                    ? this.instrument
+                    : adoptedInstrument;
                 w.unsupportedInstrument = adoptedInstrument?.notSupported;
 
                 bulkWritePayload.push({
@@ -1557,6 +1481,92 @@ export class WidgetWithInstrument extends Widget {
         }
       );
     }
+  }
+
+  @observable
+  initialized;
+
+  initializedChanged() {
+    this.mayShowContent = this.#updateMayShowContent();
+  }
+
+  @observable
+  instrumentTrader;
+
+  instrumentTraderChanged(o, n) {
+    if (this.searchControl) this.searchControl.trader = n;
+
+    this.mayShowContent = this.#updateMayShowContent();
+  }
+
+  @observable
+  unsupportedInstrument;
+
+  unsupportedInstrumentChanged() {
+    this.mayShowContent = this.#updateMayShowContent();
+  }
+
+  @observable
+  mayShowContent;
+
+  #updateMayShowContent() {
+    if (this.allowEmptyInstrument) {
+      return this.initialized && !this.unsupportedInstrument;
+    }
+
+    return (
+      this.initialized &&
+      this.instrumentTrader &&
+      this.instrument &&
+      !this.unsupportedInstrument
+    );
+  }
+
+  /**
+   * @description Isolated widget ignores instrumentChanged() callback.
+   */
+  isolated;
+
+  constructor() {
+    super();
+
+    this.mayShowContent = false;
+  }
+
+  selectInstrument(symbol, options = {}) {
+    if (this.preview && this.container.savedInstrument) {
+      this.instrument = this.container.savedInstrument;
+
+      return this.instrument;
+    }
+
+    if (!symbol || !this.instrumentTrader) return;
+
+    let adoptedInstrument = unsupportedInstrument(symbol);
+
+    if (this.instrumentTrader.instruments.has(symbol)) {
+      adoptedInstrument = this.instrumentTrader.adoptInstrument(
+        this.instrumentTrader.instruments.get(symbol)
+      );
+    } else {
+      const [s, exchange] = symbol.split('~');
+      const i = this.instrumentTrader.instruments.get(s);
+
+      if (i?.exchange === exchange) {
+        adoptedInstrument = this.instrumentTrader.adoptInstrument(i);
+      }
+    }
+
+    if (options.isolate) {
+      this.isolated = true;
+      this.instrument = adoptedInstrument;
+      this.isolated = false;
+    } else {
+      this.isolated = false;
+      this.instrument = adoptedInstrument;
+    }
+
+    return adoptedInstrument;
   }
 
   broadcastPrice(price) {

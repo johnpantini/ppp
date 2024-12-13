@@ -15,7 +15,8 @@ export default function (i18n) {
       yesterday: 'Вчера',
       summary: 'Пересказ',
       buyButtonText: 'Покупка',
-      sellButtonText: 'Продажа'
+      sellButtonText: 'Продажа',
+      restoreDefaults: 'Восстановить умолчания'
     }
   });
 }

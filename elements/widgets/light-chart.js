@@ -5,13 +5,12 @@ import {
   widgetStyles,
   WidgetWithInstrument,
   widgetDefaultHeaderTemplate,
-  widgetUnsupportedInstrumentTemplate,
+  widgetDefaultEmptyStateTemplate,
   widgetStackSelectorTemplate
 } from '../widget.js';
 import {
   html,
   css,
-  when,
   ref,
   observable,
   attr,
@@ -107,26 +106,7 @@ export const lightChartWidgetTemplate = html`
       })}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
-        <ppp-widget-empty-state-control
-          loading
-          ?hidden="${(x) => x.initialized}"
-        >
-          ${() => ppp.t('$widget.emptyState.loading')}
-        </ppp-widget-empty-state-control>
-
-        <ppp-widget-empty-state-control
-          ?hidden="${(x) => !(x.initialized && !x.instrument?.symbol)}"
-        >
-          ${() => ppp.t('$widget.emptyState.selectInstrument')}
-        </ppp-widget-empty-state-control>
-        ${widgetUnsupportedInstrumentTemplate()}
-        <div
-          class="chart-holder"
-          ?hidden="${(x) =>
-            !x.initialized ||
-            !x.instrument?.symbol ||
-            (x.instrument && x.instrumentTrader && x.unsupportedInstrument)}"
-        >
+        <div class="chart-holder" ?hidden="${(x) => !x.mayShowContent}">
           <ppp-widget-tabs
             ${ref('tfSelector')}
             activeid="${(x) => x.getActiveTimeframeTab()}"
@@ -244,6 +224,7 @@ export const lightChartWidgetTemplate = html`
             </div>
           </div>
         </div>
+        ${widgetDefaultEmptyStateTemplate()}
       </div>
       <ppp-widget-notifications-area></ppp-widget-notifications-area>
       <ppp-widget-resize-controls></ppp-widget-resize-controls>

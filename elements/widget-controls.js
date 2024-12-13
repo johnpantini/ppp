@@ -55,6 +55,7 @@ import {
   paletteGreenBase,
   paletteGreenLight3,
   paletteRedBase,
+  paletteRedDark1,
   paletteRedLight3,
   paletteWhite,
   positive,
@@ -506,6 +507,10 @@ export const widgetEmptyStateControlStyles = css`
     padding: 0 10px;
     text-align: center;
   }
+
+  :host > svg[hidden] + .text {
+    margin-top: 0;
+  }
 `;
 
 export class WidgetGroupControl extends PPPOffClickElement {
@@ -647,16 +652,30 @@ export const widgetSearchControlTemplate = html`
                 <div class="menu-item-icon-fallback">
                   <div
                     class="menu-item-icon-logo"
-                    style="${(x) =>
-                      `background-image:url(${x.getInstrumentIconUrl(
+                    style="${(x) => {
+                      if (x.widget?.unsupportedInstrument) {
+                        return `background-color:${
+                          themeConditional(paletteRedLight3, paletteRedDark1)
+                            .$value
+                        }`;
+                      }
+
+                      return `background-image:url(${x.getInstrumentIconUrl(
                         x.widget?.instrument
-                      )})`}"
+                      )})`;
+                    }}"
                   ></div>
                   ${(x) => x.widget?.instrument.fullName?.[0]}
                 </div>
               </div>
               <div class="menu-item-text">
-                ${(x) => x.widget?.instrument.fullName}
+                ${(x) => {
+                  if (x.widget?.unsupportedInstrument) {
+                    return ppp.t('$widget.unsupportedInstrumentFullName');
+                  }
+
+                  return x.widget?.instrument?.fullName ?? '';
+                }}
               </div>
               <div class="menu-item-controls">
                 <div class="menu-item-tag">
@@ -3739,7 +3758,7 @@ export const widgetCardStyles = css`
 
   .text-line-inner {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin-right: 20px;
     overflow: hidden;
   }

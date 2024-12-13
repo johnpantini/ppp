@@ -397,7 +397,7 @@ export class ListWidget extends WidgetWithInstrument {
     } catch (e) {
       this.initialized = true;
 
-      console.error(e);
+      this.$$debug('[%s] connectedCallback failed: %o', this.document.name, e);
 
       return this.notificationsArea.error({
         text: 'Не удалось загрузить содержимое.',

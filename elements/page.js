@@ -366,7 +366,8 @@ export const pageStyles = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: ${spacing1} ${spacing2};
+    flex-wrap: wrap;
   }
 
   .control-line.flex-start {

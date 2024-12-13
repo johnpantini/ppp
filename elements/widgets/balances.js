@@ -10,8 +10,7 @@ import {
   css,
   ref,
   observable,
-  repeat,
-  when
+  repeat
 } from '../../vendor/fast-element.min.js';
 import { formatPriceWithoutCurrency } from '../../lib/intl.js';
 import { COLUMN_SOURCE, WIDGET_TYPES, TRADER_DATUM } from '../../lib/const.js';
@@ -46,72 +45,74 @@ export const balancesWidgetTemplate = html`
         >
           ${() => ppp.t('$widget.emptyState.loading')}
         </ppp-widget-empty-state-control>
-        ${when(
-          (x) => x.initialized && x?.balances?.length,
-          html`
-            <div class="spacing1"></div>
-            <div class="widget-section">
-              <div class="widget-summary">
-                ${repeat(
-                  (x) => x.balances,
-                  html`
-                    <div class="widget-summary-line">
-                      <span
-                        :trader="${(x, c) => c.parent.balancesTrader}"
-                        :payload="${(x) => x}"
-                        :column="${(x, c) =>
+        <div ?hidden="${(x) => !x.initialized || !x?.balances?.length}">
+          <div class="spacing1"></div>
+          <div class="widget-section">
+            <div class="widget-summary">
+              ${repeat(
+                (x) => x.balances,
+                html`
+                  <div class="widget-summary-line">
+                    <span
+                      :trader="${(x, c) => c.parent.balancesTrader}"
+                      :payload="${(x) => x}"
+                      :column="${(x, c) =>
+                        c.parent.columnsBySource.get(COLUMN_SOURCE.INSTRUMENT)}"
+                    >
+                      ${(x, c) =>
+                        c.parent.columns.columnElement(
                           c.parent.columnsBySource.get(
                             COLUMN_SOURCE.INSTRUMENT
-                          )}"
-                      >
-                        ${(x, c) =>
-                          c.parent.columns.columnElement(
-                            c.parent.columnsBySource.get(
-                              COLUMN_SOURCE.INSTRUMENT
-                            ),
-                            x.symbol
-                          )}
-                      </span>
-                      <span
-                        title="${(x, c) => {
-                          const avgPrice = c.parent.balancesMap?.get(
-                            x.symbol
-                          )?.averagePrice;
+                          ),
+                          x.symbol
+                        )}
+                    </span>
+                    <span
+                      title="${(x, c) => {
+                        const avgPrice = c.parent.balancesMap?.get(
+                          x.symbol
+                        )?.averagePrice;
 
-                          return avgPrice
-                            ? `Средняя: ${formatPriceWithoutCurrency(avgPrice)}`
-                            : '';
-                        }}"
-                        :trader="${(x, c) => c.parent.balancesTrader}"
-                        :payload="${(x) => x}"
-                        :column="${(x, c) => {
-                          const column = c.parent.columnsBySource.get(
+                        return avgPrice
+                          ? `Средняя: ${formatPriceWithoutCurrency(avgPrice)}`
+                          : '';
+                      }}"
+                      :trader="${(x, c) => c.parent.balancesTrader}"
+                      :payload="${(x) => x}"
+                      :column="${(x, c) => {
+                        const column = c.parent.columnsBySource.get(
+                          COLUMN_SOURCE.POSITION_AVAILABLE
+                        );
+
+                        column.hideBalances = c.parent.document.hideBalances;
+
+                        return column;
+                      }}"
+                    >
+                      ${(x, c) =>
+                        c.parent.columns.columnElement(
+                          c.parent.columnsBySource.get(
                             COLUMN_SOURCE.POSITION_AVAILABLE
-                          );
-
-                          column.hideBalances = c.parent.document.hideBalances;
-
-                          return column;
-                        }}"
-                      >
-                        ${(x, c) =>
-                          c.parent.columns.columnElement(
-                            c.parent.columnsBySource.get(
-                              COLUMN_SOURCE.POSITION_AVAILABLE
-                            ),
-                            x.symbol
-                          )}
-                      </span>
-                    </div>
-                  `
-                )}
-              </div>
+                          ),
+                          x.symbol
+                        )}
+                    </span>
+                  </div>
+                `
+              )}
             </div>
-          `
-        )}
+          </div>
+        </div>
+
         <ppp-widget-empty-state-control
           ${ref('emptyStateControl')}
-          ?hidden="${(x) => !(x.initialized && !x?.balances?.length)}"
+          ?hidden="${(x) => {
+            if (!x.initialized) {
+              return true;
+            }
+
+            return x?.balances?.length;
+          }}"
         >
           ${() => ppp.t('$widget.emptyState.noBalancesToDisplay')}
         </ppp-widget-empty-state-control>
