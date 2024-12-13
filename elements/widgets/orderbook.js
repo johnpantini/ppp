@@ -221,9 +221,6 @@ export const orderbookWidgetStyles = css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
 
-  .widget-content.compact {
-  }
-
   .holder {
     position: relative;
     width: 100%;
