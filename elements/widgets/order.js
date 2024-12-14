@@ -1633,20 +1633,17 @@ export class OrderWidget extends WidgetWithInstrument {
     this.tradingStatus = '';
 
     this.#reassignSecurityStatus();
-
     super.instrumentChanged(oldValue, newValue);
 
-    // Clear price upon change.
     if (
       this.price &&
-      (!this.ordersTrader.instrumentsAreEqual(oldValue, newValue) || !oldValue)
+      oldValue &&
+      !this.ordersTrader.instrumentsAreEqual(oldValue, newValue)
     ) {
-      setTimeout(() => {
-        this.price.value = '';
-        this.price.focus();
+      this.price.value = '';
 
-        return this.saveLastPriceValue();
-      }, 100);
+      this.price.focus();
+      this.saveLastPriceValue();
     }
 
     Updates.enqueue(() => this.calculateEstimate());

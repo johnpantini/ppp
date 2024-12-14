@@ -14,13 +14,19 @@ import {
   ref,
   observable
 } from '../../vendor/fast-element.min.js';
-import { BROKERS, TRADER_DATUM, WIDGET_TYPES } from '../../lib/const.js';
+import {
+  BROKERS,
+  EXCHANGE,
+  TRADER_DATUM,
+  WIDGET_TYPES
+} from '../../lib/const.js';
 import {
   formatAmount,
   formatPercentage,
   formatPriceWithoutCurrency,
   formatQuantity,
-  priceCurrencySymbol
+  priceCurrencySymbol,
+  stringToFloat
 } from '../../lib/intl.js';
 import {
   normalize,
@@ -324,13 +330,13 @@ export const orderbookWidgetStyles = css`
     cursor: pointer;
     background-color: ${paletteBlueBase};
     color: ${paletteWhite};
-    border-radius: 24px;
     font-size: calc(${fontSizeWidget} - 1px);
-    line-height: 16px;
-    min-height: 16px;
+    line-height: 13px;
+    min-height: 13px;
     min-width: 16px;
-    padding: 1px 4px;
+    padding: 1px 2px;
     pointer-events: none;
+    transform: translateY(-1px);
   }
 
   .my > span {
@@ -453,6 +459,10 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
     if (typeof this.document.levelColoring === 'undefined') {
       this.document.levelColoring = 'volume';
+    }
+
+    if (typeof this.document.ownOrdersDisplayMode === 'undefined') {
+      this.document.ownOrdersDisplayMode = 'native';
     }
 
     this.bookProcessorFunc = new Function(
@@ -828,15 +838,10 @@ export class OrderbookWidget extends WidgetWithInstrument {
           'palette-blue-base',
           'palette-gray-base'
         ],
-        Light: [
-          'palette-green-base',
-          'palette-red-base',
-          'palette-yellow-base',
-          'palette-blue-base',
-          'palette-gray-base'
-        ],
         opacity: [20, 20, 20, 20, 0]
       };
+
+      DEFAULT_COLORS.Light = DEFAULT_COLORS.Dark;
 
       [1, 2, 3, 4, 5].forEach((L) => {
         const theme = ppp.darkMode ? 'Dark' : 'Light';
@@ -889,7 +894,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
     const bestBid = montage.bids[0]?.price ?? 0;
     const bestAsk = montage.asks[0]?.price ?? 0;
     // For my orders.
-    const seenPrices = new Set();
+    const seenBidPrices = new Set();
+    const seenAskPrices = new Set();
 
     this.spreadString = `${formatAmount(
       Math.max(0, bestAsk - bestBid),
@@ -927,7 +933,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
       let my = 0;
 
-      for (const [orderId, left] of this.orders.get(bid.price.toString()) ??
+      for (const [orderId, [left]] of this.orders.get(bid.price.toString()) ??
         []) {
         my += left;
       }
@@ -939,16 +945,25 @@ export class OrderbookWidget extends WidgetWithInstrument {
           this.instrument.broker === BROKERS.UTEX
         ) + '\n';
 
-      const formattedVolume = formatQuantity(bid.volume, this.instrument);
+      let formattedVolume = '';
 
-      if (my > 0 && !seenPrices.has(bid.price)) {
-        seenPrices.add(bid.price);
+      if (bid.pool === 'LD') {
+        formattedVolume = '&nbsp;' + '⬇️';
+      } else if (!bid.virtual) {
+        formattedVolume =
+          '&nbsp;' + formatQuantity(bid.volume, this.instrument);
+      }
+
+      if (my > 0 && !seenBidPrices.has(bid.price)) {
+        seenBidPrices.add(bid.price);
 
         bidVolumeValues +=
-          `<span class="my"><span>${formatQuantity(
+          `<span class="my${
+            bid.virtual ? ' virtual' : ''
+          }"><span>${formatQuantity(
             my,
             this.instrument
-          )}</span></span>&nbsp;${formattedVolume}` + '\n';
+          )}</span></span>${formattedVolume}` + '\n';
       } else {
         bidVolumeValues += formattedVolume + '\n';
       }
@@ -1006,7 +1021,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
       let my = 0;
 
-      for (const [orderId, left] of this.orders.get(ask.price.toString()) ??
+      for (const [orderId, [left]] of this.orders.get(ask.price.toString()) ??
         []) {
         my += left;
       }
@@ -1018,23 +1033,30 @@ export class OrderbookWidget extends WidgetWithInstrument {
           this.instrument.broker === BROKERS.UTEX
         ) + '\n';
 
-      const formattedVolume = formatQuantity(ask.volume, this.instrument);
+      let formattedVolume = '';
 
-      if (my > 0 && !seenPrices.has(ask.price)) {
-        seenPrices.add(ask.price);
+      if (ask.pool === 'LU') {
+        formattedVolume = '⬆️';
+      } else if (!ask.virtual) {
+        formattedVolume = formatQuantity(ask.volume, this.instrument);
+      }
+
+      if (my > 0 && !seenAskPrices.has(ask.price)) {
+        seenAskPrices.add(ask.price);
 
         if (this.document.displayMode === 'compact') {
           askVolumeValues +=
-            `${formattedVolume}&nbsp;<span class="my"><span>${formatQuantity(
-              my,
-              this.instrument
-            )}</span></span>` + '\n';
+            `${formattedVolume}${ask.virtual ? '' : '&nbsp;'}<span class="my${
+              ask.virtual ? ' virtual' : ''
+            }"><span>${formatQuantity(my, this.instrument)}</span></span>` +
+            '\n';
         } else {
           askVolumeValues +=
-            `<span class="my"><span>${formatQuantity(
-              my,
-              this.instrument
-            )}</span></span>&nbsp;${formattedVolume}` + '\n';
+            `<span class="my${
+              ask.virtual ? ' virtual' : ''
+            }"><span>${formatQuantity(my, this.instrument)}</span></span>${
+              ask.virtual ? '' : '&nbsp;'
+            }${formattedVolume}` + '\n';
         }
       } else {
         askVolumeValues += formattedVolume + '\n';
@@ -1167,11 +1189,63 @@ export class OrderbookWidget extends WidgetWithInstrument {
     this.realOrder = void 0;
   }
 
+  #getVirtualOrderPool() {
+    let result = this.instrument.exchange;
+
+    if (this.ordersTrader) {
+      const foreignInstrument = this.ordersTrader.adoptInstrument(
+        this.instrument
+      );
+
+      if (!foreignInstrument.notSupported) {
+        result = foreignInstrument.exchange;
+      }
+    }
+
+    if (result === EXCHANGE.UTEX_MARGIN_STOCKS) return 'UT';
+
+    return result || 'NONE';
+  }
+
   #rebuildMontage() {
     const montage = {
       bids: [],
       asks: []
     };
+
+    if (this.document.ownOrdersDisplayMode !== 'native') {
+      const pool = this.#getVirtualOrderPool();
+
+      for (let [price, map] of this.orders) {
+        price = stringToFloat(price);
+
+        for (const [orderId, [left, side]] of map) {
+          if (side === 'buy') {
+            montage.bids.push({
+              price,
+              volume: 1e9,
+              pool,
+              virtual: true
+            });
+
+            break;
+          }
+        }
+
+        for (const [orderId, [left, side]] of map) {
+          if (side === 'sell') {
+            montage.asks.push({
+              price,
+              volume: 1e9,
+              pool,
+              virtual: true
+            });
+
+            break;
+          }
+        }
+      }
+    }
 
     if (this.mainBook?.bids) {
       montage.bids.push(
@@ -1293,7 +1367,11 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   realOrderChanged(oldValue, newValue) {
-    if (newValue?.orderId) {
+    if (
+      this.instrument &&
+      newValue?.orderId &&
+      this.bookTrader.instrumentsAreEqual(this.instrument, newValue)
+    ) {
       const price = newValue.price.toString();
 
       if (!this.orders.has(price.toString())) {
@@ -1303,13 +1381,17 @@ export class OrderbookWidget extends WidgetWithInstrument {
       const left = newValue.quantity - newValue.filled;
 
       if (newValue.status === 'working' && left > 0) {
-        this.orders.get(price).set(newValue.orderId, left);
+        this.orders.get(price).set(newValue.orderId, [left, newValue.side]);
       } else {
         this.orders.get(price).delete(newValue.orderId);
       }
     }
 
-    this.#updateNeeded = true;
+    if (this.document.ownOrdersDisplayMode !== 'native') {
+      this.#rebuildMontage();
+    } else {
+      this.#updateNeeded = true;
+    }
   }
 
   normalizePool(pool, type) {
@@ -1427,6 +1509,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       $set: {
         bookTraderId: this.container.bookTraderId.value,
         ordersTraderId: this.container.ordersTraderId.value,
+        ownOrdersDisplayMode: this.container.ownOrdersDisplayMode.value,
         extraBookTrader1Id: this.container.extraBookTrader1Id.value,
         extraBookTrader2Id: this.container.extraBookTrader2Id.value,
         extraBookTrader3Id: this.container.extraBookTrader3Id.value,
@@ -1538,7 +1621,7 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер активных заявок</h5>
+              <h5>Трейдер лимитных заявок</h5>
               <p class="description">
                 Трейдер, который будет отображать собственные лимитные заявки
                 (количество) на ценовых уровнях.
@@ -1589,6 +1672,26 @@ export async function widgetDefinition() {
               >
                 +
               </ppp-button>
+            </div>
+          </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Отображение своих заявок</h5>
+            </div>
+            <div class="spacing2"></div>
+            <div class="widget-settings-input-group">
+              <ppp-radio-group
+                orientation="vertical"
+                value="${(x) => x.document.ownOrdersDisplayMode ?? 'native'}"
+                ${ref('ownOrdersDisplayMode')}
+              >
+                <ppp-radio value="native">
+                  Только если уровень есть у трейдера книги
+                </ppp-radio>
+                <ppp-radio value="above">
+                  Всегда на виртуальном уровне
+                </ppp-radio>
+              </ppp-radio-group>
             </div>
           </div>
           <div class="widget-settings-section">

@@ -2860,7 +2860,7 @@ export const widgetTrifectaFieldTemplate = html`
       min="0"
       max="1000000000"
       lotsize="1"
-      step="${(x) => x.getMinIncrement()}"
+      step="${(x) => x.step}"
       precision="${(x) => getInstrumentPrecision(x?.instrument)}"
       ?disabled="${(x) => x.market || x.disabled}"
       maxlength="${(x) => (x.kind === 'quantity' ? 8 : 12)}"
@@ -2992,100 +2992,15 @@ export class WidgetTrifectaField extends WidgetTextField {
     }
   }
 
-  get distanceString() {
-    if (this.kind === 'distance') {
-      const value = stringToFloat(this.value);
-
-      if (value > 0) {
-        return distanceToString({
-          value,
-          unit: this.distanceUnit ?? ''
-        });
-      } else {
-        return '';
-      }
-    } else {
-      return '';
-    }
-  }
-
-  toggleUnit() {
-    if (!this.distanceUnit) {
-      this.distanceUnit = '%';
-    } else if (this.distanceUnit === '%') {
-      this.distanceUnit = '+';
-    } else {
-      this.distanceUnit = '';
-    }
-
-    // Change step.
-    this.getMinIncrement();
-
-    this.value = '';
-    this.input.focus();
-
-    this.$emit('pppunitchange', this);
-  }
-
-  getMinIncrement() {
-    let result = 1;
-
-    if (this.instrument) {
-      const isPrice =
-        this.kind === 'price' ||
-        (this.kind === 'distance' && this.distanceUnit === '');
-
-      if (isPrice) {
-        result = getInstrumentMinPriceIncrement(
-          this.instrument,
-          stringToFloat(this.value)
-        );
-      } else if (this.kind === 'quantity') {
-        result = this.instrument.minQuantityIncrement ?? 1;
-      } else if (this.kind === 'distance') {
-        switch (this.distanceUnit) {
-          case '%':
-            result = 0.01;
-
-            break;
-          case '+':
-            result = 1;
-        }
-      }
-    } else {
-      result = 1;
-    }
-
-    return result;
-  }
-
-  inputEndSlotContent() {
-    if (!this.instrument) {
-      return '';
-    }
-
-    if (this.kind === 'price') {
-      return priceCurrencySymbol(this.instrument);
-    } else if (this.kind === 'quantity') {
-      return this.instrument?.lot ? '×' + this.instrument.lot : '';
-    } else {
-      return '';
-    }
-  }
-
-  onInputValueChanged = {
-    handleChange() {
-      if (this.value !== this.input.value) {
-        this.value = this.input.value;
-      }
-    }
-  };
+  @attr
+  step;
 
   constructor() {
     super();
 
     this.kind = 'price';
     this.distanceUnit = '';
+    this.step = 0.01;
 
     this.onInputValueChanged.handleChange =
       this.onInputValueChanged.handleChange.bind(this);
@@ -3115,6 +3030,98 @@ export class WidgetTrifectaField extends WidgetTextField {
     super.disconnectedCallback();
   }
 
+  get distanceString() {
+    if (this.kind === 'distance') {
+      const value = stringToFloat(this.value);
+
+      if (value > 0) {
+        return distanceToString({
+          value,
+          unit: this.distanceUnit ?? ''
+        });
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
+  }
+
+  toggleUnit() {
+    if (!this.distanceUnit) {
+      this.distanceUnit = '%';
+    } else if (this.distanceUnit === '%') {
+      this.distanceUnit = '+';
+    } else {
+      this.distanceUnit = '';
+    }
+
+    this.getAndUpdateStep();
+
+    this.value = '';
+    this.input.focus();
+
+    this.$emit('pppunitchange', this);
+  }
+
+  getAndUpdateStep(up = true) {
+    let result = 1;
+
+    if (this.instrument) {
+      const isPrice =
+        this.kind === 'price' ||
+        (this.kind === 'distance' && this.distanceUnit === '');
+      const value = stringToFloat(this.value);
+
+      if (isPrice) {
+        result = getInstrumentMinPriceIncrement(this.instrument, value);
+
+        if (value === 1 && up === false && !this.instrument.minPriceIncrement) {
+          result = 0.0001;
+        }
+      } else if (this.kind === 'quantity') {
+        result = this.instrument.minQuantityIncrement ?? 1;
+      } else if (this.kind === 'distance') {
+        switch (this.distanceUnit) {
+          case '%':
+            result = 0.01;
+
+            break;
+          case '+':
+            result = 1;
+        }
+      }
+    } else {
+      result = 1;
+    }
+
+    this.step = result;
+
+    return result;
+  }
+
+  inputEndSlotContent() {
+    if (!this.instrument) {
+      return '';
+    }
+
+    if (this.kind === 'price') {
+      return priceCurrencySymbol(this.instrument);
+    } else if (this.kind === 'quantity') {
+      return this.instrument?.lot ? '×' + this.instrument.lot : '';
+    } else {
+      return '';
+    }
+  }
+
+  onInputValueChanged = {
+    handleChange() {
+      if (this.value !== this.input.value) {
+        this.value = this.input.value;
+      }
+    }
+  };
+
   valueChanged(oldValue, newValue) {
     if (this.$fastController.isConnected) {
       this.input.value = newValue;
@@ -3127,7 +3134,9 @@ export class WidgetTrifectaField extends WidgetTextField {
 
   stepUpOrDown(up = true) {
     if (this.instrument) {
-      const minIncrement = this.getMinIncrement();
+      const step = this.getAndUpdateStep(up);
+
+      this.input.control.setAttribute('step', step);
 
       // Prevent starting from zero.
       if (this.value.endsWith(decSeparator)) {
@@ -3144,7 +3153,7 @@ export class WidgetTrifectaField extends WidgetTextField {
         } else {
           if (
             this.zeroable ||
-            stringToFloat(this.input.control.value) !== minIncrement
+            stringToFloat(this.input.control.value) !== step
           ) {
             this.input.control.stepDown();
           }
@@ -3159,6 +3168,7 @@ export class WidgetTrifectaField extends WidgetTextField {
         this.input.control.setSelectionRange(length, length);
         this.value = this.input.control.value.replace?.('.', decSeparator);
         this.$emit('pppstep', this);
+        this.getAndUpdateStep();
       });
     }
   }
@@ -3228,10 +3238,10 @@ export class WidgetTrifectaField extends WidgetTextField {
   handlePaste({ event }) {
     if (this.instrument && event.clipboardData) {
       const data = event.clipboardData.getData('text/plain').replace(',', '.');
-      const minIncrement = this.getMinIncrement();
+      const step = this.getAndUpdateStep();
       const number = parseFloat(data);
 
-      if (Number.isInteger(minIncrement) && !Number.isInteger(number)) {
+      if (Number.isInteger(step) && !Number.isInteger(number)) {
         return false;
       }
 
@@ -3252,9 +3262,9 @@ export class WidgetTrifectaField extends WidgetTextField {
         index === str.indexOf(decSeparator) ? val : ''
       );
 
-    const minIncrement = this.getMinIncrement();
+    const step = this.getAndUpdateStep();
 
-    if (Number.isInteger(minIncrement)) {
+    if (Number.isInteger(step)) {
       this.input.value = this.input.value
         .replaceAll(decSeparator, '')
         .replace(/^0/, '');
@@ -3265,9 +3275,9 @@ export class WidgetTrifectaField extends WidgetTextField {
 
   handleBeforeInput({ event }) {
     if (this.instrument && event.data) {
-      const minIncrement = this.getMinIncrement();
+      const step = this.getAndUpdateStep();
 
-      if (Number.isInteger(minIncrement)) {
+      if (Number.isInteger(step)) {
         return /[0-9]/.test(event.data);
       } else {
         return /[0-9.,]/.test(event.data);
