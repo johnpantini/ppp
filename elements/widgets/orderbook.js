@@ -1370,7 +1370,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
     if (
       this.instrument &&
       newValue?.orderId &&
-      this.bookTrader.instrumentsAreEqual(this.instrument, newValue)
+      this.bookTrader.instrumentsAreEqual(this.instrument, newValue?.instrument)
     ) {
       const price = newValue.price.toString();
 
