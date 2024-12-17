@@ -518,6 +518,21 @@ export const widgetCommonContentStyles = () => css`
     margin-bottom: 5px;
   }
 
+  .widget-text-label-icon {
+    cursor: pointer;
+    display: flex;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+  }
+
+  .widget-text-label:has(.widget-text-label-icon) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: ${spacing1};
+  }
+
   .widget-flex-line {
     width: 100%;
     display: flex;
