@@ -12,6 +12,7 @@ import {
   when,
   ref,
   observable,
+  Observable,
   repeat,
   attr,
   Updates
@@ -152,7 +153,9 @@ export const listWidgetTemplate = html`
       <div class="widget-header">
         <div class="widget-header-inner">
           <ppp-widget-group-control></ppp-widget-group-control>
-          <ppp-widget-search-control readonly></ppp-widget-search-control>
+          <ppp-widget-search-control
+            ?readonly=${(x) => !x.maySelectInstrument}
+          ></ppp-widget-search-control>
           <span class="widget-title">
             ${when(
               (x) => x.deletionAvailable && x.deletion,
@@ -267,6 +270,9 @@ export class ListWidget extends WidgetWithInstrument {
   pagination;
 
   @observable
+  maySelectInstrument;
+
+  @observable
   columnsArray;
 
   @attr({ mode: 'boolean' })
@@ -336,6 +342,7 @@ export class ListWidget extends WidgetWithInstrument {
         submit,
         extraControls,
         pagination,
+        maySelectInstrument,
         control,
         defaultColumns
       } = await mod.listDefinition();
@@ -346,6 +353,7 @@ export class ListWidget extends WidgetWithInstrument {
 
       this.extraControls = extraControls;
       this.pagination = pagination;
+      this.maySelectInstrument = !!maySelectInstrument;
 
       if (
         this.preview &&
@@ -379,6 +387,10 @@ export class ListWidget extends WidgetWithInstrument {
       await this.control?.connectedCallback?.(this);
       this.internalSort();
 
+      if (this.maySelectInstrument) {
+        this.selectInstrument(this.document.symbol, { isolate: true });
+      }
+
       this.#sortLoop = setInterval(() => {
         let needSort = false;
 
@@ -411,6 +423,18 @@ export class ListWidget extends WidgetWithInstrument {
     await this.control?.disconnectedCallback?.(this);
 
     return super.disconnectedCallback();
+  }
+
+  clear() {
+    this.tableBody.replaceChildren();
+    this.maxSeenIndex = -1;
+    this.document.listSource = [];
+    Observable.notify(this, 'document');
+  }
+
+  instrumentChanged(oldValue, newValue) {
+    super.instrumentChanged(oldValue, newValue);
+    this.control?.instrumentChanged?.(this, oldValue, newValue);
   }
 
   getColumnWidth(column) {

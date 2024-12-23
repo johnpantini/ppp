@@ -64,7 +64,7 @@ return orders.sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));`;
 
 const allTabHidden = (x) =>
   typeof x.document.showAllTab === 'undefined' ? false : !x.document.showAllTab;
-const limitTabHidden = (x) =>
+const realTabHidden = (x) =>
   typeof x.document.showLimitTab === 'undefined'
     ? false
     : !x.document.showLimitTab;
@@ -83,9 +83,7 @@ export const activeOrdersWidgetTemplate = html`
           <div class="tabs">
             <ppp-widget-box-radio-group
               ?hidden="${(x) =>
-                allTabHidden(x) &&
-                limitTabHidden(x) &&
-                conditionalTabHidden(x)}"
+                allTabHidden(x) && realTabHidden(x) && conditionalTabHidden(x)}"
               class="order-type-selector"
               @change="${(x) => x.handleOrderTypeChange()}"
               value="${(x) => x.document.activeTab ?? 'all'}"
@@ -98,7 +96,7 @@ export const activeOrdersWidgetTemplate = html`
                 ${() => ppp.t('$widget.tabs.allOrdersText')}
               </ppp-widget-box-radio>
               <ppp-widget-box-radio
-                ?hidden="${(x) => limitTabHidden(x)}"
+                ?hidden="${(x) => realTabHidden(x)}"
                 value="real"
               >
                 ${() => ppp.t('$widget.tabs.realOrdersText')}
@@ -443,13 +441,37 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
       this.selectInstrument(this.document.symbol, { isolate: true });
 
-      await this.ordersTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          realOrder: TRADER_DATUM.REAL_ORDER,
-          conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
-        }
-      });
+      if (
+        allTabHidden(this) &&
+        conditionalTabHidden(this) &&
+        this.document.activeTab === 'real'
+      ) {
+        await this.ordersTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            realOrder: TRADER_DATUM.REAL_ORDER
+          }
+        });
+      } else if (
+        allTabHidden(this) &&
+        realTabHidden(this) &&
+        this.document.activeTab === 'conditional'
+      ) {
+        await this.ordersTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+          }
+        });
+      } else {
+        await this.ordersTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            realOrder: TRADER_DATUM.REAL_ORDER,
+            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+          }
+        });
+      }
 
       this.orderProcessorFunc ??= new Function(
         'trader',
@@ -488,13 +510,37 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     this.removeEventListener('click', this.onClick);
 
     if (this.ordersTrader) {
-      await this.ordersTrader.unsubscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          realOrder: TRADER_DATUM.REAL_ORDER,
-          conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
-        }
-      });
+      if (
+        allTabHidden(this) &&
+        conditionalTabHidden(this) &&
+        this.document.activeTab === 'real'
+      ) {
+        await this.ordersTrader.unsubscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            realOrder: TRADER_DATUM.REAL_ORDER
+          }
+        });
+      } else if (
+        allTabHidden(this) &&
+        realTabHidden(this) &&
+        this.document.activeTab === 'conditional'
+      ) {
+        await this.ordersTrader.unsubscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+          }
+        });
+      } else {
+        await this.ordersTrader.unsubscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            realOrder: TRADER_DATUM.REAL_ORDER,
+            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+          }
+        });
+      }
     }
 
     return super.disconnectedCallback();
@@ -609,6 +655,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
         order.domElement = this.realOrdersRefsById.get(orderId);
 
+        if (typeof order.instrument === 'string') {
+          order.instrument = this.ordersTrader.instruments.get(
+            this.ordersTrader.symbolToCanonical(order.instrument)
+          );
+        }
+
         if (
           this.instrument?.symbol &&
           !this.document.disableInstrumentFiltering
@@ -639,6 +691,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         }
 
         order.domElement = this.conditionalOrdersRefsById.get(orderId);
+
+        if (typeof order.instrument === 'string') {
+          order.instrument = this.ordersTrader.instruments.get(
+            this.ordersTrader.symbolToCanonical(order.instrument)
+          );
+        }
 
         if (
           this.instrument?.symbol &&
