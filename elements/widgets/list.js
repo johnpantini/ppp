@@ -138,6 +138,10 @@ class ListWidgetThCell extends PPPElement {
 export const listWidgetTemplate = html`
   <template
     @columnsort="${(x, { event }) => {
+      if (x.disableSort) {
+        return;
+      }
+
       const column = event.detail.column;
 
       if (Array.isArray(x.document.columns)) {
@@ -213,7 +217,10 @@ export const listWidgetTemplate = html`
                       const cp = c.event.composedPath();
 
                       for (const node of cp) {
-                        if (node.classList?.contains?.('th')) {
+                        if (
+                          node.classList?.contains?.('th') &&
+                          !c.parent.disableSort
+                        ) {
                           node.lastElementChild.toggleSort();
 
                           break;
@@ -266,8 +273,9 @@ export class ListWidget extends WidgetWithInstrument {
   @observable
   extraControls;
 
-  @observable
   pagination;
+
+  disableSort;
 
   @observable
   maySelectInstrument;
@@ -280,6 +288,8 @@ export class ListWidget extends WidgetWithInstrument {
 
   @observable
   deletionAvailable;
+
+  defaultSortOrder = 'desc';
 
   control;
 
@@ -342,7 +352,9 @@ export class ListWidget extends WidgetWithInstrument {
         submit,
         extraControls,
         pagination,
+        disableSort,
         maySelectInstrument,
+        defaultSortOrder,
         control,
         defaultColumns
       } = await mod.listDefinition();
@@ -354,6 +366,8 @@ export class ListWidget extends WidgetWithInstrument {
       this.extraControls = extraControls;
       this.pagination = pagination;
       this.maySelectInstrument = !!maySelectInstrument;
+      this.defaultSortOrder = defaultSortOrder;
+      this.disableSort = disableSort;
 
       if (
         this.preview &&
@@ -391,19 +405,21 @@ export class ListWidget extends WidgetWithInstrument {
         this.selectInstrument(this.document.symbol, { isolate: true });
       }
 
-      this.#sortLoop = setInterval(() => {
-        let needSort = false;
+      if (!this.disableSort) {
+        this.#sortLoop = setInterval(() => {
+          let needSort = false;
 
-        for (let i = 0; i < this.columnsArray.length; i++) {
-          if (this.columnsArray[i].sort) {
-            needSort = true;
+          for (let i = 0; i < this.columnsArray.length; i++) {
+            if (this.columnsArray[i].sort) {
+              needSort = true;
 
-            break;
+              break;
+            }
           }
-        }
 
-        needSort && this.internalSort();
-      }, 500);
+          needSort && this.internalSort();
+        }, 500);
+      }
 
       this.initialized = true;
     } catch (e) {
@@ -460,9 +476,15 @@ export class ListWidget extends WidgetWithInstrument {
   internalSort() {
     // 1. ORDER BY index DESC by default (preserve insertion order).
     const sortedByDefault = Array.from(this.tableBody.children).sort((a, d) => {
-      return (
-        parseInt(d.getAttribute('index')) - parseInt(a.getAttribute('index'))
-      );
+      if (this.defaultSortOrder === 'desc') {
+        return (
+          parseInt(d.getAttribute('index')) - parseInt(a.getAttribute('index'))
+        );
+      } else {
+        return (
+          parseInt(a.getAttribute('index')) - parseInt(d.getAttribute('index'))
+        );
+      }
     });
 
     // 2. ORDER BY individual columns sort direction.
@@ -585,6 +607,28 @@ export class ListWidget extends WidgetWithInstrument {
     this.sort();
 
     return tr;
+  }
+
+  updateRow(row, payload) {
+    if (row) {
+      const columns = this.columnsArray ?? [];
+
+      for (let i = 0; i < columns.length; i++) {
+        const col = columns[i];
+
+        if (col.source === COLUMN_SOURCE.FORMATTED_VALUE) {
+          const cell = row.children[i]?.firstElementChild;
+
+          if (cell?.payload) {
+            cell.payload.values = payload.values;
+
+            cell.rebuild();
+          }
+        }
+      }
+    }
+
+    return row;
   }
 
   async saveListSource() {

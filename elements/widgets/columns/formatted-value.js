@@ -57,6 +57,8 @@ export class FormattedValueColumn extends Column {
     } else if (this.formatter === 'quantity') {
       return formatQuantity(stringToFloat(this.value), this.formatterOptions);
     } else if (this.formatter === 'datetime') {
+      if (isNaN(new Date(this.value).getTime())) return '—';
+
       return formatDateWithOptions(
         this.value,
         {
