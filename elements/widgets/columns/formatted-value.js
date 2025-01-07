@@ -3,7 +3,6 @@
 import {
   html,
   observable,
-  when,
   Observable
 } from '../../../vendor/fast-element.min.js';
 import { uuidv4 } from '../../../lib/ppp-crypto.js';
@@ -21,11 +20,7 @@ import { Column, columnStyles } from './column.js';
 
 export const columnTemplate = html`
   <template>
-    ${when(
-      (x) => x.isBalance,
-      html`<span></span>`,
-      html`<span>${(x) => x.formatValue()}</span>`
-    )}
+    <span>${(x) => (x.isBalance ? '' : x.formatValue())}</span>
   </template>
 `;
 
