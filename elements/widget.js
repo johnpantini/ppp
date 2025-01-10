@@ -993,6 +993,12 @@ export class Widget extends PPPElement {
 
       this.document = this.container.document;
       this.topLoader = this.container.topLoader;
+
+      if (this.container.mounted) {
+        this.document.symbol = ppp.app.mountPoint.widget?.instrument?.symbol;
+
+        Observable.notify(this, 'document');
+      }
     }
 
     const header = this.shadowRoot.querySelector('.widget-header');

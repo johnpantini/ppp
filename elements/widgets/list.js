@@ -749,7 +749,7 @@ export async function widgetDefinition() {
       styles: listWidgetStyles
     }).define(),
     minWidth: 275,
-    minHeight: 120,
+    minHeight: 82,
     defaultWidth: 620,
     defaultHeight: 350,
     settings: html`

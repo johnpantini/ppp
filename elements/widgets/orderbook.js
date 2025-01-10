@@ -563,6 +563,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
           }
         });
       }
+
+      this.initialized = true;
     } catch (e) {
       this.initialized = true;
 
