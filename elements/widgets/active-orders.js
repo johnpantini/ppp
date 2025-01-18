@@ -345,6 +345,8 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
         this.realOrdersById.clear();
         this.realOrdersRefsById.clear();
+
+        this.$$debug('active orders widget is clear (@CLEAR)');
       } else {
         if (order.quantity === order.filled || order.status !== 'working') {
           this.realOrdersRefsById.get(oid)?.remove();

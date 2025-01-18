@@ -77,7 +77,7 @@ export class PortfolioWidget extends ListWidget {
       }
 
       this.rowsCache.clear();
-      this.$$debug('portfolio is clear (@CLEAR)');
+      this.$$debug('portfolio widget is clear (@CLEAR)');
     } else if (!newValue?.isBalance && type) {
       if (
         this.document[

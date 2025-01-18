@@ -219,7 +219,7 @@ export class TimelineWidget extends WidgetWithInstrument {
 
       this.timeline = [];
 
-      this.$$debug('timeline is clear (@CLEAR)');
+      this.$$debug('timeline widget is clear (@CLEAR)');
 
       return Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
     }
