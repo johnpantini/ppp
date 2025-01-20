@@ -110,7 +110,9 @@ export async function extension({ ppp, baseExtensionUrl, extension }) {
                   cells: [
                     datum.ticker,
                     datum.name,
-                    ppp.t(`$extensions.liquidEquities.type.${datum.type}`),
+                    ppp.t(
+                      `$extensions.liquidEquities.type.${datum.type.toLowerCase()}`
+                    ),
                     datum.isin ?? '-',
                     datum.currency ?? '-',
                     html`
@@ -120,12 +122,20 @@ export async function extension({ ppp, baseExtensionUrl, extension }) {
                         ${datum.isShortPossible ? 'Да' : 'Нет'}
                       </ppp-badge>
                     `,
-                    datum.rateLong === 0 ? '-' : datum.rateLong.toFixed(2),
-                    datum.rateShort === 0 ? '-' : datum.rateShort.toFixed(2),
-                    datum.rateLong === 0
+                    datum.rateLong === 0 ||
+                    typeof datum.rateLong === 'undefined'
+                      ? '-'
+                      : datum.rateLong.toFixed(2),
+                    datum.rateShort === 0 ||
+                    typeof datum.rateShort === 'undefined'
+                      ? '-'
+                      : datum.rateShort.toFixed(2),
+                    datum.rateLong === 0 ||
+                    typeof datum.rateLong === 'undefined'
                       ? '-'
                       : `x${(100 / datum.rateLong).toFixed(2)}`,
-                    datum.rateShort === 0
+                    datum.rateShort === 0 ||
+                    typeof datum.rateShort === 'undefined'
                       ? '-'
                       : `x${(100 / datum.rateShort).toFixed(2)}`
                   ]

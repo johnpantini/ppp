@@ -145,7 +145,12 @@ self.addEventListener('fetch', async (event) => {
     return event.respondWith(
       (async () => {
         try {
-          if (location.origin.endsWith('.io.dev')) {
+          if (
+            location.origin.endsWith('.io.dev') ||
+            // Tauri dev and release.
+            event.request.url?.startsWith('http://127.0.0.1') ||
+            event.request.url?.startsWith('http://localhost')
+          ) {
             return await fetch(event.request, {
               cache: 'no-store'
             }).then(async (r) => {

@@ -14,7 +14,8 @@ import '../text-field.js';
 
 const isAlwaysUpToDateDomain =
   window.location.origin === 'https://johnpantini.johnpantini.pages.dev' ||
-  window.location.origin === 'https://johnpantini.pages.dev';
+  window.location.origin === 'https://johnpantini.pages.dev' ||
+  typeof window.__TAURI__ !== 'undefined';
 
 export const updatesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -78,10 +79,7 @@ export const updatesPageTemplate = html`
         html` <div class="empty-state">
           <div class="picture">${html.partial(framedCloud)}</div>
           <h3>Репозиторий приложения синхронизирован с последней версией</h3>
-          <p class="body1">
-            Текущая версия приложения:
-            ${() => localStorage.getItem('ppp-version') ?? '1.0.0'}
-          </p>
+          <p class="body1">Текущая версия приложения: ${(x) => x.version}</p>
           <ppp-button
             ?hidden="${() => isAlwaysUpToDateDomain}"
             appearance="primary"
@@ -108,8 +106,21 @@ export class UpdatesPage extends Page {
   @observable
   currentCommit;
 
+  @observable
+  version;
+
+  constructor() {
+    super();
+
+    this.version = localStorage.getItem('ppp-version') ?? '1.0.0';
+  }
+
   async connectedCallback() {
     await super.connectedCallback();
+
+    if (typeof window.__TAURI__ !== 'undefined') {
+      this.version = await window.__TAURI__.app.getVersion();
+    }
 
     return this.checkForUpdates();
   }

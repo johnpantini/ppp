@@ -371,7 +371,12 @@ export class ServiceSystemdPppAspirantPage extends Page {
       22: '127'
     }[+this.nodeVersion.value];
 
-    const rootUrl = ppp.rootUrl.replace('github.io.dev', 'pages.dev');
+    let rootUrl = ppp.rootUrl.replace('github.io.dev', 'pages.dev');
+
+    if (typeof window.__TAURI__ !== 'undefined') {
+      rootUrl = 'https://johnpantini.pages.dev';
+    }
+
     const vendorCopyCommands = [
       '/ppp/vendor/canvas/index.js',
       '/ppp/vendor/canvas/canvas-table/default-options.mjs',

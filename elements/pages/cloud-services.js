@@ -6,7 +6,8 @@ import {
   cloud,
   database,
   importExport,
-  numberedCircle
+  numberedCircle,
+  trash
 } from '../../static/svg/sprite.js';
 import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import { shouldUseAlternativeMongo } from '../../lib/realm.js';
@@ -340,11 +341,20 @@ export const cloudServicesPageTemplate = html`
       </section>
       <footer>
         <ppp-button
+          ?disabled="${() => !ppp.keyVault.ok()}"
+          appearance="danger"
+          @click="${(x) => x.clearKeys()}"
+        >
+          Очистить пароль и ключи
+          <span slot="start"> ${html.partial(trash)} </span>
+        </ppp-button>
+        <ppp-button
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
           Сохранить пароль и ключи в облаке
+          <span slot="start"> ${html.partial(cloud)} </span>
         </ppp-button>
       </footer>
     </form>
@@ -1054,6 +1064,22 @@ export class CloudServicesPage extends Page {
       this.failOperation(e);
     } finally {
       this.endOperation();
+    }
+  }
+
+  async clearKeys() {
+    if (
+      await ppp.app.confirm(
+        'Очистка пароля и ключей',
+        'Мастер-пароль и все ключи облачных сервисов будут удалены из хранилища браузера. Подтвердите действие.'
+      )
+    ) {
+      const version = localStorage.getItem('ppp-version');
+
+      localStorage.clear();
+
+      localStorage.setItem('ppp-version', version);
+      window.location.reload();
     }
   }
 }

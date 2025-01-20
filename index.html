@@ -22,10 +22,6 @@
   <script>
     let appType = 'mobile';
 
-    const params = Object.fromEntries(
-      new URLSearchParams(window.location.search).entries()
-    );
-
     if (!/mobile/i.test(navigator.userAgent)) appType = 'desktop';
 
     const lastVisitedUrl =

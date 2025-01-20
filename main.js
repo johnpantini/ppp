@@ -7,6 +7,17 @@ function appendMainScript() {
 }
 
 window.addEventListener('load', async () => {
+  if (typeof window.__TAURI__ !== 'undefined') {
+    const lastVisitedUrl =
+      localStorage.getItem('ppp-last-visited-url') ?? '?page=cloud-services';
+
+    if (window.location.search !== lastVisitedUrl) {
+      return window.location.replace(
+        window.location.origin + `/desktop${lastVisitedUrl}`
+      );
+    }
+  }
+
   const globalProxyUrlInput = document.body.querySelector('.global-proxy-url');
 
   globalProxyUrlInput.value =

@@ -752,7 +752,10 @@ export class App extends PPPElement {
 
     this.rafLoop = this.rafLoop.bind(this);
     this.onDragEnd = this.onDragEnd.bind(this);
-    this.#checkForAvailableUpdatesLoop();
+
+    if (typeof window.__TAURI__ === 'undefined') {
+      this.#checkForAvailableUpdatesLoop();
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Escape') {
