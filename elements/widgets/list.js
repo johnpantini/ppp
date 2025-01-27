@@ -505,9 +505,9 @@ export class ListWidget extends WidgetWithInstrument {
             }
           } else if (typeof aValue === 'string' || typeof dValue === 'string') {
             if (typeof result === 'undefined') {
-              result = (aValue ?? '').localeCompare(dValue ?? '');
+              result = (aValue ?? '').toString().localeCompare(dValue ?? '');
             } else {
-              result ||= (aValue ?? '').localeCompare(dValue ?? '');
+              result ||= (aValue ?? '').toString().localeCompare(dValue ?? '');
             }
           } else if (
             typeof aValue === 'boolean' ||
@@ -528,9 +528,9 @@ export class ListWidget extends WidgetWithInstrument {
             }
           } else if (typeof aValue === 'string' || typeof dValue === 'string') {
             if (typeof result === 'undefined') {
-              result = (dValue ?? '').localeCompare(aValue ?? '');
+              result = (dValue ?? '').toString().localeCompare(aValue ?? '');
             } else {
-              result ||= (dValue ?? '').localeCompare(aValue ?? '');
+              result ||= (dValue ?? '').toString().localeCompare(aValue ?? '');
             }
           } else if (
             typeof aValue === 'boolean' ||
