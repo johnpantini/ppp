@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "ppf",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppf\\ppf.mjs",
+      "program": "${workspaceFolder}/lib/aspirant-worker/ppf/ppf.mjs",
       "env": {
         "REDIS_HOST": "${env:REDIS_HOST}",
         "REDIS_PORT": "${env:REDIS_PORT}",
@@ -28,7 +28,7 @@
       "request": "launch",
       "name": "connectors",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\connectors\\connectors.mjs",
+      "program": "${workspaceFolder}/lib/aspirant-worker/connectors/connectors.mjs",
       "env": {
         "REDIS_HOST": "${env:REDIS_HOST}",
         "REDIS_PORT": "${env:REDIS_PORT}",
@@ -47,7 +47,7 @@
       "request": "launch",
       "name": "ppp-trader-runtime",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ppp-trader-runtime\\ppp-trader-runtime.mjs",
+      "program": "${workspaceFolder}/lib/aspirant-worker/ppp-trader-runtime/ppp-trader-runtime.mjs",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "env": {
@@ -69,7 +69,7 @@
       "request": "launch",
       "name": "ib-gateway",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\ib-gateway\\ib-gateway.mjs",
+      "program": "${workspaceFolder}/lib/aspirant-worker/ib-gateway/ib-gateway.mjs",
       "env": {
         "REDIS_HOST": "${env:REDIS_HOST}",
         "REDIS_PORT": "${env:REDIS_PORT}",
@@ -88,14 +88,14 @@
       "request": "launch",
       "name": "utex-alpaca",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\lib\\aspirant-worker\\utex-alpaca\\utex-alpaca.mjs"
+      "program": "${workspaceFolder}/lib/aspirant-worker/utex-alpaca/utex-alpaca.mjs"
     },
     {
       "type": "node",
       "request": "launch",
       "name": "build-traders-and-orders",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\bin\\build-traders-and-orders.js"
+      "program": "${workspaceFolder}/bin/build-traders-and-orders.js"
     }
   ],
   "compounds": [

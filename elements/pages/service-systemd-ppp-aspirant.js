@@ -163,8 +163,9 @@ export const serviceSystemdPppAspirantTemplate = html`
             value="${(x) => x.document.nodeVersion ?? '22'}"
             ${ref('nodeVersion')}
           >
-            <ppp-option value="20">20.13.1</ppp-option>
-            <ppp-option value="22">22.4.0</ppp-option>
+            <ppp-option value="20">20.18.2</ppp-option>
+            <ppp-option value="22">22.13.1</ppp-option>
+            <ppp-option value="23">23.6.1</ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -363,12 +364,14 @@ export class ServiceSystemdPppAspirantPage extends Page {
     sslReplacement.push('deny all;');
 
     const nodeVersion = {
-      20: '20.13.1',
-      22: '22.4.0'
+      20: '20.18.2',
+      22: '22.13.1',
+      23: '23.6.1'
     }[+this.nodeVersion.value];
     const uwsNodeVersion = {
       20: '115',
-      22: '127'
+      22: '127',
+      23: '131'
     }[+this.nodeVersion.value];
 
     let rootUrl = ppp.rootUrl.replace('github.io.dev', 'pages.dev');
@@ -378,45 +381,6 @@ export class ServiceSystemdPppAspirantPage extends Page {
     }
 
     const vendorCopyCommands = [
-      '/ppp/vendor/canvas/index.js',
-      '/ppp/vendor/canvas/canvas-table/default-options.mjs',
-      '/ppp/vendor/canvas/canvas-table/index.mjs',
-      ...[
-        ...[
-          'Roboto-Black.ttf',
-          'RobotoCondensed-Bold.ttf',
-          'RobotoCondensed-LightItalic.ttf',
-          'Roboto-LightItalic.ttf',
-          'Roboto-Thin.ttf',
-          'Roboto-BlackItalic.ttf',
-          'RobotoCondensed-BoldItalic.ttf',
-          'RobotoCondensed-Regular.ttf',
-          'Roboto-Medium.ttf',
-          'Roboto-ThinItalic.ttf',
-          'Roboto-Bold.ttf',
-          'RobotoCondensed-Italic.ttf',
-          'Roboto-Italic.ttf',
-          'Roboto-MediumItalic.ttf',
-          'Roboto-BoldItalic.ttf',
-          'RobotoCondensed-Light.ttf',
-          'Roboto-Light.ttf',
-          'Roboto-Regular.ttf'
-        ].map((file) => `/ppp/vendor/canvas/fonts/${file}`)
-      ],
-      ...[
-        'bindings.js',
-        'canvas.js',
-        'context2d.js',
-        'DOMMatrix.js',
-        'image.js',
-        'jpegstream.js',
-        'parse-font.js',
-        'pattern.js',
-        'pdfstream.js',
-        'pngstream.js'
-      ].map((file) => `/ppp/vendor/canvas/lib/${file}`),
-      '/ppp/vendor/canvas/linux-arm64-111/canvas.node',
-      '/ppp/vendor/canvas/linux-x64-111/canvas.node',
       ...[
         'buffer-util.mjs',
         'event-target.mjs',
@@ -513,12 +477,6 @@ export class ServiceSystemdPppAspirantPage extends Page {
       `sudo wget -q -O /ppp/lib/nginx/ngx-unzip/zip.h ${rootUrl}/lib/nginx/ngx-unzip/zip.h ;`,
 
       // vendor
-      'sudo mkdir -p /ppp/vendor/canvas ;',
-      'sudo mkdir -p /ppp/vendor/canvas/canvas-table ;',
-      'sudo mkdir -p /ppp/vendor/canvas/fonts ;',
-      'sudo mkdir -p /ppp/vendor/canvas/lib ;',
-      'sudo mkdir -p /ppp/vendor/canvas/linux-arm64-111 ;',
-      'sudo mkdir -p /ppp/vendor/canvas/linux-x64-111 ;',
       'sudo mkdir -p /ppp/vendor/uWebSockets.js ;',
       'sudo mkdir -p /ppp/vendor/websocket ;',
       ...vendorCopyCommands,
@@ -549,14 +507,14 @@ export class ServiceSystemdPppAspirantPage extends Page {
       'sudo systemctl disable consul ;',
 
       // Nomad. Use v1.7.7 or lower!
-      `sudo dnf -y install nomad ;`,
+      `sudo dnf -y install nomad-1.7.7-1 ;`,
       'sudo rm -f /etc/nomad.d/nomad.hcl ;',
       `sudo wget -q -O /etc/nomad.d/server.hcl ${rootUrl}/lib/aspirant/etc/nomad.d/server.hcl ;`,
       'sudo chown -R ppp /etc/nomad.d ;',
       'sudo systemctl disable nomad ; ',
 
       // nginx & njs
-      'sudo wget https://nginx.org/download/nginx-1.25.3.tar.gz -q -O nginx.tar.gz ;',
+      'sudo wget https://nginx.org/download/nginx-1.27.3.tar.gz -q -O nginx.tar.gz ;',
       'sudo rm -rf /usr/src/nginx && sudo mkdir -p /usr/src/nginx && sudo tar -zxC /usr/src/nginx -f nginx.tar.gz --strip-components=1 ;',
       'sudo dnf -y install pcre pcre2 pcre-devel pcre2-devel libxml2 libxml2-devel libxslt libxslt-devel ;',
       'sudo mkdir -p /etc/nginx/njs/api ;',

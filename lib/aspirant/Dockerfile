@@ -1,4 +1,4 @@
-FROM nginx:1.24-alpine3.17 AS builder
+FROM nginx:1.25.4-alpine3.18 AS builder
 
 RUN wget "http://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz" -q -O nginx.tar.gz
 RUN apk add --no-cache --virtual .build-deps \
@@ -28,11 +28,10 @@ WORKDIR /usr/src/nginx/nginx-${NGINX_VERSION}
 RUN CONFARGS=$(nginx -V 2>&1 | sed -n -e 's/^.*arguments: //p') && \
     sh -c "./configure --with-compat $CONFARGS --add-dynamic-module=/usr/src/ngx-unzip" && make modules
 
-FROM node:19.9.0-alpine3.17 as node
+FROM node:22.2.0-alpine3.18 AS node
 
-FROM nginx:1.24-alpine3.17 AS base
-RUN apk add --no-cache --update runuser gcompat nomad consul freetype-dev cairo-dev pango-dev \
-  libpng libpng-dev jpeg libjpeg-turbo libjpeg-turbo-dev jpeg-dev giflib-dev librsvg-dev
+FROM nginx:1.25.4-alpine3.18 AS base
+RUN apk add --no-cache --update runuser gcompat nomad consul
 
 RUN adduser -D ppp
 
@@ -48,7 +47,6 @@ WORKDIR /ppp/lib
 COPY ./lib/aspirant/buddy.mjs ./aspirant/buddy.mjs
 COPY ./lib/aspirant/start.sh ./aspirant/start.sh
 
-COPY ./vendor/canvas/ /ppp/vendor/canvas/
 COPY ./vendor/uWebSockets.js/ /ppp/vendor/uWebSockets.js/
 COPY ./vendor/websocket/ /ppp/vendor/websocket/
 COPY ./vendor/ioredis.min.js /ppp/vendor/ioredis.min.js
