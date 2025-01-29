@@ -14,6 +14,7 @@ server {
 
 client {
   enabled = true
+  cpu_total_compute = 1000
 
   template {
     disable_file_sandbox = true
