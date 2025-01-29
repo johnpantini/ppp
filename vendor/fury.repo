@@ -1,5 +1,5 @@
 [fury]
 name=Gemfury PPP Repo
-baseurl=https://yum.fury.io/ppp/
+baseurl=https://yum.fury.io/johnpantini/
 enabled=1
 gpgcheck=0
