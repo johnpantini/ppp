@@ -6,6 +6,7 @@ export default function (i18n) {
       showDetails: 'Показать подробности',
       of: 'из',
       average: 'Средняя',
+      commission: 'Комиссия',
       details: 'Подробности',
       position: 'В портфеле',
       price: 'Цена',

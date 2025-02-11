@@ -6,6 +6,7 @@ export default function (i18n) {
       showDetails: 'Show details',
       of: 'of',
       average: 'Average',
+      commission: 'Commission',
       details: 'Details',
       position: 'Position',
       price: 'Price',

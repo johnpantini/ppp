@@ -144,7 +144,7 @@ export const timelineWidgetTemplate = html`
                             ?hidden=${(x, c) =>
                               !c.parent.document.showCommissions}
                           >
-                            Комиссия
+                            ${() => ppp.t('$g.commission')}
                           </span>
                           <span
                             class="earth"
