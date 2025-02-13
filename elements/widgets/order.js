@@ -263,49 +263,44 @@ export const orderWidgetTemplate = html`
                   x.securityStatus !== TRADING_STATUS.NORMAL_TRADING),
               html`
                 <div class="company-card-item extended-hours">
-                  ${when(
-                    (x) => x.securityStatus,
-                    html`
-                      <div class="control-line dot-line">
-                        <span
-                          class="dot ${(x) => {
-                            return (
-                              {
-                                [TRADING_STATUS.PREMARKET]: 'dot-1',
-                                [TRADING_STATUS.QUOTATION_RESUMPTION]: 'dot-1',
-                                [TRADING_STATUS.IPO_TODAY]: 'dot-3',
-                                [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
-                                [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
-                                [TRADING_STATUS.OPENING_AUCTION_PERIOD]:
-                                  'dot-4',
-                                [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
-                                [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
-                                [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
-                                [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
-                                [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]:
-                                  'dot-5',
-                                [TRADING_STATUS.DEALER_BREAK_IN_TRADING]:
-                                  'dot-5',
-                                [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
-                                [TRADING_STATUS.DELISTED]: 'dot-5',
-                                [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
-                                  'dot-5'
-                              }[x.securityStatus] ?? ''
-                            );
-                          }}"
-                        ></span>
-                        <span
-                          title="${(x) =>
-                            x.securityStatus &&
-                            ppp.t(`$const.tradingStatus.${x.securityStatus}`)}"
-                        >
-                          ${(x) =>
-                            x.securityStatus &&
-                            ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
-                        </span>
-                      </div>
-                    `
-                  )}
+                  <div
+                    ?hidden="${(x) => !x.securityStatus}"
+                    class="control-line dot-line"
+                  >
+                    <span
+                      class="dot ${(x) => {
+                        return (
+                          {
+                            [TRADING_STATUS.PREMARKET]: 'dot-1',
+                            [TRADING_STATUS.QUOTATION_RESUMPTION]: 'dot-1',
+                            [TRADING_STATUS.IPO_TODAY]: 'dot-3',
+                            [TRADING_STATUS.AFTER_HOURS]: 'dot-4',
+                            [TRADING_STATUS.DISCRETE_AUCTION]: 'dot-4',
+                            [TRADING_STATUS.OPENING_AUCTION_PERIOD]: 'dot-4',
+                            [TRADING_STATUS.CLOSING_AUCTION]: 'dot-4',
+                            [TRADING_STATUS.OPENING_PERIOD]: 'dot-4',
+                            [TRADING_STATUS.CLOSING_PERIOD]: 'dot-4',
+                            [TRADING_STATUS.BREAK_IN_TRADING]: 'dot-5',
+                            [TRADING_STATUS.NOT_AVAILABLE_FOR_TRADING]: 'dot-5',
+                            [TRADING_STATUS.DEALER_BREAK_IN_TRADING]: 'dot-5',
+                            [TRADING_STATUS.TRADING_SUSPENDED]: 'dot-5',
+                            [TRADING_STATUS.DELISTED]: 'dot-5',
+                            [TRADING_STATUS.DEALER_NOT_AVAILABLE_FOR_TRADING]:
+                              'dot-5'
+                          }[x.securityStatus] ?? ''
+                        );
+                      }}"
+                    ></span>
+                    <span
+                      title="${(x) =>
+                        x.securityStatus &&
+                        ppp.t(`$const.tradingStatus.${x.securityStatus}`)}"
+                    >
+                      ${(x) =>
+                        x.securityStatus &&
+                        ppp.t(`$const.tradingStatus.${x.securityStatus}`)}
+                    </span>
+                  </div>
                   <span
                     class="extended-last-price-line"
                     ?hidden="${(x) => !(x.extendedLastPrice > 0)}"
@@ -389,59 +384,53 @@ export const orderWidgetTemplate = html`
               Ask ${(x) => x.formatPrice(x.bestAsk)}
             </div>
           </div>
-          ${when(
-            (x) => isBestBidAndAskHidden(x),
-            html` <div class="widget-margin-spacer"></div>`
-          )}
-          ${when(
-            (x) =>
-              x.orderTypeTabs.activeid === 'conditional' &&
-              !x.conditionalOrders?.length,
-            html`
-              <div class="widget-empty-state-holder">
-                ${staticallyCompose(emptyWidgetState)}
-                <span>
-                  <div class="no-conditional-orders-holder">
-                    <span>Условные заявки не настроены.</span>
-                    <a
-                      class="link"
-                      href="javascript:void(0);"
-                      @click="${async (x) => {
-                        let observer;
+          <div
+            ?hidden="${(x) => !isBestBidAndAskHidden(x)}"
+            class="widget-margin-spacer"
+          ></div>
+          <ppp-widget-empty-state-control
+            ?hidden="${(x) =>
+              !(
+                x.orderTypeTabs.activeid === 'conditional' &&
+                !x.conditionalOrders?.length
+              )}"
+          >
+            <div class="no-conditional-orders-holder">
+              <span>Условные заявки не настроены.</span>
+              <a
+                class="link"
+                href="javascript:void(0);"
+                @click="${async (x) => {
+                  let observer;
 
-                        if (x.preview) {
-                          return true;
-                        }
+                  if (x.preview) {
+                    return true;
+                  }
 
-                        const settingsPage =
-                          await x.headerButtons.showWidgetSettings();
-                        const widgetSettings =
-                          settingsPage.widgetSettingsDomElement;
+                  const settingsPage =
+                    await x.headerButtons.showWidgetSettings();
+                  const widgetSettings = settingsPage.widgetSettingsDomElement;
 
-                        observer = new MutationObserver(() => {
-                          const tabs =
-                            widgetSettings?.querySelector?.('ppp-tabs');
+                  observer = new MutationObserver(() => {
+                    const tabs = widgetSettings?.querySelector?.('ppp-tabs');
 
-                          if (tabs) {
-                            tabs.activeid = 'conditionals';
+                    if (tabs) {
+                      tabs.activeid = 'conditionals';
 
-                            observer.disconnect();
-                          }
-                        });
+                      observer.disconnect();
+                    }
+                  });
 
-                        observer.observe(widgetSettings, {
-                          childList: true,
-                          subtree: true
-                        });
-                      }}"
-                    >
-                      Открыть параметры.
-                    </a>
-                  </div>
-                </span>
-              </div>
-            `
-          )}
+                  observer.observe(widgetSettings, {
+                    childList: true,
+                    subtree: true
+                  });
+                }}"
+              >
+                Открыть параметры.
+              </a>
+            </div>
+          </ppp-widget-empty-state-control>
           ${when(
             (x) =>
               x.orderTypeTabs.activeid === 'conditional' &&
@@ -514,22 +503,16 @@ export const orderWidgetTemplate = html`
               )}
             `
           )}
-          ${when(
-            (x) =>
-              x.orderTypeTabs.activeid === 'conditional' &&
-              x.conditionalOrders?.length &&
-              !x.conditionalOrder,
-            html`
-              <div class="widget-empty-state-holder">
-                ${staticallyCompose(emptyWidgetState)}
-                <span>
-                  <div class="no-conditional-orders-holder">
-                    <span>Выберите условную заявку.</span>
-                  </div>
-                </span>
-              </div>
-            `
-          )}
+          <ppp-widget-empty-state-control
+            ?hidden="${(x) =>
+              !(
+                x.orderTypeTabs.activeid === 'conditional' &&
+                x.conditionalOrders?.length &&
+                !x.conditionalOrder
+              )}"
+          >
+            Выберите условную заявку.
+          </ppp-widget-empty-state-control>
           <div
             class="widget-price-quantity"
             ?hidden="${(x) => isPriceAndQuantityHidden(x)}"
@@ -1027,10 +1010,6 @@ export const orderWidgetStyles = css`
     padding: 0 10px 4px;
   }
 
-  div.widget-empty-state-holder + ppp-widget-notifications-area {
-    bottom: 20px;
-  }
-
   .company-card {
     width: 100%;
     padding: 10px 10px 0;
@@ -1345,30 +1324,7 @@ export class OrderWidget extends WidgetWithInstrument {
       });
     }
 
-    if (
-      !this.document.level1Trader &&
-      !this.document.extraLevel1Trader &&
-      !this.document.extraLevel1Trader2
-    ) {
-      this.initialized = true;
-
-      return this.notificationsArea.error({
-        text: 'Отсутствует трейдер данных L1.',
-        keep: true
-      });
-    }
-
     try {
-      if (typeof this.document.lastConditionalOrderIndex === 'number') {
-        const conditionalOrder =
-          this.conditionalOrders[this.document.lastConditionalOrderIndex];
-
-        if (conditionalOrder?.orderId) {
-          this.conditionalOrder =
-            await this.container.denormalization.denormalize(conditionalOrder);
-        }
-      }
-
       this.ordersTrader = await ppp.getOrCreateTrader(
         this.document.ordersTrader
       );
@@ -1384,6 +1340,16 @@ export class OrderWidget extends WidgetWithInstrument {
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
         }
       });
+
+      if (typeof this.document.lastConditionalOrderIndex === 'number') {
+        const conditionalOrder =
+          this.conditionalOrders[this.document.lastConditionalOrderIndex];
+
+        if (conditionalOrder?.orderId) {
+          this.conditionalOrder =
+            await this.container.denormalization.denormalize(conditionalOrder);
+        }
+      }
 
       if (this.ordersTrader) {
         this.tifList = this.ordersTrader.getTIFList() ?? [];
@@ -2179,43 +2145,51 @@ export class OrderWidget extends WidgetWithInstrument {
           });
         }
 
-        const type = this.conditionalOrder?.order?.type;
-        let implUrl;
-
-        if (
-          type === ORDERS.CUSTOM &&
-          typeof this.conditionalOrder?.order.baseUrl === 'string'
-        ) {
-          implUrl = `${new URL(this.conditionalOrder.order.baseUrl)}impl.js`;
-        } else {
-          implUrl = `${ppp.rootUrl}/lib/orders/${type}/impl.js`;
-        }
+        const circuitBreakerResult =
+          await this.conditionalOrderHolder?.firstElementChild?.onPlaceConditionalOrder?.();
 
         this.$$placeOrder(
-          '[%s] placeConditionalOrder at %s',
+          '[%s] placeConditionalOrder at %s, circuitBreakerResult: %s',
           this.document.name,
-          new Date().toISOString()
+          new Date().toISOString(),
+          circuitBreakerResult
         );
 
-        if (this.ordersTrader.document.runtime === 'url') {
-          const code = await fetch(implUrl.replace('impl.js', 'impl.min.js'), {
-            cache: 'reload'
-          }).then((r) => r.text());
+        if (circuitBreakerResult !== false) {
+          const type = this.conditionalOrder?.order?.type;
+          let implUrl;
 
-          await this.conditionalOrderHolder?.firstElementChild?.onPlaceConditionalOrder?.();
-          await this.ordersTrader.placeConditionalOrder({
-            instrument: this.instrument,
-            direction,
-            payload: this.conditionalOrder,
-            code: useCachedCode ? '' : code
-          });
-        } else {
-          await this.ordersTrader.placeConditionalOrder({
-            instrument: this.instrument,
-            direction,
-            payload: this.conditionalOrder,
-            implUrl
-          });
+          if (
+            type === ORDERS.CUSTOM &&
+            typeof this.conditionalOrder?.order.baseUrl === 'string'
+          ) {
+            implUrl = `${new URL(this.conditionalOrder.order.baseUrl)}impl.js`;
+          } else {
+            implUrl = `${ppp.rootUrl}/lib/orders/${type}/impl.js`;
+          }
+
+          if (this.ordersTrader.document.runtime === 'url') {
+            const code = await fetch(
+              implUrl.replace('impl.js', 'impl.min.js'),
+              {
+                cache: 'reload'
+              }
+            ).then((r) => r.text());
+
+            await this.ordersTrader.placeConditionalOrder({
+              instrument: this.instrument,
+              direction,
+              payload: this.conditionalOrder,
+              code: useCachedCode ? '' : code
+            });
+          } else {
+            await this.ordersTrader.placeConditionalOrder({
+              instrument: this.instrument,
+              direction,
+              payload: this.conditionalOrder,
+              implUrl
+            });
+          }
         }
       }
 
