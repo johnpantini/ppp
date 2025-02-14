@@ -1319,12 +1319,16 @@ export class Widget extends PPPElement {
         text: 'Ошибка сетевого запроса.',
         keep: true
       });
-    } else if (e.name === 'ConflictError') {
+    } else if (e?.name === 'ConflictError') {
       if (e.message === 'E_TRADER_IS_CLOSED') {
         return this.notificationsArea.error({
           text: 'Трейдер сейчас не работает.'
         });
       }
+    } else if (e?.name === 'InternalServerError') {
+      return this.notificationsArea.error({
+        text: 'Ошибка на стороне сервера.'
+      });
     } else {
       return this.notificationsArea.error({
         text: 'Неизвестная ошибка, подробности в консоли.'
