@@ -785,7 +785,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
-  async instrumentChanged(oldValue, newValue) {
+  instrumentChanged(oldValue, newValue) {
     super.instrumentChanged(oldValue, newValue);
 
     if (this.chartTrader) {
@@ -881,6 +881,10 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   // Update the last candle here.
   printChanged(oldValue, newValue) {
+    if (newValue?.symbol !== this.instrument.symbol) {
+      return;
+    }
+
     if (this.ready && newValue?.price) {
       if (Array.isArray(newValue.condition)) {
         // https://alpaca.markets/learn/stock-minute-bars/

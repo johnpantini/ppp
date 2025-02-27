@@ -8,7 +8,6 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { checkTelegramBotToken, TelegramBot } from '../../lib/telegram.js';
-import { getMongoDBRealmAccessToken } from '../../lib/realm.js';
 import '../badge.js';
 import '../button.js';
 import '../query-select.js';
@@ -76,69 +75,6 @@ export const botPageTemplate = html`
             ${ref('webhook')}
           >
           </ppp-text-field>
-          <div class="control-stack">
-            <ppp-query-select
-              ${ref('endpointSelector')}
-              :context="${(x) => x}"
-              :placeholder="${() => 'Нажмите, чтобы выбрать конечную точку'}"
-              :query="${() => {
-                return (context) => {
-                  if (typeof context.http === 'undefined') {
-                    return fetch(
-                      new URL(
-                        '/api/admin/v3.0/groups/[%#ppp.keyVault.getKey("mongo-group-id")%]/apps/[%#ppp.keyVault.getKey("mongo-app-id")%]/endpoints',
-                        '[%#ppp.keyVault.getKey("global-proxy-url")%]'
-                      ).toString(),
-                      {
-                        headers: {
-                          Authorization:
-                            'Bearer [%#(await this.getMongoDBRealmAccessToken())%]',
-                          'X-Host': 'realm.mongodb.com',
-                          'X-Allowed-Headers': 'Authorization'
-                        }
-                      }
-                    )
-                      .then((response) => response.json())
-                      .catch(() => Promise.resolve([]));
-                  }
-
-                  return context.http
-                    .get({
-                      url: 'https://realm.mongodb.com/api/admin/v3.0/groups/[%#ppp.keyVault.getKey("mongo-group-id")%]/apps/[%#ppp.keyVault.getKey("mongo-app-id")%]/endpoints',
-                      headers: {
-                        Authorization: [
-                          'Bearer [%#(await this.getMongoDBRealmAccessToken())%]'
-                        ]
-                      }
-                    })
-                    .then((response) => EJSON.parse(response.body.text()))
-                    .catch(() => Promise.resolve([]));
-                };
-              }}"
-              :transform="${() => (d) => {
-                return d
-                  .filter((e) => {
-                    return (
-                      !e.route.startsWith('/cloud_credentials') &&
-                      !e.route.startsWith('/psina')
-                    );
-                  })
-                  .map((e) => {
-                    return {
-                      _id: e._id,
-                      name: e.function_name,
-                      value: e.route
-                    };
-                  });
-              }}"
-            ></ppp-query-select>
-            <ppp-button
-              @click="${(x) => x.setWebhookUrlByEndpoint()}"
-              appearance="primary"
-            >
-              Установить ссылку по конечной точке
-            </ppp-button>
-          </div>
         </div>
       </section>
       ${documentPageFooterPartial()}
@@ -152,41 +88,6 @@ export const botPageStyles = css`
 
 export class BotPage extends Page {
   collection = 'bots';
-
-  async getMongoDBRealmAccessToken({ username, apiKey } = {}) {
-    return getMongoDBRealmAccessToken({
-      username,
-      apiKey
-    });
-  }
-
-  async setWebhookUrlByEndpoint() {
-    const datum = this.endpointSelector.datum();
-
-    if (!datum) {
-      invalidate(this.endpointSelector, {
-        errorMessage: 'Сначала выберите конечную точку',
-        skipScrollIntoView: true
-      });
-    } else {
-      const locationUrl = ppp.keyVault.getKey('mongo-location-url');
-
-      if (!locationUrl) {
-        invalidate(ppp.app.toast, {
-          errorMessage:
-            'Не получается сгенерировать ссылку - соединитесь с облачной базой данных MongoDB Realm хотя бы один раз.',
-          raiseException: true
-        });
-      }
-
-      this.webhook.appearance = 'default';
-      this.webhook.value =
-        locationUrl.replace('aws.stitch.mongodb', 'aws.data.mongodb-api') +
-        `/app/${ppp.keyVault.getKey('mongo-app-client-id')}/endpoint${
-          datum.value
-        }`;
-    }
-  }
 
   async validate() {
     await validate(this.name);

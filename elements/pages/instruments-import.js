@@ -1,7 +1,7 @@
 /** @decorator */
 
 import ppp from '../../ppp.js';
-import { html, css, ref, when } from '../../vendor/fast-element.min.js';
+import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import {
   BROKERS,
@@ -31,179 +31,191 @@ export const instrumentsImportPageTemplate = html`
         <div class="input-group">
           ${dictionarySelectorTemplate()}
           <div class="spacing2"></div>
-          <ppp-checkbox ${ref('clearBeforeImport')}>
+          <ppp-checkbox
+            @change="${(x) => {
+              ppp.settings.set(
+                'clearInstrumentsBeforeImport',
+                x.clearBeforeImport.checked
+              );
+            }}"
+            ${ref('clearBeforeImport')}
+            ?checked="${() =>
+              ppp.settings.get('clearInstrumentsBeforeImport') ?? true}"
+          >
             Удалить инструменты словаря перед импортом (ускоряет импорт)
           </ppp-checkbox>
         </div>
       </section>
-      ${when(
-        (x) =>
-          x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS ||
-          x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
-          x.dictionary.value === INSTRUMENT_DICTIONARY.IB,
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Ссылка на словарь</h5>
-            </div>
-            <div class="input-group">
-              <ppp-text-field
-                type="url"
-                placeholder="https://example.com"
-                ${ref('dictionaryUrl')}
-              ></ppp-text-field>
-            </div>
-          </section>
-          <section>
-            <div class="label-group">
-              <h5>Параметры импорта</h5>
-            </div>
-            <div class="input-group">
-              <ppp-checkbox checked ${ref('psinaSkipOTC')}>
-                Не импортировать инструменты OTC
-              </ppp-checkbox>
-            </div>
-          </section>
-        `
-      )}
-      ${when(
-        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.TINKOFF,
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Брокерский профиль T-Bank</h5>
-              <p class="description">Необходим для формирования словаря.</p>
-            </div>
-            <div class="input-group">
-              <ppp-query-select
-                ${ref('tinkoffBrokerId')}
-                :context="${(x) => x}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('brokers')
-                      .find({
-                        $and: [
-                          {
-                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.TINKOFF%]`
-                          },
-                          { removed: { $ne: true } }
-                        ]
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-query-select>
-              <div class="spacing2"></div>
-              <ppp-button
-                @click="${() =>
-                  ppp.app.mountPage('broker-tinkoff', {
-                    size: 'xlarge',
-                    adoptHeader: true
-                  })}"
-                appearance="primary"
-              >
-                Добавить профиль T-Bank
-              </ppp-button>
-            </div>
-          </section>
-        `
-      )}
-      ${when(
-        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.FINAM,
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Брокерский профиль Finam</h5>
-              <p class="description">Необходим для формирования словаря.</p>
-            </div>
-            <div class="input-group">
-              <ppp-query-select
-                ${ref('finamBrokerId')}
-                :context="${(x) => x}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('brokers')
-                      .find({
-                        $and: [
-                          {
-                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.FINAM%]`
-                          },
-                          { removed: { $ne: true } }
-                        ]
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-query-select>
-              <div class="spacing2"></div>
-              <ppp-button
-                @click="${() =>
-                  ppp.app.mountPage('broker-finam', {
-                    size: 'xlarge',
-                    adoptHeader: true
-                  })}"
-                appearance="primary"
-              >
-                Добавить профиль Finam
-              </ppp-button>
-            </div>
-          </section>
-        `
-      )}
-      ${when(
-        (x) => x.dictionary.value === INSTRUMENT_DICTIONARY.CAPITALCOM,
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Брокерский профиль Capital.com</h5>
-              <p class="description">Необходим для формирования словаря.</p>
-            </div>
-            <div class="input-group">
-              <ppp-query-select
-                ${ref('capitalcomBrokerId')}
-                :context="${(x) => x}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('brokers')
-                      .find({
-                        $and: [
-                          {
-                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.CAPITALCOM%]`
-                          },
-                          { removed: { $ne: true } }
-                        ]
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-query-select>
-              <div class="spacing2"></div>
-              <ppp-button
-                @click="${() =>
-                  ppp.app.mountPage('broker-capitalcom', {
-                    size: 'xlarge',
-                    adoptHeader: true
-                  })}"
-                appearance="primary"
-              >
-                Добавить профиль Capital.com
-              </ppp-button>
-            </div>
-          </section>
-        `
-      )}
+      <section
+        ?hidden="${(x) =>
+          !(
+            x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS ||
+            x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
+            x.dictionary.value === INSTRUMENT_DICTIONARY.IB
+          )}"
+      >
+        <div class="label-group">
+          <h5>Ссылка на словарь</h5>
+          <p class="description">
+            Этот словарь загружается из внешнего источника по ссылке. Значение
+            запоминается при редактировании.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="url"
+            placeholder="https://example.com"
+            @input="${(x) => {
+              ppp.settings.set(
+                'psinaStocksDictionaryUrl',
+                x.dictionaryUrl.value ?? ''
+              );
+            }}"
+            value="${(x) => ppp.settings.get('psinaStocksDictionaryUrl') ?? ''}"
+            ${ref('dictionaryUrl')}
+          ></ppp-text-field>
+        </div>
+      </section>
+      <section hidden>
+        <div class="label-group">
+          <h5>Параметры импорта</h5>
+        </div>
+        <div class="input-group">
+          <ppp-checkbox checked ${ref('psinaSkipOTC')}>
+            Не импортировать инструменты OTC
+          </ppp-checkbox>
+        </div>
+      </section>
+      <section
+        ?hidden="${(x) => x.dictionary.value !== INSTRUMENT_DICTIONARY.TINKOFF}"
+      >
+        <div class="label-group">
+          <h5>Брокерский профиль T-Bank</h5>
+          <p class="description">Необходим для формирования словаря.</p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('tinkoffBrokerId')}
+            :context="${(x) => x}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('brokers')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.TINKOFF%]`
+                      },
+                      { removed: { $ne: true } }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <div class="spacing2"></div>
+          <ppp-button
+            @click="${() =>
+              ppp.app.mountPage('broker-tinkoff', {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
+            appearance="primary"
+          >
+            Добавить профиль T-Bank
+          </ppp-button>
+        </div>
+      </section>
+      <section
+        ?hidden="${(x) => x.dictionary.value !== INSTRUMENT_DICTIONARY.FINAM}"
+      >
+        <div class="label-group">
+          <h5>Брокерский профиль Finam</h5>
+          <p class="description">Необходим для формирования словаря.</p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('finamBrokerId')}
+            :context="${(x) => x}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('brokers')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.FINAM%]`
+                      },
+                      { removed: { $ne: true } }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <div class="spacing2"></div>
+          <ppp-button
+            @click="${() =>
+              ppp.app.mountPage('broker-finam', {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
+            appearance="primary"
+          >
+            Добавить профиль Finam
+          </ppp-button>
+        </div>
+      </section>
+      <section
+        ?hidden="${(x) =>
+          x.dictionary.value !== INSTRUMENT_DICTIONARY.CAPITALCOM}"
+      >
+        <div class="label-group">
+          <h5>Брокерский профиль Capital.com</h5>
+          <p class="description">Необходим для формирования словаря.</p>
+        </div>
+        <div class="input-group">
+          <ppp-query-select
+            ${ref('capitalcomBrokerId')}
+            :context="${(x) => x}"
+            :query="${() => {
+              return (context) => {
+                return context.services
+                  .get('mongodb-atlas')
+                  .db('ppp')
+                  .collection('brokers')
+                  .find({
+                    $and: [
+                      {
+                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.CAPITALCOM%]`
+                      },
+                      { removed: { $ne: true } }
+                    ]
+                  })
+                  .sort({ updatedAt: -1 });
+              };
+            }}"
+            :transform="${() => ppp.decryptDocumentsTransformation()}"
+          ></ppp-query-select>
+          <div class="spacing2"></div>
+          <ppp-button
+            @click="${() =>
+              ppp.app.mountPage('broker-capitalcom', {
+                size: 'xlarge',
+                adoptHeader: true
+              })}"
+            appearance="primary"
+          >
+            Добавить профиль Capital.com
+          </ppp-button>
+        </div>
+      </section>
       <footer>
         <ppp-button
           type="submit"
@@ -279,7 +291,8 @@ export class InstrumentsImportPage extends Page {
     await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
 
     const stocks = await rStocks.json();
-    const psinaSkipOTC = this.psinaSkipOTC.checked;
+    // const psinaSkipOTC = this.psinaSkipOTC.checked;
+    const psinaSkipOTC = true;
 
     return stocks
       .filter((s) => {
@@ -501,7 +514,7 @@ export class InstrumentsImportPage extends Page {
     });
   }
 
-  async #tinkoffSecurities(security = 'Shares', token) {
+  async #tBankSecurities(security = 'Shares', token) {
     try {
       return (
         await (
@@ -533,22 +546,22 @@ export class InstrumentsImportPage extends Page {
 
     const instruments = [];
     const stocks =
-      (await this.#tinkoffSecurities(
+      (await this.#tBankSecurities(
         'Shares',
         this.tinkoffBrokerId.datum().apiToken
       )) ?? [];
     const bonds =
-      (await this.#tinkoffSecurities(
+      (await this.#tBankSecurities(
         'Bonds',
         this.tinkoffBrokerId.datum().apiToken
       )) ?? [];
     const etfs =
-      (await this.#tinkoffSecurities(
+      (await this.#tBankSecurities(
         'Etfs',
         this.tinkoffBrokerId.datum().apiToken
       )) ?? [];
     const futures =
-      (await this.#tinkoffSecurities(
+      (await this.#tBankSecurities(
         'Futures',
         this.tinkoffBrokerId.datum().apiToken
       )) ?? [];
@@ -958,6 +971,15 @@ export class InstrumentsImportPage extends Page {
     this.beginOperation();
 
     try {
+      const instruments = await this[this.dictionary.value].call(this);
+
+      if (!instruments.length) {
+        invalidate(ppp.app.toast, {
+          errorMessage: 'Список инструментов для импорта пуст.',
+          raiseException: true
+        });
+      }
+
       const { exchange, broker } = getInstrumentDictionaryMeta(
         this.dictionary.value
       );
@@ -965,7 +987,7 @@ export class InstrumentsImportPage extends Page {
       let existingInstruments;
 
       if (exchange && broker) {
-        // Use this to preserve user field values
+        // Use this to preserve user field values.
         existingInstruments = await ppp.user.functions.find(
           {
             collection: 'instruments'
@@ -1016,15 +1038,6 @@ export class InstrumentsImportPage extends Page {
         } finally {
           cache.close();
         }
-      }
-
-      const instruments = await this[this.dictionary.value].call(this);
-
-      if (!instruments.length) {
-        invalidate(ppp.app.toast, {
-          errorMessage: 'Список инструментов для импорта пуст.',
-          raiseException: true
-        });
       }
 
       // Fix execution timeout errors

@@ -15,8 +15,7 @@ import {
   when,
   observable,
   repeat,
-  Observable,
-  attr
+  Observable
 } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import { TRADER_CAPS, TRADERS, WIDGET_TYPES } from '../../lib/const.js';
@@ -30,12 +29,13 @@ import { normalize, getTraderSelectOptionColor } from '../../design/styles.js';
 import { PPPElement } from '../../lib/ppp-element.js';
 import { formatDate } from '../../lib/intl.js';
 import { fontWeightWidget } from '../../design/design-tokens.js';
-import { disconnect, trash } from '../../static/svg/sprite.js';
+import { disconnect, trash, wrench } from '../../static/svg/sprite.js';
 import '../button.js';
 import '../checkbox.js';
 import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
+import { later } from '../../lib/ppp-decorators.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -137,64 +137,71 @@ export const tccWidgetCardTemplate = html`
         ${(x) =>
           x.serialized?.createdAt
             ? formatDate(new Date(x.serialized.createdAt))
-            : 'Идёт запрос...'}
+            : '...'}
       </div>
-      ${when(
-        (x) => x.trader.runtime === 'shared-worker',
-        html`
-          <button
-            class="widget-action-button"
-            slot="actions"
-            @click="${async (x, c) => {
-              c.event.preventDefault();
-              c.event.stopPropagation();
+      <button
+        ?hidden="${(x) => x.trader.runtime !== 'shared-worker'}"
+        class="widget-action-button"
+        slot="actions"
+        @click="${async (x, c) => {
+          c.event.preventDefault();
+          c.event.stopPropagation();
+          x.widget.topLoader.start();
 
-              x.widget.topLoader.start();
+          try {
+            await x.traderRuntime?.terminate();
+          } finally {
+            x.widget.topLoader.stop();
+          }
+        }}"
+      >
+        <span>${html.partial(disconnect)}</span>
+      </button>
+      <button
+        class="widget-action-button"
+        title="Обновить инструменты"
+        slot="actions"
+        @click="${async (x, c) => {
+          c.event.preventDefault();
+          c.event.stopPropagation();
+          x.widget.topLoader.start();
 
-              try {
-                await x.traderRuntime?.terminate();
+          try {
+            await x.openInstrumentsImport();
+          } finally {
+            x.widget.topLoader.stop();
+          }
+        }}"
+      >
+        <span>${html.partial(wrench)}</span>
+      </button>
+      <button
+        ?hidden="${(x) => !x.trader.caps?.includes?.(TRADER_CAPS.CAPS_PAPER)}"
+        title="Выполнить сброс"
+        class="widget-action-button"
+        slot="actions"
+        @click="${async (x, c) => {
+          c.event.preventDefault();
+          c.event.stopPropagation();
+          x.widget.topLoader.start();
 
-                x.status = 'terminated';
-              } finally {
-                x.widget.topLoader.stop();
-              }
-            }}"
-          >
-            <span>${html.partial(disconnect)}</span>
-          </button>
-        `
-      )}
-      ${when(
-        (x) => x.trader.caps?.includes?.(TRADER_CAPS.CAPS_PAPER),
-        html`
-          <button
-            title="Выполнить сброс"
-            class="widget-action-button"
-            slot="actions"
-            @click="${async (x, c) => {
-              c.event.preventDefault();
-              c.event.stopPropagation();
-
-              x.widget.topLoader.start();
-
-              try {
-                await x.traderRuntime?.call({
-                  method: 'clear'
-                });
-              } finally {
-                x.widget.topLoader.stop();
-              }
-            }}"
-          >
-            <span>${html.partial(trash)}</span>
-          </button>
-        `
-      )}
+          try {
+            await x.traderRuntime?.call({
+              method: 'clear'
+            });
+          } finally {
+            x.widget.topLoader.stop();
+          }
+        }}"
+      >
+        <span>${html.partial(trash)}</span>
+      </button>
     </ppp-widget-card>
   </template>
 `;
 
 export const tccWidgetCardStyles = css`
+  ${normalize()}
   ${widgetCommonContentStyles()}
   [status-text] {
     font-weight: ${fontWeightWidget};
@@ -202,19 +209,24 @@ export const tccWidgetCardStyles = css`
 `;
 
 export class TccWidgetCard extends PPPElement {
-  @attr
-  status;
-
   getStatusText() {
-    if (this.status === 'terminated') {
-      return 'Остановлен';
-    }
-
-    return 'Нет статуса';
+    return this?.serialized?.broker
+      ? ppp.t(`$const.broker.${this.serialized.broker}`)
+      : '...';
   }
 
   @observable
   trader;
+
+  async openInstrumentsImport() {
+    const importPage = await ppp.app.mountPage('instruments-import', {
+      title: 'Импорт инструментов'
+    });
+
+    if (typeof this.traderRuntime?.getDictionary === 'function') {
+      importPage.dictionary.value = this.traderRuntime.getDictionary();
+    }
+  }
 
   traderRuntime;
 

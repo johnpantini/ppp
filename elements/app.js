@@ -293,20 +293,6 @@ export const appTemplate = html`
               </ppp-side-nav-item>
             </a>
             <a
-              href="?page=endpoints"
-              @click="${(x) =>
-                x.navigate({
-                  page: 'endpoints'
-                })}"
-            >
-              <ppp-side-nav-item
-                ?disabled="${() => !ppp.keyVault.ok()}"
-                ?active="${(x) => x.page.startsWith('endpoint')}"
-              >
-                <span>Конечные точки</span>
-              </ppp-side-nav-item>
-            </a>
-            <a
               href="?page=servers"
               @click="${(x) =>
                 x.navigate({

@@ -34,7 +34,7 @@ export const dictionarySelectorTemplate = (options = {}) => html`
   <ppp-select
     value="${() => options.value ?? INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}"
     @change="${(x) => {
-      if (options.silent) {
+      if (options.silent || ppp.app.page !== 'instruments') {
         return;
       }
 

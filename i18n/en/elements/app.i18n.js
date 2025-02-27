@@ -6,21 +6,21 @@ export default function (i18n) {
   i18n.extend({
     $collection: {
       apis: 'API',
-      brokers: 'Брокеры',
-      endpoints: 'Конечные точки',
-      extensions: 'Дополнения',
-      instruments: 'Инструменты',
-      servers: 'Серверы',
-      services: 'Сервисы',
-      settings: 'Параметры',
-      bots: 'Боты',
-      traders: 'Трейдеры',
-      widgets: 'Шаблоны виджетов',
-      orders: 'Шаблоны заявок',
-      workspaces: 'Терминалы'
+      brokers: 'Brokers',
+      endpoints: 'Endpoints',
+      extensions: 'Extensions',
+      instruments: 'Instruments',
+      servers: 'Servers',
+      services: 'Services',
+      settings: 'Settings',
+      bots: 'Bots',
+      traders: 'Traders',
+      widgets: 'Widget Templates',
+      orders: 'Order Templates',
+      workspaces: 'Workspaces'
     },
     $sideNav: {
-      newWorkspace: 'Новый терминал'
+      newWorkspace: 'New Workspace'
     }
   });
 }

@@ -70,6 +70,7 @@ export default function (i18n) {
       E_INACTIVE_TRADING_SESSION: 'Торговая сессия не идёт.',
       E_NO_ACCESS_TOKEN: 'Токен доступа не найден или не активен.',
       E_CONFIRMATION_NEEDED: 'Требуется подтверждение операции.',
+      E_OPERATION_IN_PROGRESS: 'Операция ещё в процессе.',
       E_RATE_LIMIT_EXCEEDED: 'Превышен лимит запросов.',
       E_ORDER_BLOCKED_BY_EXCHANGE: 'Заявка заблокирована биржей',
       E_INCORRECT_PRICE: 'Недопустимая цена в заявке.',
