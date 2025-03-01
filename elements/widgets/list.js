@@ -561,11 +561,11 @@ export class ListWidget extends WidgetWithInstrument {
     );
   }
 
-  appendRow(payload, fallbackIndex) {
+  appendRow(payload, options = {}) {
     let index = payload.index;
 
     if (typeof index !== 'number') {
-      index = fallbackIndex ?? this.maxSeenIndex + 1;
+      index = this.maxSeenIndex + 1;
 
       payload.index = index;
     }
@@ -592,15 +592,20 @@ export class ListWidget extends WidgetWithInstrument {
       cell.payload = payload;
       cell.trader = payload.traderId;
 
-      cell.appendChild(column);
-      tr.appendChild(cell);
+      cell.append(column);
+      tr.append(cell);
     }
 
     const lastEmptyCell = document.createElement('div');
 
     lastEmptyCell.setAttribute('class', 'td cell');
     tr.appendChild(lastEmptyCell);
-    this.tableBody.appendChild(tr);
+
+    if (options.prepend) {
+      this.tableBody.prepend(tr);
+    } else {
+      this.tableBody.append(tr);
+    }
 
     this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
 

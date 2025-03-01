@@ -68,7 +68,9 @@ export async function listDefinition() {
         }
 
         for (let i = 0; i < widget.document?.listSource?.length ?? 0; i++) {
-          widget.appendRow(widget.document.listSource[i], i);
+          widget.document.listSource[i].index ??= i;
+
+          widget.appendRow(widget.document.listSource[i]);
         }
       }
 
