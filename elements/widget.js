@@ -50,7 +50,9 @@ import {
   createThemed,
   lineHeightBody1,
   fontWeightBody1,
-  fontSizeBody1
+  fontSizeBody1,
+  buy,
+  sell
 } from '../design/design-tokens.js';
 import { unsupportedInstrument } from '../lib/traders/trader-worker.js';
 import {
@@ -406,6 +408,26 @@ export const widgetTableStyles = () => css`
   .widget-table .row[active] .td:first-child::before {
     transform: scaleY(1);
     background-color: ${themeConditional(paletteGreenDark1, paletteGreenBase)};
+  }
+
+  .widget-table .row[positive] td,
+  .widget-table .row[positive] .td {
+    background-color: rgba(${toColorComponents(buy)}, 0.2);
+  }
+
+  .widget-table .row[negative] td,
+  .widget-table .row[negative] .td {
+    background-color: rgba(${toColorComponents(sell)}, 0.2);
+  }
+
+  .widget-table .row[earth] td,
+  .widget-table .row[earth] .td {
+    background-color: rgba(
+      ${toColorComponents(
+        themeConditional(paletteYellowLight2, paletteYellowDark2)
+      )},
+      0.2
+    );
   }
 `;
 

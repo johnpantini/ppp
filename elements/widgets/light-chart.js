@@ -373,6 +373,26 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   shouldShowPriceInfo;
 
+  #historyQueue = [];
+
+  requestHistory(instrument) {
+    instrument && this.#historyQueue.push(instrument);
+
+    if (this.ready) {
+      const next = this.#historyQueue.shift();
+
+      if (this.chartTrader.instrumentsAreEqual(instrument, next)) {
+        this.loadHistory().finally(() => {
+          if (this.#historyQueue.length > 0) {
+            this.requestHistory();
+          }
+        });
+      } else if (this.#historyQueue.length > 0) {
+        this.requestHistory();
+      }
+    }
+  }
+
   css(dt) {
     const value = dt.$value;
 
@@ -385,7 +405,6 @@ export class LightChartWidget extends WidgetWithInstrument {
     super();
 
     this.timeframes = [];
-    this.ready = false;
   }
 
   async connectedCallback() {
@@ -421,8 +440,6 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.tfSelector.activeid = this.getActiveTimeframeTab();
       this.chartTrader = await ppp.getOrCreateTrader(this.document.chartTrader);
       this.instrumentTrader = this.chartTrader;
-
-      this.selectInstrument(this.document.symbol, { isolate: true });
 
       this.chart = createChart(this.shadowRoot.querySelector('.chart'), {
         layout: {
@@ -496,6 +513,9 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
 
       this.initialized = true;
+      this.ready = true;
+
+      this.selectInstrument(this.document.symbol, { isolate: true });
     } catch (e) {
       this.initialized = true;
 
@@ -700,9 +720,8 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   // Older quotes come first.
-  setData(ohlcv) {
+  setData(ohlcv = []) {
     this.mainSeries.setData(ohlcv);
-
     this.volumeSeries.setData(
       ohlcv.map((c) => {
         return {
@@ -725,13 +744,11 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   async traderEventChanged(oldValue, newValue) {
     if (typeof newValue === 'object' && newValue?.event === 'reconnect') {
-      if (this.ready) {
-        this.cursor = void 0;
-        this.ohlcv = [];
-        this.hasMore = true;
+      this.cursor = void 0;
+      this.ohlcv = [];
+      this.hasMore = true;
 
-        this.loadHistory();
-      }
+      this.#historyQueue.push(this.instrument);
     }
   }
 
@@ -795,7 +812,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.hasMore = true;
 
         this.mainSeries && this.setData([]);
-        this.loadHistory();
+        this.requestHistory(this.instrument);
       }
     }
   }
@@ -826,15 +843,14 @@ export class LightChartWidget extends WidgetWithInstrument {
     );
   }
 
-  async timeframeChanged() {
+  timeframeChanged() {
     if (this.chartTrader) {
       if (this.instrument?.symbol) {
         this.cursor = void 0;
         this.ohlcv = [];
         this.hasMore = true;
 
-        await this.loadHistory();
-        this.applyChartOptions();
+        this.requestHistory(this.instrument);
       }
     }
   }

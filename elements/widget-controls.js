@@ -1488,7 +1488,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
     }
   }
 
-  getInstrumentIconUrl(instrument) {
+  getInstrumentIconUrl(instrument = {}) {
     return (
       this.widget?.instrumentTrader?.getInstrumentIconUrl?.(instrument) ??
       'static/instruments/unknown.svg'

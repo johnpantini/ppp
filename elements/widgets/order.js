@@ -371,10 +371,12 @@ export const orderWidgetTemplate = html`
                 <div class="nbbo-line-icon-fallback">
                   <div
                     class="nbbo-line-icon-logo"
-                    style="${(x) =>
-                      `background-image:url(${x.searchControl?.getInstrumentIconUrl(
-                        x.instrument
-                      )})`}"
+                    style="${(x) => {
+                      return `background-image:url(${
+                        x.searchControl?.getInstrumentIconUrl(x.instrument) ||
+                        'static/instruments/unknown.svg'
+                      })`;
+                    }}"
                   ></div>
                   ${(x) => x.instrument?.fullName?.[0]}
                 </div>
@@ -1163,6 +1165,9 @@ export const orderWidgetStyles = css`
 `;
 
 export class OrderWidget extends WidgetWithInstrument {
+  @observable
+  searchControl;
+
   /** @type {WidgetNotificationsArea} */
   notificationsArea;
 
@@ -1663,9 +1668,10 @@ export class OrderWidget extends WidgetWithInstrument {
           instrument: this.instrument
         });
 
-        this.notificationsArea.note({
-          title: 'Заявки отменены'
-        });
+        !this.document.onlyShowErrorNotifications &&
+          this.notificationsArea.note({
+            title: 'Заявки отменены'
+          });
       } catch (e) {
         console.log(e);
 
@@ -2193,9 +2199,10 @@ export class OrderWidget extends WidgetWithInstrument {
         }
       }
 
-      return this.notificationsArea.success({
-        title: 'Заявка выставлена'
-      });
+      !this.document.onlyShowErrorNotifications &&
+        this.notificationsArea.success({
+          title: 'Заявка выставлена'
+        });
     } catch (e) {
       this.$$placeOrder(
         '[%s] exception -> %s: %o',
@@ -2275,6 +2282,8 @@ export class OrderWidget extends WidgetWithInstrument {
         this.container.changePriceQuantityViaMouseWheel.checked,
       setPriceShouldShowLimitTab:
         this.container.setPriceShouldShowLimitTab.checked,
+      onlyShowErrorNotifications:
+        this.container.onlyShowErrorNotifications.checked,
       showLastPriceInHeader: this.container.showLastPriceInHeader.checked,
       showAbsoluteChangeInHeader:
         this.container.showAbsoluteChangeInHeader.checked,
@@ -2287,7 +2296,9 @@ export class OrderWidget extends WidgetWithInstrument {
         this.container.showConditionalOrderToolbar.checked,
       showAmountSection: this.container.showAmountSection.checked,
       showEstimateSection: this.container.showEstimateSection.checked,
-      conditionalOrders: this.container.conditionalOrderList.value
+      conditionalOrders: this.preview
+        ? this.conditionalOrders
+        : this.container.conditionalOrderList.value
     };
 
     if (this.container.settingsTabs.activeid === 'conditionals') {
@@ -2658,6 +2669,12 @@ export async function widgetDefinition() {
               ${ref('setPriceShouldShowLimitTab')}
             >
               Подстановка цены извне всегда активирует вкладку «Лимитная»
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.onlyShowErrorNotifications}"
+              ${ref('onlyShowErrorNotifications')}
+            >
+              Показывать только уведомления об ошибках
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">

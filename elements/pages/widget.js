@@ -662,30 +662,31 @@ export const widgetPageTemplate = html`
               </div>
               <div class="spacing3"></div>
               <h2 class="widget-name">
-                ${when(
-                  (x) => x.widgetDefinition.title && x.isSteady(),
-                  html`
-                    <span class="positive">
-                      ${(x) => x.widgetDefinition.title}
-                    </span>
-                  `
-                )}
+                <span
+                  class="positive"
+                  ?hidden="${(x) =>
+                    !(x.widgetDefinition.title && x.isSteady())}"
+                >
+                  ${(x) => x.widgetDefinition.title}
+                </span>
                 <span ?hidden="${(x) => x.isSteady()}" class="positive">
                   Идёт загрузка, подождите...
                 </span>
               </h2>
               ${when(
                 (x) => x.widgetDefinition.tags,
-                html` <div class="widget-tags">
-                  ${repeat(
-                    (x) => x.widgetDefinition.tags,
-                    html`
-                      <ppp-badge class="widget-tags" appearance="lightgray">
-                        ${(x) => x}
-                      </ppp-badge>
-                    `
-                  )}
-                </div>`
+                html`
+                  <div class="widget-tags">
+                    ${repeat(
+                      (x) => x.widgetDefinition.tags,
+                      html`
+                        <ppp-badge class="widget-tags" appearance="lightgray">
+                          ${(x) => x}
+                        </ppp-badge>
+                      `
+                    )}
+                  </div>
+                `
               )}
               <div class="widget-info">
                 <p class="description">

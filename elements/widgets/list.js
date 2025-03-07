@@ -170,6 +170,7 @@ export const listWidgetTemplate = html`
             )}
           </span>
           <ppp-widget-header-buttons>
+            ${(x) => x?.extraHeaderButtons}
             <div
               ?hidden="${(x) => !x.deletionAvailable}"
               class="button${(x) => (x.deletion ? ' negative' : '')}"
@@ -273,6 +274,9 @@ export class ListWidget extends WidgetWithInstrument {
   @observable
   extraControls;
 
+  @observable
+  extraHeaderButtons;
+
   pagination;
 
   disableSort;
@@ -351,6 +355,7 @@ export class ListWidget extends WidgetWithInstrument {
         validate,
         submit,
         extraControls,
+        extraHeaderButtons,
         pagination,
         disableSort,
         maySelectInstrument,
@@ -364,6 +369,7 @@ export class ListWidget extends WidgetWithInstrument {
       }
 
       this.extraControls = extraControls;
+      this.extraHeaderButtons = extraHeaderButtons;
       this.pagination = pagination;
       this.maySelectInstrument = !!maySelectInstrument;
       this.defaultSortOrder = defaultSortOrder;
