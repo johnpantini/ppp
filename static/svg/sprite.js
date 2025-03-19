@@ -145,6 +145,9 @@ export const importantWithCircle =
 export const checkmarkWithCircle =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8 15A7 7 0 108 1a7 7 0 000 14zm2.448-10.104a.997.997 0 111.508 1.306l-4.572 5.28a1 1 0 01-1.64-.07l-1.82-2.868a1 1 0 111.69-1.07l1.1 1.734 3.734-4.312z"/></svg>';
 
+export const questionMarkWithCircle =
+  '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14ZM6.932 5.612C7.054 5.298 7.425 5 7.942 5 8.615 5 9 5.478 9 5.875c0 .162-.057.33-.172.476a.985.985 0 0 1-.242.216l-.016.01a1.141 1.141 0 0 1-.098.054c-.59.286-1.53.967-1.53 2.119V9a1 1 0 0 0 2 0c0-.035.011-.12.138-.27a2.66 2.66 0 0 1 .587-.48 3 3 0 0 0 .726-.656A2.742 2.742 0 0 0 11 5.875C11 4.201 9.54 3 7.941 3c-1.275 0-2.43.745-2.873 1.888a1 1 0 1 0 1.864.724ZM8 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"></path></svg>';
+
 export const warning =
   '<svg viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M8.864 2.514a.983.983 0 00-1.728 0L1.122 13.539A.987.987 0 001.986 15h12.028a.987.987 0 00.864-1.461L8.864 2.514zM7 6a1 1 0 012 0v4a1 1 0 11-2 0V6zm2 7a1 1 0 11-2 0 1 1 0 012 0z"/></svg>';
 
