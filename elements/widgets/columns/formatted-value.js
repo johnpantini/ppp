@@ -10,6 +10,7 @@ import {
   formatPercentage,
   formatVolume,
   formatRelativeChange,
+  formatAbsoluteChange,
   formatDateWithOptions,
   stringToFloat,
   formatAmount,
@@ -20,13 +21,18 @@ import { Column, columnStyles } from './column.js';
 
 export const columnTemplate = html`
   <template>
-    <span>${(x) => (x.isBalance ? '' : x.formatValue())}</span>
+    <span class="${(x) => x.extraClass}">
+      ${(x) => (x.isBalance ? '' : x.formatValue())}
+    </span>
   </template>
 `;
 
 export class FormattedValueColumn extends Column {
   @observable
   value;
+
+  @observable
+  extraClass;
 
   formatter;
 
@@ -47,6 +53,16 @@ export class FormattedValueColumn extends Column {
       return formatRelativeChange(stringToFloat(this.value));
     } else if (this.formatter === 'amount') {
       return formatAmount(stringToFloat(this.value), this.instrument);
+    } else if (this.formatter === 'pnl') {
+      const v = stringToFloat(this.value);
+
+      if (this.formatterOptions?.colorize) {
+        this.extraClass = v > 0 ? 'positive' : v < 0 ? 'negative' : '';
+      }
+
+      return formatAbsoluteChange(v, this.instrument, {
+        maximumFractionDigits: 2
+      });
     } else if (this.formatter === 'volume') {
       return formatVolume(stringToFloat(this.value), this.formatterOptions);
     } else if (this.formatter === 'quantity') {
@@ -79,6 +95,7 @@ export class FormattedValueColumn extends Column {
       this.value = entry.value ?? '—';
       this.formatter = entry.formatter;
       this.formatterOptions = entry.formatterOptions;
+      this.extraClass = entry.extraClass;
 
       Observable.notify(this, 'value');
     }
