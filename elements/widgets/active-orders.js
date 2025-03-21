@@ -769,7 +769,10 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     this.topLoader.start();
 
     try {
-      await this.ordersTrader?.cancelRealOrder?.(order);
+      await this.ordersTrader?.cancelRealOrder?.({
+        ...order,
+        ...{ domElement: null }
+      });
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
