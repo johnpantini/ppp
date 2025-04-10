@@ -2857,8 +2857,8 @@ export const widgetTrifectaFieldTemplate = html`
     <ppp-widget-text-field
       type="text"
       autocomplete="off"
-      min="0"
-      max="1000000000"
+      min="${(x) => x.min || 0}"
+      max="${(x) => x.max || 1000000000}"
       lotsize="1"
       step="${(x) => x.step}"
       precision="${(x) => getInstrumentPrecision(x?.instrument)}"
@@ -2970,6 +2970,12 @@ export class WidgetTrifectaField extends WidgetTextField {
 
   @attr
   value;
+
+  @attr
+  min;
+
+  @attr
+  max;
 
   @attr
   placeholder;
@@ -3265,9 +3271,11 @@ export class WidgetTrifectaField extends WidgetTextField {
     const step = this.getAndUpdateStep();
 
     if (Number.isInteger(step)) {
-      this.input.value = this.input.value
-        .replaceAll(decSeparator, '')
-        .replace(/^0/, '');
+      this.input.value = this.input.value.replaceAll(decSeparator, '');
+
+      if (!this.zeroable) {
+        this.input.value = this.input.value.replace(/^0/, '');
+      }
     }
 
     return true;
