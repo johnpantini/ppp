@@ -138,6 +138,7 @@ export default function (i18n) {
         [TRADER_CAPS.CAPS_CONDITIONAL_ORDERS]: 'Conditional orders',
         [TRADER_CAPS.CAPS_ACTIVE_ORDERS]: 'Active orders',
         [TRADER_CAPS.CAPS_ORDERBOOK]: 'Orderbook',
+        [TRADER_CAPS.CAPS_CANDLES]: 'Candles',
         [TRADER_CAPS.CAPS_TIME_AND_SALES]: 'Лента всех сделок',
         [TRADER_CAPS.CAPS_POSITIONS]: 'Positions',
         [TRADER_CAPS.CAPS_TIMELINE]: 'Timeline',

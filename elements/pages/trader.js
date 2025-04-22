@@ -492,6 +492,7 @@ export const traderNameAndRuntimePartial = ({
               TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
               TRADER_CAPS.CAPS_ACTIVE_ORDERS,
               TRADER_CAPS.CAPS_ORDERBOOK,
+              TRADER_CAPS.CAPS_CANDLES,
               TRADER_CAPS.CAPS_TIME_AND_SALES,
               TRADER_CAPS.CAPS_POSITIONS,
               TRADER_CAPS.CAPS_TIMELINE,

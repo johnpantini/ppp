@@ -322,24 +322,27 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   ohlcv = [];
 
+  // By valueOf() timestamp.
+  candles = new Map();
+
   @observable
   chartTrader;
 
   @observable
   tradesTrader;
 
+  @observable
+  candlesTrader;
+
   // Ready to receive realtime updates.
   @attr({ mode: 'boolean' })
   ready;
 
-  @observable
-  print;
+  @attr
+  tf;
 
   @observable
   traderEvent;
-
-  @observable
-  candle;
 
   @observable
   lastCandle;
@@ -423,11 +426,11 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
     }
 
-    if (!this.document.tradesTrader) {
+    if (!this.document.tradesTrader && !this.document.candlesTrader) {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер ленты сделок.',
+        text: 'Отсутствует трейдер формирования графика.',
         keep: true
       });
     }
@@ -494,16 +497,33 @@ export class LightChartWidget extends WidgetWithInstrument {
 
       await this.setupChart();
 
-      this.tradesTrader = await ppp.getOrCreateTrader(
-        this.document.tradesTrader
-      );
+      this.document.feedMode ??= 'prints';
 
-      await this.tradesTrader.subscribeFields?.({
-        source: this,
-        fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
-        }
-      });
+      if (this.document.tradesTrader && this.document.feedMode === 'prints') {
+        this.tradesTrader = await ppp.getOrCreateTrader(
+          this.document.tradesTrader
+        );
+
+        await this.tradesTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            print: TRADER_DATUM.MARKET_PRINT
+          }
+        });
+      }
+
+      if (this.document.candlesTrader && this.document.feedMode === 'candles') {
+        this.candlesTrader = await ppp.getOrCreateTrader(
+          this.document.candlesTrader
+        );
+
+        await this.candlesTrader.subscribeFields?.({
+          source: this,
+          fieldDatumPairs: {
+            candle: TRADER_DATUM.CANDLE
+          }
+        });
+      }
 
       await this.chartTrader.subscribeFields?.({
         source: this,
@@ -542,11 +562,20 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
     }
 
-    if (this.tradesTrader) {
+    if (this.tradesTrader && this.document.feedMode === 'prints') {
       await this.tradesTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
           print: TRADER_DATUM.MARKET_PRINT
+        }
+      });
+    }
+
+    if (this.candlesTrader && this.document.feedMode === 'candles') {
+      await this.candlesTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: {
+          candle: TRADER_DATUM.CANDLE
         }
       });
     }
@@ -615,7 +644,26 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.absoluteChange = candle.close - candle.open;
         this.relativeChange = (candle.close - candle.open) / candle.open;
       }
+
+      if (this.candlesTrader) {
+        const dataCandle = this.candles.get(param.time);
+
+        if (dataCandle) {
+          this.candlesTrader.trader.bus.emit('ppp:light-chart', {
+            event: 'crosshairmove',
+            tf: this.tf,
+            candle: dataCandle
+          });
+        }
+      }
     } else {
+      this.candlesTrader &&
+        this.candlesTrader.trader.bus.emit('ppp:light-chart', {
+          event: 'crosshairmove',
+          tf: this.tf,
+          candle: null
+        });
+
       this.shouldShowPriceInfo = false;
     }
   }
@@ -627,7 +675,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   applyChartOptions() {
-    const tf = this.getCurentTimeframe();
+    const tf = this.getCurrentTimeframe();
 
     this.chart.applyOptions({
       timeframe: '5',
@@ -748,6 +796,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.ohlcv = [];
       this.hasMore = true;
 
+      this.candles.clear();
       this.#historyQueue.push(this.instrument);
     }
   }
@@ -767,7 +816,7 @@ export class LightChartWidget extends WidgetWithInstrument {
           tab.setAttribute('disabled', '');
         }
 
-        const { unit, value } = this.getCurentTimeframe();
+        const { unit, value } = this.getCurrentTimeframe();
         const { candles, cursor } =
           (await this.chartTrader.historicalCandles({
             instrument: this.instrument,
@@ -783,10 +832,17 @@ export class LightChartWidget extends WidgetWithInstrument {
         }
 
         if (candles?.length) {
-          this.ohlcv = [
-            ...candles.map(this.traderQuoteToChartQuote),
-            ...this.ohlcv
-          ];
+          const newCandles = [];
+
+          candles.forEach((c) => {
+            const tq = this.traderQuoteToChartQuote(c);
+
+            newCandles.push(tq);
+
+            this.candles.set(tq.time, tq);
+          });
+
+          this.ohlcv = [...newCandles, ...this.ohlcv];
         }
 
         this.setData(this.ohlcv);
@@ -811,6 +867,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.ohlcv = [];
         this.hasMore = true;
 
+        this.candles.clear();
         this.mainSeries && this.setData([]);
         this.requestHistory(this.instrument);
       }
@@ -832,15 +889,60 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
-  getCurentTimeframe() {
-    return (
-      this.timeframes[+this.tfSelector?.activeid - 1] ??
+  timeFrameObjectToSeconds(tfObject) {
+    const { unit, value } = tfObject;
+    // Day in seconds.
+    let tf = 3600 * 24;
+
+    switch (unit) {
+      case 'Sec':
+        tf = value;
+
+        break;
+      case 'Min':
+        tf = value * 60;
+
+        break;
+      case 'Hour':
+        tf = value * 3600;
+
+        break;
+      case 'Day':
+        tf = value * 3600 * 24;
+
+        break;
+      case 'Week':
+        tf = value * 3600 * 24 * 7;
+
+        break;
+      case 'Month':
+        const now = new Date();
+        const daysInMonth = new Date(
+          now.getFullYear(),
+          now.getMonth() + 1,
+          0
+        ).getDate();
+
+        tf = value * 3600 * 24 * daysInMonth;
+
+        break;
+    }
+
+    return tf;
+  }
+
+  getCurrentTimeframe() {
+    const tfObject = this.timeframes[+this.tfSelector?.activeid - 1] ??
       this.timeframes[this.document.activeTimeFrameTab - 1] ??
       this.timeframes[0] ?? {
         unit: 'Day',
         value: 1
-      }
-    );
+      };
+
+    // Always update chart's "tf" attribute.
+    this.tf = this.timeFrameObjectToSeconds(tfObject);
+
+    return tfObject;
   }
 
   timeframeChanged() {
@@ -850,6 +952,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.ohlcv = [];
         this.hasMore = true;
 
+        this.candles.clear();
         this.requestHistory(this.instrument);
       }
     }
@@ -861,7 +964,8 @@ export class LightChartWidget extends WidgetWithInstrument {
       high: quote.high,
       low: quote.low,
       close: quote.close,
-      volume: quote.volume
+      volume: quote.volume,
+      customValues: quote.customValues
     };
 
     if (typeof quote.vw === 'number') {
@@ -883,10 +987,10 @@ export class LightChartWidget extends WidgetWithInstrument {
    * @returns {number}
    */
   roundTimestampForTimeframe(timestamp, tf) {
-    const printTime = new Date(timestamp);
+    const time = new Date(timestamp);
     const coefficient = 1000 * tf;
     const roundedTime = new Date(
-      Math.floor(printTime.getTime() / coefficient) * coefficient
+      Math.floor(time.getTime() / coefficient) * coefficient
     );
 
     return (
@@ -895,9 +999,15 @@ export class LightChartWidget extends WidgetWithInstrument {
     );
   }
 
-  // Update the last candle here.
+  @observable
+  print;
+
+  // Updates the last candle.
   printChanged(oldValue, newValue) {
-    if (newValue?.symbol !== this.instrument.symbol) {
+    if (
+      this.tradesTrader.symbolToCanonical(newValue?.symbol) !==
+      this.instrument.symbol
+    ) {
       return;
     }
 
@@ -930,44 +1040,10 @@ export class LightChartWidget extends WidgetWithInstrument {
         }
       }
 
-      const { unit, value } = this.getCurentTimeframe();
-      let tf = 1;
+      // Update this.tf value.
+      this.getCurrentTimeframe();
 
-      switch (unit) {
-        case 'Sec':
-          tf = value;
-
-          break;
-        case 'Min':
-          tf = value * 60;
-
-          break;
-        case 'Hour':
-          tf = value * 3600;
-
-          break;
-        case 'Day':
-          tf = value * 3600 * 24;
-
-          break;
-        case 'Week':
-          tf = value * 3600 * 24 * 7;
-
-          break;
-        case 'Month':
-          const now = new Date();
-          const daysInMonth = new Date(
-            now.getFullYear(),
-            now.getMonth() + 1,
-            0
-          ).getDate();
-
-          tf = value * 3600 * 24 * daysInMonth;
-
-          break;
-      }
-
-      const time = this.roundTimestampForTimeframe(newValue.timestamp, tf);
+      const time = this.roundTimestampForTimeframe(newValue.timestamp, this.tf);
 
       if (
         typeof this.lastCandle === 'undefined' ||
@@ -979,10 +1055,11 @@ export class LightChartWidget extends WidgetWithInstrument {
           low: newValue.price,
           close: newValue.price,
           time,
-          volume: newValue.volume
+          volume: newValue.volume,
+          customValues: newValue.customValues
         };
       } else {
-        const { high, low, open, volume } = this.lastCandle;
+        const { high, low, open, volume, customValues } = this.lastCandle;
 
         this.lastCandle = {
           open,
@@ -990,14 +1067,42 @@ export class LightChartWidget extends WidgetWithInstrument {
           low: Math.min(low, newValue.price),
           close: newValue.price,
           time,
-          volume: volume + newValue.volume
+          volume: volume + newValue.volume,
+          customValues
         };
       }
     }
   }
 
+  @observable
+  candle;
+
+  candleChanged(oldValue, newValue) {
+    if (
+      this.candlesTrader.symbolToCanonical(newValue?.symbol) !==
+      this.instrument.symbol
+    ) {
+      return;
+    }
+
+    // Update this.tf value.
+    this.getCurrentTimeframe();
+
+    this.lastCandle = {
+      open: newValue.open,
+      high: newValue.high,
+      low: newValue.low,
+      close: newValue.close,
+      time: this.roundTimestampForTimeframe(newValue.timestamp, this.tf),
+      volume: newValue.volume,
+      customValues: newValue.customValues
+    };
+  }
+
   lastCandleChanged(oldValue, newValue) {
     if (newValue?.close) {
+      this.candles.set(newValue.time, newValue);
+
       try {
         this.mainSeries.update(newValue);
         this.volumeSeries.update({
@@ -1029,7 +1134,9 @@ export class LightChartWidget extends WidgetWithInstrument {
     return {
       $set: {
         chartTraderId: this.container.chartTraderId.value,
+        feedMode: this.container.feedMode.value,
         tradesTraderId: this.container.tradesTraderId.value,
+        candlesTraderId: this.container.candlesTraderId.value,
         timeframes: this.container.timeframeList.value,
         showToolbar: this.container.showToolbar.checked,
         showResetButton: this.container.showResetButton.checked,
@@ -1063,7 +1170,7 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер графика</h5>
+              <h5>Трейдер исторических данных</h5>
               <p class="description">
                 Трейдер, который будет являться источником исторических данных
                 графика.
@@ -1135,10 +1242,29 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
+              <h5>Режим формирования графика</h5>
+            </div>
+            <div class="spacing2"></div>
+            <div class="widget-settings-input-group">
+              <ppp-radio-group
+                orientation="vertical"
+                value="${(x) => x.document.feedMode ?? 'prints'}"
+                ${ref('feedMode')}
+              >
+                <ppp-radio value="prints">По сделкам</ppp-radio>
+                <ppp-radio value="candles">По барам</ppp-radio>
+              </ppp-radio-group>
+            </div>
+          </div>
+          <div
+            class="widget-settings-section"
+            ?hidden="${(x) => x?.feedMode?.value !== 'prints'}"
+          >
+            <div class="widget-settings-label-group">
               <h5>Трейдер ленты сделок</h5>
               <p class="description">
-                Будет использован как источник последних сделок для формирования
-                графика в режиме реального времени.
+                График будет формироваться из сделок, приходящих от
+                трейдера-источника.
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1171,6 +1297,66 @@ export async function widgetDefinition() {
                             $or: [
                               { removed: { $ne: true } },
                               { _id: `[%#this.document.tradesTraderId ?? ''%]` }
+                            ]
+                          }
+                        ]
+                      })
+                      .sort({ updatedAt: -1 });
+                  };
+                }}"
+                :transform="${() => ppp.decryptDocumentsTransformation()}"
+              ></ppp-query-select>
+              <ppp-button
+                appearance="default"
+                @click="${() => window.open('?page=trader', '_blank').focus()}"
+              >
+                +
+              </ppp-button>
+            </div>
+          </div>
+          <div
+            class="widget-settings-section"
+            ?hidden="${(x) => x?.feedMode?.value !== 'candles'}"
+          >
+            <div class="widget-settings-label-group">
+              <h5>Трейдер баров</h5>
+              <p class="description">
+                График будет формироваться из баров, приходящих от
+                трейдера-источника.
+              </p>
+            </div>
+            <div class="control-line flex-start">
+              <ppp-query-select
+                ${ref('candlesTraderId')}
+                deselectable
+                standalone
+                placeholder="Опционально, нажмите для выбора"
+                value="${(x) => x.document.candlesTraderId}"
+                :context="${(x) => x}"
+                :preloaded="${(x) => x.document.candlesTrader ?? ''}"
+                :displayValueFormatter="${() => (item) =>
+                  html`
+                    <span style="color:${getTraderSelectOptionColor(item)}">
+                      ${item?.name}
+                    </span>
+                  `}"
+                :query="${() => {
+                  return (context) => {
+                    return context.services
+                      .get('mongodb-atlas')
+                      .db('ppp')
+                      .collection('traders')
+                      .find({
+                        $and: [
+                          {
+                            caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_CANDLES%]`
+                          },
+                          {
+                            $or: [
+                              { removed: { $ne: true } },
+                              {
+                                _id: `[%#this.document.candlesTraderId ?? ''%]`
+                              }
                             ]
                           }
                         ]
