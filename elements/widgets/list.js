@@ -580,12 +580,12 @@ export class ListWidget extends WidgetWithInstrument {
       return;
     }
 
-    const tr = document.createElement('div');
+    const row = document.createElement('div');
 
-    tr.setAttribute('class', 'tr');
-    tr.setAttribute('symbol', payload.symbol);
-    tr.setAttribute('index', index);
-    tr.classList.add('row');
+    row.setAttribute('class', 'tr');
+    row.setAttribute('symbol', payload.symbol);
+    row.setAttribute('index', index);
+    row.classList.add('row');
 
     for (const col of this.columns.array) {
       const cell = document.createElement('div');
@@ -599,44 +599,74 @@ export class ListWidget extends WidgetWithInstrument {
       cell.trader = payload.traderId;
 
       cell.append(column);
-      tr.append(cell);
+      row.append(cell);
     }
 
     const lastEmptyCell = document.createElement('div');
 
     lastEmptyCell.setAttribute('class', 'td cell');
-    tr.appendChild(lastEmptyCell);
+    row.appendChild(lastEmptyCell);
 
     if (options.prepend) {
-      this.tableBody.prepend(tr);
+      this.tableBody.prepend(row);
     } else {
-      this.tableBody.append(tr);
+      this.tableBody.append(row);
     }
 
     this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
 
     this.sort();
 
-    return tr;
+    return row;
   }
 
-  updateRow(row, payload) {
+  updateRow(row, payload, options = {}) {
     if (row) {
       const columns = this.columnsArray ?? [];
 
       for (let i = 0; i < columns.length; i++) {
         const col = columns[i];
+        const cell = row.children[i]?.firstElementChild;
 
         if (col.source === COLUMN_SOURCE.FORMATTED_VALUE) {
-          const cell = row.children[i]?.firstElementChild;
-
           if (cell?.payload) {
-            cell.payload.values = payload.values;
+            if (options.updateInstrument) {
+              cell.payload = payload;
+              cell.trader = payload.traderId;
+            } else {
+              cell.payload.values = payload.values;
+            }
 
-            cell.rebuild();
+            cell.rebuild({
+              updateInstrument: options.updateInstrument
+            });
           }
+        } else if (options.updateInstrument) {
+          let index = payload.index;
+
+          if (typeof index !== 'number') {
+            index = this.maxSeenIndex + 1;
+
+            payload.index = index;
+          }
+
+          if (!payload.symbol) {
+            continue;
+          }
+
+          row.setAttribute('symbol', payload.symbol);
+          row.setAttribute('index', index);
+
+          cell.payload = payload;
+          cell.trader = payload.traderId;
+
+          cell.updateInstrument();
+
+          this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
         }
       }
+
+      this.sort();
     }
 
     return row;

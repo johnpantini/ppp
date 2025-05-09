@@ -48,15 +48,15 @@ export default function (i18n) {
         [BROKERS.UNKNOWN]: 'Unknown'
       },
       columnSource: {
-        [COLUMN_SOURCE.INSTRUMENT]: 'Инструмент',
-        [COLUMN_SOURCE.SYMBOL]: 'Тикер',
-        [COLUMN_SOURCE.INSTRUMENT_TYPE]: 'Тип',
+        [COLUMN_SOURCE.INSTRUMENT]: 'Instrument',
+        [COLUMN_SOURCE.SYMBOL]: 'Symbol',
+        [COLUMN_SOURCE.INSTRUMENT_TYPE]: 'Type',
         [COLUMN_SOURCE.BEST_BID]: 'Bid',
         [COLUMN_SOURCE.BEST_ASK]: 'Ask',
-        [COLUMN_SOURCE.LAST_PRICE]: 'Цена',
+        [COLUMN_SOURCE.LAST_PRICE]: 'Price',
         [COLUMN_SOURCE.LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены',
         [COLUMN_SOURCE.LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены, %',
-        [COLUMN_SOURCE.EXTENDED_LAST_PRICE]: 'Цена+',
+        [COLUMN_SOURCE.EXTENDED_LAST_PRICE]: 'Price+',
         [COLUMN_SOURCE.EXTENDED_LAST_PRICE_ABSOLUTE_CHANGE]: 'Изм. цены+',
         [COLUMN_SOURCE.EXTENDED_LAST_PRICE_RELATIVE_CHANGE]: 'Изм. цены+, %',
         [COLUMN_SOURCE.PL_ABSOLUTE]: 'Доход',
@@ -64,12 +64,12 @@ export default function (i18n) {
         [COLUMN_SOURCE.EXTENDED_PL_ABSOLUTE]: 'Доход+',
         [COLUMN_SOURCE.EXTENDED_PL_RELATIVE]: 'Доход+, %',
         [COLUMN_SOURCE.POSITION_AVAILABLE]: 'Доступно',
-        [COLUMN_SOURCE.POSITION_AVERAGE]: 'Средняя',
+        [COLUMN_SOURCE.POSITION_AVERAGE]: 'AvgPx',
         [COLUMN_SOURCE.TOTAL_AMOUNT]: 'Стоимость',
         [COLUMN_SOURCE.EXTENDED_TOTAL_AMOUNT]: 'Стоимость+',
-        [COLUMN_SOURCE.DAY_VOLUME]: 'Объём',
+        [COLUMN_SOURCE.DAY_VOLUME]: 'Volume',
         [COLUMN_SOURCE.TRADING_STATUS]: 'Торговый статус',
-        [COLUMN_SOURCE.FORMATTED_VALUE]: 'Значение'
+        [COLUMN_SOURCE.FORMATTED_VALUE]: 'Value'
       },
       datum: {
         [TRADER_DATUM.LAST_PRICE]: 'Price',

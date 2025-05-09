@@ -22,6 +22,8 @@ export const columnStyles = css`
 `;
 
 class Column extends PPPElement {
+  #denormalizedColumn;
+
   @observable
   instrument;
 
@@ -55,6 +57,11 @@ class Column extends PPPElement {
     this.widget = this.getRootNode().host;
     this.payload = this.parentNode.payload;
     this.column = this.parentNode.column;
+
+    return this.updateInstrument();
+  }
+
+  async updateInstrument() {
     this.isBalance = this.hasAttribute('balance');
 
     if (!this.parentNode.trader) {
@@ -67,13 +74,14 @@ class Column extends PPPElement {
     }
 
     // Populate trader and extraTrader fields to the column here.
-    const column = await this.widget?.container.denormalization.denormalize(
-      this.column
-    );
+    this.#denormalizedColumn ??=
+      await this.widget?.container.denormalization.denormalize(this.column);
 
     try {
-      if (column?.defaultTraderId) {
-        this.defaultTrader = await ppp.getOrCreateTrader(column.defaultTrader);
+      if (this.#denormalizedColumn?.defaultTraderId) {
+        this.defaultTrader = await ppp.getOrCreateTrader(
+          this.#denormalizedColumn.defaultTrader
+        );
       }
 
       if (this.payload?.instrument) {
@@ -87,12 +95,16 @@ class Column extends PPPElement {
         Observable.notify(this, 'payload');
       }
 
-      if (column?.trader) {
-        this.trader = await ppp.getOrCreateTrader(column.trader);
+      if (this.#denormalizedColumn?.trader) {
+        this.trader = await ppp.getOrCreateTrader(
+          this.#denormalizedColumn.trader
+        );
       }
 
-      if (column?.extraTrader) {
-        this.extraTrader = await ppp.getOrCreateTrader(column.extraTrader);
+      if (this.#denormalizedColumn?.extraTrader) {
+        this.extraTrader = await ppp.getOrCreateTrader(
+          this.#denormalizedColumn.extraTrader
+        );
       }
     } catch (e) {
       return this.widget.catchException(e);

@@ -32,25 +32,17 @@ export async function extension({ ppp, baseExtensionUrl, extension }) {
         >
           <ppp-tab id="alor-ksur">Алор КСУР</ppp-tab>
           <ppp-tab id="alor-kpur">Алор КПУР</ppp-tab>
-          <ppp-tab id="alor-ksur-turbo">Алор КСУР с Турбо</ppp-tab>
-          <ppp-tab id="alor-kpur-turbo">Алор КПУР с Турбо</ppp-tab>
-          <ppp-tab id="alor-ksur-spbex-no-overnight">
-            Алор КСУР СПБ без переноса
-          </ppp-tab>
-          <ppp-tab id="alor-kpur-spbex-no-overnight">
-            Алор КПУР СПБ без переноса
-          </ppp-tab>
+          <ppp-tab id="alor-ksur-edp">Алор КСУР с ЕДП</ppp-tab>
+          <ppp-tab id="alor-kpur-edp">Алор КПУР с ЕДП</ppp-tab>
+          <ppp-tab id="alor-knur">Алор КНУР</ppp-tab>
+          <ppp-tab id="alor-knur-edp">Алор КНУР с ЕДП</ppp-tab>
           <ppp-tab id="tinkoff">Тинькофф</ppp-tab>
           <ppp-tab-panel id="alor-ksur-panel"></ppp-tab-panel>
           <ppp-tab-panel id="alor-kpur-panel"></ppp-tab-panel>
-          <ppp-tab-panel id="alor-ksur-turbo-panel"></ppp-tab-panel>
-          <ppp-tab-panel id="alor-kpur-turbo-panel"></ppp-tab-panel>
-          <ppp-tab-panel
-            id="alor-ksur-spbex-no-overnight-panel"
-          ></ppp-tab-panel>
-          <ppp-tab-panel
-            id="alor-kpur-spbex-no-overnight-panel"
-          ></ppp-tab-panel>
+          <ppp-tab-panel id="alor-ksur-edp-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="alor-kpur-edp-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="alor-knur-panel"></ppp-tab-panel>
+          <ppp-tab-panel id="alor-knur-edp-panel"></ppp-tab-panel>
           <ppp-tab-panel id="tinkoff-panel"></ppp-tab-panel>
         </ppp-tabs>
         <ppp-text-field
@@ -188,10 +180,10 @@ export async function extension({ ppp, baseExtensionUrl, extension }) {
           const categoryId = {
             'alor-ksur': 1,
             'alor-kpur': 2,
-            'alor-ksur-turbo': 4,
-            'alor-kpur-turbo': 5,
-            'alor-ksur-spbex-no-overnight': 6,
-            'alor-kpur-spbex-no-overnight': 7
+            'alor-ksur-edp': 700,
+            'alor-kpur-edp': 701,
+            'alor-knur': 8,
+            'alor-knur-edp': 702
           }[id];
 
           json = await (

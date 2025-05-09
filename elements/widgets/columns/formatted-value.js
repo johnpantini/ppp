@@ -50,7 +50,13 @@ export class FormattedValueColumn extends Column {
     } else if (this.formatter === 'percent') {
       return formatPercentage(stringToFloat(this.value));
     } else if (this.formatter === 'change') {
-      return formatRelativeChange(stringToFloat(this.value));
+      const v = stringToFloat(this.value);
+
+      if (this.formatterOptions?.colorize) {
+        this.extraClass = v > 0 ? 'positive' : v < 0 ? 'negative' : '';
+      }
+
+      return formatRelativeChange(v);
     } else if (this.formatter === 'amount') {
       return formatAmount(stringToFloat(this.value), this.instrument);
     } else if (this.formatter === 'pnl') {
@@ -86,7 +92,7 @@ export class FormattedValueColumn extends Column {
     }
   }
 
-  rebuild() {
+  async rebuild(options = {}) {
     if (!this.column?.valueKey) {
       this.value = '—';
     } else {
@@ -99,13 +105,17 @@ export class FormattedValueColumn extends Column {
 
       Observable.notify(this, 'value');
     }
+
+    if (options.updateInstrument) {
+      return this.updateInstrument();
+    }
   }
 
   async connectedCallback() {
     await super.connectedCallback();
 
     if (!this.isBalance) {
-      this.rebuild();
+      return this.rebuild();
     }
   }
 }
