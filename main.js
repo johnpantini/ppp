@@ -13,7 +13,7 @@ window.addEventListener('load', async () => {
 
     if (window.location.search !== lastVisitedUrl) {
       return window.location.replace(
-        window.location.origin + `/desktop${lastVisitedUrl}`
+        `${window.location.origin}/desktop${lastVisitedUrl}`
       );
     }
   }
