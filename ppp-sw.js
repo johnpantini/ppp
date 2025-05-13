@@ -68,6 +68,7 @@ function removeDecorators(source) {
           l: nextLine
         });
 
+        // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
         t === 'prop' && (lines[i + 1] = '');
       }
     } else if (/(^export default)|(\/\/ export default)/.test(line)) {

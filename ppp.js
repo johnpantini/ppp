@@ -90,8 +90,8 @@ class PPPCrypto {
     return this.#key;
   }
 
-  async encrypt(iv, plaintext, password) {
-    if (typeof iv === 'string') iv = stringToBuffer(iv);
+  async encrypt(ivector, plaintext, password) {
+    const iv = typeof ivector === 'string' ? stringToBuffer(ivector) : ivector;
 
     const encoded = new TextEncoder().encode(plaintext);
     const key = await this.#generateKey(password);
@@ -107,8 +107,8 @@ class PPPCrypto {
     return bufferToString(ciphertext);
   }
 
-  async decrypt(iv, ciphertext, password) {
-    if (typeof iv === 'string') iv = stringToBuffer(iv);
+  async decrypt(ivector, ciphertext, password) {
+    const iv = typeof ivector === 'string' ? stringToBuffer(ivector) : ivector;
 
     const key = await this.#generateKey(password);
     const decrypted = await window.crypto.subtle.decrypt(
@@ -327,7 +327,7 @@ class PPP {
                 shouldShowSwitchToCloudDBButton: true
               });
 
-              const listener = function () {
+              const listener = () => {
                 localStorage.removeItem('ppp-use-alternative-mongo');
                 window.location.reload();
 
@@ -444,7 +444,7 @@ class PPP {
               shouldShowSwitchToCloudDBButton: true
             });
 
-            const listener = function () {
+            const listener = () => {
               localStorage.removeItem('ppp-use-alternative-mongo');
               window.location.reload();
 
@@ -501,7 +501,7 @@ class PPP {
     }
 
     try {
-      await import(`./elements/app.js`);
+      await import('./elements/app.js');
 
       const appElement = document.createElement('ppp-app');
 
