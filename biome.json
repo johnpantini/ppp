@@ -36,7 +36,9 @@
       "style": {
         "useTemplate": "off",
         "useNumberNamespace": "off",
-        "noUselessElse": "off"
+        "noUselessElse": "off",
+        "noParameterAssign": "off",
+        "useDefaultParameterLast": "off"
       },
       "complexity": {
         "noForEach": "off"
