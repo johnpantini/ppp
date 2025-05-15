@@ -44,7 +44,8 @@
         "noForEach": "off"
       },
       "suspicious": {
-        "noGlobalIsNan": "off"
+        "noGlobalIsNan": "off",
+        "noAssignInExpressions": "off"
       }
     }
   }
