@@ -699,7 +699,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 <div class="label-group full" style="min-width: 600px">
                   <h5>Параметры запуска</h5>
                   <p class="description">
-                    Можно переопределить команду и аргументы на запуск сервиса.
+                    Можно переопределить команду и аргументы на запуск сервиса. В аргументах доступны $PPP_WORKER_ID и $PPP_WORKER_PATH.
                   </p>
                   <ppp-text-field
                     optional
@@ -1547,7 +1547,7 @@ export class ServicePppAspirantWorkerPage extends Page {
         // Create new bucket.
         const rNewBucket = await maybeFetchError(
           await ppp.fetch(
-            `https://storage.api.cloud.yandex.net/storage/v1/buckets`,
+            'https://storage.api.cloud.yandex.net/storage/v1/buckets',
             {
               method: 'POST',
               headers: {
@@ -1633,6 +1633,13 @@ export class ServicePppAspirantWorkerPage extends Page {
         this.#getInternalEnv()
       );
 
+      const args = (this.document.args || '')
+        .replaceAll('$PPP_WORKER_ID', this.document._id)
+        .replaceAll(
+          '$PPP_WORKER_PATH',
+          `\${NOMAD_TASK_DIR}/nginx/workers/${this.document._id}/${this.document._id}.mjs`
+        );
+
       await maybeFetchError(
         await fetch(`${aspirantUrl}/api/v1/workers`, {
           cache: 'reload',
@@ -1646,7 +1653,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             enableHttp: this.enableHttp.checked,
             env,
             command: this.document.command,
-            args: this.document.args
+            args
           })
         }),
         'Не удалось запланировать сервис на исполнение.'
