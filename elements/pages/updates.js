@@ -222,6 +222,10 @@ export class UpdatesPage extends Page {
   }
 
   async updateApp(silent = false) {
+    const token = ppp.keyVault.getKey('github-token');
+
+    if (!token) return;
+
     this.beginOperation();
 
     try {
