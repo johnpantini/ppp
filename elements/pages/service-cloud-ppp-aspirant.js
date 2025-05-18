@@ -330,7 +330,7 @@ export class ServiceCloudPppAspirantPage extends Page {
       GLOBAL_PROXY_URL: ppp.keyVault.getKey('global-proxy-url'),
       REDIS_HOST: redisApi.host,
       REDIS_PORT: redisApi.port.toString(),
-      REDIS_TLS: !!redisApi.tls ? 'true' : '',
+      REDIS_TLS: redisApi.tls ? 'true' : '',
       REDIS_USERNAME: redisApi.username?.toString() ?? 'default',
       REDIS_PASSWORD: redisApi.password?.toString(),
       REDIS_DATABASE: redisApi.database.toString()

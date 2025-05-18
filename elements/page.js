@@ -496,7 +496,7 @@ class Page extends PPPElement {
 
   #keypressHandler(e) {
     switch (e.code) {
-      case 'Enter':
+      case 'Enter': {
         const cp = e.composedPath();
 
         if (cp.find((el) => el?.tagName?.toLowerCase() === 'textarea')) return;
@@ -512,6 +512,7 @@ class Page extends PPPElement {
         }
 
         break;
+      }
     }
   }
 
@@ -980,7 +981,7 @@ class Page extends PPPElement {
           errorMessage: e?.href
             ? html`Документ с таким названием уже существует, перейдите по
                 <a href="${e.href}">ссылке</a> для редактирования.`
-            : e?.message ?? ppp.t('$pppErrors.E_DOCUMENT_CONFLICT')
+            : (e?.message ?? ppp.t('$pppErrors.E_DOCUMENT_CONFLICT'))
         });
       default:
         invalidate(ppp.app.toast, {
@@ -1235,7 +1236,7 @@ class PageWithService {
     const parsed = parsePPPScript(snippet.value);
 
     if (parsed) {
-      [version] = parsed?.meta?.version;
+      [version] = parsed?.meta?.version ?? [];
       version = Math.abs(+version) || 1;
     }
 
@@ -1282,7 +1283,7 @@ class PageWithService {
             });
           }
 
-          const [version] = parsed.meta?.version;
+          const [version] = parsed.meta?.version ?? [];
 
           this.actualVersion = Math.abs(parseInt(version) || 1);
 

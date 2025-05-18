@@ -18,7 +18,7 @@ export const backupMongodbModalPageTemplate = html`
     <form novalidate>
       <section>
         <div class="label-group full">
-          <h5>API Yandex Cloud</h5>
+          <h5>API S3</h5>
           <p class="description">
             API, который будет использован для выгрузки резервной копии в
             облачное хранилище.
@@ -30,7 +30,7 @@ export const backupMongodbModalPageTemplate = html`
         </div>
         <div class="input-group">
           <ppp-query-select
-            ${ref('ycApiId')}
+            ${ref('s3ApiID')}
             :context="${(x) => x}"
             :query="${() => {
               return (context) => {
@@ -88,7 +88,7 @@ export class BackupMongodbModalPage extends Page {
     this.beginOperation();
 
     try {
-      await validate(this.ycApiId);
+      await validate(this.s3ApiID);
 
       const collections = [
         'apis',
@@ -133,7 +133,7 @@ export class BackupMongodbModalPage extends Page {
         ycPrivateKey,
         ycStaticKeyID,
         ycStaticKeySecret
-      } = this.ycApiId.datum();
+      } = this.s3ApiID.datum();
       const { psinaFolderId, iamToken } = await getYCPsinaFolder({
         jose,
         ycServiceAccountID,
@@ -162,7 +162,7 @@ export class BackupMongodbModalPage extends Page {
         // Create new bucket.
         const rNewBucket = await maybeFetchError(
           await ppp.fetch(
-            `https://storage.api.cloud.yandex.net/storage/v1/buckets`,
+            'https://storage.api.cloud.yandex.net/storage/v1/buckets',
             {
               method: 'POST',
               headers: {

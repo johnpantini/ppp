@@ -1,5 +1,7 @@
+/** @decorator */
+
 import ppp from '../../ppp.js';
-import { css, html, ref, when } from '../../vendor/fast-element.min.js';
+import { css, html, ref, observable } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { bufferToString, generateIV } from '../../lib/ppp-crypto.js';
 import {
@@ -28,9 +30,11 @@ export const cloudServicesPageTemplate = html`
       <ppp-page-header>
         Облачные сервисы
         <ppp-badge slot="controls" appearance="yellow">
-          ${shouldUseAlternativeMongo
-            ? 'Альтернативная MongoDB'
-            : 'Облачная MongoDB'}
+          ${
+            shouldUseAlternativeMongo
+              ? 'Альтернативная MongoDB'
+              : 'Облачная MongoDB'
+          }
         </ppp-badge>
         <ppp-button
           ?disabled="${() => !ppp.keyVault.ok()}"
@@ -77,59 +81,34 @@ export const cloudServicesPageTemplate = html`
           slot="body"
         ></ppp-import-cloud-keys-modal-page>
       </ppp-modal>
-      ${when(
-        () => ppp.keyVault.ok(),
-        html`
-          <section>
-            <div class="control-stack">
-              <ppp-banner class="inline" appearance="warning">
-                ${when(
-                  ppp.keyVault.getKey('mongo-location-url'),
-                  html`
-                    <span>
-                      Чтобы перенести ключи в другой браузер, используйте это
-                      компактное представление:
-                    </span>
-                  `
-                )}
-                ${when(
-                  !ppp.keyVault.getKey('mongo-location-url'),
-                  html`
-                    <span>
-                      Чтобы получить компактное представление, необходимо
-                      соединиться с облачной базой данных MongoDB Cloud Services
-                      хотя бы 1 раз.
-                    </span>
-                  `
-                )}
-              </ppp-banner>
-              <ppp-copyable>
-                ${(x) => x.generateCloudCredentialsString()}
-              </ppp-copyable>
-            </div>
-          </section>
-        `
-      )}
-      ${when(
-        () => !ppp.keyVault.ok(),
-        html`
-          <section>
-            <div class="control-stack">
-              <ppp-banner class="inline" appearance="warning">
-                Сохраните заново или
-                <a
-                  class="link"
-                  @click="${(x) =>
-                    x.importCloudKeysModal.removeAttribute('hidden')}"
-                  href="javascript:void(0)"
-                  >импортируйте</a
-                >
-                ключи облачных сервисов, чтобы пользоваться приложением.
-              </ppp-banner>
-            </div>
-          </section>
-        `
-      )}
+      <section ?hidden="${() => !ppp.keyVault.ok()}">
+        <div class="control-stack">
+          <ppp-banner class="inline" appearance="warning">
+            <span>
+              Чтобы перенести ключи в другой браузер, используйте это компактное
+              представление:
+            </span>
+          </ppp-banner>
+          <ppp-copyable>
+            ${(x) => x.cloudCredentialsString}
+          </ppp-copyable>
+        </div>
+      </section>
+      <section ?hidden="${() => ppp.keyVault.ok()}">
+        <div class="control-stack">
+          <ppp-banner class="inline" appearance="warning">
+            Введите заново или
+            <a
+              class="link"
+              @click="${(x) =>
+                x.importCloudKeysModal.removeAttribute('hidden')}"
+              href="javascript:void(0)"
+              >импортируйте</a
+            >
+            ключи облачных сервисов, чтобы пользоваться приложением.
+          </ppp-banner>
+        </div>
+      </section>
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(1))}</div>
         <div class="label-group">
@@ -186,8 +165,7 @@ export const cloudServicesPageTemplate = html`
               target="_blank"
               href="https://deno.com/deploy"
               >Deno Deploy</a
-            >. После успешного сохранения облачных сервисов можно изменить в
-            параметрах приложения.
+            >.
           </p>
         </div>
         <div class="input-group">
@@ -234,7 +212,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(4))}</div>
         <div class="label-group">
-          <h6>Публичный ключ MongoDB Cloud Services</h6>
+          <h6>Публичный ключ MongoDB App Services</h6>
           <p class="description">
             <a
               class="link"
@@ -242,7 +220,7 @@ export const cloudServicesPageTemplate = html`
               rel="noopener"
               href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/mongodb-realm-keys"
             >
-              MongoDB Cloud Services
+              MongoDB App Services
             </a>
             обеспечивает приложение базой данных (хранилищем) и облачными
             функциями.
@@ -264,7 +242,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
         <div class="label-group">
-          <h6>Приватный ключ MongoDB Cloud Services</h6>
+          <h6>Приватный ключ MongoDB App Services</h6>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -353,7 +331,7 @@ export const cloudServicesPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить пароль и ключи в облаке
+          Настроить облачные функции и триггеры
           <span slot="start"> ${html.partial(cloud)} </span>
         </ppp-button>
       </footer>
@@ -392,34 +370,6 @@ export async function checkMongoDBCloudServicesCredentials({
       })
     }
   );
-}
-
-async function getCloudCredentialsFuncSource() {
-  const iv = generateIV();
-  const cipherText = await ppp.crypto.encrypt(
-    iv,
-    JSON.stringify({
-      'global-proxy-url': ppp.keyVault.getKey('global-proxy-url'),
-      'github-login': ppp.keyVault.getKey('github-login'),
-      'github-token': ppp.keyVault.getKey('github-token'),
-      'mongo-api-key': ppp.keyVault.getKey('mongo-api-key'),
-      'mongo-app-client-id': ppp.keyVault.getKey('mongo-app-client-id'),
-      'mongo-app-id': ppp.keyVault.getKey('mongo-app-id'),
-      'mongo-group-id': ppp.keyVault.getKey('mongo-group-id'),
-      'mongo-private-key': ppp.keyVault.getKey('mongo-private-key'),
-      'mongo-public-key': ppp.keyVault.getKey('mongo-public-key'),
-      'use-alternative-mongo': ppp.keyVault.getKey('use-alternative-mongo'),
-      'mongo-proxy-url': ppp.keyVault.getKey('mongo-proxy-url'),
-      'mongo-connection-uri': ppp.keyVault.getKey('mongo-connection-uri'),
-      tag: TAG
-    })
-  );
-
-  return `exports = function () {
-      return {
-        iv: '${bufferToString(iv)}', data: '${cipherText}'
-      };
-    };`;
 }
 
 async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
@@ -515,100 +465,56 @@ async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
     );
 }
 
-async function createCloudCredentialsEndpoint({
-  mongoDBRealmAccessToken,
-  functionList
-}) {
-  const groupId = ppp.keyVault.getKey('mongo-group-id');
-  const appId = ppp.keyVault.getKey('mongo-app-id');
-  let cloudCredentialsFuncId;
-
-  const func = functionList?.find((f) => f.name === 'cloudCredentials');
-
-  if (func) {
-    cloudCredentialsFuncId = func._id;
-
-    const rUpdateFunc = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${func._id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${mongoDBRealmAccessToken}`
-        },
-        body: JSON.stringify({
-          name: 'cloudCredentials',
-          source: await getCloudCredentialsFuncSource(),
-          run_as_system: true
-        })
-      }
-    );
-
-    await maybeFetchError(
-      rUpdateFunc,
-      'Не удалось обновить функцию конечной точки компактного представления ключей.'
-    );
-  } else {
-    const rCreateFunc = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${mongoDBRealmAccessToken}`
-        },
-        body: JSON.stringify({
-          name: 'cloudCredentials',
-          source: await getCloudCredentialsFuncSource(),
-          run_as_system: true
-        })
-      }
-    );
-
-    await maybeFetchError(
-      rCreateFunc,
-      'Не удалось создать функцию конечной точки компактного представления ключей.'
-    );
-
-    const jCreateFunc = await rCreateFunc.json();
-
-    cloudCredentialsFuncId = jCreateFunc._id;
-  }
-
-  const rNewEndpoint = await ppp.fetch(
-    `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/endpoints`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${mongoDBRealmAccessToken}`
-      },
-      body: JSON.stringify({
-        route: '/cloud_credentials',
-        function_name: 'cloudCredentials',
-        function_id: cloudCredentialsFuncId,
-        http_method: 'GET',
-        validation_method: 'NO_VALIDATION',
-        secret_id: '',
-        secret_name: '',
-        create_user_on_auth: false,
-        fetch_custom_user_data: false,
-        respond_result: true,
-        disabled: false
-      })
-    }
-  );
-
-  // Conflict is OK
-  if (rNewEndpoint.status !== 409) {
-    await maybeFetchError(
-      rNewEndpoint,
-      'Не удалось создать конечную точку компактного представления ключей.'
-    );
-  }
-}
-
 export class CloudServicesPage extends Page {
+  @observable
+  cloudCredentialsString;
+
+  async connectedCallback() {
+    await super.connectedCallback();
+
+    if (!ppp.keyVault.ok()) {
+      this.cloudCredentialsString = 'Нужно ввести все ключи и мастер-пароль.';
+    } else {
+      this.cloudCredentialsString = 'Генерация компактного представления...';
+
+      try {
+        this.cloudCredentialsString = btoa(
+          JSON.stringify(await this.generateCloudCredentialsString())
+        );
+      } catch (e) {
+        this.cloudCredentialsString =
+          'Ошибка генерации компактного представления.';
+      }
+    }
+  }
+
+  async generateCloudCredentialsString() {
+    const iv = generateIV();
+    const data = await ppp.crypto.encrypt(
+      iv,
+      JSON.stringify({
+        'global-proxy-url': ppp.keyVault.getKey('global-proxy-url'),
+        'github-login': ppp.keyVault.getKey('github-login'),
+        'github-token': ppp.keyVault.getKey('github-token'),
+        'mongo-api-key': ppp.keyVault.getKey('mongo-api-key'),
+        'mongo-app-client-id': ppp.keyVault.getKey('mongo-app-client-id'),
+        'mongo-app-id': ppp.keyVault.getKey('mongo-app-id'),
+        'mongo-group-id': ppp.keyVault.getKey('mongo-group-id'),
+        'mongo-private-key': ppp.keyVault.getKey('mongo-private-key'),
+        'mongo-public-key': ppp.keyVault.getKey('mongo-public-key'),
+        'use-alternative-mongo': ppp.keyVault.getKey('use-alternative-mongo'),
+        'mongo-proxy-url': ppp.keyVault.getKey('mongo-proxy-url'),
+        'mongo-connection-uri': ppp.keyVault.getKey('mongo-connection-uri'),
+        tag: TAG
+      })
+    );
+
+    return {
+      iv: bufferToString(iv),
+      data
+    };
+  }
+
   async backupMongoDB(isCloud) {
     this.beginOperation();
 
@@ -649,24 +555,6 @@ export class CloudServicesPage extends Page {
     } finally {
       this.endOperation();
     }
-  }
-
-  generateCloudCredentialsString() {
-    if (!ppp.keyVault.getKey('mongo-location-url'))
-      return 'Соединитесь с облачной базой MongoDB Cloud Services';
-
-    return btoa(
-      JSON.stringify({
-        u: ppp.keyVault.getKey('global-proxy-url'),
-        e:
-          ppp.keyVault
-            .getKey('mongo-location-url')
-            .replace('aws.stitch.mongodb', 'aws.data.mongodb-api') +
-          `/app/${ppp.keyVault.getKey(
-            'mongo-app-client-id'
-          )}/endpoint/cloud_credentials`
-      })
-    );
   }
 
   async #createServerlessFunctions({ mongoDBRealmAccessToken }) {
@@ -775,16 +663,9 @@ export class CloudServicesPage extends Page {
       ppp.app.toast.progress.value += Math.floor(30 / funcs.length);
     }
 
-    this.progressOperation(80, 'Настройка триггеров');
+    this.progressOperation(95, 'Сохранение триггеров...');
 
     await createWakeUpTrigger({
-      mongoDBRealmAccessToken,
-      functionList
-    });
-
-    this.progressOperation(95, 'Сохранение ключей облачных сервисов');
-
-    await createCloudCredentialsEndpoint({
       mongoDBRealmAccessToken,
       functionList
     });
@@ -803,9 +684,9 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rProjectId,
-      'Не удалось получить ID проекта PPP в MongoDB Cloud Services.'
+      'Не удалось получить ID проекта ppp в MongoDB App Services.'
     );
-    this.progressOperation(5, 'Поиск проекта PPP в MongoDB Cloud Services');
+    this.progressOperation(5, 'Поиск проекта ppp в MongoDB App Services...');
 
     const { roles } = await rProjectId.json();
 
@@ -816,7 +697,7 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-group-id', groupId);
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Проект ppp не найден в MongoDB Cloud Services.',
+        errorMessage: 'Проект ppp не найден в MongoDB App Services.',
         raiseException: true
       });
     }
@@ -833,7 +714,7 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rAppId,
-      'Не удалось получить ID приложения PPP в MongoDB Cloud Services.'
+      'Не удалось получить ID приложения ppp в MongoDB App Services.'
     );
     this.progressOperation(10);
 
@@ -845,7 +726,7 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-app-id', pppApp._id);
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Приложение PPP не найдено в MongoDB Cloud Services.',
+        errorMessage: 'Приложение ppp не найдено в MongoDB App Services.',
         raiseException: true
       });
     }
@@ -862,17 +743,17 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rAuthProviders,
-      'Не удалось получить список провайдеров авторизации MongoDB Cloud Services.'
+      'Не удалось получить список провайдеров авторизации MongoDB App Services.'
     );
     this.progressOperation(
       15,
-      'Создание API-ключа пользователя в MongoDB Cloud Services'
+      'Создание API-ключа пользователя в MongoDB App Services'
     );
 
     const providers = await rAuthProviders.json();
     const apiKeyProvider = providers.find((p) => (p.type = 'api-key'));
 
-    if (apiKeyProvider && apiKeyProvider.disabled) {
+    if (apiKeyProvider?.disabled) {
       const rEnableAPIKeyProvider = await ppp.fetch(
         `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers/${apiKeyProvider._id}/enable`,
         {
@@ -886,7 +767,7 @@ export class CloudServicesPage extends Page {
 
       await maybeFetchError(
         rEnableAPIKeyProvider,
-        'Не удалось активировать провайдера API-ключей MongoDB Cloud Services.'
+        'Не удалось активировать провайдера API-ключей MongoDB App Services.'
       );
     }
 
@@ -909,7 +790,7 @@ export class CloudServicesPage extends Page {
 
       await maybeFetchError(
         rCreateAPIKeyProvider,
-        'Не удалось подключить провайдера API-ключей MongoDB Cloud Services.'
+        'Не удалось подключить провайдера API-ключей MongoDB App Services.'
       );
     }
 
@@ -930,9 +811,9 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rCreateAPIKey,
-      'Не удалось создать API-ключ нового пользователя MongoDB Cloud Services.'
+      'Не удалось создать API-ключ нового пользователя MongoDB App Services.'
     );
-    this.progressOperation(25, 'Запись облачных функций');
+    this.progressOperation(25, 'Запись облачных функций...');
     ppp.keyVault.setKey('mongo-api-key', (await rCreateAPIKey.json()).key);
 
     // 5. Create serverless functions.
@@ -1027,7 +908,7 @@ export class CloudServicesPage extends Page {
 
       if (!rMongoDBRealmCredentials.ok) {
         invalidate(this.mongoPrivateKey, {
-          errorMessage: 'Неверная пара ключей MongoDB Cloud Services',
+          errorMessage: 'Неверная пара ключей MongoDB App Services',
           raiseException: true
         });
       }
@@ -1050,9 +931,9 @@ export class CloudServicesPage extends Page {
       const { access_token: mongoDBRealmAccessToken } =
         await rMongoDBRealmCredentials.json();
 
-      this.progressOperation(0, 'Настройка приложения MongoDB Cloud Services');
+      this.progressOperation(0, 'Настройка приложения MongoDB App Services...');
 
-      // 3. Create a MongoDB Cloud Services API key, set up cloud functions.
+      // 3. Create a MongoDB App Services API key, set up cloud functions.
       await this.#setUpMongoDBCloudServicesApp({
         mongoDBRealmAccessToken
       });

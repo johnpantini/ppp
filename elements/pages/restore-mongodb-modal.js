@@ -43,11 +43,11 @@ export const restoreMongodbModalPageTemplate = html`
       <div class="spacing2"></div>
       <ppp-query-select
         style="max-width: 384px"
-        placeholder="Выберите API Yandex Cloud для загрузки списка копий"
-        ${ref('ycApiId')}
+        placeholder="Выберите API S3 для загрузки списка копий"
+        ${ref('s3ApiID')}
         :context="${(x) => x}"
         @change="${(x) => {
-          x.ycApiId.disabled = true;
+          x.s3ApiID.disabled = true;
 
           return x.populateDocuments();
         }}"
@@ -72,7 +72,7 @@ export const restoreMongodbModalPageTemplate = html`
       ></ppp-query-select>
       <div class="spacing2"></div>
       <ppp-table
-        ?hidden="${(x) => !x.ycApiId.value}"
+        ?hidden="${(x) => !x.s3ApiID.value}"
         :columns="${() => [
           {
             label: 'База данных'
@@ -102,9 +102,11 @@ export const restoreMongodbModalPageTemplate = html`
                       href="${datum.url}"
                       target="_blank"
                       rel="noopener"
-                      >${/backup-of-cloud-mongodb/i.test(datum.url)
-                        ? 'Облачная'
-                        : 'Альтернативная'}</a
+                      >${
+                        /backup-of-cloud-mongodb/i.test(datum.url)
+                          ? 'Облачная'
+                          : 'Альтернативная'
+                      }</a
                     >
                   `,
                   formatDateWithOptions(datum.lastModified, {
@@ -337,7 +339,7 @@ export class RestoreMongodbModalPage extends Page {
       this.beginOperation();
 
       try {
-        const { ycStaticKeyID, ycStaticKeySecret } = this.ycApiId.datum();
+        const { ycStaticKeyID, ycStaticKeySecret } = this.s3ApiID.datum();
         const { host, key } = datum;
         const xAmzDate =
           new Date()
@@ -388,7 +390,7 @@ export class RestoreMongodbModalPage extends Page {
   }
 
   async populate() {
-    if (!this.ycApiId.value) {
+    if (!this.s3ApiID.value) {
       return;
     }
 
@@ -398,7 +400,7 @@ export class RestoreMongodbModalPage extends Page {
       ycPrivateKey,
       ycStaticKeyID,
       ycStaticKeySecret
-    } = this.ycApiId.datum();
+    } = this.s3ApiID.datum();
     const { psinaFolderId, iamToken } = await getYCPsinaFolder({
       jose,
       ycServiceAccountID,

@@ -63,29 +63,9 @@ export class ImportCloudKeysModalPage extends Page {
       await validate(this.masterPasswordForImport);
       await validate(this.cloudCredentialsData);
 
-      const { u, e } = JSON.parse(atob(this.cloudCredentialsData.value.trim()));
-
-      if (!e?.startsWith('https')) {
-        invalidate(ppp.app.toast, {
-          errorMessage:
-            'Компактное представление не содержит адреса URL базы данных.',
-          raiseException: true
-        });
-      }
-
-      const proxyUrl = new URL(u);
-      const endpointUrl = new URL(e);
-      const endpointHostname = endpointUrl.hostname;
-
-      endpointUrl.hostname = proxyUrl.hostname;
-
-      const { iv, data } = await (
-        await fetch(endpointUrl.toString(), {
-          headers: {
-            'X-Host': endpointHostname
-          }
-        })
-      ).json();
+      const { iv, data } = JSON.parse(
+        atob(this.cloudCredentialsData.value.trim())
+      );
 
       ppp.crypto.resetKey();
 
@@ -106,11 +86,9 @@ export class ImportCloudKeysModalPage extends Page {
         ppp.keyVault.setKey(k, decryptedCredentials[k]);
       });
 
-      ppp.keyVault.setKey('global-proxy-url', u);
-
       if (+TAG > +decryptedCredentials.tag) {
         this.showSuccessNotification(
-          'Импортированные ключи устарели. Обновите страницу и сохраните их заново.'
+          'Импортированные ключи устарели. Обновите страницу и введите их заново. Затем настройте облачные функции и триггеры.'
         );
       } else {
         this.showSuccessNotification(

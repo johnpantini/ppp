@@ -126,6 +126,10 @@ export class UpdatesPage extends Page {
   }
 
   async checkForUpdates(force = false) {
+    const token = ppp.keyVault.getKey('github-token');
+
+    if (!token) return;
+
     if (isAlwaysUpToDateDomain && !force) return;
 
     this.beginOperation();
@@ -140,7 +144,7 @@ export class UpdatesPage extends Page {
           cache: 'no-cache',
           headers: {
             Accept: 'application/vnd.github.v3+json',
-            Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+            Authorization: `token ${token}`
           }
         }
       );
@@ -155,7 +159,7 @@ export class UpdatesPage extends Page {
         cache: 'no-cache',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+          Authorization: `token ${token}`
         }
       });
 
@@ -169,7 +173,7 @@ export class UpdatesPage extends Page {
       const rGitHubUser = await fetch('https://api.github.com/user', {
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+          Authorization: `token ${token}`
         }
       });
 
@@ -185,7 +189,7 @@ export class UpdatesPage extends Page {
           cache: 'no-cache',
           headers: {
             Accept: 'application/vnd.github.v3+json',
-            Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+            Authorization: `token ${token}`
           }
         }
       );
@@ -200,7 +204,7 @@ export class UpdatesPage extends Page {
         cache: 'no-cache',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+          Authorization: `token ${token}`
         }
       });
 
@@ -224,7 +228,7 @@ export class UpdatesPage extends Page {
       const rGitHubUser = await fetch('https://api.github.com/user', {
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+          Authorization: `token ${token}`
         }
       });
 
@@ -240,7 +244,7 @@ export class UpdatesPage extends Page {
           method: 'PATCH',
           headers: {
             Accept: 'application/vnd.github.v3+json',
-            Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+            Authorization: `token ${token}`
           },
           body: JSON.stringify({
             sha: this.targetCommit.sha
@@ -259,7 +263,7 @@ export class UpdatesPage extends Page {
           method: 'POST',
           headers: {
             Accept: 'application/vnd.github.v3+json',
-            Authorization: `token ${ppp.keyVault.getKey('github-token')}`
+            Authorization: `token ${token}`
           }
         }
       );
