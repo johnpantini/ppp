@@ -1,12 +1,12 @@
 import ppp from '../../ppp.js';
 import { TAG } from '../../lib/tag.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
-import { invalidate, validate } from '../../lib/ppp-errors.js';
+import { validate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
 import '../button.js';
 import '../text-field.js';
 
-export const importCloudKeysModalPageTemplate = html`
+export const importKeysModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
@@ -51,11 +51,11 @@ export const importCloudKeysModalPageTemplate = html`
   </template>
 `;
 
-export const importCloudKeysModalPageStyles = css`
+export const importKeysModalPageStyles = css`
   ${pageStyles}
 `;
 
-export class ImportCloudKeysModalPage extends Page {
+export class importKeysModalPage extends Page {
   async submitDocument() {
     this.beginOperation();
 
@@ -103,7 +103,9 @@ export class ImportCloudKeysModalPage extends Page {
   }
 }
 
-export default ImportCloudKeysModalPage.compose({
-  template: importCloudKeysModalPageTemplate,
-  styles: importCloudKeysModalPageStyles
-}).define();
+export default importKeysModalPage
+  .compose({
+    template: importKeysModalPageTemplate,
+    styles: importKeysModalPageStyles
+  })
+  .define();

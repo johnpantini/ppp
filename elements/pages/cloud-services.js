@@ -13,7 +13,7 @@ import {
 } from '../../static/svg/sprite.js';
 import { invalidate, maybeFetchError, validate } from '../../lib/ppp-errors.js';
 import { shouldUseAlternativeMongo } from '../../lib/realm.js';
-import '../pages/import-cloud-keys-modal.js';
+import '../pages/import-keys-modal.js';
 import { TAG } from '../../lib/tag.js';
 import '../badge.js';
 import '../banner.js';
@@ -60,26 +60,19 @@ export const cloudServicesPageTemplate = html`
         <ppp-button
           appearance="default"
           slot="controls"
-          @click="${(x) => x.importCloudKeysModal.removeAttribute('hidden')}"
+          @click="${(x) => x.importKeysModal.removeAttribute('hidden')}"
         >
-          Импортировать ключи из облака
+          Импортировать ключи
           <span slot="start">${html.partial(importExport)}</span>
         </ppp-button>
       </ppp-page-header>
-      <ppp-modal
-        ${ref('importCloudKeysModal')}
-        class="large"
-        hidden
-        dismissible
-      >
+      <ppp-modal ${ref('importKeysModal')} class="large" hidden dismissible>
         <span slot="title">Импорт ключей</span>
         <div slot="description">
           Чтобы импортировать ключи, приготовьте мастер-пароль и компактное
           представление из ранее настроенного приложения.
         </div>
-        <ppp-import-cloud-keys-modal-page
-          slot="body"
-        ></ppp-import-cloud-keys-modal-page>
+        <ppp-import-keys-modal-page slot="body"></ppp-import-keys-modal-page>
       </ppp-modal>
       <section ?hidden="${() => !ppp.keyVault.ok()}">
         <div class="control-stack">
@@ -89,9 +82,7 @@ export const cloudServicesPageTemplate = html`
               представление:
             </span>
           </ppp-banner>
-          <ppp-copyable>
-            ${(x) => x.cloudCredentialsString}
-          </ppp-copyable>
+          <ppp-copyable> ${(x) => x.cloudCredentialsString} </ppp-copyable>
         </div>
       </section>
       <section ?hidden="${() => ppp.keyVault.ok()}">
@@ -100,8 +91,7 @@ export const cloudServicesPageTemplate = html`
             Введите заново или
             <a
               class="link"
-              @click="${(x) =>
-                x.importCloudKeysModal.removeAttribute('hidden')}"
+              @click="${(x) => x.importKeysModal.removeAttribute('hidden')}"
               href="javascript:void(0)"
               >импортируйте</a
             >
