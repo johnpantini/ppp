@@ -22,7 +22,6 @@ export const keySet = [
   'master-password',
   'mongo-api-key',
   'mongo-app-client-id',
-  'mongo-app-client-id',
   'mongo-app-id',
   'mongo-group-id',
   'mongo-private-key',

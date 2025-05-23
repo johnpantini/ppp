@@ -151,8 +151,8 @@ export const orderWidgetTemplate = html`
               ?hidden="${(x) =>
                 !(
                   isLastPriceInHeaderHidden(x) &&
-                  isAbsoluteChangeInHeaderHidden(x) &&
-                  isRelativeChangeInHeaderHidden(x)
+                    isAbsoluteChangeInHeaderHidden(x) &&
+                    isRelativeChangeInHeaderHidden(x)
                 )}"
               class="title"
             >
@@ -394,7 +394,7 @@ export const orderWidgetTemplate = html`
             ?hidden="${(x) =>
               !(
                 x.orderTypeTabs.activeid === 'conditional' &&
-                !x.conditionalOrders?.length
+                  !x.conditionalOrders?.length
               )}"
           >
             <div class="no-conditional-orders-holder">
@@ -403,8 +403,6 @@ export const orderWidgetTemplate = html`
                 class="link"
                 href="javascript:void(0);"
                 @click="${async (x) => {
-                  let observer;
-
                   if (x.preview) {
                     return true;
                   }
@@ -413,7 +411,7 @@ export const orderWidgetTemplate = html`
                     await x.headerButtons.showWidgetSettings();
                   const widgetSettings = settingsPage.widgetSettingsDomElement;
 
-                  observer = new MutationObserver(() => {
+                  const observer = new MutationObserver(() => {
                     const tabs = widgetSettings?.querySelector?.('ppp-tabs');
 
                     if (tabs) {
@@ -509,8 +507,8 @@ export const orderWidgetTemplate = html`
             ?hidden="${(x) =>
               !(
                 x.orderTypeTabs.activeid === 'conditional' &&
-                x.conditionalOrders?.length &&
-                !x.conditionalOrder
+                  x.conditionalOrders?.length &&
+                  !x.conditionalOrder
               )}"
           >
             Выберите условную заявку.
@@ -972,6 +970,47 @@ export const orderWidgetTemplate = html`
                   ${(x) =>
                     x.conditionalOrder?.order?.buttonText ??
                     'Разместить заявку'}
+                </ppp-widget-button>
+              </div>
+            </div>
+          </div>
+          <div
+            class="widget-margin-spacer"
+            ?hidden=${(x) => !x.document.showShortButton}
+          ></div>
+          <div
+            class="widget-section"
+            ?hidden=${(x) => !x.document.showShortButton}
+          >
+            <div class="widget-subsection">
+              <div class="widget-button-line">
+                <ppp-widget-button
+                  appearance="danger"
+                  ?hidden="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      x.conditionalOrder &&
+                      x.conditionalOrder.order.sideAgnostic
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  ?disabled="${(x) => {
+                    if (
+                      x.orderTypeTabs.activeid === 'conditional' &&
+                      !x.conditionalOrder
+                    ) {
+                      return true;
+                    }
+
+                    return false;
+                  }}"
+                  @click="${(x, { event }) =>
+                    x.placeOrder('short', event.shiftKey)}"
+                >
+                  Short
                 </ppp-widget-button>
               </div>
             </div>
@@ -1742,9 +1781,11 @@ export class OrderWidget extends WidgetWithInstrument {
       let volume = parseFloat(v);
 
       if (multiplier) {
-        if (multiplier.toLowerCase() === 'k') volume *= 1000;
-        else if (multiplier.toLowerCase() === 'm') volume /= 1000;
-        else if (multiplier.toLowerCase() === 'M') volume *= 10000000;
+        const lm = multiplier.toLowerCase();
+
+        if (lm === 'k') volume *= 1000;
+        else if (lm === 'm') volume /= 1000;
+        else if (multiplier.toUpperCase() === 'M') volume *= 10000000;
       }
 
       if (volume > 0) {
@@ -1992,8 +2033,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
         if (quantity > 0 && quantity !== Infinity) {
           orderNode.quantityField.value =
-            Math.trunc(+quantity * Math.pow(10, precision)) /
-            Math.pow(10, precision);
+            Math.trunc(+quantity * 10 ** precision) / 10 ** precision;
 
           orderNode.save?.();
           orderNode.quantityField.$emit('input');
@@ -2016,8 +2056,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
       if (quantity > 0 && quantity !== Infinity) {
         this.quantity.value =
-          Math.trunc(+quantity * Math.pow(10, precision)) /
-          Math.pow(10, precision);
+          Math.trunc(+quantity * 10 ** precision) / 10 ** precision;
 
         this.calculateTotalAmount(false);
 
@@ -2054,7 +2093,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
   formatPositionSize() {
     let size = 0;
-    let suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
+    const suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
 
     if (this.instrument) {
       size = this.positionSize ?? 0;
@@ -2296,6 +2335,7 @@ export class OrderWidget extends WidgetWithInstrument {
         this.container.showConditionalOrderToolbar.checked,
       showAmountSection: this.container.showAmountSection.checked,
       showEstimateSection: this.container.showEstimateSection.checked,
+      showShortButton: this.container.showShortButton.checked,
       conditionalOrders: this.preview
         ? this.conditionalOrders
         : this.container.conditionalOrderList.value
@@ -2737,6 +2777,12 @@ export async function widgetDefinition() {
               ${ref('showEstimateSection')}
             >
               Показывать секцию «Доступно/С плечом»
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showShortButton ?? false}"
+              ${ref('showShortButton')}
+            >
+              Показывать кнопку "Short"
             </ppp-checkbox>
           </div>
         </ppp-tab-panel>
