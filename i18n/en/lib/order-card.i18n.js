@@ -9,6 +9,7 @@ export default function (i18n) {
         failed: 'Failed',
         unknown: 'Unknown',
         paused: 'Paused',
+        panic: 'Panic',
         pending: 'Pending'
       }
     }

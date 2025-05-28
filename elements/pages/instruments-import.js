@@ -50,8 +50,8 @@ export const instrumentsImportPageTemplate = html`
         ?hidden="${(x) =>
           !(
             x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS ||
-            x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
-            x.dictionary.value === INSTRUMENT_DICTIONARY.IB
+              x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
+              x.dictionary.value === INSTRUMENT_DICTIONARY.IB
           )}"
       >
         <div class="label-group">
@@ -728,9 +728,8 @@ export class InstrumentsImportPage extends Page {
 
     const result = [];
     const alorSpbexSecurities = await this[INSTRUMENT_DICTIONARY.ALOR_SPBX]();
-    const alorMoexSecurities = await this[
-      INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES
-    ]();
+    const alorMoexSecurities =
+      await this[INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES]();
 
     for (const s of alorSpbexSecurities) {
       if (/@/.test(s.symbol) && s.symbol !== 'SPB@US') {
@@ -867,7 +866,7 @@ export class InstrumentsImportPage extends Page {
 
   async [INSTRUMENT_DICTIONARY.BINANCE]() {
     const rExchangeInfo = await fetch(
-      `https://api.binance.com/api/v3/exchangeInfo`,
+      'https://api.binance.com/api/v3/exchangeInfo',
       {
         cache: 'reload'
       }

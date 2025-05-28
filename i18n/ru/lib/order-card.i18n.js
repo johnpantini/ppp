@@ -9,6 +9,7 @@ export default function (i18n) {
         failed: 'Не исполнена',
         unknown: 'Статус неизвестен',
         paused: 'Пауза',
+        panic: 'Паника',
         pending: 'В ожидании'
       }
     }

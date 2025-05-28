@@ -587,7 +587,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     Updates.enqueue(() => {
       if (this.chart) {
         const { width, height } = getComputedStyle(this);
-        const toolbarOffset = this.document.showToolbar ?? true ? 28 : 0;
+        const toolbarOffset = (this.document.showToolbar ?? true) ? 28 : 0;
 
         if (this.stackSelector.hasAttribute('hidden')) {
           this.chart.resize(
@@ -657,12 +657,11 @@ export class LightChartWidget extends WidgetWithInstrument {
         }
       }
     } else {
-      this.candlesTrader &&
-        this.candlesTrader.trader.bus.emit('ppp:light-chart', {
-          event: 'crosshairmove',
-          tf: this.tf,
-          candle: null
-        });
+      this.candlesTrader?.trader?.bus?.emit?.('ppp:light-chart', {
+        event: 'crosshairmove',
+        tf: this.tf,
+        candle: null
+      });
 
       this.shouldShowPriceInfo = false;
     }
@@ -915,7 +914,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         tf = value * 3600 * 24 * 7;
 
         break;
-      case 'Month':
+      case 'Month': {
         const now = new Date();
         const daysInMonth = new Date(
           now.getFullYear(),
@@ -926,6 +925,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         tf = value * 3600 * 24 * daysInMonth;
 
         break;
+      }
     }
 
     return tf;
@@ -953,6 +953,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.hasMore = true;
 
         this.candles.clear();
+        this.applyChartOptions();
         this.requestHistory(this.instrument);
       }
     }
