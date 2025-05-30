@@ -651,6 +651,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         if (dataCandle) {
           this.candlesTrader.trader.bus.emit('ppp:light-chart', {
             event: 'crosshairmove',
+            instrument: this.instrument,
             tf: this.tf,
             candle: dataCandle
           });
@@ -659,6 +660,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     } else {
       this.candlesTrader?.trader?.bus?.emit?.('ppp:light-chart', {
         event: 'crosshairmove',
+        instrument: this.instrument,
         tf: this.tf,
         candle: null
       });

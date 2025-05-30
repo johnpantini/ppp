@@ -587,6 +587,8 @@ export class ListWidget extends WidgetWithInstrument {
     row.setAttribute('index', index);
     row.classList.add('row');
 
+    row.pppInstrument = payload.instrument;
+
     for (const col of this.columns.array) {
       const cell = document.createElement('div');
 
