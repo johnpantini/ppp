@@ -22,7 +22,9 @@ import { Column, columnStyles } from './column.js';
 export const columnTemplate = html`
   <template>
     <span class="${(x) => x.extraClass}">
+      ${(x) => (x.prefix ? x.prefix : '')}
       ${(x) => (x.isBalance ? '' : x.formatValue())}
+      ${(x) => (x.suffix ? x.suffix : '')}
     </span>
   </template>
 `;
@@ -30,6 +32,12 @@ export const columnTemplate = html`
 export class FormattedValueColumn extends Column {
   @observable
   value;
+
+  @observable
+  prefix;
+
+  @observable
+  suffix;
 
   @observable
   extraClass;
@@ -102,6 +110,8 @@ export class FormattedValueColumn extends Column {
       this.formatter = entry.formatter;
       this.formatterOptions = entry.formatterOptions;
       this.extraClass = entry.extraClass;
+      this.prefix = entry.prefix;
+      this.suffix = entry.suffix;
 
       Observable.notify(this, 'value');
     }
