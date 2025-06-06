@@ -1457,7 +1457,7 @@ export class WidgetSearchControl extends PPPOffClickElement {
     if (event.key === keyEscape) {
       this.open = false;
     } else if (event.key === keyEnter) {
-      this.activeItem && this.activeItem.click();
+      this.activeItem?.click();
     } else if (event.key === keyArrowDown || event.key === keyArrowUp) {
       const items = Array.from(this.menuHolder.querySelectorAll('.menu-item'));
 
@@ -1944,8 +1944,8 @@ export const widgetNotificationsAreaTemplate = html`
                     (x.status ?? 'success') === 'success'
                       ? notificationSuccess
                       : x.status === 'note'
-                      ? notificationNote
-                      : notificationError
+                        ? notificationNote
+                        : notificationError
                   )}`}
               </div>
               <div class="widget-notification-text-container">
@@ -2146,9 +2146,12 @@ export class WidgetNotificationsArea extends PPPElement {
     clearTimeout(this.#timeout);
 
     if (!keep) {
-      this.#timeout = setTimeout(() => {
-        this.setAttribute('hidden', '');
-      }, timeout ?? timeoutFromSettings ?? 3000);
+      this.#timeout = setTimeout(
+        () => {
+          this.setAttribute('hidden', '');
+        },
+        timeout ?? timeoutFromSettings ?? 3000
+      );
     }
   }
 
@@ -2906,8 +2909,8 @@ export const widgetTrifectaFieldTemplate = html`
             x.distanceUnit === '%'
               ? 'В процентах'
               : x.distanceUnit === '+'
-              ? 'В шагах цены'
-              : 'В валюте'}"
+                ? 'В шагах цены'
+                : 'В валюте'}"
           @click="${(x) => x.toggleUnit()}"
         >
           <button ?disabled=${(x) => x.disabled}>
@@ -2915,8 +2918,8 @@ export const widgetTrifectaFieldTemplate = html`
               x.distanceUnit === '%'
                 ? '%'
                 : x.distanceUnit === '+'
-                ? html`${html.partial(upDown)}`
-                : priceCurrencySymbol(x.instrument)}
+                  ? html`${html.partial(upDown)}`
+                  : priceCurrencySymbol(x.instrument)}
           </button>
         </div>
       `
@@ -3139,6 +3142,10 @@ export class WidgetTrifectaField extends WidgetTextField {
   }
 
   stepUpOrDown(up = true) {
+    if (this.disabled) {
+      return;
+    }
+
     if (this.instrument) {
       const step = this.getAndUpdateStep(up);
 
@@ -3194,6 +3201,7 @@ export class WidgetTrifectaField extends WidgetTextField {
       this.stepDown();
     }
 
+    // biome-ignore lint/style/useConst: <explanation>
     let timeout;
     let interval;
 
