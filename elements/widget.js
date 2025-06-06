@@ -681,6 +681,11 @@ export const widgetCommonContentStyles = () => css`
     fill: ${themeConditional(paletteBlueDark2, paletteBlueLight2)};
   }
 
+  .widget-action-button.alien svg rect,
+  .widget-action-button.alien svg path {
+    fill: ${themeConditional(palettePurpleDark2, palettePurpleLight2)};
+  }
+
   .control-line {
     display: flex;
     flex-direction: row;
@@ -1001,8 +1006,8 @@ export class Widget extends PPPElement {
         }px`;
       }
 
-      this.style.maxHeight = `512px`;
-      this.style.maxWidth = `544px`;
+      this.style.maxHeight = '512px';
+      this.style.maxWidth = '544px';
       this.style.minHeight = `${this.widgetDefinition.minHeight ?? 120}px`;
 
       if (this.container.savedHeight > 0)
