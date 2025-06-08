@@ -24,7 +24,7 @@ export const backupMongodbModalPageTemplate = html`
             облачное хранилище.
           </p>
           <div class="spacing2"></div>
-          <ppp-checkbox checked ${ref('downloadBackupFile')}>
+          <ppp-checkbox ${ref('downloadBackupFile')}>
             Также скачать архив с копией на диск
           </ppp-checkbox>
         </div>
