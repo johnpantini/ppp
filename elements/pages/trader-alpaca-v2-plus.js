@@ -269,7 +269,7 @@ export const checkConnection = async (control, login, password) => {
 };
 
 export const PSINA_CAPS = {
-  17555: [TRADER_CAPS.CAPS_CANDLES],
+  17555: [TRADER_CAPS.CAPS_CANDLES, TRADER_CAPS.CAPS_CHARTS],
   38567: [
     TRADER_CAPS.CAPS_TIME_AND_SALES,
     TRADER_CAPS.CAPS_MIC,
