@@ -202,7 +202,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(4))}</div>
         <div class="label-group">
-          <h6>Публичный ключ MongoDB App Services</h6>
+          <h6>Публичный ключ MongoDB Atlas</h6>
           <p class="description">
             <a
               class="link"
@@ -210,7 +210,7 @@ export const cloudServicesPageTemplate = html`
               rel="noopener"
               href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/mongodb-realm-keys"
             >
-              MongoDB App Services
+              MongoDB Atlas
             </a>
             обеспечивает приложение базой данных (хранилищем) и облачными
             функциями.
@@ -232,7 +232,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
         <div class="label-group">
-          <h6>Приватный ключ MongoDB App Services</h6>
+          <h6>Приватный ключ MongoDB Atlas</h6>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -348,7 +348,7 @@ export async function checkMongoDBCloudServicesCredentials({
   privateKey
 }) {
   return ppp.fetch(
-    'https://realm.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
+    'https://services.cloud.mongodb.com/api/admin/v3.0/auth/providers/mongodb-cloud/login',
     {
       method: 'POST',
       headers: {
@@ -379,7 +379,7 @@ async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
     realmWakeUpFuncId = func._id;
 
     const rUpdateFunc = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${func._id}`,
+      `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${func._id}`,
       {
         method: 'PUT',
         headers: {
@@ -400,7 +400,7 @@ async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
     );
   } else {
     const rCreateFunc = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
+      `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
       {
         method: 'POST',
         headers: {
@@ -426,7 +426,7 @@ async function createWakeUpTrigger({ mongoDBRealmAccessToken, functionList }) {
   }
 
   const rNewTrigger = await ppp.fetch(
-    `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/triggers`,
+    `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/triggers`,
     {
       method: 'POST',
       headers: {
@@ -579,7 +579,7 @@ export class CloudServicesPage extends Page {
     ];
 
     const rFunctionList = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
+      `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
       {
         headers: {
           Authorization: `Bearer ${mongoDBRealmAccessToken}`
@@ -598,7 +598,7 @@ export class CloudServicesPage extends Page {
     for (const f of functionList) {
       if (funcs.find((fun) => fun.name === f.name)) {
         const rRemoveFunc = await ppp.fetch(
-          `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${f._id}`,
+          `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions/${f._id}`,
           {
             method: 'DELETE',
             headers: {
@@ -630,7 +630,7 @@ export class CloudServicesPage extends Page {
       }
 
       const rCreateFunc = await ppp.fetch(
-        `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
+        `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${appId}/functions`,
         {
           method: 'POST',
           headers: {
@@ -661,10 +661,15 @@ export class CloudServicesPage extends Page {
     });
   }
 
-  async #setUpMongoDBCloudServicesApp({ mongoDBRealmAccessToken }) {
+  async #setUpMongoDBAtlasApp({ mongoDBRealmAccessToken }) {
+    this.progressOperation(
+      5,
+      'Поиск проекта с ролью GROUP_OWNER в MongoDB Atlas...'
+    );
+
     // 1. Get Group (Project) ID.
     const rProjectId = await ppp.fetch(
-      'https://realm.mongodb.com/api/admin/v3.0/auth/profile',
+      'https://services.cloud.mongodb.com/api/admin/v3.0/auth/profile',
       {
         headers: {
           Authorization: `Bearer ${mongoDBRealmAccessToken}`
@@ -674,9 +679,8 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rProjectId,
-      'Не удалось получить ID проекта ppp в MongoDB App Services.'
+      'Не удалось получить ID проекта в MongoDB Atlas.'
     );
-    this.progressOperation(5, 'Поиск проекта ppp в MongoDB App Services...');
 
     const { roles } = await rProjectId.json();
 
@@ -687,14 +691,15 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-group-id', groupId);
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Проект ppp не найден в MongoDB App Services.',
+        errorMessage:
+          'MongoDB Atlas не содержит ни одного проекта с ролью GROUP_OWNER.',
         raiseException: true
       });
     }
 
     // 2. Get App Client ID.
     const rAppId = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps`,
+      `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps`,
       {
         headers: {
           Authorization: `Bearer ${mongoDBRealmAccessToken}`
@@ -704,7 +709,7 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rAppId,
-      'Не удалось получить ID приложения ppp в MongoDB App Services.'
+      'Не удалось получить ID связанного приложения в MongoDB Atlas.'
     );
     this.progressOperation(10);
 
@@ -716,14 +721,14 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-app-id', pppApp._id);
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Приложение ppp не найдено в MongoDB App Services.',
+        errorMessage: 'Связанное приложение ppp не найдено в MongoDB Atlas.',
         raiseException: true
       });
     }
 
     // 3. Create & enable API Key provider.
     const rAuthProviders = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers`,
+      `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers`,
       {
         headers: {
           Authorization: `Bearer ${mongoDBRealmAccessToken}`
@@ -733,11 +738,11 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rAuthProviders,
-      'Не удалось получить список провайдеров авторизации MongoDB App Services.'
+      'Не удалось получить список провайдеров авторизации MongoDB Atlas.'
     );
     this.progressOperation(
       15,
-      'Создание API-ключа пользователя в MongoDB App Services'
+      'Создание API-ключа пользователя в MongoDB Atlas'
     );
 
     const providers = await rAuthProviders.json();
@@ -745,7 +750,7 @@ export class CloudServicesPage extends Page {
 
     if (apiKeyProvider?.disabled) {
       const rEnableAPIKeyProvider = await ppp.fetch(
-        `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers/${apiKeyProvider._id}/enable`,
+        `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers/${apiKeyProvider._id}/enable`,
         {
           method: 'PUT',
           headers: {
@@ -757,13 +762,13 @@ export class CloudServicesPage extends Page {
 
       await maybeFetchError(
         rEnableAPIKeyProvider,
-        'Не удалось активировать провайдера API-ключей MongoDB App Services.'
+        'Не удалось активировать провайдера API-ключей MongoDB Atlas.'
       );
     }
 
     if (!apiKeyProvider) {
       const rCreateAPIKeyProvider = await ppp.fetch(
-        `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers`,
+        `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/auth_providers`,
         {
           method: 'POST',
           headers: {
@@ -780,13 +785,13 @@ export class CloudServicesPage extends Page {
 
       await maybeFetchError(
         rCreateAPIKeyProvider,
-        'Не удалось подключить провайдера API-ключей MongoDB App Services.'
+        'Не удалось подключить провайдера API-ключей MongoDB Atlas.'
       );
     }
 
     // 4. Create API Key.
     const rCreateAPIKey = await ppp.fetch(
-      `https://realm.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys`,
+      `https://services.cloud.mongodb.com/api/admin/v3.0/groups/${groupId}/apps/${pppApp._id}/api_keys`,
       {
         method: 'POST',
         headers: {
@@ -801,7 +806,7 @@ export class CloudServicesPage extends Page {
 
     await maybeFetchError(
       rCreateAPIKey,
-      'Не удалось создать API-ключ нового пользователя MongoDB App Services.'
+      'Не удалось создать API-ключ нового пользователя MongoDB Atlas.'
     );
     this.progressOperation(25, 'Запись облачных функций...');
     ppp.keyVault.setKey('mongo-api-key', (await rCreateAPIKey.json()).key);
@@ -855,7 +860,7 @@ export class CloudServicesPage extends Page {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'X-Host': 'realm.mongodb.com'
+                'X-Host': 'services.cloud.mongodb.com'
               },
               body: JSON.stringify({
                 username: this.mongoPublicKey.value.trim(),
@@ -898,7 +903,7 @@ export class CloudServicesPage extends Page {
 
       if (!rMongoDBRealmCredentials.ok) {
         invalidate(this.mongoPrivateKey, {
-          errorMessage: 'Неверная пара ключей MongoDB App Services',
+          errorMessage: 'Неверная пара ключей MongoDB Atlas',
           raiseException: true
         });
       }
@@ -921,10 +926,10 @@ export class CloudServicesPage extends Page {
       const { access_token: mongoDBRealmAccessToken } =
         await rMongoDBRealmCredentials.json();
 
-      this.progressOperation(0, 'Настройка приложения MongoDB App Services...');
+      this.progressOperation(0, 'Настройка приложения MongoDB Atlas...');
 
-      // 3. Create a MongoDB App Services API key, set up cloud functions.
-      await this.#setUpMongoDBCloudServicesApp({
+      // 3. Create a MongoDB Atlas API key, set up cloud functions.
+      await this.#setUpMongoDBAtlasApp({
         mongoDBRealmAccessToken
       });
 
