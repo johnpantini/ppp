@@ -44,7 +44,8 @@
         "useDefaultParameterLast": "off"
       },
       "complexity": {
-        "noForEach": "off"
+        "noForEach": "off",
+        "useDateNow": "off"
       },
       "suspicious": {
         "noGlobalIsNan": "off",
