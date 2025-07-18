@@ -142,7 +142,7 @@ export class TraderCommonPage extends Page {
           // Create new bucket.
           const rNewBucket = await maybeFetchError(
             await ppp.fetch(
-              `https://storage.api.cloud.yandex.net/storage/v1/buckets`,
+              'https://storage.api.cloud.yandex.net/storage/v1/buckets',
               {
                 method: 'POST',
                 headers: {
