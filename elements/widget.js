@@ -65,7 +65,6 @@ import {
   ValidationError,
   FetchError
 } from '../lib/ppp-errors.js';
-import { uuidv4 } from '../lib/ppp-crypto.js';
 import { WidgetColumns } from './widget-columns.js';
 import { $debounce } from '../lib/ppp-decorators.js';
 
@@ -928,6 +927,8 @@ export const widgetStyles = () => css`
 `;
 
 export class Widget extends PPPElement {
+  sourceID;
+
   @attr({ mode: 'boolean' })
   dragging;
 
@@ -972,7 +973,7 @@ export class Widget extends PPPElement {
 
     super.connectedCallback();
 
-    this.sourceID = uuidv4();
+    this.sourceID = ppp.nextSourceID();
 
     this.restack();
     this.adjustTitleEllipsis();

@@ -195,6 +195,12 @@ class PPP {
 
   locales = ['ru', 'en'];
 
+  sourceIDCounter = 0;
+
+  nextSourceID() {
+    return (++this.sourceIDCounter).toString();
+  }
+
   locale =
     localStorage.getItem('ppp-locale') ??
     this.locales.find((l) => {

@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../../ppp.js';
 import { PPPElement } from '../../../lib/ppp-element.js';
 import {
   Observable,
@@ -9,7 +10,6 @@ import {
 import { widgetColumns } from '../../../design/styles.js';
 import { widgetStyles } from '../../widget.js';
 import { display } from '../../../vendor/fast-utilities.js';
-import { uuidv4 } from '../../../lib/ppp-crypto.js';
 import { TraderRuntime } from '../../../lib/traders/runtime.js';
 
 export const columnStyles = css`
@@ -22,6 +22,8 @@ export const columnStyles = css`
 `;
 
 class Column extends PPPElement {
+  sourceID;
+
   #denormalizedColumn;
 
   @observable
@@ -53,7 +55,7 @@ class Column extends PPPElement {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.sourceID = uuidv4();
+    this.sourceID = ppp.nextSourceID();
     this.widget = this.getRootNode().host;
     this.payload = this.parentNode.payload;
     this.column = this.parentNode.column;
