@@ -325,13 +325,14 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   tradesTrader;
 
   @observable
-  print;
+  p;
 
   highlightedVolumeThreshold = 0;
 
   timeColumnOptions;
 
-  async printChanged(oldValue, trade) {
+  async pChanged(oldValue, rawTrade) {
+    const trade = this.tradesTrader.rawTradeToCanonicalTrade(rawTrade);
     const threshold = await this.getThreshold(trade);
 
     if (this.instrument.symbol !== trade.symbol) {
@@ -432,7 +433,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       await this.tradesTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
+          p: TRADER_DATUM.MARKET_PRINT
         }
       });
 
@@ -455,7 +456,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       await this.tradesTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
+          p: TRADER_DATUM.MARKET_PRINT
         }
       });
     }

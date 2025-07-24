@@ -281,7 +281,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   ordersTrader;
 
   @observable
-  realOrder;
+  ro;
 
   onClick(e) {
     for (const node of e.composedPath()) {
@@ -334,7 +334,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     }
   }
 
-  realOrderChanged(oldValue, order) {
+  roChanged(oldValue, order) {
     if (order?.orderId) {
       const oid = order.orderId.toString();
 
@@ -389,7 +389,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   @observable
-  conditionalOrder;
+  co;
 
   @observable
   orders;
@@ -451,7 +451,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         await this.ordersTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            realOrder: TRADER_DATUM.REAL_ORDER
+            ro: TRADER_DATUM.REAL_ORDER
           }
         });
       } else if (
@@ -462,15 +462,15 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         await this.ordersTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+            co: TRADER_DATUM.CONDITIONAL_ORDER
           }
         });
       } else {
         await this.ordersTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            realOrder: TRADER_DATUM.REAL_ORDER,
-            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+            ro: TRADER_DATUM.REAL_ORDER,
+            co: TRADER_DATUM.CONDITIONAL_ORDER
           }
         });
       }
@@ -520,7 +520,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         await this.ordersTrader.unsubscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            realOrder: TRADER_DATUM.REAL_ORDER
+            ro: TRADER_DATUM.REAL_ORDER
           }
         });
       } else if (
@@ -531,15 +531,15 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         await this.ordersTrader.unsubscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+            co: TRADER_DATUM.CONDITIONAL_ORDER
           }
         });
       } else {
         await this.ordersTrader.unsubscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            realOrder: TRADER_DATUM.REAL_ORDER,
-            conditionalOrder: TRADER_DATUM.CONDITIONAL_ORDER
+            ro: TRADER_DATUM.REAL_ORDER,
+            co: TRADER_DATUM.CONDITIONAL_ORDER
           }
         });
       }
@@ -548,9 +548,11 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     return super.disconnectedCallback();
   }
 
-  conditionalOrderChanged(oldValue, newValue) {
-    if (newValue?.orderId) {
-      this.#conditionalOrdersQueue.push(newValue);
+  coChanged(oldValue, newValue) {
+    const CO = this.ordersTrader.rawCOToCanonicalCO(newValue);
+
+    if (CO?.orderId) {
+      this.#conditionalOrdersQueue.push(CO);
       Updates.enqueue(() => this.#drainConditionalOrdersQueue());
     }
   }

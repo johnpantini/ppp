@@ -197,8 +197,8 @@ class PPP {
 
   sourceIDCounter = 0;
 
-  nextSourceID() {
-    return (++this.sourceIDCounter).toString();
+  nextSourceID(prefix = '') {
+    return `${prefix}${++this.sourceIDCounter}`;
   }
 
   locale =

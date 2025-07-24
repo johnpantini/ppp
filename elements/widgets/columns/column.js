@@ -55,7 +55,7 @@ class Column extends PPPElement {
   async connectedCallback() {
     super.connectedCallback();
 
-    this.sourceID = ppp.nextSourceID();
+    this.sourceID = ppp.nextSourceID('C');
     this.widget = this.getRootNode().host;
     this.payload = this.parentNode.payload;
     this.column = this.parentNode.column;

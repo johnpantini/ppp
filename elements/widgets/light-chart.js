@@ -507,7 +507,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         await this.tradesTrader.subscribeFields?.({
           source: this,
           fieldDatumPairs: {
-            print: TRADER_DATUM.MARKET_PRINT
+            p: TRADER_DATUM.MARKET_PRINT
           }
         });
       }
@@ -566,7 +566,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       await this.tradesTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          print: TRADER_DATUM.MARKET_PRINT
+          p: TRADER_DATUM.MARKET_PRINT
         }
       });
     }
@@ -1003,21 +1003,23 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   @observable
-  print;
+  p;
 
   // Updates the last candle.
-  printChanged(oldValue, newValue) {
+  pChanged(oldValue, rawTrade) {
+    const trade = this.tradesTrader.rawTradeToCanonicalTrade(rawTrade);
+
     if (
-      this.tradesTrader.symbolToCanonical(newValue?.symbol) !==
+      this.tradesTrader.symbolToCanonical(trade?.symbol) !==
       this.instrument.symbol
     ) {
       return;
     }
 
-    if (this.ready && newValue?.price) {
-      if (Array.isArray(newValue.condition)) {
+    if (this.ready && trade?.price) {
+      if (Array.isArray(trade.condition)) {
         // https://alpaca.markets/learn/stock-minute-bars/
-        for (const condition of newValue.condition) {
+        for (const condition of trade.condition) {
           if (
             [
               'B',
@@ -1046,31 +1048,31 @@ export class LightChartWidget extends WidgetWithInstrument {
       // Update this.tf value.
       this.getCurrentTimeframe();
 
-      const time = this.roundTimestampForTimeframe(newValue.timestamp, this.tf);
+      const time = this.roundTimestampForTimeframe(trade.timestamp, this.tf);
 
       if (
         typeof this.lastCandle === 'undefined' ||
         this.lastCandle.time < time
       ) {
         this.lastCandle = {
-          open: newValue.price,
-          high: newValue.price,
-          low: newValue.price,
-          close: newValue.price,
+          open: trade.price,
+          high: trade.price,
+          low: trade.price,
+          close: trade.price,
           time,
-          volume: newValue.volume,
-          customValues: newValue.customValues
+          volume: trade.volume,
+          customValues: trade.customValues
         };
       } else {
         const { high, low, open, volume, customValues } = this.lastCandle;
 
         this.lastCandle = {
           open,
-          high: Math.max(high, newValue.price),
-          low: Math.min(low, newValue.price),
-          close: newValue.price,
+          high: Math.max(high, trade.price),
+          low: Math.min(low, trade.price),
+          close: trade.price,
           time,
-          volume: volume + newValue.volume,
+          volume: volume + trade.volume,
           customValues
         };
       }

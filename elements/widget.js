@@ -973,7 +973,7 @@ export class Widget extends PPPElement {
 
     super.connectedCallback();
 
-    this.sourceID = ppp.nextSourceID();
+    this.sourceID = ppp.nextSourceID('W');
 
     this.restack();
     this.adjustTitleEllipsis();

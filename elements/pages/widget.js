@@ -75,7 +75,7 @@ export const colorSelectorTemplate = ({
     variant="${variant ?? 'tiny'}"
     ${ref(refName)}
     value="${() => value ?? 'default'}"
-    standalone="${hideDescription ? true : false}"
+    standalone="${!!hideDescription}"
   >
     <span ?hidden="${hideDescription}" slot="description"
       >${isDark ? 'Тёмная тема' : 'Светлая тема'}</span
@@ -515,8 +515,8 @@ export const widgetPageTemplate = html`
                                   ?disabled="${(x) =>
                                     !(
                                       x.document.type === 'custom' &&
-                                      typeof x.widgetDefinition
-                                        ?.customElement === 'undefined'
+                                        typeof x.widgetDefinition
+                                          ?.customElement === 'undefined'
                                     )}"
                                   type="url"
                                   placeholder="https://example.com/widget.js"
@@ -535,8 +535,8 @@ export const widgetPageTemplate = html`
                                       ?disabled="${(x) =>
                                         !(
                                           x.document.type === 'custom' &&
-                                          typeof x.widgetDefinition
-                                            ?.customElement === 'undefined'
+                                            typeof x.widgetDefinition
+                                              ?.customElement === 'undefined'
                                         )}"
                                       placeholder="Выберите готовую ссылку"
                                       @change="${(x) => {
@@ -1658,7 +1658,8 @@ export class WidgetPage extends Page {
       };
 
       if (typeof this.widgetElement?.submit === 'function') {
-        const { $set } = await this.widgetElement?.submit({ preview: true });
+        const { $set } =
+          (await this.widgetElement?.submit({ preview: true })) ?? {};
 
         documentAfterChanges = await this.denormalization.denormalize(
           Object.assign({}, this.document, $set ?? {}, mainFields, urlObject)
