@@ -342,7 +342,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   tf;
 
   @observable
-  traderEvent;
+  te;
 
   @observable
   lastCandle;
@@ -528,7 +528,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       await this.chartTrader.subscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          traderEvent: TRADER_DATUM.TRADER
+          te: TRADER_DATUM.TRADER
         }
       });
 
@@ -557,7 +557,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       await this.chartTrader.unsubscribeFields?.({
         source: this,
         fieldDatumPairs: {
-          traderEvent: TRADER_DATUM.TRADER
+          te: TRADER_DATUM.TRADER
         }
       });
     }
@@ -791,7 +791,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.lastCandle = ohlcv[ohlcv.length - 1];
   }
 
-  async traderEventChanged(oldValue, newValue) {
+  async teChanged(oldValue, newValue) {
     if (typeof newValue === 'object' && newValue?.event === 'reconnect') {
       this.cursor = void 0;
       this.ohlcv = [];

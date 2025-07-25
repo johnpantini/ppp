@@ -25,7 +25,7 @@ const server = createServer(async (request, response) => {
       'Access-Control-Allow-Methods',
       'GET, POST, OPTIONS, PUT, PATCH, DELETE'
     );
-    response.setHeader('Access-Control-Allow-Headers', '*');
+    response.setHeader('Access-Control-Allow-Headers', '*, Authorization');
   }
 
   if (/options/i.test(request.method)) {

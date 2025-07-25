@@ -1223,7 +1223,7 @@ export class OrderWidget extends WidgetWithInstrument {
   extraLevel1Trader2;
 
   @observable
-  traderEvent;
+  te;
 
   @observable
   lastPrice;
@@ -1378,7 +1378,7 @@ export class OrderWidget extends WidgetWithInstrument {
         source: this,
         fieldDatumPairs: {
           // For estimate().
-          traderEvent: TRADER_DATUM.TRADER,
+          te: TRADER_DATUM.TRADER,
           position: TRADER_DATUM.POSITION,
           positionSize: TRADER_DATUM.POSITION_SIZE,
           positionAverage: TRADER_DATUM.POSITION_AVERAGE
@@ -1512,7 +1512,7 @@ export class OrderWidget extends WidgetWithInstrument {
     await this.ordersTrader?.unsubscribeFields?.({
       source: this,
       fieldDatumPairs: {
-        traderEvent: TRADER_DATUM.TRADER,
+        te: TRADER_DATUM.TRADER,
         position: TRADER_DATUM.POSITION,
         positionSize: TRADER_DATUM.POSITION_SIZE,
         positionAverage: TRADER_DATUM.POSITION_AVERAGE
@@ -1631,7 +1631,7 @@ export class OrderWidget extends WidgetWithInstrument {
       return this.selectInstrument(data.t.toUpperCase().split('~')[0]);
   }
 
-  traderEventChanged(oldValue, newValue) {
+  teChanged(oldValue, newValue) {
     if (typeof newValue === 'object' && newValue?.event === 'estimate') {
       this.calculateEstimate();
     }
