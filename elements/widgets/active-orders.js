@@ -11,6 +11,7 @@ import {
 import { invalidate } from '../../lib/ppp-errors.js';
 import {
   html,
+  attr,
   css,
   ref,
   observable,
@@ -275,6 +276,9 @@ export const activeOrdersWidgetStyles = css`
 `;
 
 export class ActiveOrdersWidget extends WidgetWithInstrument {
+  @attr
+  aco;
+
   allowEmptyInstrument = true;
 
   @observable
@@ -417,6 +421,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   constructor() {
     super();
 
+    this.aco = '*';
     this.onClick = this.onClick.bind(this);
     this.orders = [];
   }
@@ -646,12 +651,23 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   #rebuildOrdersArray() {
+    const typeSelectorValue = this.orderTypeSelector.value;
+
+    if (typeSelectorValue === 'real') {
+      this.aco = '-';
+    } else if (!this.document.isConditionalOrdersFilterActive) {
+      this.aco = '*';
+    } else {
+      const aco = Array.from(this.allowedConditionalOrders ?? []);
+
+      this.aco = aco.length ? aco.join(',') : '*';
+    }
+
     if (!this.orderProcessorFunc) {
       return;
     }
 
     const orders = [];
-    const typeSelectorValue = this.orderTypeSelector.value;
 
     if (typeSelectorValue === 'all' || typeSelectorValue === 'real') {
       for (const [orderId, order] of this.realOrdersById ?? []) {
