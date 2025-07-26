@@ -261,10 +261,6 @@ export class TraderCombinedOrderbookPage extends TraderCommonPage {
 
   denormalization = new Denormalization();
 
-  async connectedCallback() {
-    super.connectedCallback();
-  }
-
   getDefaultCaps() {
     return [TRADER_CAPS.CAPS_ORDERBOOK];
   }

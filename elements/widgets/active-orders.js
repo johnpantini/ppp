@@ -633,6 +633,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
           order.cardDefinition = cardModule.default;
 
+          if (order.payload?.orderId) {
+            order.payload = await this.container.denormalization.denormalize(
+              order.payload
+            );
+          }
+
           this.#conditionalOrderLoadedAndChanged(order);
         } finally {
           this.#conditionalOrdersQueueIsBusy = false;
