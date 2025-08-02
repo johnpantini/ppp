@@ -292,7 +292,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
     if (
       await ppp.app.confirm(
         'Обновление сертификатов Tailnet',
-        `Будут обновлены сертификаты сервера в сети Tailnet. Подтвердите действие.`
+        'Будут обновлены сертификаты сервера в сети Tailnet. Подтвердите действие.'
       )
     ) {
       this.beginOperation();
@@ -332,7 +332,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
       GLOBAL_PROXY_URL: ppp.keyVault.getKey('global-proxy-url'),
       REDIS_HOST: redisApi.host,
       REDIS_PORT: redisApi.port.toString(),
-      REDIS_TLS: !!redisApi.tls ? 'true' : '',
+      REDIS_TLS: redisApi.tls ? 'true' : '',
       REDIS_USERNAME: redisApi.username?.toString() ?? 'default',
       REDIS_PASSWORD: redisApi.password?.toString(),
       REDIS_DATABASE: redisApi.database.toString(),
@@ -360,7 +360,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
     sslReplacement.push('ssl_prefer_server_ciphers off;');
     sslReplacement.push('ssl_stapling on;');
     sslReplacement.push('ssl_stapling_verify on;');
-    sslReplacement.push(`allow 100.0.0.0/8;`);
+    sslReplacement.push('allow 100.0.0.0/8;');
     sslReplacement.push('deny all;');
 
     const nodeVersion = {
@@ -420,9 +420,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
           `ExecStartPre=+/bin/cp /etc/letsencrypt/live/${domain}/fullchain.pem /usr/lib/nginx/certs/%i/fullchain.pem`,
           `ExecStartPre=+/bin/cp /etc/letsencrypt/live/${domain}/chain.pem /usr/lib/nginx/certs/%i/chain.pem`,
           `ExecStartPre=+/bin/cp /etc/letsencrypt/live/${domain}/privkey.pem /usr/lib/nginx/certs/%i/privkey.pem`,
-          `ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/fullchain.pem`,
-          `ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/privkey.pem`,
-          `ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/chain.pem`
+          'ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/fullchain.pem',
+          'ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/privkey.pem',
+          'ExecStartPre=+/bin/chmod 644 /usr/lib/nginx/certs/%i/chain.pem'
         ]
       );
     }
@@ -463,7 +463,7 @@ export class ServiceSystemdPppAspirantPage extends Page {
       `sudo sed -i 's\\etc/consul\\etc/consul.d\\g' /ppp/lib/aspirant/start.sh ;`,
 
       // SELinux
-      `sudo /bin/cp -f /ppp/lib/aspirant/start.sh /usr/sbin/start-aspirant.sh ;`,
+      'sudo /bin/cp -f /ppp/lib/aspirant/start.sh /usr/sbin/start-aspirant.sh ;',
       'sudo chmod +x /usr/sbin/start-aspirant.sh ;',
 
       // ngx-unzip
@@ -490,24 +490,24 @@ export class ServiceSystemdPppAspirantPage extends Page {
       '/usr/local/bin/npm config set prefix /usr ;',
 
       // firewalld
-      `sudo firewall-cmd --permanent --zone=trusted --add-source=100.0.0.0/8 ;`,
-      `sudo firewall-cmd --permanent --add-service=http ;`,
-      `sudo firewall-cmd --permanent --add-service=https ;`,
-      `sudo firewall-cmd --reload ;`,
+      'sudo firewall-cmd --permanent --zone=trusted --add-source=100.0.0.0/8 ;',
+      'sudo firewall-cmd --permanent --add-service=http ;',
+      'sudo firewall-cmd --permanent --add-service=https ;',
+      'sudo firewall-cmd --reload ;',
 
       // Fury repo
       `sudo wget -q -O /etc/yum.repos.d/fury.repo ${rootUrl}/vendor/fury.repo`,
       'sudo dnf clean dbcache ;',
 
       // Consul
-      `sudo dnf -y install consul ;`,
+      'sudo dnf -y install consul ;',
       'sudo rm -f /etc/consul.d/consul.hcl ;',
       `sudo wget -q -O /etc/consul.d/server.json ${rootUrl}/lib/aspirant/etc/consul/server.json ;`,
       'sudo chown consul /etc/consul.d/server.json ;',
       'sudo systemctl disable consul ;',
 
       // Nomad. Use v1.7.7 or lower!
-      `sudo dnf -y install nomad-1.7.7-1 ;`,
+      'sudo dnf -y install nomad-1.7.7-1 ;',
       'sudo rm -f /etc/nomad.d/nomad.hcl ;',
       `sudo wget -q -O /etc/nomad.d/server.hcl ${rootUrl}/lib/aspirant/etc/nomad.d/server.hcl ;`,
       'sudo chown -R ppp /etc/nomad.d ;',
@@ -531,10 +531,10 @@ export class ServiceSystemdPppAspirantPage extends Page {
       `sudo /bin/sh -c 'cd /usr/src/nginx && ./configure --prefix=/usr/lib/nginx --sbin-path=/usr/sbin/nginx --conf-path=/etc/nginx/nginx.conf --pid-path=/usr/lib/nginx/nginx.pid --with-http_ssl_module --with-stream --with-pcre --with-compat --add-dynamic-module=/ppp/lib/nginx/ngx-unzip --add-dynamic-module=/usr/src/njs/nginx' ;`,
       `sudo /bin/sh -c 'cd /usr/src/nginx && make -j$(nproc)' ;`,
       'sudo mkdir -p /usr/lib/nginx/modules ;',
-      `sudo /bin/cp -f /usr/src/nginx/objs/ngx_http_js_module.so /usr/lib/nginx/modules/ngx_http_js_module.so ;`,
-      `sudo /bin/cp -f /usr/src/nginx/objs/ngx_stream_js_module.so /usr/lib/nginx/modules/ngx_stream_js_module.so ;`,
-      `sudo /bin/cp -f /usr/src/nginx/objs/ngx_http_unzip_module.so /usr/lib/nginx/modules/ngx_http_unzip_module.so ;`,
-      `sudo /bin/cp -f /usr/src/nginx/objs/nginx /usr/sbin/nginx ;`,
+      'sudo /bin/cp -f /usr/src/nginx/objs/ngx_http_js_module.so /usr/lib/nginx/modules/ngx_http_js_module.so ;',
+      'sudo /bin/cp -f /usr/src/nginx/objs/ngx_stream_js_module.so /usr/lib/nginx/modules/ngx_stream_js_module.so ;',
+      'sudo /bin/cp -f /usr/src/nginx/objs/ngx_http_unzip_module.so /usr/lib/nginx/modules/ngx_http_unzip_module.so ;',
+      'sudo /bin/cp -f /usr/src/nginx/objs/nginx /usr/sbin/nginx ;',
 
       // Tailnet certificates
       `sudo mkdir -p /usr/lib/nginx/certs/${tailnetDomain} ;`,
@@ -634,8 +634,8 @@ export class ServiceSystemdPppAspirantPage extends Page {
           `sudo systemctl stop aspirant@${this.document._id}.service ;`,
           `sudo systemctl disable aspirant@${this.document._id}.service ;`,
           `sudo rm -f /etc/systemd/system/aspirant@${this.document._id}.service`,
-          `sudo rm -f /ppp`,
-          `sudo rm -f /usr/sbin/start-aspirant.sh`,
+          'sudo rm -f /ppp',
+          'sudo rm -f /usr/sbin/start-aspirant.sh',
           'sudo systemctl daemon-reload ;',
           'sudo systemctl reset-failed && '
         ].join(' ')
