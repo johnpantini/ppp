@@ -779,6 +779,7 @@ export class LightChartWidget extends WidgetWithInstrument {
 
       this.candles.clear();
       this.mainSeries && this.setData([]);
+      this.applyChartOptions();
       this.reloadNeeded(this.instrument.symbol);
     }
   }
