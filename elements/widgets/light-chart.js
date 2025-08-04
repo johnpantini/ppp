@@ -376,26 +376,6 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   shouldShowPriceInfo;
 
-  #historyQueue = [];
-
-  requestHistory(instrument) {
-    instrument && this.#historyQueue.push(instrument);
-
-    if (this.ready) {
-      const next = this.#historyQueue.shift();
-
-      if (this.chartTrader.instrumentsAreEqual(instrument, next)) {
-        this.loadHistory().finally(() => {
-          if (this.#historyQueue.length > 0) {
-            this.requestHistory();
-          }
-        });
-      } else if (this.#historyQueue.length > 0) {
-        this.requestHistory();
-      }
-    }
-  }
-
   css(dt) {
     const value = dt.$value;
 
@@ -624,7 +604,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     const info = this.mainSeries.barsInLogicalRange(newRange);
 
     if (info !== null && info.barsBefore < 50) {
-      this.ready && this.loadHistory();
+      this.ready && this.loadHistory(this.instrument.symbol);
     }
   }
 
@@ -791,18 +771,34 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.lastCandle = ohlcv[ohlcv.length - 1];
   }
 
-  async teChanged(oldValue, newValue) {
-    if (typeof newValue === 'object' && newValue?.event === 'reconnect') {
+  reload() {
+    if (this.chartTrader && this.instrument?.symbol) {
       this.cursor = void 0;
       this.ohlcv = [];
       this.hasMore = true;
 
       this.candles.clear();
-      this.#historyQueue.push(this.instrument);
+      this.mainSeries && this.setData([]);
+      this.reloadNeeded(this.instrument.symbol);
     }
   }
 
-  async loadHistory() {
+  teChanged(oldValue, newValue) {
+    if (newValue?.event === 'reconnect') {
+      this.reload();
+    }
+  }
+
+  instrumentChanged(oldValue, newValue) {
+    super.instrumentChanged(oldValue, newValue);
+    this.reload();
+  }
+
+  reloadNeeded(symbol) {
+    return this.loadHistory(symbol);
+  }
+
+  async loadHistory(symbol) {
     if (!this.hasMore) {
       return;
     }
@@ -832,7 +828,7 @@ export class LightChartWidget extends WidgetWithInstrument {
           this.hasMore = false;
         }
 
-        if (candles?.length) {
+        if (candles?.length && symbol === this.instrument.symbol) {
           const newCandles = [];
 
           candles.forEach((c) => {
@@ -855,22 +851,6 @@ export class LightChartWidget extends WidgetWithInstrument {
         for (const tab of this.tfSelector.tabs) {
           tab.removeAttribute('disabled');
         }
-      }
-    }
-  }
-
-  instrumentChanged(oldValue, newValue) {
-    super.instrumentChanged(oldValue, newValue);
-
-    if (this.chartTrader) {
-      if (this.instrument?.symbol) {
-        this.cursor = void 0;
-        this.ohlcv = [];
-        this.hasMore = true;
-
-        this.candles.clear();
-        this.mainSeries && this.setData([]);
-        this.requestHistory(this.instrument);
       }
     }
   }
@@ -948,17 +928,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   timeframeChanged() {
-    if (this.chartTrader) {
-      if (this.instrument?.symbol) {
-        this.cursor = void 0;
-        this.ohlcv = [];
-        this.hasMore = true;
-
-        this.candles.clear();
-        this.applyChartOptions();
-        this.requestHistory(this.instrument);
-      }
-    }
+    this.reload();
   }
 
   traderQuoteToChartQuote(quote) {

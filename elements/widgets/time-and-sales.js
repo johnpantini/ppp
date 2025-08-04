@@ -820,7 +820,11 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
             )) ?? []) {
               const threshold = await this.getThreshold(trade);
 
-              if (typeof threshold === 'number' && trade.volume >= threshold) {
+              if (
+                this.instrument.symbol === trade.symbol &&
+                typeof threshold === 'number' &&
+                trade.volume >= threshold
+              ) {
                 this.#trades.push(this.formatTrade(trade));
               }
             }
@@ -849,7 +853,6 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
           );
 
           return this.notificationsArea.error({
-            title: 'Лента всех сделок',
             text: 'Не удалось загрузить историю сделок.'
           });
         }
