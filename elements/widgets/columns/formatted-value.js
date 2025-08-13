@@ -86,14 +86,16 @@ export class FormattedValueColumn extends Column {
 
       return formatDateWithOptions(
         this.value,
-        {
-          month: 'numeric',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric'
-        },
-        this.formatterOptions
+        Object.assign(
+          {
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric'
+          },
+          this.formatterOptions ?? {}
+        )
       );
     } else {
       return this.value;

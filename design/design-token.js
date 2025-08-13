@@ -16,8 +16,8 @@ const __decorate = function (decorators, target, key, desc) {
       c < 3
         ? target
         : desc === null
-        ? (desc = Object.getOwnPropertyDescriptor(target, key))
-        : desc,
+          ? (desc = Object.getOwnPropertyDescriptor(target, key))
+          : desc,
     d;
 
   for (let i = decorators.length - 1; i >= 0; i--)
@@ -312,8 +312,8 @@ class DesignTokenNode {
     return !DesignTokenNode.isAssigned(node, token)
       ? undefined
       : DesignTokenNode.isDerivedFor(node, token)
-      ? node._derived.get(token).value
-      : node._values.get(token);
+        ? node._derived.get(token).value
+        : node._values.get(token);
   }
 
   static getOrCreateDependencyGraph(node, token) {
@@ -1286,8 +1286,8 @@ let CSSDesignToken = class CSSDesignToken extends DesignToken {
           record.target === FASTDesignTokenNode.defaultNode
             ? FASTDesignTokenNode.rootStyleSheetTarget
             : record.target instanceof FASTDesignTokenNode
-            ? PropertyTargetManager.getOrCreate(record.target.target)
-            : null;
+              ? PropertyTargetManager.getOrCreate(record.target.target)
+              : null;
 
         if (target) {
           if (
