@@ -207,13 +207,15 @@ export class TimelineWidget extends WidgetWithInstrument {
   @observable
   timelineItem;
 
-  timelineItemChanged(oldValue, newValue) {
-    if (typeof newValue.operationId === 'undefined') {
+  timelineItemChanged(oldValue, newValue = {}) {
+    const item = Object.assign({}, newValue);
+
+    if (typeof item.operationId === 'undefined') {
       return;
     }
 
     // Special case - clear the timeline.
-    if (newValue.operationId === '@CLEAR') {
+    if (item.operationId === '@CLEAR') {
       this.timelineMap.clear();
       this.emptyIndicatorMap.clear();
 
@@ -224,35 +226,32 @@ export class TimelineWidget extends WidgetWithInstrument {
       return Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
     }
 
-    const date = new Date(newValue.createdAt);
+    const date = new Date(item.createdAt);
     // Timeline item date (bucket)
     const topLevelKey = `${date.getFullYear()}-${this.#padTo2Digits(
       date.getMonth() + 1
     )}-${this.#padTo2Digits(date.getDate())}`;
 
     if (!this.timelineMap.has(topLevelKey)) {
-      this.timelineMap.set(
-        topLevelKey,
-        new Map().set(newValue.parentId, [newValue])
-      );
+      this.timelineMap.set(topLevelKey, new Map().set(item.parentId, [item]));
     } else {
       const topLevelMap = this.timelineMap.get(topLevelKey);
 
-      if (topLevelMap.has(newValue.parentId)) {
-        const parent = topLevelMap.get(newValue.parentId);
+      if (topLevelMap.has(item.parentId)) {
+        const parent = topLevelMap.get(item.parentId);
 
         if (
           !parent.find(
-            (operation) => operation.operationId === newValue.operationId
+            (operation) => operation.operationId === item.operationId
           )
         )
-          parent.push(newValue);
+          parent.push(item);
       } else {
-        topLevelMap.set(newValue.parentId, [newValue]);
+        topLevelMap.set(item.parentId, [item]);
       }
     }
 
-    const symbol = newValue.instrument?.symbol ?? newValue.symbol;
+    const symbol = item.instrument?.symbol ?? item.symbol;
 
     if (this.emptyIndicatorMap.has(symbol)) {
       const array = this.emptyIndicatorMap.get(symbol);
