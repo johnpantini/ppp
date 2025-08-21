@@ -1053,9 +1053,9 @@ export class LightChartWidget extends WidgetWithInstrument {
   @observable
   candle;
 
-  candleChanged(oldValue, newValue) {
+  candleChanged(oldValue, candle) {
     if (
-      this.candlesTrader.symbolToCanonical(newValue?.symbol) !==
+      this.candlesTrader.symbolToCanonical(candle?.symbol) !==
       this.instrument.symbol
     ) {
       return;
@@ -1065,27 +1065,27 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.getCurrentTimeframe();
 
     this.lastCandle = {
-      open: newValue.open,
-      high: newValue.high,
-      low: newValue.low,
-      close: newValue.close,
-      time: this.roundTimestampForTimeframe(newValue.timestamp, this.tf),
-      volume: newValue.volume,
-      customValues: newValue.customValues
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
+      close: candle.close,
+      time: this.roundTimestampForTimeframe(candle.timestamp, this.tf),
+      volume: candle.volume,
+      customValues: candle.customValues
     };
   }
 
-  lastCandleChanged(oldValue, newValue) {
-    if (newValue?.close) {
-      this.candles.set(newValue.time, newValue);
+  lastCandleChanged(oldValue, candle) {
+    if (candle?.close) {
+      this.candles.set(candle.time, candle);
 
       try {
-        this.mainSeries.update(newValue);
+        this.mainSeries.update(candle);
         this.volumeSeries.update({
-          time: newValue.time,
-          value: newValue.volume,
+          time: candle.time,
+          value: candle.volume,
           color:
-            newValue.close < newValue.open
+            candle.close < candle.open
               ? `rgba(${themeConditional(
                   toColorComponents(paletteRedLight3),
                   toColorComponents(paletteRedDark1)
