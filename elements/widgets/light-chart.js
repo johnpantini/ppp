@@ -625,11 +625,23 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.relativeChange = (candle.close - candle.open) / candle.open;
       }
 
-      if (this.candlesTrader) {
-        const dataCandle = this.candles.get(param.time);
+      const dataCandle =
+        this.lastCandle?.time === param.time
+          ? this.lastCandle
+          : this.candles.get(param.time);
 
+      if (this.candlesTrader) {
         if (dataCandle) {
           this.candlesTrader.trader.bus.emit('ppp:light-chart', {
+            event: 'crosshairmove',
+            instrument: this.instrument,
+            tf: this.tf,
+            candle: dataCandle
+          });
+        }
+      } else {
+        if (dataCandle) {
+          this.chartTrader.trader.bus.emit('ppp:light-chart', {
             event: 'crosshairmove',
             instrument: this.instrument,
             tf: this.tf,
@@ -1034,6 +1046,10 @@ export class LightChartWidget extends WidgetWithInstrument {
           volume: trade.volume,
           customValues: trade.customValues
         };
+
+        if (this.ohlcv?.at?.(-1)?.time !== time) {
+          this.ohlcv.push(this.lastCandle);
+        }
       } else {
         const { high, low, open, volume, customValues } = this.lastCandle;
 
@@ -1046,6 +1062,10 @@ export class LightChartWidget extends WidgetWithInstrument {
           volume: volume + trade.volume,
           customValues
         };
+
+        if (this.ohlcv?.at?.(-1)?.time === time) {
+          this.ohlcv[this.ohlcv.length - 1] = this.lastCandle;
+        }
       }
     }
   }
