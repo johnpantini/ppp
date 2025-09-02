@@ -48,14 +48,13 @@ export const cloudServicesPageTemplate = html`
           </span>
         </ppp-button>
         <ppp-button
-          ?disabled="${() => !ppp.keyVault.ok()}"
           slot="controls"
           @click="${(x) => x.restoreMongoDB(!shouldUseAlternativeMongo)}"
         >
           Восстановить базу из копии
-          <span slot="start"
-            >${html.partial(shouldUseAlternativeMongo ? database : cloud)}</span
-          >
+          <span slot="start">
+            ${html.partial(shouldUseAlternativeMongo ? database : cloud)}
+          </span>
         </ppp-button>
         <ppp-button
           appearance="default"

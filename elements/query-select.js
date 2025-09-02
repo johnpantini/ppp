@@ -204,18 +204,18 @@ export class QuerySelect extends PPPAppearanceElement {
               datum: item,
               value: item._id,
               displayValue:
-                typeof this.displayValueFormatter == 'function'
+                typeof this.displayValueFormatter === 'function'
                   ? this.displayValueFormatter(item)
                   : item.name,
               removed: item.removed
             };
           });
-        } else {
+        } else if (data) {
           return {
             datum: data,
             value: data._id,
             displayValue:
-              typeof this.displayValueFormatter == 'function'
+              typeof this.displayValueFormatter === 'function'
                 ? this.displayValueFormatter(data)
                 : data.name,
             removed: data.removed
@@ -226,7 +226,7 @@ export class QuerySelect extends PPPAppearanceElement {
   }
 
   async #onControlOpenChanged() {
-    if (this.options.length) {
+    if (this.options?.length) {
       this.control.listboxHolder.removeAttribute('hidden');
     } else {
       this.control.listboxHolder.setAttribute('hidden', '');
@@ -239,7 +239,7 @@ export class QuerySelect extends PPPAppearanceElement {
         let queryResult;
 
         if (typeof this.#code === 'string') {
-          queryResult = await ppp.user.functions.eval(
+          queryResult = await ppp.user?.functions.eval(
             await new Tmpl().render(this.context, this.#code, {})
           );
         } else {
@@ -252,7 +252,7 @@ export class QuerySelect extends PPPAppearanceElement {
 
         this.options = this.#formatter().call(this, queryResult);
 
-        if (this.options.length) {
+        if (this.options?.length) {
           this.control.listboxHolder.removeAttribute('hidden');
         } else {
           this.control.listboxHolder.setAttribute('hidden', '');
