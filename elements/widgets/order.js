@@ -42,7 +42,6 @@ import {
   typography,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
-import { emptyWidgetState } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteBlack,
