@@ -1093,6 +1093,10 @@ export class LightChartWidget extends WidgetWithInstrument {
       volume: candle.volume,
       customValues: candle.customValues
     };
+
+    if (this.ohlcv?.at?.(-1)?.time !== this.lastCandle.time) {
+      this.ohlcv.push(this.lastCandle);
+    }
   }
 
   lastCandleChanged(oldValue, candle) {
