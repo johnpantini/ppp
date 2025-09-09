@@ -2833,6 +2833,11 @@ export const widgetTrifectaFieldStyles = css`
     height: 16px;
   }
 
+  button svg {
+    width: 16px;
+    height: 16px;
+  }
+
   .reset-input:hover svg {
     color: ${themeConditional(paletteBlack, paletteGrayLight2)};
   }
