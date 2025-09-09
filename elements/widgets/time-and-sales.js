@@ -31,7 +31,7 @@ import {
   scrollbars,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
-import { trash } from '../../static/svg/sprite.js';
+import { pause, trash, refresh } from '../../static/svg/sprite.js';
 import {
   fontSizeWidget,
   paletteGrayBase,
@@ -95,6 +95,28 @@ export const timeAndSalesWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate({
         buttons: html`
+          <div
+            ?hidden="${(x) => !x.document.showPauseButton}"
+            title="Обновить вручную"
+            class="button"
+            slot="start"
+            @click="${(x) => {
+              x.refresh();
+            }}"
+          >
+            ${html.partial(refresh)}
+          </div>
+          <div
+            ?hidden="${(x) => !x.document.showPauseButton}"
+            title="Пауза"
+            class="button${(x) => (x.paused ? ' earth' : '')}"
+            slot="start"
+            @click="${(x) => {
+              x.togglePause();
+            }}"
+          >
+            ${html.partial(pause)}
+          </div>
           <div
             ?hidden="${(x) => !x.document.showResetButton}"
             title="Очистить виджет"
@@ -331,6 +353,17 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   timeColumnOptions;
 
+  @observable
+  paused;
+
+  togglePause() {
+    this.paused = !this.paused;
+  }
+
+  refresh() {
+    this.#updateNeeded = true;
+  }
+
   async pChanged(oldValue, rawTrade) {
     const trade = this.tradesTrader.rawTradeToCanonicalTrade(rawTrade);
     const threshold = await this.getThreshold(trade);
@@ -356,7 +389,10 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         }
 
         this.#stillGrowing = this.#trades.length < this.document.depth + 1;
-        this.#updateNeeded = true;
+
+        if (!this.paused) {
+          this.#updateNeeded = true;
+        }
       }
     }
   }
@@ -915,6 +951,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         columns: this.container.columnList.value,
         threshold: this.container.threshold.value,
         showResetButton: this.container.showResetButton.checked,
+        showPauseButton: this.container.showPauseButton.checked,
         timeColumnOptions: this.container.timeColumnOptions.value,
         depth: this.container.depth.value
           ? Math.trunc(Math.abs(this.container.depth.value))
@@ -1043,7 +1080,7 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>Интерфейс заголовка</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
@@ -1051,6 +1088,12 @@ export async function widgetDefinition() {
               ${ref('showResetButton')}
             >
               Показывать кнопку очистки
+            </ppp-checkbox>
+             <ppp-checkbox
+              ?checked="${(x) => x.document.showPauseButton ?? false}"
+              ${ref('showPauseButton')}
+            >
+              Показывать кнопку паузы
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">

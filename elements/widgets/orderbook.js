@@ -20,6 +20,7 @@ import {
   TRADER_DATUM,
   WIDGET_TYPES
 } from '../../lib/const.js';
+import { pause, trash, refresh } from '../../static/svg/sprite.js';
 import {
   formatAmount,
   formatPercentage,
@@ -81,7 +82,43 @@ return prices;
 export const orderbookWidgetTemplate = html`
   <template>
     <div class="widget-root">
-      ${widgetDefaultHeaderTemplate()}
+      ${widgetDefaultHeaderTemplate({
+        buttons: html`
+          <div
+            ?hidden="${(x) => !x.document.showPauseButton}"
+            title="Обновить вручную"
+            class="button"
+            slot="start"
+            @click="${(x) => {
+              x.refresh();
+            }}"
+          >
+            ${html.partial(refresh)}
+          </div>
+          <div
+            ?hidden="${(x) => !x.document.showPauseButton}"
+            title="Пауза"
+            class="button${(x) => (x.paused ? ' earth' : '')}"
+            slot="start"
+            @click="${(x) => {
+              x.togglePause();
+            }}"
+          >
+            ${html.partial(pause)}
+          </div>
+          <div
+            ?hidden="${(x) => !x.document.showResetButton}"
+            title="Очистить виджет"
+            class="button"
+            slot="start"
+            @click="${(x) => {
+              x.clear();
+            }}"
+          >
+            ${html.partial(trash)}
+          </div>
+        `
+      })}
       <div class="widget-body">
         ${widgetStackSelectorTemplate()}
         <div class="widget-content" ?hidden="${(x) => !x.mayShowContent}">
@@ -346,7 +383,7 @@ export const orderbookWidgetStyles = css`
     ${ellipsis()};
   }
 
-  svg {
+  svg[orderbook]{
     position: absolute;
     pointer-events: none;
     z-index: 0;
@@ -441,6 +478,25 @@ export class OrderbookWidget extends WidgetWithInstrument {
   bookProcessorFunc;
 
   #updateNeeded = false;
+
+  @observable
+  paused;
+
+  togglePause() {
+    this.paused = !this.paused;
+  }
+
+  refresh() {
+    this.#updateNeeded = true;
+  }
+
+  clear() {
+    this.montage = {
+      bids: [],
+      asks: []
+    };
+    this.empty = true;
+  }
 
   constructor() {
     super();
@@ -627,7 +683,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
   #createDOM() {
     const vectors = [
-      `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${
+      `<svg orderbook xmlns="http://www.w3.org/2000/svg" width="100%" height="${
         (this.document.depth ?? 1) * 20
       }px" preserveAspectRatio="none" viewBox="0 0 100 ${
         (this.document.depth ?? 1) * 20
@@ -1364,7 +1420,10 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   montageChanged() {
-    this.#updateNeeded = true;
+    if (!this.paused) {
+      this.#updateNeeded = true;
+    }
+
     this.initialized = true;
   }
 
@@ -1523,6 +1582,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
         displayMode: this.container.displayMode.value,
         showBorders: this.container.showBorders.checked,
         levelColoring: this.container.levelColoring.value,
+        showResetButton: this.container.showResetButton.checked,
+        showPauseButton: this.container.showPauseButton.checked,
         showSpread: this.container.showSpread.checked,
         showPools: this.container.showPools.checked,
         useMicsForPools: this.container.useMicsForPools.checked,
@@ -1936,6 +1997,24 @@ export async function widgetDefinition() {
               ></ppp-text-field>
             </div>
           </div>
+          <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Интерфейс заголовка</h5>
+            </div>
+            <div class="spacing2"></div>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showResetButton ?? false}"
+              ${ref('showResetButton')}
+            >
+              Показывать кнопку очистки
+            </ppp-checkbox>
+             <ppp-checkbox
+              ?checked="${(x) => x.document.showPauseButton ?? false}"
+              ${ref('showPauseButton')}
+            >
+              Показывать кнопку паузы
+            </ppp-checkbox>
+          </div>          
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>Наполнение</h5>
