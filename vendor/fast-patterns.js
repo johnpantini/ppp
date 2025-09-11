@@ -7,8 +7,8 @@ var __decorate = function (decorators, target, key, desc) {
       c < 3
         ? target
         : desc === null
-        ? (desc = Object.getOwnPropertyDescriptor(target, key))
-        : desc,
+          ? (desc = Object.getOwnPropertyDescriptor(target, key))
+          : desc,
     d;
 
   if (typeof Reflect === 'object' && typeof Reflect.decorate === 'function')
