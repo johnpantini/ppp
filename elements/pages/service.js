@@ -135,7 +135,7 @@ export const servicePageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
-        <ppp-generic-card>
+        <ppp-generic-card hidden>
           <img
             slot="logo"
             draggable="false"
@@ -164,7 +164,7 @@ export const servicePageTemplate = html`
             Продолжить
           </ppp-button>
         </ppp-generic-card>
-        <ppp-generic-card>
+        <ppp-generic-card hidden>
           <img
             slot="logo"
             draggable="false"

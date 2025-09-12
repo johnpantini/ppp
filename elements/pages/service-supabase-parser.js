@@ -41,7 +41,7 @@ export const predefinedParserData = {
 description text not null,
 pub_date text not null,
 link text not null`,
-    constsCode: `return [];`,
+    constsCode: 'return [];',
     parsingCode: await (
       await fetch(`${ppp.rootUrl}/lib/supabase-parser/default-parser.js`)
     ).text(),
@@ -82,7 +82,7 @@ topic text,
 date text not null,
 priority bool not null,
 link text`,
-    constsCode: `return [];`,
+    constsCode: 'return [];',
     insertTriggerCode: `/**
  * @constant {string} TABLE_NAME - Имя таблицы состояния.
  */
@@ -634,7 +634,7 @@ export const serviceSupabaseParserPageTemplate = html`
               <ppp-button
                 ?disabled="${(x) => !x.telegramEnabled.checked}"
                 @click="${() =>
-                  ppp.app.mountPage(`bot`, {
+                  ppp.app.mountPage('bot', {
                     size: 'xlarge',
                     adoptHeader: true
                   })}"
@@ -916,7 +916,7 @@ export class ServiceSupabaseParserPage extends Page {
 
   async generateUrlByTemplate(template) {
     switch (template) {
-      case 'thefly':
+      case 'thefly': {
         await validate(this.cloudflareWorkerSelector);
 
         const datum = this.cloudflareWorkerSelector.datum();
@@ -926,6 +926,7 @@ export class ServiceSupabaseParserPage extends Page {
         this.url.value = url;
 
         break;
+      }
     }
   }
 
@@ -1083,7 +1084,7 @@ export class ServiceSupabaseParserPage extends Page {
     const parsed = parsePPPScript(this.parsingCode.value);
 
     if (parsed) {
-      [version] = parsed?.meta?.version;
+      [version] = parsed?.meta?.version ?? [1];
       version = Math.abs(+version) || 1;
     }
 

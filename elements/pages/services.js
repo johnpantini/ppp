@@ -62,15 +62,22 @@ export const servicesPageTemplate = html`
               <ppp-side-nav-group>
                 <span slot="title">Или по типу</span>
                 ${repeat(
-                  (x) => Object.keys(SERVICES),
+                  (x) =>
+                    Object.keys(SERVICES).filter(
+                      (x) =>
+                        ![
+                          SERVICES.SUPABASE_PARSER,
+                          SERVICES.NYSE_NSDQ_HALTS
+                        ].includes(SERVICES[x])
+                    ),
                   html`
                     <ppp-side-nav-item
                       slug="${(x) => SERVICES[x]}"
                       ?active="${(x, c) => c.parent.activeItem === SERVICES[x]}"
                     >
-                      <span
-                        >${(x) => ppp.t(`$const.service.${SERVICES[x]}`)}</span
-                      >
+                      <span>
+                        ${(x) => ppp.t(`$const.service.${SERVICES[x]}`)}
+                      </span>
                     </ppp-side-nav-item>
                   `
                 )}
@@ -372,7 +379,7 @@ export class ServicesPage extends Page {
           const parsed = parsePPPScript(await contentsResponse.text());
 
           if (parsed && Array.isArray(parsed.meta?.version)) {
-            const [version] = parsed.meta?.version;
+            const [version] = parsed.meta?.version ?? [1];
 
             doc.actualVersion = Math.abs(+version) || 1;
             doc.versioningStatus =
