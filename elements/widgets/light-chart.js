@@ -42,6 +42,8 @@ import {
   paletteGrayLight3,
   paletteGreenDark1,
   paletteGreenLight2,
+  paletteYellowDark2,
+  paletteYellowLight2,
   paletteRedDark1,
   paletteRedLight3,
   paletteWhite,
@@ -219,6 +221,17 @@ export const lightChartWidgetTemplate = html`
                       </span>
                     </div>
                   </div>
+                  <div class="ohlcv-line" ?hidden="${(x) => !x.vwap}">
+                    <div class="pair vwap">
+                      <span>VWAP</span>
+                      <span class="ohlcv earth">
+                        ${(x) =>
+                          typeof x.vwap === 'number'
+                            ? x.priceFormatter(x.vwap)
+                            : ''}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -291,7 +304,8 @@ export const lightChartWidgetStyles = css`
     gap: 0;
   }
 
-  .ohlcv-line .pair.volume {
+  .ohlcv-line .pair.volume, 
+  .ohlcv-line .pair.vwap {
     gap: 0 8px;
   }
 
@@ -317,6 +331,8 @@ export class LightChartWidget extends WidgetWithInstrument {
   mainSeries;
 
   volumeSeries;
+
+  vwapSeries;
 
   hasMore = true;
 
@@ -372,6 +388,9 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   @observable
   relativeChange;
+
+  @observable
+  vwap;
 
   @observable
   shouldShowPriceInfo;
@@ -612,8 +631,23 @@ export class LightChartWidget extends WidgetWithInstrument {
     if (param.time) {
       this.shouldShowPriceInfo = true;
 
-      const values = param.seriesPrices.values();
-      const [candle, volume] = values;
+      const values = Array.from(param.seriesPrices.values());
+
+      let vwap;
+      let candle;
+      let volume;
+
+      if (this.vwapSeries) {
+        vwap = values[0];
+
+        this.vwap = vwap ?? '—';
+
+        candle = values[1];
+        volume = values[2];
+      } else {
+        candle = values[0];
+        volume = values[1];
+      }
 
       if (candle) {
         this.openPrice = candle.open;
@@ -715,6 +749,20 @@ export class LightChartWidget extends WidgetWithInstrument {
       seriesKind = 'Candlestick';
     }
 
+    if (
+      this.document.candlesTrader &&
+      this.document.feedMode === 'candles' &&
+      this.document.showVWAPFlag
+    ) {
+      this.vwapSeries = this.chart.addLineSeries({
+        lineWidth: 2,
+        color: themeConditional(paletteYellowDark2, paletteYellowLight2).$value,
+        lastValueVisible: false,
+        priceLineVisible: false,
+        isMain: false
+      });
+    }
+
     this.mainSeries = this.chart[`add${seriesKind}Series`]({
       downColor: chartDownColor.$value,
       upColor: chartUpColor.$value,
@@ -763,22 +811,38 @@ export class LightChartWidget extends WidgetWithInstrument {
   // Older quotes come first.
   setData(ohlcv = []) {
     this.mainSeries.setData(ohlcv);
-    this.volumeSeries.setData(
-      ohlcv.map((c) => {
-        return {
-          time: new Date(c.time).valueOf(),
-          value: c.volume,
-          color:
-            c.close < c.open
-              ? `rgba(${toColorComponents(
-                  chartDownColor
-                ).$value.createCSS()}, 0.56)`
-              : `rgba(${toColorComponents(
-                  chartUpColor
-                ).$value.createCSS()}, 0.56)`
-        };
-      })
-    );
+
+    const volumeData = [];
+    const vwapData = [];
+
+    for (const c of ohlcv) {
+      const time = new Date(c.time).valueOf();
+
+      volumeData.push({
+        time,
+        value: c.volume,
+        color:
+          c.close < c.open
+            ? `rgba(${toColorComponents(
+                chartDownColor
+              ).$value.createCSS()}, 0.56)`
+            : `rgba(${toColorComponents(
+                chartUpColor
+              ).$value.createCSS()}, 0.56)`
+      });
+
+      vwapData.push({
+        open: c.vw,
+        close: c.vw,
+        time
+      });
+    }
+
+    if (this.vwapSeries) {
+      this.vwapSeries.setData(vwapData);
+    }
+
+    this.volumeSeries.setData(volumeData);
 
     this.lastCandle = ohlcv[ohlcv.length - 1];
   }
@@ -1091,6 +1155,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       close: candle.close,
       time: this.roundTimestampForTimeframe(candle.timestamp, this.tf),
       volume: candle.volume,
+      vw: candle.vw,
       customValues: candle.customValues
     };
 
@@ -1105,6 +1170,16 @@ export class LightChartWidget extends WidgetWithInstrument {
 
       try {
         this.mainSeries.update(candle);
+
+        if (this.vwapSeries) {
+          this.vwapSeries.update(candle);
+          this.vwapSeries.update({
+            time: candle.time,
+            open: candle.vw,
+            close: candle.vw
+          });
+        }
+
         this.volumeSeries.update({
           time: candle.time,
           value: candle.volume,
@@ -1140,7 +1215,8 @@ export class LightChartWidget extends WidgetWithInstrument {
         timeframes: this.container.timeframeList.value,
         showToolbar: this.container.showToolbar.checked,
         showResetButton: this.container.showResetButton.checked,
-        seriesKind: this.container.seriesKind.value
+        seriesKind: this.container.seriesKind.value,
+        showVWAPFlag: this.container.showVWAPFlag.checked
       }
     };
   }
@@ -1424,6 +1500,20 @@ export async function widgetDefinition() {
                 <ppp-radio value="Bar">Бары</ppp-radio>
                 <ppp-radio value="Line">Линия</ppp-radio>
               </ppp-radio-group>
+            </div>
+          </div>
+             <div class="widget-settings-section">
+            <div class="widget-settings-label-group">
+              <h5>Наполнение</h5>
+            </div>
+            <div class="spacing2"></div>
+            <div class="widget-settings-input-group">
+             <ppp-checkbox
+              ?checked="${(x) => x.document.showVWAPFlag ?? false}"
+              ${ref('showVWAPFlag')}
+            >
+              Показывать линию VWAP
+            </ppp-checkbox>
             </div>
           </div>
         </ppp-tab-panel>
