@@ -749,11 +749,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       seriesKind = 'Candlestick';
     }
 
-    if (
-      this.document.candlesTrader &&
-      this.document.feedMode === 'candles' &&
-      this.document.showVWAPFlag
-    ) {
+    if (this.document.showVWAPFlag) {
       this.vwapSeries = this.chart.addLineSeries({
         lineWidth: 2,
         color: themeConditional(paletteYellowDark2, paletteYellowLight2).$value,
