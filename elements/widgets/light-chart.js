@@ -411,6 +411,7 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   async connectedCallback() {
     this.onCrosshairMove = this.onCrosshairMove.bind(this);
+    this.onChartClick = this.onChartClick.bind(this);
     this.onVisibleLogicalRangeChanged =
       this.onVisibleLogicalRangeChanged.bind(this);
 
@@ -545,6 +546,8 @@ export class LightChartWidget extends WidgetWithInstrument {
   async disconnectedCallback() {
     if (this.chart) {
       this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
+      this.chart.unsubscribeClick(this.onChartClick);
+
       this.chart
         .timeScale()
         .unsubscribeVisibleLogicalRangeChange(
@@ -624,6 +627,45 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     if (info !== null && info.barsBefore < 50) {
       this.ready && this.loadHistory(this.instrument.symbol);
+    }
+  }
+
+  onChartClick(param) {
+    if (param.time) {
+      const values = Array.from(param.seriesPrices.values());
+
+      let vwap;
+      let candle;
+      let volume;
+
+      if (this.vwapSeries) {
+        vwap = values[0];
+
+        this.vwap = vwap ?? '—';
+
+        candle = values[1];
+        volume = values[2];
+      } else {
+        candle = values[0];
+        volume = values[1];
+      }
+
+      const dataCandle =
+        this.lastCandle?.time === param.time
+          ? this.lastCandle
+          : this.candles.get(param.time);
+
+      if (candle && dataCandle) {
+        this.$$debug('bar: %o', {
+          vwap: vwap,
+          volume: volume,
+          open: candle.open,
+          high: candle.high,
+          low: candle.low,
+          close: candle.close,
+          cv: dataCandle.customValues
+        });
+      }
     }
   }
 
@@ -738,6 +780,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   async setupChart() {
     this.applyChartOptions();
     this.chart.subscribeCrosshairMove(this.onCrosshairMove);
+    this.chart.subscribeClick(this.onChartClick);
     this.chart
       .timeScale()
       .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
