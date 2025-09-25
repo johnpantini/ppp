@@ -134,6 +134,7 @@ export class IntradayStatsIndividualSymbolSource {
 }
 
 function pushSorted(array, item, comparator) {
+  // biome-ignore lint/complexity/useArrowFunction: N/A
   const index = (function (arr) {
     let m = 0;
     let n = arr.length - 1;
