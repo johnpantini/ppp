@@ -1178,8 +1178,9 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   candleChanged(oldValue, candle) {
     if (
+      !this.ready ||
       this.candlesTrader.symbolToCanonical(candle?.symbol) !==
-      this.instrument.symbol
+        this.instrument.symbol
     ) {
       return;
     }
