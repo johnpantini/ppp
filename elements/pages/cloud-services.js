@@ -107,11 +107,6 @@ export const cloudServicesPageTemplate = html`
             type="password"
             placeholder="Введите пароль"
             value="${() => ppp.keyVault.getKey('master-password')}"
-            @input="${(x) =>
-              ppp.keyVault.setKey(
-                'master-password',
-                x.masterPassword.value.trim()
-              )}"
             ${ref('masterPassword')}
           ></ppp-text-field>
           <div class="spacing4"></div>
@@ -153,11 +148,6 @@ export const cloudServicesPageTemplate = html`
             type="password"
             placeholder="https://example.deno.dev"
             value="${() => ppp.keyVault.getKey('global-proxy-url')}"
-            @input="${(x) =>
-              ppp.keyVault.setKey(
-                'global-proxy-url',
-                x.globalProxyUrl.value.trim()
-              )}"
             ${ref('globalProxyUrl')}
           ></ppp-text-field>
         </div>
@@ -183,8 +173,6 @@ export const cloudServicesPageTemplate = html`
             type="password"
             placeholder="Токен"
             value="${() => ppp.keyVault.getKey('github-token')}"
-            @input="${(x) =>
-              ppp.keyVault.setKey('github-token', x.gitHubToken.value.trim())}"
             ${ref('gitHubToken')}
           ></ppp-text-field>
         </div>
@@ -202,11 +190,6 @@ export const cloudServicesPageTemplate = html`
             type="password"
             placeholder="mongodb://0.0.0.0:27017"
             value="${() => ppp.keyVault.getKey('mongo-connection-uri')}"
-            @input="${(x) =>
-              ppp.keyVault.setKey(
-                'mongo-connection-uri',
-                x.mongoConnectionUri.value.trim()
-              )}"
             ${ref('mongoConnectionUri')}
           ></ppp-text-field>
         </div>
@@ -223,12 +206,7 @@ export const cloudServicesPageTemplate = html`
           <ppp-text-field
             type="url"
             placeholder="http://0.0.0.0:14444"
-            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"
-            @input="${(x) =>
-              ppp.keyVault.setKey(
-                'mongo-proxy-url',
-                x.mongoProxyUrl.value.trim()
-              )}"
+            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"            
             ${ref('mongoProxyUrl')}
           ></ppp-text-field>
         </div>
