@@ -7,10 +7,6 @@ import {
   documentPageFooterPartial
 } from '../page.js';
 import { APIS } from '../../lib/const.js';
-import {
-  upsertMongoDBRealmScheduledTrigger,
-  removeMongoDBRealmTrigger
-} from '../../lib/realm.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -181,71 +177,7 @@ export class ApiRedisPage extends Page {
   async #createUpstashRedisPingTrigger() {
     if (this.document.host.endsWith('upstash.io')) {
       // Upstash specific code and options.
-      return upsertMongoDBRealmScheduledTrigger({
-        functionName: `pppUpstashRedisPing${this.document._id}`,
-        triggerName: `pppUpstashRedisPingTrigger${this.document._id}`,
-        schedule: '0 */12 * * *',
-        functionSource: `
-        exports = function () {
-          const tls = require('tls');
- 
-          const star = Buffer.from('*', 'ascii');
-          const dollar = Buffer.from('$', 'ascii');
-          const crlf = Buffer.from('\\r\\n', 'ascii');
-          
-          function toRESPBulkString(string) {
-            const asciiString = Buffer.from(string, 'ascii');
-            const byteLength = Buffer.from(String(asciiString.length), 'ascii');
-            const totalLength =
-              dollar.length +
-              byteLength.length +
-              crlf.length +
-              asciiString.length +
-              crlf.length;
-          
-            return Buffer.concat(
-              [dollar, byteLength, crlf, asciiString, crlf],
-              totalLength
-            );
-          }
-          
-          function toRESPArray(command) {
-            const respStrings = command.map(toRESPBulkString);
-            const stringCount = Buffer.from(String(respStrings.length), 'ascii');
-          
-            return Buffer.concat([star, stringCount, crlf, ...respStrings]);
-          }
-          
-          function createRedisCommand(commands) {
-            const respArrays = commands.map(toRESPArray);
-          
-            return Buffer.concat([...respArrays, crlf]);
-          }
-          
-          const socket = tls.connect({
-            host: '${this.host.value.trim()}',
-            port: ${Math.abs(+this.port.value)},
-            servername: '${this.host.value.trim()}'
-          });
-          
-          socket.setEncoding('utf8');
-          socket.on('connect', () => {
-            socket.write(
-              createRedisCommand([
-                ['auth', '${this.username.value.trim()}' || 'default', '${this.password.value.trim()}']
-              ])
-            );
-            socket.write(
-              createRedisCommand([['set', 'ppp:${
-                this.document._id
-              }', new Date().toISOString()]])
-            );
-          
-            process.nextTick(() => socket.end());
-          });
-        };
-      `
-      });
+      // Not implemented yet.
     }
   }
 
@@ -279,9 +211,8 @@ export class ApiRedisPage extends Page {
 
   async cleanup() {
     if (this.document.host.endsWith('upstash.io')) {
-      return removeMongoDBRealmTrigger({
-        triggerName: `pppUpstashRedisPingTrigger${this.document._id}`
-      });
+      // Upstash specific code and options.
+      // Not implemented yet.
     }
   }
 }

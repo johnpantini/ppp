@@ -20,10 +20,6 @@ import {
 } from './service.js';
 import { uuidv4 } from '../../lib/ppp-crypto.js';
 import { applyMixins } from '../../vendor/fast-utilities.js';
-import {
-  removeMongoDBRealmTrigger,
-  upsertMongoDBRealmScheduledTrigger
-} from '../../lib/realm.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -497,21 +493,7 @@ export class ServiceCloudPppAspirantPage extends Page {
       'Не удалось развернуть сервис Aspirant в облаке Render.'
     );
 
-    await upsertMongoDBRealmScheduledTrigger({
-      functionName: `pppAspirantOnRenderPing${this.document._id}`,
-      triggerName: `pppAspirantOnRenderPingTrigger${this.document._id}`,
-      schedule: '*/5 * * * *',
-      functionSource: `
-        exports = async function () {
-          return context.http
-            .get({
-              url: 'https://aspirant-${this.document.slug}.onrender.com/nginx/health'
-            })
-            .then((response) => response.body.text())
-            .catch(() => Promise.resolve({}));
-        };
-      `
-    });
+    // Add Render ping trigger code here.
   }
 
   async submit() {
@@ -659,9 +641,7 @@ export class ServiceCloudPppAspirantPage extends Page {
         throw error;
       });
     } else {
-      await removeMongoDBRealmTrigger({
-        triggerName: `pppAspirantOnRenderPingTrigger${this.document._id}`
-      });
+      // Add Render trigger removal code here.
 
       return maybeFetchError(
         await ppp.fetch(

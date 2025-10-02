@@ -17,16 +17,12 @@ import { APIS } from './lib/const.js';
 import { TAG } from './lib/tag.js';
 
 export const keySet = [
+  'master-password',
+  'global-proxy-url',
   'github-login',
   'github-token',
-  'master-password',
-  'mongo-api-key',
-  'mongo-app-client-id',
-  'mongo-app-id',
-  'mongo-group-id',
-  'mongo-private-key',
-  'mongo-public-key',
-  'global-proxy-url'
+  'mongo-connection-uri',
+  'mongo-proxy-url'
 ];
 
 class KeyVault {
@@ -262,11 +258,7 @@ class PPP {
     }
   }
 
-  #showLoadingError({
-    errorText,
-    shouldShowGlobalProxyUrlInput,
-    shouldShowSwitchToCloudDBButton
-  }) {
+  #showLoadingError({ errorText, shouldShowGlobalProxyUrlInput }) {
     document.querySelector('.splashscreen-loader').classList.add('error');
     document.querySelector('.loading-text').classList.add('error');
 
@@ -276,9 +268,7 @@ class PPP {
       document.querySelector('.global-proxy-url').removeAttribute('hidden');
     }
 
-    if (shouldShowSwitchToCloudDBButton) {
-      document.querySelector('.switch-to-cloud-db').removeAttribute('hidden');
-    }
+    document.querySelector('.switch-to-cloud-db').removeAttribute('hidden');
   }
 
   async #rebuildDictionary() {
@@ -312,46 +302,25 @@ class PPP {
 
       try {
         this.traders = new Traders();
-        this.realm = getApp(this.keyVault.getKey('mongo-app-client-id'));
-        this.credentials = Credentials.apiKey(
-          this.keyVault.getKey('mongo-api-key')
-        );
+        this.realm = getApp('ppp');
+        this.credentials = Credentials.apiKey('ppp');
         this.user = await this.realm.logIn(this.credentials, false);
       } catch (e) {
         console.error(e);
 
         if (e.statusCode === 401 || e.statusCode === 404) {
-          this.keyVault.removeKey('mongo-api-key');
+          this.keyVault.removeKey('tag');
 
           return this.#createApplication({ emergency: true });
         } else {
           if (/Failed to fetch/i.test(e?.message)) {
-            if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
-              this.#showLoadingError({
-                errorText: this.t('$pppErrors.E_NO_MONGODB_CONNECTION'),
-                shouldShowSwitchToCloudDBButton: true
-              });
-
-              const listener = () => {
-                localStorage.removeItem('ppp-use-alternative-mongo');
-                window.location.reload();
-
-                const button = document.querySelector('.switch-to-cloud-db');
-
-                button.setAttribute('hidden', '');
-                button.removeEventListener('click', listener);
-              };
-
-              document
-                .querySelector('.switch-to-cloud-db')
-                .addEventListener('click', listener);
-            } else {
-              this.#showLoadingError({
-                errorText: this.t('$pppErrors.E_NO_PROXY_CONNECTION'),
-                shouldShowGlobalProxyUrlInput: true
-              });
-            }
+            this.#showLoadingError({
+              errorText: this.t('$pppErrors.E_NO_MONGODB_CONNECTION'),
+              shouldShowGlobalProxyUrlInput: true
+            });
           } else {
+            localStorage.removeItem('ppp-tag');
+
             this.#showLoadingError({
               errorText: this.t('$pppErrors.E_UNKNOWN')
             });
@@ -443,59 +412,12 @@ class PPP {
         console.error(e);
 
         if (/Failed to fetch/i.test(e?.message)) {
-          if (localStorage.getItem('ppp-use-alternative-mongo') === '1') {
-            this.#showLoadingError({
-              errorText: this.t('$pppErrors.E_NO_MONGODB_CONNECTION'),
-              shouldShowSwitchToCloudDBButton: true
-            });
-
-            const listener = () => {
-              localStorage.removeItem('ppp-use-alternative-mongo');
-              window.location.reload();
-
-              const button = document.querySelector('.switch-to-cloud-db');
-
-              button.setAttribute('hidden', '');
-              button.removeEventListener('click', listener);
-            };
-
-            document
-              .querySelector('.switch-to-cloud-db')
-              .addEventListener('click', listener);
-          } else {
-            this.#showLoadingError({
-              errorText: this.t('$pppErrors.E_NO_PROXY_CONNECTION'),
-              shouldShowGlobalProxyUrlInput: true
-            });
-          }
-        } else if (/failed to find refresh token/i.test(e?.message)) {
-          sessionStorage.removeItem('realmLogin');
-          window.location.reload();
-        } else if (/Cannot access member 'db' of undefined/i.test(e?.message)) {
           this.#showLoadingError({
-            errorText: this.t('$pppErrors.E_BROKEN_ATLAS_REALM_LINK')
+            errorText: this.t('$pppErrors.E_NO_MONGODB_CONNECTION'),
+            shouldShowGlobalProxyUrlInput: true
           });
-        } else if (
-          /error resolving cluster hostname/i.test(e?.message) ||
-          /error connecting to MongoDB cluster/i.test(e?.message) ||
-          /server selection error/i.test(e?.message)
-        ) {
-          this.#showLoadingError({
-            errorText: this.t('$pppErrors.E_OFFLINE_MONGODB_APP')
-          });
-        } else if (/function not found/i.test(e?.message)) {
-          this.#showLoadingError({
-            errorText: this.t(
-              '$pppErrors.E_CLOUD_SERVICES_MISCONFIGURATION_PLEASE_WAIT'
-            )
-          });
-
-          setTimeout(() => {
-            localStorage.removeItem('ppp-mongo-app-id');
-            localStorage.removeItem('ppp-tag');
-            window.location.reload();
-          }, 5000);
         } else {
+          localStorage.removeItem('ppp-tag');
           this.#showLoadingError({
             errorText: this.t('$pppErrors.E_UNKNOWN')
           });

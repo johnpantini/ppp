@@ -2,7 +2,7 @@ export default function (i18n) {
   i18n.extend({
     $pppErrors: {
       E_NO_PROXY_CONNECTION: 'Нет связи с прокси',
-      E_NO_MONGODB_CONNECTION: 'Нет связи с альтернативной базой данных',
+      E_NO_MONGODB_CONNECTION: 'Нет связи с базой данных MongoDB',
       E_BROKEN_ATLAS_REALM_LINK:
         'Отсутствует связь между базой данных и приложением MongoDB',
       E_OFFLINE_MONGODB_APP:

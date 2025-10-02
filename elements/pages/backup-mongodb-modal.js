@@ -79,9 +79,6 @@ export const backupMongodbModalPageStyles = css`
 `;
 
 export class BackupMongodbModalPage extends Page {
-  @attr({ mode: 'boolean' })
-  cloud;
-
   zipWriter;
 
   async submitDocument() {
@@ -159,7 +156,6 @@ export class BackupMongodbModalPage extends Page {
       );
 
       if (!backupsBucket) {
-        // Create new bucket.
         const rNewBucket = await maybeFetchError(
           await ppp.fetch(
             'https://storage.api.cloud.yandex.net/storage/v1/buckets',
@@ -190,9 +186,7 @@ export class BackupMongodbModalPage extends Page {
       }
 
       const now = Date.now();
-      const key = `backup-of-${
-        this.cloud ? 'cloud' : 'alternative'
-      }-mongodb-${now}.zip`;
+      const key = `backup-of-mongodb-${now}.zip`;
       const host = `${backupsBucket.name}.storage.yandexcloud.net`;
       const xAmzDate =
         new Date()
@@ -239,9 +233,7 @@ export class BackupMongodbModalPage extends Page {
       if (this.downloadBackupFile.checked) {
         const link = document.createElement('a');
 
-        link.download = `backup-of-${
-          this.cloud ? 'cloud' : 'alternative'
-        }-mongodb-${now}.zip`;
+        link.download = `backup-of-mongodb-${now}.zip`;
         link.href = window.URL.createObjectURL(zipBlob);
         link.dataset.downloadurl = [
           'application/zip',
@@ -261,11 +253,7 @@ export class BackupMongodbModalPage extends Page {
 
       ppp.app.mountPointModal.setAttribute('hidden', '');
 
-      this.showSuccessNotification(
-        this.cloud
-          ? 'Копия облачной базы данных успешно сохранена.'
-          : 'Копия альтернативной базы данных успешно сохранена.'
-      );
+      this.showSuccessNotification('Копия базы данных успешно сохранена.');
     } catch (e) {
       this.failOperation(e, 'Создание резервной копии');
     } finally {

@@ -276,8 +276,12 @@
         class="global-proxy-url"
         placeholder="https://example.deno.dev"
       />
-      <button hidden class="switch-to-cloud-db">
-        <div>➡️ MongoDB Atlas</div>
+      <button
+        hidden
+        class="switch-to-cloud-db"
+        onclick="localStorage.removeItem('ppp-tag');window.location.reload();"
+      >
+        <div>➡️ Cloud Services</div>
       </button>
     </div>
     <ppp-design-system-canvas>

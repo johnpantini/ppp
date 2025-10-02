@@ -18,10 +18,6 @@ import {
 import { APIS } from '../../lib/const.js';
 import { checkAstraDbCredentials } from '../../lib/astradb.js';
 import { formatDate } from '../../lib/intl.js';
-import {
-  upsertMongoDBRealmScheduledTrigger,
-  removeMongoDBRealmTrigger
-} from '../../lib/realm.js';
 import '../badge.js';
 import '../banner.js';
 import '../button.js';
@@ -330,29 +326,8 @@ export class ApiAstraDbPage extends Page {
   }
 
   async #createWakeUpTrigger() {
-    return upsertMongoDBRealmScheduledTrigger({
-      functionName: `pppAstraDBWakeUp${this.document._id}`,
-      triggerName: `pppAstraDBWakeUpTrigger${this.document._id}`,
-      functionSource: `
-        exports = async function () {
-          return context.http
-            .put({
-              url: 'https://${this.document.dbID}-${this.document.dbRegion}.apps.astra.datastax.com/api/rest/v2/namespaces/${this.document.dbKeyspace}/collections/stats/heartbeat',
-              headers: {
-                'X-Cassandra-Token': [
-                  '${this.document.dbToken}'
-                ],
-                'Content-Type': ['application/json']
-              },
-              body: JSON.stringify({
-                updatedAt: Date.now()
-              })
-            })
-            .then((response) => EJSON.parse(response.body.text()))
-            .catch(() => Promise.resolve({}));
-        };
-      `
-    });
+    // Not implemented.
+    return;
   }
 
   async submit() {
@@ -382,9 +357,8 @@ export class ApiAstraDbPage extends Page {
   }
 
   async cleanup() {
-    return removeMongoDBRealmTrigger({
-      triggerName: `pppAstraDBWakeUpTrigger${this.document._id}`
-    });
+    // Not implemented.
+    return;
   }
 }
 

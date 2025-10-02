@@ -102,12 +102,7 @@ export const restoreMongodbModalPageTemplate = html`
                       href="${datum.url}"
                       target="_blank"
                       rel="noopener"
-                      >${
-                        /backup-of-cloud-mongodb/i.test(datum.url)
-                          ? 'Облачная'
-                          : 'Альтернативная'
-                      }</a
-                    >
+                      >Ссылка</a>
                   `,
                   formatDateWithOptions(datum.lastModified, {
                     year: 'numeric',
