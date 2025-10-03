@@ -3,7 +3,7 @@ import mongodb from '/ppp/vendor/mongodb.min.js';
 
 const { MongoClient, BSON } = mongodb;
 const EJSON = BSON.EJSON;
-// biome-ignore lint/complexity/useArrowFunction: <explanation>
+// biome-ignore lint/complexity/useArrowFunction: OK
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const mongoClients = new Map();
 
@@ -44,7 +44,6 @@ const server = createServer(async (request, response) => {
 
       if (request.url === '/mongodb' && body.mongoDbUri) {
         await getMongoClient(body.mongoDbUri);
-
         response.write('200 OK');
         response.end();
       } else if (body.name) {
@@ -133,7 +132,6 @@ const server = createServer(async (request, response) => {
       }
     } catch (e) {
       console.error(e);
-
       response.setHeader('Content-Type', 'application/json; charset=UTF-8');
       response.writeHead(400);
       response.write(e.toString());
@@ -146,13 +144,13 @@ const server = createServer(async (request, response) => {
         ok: true,
         result: {
           env: {
-            PPP_WORKER_ID: process.env.PPP_WORKER_ID
+            PPP_WORKER_ID: process.env.PPP_WORKER_ID ?? ''
           }
         }
       })
     );
     response.end();
   }
-}).listen(process.env.NOMAD_PORT_HTTP ?? process.env.PORT ?? 14444, () => {
-  console.log('[ppf.full.js] listening to port ' + server.address().port);
+}).listen(process.env.NOMAD_PORT_HTTP ?? process.env.PPF_PORT ?? 14444, () => {
+  console.log('[ppf.full] listening to port ' + server.address().port);
 });

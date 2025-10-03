@@ -39,6 +39,7 @@ export const cloudServicesPageTemplate = html`
           Создать резервную копию базы
         </ppp-button>
         <ppp-button
+          ?disabled="${() => !ppp.keyVault.ok()}"
           slot="controls"
           @click="${(x) => x.restoreMongoDB()}"
         >
