@@ -12,7 +12,14 @@ async function getMongoClient(uri) {
     const newClient = new MongoClient(uri.replace('localhost', '0.0.0.0'));
 
     mongoClients.set(uri, newClient);
-    await newClient.connect();
+
+    try {
+      await newClient.connect();
+    } catch (e) {
+      mongoClients.delete(uri);
+
+      throw e;
+    }
   }
 
   return mongoClients.get(uri);
@@ -134,7 +141,13 @@ const server = createServer(async (request, response) => {
       console.error(e);
       response.setHeader('Content-Type', 'application/json; charset=UTF-8');
       response.writeHead(400);
-      response.write(e.toString());
+      response.write(
+        e
+          ? JSON.stringify(e, (key, value) =>
+              value && value instanceof Set ? Array.from(value) : value
+            )
+          : 'UnknownMongoDBError'
+      );
       response.end();
     }
   } else if (request.url === '/') {

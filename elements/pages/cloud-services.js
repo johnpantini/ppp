@@ -139,8 +139,8 @@ export const cloudServicesPageTemplate = html`
               class="link"
               rel="noopener"
               target="_blank"
-              href="https://deno.com/deploy"
-              >Deno Deploy</a
+              href="https://app.netlify.com/login"
+              >Netlify</a
             >.
           </p>
         </div>
@@ -181,6 +181,23 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(4))}</div>
         <div class="label-group">
+          <h6>Шлюз доступа к MongoDB</h6>
+          <p class="description">
+            Ссылка на шлюз для подключения к кластеру MongoDB.
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="url"
+            placeholder="http://0.0.0.0:14444"
+            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"            
+            ${ref('mongoProxyUrl')}
+          ></ppp-text-field>
+        </div>
+      </section>
+            <section>
+        <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
+        <div class="label-group">
           <h6>Подключение к базе данных MongoDB</h6>
           <p class="description">
             Ссылка на кластер MongoDB.
@@ -192,23 +209,6 @@ export const cloudServicesPageTemplate = html`
             placeholder="mongodb://0.0.0.0:27017"
             value="${() => ppp.keyVault.getKey('mongo-connection-uri')}"
             ${ref('mongoConnectionUri')}
-          ></ppp-text-field>
-        </div>
-      </section>
-      <section>
-        <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
-        <div class="label-group">
-          <h6>Шлюз доступа к MongoDB</h6>
-          <p class="description">
-            Ссылка на шлюз для подключения к кластеру MongoDB
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-text-field
-            type="url"
-            placeholder="http://0.0.0.0:14444"
-            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"            
-            ${ref('mongoProxyUrl')}
           ></ppp-text-field>
         </div>
       </section>
@@ -225,7 +225,7 @@ export const cloudServicesPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить ключи
+          Проверить и сохранить ключи
         </ppp-button>
       </footer>
     </form>
@@ -346,19 +346,18 @@ export class CloudServicesPage extends Page {
         this.progressOperation(25, 'Проверка прокси-ресурса...');
 
         await maybeFetchError(
-          await fetch(new URL('user', globalProxyUrl.origin).toString(), {
+          await fetch(new URL('zen', globalProxyUrl.origin).toString(), {
             method: 'GET',
             cache: 'no-cache',
             headers: {
-              Accept: 'application/vnd.github.v3+json',
-              Authorization: `token ${this.gitHubToken.value.trim()}`,
-              'X-Host': 'api.github.com',
-              'X-Allowed-Headers': 'accept,authorization'
+              'X-Host': 'api.github.com'
             }
           })
         );
       } catch (e) {
-        invalidate(this.globalProxyUrl, {
+        ppp.$$debug('proxy: %o', e);
+
+        return invalidate(this.globalProxyUrl, {
           errorMessage:
             'Этот ресурс не может быть использован в качестве прокси',
           raiseException: true
@@ -366,7 +365,6 @@ export class CloudServicesPage extends Page {
       }
 
       ppp.keyVault.setKey('global-proxy-url', globalProxyUrl.origin);
-
       this.progressOperation(50, 'Проверка токена GitHub...');
 
       // Check GitHub token, store repo owner.
@@ -375,7 +373,9 @@ export class CloudServicesPage extends Page {
       });
 
       if (!rGitHub.ok) {
-        invalidate(this.gitHubToken, {
+        ppp.$$debug('github: %o, text: %s', rGitHub, await rGitHub.text());
+
+        return invalidate(this.gitHubToken, {
           errorMessage: 'Неверный или истёкший токен',
           raiseException: true
         });
@@ -383,12 +383,59 @@ export class CloudServicesPage extends Page {
 
       ppp.keyVault.setKey('github-login', (await rGitHub.json()).login);
       ppp.keyVault.setKey('github-token', this.gitHubToken.value.trim());
+
+      // Check gateway connection.
+      this.progressOperation(75, 'Проверка шлюза доступа к MongoDB...');
+
+      let mongoProxyUrl = this.mongoProxyUrl.value
+        .trim()
+        .replace('0.0.0.0', 'localhost');
+
+      if (!mongoProxyUrl.endsWith('/')) mongoProxyUrl = `${mongoProxyUrl}/`;
+
+      try {
+        await maybeFetchError(
+          await fetch(mongoProxyUrl, {
+            cache: 'no-cache'
+          })
+        );
+      } catch (e) {
+        ppp.$$debug('gateway: %o', e);
+
+        return invalidate(this.mongoProxyUrl, {
+          errorMessage: 'Запрос к шлюзу завершился с ошибкой',
+          raiseException: true
+        });
+      }
+
+      ppp.keyVault.setKey('mongo-proxy-url', this.mongoProxyUrl.value.trim());
+
+      // Check database connection.
+      this.progressOperation(90, 'Проверка подключения к MongoDB...');
+
+      try {
+        await maybeFetchError(
+          await fetch(mongoProxyUrl + 'mongodb', {
+            method: 'POST',
+            cache: 'no-cache',
+            body: JSON.stringify({
+              mongoDbUri: this.mongoConnectionUri.value.trim()
+            })
+          })
+        );
+      } catch (e) {
+        ppp.$$debug('mongodb: %o', e);
+
+        return invalidate(this.mongoConnectionUri, {
+          errorMessage: 'Запрос к MongoDB завершился с ошибкой',
+          raiseException: true
+        });
+      }
+
       ppp.keyVault.setKey(
         'mongo-connection-uri',
         this.mongoConnectionUri.value.trim()
       );
-      ppp.keyVault.setKey('mongo-proxy-url', this.mongoProxyUrl.value.trim());
-
       this.showSuccessNotification(
         'Операция успешно выполнена. Обновите страницу, чтобы пользоваться приложением.'
       );

@@ -87,7 +87,6 @@ class PPPCrypto {
 
   async encrypt(ivector, plaintext, password) {
     const iv = typeof ivector === 'string' ? stringToBuffer(ivector) : ivector;
-
     const encoded = new TextEncoder().encode(plaintext);
     const key = await this.#generateKey(password);
     const ciphertext = await window.crypto.subtle.encrypt(
@@ -104,7 +103,6 @@ class PPPCrypto {
 
   async decrypt(ivector, ciphertext, password) {
     const iv = typeof ivector === 'string' ? stringToBuffer(ivector) : ivector;
-
     const key = await this.#generateKey(password);
     const decrypted = await window.crypto.subtle.decrypt(
       {
@@ -192,6 +190,8 @@ class PPP {
   locales = ['ru', 'en'];
 
   sourceIDCounter = 0;
+
+  $$debug;
 
   nextSourceID(prefix = '') {
     return `${prefix}${++this.sourceIDCounter}`;
@@ -291,6 +291,9 @@ class PPP {
 
   async #createApplication({ emergency }) {
     await this.#rebuildDictionary();
+    await import(`${this.rootUrl}/lib/debug.js`);
+
+    this.$$debug = this.$debug('ppp');
 
     if (!emergency) {
       const { getApp, Credentials } = await import(
@@ -306,7 +309,7 @@ class PPP {
         this.credentials = Credentials.apiKey('ppp');
         this.user = await this.realm.logIn(this.credentials, false);
       } catch (e) {
-        console.error(e);
+        this.$$debug('mongodb login failed: %o', e);
 
         if (e.statusCode === 401 || e.statusCode === 404) {
           this.keyVault.removeKey('tag');
@@ -347,16 +350,13 @@ class PPP {
       try {
         const lines = ((context) => {
           const db = context.services.get('mongodb-atlas').db('ppp');
-
           const workspaces = db
             .collection('workspaces')
             .find(
               { removed: { $not: { $eq: true } } },
               { _id: 1, name: 1, order: 1 }
             );
-
           const settings = db.collection('app').findOne({ _id: '@settings' });
-
           const extensions = db
             .collection('extensions')
             .find({ removed: { $not: { $eq: true } } });
@@ -379,8 +379,6 @@ class PPP {
             this.settings.load(key, evalRequest.settings?.[key]);
           }
         }
-
-        await import(`${this.rootUrl}/lib/debug.js`);
 
         const storedDarkMode = this.settings.get('darkMode');
 
@@ -409,7 +407,7 @@ class PPP {
         await this.#rebuildDictionary();
         localStorage.setItem('ppp-locale', this.locale);
       } catch (e) {
-        console.error(e);
+        this.$$debug('eval: %o', e);
 
         if (/Failed to fetch/i.test(e?.message)) {
           this.#showLoadingError({
@@ -438,7 +436,7 @@ class PPP {
         .querySelector('.splashscreen-loader')
         .setAttribute('hidden', true);
     } catch (e) {
-      console.error(e);
+      this.$$debug('app.js: %o', e);
 
       this.#showLoadingError({
         errorText: this.t('$pppErrors.E_UNKNOWN')
@@ -654,7 +652,7 @@ class PPP {
         }
 
         db.onerror = (event) => {
-          console.error(event.target.error);
+          this.$$debug('db.onerror: %o', event.target.error);
           reject(event.target.error);
         };
       };

@@ -19,13 +19,13 @@ import {
 export const progressTemplate = html`
   <template
     role="progressbar"
-    aria-valuenow="${(x) => x.value}"
-    aria-valuemin="${(x) => x.min}"
-    aria-valuemax="${(x) => x.max}"
-    class="${(x) => (x.paused ? 'paused' : '')}"
+    aria-valuenow="${(x) => x?.value}"
+    aria-valuemin="${(x) => x?.min}"
+    aria-valuemax="${(x) => x?.max}"
+    class="${(x) => (x?.paused ? 'paused' : '')}"
   >
     ${when(
-      (x) => typeof x.value === 'number',
+      (x) => typeof x?.value === 'number',
       html`
         <div class="progress" part="progress" slot="determinate">
           <div
