@@ -34,7 +34,8 @@
       "recommended": true,
       "correctness": {
         "noUnusedVariables": "off",
-        "noUnusedFunctionParameters": "off"
+        "noUnusedFunctionParameters": "off",
+        "useParseIntRadix": "off"
       },
       "style": {
         "useTemplate": "off",
@@ -49,7 +50,15 @@
       },
       "suspicious": {
         "noGlobalIsNan": "off",
-        "noAssignInExpressions": "off"
+        "noAssignInExpressions": "off",
+        "useIterableCallbackReturn": "off"
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
       }
     }
   }
