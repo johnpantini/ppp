@@ -415,6 +415,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         minute: 'numeric',
         second: 'numeric'
       },
+      fractional: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        fractionalSecondDigits: 3
+      },
       'day-1': {
         month: 'numeric',
         day: 'numeric',
@@ -1108,6 +1114,7 @@ export async function widgetDefinition() {
                 ${ref('timeColumnOptions')}
               >
                 <ppp-radio value="default">Часы, минуты, секунды</ppp-radio>
+                <ppp-radio value="fractional">Часы, минуты, секунды, миллисекунды</ppp-radio>
                 <ppp-radio value="day-1">День, часы, минуты, секунды</ppp-radio>
                 <ppp-radio value="compact">Часы, минуты</ppp-radio>
                 <ppp-radio value="day-2">День, часы, минуты</ppp-radio>
