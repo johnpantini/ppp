@@ -71,7 +71,11 @@ export const levelOneTraderClonableListTemplate = html`
                       .db('ppp')
                       .collection('traders')
                       .find({
-                        caps: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`,
+                        caps: {
+                          $in: [
+                            `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADER_CAPS.CAPS_LEVEL1%]`
+                          ]
+                        },
                         type: {
                           $ne: `[%#(await import(ppp.rootUrl + '/lib/const.js')).TRADERS.COMBINED_L1%]`
                         }
@@ -290,10 +294,6 @@ export class TraderCombinedL1Page extends TraderCommonPage {
   traders;
 
   denormalization = new Denormalization();
-
-  async connectedCallback() {
-    super.connectedCallback();
-  }
 
   getDefaultCaps() {
     return [TRADER_CAPS.CAPS_LEVEL1];

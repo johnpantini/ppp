@@ -55,7 +55,7 @@ import {
   positive,
   negative
 } from '../../design/design-tokens.js';
-import { arrowRight, trash } from '../../static/svg/sprite.js';
+import { arrowRight, trash, refresh } from '../../static/svg/sprite.js';
 import {
   formatAmount,
   formatPriceWithoutCurrency,
@@ -84,6 +84,17 @@ export const lightChartWidgetTemplate = html`
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate({
         buttons: html`
+          <div
+            ?hidden="${(x) => !x.document.showRefreshButton}"
+            title="Обновить вручную"
+            class="button"
+            slot="start"
+            @click="${(x) => {
+              x.refresh();
+            }}"
+          >
+            ${html.partial(refresh)}
+          </div>
           <div
             ?hidden="${(x) => !x.document.showResetButton}"
             title="Очистить виджет"
@@ -743,6 +754,10 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
   }
 
+  refresh() {
+    this.reload();
+  }
+
   applyChartOptions() {
     const tf = this.getCurrentTimeframe();
 
@@ -1255,6 +1270,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         timeframes: this.container.timeframeList.value,
         showToolbar: this.container.showToolbar.checked,
         showResetButton: this.container.showResetButton.checked,
+        showRefreshButton: this.container.showRefreshButton.checked,
         seriesKind: this.container.seriesKind.value,
         showVWAPFlag: this.container.showVWAPFlag.checked
       }
@@ -1523,6 +1539,12 @@ export async function widgetDefinition() {
               ${ref('showResetButton')}
             >
               Показывать кнопку очистки
+            </ppp-checkbox>
+            <ppp-checkbox
+              ?checked="${(x) => x.document.showRefreshButton ?? false}"
+              ${ref('showRefreshButton')}
+            >
+              Показывать кнопку ручного обновления
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">

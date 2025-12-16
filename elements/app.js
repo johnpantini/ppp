@@ -399,7 +399,7 @@ export const appTemplate = html`
           )}
           ${when(
             (x) => x.pageNotFound,
-            html` <ppp-not-found-page></ppp-not-found-page>`
+            html`<ppp-not-found-page></ppp-not-found-page>`
           )}
           <ppp-modal ${ref('mountPointModal')} hidden dismissible>
             <span slot="title" ${ref('mountPointTitle')}></span>
@@ -408,8 +408,9 @@ export const appTemplate = html`
           <ppp-modal ${ref('confirmationModal')} with-icon hidden dismissible>
             <div slot="title-icon">${html.partial(warning)}</div>
             <span slot="title" ${ref('confirmationModalTitle')}></span>
-            <span slot="description" ${ref('confirmationModalDescription')}>
-            </span>
+            <div slot="description" ${ref('confirmationModalDescription')}>
+              ${(x) => x.confirmationModalDescriptionContent}
+            </div>
             <div slot="body">
               <div class="modal-footer">
                 <ppp-button
@@ -547,6 +548,9 @@ export const appStyles = css`
 `;
 
 export class App extends PPPElement {
+  @observable
+  confirmationModalDescriptionContent;
+
   #updateInterval = 30000;
 
   #toast;
@@ -1049,7 +1053,12 @@ export class App extends PPPElement {
     description = 'Необходимо подтверждение, чтобы продолжить.'
   ) {
     this.confirmationModalTitle.textContent = title;
-    this.confirmationModalDescription.textContent = description;
+    this.confirmationModalDescriptionContent = void 0;
+
+    if (description) {
+      this.confirmationModalDescriptionContent = description;
+    }
+
     this.confirmationModal.result = null;
 
     this.confirmationModal.removeAttribute('hidden');
