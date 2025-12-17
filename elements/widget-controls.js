@@ -3206,7 +3206,6 @@ export class WidgetTrifectaField extends WidgetTextField {
       this.stepDown();
     }
 
-    // biome-ignore lint/style/useConst: <explanation>
     let timeout;
     let interval;
 
