@@ -23,7 +23,15 @@ import {
   spacing,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
-import { createChart, CrosshairMode, LineStyle } from '../../lib/ppp-charts.js';
+import {
+  createChart,
+  CrosshairMode,
+  LineStyle,
+  LineSeries,
+  HistogramSeries,
+  CandlestickSeries,
+  BarSeries
+} from '../../vendor/lightweight-charts.min.js';
 import {
   bodyFont,
   chartBorderDownColor,
@@ -337,6 +345,12 @@ export const lightChartWidgetStyles = css`
 `;
 
 export class LightChartWidget extends WidgetWithInstrument {
+  #updateNeeded = false;
+
+  #volumeBearishColor;
+
+  #volumeBullishColor;
+
   chart;
 
   mainSeries;
@@ -417,6 +431,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   constructor() {
     super();
 
+    this.rafLoop = this.rafLoop.bind(this);
     this.timeframes = [];
   }
 
@@ -455,11 +470,22 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.chartTrader = await ppp.getOrCreateTrader(this.document.chartTrader);
       this.instrumentTrader = this.chartTrader;
 
+      this.#volumeBearishColor = `rgba(${themeConditional(
+        toColorComponents(paletteRedLight3),
+        toColorComponents(paletteRedDark1)
+      ).$value.createCSS()}, 0.56)`;
+      this.#volumeBullishColor = `rgba(${themeConditional(
+        toColorComponents(paletteGreenLight2),
+        toColorComponents(paletteGreenDark1)
+      ).$value.createCSS()}, 0.56)`;
+
       this.chart = createChart(this.shadowRoot.querySelector('.chart'), {
         layout: {
           fontFamily: bodyFont.$value,
           fontSize: parseInt(fontSizeWidget.$value),
-          backgroundColor: themeConditional(paletteWhite, paletteBlack).$value,
+          background: {
+            color: themeConditional(paletteWhite, paletteBlack).$value
+          },
           textColor: themeConditional(paletteGrayBase, paletteGrayLight1).$value
         },
         grid: {
@@ -507,6 +533,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
 
       await this.setupChart();
+      ppp.app.rafEnqueue(this.rafLoop);
 
       this.document.feedMode ??= 'prints';
 
@@ -555,15 +582,18 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   async disconnectedCallback() {
-    if (this.chart) {
-      this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
-      this.chart.unsubscribeClick(this.onChartClick);
+    this.#updateNeeded = false;
 
-      this.chart
-        .timeScale()
-        .unsubscribeVisibleLogicalRangeChange(
-          this.onVisibleLogicalRangeChanged
-        );
+    ppp.app.rafDequeue(this.rafLoop);
+
+    if (this.chart) {
+      // this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
+      // this.chart.unsubscribeClick(this.onChartClick);
+      // this.chart
+      //   .timeScale()
+      //   .unsubscribeVisibleLogicalRangeChange(
+      //     this.onVisibleLogicalRangeChanged
+      //   );
     }
 
     if (this.chartTrader) {
@@ -794,11 +824,11 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   async setupChart() {
     this.applyChartOptions();
-    this.chart.subscribeCrosshairMove(this.onCrosshairMove);
-    this.chart.subscribeClick(this.onChartClick);
-    this.chart
-      .timeScale()
-      .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
+    // this.chart.subscribeCrosshairMove(this.onCrosshairMove);
+    // this.chart.subscribeClick(this.onChartClick);
+    // this.chart
+    //   .timeScale()
+    //   .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
     this.resizeChart();
 
     let seriesKind = this.document.seriesKind;
@@ -808,7 +838,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     }
 
     if (this.document.showVWAPFlag) {
-      this.vwapSeries = this.chart.addLineSeries({
+      this.vwapSeries = this.chart.addSeries(LineSeries, {
         lineWidth: 2,
         color: themeConditional(paletteYellowDark2, paletteYellowLight2).$value,
         lastValueVisible: false,
@@ -817,16 +847,25 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
     }
 
-    this.mainSeries = this.chart[`add${seriesKind}Series`]({
-      downColor: chartDownColor.$value,
-      upColor: chartUpColor.$value,
-      borderDownColor: chartBorderDownColor.$value,
-      borderUpColor: chartBorderUpColor.$value,
-      wickDownColor: chartWickDownColor.$value,
-      wickUpColor: chartWickUpColor.$value
-    });
+    this.mainSeries = this.chart.addSeries(
+      {
+        Candlestick: CandlestickSeries,
+        Bar: BarSeries,
+        Line: LineSeries
+      }[seriesKind],
+      {
+        downColor: chartDownColor.$value,
+        upColor: chartUpColor.$value,
+        borderDownColor: chartBorderDownColor.$value,
+        borderUpColor: chartBorderUpColor.$value,
+        wickDownColor: chartWickDownColor.$value,
+        wickUpColor: chartWickUpColor.$value,
+        borderVisible: false,
+        enableConflation: true
+      }
+    );
 
-    this.volumeSeries = this.chart.addHistogramSeries({
+    this.volumeSeries = this.chart.addSeries(HistogramSeries, {
       priceFormat: {
         type: 'volume'
       },
@@ -839,16 +878,23 @@ export class LightChartWidget extends WidgetWithInstrument {
       lastValueVisible: false
     });
 
+    this.volumeSeries.priceScale().applyOptions({
+      scaleMargins: {
+        top: 0.85,
+        bottom: 0
+      }
+    });
+
     if (this.instrument && !this.unsupportedInstrument) {
       try {
-        this.mainSeries.applyOptions({
+        this.mainSeries.priceScale().applyOptions({
           priceFormat: {
             precision: 2,
             minMove: 0.01
           },
           scaleMargins: {
             top: 0.1,
-            bottom: 0.2
+            bottom: 0.4
           },
           isMain: true
         });
@@ -860,6 +906,8 @@ export class LightChartWidget extends WidgetWithInstrument {
         });
       }
     }
+
+    this.chart.timeScale().fitContent();
   }
 
   // Older quotes come first.
@@ -886,9 +934,8 @@ export class LightChartWidget extends WidgetWithInstrument {
       });
 
       vwapData.push({
-        open: c.vw,
-        close: c.vw,
-        time
+        time,
+        value: c.vw
       });
     }
 
@@ -899,6 +946,8 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.volumeSeries.setData(volumeData);
 
     this.lastCandle = ohlcv[ohlcv.length - 1];
+
+    this.#updateNeeded = true;
   }
 
   reload() {
@@ -926,6 +975,8 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   reloadNeeded(symbol) {
+    this.#updateNeeded = true;
+
     return this.loadHistory(symbol);
   }
 
@@ -974,6 +1025,8 @@ export class LightChartWidget extends WidgetWithInstrument {
         }
 
         this.setData(this.ohlcv);
+
+        this.#updateNeeded = true;
       } finally {
         this.ready = true;
 
@@ -1223,36 +1276,38 @@ export class LightChartWidget extends WidgetWithInstrument {
     if (candle?.close) {
       this.candles.set(candle.time, candle);
 
-      try {
-        this.mainSeries.update(candle);
+      this.#updateNeeded = true;
+    }
+  }
 
-        if (this.vwapSeries) {
-          this.vwapSeries.update(candle);
-          this.vwapSeries.update({
-            time: candle.time,
-            open: candle.vw,
-            close: candle.vw
-          });
-        }
+  rafLoop() {
+    if (
+      this.$fastController.isConnected &&
+      this.#updateNeeded &&
+      this.lastCandle
+    ) {
+      this.#updateNeeded = false;
 
-        this.volumeSeries.update({
+      const candle = this.lastCandle;
+
+      this.mainSeries.update(candle);
+
+      if (this.vwapSeries) {
+        this.vwapSeries.update(candle);
+        this.vwapSeries.update({
           time: candle.time,
-          value: candle.volume,
-          color:
-            candle.close < candle.open
-              ? `rgba(${themeConditional(
-                  toColorComponents(paletteRedLight3),
-                  toColorComponents(paletteRedDark1)
-                ).$value.createCSS()}, 0.56)`
-              : `rgba(${themeConditional(
-                  toColorComponents(paletteGreenLight2),
-                  toColorComponents(paletteGreenDark1)
-                ).$value.createCSS()}, 0.56)`
+          value: candle.vw
         });
-      } catch (e) {
-        // Suppress TV errors.
-        void 0;
       }
+
+      this.volumeSeries.update({
+        time: candle.time,
+        value: candle.volume,
+        color:
+          candle.close < candle.open
+            ? this.#volumeBearishColor
+            : this.#volumeBullishColor
+      });
     }
   }
 

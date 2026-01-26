@@ -991,7 +991,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
       let my = 0;
 
-      for (const [orderId, [left]] of this.orders.get(bid.price.toString()) ??
+      for (const [left] of this.orders.get(bid.price.toString())?.values() ??
         []) {
         my += left;
       }
@@ -1079,7 +1079,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
 
       let my = 0;
 
-      for (const [orderId, [left]] of this.orders.get(ask.price.toString()) ??
+      for (const [left] of this.orders.get(ask.price.toString())?.values() ??
         []) {
         my += left;
       }
