@@ -23,6 +23,7 @@ import {
   spacing,
   getTraderSelectOptionColor
 } from '../../design/styles.js';
+import { $throttle } from '../../lib/ppp-decorators.js';
 import {
   createChart,
   CrosshairMode,
@@ -359,6 +360,8 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   vwapSeries;
 
+  signalMarkers;
+
   hasMore = true;
 
   ohlcv = [];
@@ -436,7 +439,7 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   async connectedCallback() {
-    this.onCrosshairMove = this.onCrosshairMove.bind(this);
+    this.onCrosshairMove = $throttle(this.onCrosshairMove.bind(this), 50);
     this.onChartClick = this.onChartClick.bind(this);
     this.onVisibleLogicalRangeChanged =
       this.onVisibleLogicalRangeChanged.bind(this);
@@ -587,13 +590,13 @@ export class LightChartWidget extends WidgetWithInstrument {
     ppp.app.rafDequeue(this.rafLoop);
 
     if (this.chart) {
-      // this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
-      // this.chart.unsubscribeClick(this.onChartClick);
-      // this.chart
-      //   .timeScale()
-      //   .unsubscribeVisibleLogicalRangeChange(
-      //     this.onVisibleLogicalRangeChanged
-      //   );
+      this.chart.unsubscribeCrosshairMove(this.onCrosshairMove);
+      this.chart.unsubscribeClick(this.onChartClick);
+      this.chart
+        .timeScale()
+        .unsubscribeVisibleLogicalRangeChange(
+          this.onVisibleLogicalRangeChanged
+        );
     }
 
     if (this.chartTrader) {
@@ -672,25 +675,15 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   onChartClick(param) {
-    if (param.time) {
-      const values = Array.from(param.seriesPrices.values());
-
-      let vwap;
-      let candle;
-      let volume;
+    if (param.time && param.point) {
+      let vwap = 0;
 
       if (this.vwapSeries) {
-        vwap = values[0];
-
-        this.vwap = vwap ?? '—';
-
-        candle = values[1];
-        volume = values[2];
-      } else {
-        candle = values[0];
-        volume = values[1];
+        vwap = param.seriesData.get(this.vwapSeries)?.value ?? 0;
       }
 
+      const candle = param.seriesData.get(this.mainSeries);
+      const volume = param.seriesData.get(this.volumeSeries)?.value ?? 0;
       const dataCandle =
         this.lastCandle?.time === param.time
           ? this.lastCandle
@@ -711,26 +704,17 @@ export class LightChartWidget extends WidgetWithInstrument {
   }
 
   onCrosshairMove(param) {
-    if (param.time) {
+    if (param.time && param.point) {
       this.shouldShowPriceInfo = true;
 
-      const values = Array.from(param.seriesPrices.values());
-
-      let vwap;
-      let candle;
-      let volume;
-
       if (this.vwapSeries) {
-        vwap = values[0];
+        const vwap = param.seriesData.get(this.vwapSeries)?.value ?? 0;
 
         this.vwap = vwap ?? '—';
-
-        candle = values[1];
-        volume = values[2];
-      } else {
-        candle = values[0];
-        volume = values[1];
       }
+
+      const candle = param.seriesData.get(this.mainSeries);
+      const volume = param.seriesData.get(this.volumeSeries)?.value ?? 0;
 
       if (candle) {
         this.openPrice = candle.open;
@@ -824,11 +808,11 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   async setupChart() {
     this.applyChartOptions();
-    // this.chart.subscribeCrosshairMove(this.onCrosshairMove);
-    // this.chart.subscribeClick(this.onChartClick);
-    // this.chart
-    //   .timeScale()
-    //   .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
+    this.chart.subscribeCrosshairMove(this.onCrosshairMove);
+    this.chart.subscribeClick(this.onChartClick);
+    this.chart
+      .timeScale()
+      .subscribeVisibleLogicalRangeChange(this.onVisibleLogicalRangeChanged);
     this.resizeChart();
 
     let seriesKind = this.document.seriesKind;
@@ -1290,24 +1274,27 @@ export class LightChartWidget extends WidgetWithInstrument {
 
       const candle = this.lastCandle;
 
-      this.mainSeries.update(candle);
+      if (typeof candle.time === 'number') {
+        this.mainSeries.update(candle);
 
-      if (this.vwapSeries) {
-        this.vwapSeries.update(candle);
-        this.vwapSeries.update({
-          time: candle.time,
-          value: candle.vw
-        });
+        if (this.vwapSeries && typeof candle.vw === 'number') {
+          this.vwapSeries.update({
+            time: candle.time,
+            value: candle.vw
+          });
+        }
+
+        if (typeof candle.volume === 'number') {
+          this.volumeSeries.update({
+            time: candle.time,
+            value: candle.volume,
+            color:
+              candle.close < candle.open
+                ? this.#volumeBearishColor
+                : this.#volumeBullishColor
+          });
+        }
       }
-
-      this.volumeSeries.update({
-        time: candle.time,
-        value: candle.volume,
-        color:
-          candle.close < candle.open
-            ? this.#volumeBearishColor
-            : this.#volumeBullishColor
-      });
     }
   }
 
