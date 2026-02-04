@@ -26,7 +26,6 @@ import {
   Denormalization,
   extractEverything
 } from '../../lib/ppp-denormalize.js';
-import { later } from '../../lib/ppp-decorators.js';
 import '../../vendor/zip-full.min.js';
 import '../button.js';
 import '../checkbox.js';

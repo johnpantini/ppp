@@ -582,7 +582,8 @@ export class WidgetGroupControl extends PPPOffClickElement {
           if (this.widget.instrument) {
             void this.widget.updateDocumentFragment({
               $set: {
-                'widgets.$.symbol': this.widget.instrument.symbol
+                'widgets.$.instrument': this.widget.instrument ?? {},
+                'widgets.$.symbol': this.widget.instrument?.symbol ?? ''
               }
             });
           }

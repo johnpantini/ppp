@@ -305,7 +305,11 @@ export class TimelineWidget extends WidgetWithInstrument {
       );
       this.instrumentTrader = this.timelineTrader;
 
-      this.selectInstrument(this.document.symbol, { isolate: true });
+      if (this.document.instrument?.type === 'option') {
+        this.selectInstrument(this.document.instrument, { isolate: true });
+      } else {
+        this.selectInstrument(this.document.symbol, { isolate: true });
+      }
 
       await this.timelineTrader.subscribeFields?.({
         source: this,

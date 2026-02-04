@@ -470,7 +470,13 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.instrumentTrader = this.tradesTrader;
 
       this.#createDOM();
-      this.selectInstrument(this.document.symbol, { isolate: true });
+
+      if (this.document.instrument?.type === 'option') {
+        this.selectInstrument(this.document.instrument, { isolate: true });
+      } else {
+        this.selectInstrument(this.document.symbol, { isolate: true });
+      }
+
       ppp.app.rafEnqueue(this.rafLoop);
       await this.tradesTrader.subscribeFields?.({
         source: this,

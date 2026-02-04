@@ -35,7 +35,6 @@ import '../checkbox.js';
 import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
-import { later } from '../../lib/ppp-decorators.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -224,7 +223,7 @@ export class TccWidgetCard extends PPPElement {
     });
 
     if (typeof this.traderRuntime?.getDictionary === 'function') {
-      importPage.dictionary.value = this.traderRuntime.getDictionary();
+      importPage.dictionary.value = await this.traderRuntime.getDictionary();
     }
   }
 

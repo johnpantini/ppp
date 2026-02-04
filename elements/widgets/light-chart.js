@@ -576,7 +576,11 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.initialized = true;
       this.ready = true;
 
-      this.selectInstrument(this.document.symbol, { isolate: true });
+      if (this.document.instrument?.type === 'option') {
+        this.selectInstrument(this.document.instrument, { isolate: true });
+      } else {
+        this.selectInstrument(this.document.symbol, { isolate: true });
+      }
     } catch (e) {
       this.initialized = true;
 
