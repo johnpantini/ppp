@@ -703,6 +703,17 @@ export class LightChartWidget extends WidgetWithInstrument {
           close: candle.close,
           cv: dataCandle.customValues
         });
+
+        if (this.chartTrader) {
+          this.chartTrader.trader.bus.emit('ppp:light-chart', {
+            event: 'click',
+            point: param.point,
+            instrument: this.instrument,
+            tf: this.tf,
+            sourceEvent: param.sourceEvent,
+            candle
+          });
+        }
       }
     }
   }
