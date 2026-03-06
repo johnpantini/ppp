@@ -21,7 +21,7 @@ export const traderIbV3Template = html`
       ${documentPageHeaderPartial({
         pageUrl: import.meta.url
       })}
-      ${traderNameAndRuntimePartial()}
+      ${traderNameAndRuntimePartial({ editableCaps: true })}
       <section>
         <div class="label-group">
           <h5>Профиль брокера</h5>
@@ -97,6 +97,9 @@ export class TraderIbPage extends TraderCommonPage {
 
   getDefaultCaps() {
     return [
+      TRADER_CAPS.CAPS_LEVEL1,
+      TRADER_CAPS.CAPS_ORDERBOOK,
+      TRADER_CAPS.CAPS_BLUEATS,
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
       TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
