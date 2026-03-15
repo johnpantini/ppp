@@ -1,6 +1,7 @@
 export default function (i18n) {
   i18n.extend({
     $g: {
+      all: 'Все',
       atMarket: 'По рынку',
       openInNewTab: 'Открыть в новой вкладке',
       showDetails: 'Показать подробности',
@@ -17,7 +18,8 @@ export default function (i18n) {
       summary: 'Пересказ',
       buyButtonText: 'Покупка',
       sellButtonText: 'Продажа',
-      restoreDefaults: 'Восстановить умолчания'
+      restoreDefaults: 'Восстановить умолчания',
+      unknownStatus: 'Статус неизвестен'
     }
   });
 }

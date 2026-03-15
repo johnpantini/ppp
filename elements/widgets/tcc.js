@@ -297,7 +297,7 @@ export const tccWidgetTemplate = html`
               value="${(x) => x.document.activeTab ?? 'all'}"
               ${ref('traderTypeSelector')}
             >
-              <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
+              <ppp-widget-box-radio value="all">${() => ppp.t('$g.all')}</ppp-widget-box-radio>
               <ppp-widget-box-radio value="main-thread">
                 <span class="ocean">MainThread</span>
               </ppp-widget-box-radio>
