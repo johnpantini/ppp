@@ -33,13 +33,9 @@ export const templateLibraryModalPageTemplate = html`
         </div>
         <div class="input-group">
           <ppp-select
-            value="${(x) => x.template ?? 'thefly/formatter'}"
+            value="${(x) => x.template ?? 'psina-us-news'}"
             ${ref('templateSelector')}
           >
-            <ppp-option value="thefly">The Fly</ppp-option>
-            <ppp-option value="nyse-nsdq-halts">
-              Паузы NYSE/NASDAQ (Supabase)
-            </ppp-option>
             <ppp-option value="psina-us-news">Новости (Psina, US)</ppp-option>
             <ppp-option value="psina-us-statuses">
               Торговые статусы (Psina, US)
@@ -47,80 +43,6 @@ export const templateLibraryModalPageTemplate = html`
           </ppp-select>
         </div>
       </section>
-      ${when(
-        (x) => x.templateSelector.value === 'thefly',
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Парсер The Fly</h5>
-              <p class="description">Выберите сервис парсера.</p>
-            </div>
-            <div class="input-group">
-              <ppp-query-select
-                ${ref('theflyServiceId')}
-                :context="${(x) => x}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('services')
-                      .find({
-                        $and: [
-                          {
-                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.SUPABASE_PARSER%]`
-                          },
-                          {
-                            removed: { $ne: true }
-                          }
-                        ]
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-query-select>
-            </div>
-          </section>
-        `
-      )}
-      ${when(
-        (x) => x.templateSelector.value === 'nyse-nsdq-halts',
-        html`
-          <section>
-            <div class="label-group">
-              <h5>Парсер торговых пауз NYSE/NASDAQ</h5>
-              <p class="description">Выберите сервис парсера.</p>
-            </div>
-            <div class="input-group">
-              <ppp-query-select
-                ${ref('nyseNsdqHaltsServiceId')}
-                :context="${(x) => x}"
-                :query="${() => {
-                  return (context) => {
-                    return context.services
-                      .get('mongodb-atlas')
-                      .db('ppp')
-                      .collection('services')
-                      .find({
-                        $and: [
-                          {
-                            type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).SERVICES.NYSE_NSDQ_HALTS%]`
-                          },
-                          {
-                            removed: { $ne: true }
-                          }
-                        ]
-                      })
-                      .sort({ updatedAt: -1 });
-                  };
-                }}"
-                :transform="${() => ppp.decryptDocumentsTransformation()}"
-              ></ppp-query-select>
-            </div>
-          </section>
-        `
-      )}
       ${when(
         (x) => x.templateSelector.value === 'psina-us-news',
         html`
@@ -309,16 +231,6 @@ export class TemplateLibraryModalPage extends Page {
       this.template = this.templateSelector.value;
 
       switch (this.template) {
-        case 'thefly':
-          await validate(this.theflyServiceId);
-
-          break;
-
-        case 'nyse-nsdq-halts':
-          await validate(this.nyseNsdqHaltsServiceId);
-
-          break;
-
         case 'psina-us-news':
           await validate(this.psinaUsNewsServiceId);
 
@@ -333,19 +245,6 @@ export class TemplateLibraryModalPage extends Page {
       let code = await this.loadTemplate();
 
       switch (this.template) {
-        case 'thefly':
-          code = code.replace('@@SERVICE_ID', this.theflyServiceId.datum()._id);
-
-          break;
-
-        case 'nyse-nsdq-halts':
-          code = code.replace(
-            '@@SERVICE_ID',
-            this.nyseNsdqHaltsServiceId.datum()._id
-          );
-
-          break;
-
         case 'psina-us-news':
           code = code.replace(
             '@@SERVICE_ID',
@@ -376,7 +275,7 @@ export class TemplateLibraryModalPage extends Page {
           break;
       }
 
-      if (typeof this.destination.updateCode == 'function') {
+      if (typeof this.destination.updateCode === 'function') {
         this.destination.updateCode(code);
       } else {
         this.destination.value = code;

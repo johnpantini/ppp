@@ -1493,6 +1493,9 @@ export class WidgetWithInstrument extends Widget {
                     },
                     update: {
                       $set: {
+                        'widgets.$.instrument': adoptedInstrument.notSupported
+                          ? {}
+                          : adoptedInstrument,
                         'widgets.$.symbol': adoptedInstrument.notSupported
                           ? ''
                           : adoptedInstrument.symbol
@@ -1517,6 +1520,7 @@ export class WidgetWithInstrument extends Widget {
           },
           update: {
             $set: {
+              'widgets.$.instrument': this.instrument ?? {},
               'widgets.$.symbol': this.instrument?.symbol
             }
           },
@@ -1597,16 +1601,23 @@ export class WidgetWithInstrument extends Widget {
 
     let adoptedInstrument = unsupportedInstrument(symbol);
 
-    if (this.instrumentTrader.instruments.has(symbol)) {
-      adoptedInstrument = this.instrumentTrader.adoptInstrument(
-        this.instrumentTrader.instruments.get(symbol)
-      );
+    if (typeof symbol === 'object' && symbol?.type === 'option') {
+      // Special handling for options.
+      if (this.instrumentTrader.instruments.has(symbol.underlyingSymbol)) {
+        adoptedInstrument = this.instrumentTrader.adoptInstrument(symbol);
+      }
     } else {
-      const [s, exchange] = symbol.split('~');
-      const i = this.instrumentTrader.instruments.get(s);
+      if (this.instrumentTrader.instruments.has(symbol)) {
+        adoptedInstrument = this.instrumentTrader.adoptInstrument(
+          this.instrumentTrader.instruments.get(symbol)
+        );
+      } else {
+        const [s, exchange] = symbol.split('~');
+        const i = this.instrumentTrader.instruments.get(s);
 
-      if (i?.exchange === exchange) {
-        adoptedInstrument = this.instrumentTrader.adoptInstrument(i);
+        if (i?.exchange === exchange) {
+          adoptedInstrument = this.instrumentTrader.adoptInstrument(i);
+        }
       }
     }
 

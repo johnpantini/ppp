@@ -35,7 +35,6 @@ import '../checkbox.js';
 import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
-import { later } from '../../lib/ppp-decorators.js';
 
 await ppp.i18n(import.meta.url);
 
@@ -224,7 +223,7 @@ export class TccWidgetCard extends PPPElement {
     });
 
     if (typeof this.traderRuntime?.getDictionary === 'function') {
-      importPage.dictionary.value = this.traderRuntime.getDictionary();
+      importPage.dictionary.value = await this.traderRuntime.getDictionary();
     }
   }
 
@@ -298,7 +297,7 @@ export const tccWidgetTemplate = html`
               value="${(x) => x.document.activeTab ?? 'all'}"
               ${ref('traderTypeSelector')}
             >
-              <ppp-widget-box-radio value="all">Все</ppp-widget-box-radio>
+              <ppp-widget-box-radio value="all">${() => ppp.t('$g.all')}</ppp-widget-box-radio>
               <ppp-widget-box-radio value="main-thread">
                 <span class="ocean">MainThread</span>
               </ppp-widget-box-radio>

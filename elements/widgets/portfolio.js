@@ -149,7 +149,11 @@ export class PortfolioWidget extends ListWidget {
       );
       this.instrumentTrader = this.portfolioTrader;
 
-      this.selectInstrument(this.document.symbol, { isolate: true });
+      if (this.document.instrument?.type === 'option') {
+        this.selectInstrument(this.document.instrument, { isolate: true });
+      } else {
+        this.selectInstrument(this.document.symbol, { isolate: true });
+      }
 
       this.columns = new WidgetColumns({
         columns: this.document.columns ?? DEFAULT_COLUMNS

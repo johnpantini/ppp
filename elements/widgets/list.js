@@ -408,7 +408,11 @@ export class ListWidget extends WidgetWithInstrument {
       this.internalSort();
 
       if (this.maySelectInstrument) {
-        this.selectInstrument(this.document.symbol, { isolate: true });
+        if (this.document.instrument?.type === 'option') {
+          this.selectInstrument(this.document.instrument, { isolate: true });
+        } else {
+          this.selectInstrument(this.document.symbol, { isolate: true });
+        }
       }
 
       if (!this.disableSort) {

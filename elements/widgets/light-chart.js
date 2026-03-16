@@ -576,7 +576,11 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.initialized = true;
       this.ready = true;
 
-      this.selectInstrument(this.document.symbol, { isolate: true });
+      if (this.document.instrument?.type === 'option') {
+        this.selectInstrument(this.document.instrument, { isolate: true });
+      } else {
+        this.selectInstrument(this.document.symbol, { isolate: true });
+      }
     } catch (e) {
       this.initialized = true;
 
@@ -699,6 +703,17 @@ export class LightChartWidget extends WidgetWithInstrument {
           close: candle.close,
           cv: dataCandle.customValues
         });
+
+        if (this.chartTrader) {
+          this.chartTrader.trader.bus.emit('ppp:light-chart', {
+            event: 'click',
+            point: param.point,
+            instrument: this.instrument,
+            tf: this.tf,
+            sourceEvent: param.sourceEvent,
+            candle
+          });
+        }
       }
     }
   }

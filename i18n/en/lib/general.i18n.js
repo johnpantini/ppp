@@ -1,6 +1,7 @@
 export default function (i18n) {
   i18n.extend({
     $g: {
+      all: 'All',
       atMarket: 'At market',
       openInNewTab: 'Open in new tab',
       showDetails: 'Show details',
@@ -17,7 +18,8 @@ export default function (i18n) {
       summary: 'Summary',
       buyButtonText: 'Buy',
       sellButtonText: 'Sell',
-      restoreDefaults: 'Restore Defaults'
+      restoreDefaults: 'Restore Defaults',
+      unknownStatus: 'Unknown Status'
     }
   });
 }
