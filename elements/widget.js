@@ -1350,7 +1350,7 @@ export class Widget extends PPPElement {
     } else if (e?.name === 'ConflictError') {
       if (e.message === 'E_TRADER_IS_CLOSED') {
         return this.notificationsArea.error({
-          text: 'Трейдер сейчас не работает.'
+          text: ppp.t('$traderErrors.E_TRADER_IS_CLOSED')
         });
       }
     } else if (e?.name === 'InternalServerError') {
