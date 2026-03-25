@@ -707,6 +707,8 @@ export class ListWidget extends WidgetWithInstrument {
   }
 
   async handleListTableClick({ event }) {
+    await this.control?.beforeListTableClick?.(event);
+
     if (!this.document?.listSource?.length) {
       return;
     }
@@ -745,6 +747,8 @@ export class ListWidget extends WidgetWithInstrument {
         }
       }
     }
+
+    return await this.control?.afterListTableClick?.(event);
   }
 
   toggleDeletionMode() {
