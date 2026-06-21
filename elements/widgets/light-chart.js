@@ -793,6 +793,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.chart.applyOptions({
       timeframe: '5',
       localization: {
+        locale: ppp.i18nLocale,
         priceFormatter: this.priceFormatter.bind(this),
         timeFormatter: (t) => {
           const options = {
