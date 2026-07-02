@@ -331,11 +331,6 @@ export class IntradayStats {
       return;
     }
 
-    if (newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE) {
-      newValue.price = 0;
-      newValue.quantity = 0;
-    }
-
     const currency = newValue.instrument.currency;
 
     if (!this.timeline.has(currency)) {
@@ -355,8 +350,14 @@ export class IntradayStats {
       array,
       {
         instrument: newValue.instrument,
-        price: newValue.price,
-        quantity: newValue.quantity,
+        price:
+          newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
+            ? 0
+            : newValue.price,
+        quantity:
+          newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
+            ? 0
+            : newValue.quantity,
         commission: newValue.commission,
         createdAt: new Date(newValue.createdAt),
         side:

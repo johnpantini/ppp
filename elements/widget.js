@@ -440,15 +440,15 @@ export const widgetCommonColors = () => css`
   }
 
   .earth {
-    color: ${themeConditional(paletteYellowDark2, paletteYellowLight2)};
+    color: ${themeConditional(paletteYellowDark2, paletteYellowLight2)} !important;
   }
 
   .ocean {
-    color: ${themeConditional(paletteBlueDark2, paletteBlueLight2)};
+    color: ${themeConditional(paletteBlueDark2, paletteBlueLight2)} !important;
   }
 
   .alien {
-    color: ${themeConditional(palettePurpleDark2, palettePurpleLight2)};
+    color: ${themeConditional(palettePurpleDark2, palettePurpleLight2)} !important;
   }
 `;
 

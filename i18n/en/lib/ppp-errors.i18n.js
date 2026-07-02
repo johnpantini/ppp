@@ -38,6 +38,9 @@ export default function (i18n) {
       E_UNKNOWN: 'Неизвестная ошибка трейдера.',
       E_REQUEST_TIMEOUT: 'Request timeout.',
       E_TRADING_ACCOUNT_NOT_FOUND: 'Trading account not found.',
+      E_NO_LOCATES_FOR_ACCOUNT_SYMBOL: 'No locates for account/symbol.',
+      E_ALPACA_ONLY_DAY_ORDERS_ALLOWED_FOR_HTB:
+        'Only day orders are allowed for HTB instruments.',
       E_NOT_AVAILABLE_FOR_SHORT:
         'The instrument is not available for short sale.',
       E_SIZE_CANT_BE_ZERO: 'The size value cannot be zero.',
