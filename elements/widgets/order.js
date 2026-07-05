@@ -2276,7 +2276,10 @@ export class OrderWidget extends WidgetWithInstrument {
 
       return this.notificationsArea.error({
         title: 'Ошибка заявки',
-        text: ppp.t(`$traderErrors.${key}`, options)
+        text:
+          key[0] === 'E' && key[1] === '_'
+            ? ppp.t(`$traderErrors.${key}`, options)
+            : key
       });
     } finally {
       this.topLoader.stop();

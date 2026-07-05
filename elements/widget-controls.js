@@ -2082,6 +2082,10 @@ export const widgetNotificationsAreaStyles = css`
     color: ${themeConditional(paletteGrayBase, paletteGrayLight1)};
   }
 
+  .widget-notification-text::first-letter {
+    text-transform: uppercase;
+  }
+
   .widget-notification-close-icon {
     margin-left: 4px;
     cursor: pointer;

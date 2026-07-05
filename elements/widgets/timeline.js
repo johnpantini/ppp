@@ -525,7 +525,7 @@ export class TimelineWidget extends WidgetWithInstrument {
             {
               minimumFractionDigits: 0,
               maximumFractionDigits:
-                firstOperation.instrument?.broker === BROKERS.IB ? 3 : void 0
+                firstOperation.instrument?.broker === BROKERS.IB ? 3 : 5
             }
           )
         });
