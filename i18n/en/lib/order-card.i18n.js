@@ -3,7 +3,7 @@ export default function (i18n) {
     $conditionalOrder: {
       status: {
         inactive: 'Inactive',
-        working: 'Active',
+        working: 'Working',
         executing: 'Executing',
         executed: 'Executed',
         failed: 'Failed',
