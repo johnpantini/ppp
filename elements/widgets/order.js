@@ -387,6 +387,7 @@ export const orderWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !isBestBidAndAskHidden(x)}"
+            ${ref('conditionalOrderSpacer')}
             class="widget-margin-spacer"
           ></div>
           <ppp-widget-empty-state-control
