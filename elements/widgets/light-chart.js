@@ -1108,6 +1108,9 @@ export class LightChartWidget extends WidgetWithInstrument {
     // Always update chart's "tf" attribute.
     this.tf = this.timeFrameObjectToSeconds(tfObject);
 
+    // Force immediate change.
+    this.setAttribute('tf', this.tf);
+
     return tfObject;
   }
 
