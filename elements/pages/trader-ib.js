@@ -14,6 +14,8 @@ import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderIbV3Template = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -24,8 +26,10 @@ export const traderIbV3Template = html`
       ${traderNameAndRuntimePartial({ editableCaps: true })}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Interactive Brokers.</p>
+          <h5>${() => ppp.t('$traderIbPage.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderIbPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -66,14 +70,16 @@ export const traderIbV3Template = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль IB
+            ${() => ppp.t('$traderIbPage.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Торговый счёт IB</h5>
-          <p class="description">Можно найти в TWS в заголовке программы.</p>
+          <h5>${() => ppp.t('$traderIbPage.accountTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderIbPage.accountDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -102,7 +108,7 @@ export class TraderIbPage extends TraderCommonPage {
       TRADER_CAPS.CAPS_BLUEATS,
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_POSITIONS,
       TRADER_CAPS.CAPS_TIMELINE,
@@ -138,7 +144,10 @@ export class TraderIbPage extends TraderCommonPage {
       })
     });
 
-    await maybeFetchError(connectionResponse, 'Нет связи со шлюзом.');
+    await maybeFetchError(
+      connectionResponse,
+      ppp.t('$traderIbPage.gatewayConnectionFailed')
+    );
     await later(3000);
 
     const summaryResponse = await fetch(`${gatewayUrl}call`, {
@@ -151,14 +160,14 @@ export class TraderIbPage extends TraderCommonPage {
 
     await maybeFetchError(
       summaryResponse,
-      'Шлюз не выполнил запрос информации о портфеле.'
+      ppp.t('$traderIbPage.gatewaySummaryFailed')
     );
 
     const { result } = await summaryResponse.json();
 
     if (typeof result.summary[this.account.value.trim()] === 'undefined') {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Торговый счёт не найден.',
+        errorMessage: ppp.t('$traderErrors.E_TRADING_ACCOUNT_NOT_FOUND'),
         raiseException: true
       });
     }

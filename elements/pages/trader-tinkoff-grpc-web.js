@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
@@ -21,6 +22,8 @@ import '../radio-group.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderTinkoffGrpcWebTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -31,8 +34,10 @@ export const traderTinkoffGrpcWebTemplate = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Tinkoff.</p>
+          <h5>${() => ppp.t('$traderTinkoffGrpcWebPage.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderTinkoffGrpcWebPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -74,13 +79,13 @@ export const traderTinkoffGrpcWebTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Tinkoff
+            ${() => ppp.t('$traderTinkoffGrpcWebPage.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Торговый счёт</h5>
+          <h5>${() => ppp.t('$traderTinkoffGrpcWebPage.accountTitle')}</h5>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -88,7 +93,8 @@ export const traderTinkoffGrpcWebTemplate = html`
             value="${(x) => x.document.account}"
             ?disabled="${(x) => !x.scratch.get('brokerId')}"
             :context="${(x) => x}"
-            :placeholder="${() => 'Нажмите, чтобы выбрать счёт'}"
+            :placeholder="${() =>
+              ppp.t('$traderTinkoffGrpcWebPage.clickToSelectAccount')}"
             :preloaded="${(x) => {
               return {
                 _id: x.document.account,
@@ -132,11 +138,12 @@ export const traderTinkoffGrpcWebTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тайм-аут восстановления соединения</h5>
+          <h5>
+            ${() => ppp.t('$traderTinkoffGrpcWebPage.reconnectTimeoutTitle')}
+          </h5>
           <p class="description">
-            Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверам брокера. Задаётся в
-            миллисекундах, по умолчанию 1000 мс.
+            ${() =>
+              ppp.t('$traderTinkoffGrpcWebPage.reconnectTimeoutDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -165,7 +172,7 @@ export class TraderTinkoffGrpcWebPage extends TraderCommonPage {
     return [
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_ORDERBOOK,
       TRADER_CAPS.CAPS_CANDLES,
@@ -184,7 +191,7 @@ export class TraderTinkoffGrpcWebPage extends TraderCommonPage {
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
-        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 100, max: 10000 })
       });
     }
   }

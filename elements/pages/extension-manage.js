@@ -11,6 +11,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const extensionManagePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -20,9 +22,9 @@ export const extensionManagePageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название</h5>
+          <h5>${() => ppp.t('$g.name')}</h5>
           <p class="description">
-            Название для отображения в боковой панели в разделе дополнений.
+            ${() => ppp.t('$extensionManagePage.titleDescription')}
           </p>
         </div>
         <div class="input-group">

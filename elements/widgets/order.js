@@ -398,7 +398,7 @@ export const orderWidgetTemplate = html`
               )}"
           >
             <div class="no-conditional-orders-holder">
-              <span>Условные заявки не настроены.</span>
+              <span>${() => ppp.t('$orderWidget.noConditionalOrdersText')}</span>
               <a
                 class="link"
                 href="javascript:void(0);"
@@ -427,7 +427,7 @@ export const orderWidgetTemplate = html`
                   });
                 }}"
               >
-                Открыть параметры.
+                ${() => ppp.t('$orderWidget.openWidgetSettingsText')}
               </a>
             </div>
           </ppp-widget-empty-state-control>
@@ -511,7 +511,7 @@ export const orderWidgetTemplate = html`
                   !x.conditionalOrder
               )}"
           >
-            Выберите условную заявку.
+            ${() => ppp.t('$orderWidget.selectConditionalOrderText')}
           </ppp-widget-empty-state-control>
           <div
             class="widget-price-quantity"
@@ -608,11 +608,14 @@ export const orderWidgetTemplate = html`
                   <div class="widget-margin-spacer"></div>
                   <div class="widget-subsection">
                     <div class="widget-subsection-item">
-                      <div class="widget-text-label">Отображаемый объём</div>
+                      <div class="widget-text-label">
+                        ${() => ppp.t('$orderWidget.displaySizeLabel')}
+                      </div>
                       <div class="widget-flex-line">
                         <ppp-widget-trifecta-field
                           kind="quantity"
-                          placeholder="Показывать весь объём"
+                          placeholder="${() =>
+                            ppp.t('$orderWidget.displaySizePlaceholder')}"
                           :instrument="${(x) => x.instrument}"
                           :changeViaMouseWheel="${(x) =>
                             x.document.changePriceQuantityViaMouseWheel}"
@@ -652,7 +655,9 @@ export const orderWidgetTemplate = html`
                         ),
                       html`
                         <div class="widget-subsection-item">
-                          <div class="widget-text-label">Назначение</div>
+                          <div class="widget-text-label">
+                            ${() => ppp.t('$orderWidget.destinationLabel')}
+                          </div>
                           <div class="widget-flex-line">
                             <ppp-widget-select
                               ${ref('destination')}
@@ -787,20 +792,20 @@ export const orderWidgetTemplate = html`
             >
               <div class="widget-summary">
                 <div class="widget-summary-line">
-                  <span>Стоимость</span>
+                  <span>${() => ppp.t('$orderWidget.totalAmountText')}</span>
                   <span class="widget-summary-line-price">
                     ${(x) =>
                       x.orderTypeTabs.activeid === 'market'
-                        ? 'по факту сделки'
+                        ? ppp.t('$orderWidget.atTradeExecutionText')
                         : formatAmount(x.totalAmount, x.instrument)}
                   </span>
                 </div>
                 <div class="widget-summary-line">
-                  <span>Комиссия</span>
+                  <span>${() => ppp.t('$g.commission')}</span>
                   <span>
                     ${(x) =>
                       x.orderTypeTabs.activeid === 'market'
-                        ? 'по факту сделки'
+                        ? ppp.t('$orderWidget.atTradeExecutionText')
                         : formatCommission(x.commission, x.instrument)}
                   </span>
                 </div>
@@ -823,7 +828,7 @@ export const orderWidgetTemplate = html`
                       force: true
                     })}"
                 >
-                  <span>Доступно</span>
+                  <span>${() => ppp.t('$orderWidget.availableText')}</span>
                   <span class="positive">
                     ${(x) => x.buyingPowerQuantity ?? '—'}
                   </span>
@@ -836,7 +841,7 @@ export const orderWidgetTemplate = html`
                       force: true
                     })}"
                 >
-                  <span>С плечом</span>
+                  <span>${() => ppp.t('$orderWidget.withMarginText')}</span>
                   <span class="positive">
                     ${(x) => x.marginBuyingPowerQuantity ?? '—'}
                   </span>
@@ -851,7 +856,7 @@ export const orderWidgetTemplate = html`
                       force: true
                     })}"
                 >
-                  <span>Доступно</span>
+                  <span>${() => ppp.t('$orderWidget.availableText')}</span>
                   <span class="negative">
                     ${(x) => x.sellingPowerQuantity ?? '—'}
                   </span>
@@ -864,7 +869,7 @@ export const orderWidgetTemplate = html`
                       force: true
                     })}"
                 >
-                  <span>С плечом</span>
+                  <span>${() => ppp.t('$orderWidget.withMarginText')}</span>
                   <span class="negative">
                     ${(x) => x.marginSellingPowerQuantity ?? '—'}
                   </span>
@@ -973,7 +978,7 @@ export const orderWidgetTemplate = html`
                 >
                   ${(x) =>
                     x.conditionalOrder?.order?.buttonText ??
-                    'Разместить заявку'}
+                    ppp.t('$orderWidget.placeOrderButtonText')}
                 </ppp-widget-button>
               </div>
             </div>
@@ -1367,7 +1372,7 @@ export class OrderWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер для выставления заявок.',
+        text: ppp.t('$orderWidget.noOrdersTraderText'),
         keep: true
       });
     }
@@ -1717,13 +1722,13 @@ export class OrderWidget extends WidgetWithInstrument {
 
         !this.document.onlyShowErrorNotifications &&
           this.notificationsArea.note({
-            title: 'Заявки отменены'
+            title: ppp.t('$orderWidget.ordersCancelledTitle')
           });
       } catch (e) {
         console.log(e);
 
         this.notificationsArea.error({
-          text: 'Не удалось отменить заявки.'
+          text: ppp.t('$orderWidget.cancelOrdersFailedText')
         });
       } finally {
         this.topLoader.stop();
@@ -1829,7 +1834,7 @@ export class OrderWidget extends WidgetWithInstrument {
             console.log(error);
 
             this.notificationsArea.error({
-              text: 'Не удалось рассчитать комиссию.'
+              text: ppp.t('$traderErrors.E_COMMISSION_CALCULATION_ERROR')
             });
           });
       }
@@ -1878,7 +1883,7 @@ export class OrderWidget extends WidgetWithInstrument {
             console.log(error);
 
             this.notificationsArea.error({
-              text: 'Не удалось рассчитать доступные остатки.'
+              text: ppp.t('$orderWidget.estimateFailedText')
             });
           });
       }
@@ -2101,7 +2106,9 @@ export class OrderWidget extends WidgetWithInstrument {
 
   formatPositionSize() {
     let size = 0;
-    const suffix = this.document.displaySizeInUnits ? 'шт.' : 'л.';
+    const suffix = this.document.displaySizeInUnits
+      ? ppp.t('$orderWidget.sizeUnitsSuffix')
+      : ppp.t('$orderWidget.sizeLotsSuffix');
 
     if (this.instrument) {
       size = this.positionSize ?? 0;
@@ -2115,8 +2122,8 @@ export class OrderWidget extends WidgetWithInstrument {
   async placeOrder(direction, useCachedCode) {
     if (!this.ordersTrader) {
       return this.notificationsArea.error({
-        title: 'Ошибка заявки',
-        text: 'Отсутствует трейдер для выставления заявок.'
+        title: ppp.t('$orderWidget.orderErrorTitle'),
+        text: ppp.t('$orderWidget.noOrdersTraderText')
       });
     }
 
@@ -2137,22 +2144,22 @@ export class OrderWidget extends WidgetWithInstrument {
       if (this.orderTypeTabs?.activeid === 'limit') {
         if (typeof this.ordersTrader.placeLimitOrder !== 'function') {
           return this.notificationsArea.error({
-            title: 'Ошибка заявки',
-            text: 'Трейдер не поддерживает выставление лимитных заявок.'
+            title: ppp.t('$orderWidget.orderErrorTitle'),
+            text: ppp.t('$orderWidget.limitOrdersNotSupportedText')
           });
         }
 
         if (!this.price.value) {
           return this.notificationsArea.error({
-            title: 'Ошибка заявки',
-            text: 'Цена должна быть положительной.'
+            title: ppp.t('$orderWidget.orderErrorTitle'),
+            text: ppp.t('$traderErrors.E_PRICE_MUST_BE_POSITIVE')
           });
         }
 
         if (!this.quantity.value) {
           return this.notificationsArea.error({
-            title: 'Ошибка заявки',
-            text: 'Количество должно быть положительным.'
+            title: ppp.t('$orderWidget.orderErrorTitle'),
+            text: ppp.t('$orderWidget.quantityMustBePositiveText')
           });
         }
 
@@ -2168,15 +2175,15 @@ export class OrderWidget extends WidgetWithInstrument {
       } else if (this.orderTypeTabs?.activeid === 'market') {
         if (typeof this.ordersTrader.placeMarketOrder !== 'function') {
           return this.notificationsArea.error({
-            title: 'Ошибка заявки',
-            text: 'Трейдер не поддерживает выставление рыночных заявок.'
+            title: ppp.t('$orderWidget.orderErrorTitle'),
+            text: ppp.t('$orderWidget.marketOrdersNotSupportedText')
           });
         }
 
         if (!this.quantity.value) {
           return this.notificationsArea.error({
-            title: 'Ошибка заявки',
-            text: 'Количество должно быть положительным.'
+            title: ppp.t('$orderWidget.orderErrorTitle'),
+            text: ppp.t('$orderWidget.quantityMustBePositiveText')
           });
         }
 
@@ -2193,7 +2200,7 @@ export class OrderWidget extends WidgetWithInstrument {
           await this.conditionalOrderHolder?.firstElementChild?.validate?.();
         } catch (e) {
           return this.notificationsArea.error({
-            title: 'Ошибка валидации',
+            title: ppp.t('$orderWidget.validationErrorTitle'),
             text: e.message
           });
         }
@@ -2248,7 +2255,7 @@ export class OrderWidget extends WidgetWithInstrument {
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.success({
-          title: 'Заявка выставлена'
+          title: ppp.t('$orderWidget.orderPlacedTitle')
         });
     } catch (e) {
       this.$$placeOrder(
@@ -2276,7 +2283,7 @@ export class OrderWidget extends WidgetWithInstrument {
       }
 
       return this.notificationsArea.error({
-        title: 'Ошибка заявки',
+        title: ppp.t('$orderWidget.orderErrorTitle'),
         text:
           key[0] === 'E' && key[1] === '_'
             ? ppp.t(`$traderErrors.${key}`, options)
@@ -2293,7 +2300,7 @@ export class OrderWidget extends WidgetWithInstrument {
         hook: async () =>
           this.container.buyShortcut.value !==
           this.container.sellShortcut.value,
-        errorMessage: 'Горячие клавиши Buy/Sell должны различаться'
+        errorMessage: ppp.t('$orderWidget.buySellHotkeysMustDiffer')
       });
     }
 
@@ -2305,8 +2312,7 @@ export class OrderWidget extends WidgetWithInstrument {
         hook: async () =>
           this.container.searchShortcut.value !==
           this.container.cancelAllOrdersShortcut.value,
-        errorMessage:
-          'Горячие клавиши отмены заявок и поиска должны различаться'
+        errorMessage: ppp.t('$orderWidget.cancelSearchHotkeysMustDiffer')
       });
     }
 
@@ -2364,9 +2370,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.ORDER,
     collection: 'PPP',
-    title: html`Заявка`,
-    description: html`Виджет <span class="positive">Заявка</span> используется,
-      чтобы выставлять рыночные, лимитные и условные заявки.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.ORDER}`)}`,
+    description: html`${() => ppp.t('$orderWidget.widgetDescriptionPrefix')}
+      <span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.ORDER}`)}
+      </span>
+      ${() => ppp.t('$orderWidget.widgetDescriptionSuffix')}`,
     customElement: OrderWidget.compose({
       template: orderWidgetTemplate,
       styles: orderWidgetStyles
@@ -2377,17 +2386,22 @@ export async function widgetDefinition() {
     defaultHeight: 420,
     settings: html`
       <ppp-tabs activeid="traders" ${ref('settingsTabs')}>
-        <ppp-tab id="traders">Подключения</ppp-tab>
+        <ppp-tab id="traders">
+          ${() => ppp.t('$orderWidget.connectionsTabText')}
+        </ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
-        <ppp-tab id="hotkeys">Горячие клавиши</ppp-tab>
-        <ppp-tab id="conditionals">Условные заявки</ppp-tab>
+        <ppp-tab id="hotkeys">
+          ${() => ppp.t('$orderWidget.hotkeysTabText')}
+        </ppp-tab>
+        <ppp-tab id="conditionals">
+          ${() => ppp.t('$orderWidget.conditionalOrdersText')}
+        </ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер инструментов и заявок</h5>
+              <h5>${() => ppp.t('$orderWidget.ordersTraderHeader')}</h5>
               <p class="description">
-                Трейдер, который будет выставлять заявки, а также фильтровать
-                инструменты в поиске.
+                ${() => ppp.t('$orderWidget.ordersTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -2395,7 +2409,7 @@ export async function widgetDefinition() {
                 ${ref('ordersTraderId')}
                 standalone
                 deselectable
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.ordersTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.ordersTrader ?? ''}"
@@ -2445,9 +2459,9 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер L1</h5>
+              <h5>${() => ppp.t('$widget.traderL1')}</h5>
               <p class="description">
-                Трейдер, выступающий источником L1-данных виджета.
+                ${() => ppp.t('$orderWidget.level1TraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -2455,7 +2469,7 @@ export async function widgetDefinition() {
                 ${ref('level1TraderId')}
                 standalone
                 deselectable
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.level1TraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.level1Trader ?? ''}"
@@ -2499,10 +2513,11 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Дополнительный трейдер L1 #1</h5>
+              <h5>
+                ${() => ppp.t('$orderWidget.extraLevel1TraderHeader', { n: 1 })}
+              </h5>
               <p class="description">
-                Трейдер, выступающий дополнительным источником L1-данных
-                виджета.
+                ${() => ppp.t('$orderWidget.extraLevel1TraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -2510,7 +2525,7 @@ export async function widgetDefinition() {
                 ${ref('extraLevel1TraderId')}
                 standalone
                 deselectable
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.extraLevel1TraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
@@ -2556,10 +2571,11 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Дополнительный трейдер L1 #2</h5>
+              <h5>
+                ${() => ppp.t('$orderWidget.extraLevel1TraderHeader', { n: 2 })}
+              </h5>
               <p class="description">
-                Трейдер, выступающий дополнительным источником L1-данных
-                виджета.
+                ${() => ppp.t('$orderWidget.extraLevel1TraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -2567,7 +2583,7 @@ export async function widgetDefinition() {
                 ${ref('extraLevel1Trader2Id')}
                 standalone
                 deselectable
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.extraLevel1Trader2Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
@@ -2613,9 +2629,9 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интеграция с Pusher</h5>
+              <h5>${() => ppp.t('$orderWidget.pusherIntegrationHeader')}</h5>
               <p class="description">
-                Для управления виджетом из внешних систем.
+                ${() => ppp.t('$orderWidget.pusherIntegrationDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2624,7 +2640,7 @@ export async function widgetDefinition() {
                   ${ref('pusherApiId')}
                   standalone
                   deselectable
-                  placeholder="Опционально, нажмите для выбора"
+                  placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                   value="${(x) => x.document.pusherApiId}"
                   :context="${(x) => x}"
                   :preloaded="${(x) => x.document.pusherApi ?? ''}"
@@ -2669,11 +2685,9 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Кнопки быстрого объёма</h5>
+              <h5>${() => ppp.t('$orderWidget.fastVolumeButtonsHeader')}</h5>
               <p class="description">
-                Перечислите значения через точку с запятой. Нажатие на кнопку
-                подставляет номинал в поле количества. Поставьте ~ перед
-                значением, чтобы указать объём в единицах валюты.
+                ${() => ppp.t('$orderWidget.fastVolumeButtonsDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2693,79 +2707,81 @@ export async function widgetDefinition() {
               ?checked="${(x) => x.document.doNotLockFastVolume ?? false}"
               ${ref('doNotLockFastVolume')}
             >
-              Не фиксировать объём двойным нажатием на кнопки
+              ${() => ppp.t('$orderWidget.doNotLockFastVolumeText')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>${() => ppp.t('$orderWidget.interfaceHeader')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.displaySizeInUnits}"
               ${ref('displaySizeInUnits')}
             >
-              Показывать количество инструмента в портфеле в штуках
+              ${() => ppp.t('$orderWidget.displaySizeInUnitsText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.changePriceQuantityViaMouseWheel}"
               ${ref('changePriceQuantityViaMouseWheel')}
             >
-              Изменять цену и количество колесом мыши
+              ${() => ppp.t('$orderWidget.changePriceQuantityViaMouseWheelText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.setPriceShouldShowLimitTab}"
               ${ref('setPriceShouldShowLimitTab')}
             >
-              Подстановка цены извне всегда активирует вкладку «Лимитная»
+              ${() => ppp.t('$orderWidget.setPriceShouldShowLimitTabText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.onlyShowErrorNotifications}"
               ${ref('onlyShowErrorNotifications')}
             >
-              Показывать только уведомления об ошибках
+              ${() => ppp.t('$orderWidget.onlyShowErrorNotificationsText')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Наполнение</h5>
+              <h5>${() => ppp.t('$orderWidget.contentHeader')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showLastPriceInHeader ?? true}"
               ${ref('showLastPriceInHeader')}
             >
-              Показывать последнюю цену в заголовке
+              ${() => ppp.t('$orderWidget.showLastPriceInHeaderText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showAbsoluteChangeInHeader ?? true}"
               ${ref('showAbsoluteChangeInHeader')}
             >
-              Показывать абсолютное изменение цены в заголовке
+              ${() => ppp.t('$orderWidget.showAbsoluteChangeInHeaderText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showRelativeChangeInHeader ?? true}"
               ${ref('showRelativeChangeInHeader')}
             >
-              Показывать относительное изменение цены в заголовке
+              ${() => ppp.t('$orderWidget.showRelativeChangeInHeaderText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showOrderTypeTabs ?? true}"
               ${ref('showOrderTypeTabs')}
             >
-              Показывать вкладки с типом заявки
+              ${() => ppp.t('$orderWidget.showOrderTypeTabsText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showCompanyCard ?? true}"
               ${ref('showCompanyCard')}
             >
-              Показывать наименование инструмента с ценой
+              ${() => ppp.t('$orderWidget.showCompanyCardText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showBestBidAndAsk ?? true}"
               ${ref('showBestBidAndAsk')}
             >
-              Показывать лучшие цены <span class="positive">bid</span> и
+              ${() => ppp.t('$orderWidget.showBestPricesText')}
+              <span class="positive">bid</span>
+              ${() => ppp.t('$orderWidget.andText')}
               <span class="negative">ask</span>
             </ppp-checkbox>
             <ppp-checkbox
@@ -2773,42 +2789,41 @@ export async function widgetDefinition() {
                 x.document.showConditionalOrderToolbar ?? true}"
               ${ref('showConditionalOrderToolbar')}
             >
-              Показывать панель условных заявок
+              ${() => ppp.t('$orderWidget.showConditionalOrderToolbarText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showAmountSection ?? true}"
               ${ref('showAmountSection')}
             >
-              Показывать секцию с комиссией и стоимостью
+              ${() => ppp.t('$orderWidget.showAmountSectionText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showEstimateSection ?? true}"
               ${ref('showEstimateSection')}
             >
-              Показывать секцию «Доступно/С плечом»
+              ${() => ppp.t('$orderWidget.showEstimateSectionText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showShortButton ?? false}"
               ${ref('showShortButton')}
             >
-              Показывать кнопку "Short"
+              ${() => ppp.t('$orderWidget.showShortButtonText')}
             </ppp-checkbox>
           </div>
         </ppp-tab-panel>
         <ppp-tab-panel id="hotkeys-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Горячая клавиша для покупки</h5>
+              <h5>${() => ppp.t('$orderWidget.buyShortcutHeader')}</h5>
               <p class="description">
-                Покупка сработает, если фокус ввода будет находиться в поле цены
-                или количества. Нажмите Backspace, чтобы отменить эту функцию.
+                ${() => ppp.t('$orderWidget.buyShortcutDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
                 standalone
                 optional
-                placeholder="Не задана"
+                placeholder="${() => ppp.t('$orderWidget.notSetPlaceholder')}"
                 value="${(x) => x.document.buyShortcut}"
                 @keydown="${(x, { event }) => {
                   if (
@@ -2833,17 +2848,16 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Горячая клавиша для продажи</h5>
+              <h5>${() => ppp.t('$orderWidget.sellShortcutHeader')}</h5>
               <p class="description">
-                Продажа сработает, если фокус ввода будет находиться в любом
-                текстовом поле. Нажмите Backspace, чтобы отменить эту функцию.
+                ${() => ppp.t('$orderWidget.sellShortcutDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
                 standalone
                 optional
-                placeholder="Не задана"
+                placeholder="${() => ppp.t('$orderWidget.notSetPlaceholder')}"
                 value="${(x) => x.document.sellShortcut}"
                 @keydown="${(x, { event }) => {
                   if (
@@ -2868,18 +2882,16 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Горячая клавиша для поиска инструментов</h5>
+              <h5>${() => ppp.t('$orderWidget.searchShortcutHeader')}</h5>
               <p class="description">
-                Если фокус ввода будет находиться в любом текстовом поле, то
-                откроется окно поиска инструмента. Нажмите Backspace, чтобы
-                отменить эту функцию.
+                ${() => ppp.t('$orderWidget.searchShortcutDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
                 standalone
                 optional
-                placeholder="Не задана"
+                placeholder="${() => ppp.t('$orderWidget.notSetPlaceholder')}"
                 value="${(x) => x.document.searchShortcut}"
                 @keydown="${(x, { event }) => {
                   if (
@@ -2904,19 +2916,19 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Горячая клавиша для отмены всех активных заявок</h5>
+              <h5>
+                ${() => ppp.t('$orderWidget.cancelAllOrdersShortcutHeader')}
+              </h5>
               <p class="description">
-                Если фокус ввода будет находиться в любом текстовом поле, то
-                будут отменены активные заявки (лимитные или условные, в
-                зависимости от вкладки) по текущему инструменту виджета. Нажмите
-                Backspace, чтобы отменить эту функцию.
+                ${() =>
+                  ppp.t('$orderWidget.cancelAllOrdersShortcutDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
                 standalone
                 optional
-                placeholder="Не задана"
+                placeholder="${() => ppp.t('$orderWidget.notSetPlaceholder')}"
                 value="${(x) => x.document.cancelAllOrdersShortcut}"
                 @keydown="${(x, { event }) => {
                   if (
@@ -2942,13 +2954,12 @@ export async function widgetDefinition() {
         </ppp-tab-panel>
         <ppp-tab-panel id="conditionals-panel">
           <ppp-banner class="inline" appearance="warning">
-            В этом разделе настраиваются условные заявки, которые будут доступны
-            на соответствующей вкладке виджета.
+            ${() => ppp.t('$orderWidget.conditionalsBannerText')}
           </ppp-banner>
           <div class="spacing2"></div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Условные заявки</h5>
+              <h5>${() => ppp.t('$orderWidget.conditionalOrdersText')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-widget-order-list

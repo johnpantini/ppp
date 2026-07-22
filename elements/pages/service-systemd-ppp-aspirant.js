@@ -22,6 +22,7 @@ import '../query-select.js';
 import '../select.js';
 import '../terminal.js';
 import '../text-field.js';
+await ppp.i18n(import.meta.url);
 
 export const serviceSystemdPppAspirantTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -33,10 +34,9 @@ export const serviceSystemdPppAspirantTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -49,8 +49,11 @@ export const serviceSystemdPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Хранилище Redis</h5>
-          <p class="description">Персистентность для сервиса.</p>
+          <h5>${() => ppp.t('$serviceSystemdPppAspirantPage.redisStorage')}</h5>
+          <p class="description">
+            ${() =>
+              ppp.t('$serviceSystemdPppAspirantPage.redisStorageDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -91,16 +94,15 @@ export const serviceSystemdPppAspirantTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Redis
+            ${() => ppp.t('$serviceSystemdPppAspirantPage.addRedisApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервер</h5>
+          <h5>${() => ppp.t('$serviceSystemdPppAspirantPage.server')}</h5>
           <p class="description">
-            Сервер, на котором будет запущен Aspirant. Нельзя изменить после
-            создания сервиса.
+            ${() => ppp.t('$serviceSystemdPppAspirantPage.serverDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -147,15 +149,18 @@ export const serviceSystemdPppAspirantTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить сервер
+            ${() => ppp.t('$serviceSystemdPppAspirantPage.addServer')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Версия node.js</h5>
+          <h5>
+            ${() => ppp.t('$serviceSystemdPppAspirantPage.nodeJsVersion')}
+          </h5>
           <p class="description">
-            Выберите, какую версию node.js следует установить.
+            ${() =>
+              ppp.t('$serviceSystemdPppAspirantPage.nodeJsVersionDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -171,9 +176,14 @@ export const serviceSystemdPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Домен глобальной сети</h5>
+          <h5>
+            ${() => ppp.t('$serviceSystemdPppAspirantPage.globalNetworkDomain')}
+          </h5>
           <p class="description">
-            Опциональный домен, чтобы сгенерировать сертификаты.
+            ${() =>
+              ppp.t(
+                '$serviceSystemdPppAspirantPage.globalNetworkDomainDescription'
+              )}
           </p>
         </div>
         <div class="input-group">
@@ -181,7 +191,7 @@ export const serviceSystemdPppAspirantTemplate = html`
             deselectable
             ?disabled="${(x) =>
               !x.serverId.value || !x.scratch.get('server')?.domains}"
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.domain ?? ''}"
             ${ref('domain')}
           >
@@ -194,8 +204,13 @@ export const serviceSystemdPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Домен Tailnet</h5>
-          <p class="description">Домен сервера в сети Tailscale.</p>
+          <h5>
+            ${() => ppp.t('$serviceSystemdPppAspirantPage.tailnetDomain')}
+          </h5>
+          <p class="description">
+            ${() =>
+              ppp.t('$serviceSystemdPppAspirantPage.tailnetDomainDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -206,7 +221,7 @@ export const serviceSystemdPppAspirantTemplate = html`
         </div>
       </section>
       ${documentPageFooterPartial({
-        text: 'Сохранить в PPP и развернуть на сервере',
+        text: ppp.t('$serviceSystemdPppAspirantPage.saveAndDeployToServer'),
         extraControls: html`
           <div class="control-line extra-controls">
             <ppp-button
@@ -214,7 +229,7 @@ export const serviceSystemdPppAspirantTemplate = html`
               ?disabled="${(x) => !x.isSteady() || x.document.removed}"
               @click="${(x) => x.updateTailnetCerts()}"
             >
-              Обновить сертификаты Tailnet
+              ${() => ppp.t('$serviceSystemdPppAspirantPage.updateTailnetCerts')}
             </ppp-button>
           </div>
           ${servicePageFooterExtraControls}
@@ -291,8 +306,8 @@ export class ServiceSystemdPppAspirantPage extends Page {
   async updateTailnetCerts() {
     if (
       await ppp.app.confirm(
-        'Обновление сертификатов Tailnet',
-        'Будут обновлены сертификаты сервера в сети Tailnet. Подтвердите действие.'
+        ppp.t('$serviceSystemdPppAspirantPage.updateTailnetCertsTitle'),
+        ppp.t('$serviceSystemdPppAspirantPage.updateTailnetCertsConfirm')
       )
     ) {
       this.beginOperation();
@@ -314,7 +329,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
           }))
         ) {
           invalidate(ppp.app.toast, {
-            errorMessage: 'Не удалось настроить сервис Aspirant.',
+            errorMessage: ppp.t(
+          '$serviceSystemdPppAspirantPage.cannotConfigureAspirant'
+        ),
             raiseException: true
           });
         }
@@ -563,7 +580,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
       }))
     ) {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Не удалось настроить сервис Aspirant.',
+        errorMessage: ppp.t(
+          '$serviceSystemdPppAspirantPage.cannotConfigureAspirant'
+        ),
         raiseException: true
       });
     }
@@ -606,7 +625,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
       }))
     ) {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Не удалось перезапустить сервис Aspirant.',
+        errorMessage: ppp.t(
+          '$serviceSystemdPppAspirantPage.cannotRestartAspirant'
+        ),
         raiseException: true
       });
     }
@@ -620,7 +641,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
       }))
     ) {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Не удалось остановить сервис Aspirant.',
+        errorMessage: ppp.t(
+          '$serviceSystemdPppAspirantPage.cannotStopAspirant'
+        ),
         raiseException: true
       });
     }
@@ -642,7 +665,9 @@ export class ServiceSystemdPppAspirantPage extends Page {
       }))
     ) {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Не удалось остановить сервис Aspirant.',
+        errorMessage: ppp.t(
+          '$serviceSystemdPppAspirantPage.cannotStopAspirant'
+        ),
         raiseException: true
       });
     }

@@ -12,6 +12,8 @@ import '../banner.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 const isAlwaysUpToDateDomain =
   window.location.origin === 'https://johnpantini.johnpantini.pages.dev' ||
   window.location.origin === 'https://johnpantini.pages.dev' ||
@@ -21,7 +23,7 @@ export const updatesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>Центр обновлений</ppp-page-header>
+      <ppp-page-header>${() => ppp.t('$sideNav.updatesCenter')}</ppp-page-header>
       ${when(
         (x) =>
           !isAlwaysUpToDateDomain &&
@@ -31,12 +33,11 @@ export const updatesPageTemplate = html`
         html`
           <div class="spacing2"></div>
           <ppp-banner class="inline margin-top" appearance="info">
-            Для полного применения обновления может потребоваться несколько
-            минут.
+            ${() => ppp.t('$updatesPage.updateMayTakeMinutes')}
           </ppp-banner>
           <section>
             <div class="label-group">
-              <h6>Текущая версия</h6>
+              <h6>${() => ppp.t('$updatesPage.currentVersion')}</h6>
               <div class="spacing2"></div>
               <ppp-badge appearance="yellow">
                 ${(x) => x.currentCommit?.sha}
@@ -48,7 +49,7 @@ export const updatesPageTemplate = html`
           </section>
           <section>
             <div class="label-group">
-              <h6>Последняя версия</h6>
+              <h6>${() => ppp.t('$const.versioningStatus.ok')}</h6>
               <div class="spacing2"></div>
               <ppp-badge appearance="green">
                 ${(x) => x.targetCommit?.sha}
@@ -65,7 +66,7 @@ export const updatesPageTemplate = html`
                 appearance="primary"
                 @click="${(x) => x.updateApp()}"
               >
-                Обновить приложение
+                ${() => ppp.t('$updatesPage.updateApp')}
               </ppp-button>
             </div>
           </section>
@@ -78,15 +79,17 @@ export const updatesPageTemplate = html`
             x.currentCommit?.sha === x.targetCommit?.sha),
         html` <div class="empty-state">
           <div class="picture">${html.partial(framedCloud)}</div>
-          <h3>Репозиторий приложения синхронизирован с последней версией</h3>
-          <p class="body1">Текущая версия приложения: ${(x) => x.version}</p>
+          <h3>${() => ppp.t('$updatesPage.repoInSync')}</h3>
+          <p class="body1">
+            ${() => ppp.t('$updatesPage.currentAppVersion')} ${(x) => x.version}
+          </p>
           <ppp-button
             ?hidden="${() => isAlwaysUpToDateDomain}"
             appearance="primary"
             class="large"
             @click="${(x) => x.checkForUpdates()}"
           >
-            Проверить ещё раз
+            ${() => ppp.t('$updatesPage.checkAgain')}
           </ppp-button>
         </div>`
       )}
@@ -151,7 +154,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rTargetRef,
-        'Не удалось получить ссылку HEAD на ветку main официального репозитория. Убедитесь, что токен GitHub не истёк.'
+        ppp.t('$updatesPage.fetchTargetRefFailed')
       );
 
       const targetRef = await rTargetRef.json();
@@ -165,7 +168,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rTargetCommit,
-        'Не удалось получить последний commit ветки main официального репозитория.'
+        ppp.t('$updatesPage.fetchTargetCommitFailed')
       );
 
       this.targetCommit = await rTargetCommit.json();
@@ -179,7 +182,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rGitHubUser,
-        'Не удалось получить профиль пользователя GitHub.'
+        ppp.t('$updatesPage.fetchGitHubUserFailed')
       );
 
       const user = await rGitHubUser.json();
@@ -196,7 +199,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rCurrentRef,
-        'Не удалось получить ссылку HEAD на ветку main в текущем репозитории.'
+        ppp.t('$updatesPage.fetchCurrentRefFailed')
       );
 
       const currentRef = await rCurrentRef.json();
@@ -210,7 +213,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rCurrentCommit,
-        'Не удалось получить последний commit ветки main в текущем репозитории.'
+        ppp.t('$updatesPage.fetchCurrentCommitFailed')
       );
 
       this.currentCommit = await rCurrentCommit.json();
@@ -238,7 +241,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rGitHubUser,
-        'Не удалось получить профиль пользователя GitHub.'
+        ppp.t('$updatesPage.fetchGitHubUserFailed')
       );
 
       const user = await rGitHubUser.json();
@@ -258,7 +261,7 @@ export class UpdatesPage extends Page {
 
       await maybeFetchError(
         rUpdateHeads,
-        'Не удалось изменить ссылку HEAD на ветку main в текущем репозитории.'
+        ppp.t('$updatesPage.updateHeadsFailed')
       );
 
       const rPagesBuildResponse = await fetch(
@@ -276,7 +279,7 @@ export class UpdatesPage extends Page {
       if (rPagesBuildResponse.status !== 403) {
         await maybeFetchError(
           rPagesBuildResponse,
-          'Не удалось выполнить запрос на принудительную сборку GitHub Pages.'
+          ppp.t('$updatesPage.pagesBuildFailed')
         );
       }
 
@@ -284,7 +287,7 @@ export class UpdatesPage extends Page {
 
       if (!silent) {
         this.showSuccessNotification(
-          'Приложение синхронизировано с последней версией. Когда обновление будет готово, вы получите уведомление.'
+          ppp.t('$updatesPage.appSynchronized')
         );
       }
     } catch (e) {

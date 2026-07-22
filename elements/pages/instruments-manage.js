@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   html,
   css,
@@ -12,6 +13,8 @@ import {
 import { Page, pageStyles } from '../page.js';
 import {
   BROKERS,
+  COLUMN_SOURCE,
+  EXCHANGE,
   INSTRUMENT_DICTIONARY,
   getInstrumentDictionaryMeta
 } from '../../lib/const.js';
@@ -45,37 +48,37 @@ export const dictionarySelectorTemplate = (options = {}) => html`
     ${ref('dictionary')}
   >
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.BINANCE}">
-      Binance (спот)
+      ${() => ppp.t('$instrumentsManagePage.binanceSpot')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_LINEAR}">
-      Bybit (деривативы)
+      ${() => ppp.t(`$const.exchange.${EXCHANGE.BYBIT_LINEAR}`)}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.BYBIT_SPOT}">
-      Bybit (спот)
+      ${() => ppp.t(`$const.exchange.${EXCHANGE.BYBIT_SPOT}`)}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.UTEX_MARGIN_STOCKS}">
-      UTEX Margin (акции и ETF, US)
+      ${() => ppp.t('$instrumentsManagePage.utexMarginStocks')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.IB}">
-      Interactive Brokers (акции и ETF, US)
+      ${() => ppp.t('$instrumentsManagePage.ibStocks')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.PSINA_US_STOCKS}">
-      Psina (акции и ETF, US)
+      ${() => ppp.t('$instrumentsManagePage.psinaStocks')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALPACA}">
-      Alpaca (акции и ETF, US)
+      ${() => ppp.t('$instrumentsManagePage.alpacaStocks')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_SPBX}">
-      Alor (СПБ Биржа)
+      ${() => ppp.t('$instrumentsManagePage.alorSpbx')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES}">
-      Alor (MOEX), фондовый рынок
+      ${() => ppp.t('$instrumentsManagePage.alorMoexSecurities')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_FORTS}">
-      Alor (MOEX), срочный рынок
+      ${() => ppp.t('$instrumentsManagePage.alorForts')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.ALOR_MOEX_FX_METALS}">
-      Alor (MOEX), валюта и драг. металлы
+      ${() => ppp.t('$instrumentsManagePage.alorMoexFxMetals')}
     </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
       T-Bank
@@ -95,20 +98,18 @@ export const instrumentsManagePageTemplate = html`
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Словарь</h5>
+          <h5>${() => ppp.t('$instrumentsManagePage.dictionary')}</h5>
           <p class="description">
-            Выберите словарь-источник. Инструменты добавляются и редактируются в
-            рамках существующего словаря.
+            ${() => ppp.t('$instrumentsManagePage.dictionaryDescription')}
           </p>
         </div>
         <div class="input-group">${dictionarySelectorTemplate()}</div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Торговая площадка</h5>
+          <h5>${() => ppp.t('$instrumentsManagePage.exchange')}</h5>
           <p class="description">
-            Торговая площадка (биржа), на которой торгуется (листингован)
-            инструмент.
+            ${() => ppp.t('$instrumentsManagePage.exchangeDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -133,16 +134,16 @@ export const instrumentsManagePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тикер</h5>
+          <h5>${() => ppp.t('$g.symbol')}</h5>
           <p class="description">
-            Введите тикер, чтобы найти инструмент в базе данных.
+            ${() => ppp.t('$instrumentsManagePage.symbolDescription')}
           </p>
           ${when(
             (x) => x.isSteady() && x.notFound && x.symbol.value,
             html`
               <div class="spacing2"></div>
               <ppp-banner class="inline" appearance="warning">
-                Инструмент не найден в базе данных.
+                ${() => ppp.t('$instrumentsManagePage.notFoundInDatabase')}
               </ppp-banner>
             `
           )}
@@ -166,12 +167,14 @@ export const instrumentsManagePageTemplate = html`
         html`
           <section>
             <div class="label-group">
-              <h5>Полное наименование</h5>
-              <p class="description">Полное наименование инструмента.</p>
+              <h5>${() => ppp.t('$instrumentsManagePage.fullName')}</h5>
+              <p class="description">
+                ${() => ppp.t('$instrumentsManagePage.fullNameDescription')}
+              </p>
             </div>
             <div class="input-group">
               <ppp-text-field
-                placeholder="Полное наименование"
+                placeholder="${() => ppp.t('$instrumentsManagePage.fullName')}"
                 value="${(x) => x.document.fullName}"
                 ${ref('fullName')}
               ></ppp-text-field>
@@ -179,8 +182,13 @@ export const instrumentsManagePageTemplate = html`
           </section>
           <section>
             <div class="label-group">
-              <h5>Тип</h5>
-              <p class="description">Тип торгуемого инструмента.</p>
+              <h5>
+                ${() =>
+                  ppp.t(`$const.columnSource.${COLUMN_SOURCE.INSTRUMENT_TYPE}`)}
+              </h5>
+              <p class="description">
+                ${() => ppp.t('$instrumentsManagePage.typeDescription')}
+              </p>
             </div>
             <div class="input-group">
               <ppp-radio-group
@@ -188,15 +196,27 @@ export const instrumentsManagePageTemplate = html`
                 value="${(x) => x.document.type ?? 'stock'}"
                 ${ref('type')}
               >
-                <ppp-radio value="stock">Акция</ppp-radio>
-                <ppp-radio value="bond">Облигация</ppp-radio>
-                <ppp-radio value="etf">Фонд</ppp-radio>
-                <ppp-radio value="future">Фьючерс</ppp-radio>
+                <ppp-radio value="stock">
+                  ${() => ppp.t('$const.instrumentType.stock')}
+                </ppp-radio>
+                <ppp-radio value="bond">
+                  ${() => ppp.t('$const.instrumentType.bond')}
+                </ppp-radio>
+                <ppp-radio value="etf">
+                  ${() => ppp.t('$const.instrumentType.etf')}
+                </ppp-radio>
+                <ppp-radio value="future">
+                  ${() => ppp.t('$const.instrumentType.future')}
+                </ppp-radio>
                 <ppp-radio value="currency">FX</ppp-radio>
-                <ppp-radio value="index">Индекс</ppp-radio>
-                <ppp-radio value="commodity">Товар</ppp-radio>
+                <ppp-radio value="index">
+                  ${() => ppp.t('$const.instrumentType.index')}
+                </ppp-radio>
+                <ppp-radio value="commodity">
+                  ${() => ppp.t('$const.instrumentType.commodity')}
+                </ppp-radio>
                 <ppp-radio value="cryptocurrency">
-                  Криптовалютная пара
+                  ${() => ppp.t('$instrumentsManagePage.cryptocurrencyPair')}
                 </ppp-radio>
               </ppp-radio-group>
             </div>
@@ -206,9 +226,9 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Валюта</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.currency')}</h5>
                   <p class="description">
-                    Валюта, в которой торгуется инструмент.
+                    ${() => ppp.t('$instrumentsManagePage.currencyDescription')}
                   </p>
                 </div>
                 <div class="input-group">
@@ -216,7 +236,9 @@ export const instrumentsManagePageTemplate = html`
                     value="${(x) => x.document.currency ?? 'USD'}"
                     ${ref('currency')}
                   >
-                    <ppp-option value="N/A">Не применимо</ppp-option>
+                    <ppp-option value="N/A">
+                      ${() => ppp.t('$instrumentsManagePage.notApplicable')}
+                    </ppp-option>
                     <ppp-option value="USD">USD</ppp-option>
                     <ppp-option value="USDT">USDT</ppp-option>
                     <ppp-option value="RUB">RUB</ppp-option>
@@ -233,12 +255,13 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Идентификатор инструмента UTEX</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.utexSymbolID')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
                     type="number"
-                    placeholder="Идентификатор"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.identifier')}"
                     value="${(x) => x.document.utexSymbolID ?? ''}"
                     ${ref('utexSymbolID')}
                   ></ppp-text-field>
@@ -248,9 +271,9 @@ export const instrumentsManagePageTemplate = html`
           )}
           <section>
             <div class="label-group">
-              <h5>Флаги</h5>
+              <h5>${() => ppp.t('$instrumentsManagePage.flags')}</h5>
               <p class="description">
-                Параметры инструмента, принимающие значение Да или Нет.
+                ${() => ppp.t('$instrumentsManagePage.flagsDescription')}
               </p>
             </div>
             <div class="input-group">
@@ -259,7 +282,8 @@ export const instrumentsManagePageTemplate = html`
                   ?checked="${(x) => x.document.forQualInvestorFlag}"
                   ${ref('forQualInvestorFlag')}
                 >
-                  Только для квалифицированных инвесторов
+                  ${() =>
+                    ppp.t('$instrumentsManagePage.forQualInvestorFlag')}
                 </ppp-checkbox>
                 ${when(
                   (x) => x.type.value === 'bond',
@@ -268,25 +292,28 @@ export const instrumentsManagePageTemplate = html`
                       ?checked="${(x) => x.document.amortizationFlag}"
                       ${ref('amortizationFlag')}
                     >
-                      Облигация с амортизацией
+                      ${() =>
+                        ppp.t('$instrumentsManagePage.amortizationFlag')}
                     </ppp-checkbox>
                     <ppp-checkbox
                       ?checked="${(x) => x.document.floatingCouponFlag}"
                       ${ref('floatingCouponFlag')}
                     >
-                      Плавающий купон
+                      ${() =>
+                        ppp.t('$instrumentsManagePage.floatingCouponFlag')}
                     </ppp-checkbox>
                     <ppp-checkbox
                       ?checked="${(x) => x.document.perpetualFlag}"
                       ${ref('perpetualFlag')}
                     >
-                      Бессрочная облигация
+                      ${() => ppp.t('$instrumentsManagePage.perpetualFlag')}
                     </ppp-checkbox>
                     <ppp-checkbox
                       ?checked="${(x) => x.document.subordinatedFlag}"
                       ${ref('subordinatedFlag')}
                     >
-                      Субординированная облигация
+                      ${() =>
+                        ppp.t('$instrumentsManagePage.subordinatedFlag')}
                     </ppp-checkbox>
                   `
                 )}
@@ -298,9 +325,9 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Лотность</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.lot')}</h5>
                   <p class="description">
-                    Минимальное количество, доступное для покупки.
+                    ${() => ppp.t('$instrumentsManagePage.lotDescription')}
                   </p>
                 </div>
                 <div class="input-group">
@@ -316,10 +343,10 @@ export const instrumentsManagePageTemplate = html`
           )}
           <section>
             <div class="label-group">
-              <h5>Шаг цены</h5>
+              <h5>${() => ppp.t('$instrumentsManagePage.minPriceIncrement')}</h5>
               <p class="description">
-                Если указать нулевое значение, шаг будет определяться
-                автоматически по цене инструмента.
+                ${() =>
+                  ppp.t('$instrumentsManagePage.minPriceIncrementDescription')}
               </p>
             </div>
             <div class="input-group">
@@ -338,7 +365,10 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Шаг количества</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t('$instrumentsManagePage.minQuantityIncrement')}
+                  </h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
@@ -353,14 +383,16 @@ export const instrumentsManagePageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Минимальная сумма заявки</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.minNotional')}</h5>
                   <p class="description">
-                    Измеряется в единицах актива котировки.
+                    ${() =>
+                      ppp.t('$instrumentsManagePage.minNotionalDescription')}
                   </p>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
-                    placeholder="Минимальная сумма заявки"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.minNotional')}"
                     value="${(x) => x.document.minNotional}"
                     @beforeinput="${(x, { event }) => {
                       return event.data === null || /[0-9.,]/.test(event.data);
@@ -381,7 +413,7 @@ export const instrumentsManagePageTemplate = html`
                 <div class="label-group">
                   <h5>ISIN</h5>
                   <p class="description">
-                    Международный идентификационный код ценной бумаги.
+                    ${() => ppp.t('$instrumentsManagePage.isinDescription')}
                   </p>
                 </div>
                 <div class="input-group">
@@ -402,7 +434,7 @@ export const instrumentsManagePageTemplate = html`
                 html`
                   <section>
                     <div class="label-group">
-                      <h5>Идентификатор FIGI</h5>
+                      <h5>${() => ppp.t('$instrumentsManagePage.figi')}</h5>
                       <ppp-badge appearance="green">
                         ${() => ppp.t(`$const.broker.${BROKERS.TINKOFF}`)}
                       </ppp-badge>
@@ -431,12 +463,15 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Класс-код (секция торгов)</h5>
+                  <h5>
+                    ${() => ppp.t('$instrumentsManagePage.classCodeTitle')}
+                  </h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
                     optional
-                    placeholder="Класс-код"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.classCode')}"
                     value="${(x) => x.document.classCode ?? ''}"
                     ${ref('classCode')}
                   ></ppp-text-field>
@@ -449,23 +484,27 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Форма выпуска</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.issueKind')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-select
                     value="${(x) => x.document.issueKind ?? 'non_documentary'}"
                     ${ref('issueKind')}
                   >
-                    <ppp-option value="documentary">Документарная</ppp-option>
+                    <ppp-option value="documentary">
+                      ${() => ppp.t('$instrumentsManagePage.documentary')}
+                    </ppp-option>
                     <ppp-option value="non_documentary">
-                      Бездокументарная
+                      ${() => ppp.t('$instrumentsManagePage.nonDocumentary')}
                     </ppp-option>
                   </ppp-select>
                 </div>
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Начальный номинал</h5>
+                  <h5>
+                    ${() => ppp.t('$instrumentsManagePage.initialNominal')}
+                  </h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
@@ -478,7 +517,7 @@ export const instrumentsManagePageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Текущий номинал</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.nominal')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
@@ -491,11 +530,12 @@ export const instrumentsManagePageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Дата погашения облигации</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.maturityDate')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
-                    placeholder="Дата погашения"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.maturityDatePlaceholder')}"
                     value="${(x) => x.document.maturityDate}"
                     ${ref('maturityDate')}
                   ></ppp-text-field>
@@ -503,13 +543,19 @@ export const instrumentsManagePageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Количество выплат по купонам в год</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t('$instrumentsManagePage.couponQuantityPerYear')}
+                  </h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
                     type="number"
                     optional
-                    placeholder="Купонов в в год"
+                    placeholder="${() =>
+                      ppp.t(
+                        '$instrumentsManagePage.couponQuantityPerYearPlaceholder'
+                      )}"
                     value="${(x) => x.document.couponQuantityPerYear}"
                     ${ref('couponQuantityPerYear')}
                   ></ppp-text-field>
@@ -522,11 +568,12 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Основной актив</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.baseAsset')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
-                    placeholder="Основной актив"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.baseAsset')}"
                     value="${(x) => x.document.baseAsset}"
                     ${ref('baseAsset')}
                   ></ppp-text-field>
@@ -534,11 +581,14 @@ export const instrumentsManagePageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Дата экспирации</h5>
+                  <h5>
+                    ${() => ppp.t('$instrumentsManagePage.expirationDate')}
+                  </h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
-                    placeholder="Дата экспирации"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.expirationDate')}"
                     value="${(x) => x.document.expirationDate}"
                     ${ref('expirationDate')}
                   ></ppp-text-field>
@@ -551,11 +601,12 @@ export const instrumentsManagePageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Основной актив</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.baseAsset')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
-                    placeholder="Основной актив"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.baseAsset')}"
                     value="${(x) => x.document.baseCryptoAsset}"
                     ${ref('baseCryptoAsset')}
                   ></ppp-text-field>
@@ -563,11 +614,12 @@ export const instrumentsManagePageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Актив котировки</h5>
+                  <h5>${() => ppp.t('$instrumentsManagePage.quoteAsset')}</h5>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
-                    placeholder="Актив котировки"
+                    placeholder="${() =>
+                      ppp.t('$instrumentsManagePage.quoteAsset')}"
                     value="${(x) => x.document.quoteCryptoAsset}"
                     ${ref('quoteCryptoAsset')}
                   ></ppp-text-field>
@@ -577,10 +629,9 @@ export const instrumentsManagePageTemplate = html`
           )}
           <section>
             <div class="label-group">
-              <h5>Пользовательские флаги</h5>
+              <h5>${() => ppp.t('$instrumentsManagePage.userFlags')}</h5>
               <p class="description">
-                Принимают значение Да или Нет, не перезаписываются при импорте
-                инструментов.
+                ${() => ppp.t('$instrumentsManagePage.userFlagsDescription')}
               </p>
             </div>
             <div class="input-group">
@@ -589,7 +640,7 @@ export const instrumentsManagePageTemplate = html`
                   ?checked="${(x) => x.document.removed}"
                   ${ref('removedFlag')}
                 >
-                  Скрыт из поиска виджетов
+                  ${() => ppp.t('$instrumentsManagePage.removedFlag')}
                 </ppp-checkbox>
               </div>
             </div>
@@ -602,7 +653,7 @@ export const instrumentsManagePageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить инструмент
+          ${() => ppp.t('$instrumentsManagePage.saveInstrument')}
         </ppp-button>
       </footer>
     </form>

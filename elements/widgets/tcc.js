@@ -62,7 +62,7 @@ export const tccWidgetTraderListTemplate = html`
               :preloaded="${(x, c) => {
                 return c.parent?.traders?.find((t) => t._id === x.traderId);
               }}"
-              placeholder="Трейдер"
+              placeholder="${() => ppp.t('$tccWidget.trader')}"
               variant="compact"
               :context="${(x) => x}"
               :displayValueFormatter="${() => (item) =>
@@ -158,7 +158,7 @@ export const tccWidgetCardTemplate = html`
       </button>
       <button
         class="widget-action-button"
-        title="Обновить инструменты"
+        title="${() => ppp.t('$tccWidget.updateInstruments')}"
         slot="actions"
         @click="${async (x, c) => {
           c.event.preventDefault();
@@ -176,7 +176,7 @@ export const tccWidgetCardTemplate = html`
       </button>
       <button
         ?hidden="${(x) => !x.trader.caps?.includes?.(TRADER_CAPS.CAPS_PAPER)}"
-        title="Выполнить сброс"
+        title="${() => ppp.t('$tccWidget.performReset')}"
         class="widget-action-button"
         slot="actions"
         @click="${async (x, c) => {
@@ -219,7 +219,7 @@ export class TccWidgetCard extends PPPElement {
 
   async openInstrumentsImport() {
     const importPage = await ppp.app.mountPage('instruments-import', {
-      title: 'Импорт инструментов'
+      title: ppp.t('$widget.importInstrumentsTitle')
     });
 
     if (typeof this.traderRuntime?.getDictionary === 'function') {
@@ -312,7 +312,7 @@ export const tccWidgetTemplate = html`
         </div>
         <div class="widget-card-list">
           <ppp-widget-empty-state-control ?hidden="${(x) => x?.traders.length}">
-            ${() => 'Нет трейдеров для отображения.'}
+            ${() => ppp.t('$tccWidget.noTradersToDisplay')}
           </ppp-widget-empty-state-control>
           ${when(
             (x) => x?.traders.length,
@@ -446,10 +446,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.TCC,
     collection: 'PPP',
-    title: html`Управление трейдерами`,
-    description: html`Виджет
-      <span class="positive">Управление трейдерами</span> служит для просмотра
-      информации о трейдерах приложения и взаимодействия с ними.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.TCC}`)}`,
+    description: html`${() => ppp.t('$tccWidget.descriptionBeforeName')}
+      <span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.TCC}`)}
+      </span>
+      ${() => ppp.t('$tccWidget.descriptionAfterName')}`,
     customElement: TccWidget.compose({
       template: tccWidgetTemplate,
       styles: tccWidgetStyles
@@ -461,7 +463,7 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Cписок трейдеров</h5>
+          <h5>${() => ppp.t('$tccWidget.traderList')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-tcc-widget-trader-list

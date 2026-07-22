@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import {
   attr,
   observable,
@@ -43,7 +44,7 @@ export const querySelectTemplate = html`
       ?deselectable="${(x) => x.deselectable}"
       ${ref('control')}
       ?disabled="${(x) => x.disabled}"
-      placeholder="${(x) => x.placeholder ?? 'Нажмите для выбора'}"
+      placeholder="${(x) => x.placeholder ?? ppp.t('$g.clickToSelect')}"
     >
       <div class="indicator" slot="indicator">
         ${when(
@@ -63,16 +64,16 @@ export const querySelectTemplate = html`
         :value="${() => void 0}"
         :pppContent="${(x) =>
           html`<span class="placeholder"
-            >${() => x.placeholder ?? 'Нажмите для выбора'}</span
+            >${() => x.placeholder ?? ppp.t('$g.clickToSelect')}</span
           >`}"
       >
-        ${(x) => x.placeholder ?? 'Нажмите для выбора'}
+        ${(x) => x.placeholder ?? ppp.t('$g.clickToSelect')}
       </ppp-loading-option>
       ${repeat(
         (x) => x.options,
         html`
           <ppp-option
-            title="${(x) => (x.removed ? 'Этот элемент был удалён' : null)}"
+            title="${(x) => (x.removed ? ppp.t('$g.itemWasRemoved') : null)}"
             ?removed="${(x) => x.removed}"
             :value="${(x) => x.value}"
             :displayValue="${(x) => x.displayValue}"
@@ -257,7 +258,7 @@ export class QuerySelect extends PPPAppearanceElement {
         } else {
           this.control.listboxHolder.setAttribute('hidden', '');
 
-          this.errorMessage = 'Нет вариантов для выбора';
+          this.errorMessage = ppp.t('$g.noOptionsToChoose');
           this.appearance = 'error';
         }
       } catch (e) {
@@ -266,7 +267,7 @@ export class QuerySelect extends PPPAppearanceElement {
         this.control.open = false;
 
         invalidate(this, {
-          errorMessage: 'Не удалось загрузить данные'
+          errorMessage: ppp.t('$g.loadingFailed')
         });
       } finally {
         this.loading = false;

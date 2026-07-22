@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { APIS } from '../../lib/const.js';
@@ -6,15 +7,17 @@ import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>Внешние API</ppp-page-header>
+      <ppp-page-header>${() => ppp.t('$apiPage.pageHeader')}</ppp-page-header>
       <ppp-text-field
         class="global-search-input"
         type="search"
-        placeholder="Поиск"
+        placeholder="${() => ppp.t('$apiPage.searchPlaceholder')}"
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
@@ -31,12 +34,12 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Supabase</span>
           <span slot="description">
-            Платформа бессерверной разработки на базе PostgreSQL.&nbsp;<a
+            ${() => ppp.t('$apiPage.supabaseDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://supabase.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$apiPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -46,7 +49,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.SUPABASE}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -59,12 +62,12 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Pusher</span>
           <span slot="description">
-            Платформа рассылки уведомлений.&nbsp;<a
+            ${() => ppp.t('$apiPage.pusherDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://pusher.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$apiPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -74,7 +77,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.PUSHER}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -87,12 +90,12 @@ export const apiPageTemplate = html`
           />
           <span slot="title">DataStax Astra</span>
           <span slot="description">
-            Облачная база данных на основе Apache Cassandra™.&nbsp;<a
+            ${() => ppp.t('$apiPage.astraDbDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://www.datastax.com/products/datastax-astra"
-              >Официальный ресурс</a
+              >${() => ppp.t('$apiPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -102,7 +105,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.ASTRADB}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -115,12 +118,12 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Northflank</span>
           <span slot="description">
-            Платформа для развёртывания приложений.&nbsp;<a
+            ${() => ppp.t('$apiPage.deploymentPlatformDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://northflank.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$apiPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -130,7 +133,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.NORTHFLANK}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -143,12 +146,12 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Render</span>
           <span slot="description">
-            Платформа для развёртывания приложений.&nbsp;<a
+            ${() => ppp.t('$apiPage.deploymentPlatformDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://Render.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$apiPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -158,7 +161,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.RENDER}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -171,12 +174,12 @@ export const apiPageTemplate = html`
           />
           <span slot="title">Seatable</span>
           <span slot="description">
-            База данных с табличным интерфейсом.&nbsp;<a
+            ${() => ppp.t('$apiPage.seatableDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://api.seatable.io/"
-              >Документация</a
+              >${() => ppp.t('$apiPage.documentation')}</a
             >.
           </span>
           <ppp-button
@@ -186,7 +189,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.SEATABLE}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -198,7 +201,9 @@ export const apiPageTemplate = html`
             src="${() => ppp.brandSvg('redis')}"
           />
           <span slot="title">Redis</span>
-          <span slot="description">База данных NoSQL.</span>
+          <span slot="description">
+            ${() => ppp.t('$apiPage.redisDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -206,7 +211,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.REDIS}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card hidden>
@@ -218,7 +223,9 @@ export const apiPageTemplate = html`
             src="${() => ppp.brandSvg('postgresql')}"
           />
           <span slot="title">PostgreSQL</span>
-          <span slot="description">Реляционная база данных.</span>
+          <span slot="description">
+            ${() => ppp.t('$apiPage.postgresqlDescription')}
+          </span>
           <ppp-button
             disabled
             slot="action"
@@ -227,7 +234,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.POSTGRESQL}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -239,7 +246,9 @@ export const apiPageTemplate = html`
             src="${() => ppp.brandSvg('cloudflare')}"
           />
           <span slot="title">Cloudflare</span>
-          <span slot="description">Доступ к API Cloudflare Workers.</span>
+          <span slot="description">
+            ${() => ppp.t('$apiPage.cloudflareDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -247,7 +256,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.CLOUDFLARE}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -259,7 +268,9 @@ export const apiPageTemplate = html`
             src="${() => ppp.brandSvg('yc')}"
           />
           <span slot="title">Yandex Cloud</span>
-          <span slot="description">Доступ к облачной платформе от Yandex.</span>
+          <span slot="description">
+            ${() => ppp.t('$apiPage.ycDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -267,7 +278,7 @@ export const apiPageTemplate = html`
                 page: `api-${APIS.YC}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$apiPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
       </div>

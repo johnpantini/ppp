@@ -54,6 +54,8 @@ import '../snippet.js';
 import '../text-field.js';
 import '../terminal.js';
 
+await ppp.i18n(import.meta.url);
+
 export const predefinedWorkerData = {
   default: {
     env: '{}',
@@ -258,7 +260,7 @@ export async function getAspirantBaseUrl(datum) {
 
       await maybeFetchError(
         rNFService,
-        'Не удалось получить ссылку на сервис в облаке Northflank.'
+        ppp.t('$servicePppAspirantWorkerPage.northflankServiceLinkFailed')
       );
 
       const nfService = await rNFService.json();
@@ -302,7 +304,8 @@ export const psinaUsNewsTemplate = () =>
         <ppp-query-select
           ${ref('psinaUsNewsBrokerId')}
           standalone
-          placeholder="Выберите профиль Psina"
+          placeholder="${() =>
+            ppp.t('$servicePppAspirantWorkerPage.selectPsinaBroker')}"
           :context="${(x) => x}"
           :query="${() => {
             return (context) => {
@@ -341,7 +344,8 @@ export const psinaUsNewsTemplate = () =>
         <ppp-query-select
           ${ref('psinaUsNewsPusherApiId')}
           standalone
-          placeholder="Выберите профиль API Pusher"
+          placeholder="${() =>
+            ppp.t('$servicePppAspirantWorkerPage.selectPusherApi')}"
           :context="${(x) => x}"
           :query="${() => {
             return (context) => {
@@ -380,7 +384,8 @@ export const psinaUsNewsTemplate = () =>
         <ppp-query-select
           ${ref('psinaUsNewsAstraDbApiId')}
           standalone
-          placeholder="Выберите профиль API AstraDB"
+          placeholder="${() =>
+            ppp.t('$servicePppAspirantWorkerPage.selectAstraDbApi')}"
           :context="${(x) => x}"
           :query="${() => {
             return (context) => {
@@ -431,7 +436,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
             slot="controls"
             @click="${(x) => (x.shouldShowFrame = true)}"
           >
-            Показать сервис в Nomad
+            ${() => ppp.t('$servicePppAspirantWorkerPage.showServiceInNomad')}
           </ppp-button>
           <ppp-button
             ?hidden="${(x) =>
@@ -440,7 +445,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
             slot="controls"
             @click="${(x) => (x.shouldShowLogs = true)}"
           >
-            Показать логи
+            ${() => ppp.t('$servicePppAspirantWorkerPage.showLogs')}
           </ppp-button>
           ${servicePageHeaderExtraControls}
         `
@@ -458,7 +463,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
             <div class="control-line">
               <div class="control-stack">
                 <ppp-banner class="inline" appearance="warning">
-                  Глобальная ссылка сервиса:
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.globalServiceLink')}
                 </ppp-banner>
                 <ppp-copyable> ${(x) => x.url}</ppp-copyable>
               </div>
@@ -472,7 +478,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
           <section style="gap: 0 8px;">
             <div class="label-group">
               <h5 class="positive">stdout</h5>
-              <p class="description">Поток стандартного вывода.</p>
+              <p class="description">
+                ${() => ppp.t('$servicePppAspirantWorkerPage.stdoutDescription')}
+              </p>
               <div class="spacing2"></div>
               <ppp-terminal
                 font-size="12"
@@ -482,7 +490,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
             </div>
             <div class="label-group">
               <h5 class="negative">stderr</h5>
-              <p class="description">Поток стандартного вывода ошибок.</p>
+              <p class="description">
+                ${() => ppp.t('$servicePppAspirantWorkerPage.stderrDescription')}
+              </p>
               <div class="spacing2"></div>
               <ppp-terminal
                 font-size="12"
@@ -493,17 +503,22 @@ export const servicePppAspirantWorkerPageTemplate = html`
           </section>
           <section ?hidden="${(x) => !x.url}">
             <div class="label-group">
-              <h5>Отладочные пространства имён</h5>
+              <h5>
+                ${() => ppp.t('$servicePppAspirantWorkerPage.debugNamespaces')}
+              </h5>
               <p class="description">
-                Задаются через запятую. Префикс "-" отключает пространство имён.
-                Используйте *, чтобы включить все отладочные сообщения.
+                ${() =>
+                  ppp.t(
+                    '$servicePppAspirantWorkerPage.debugNamespacesDescription'
+                  )}
               </p>
               <div class="spacing2"></div>
               <ppp-button
                 appearance="danger"
                 @click="${(x) => x.enableDebug()}"
               >
-                Отключить отладочные сообщения
+                ${() =>
+                  ppp.t('$servicePppAspirantWorkerPage.disableDebugMessages')}
               </ppp-button>
             </div>
             <div class="input-group">
@@ -518,7 +533,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 appearance="primary"
                 @click="${(x) => x.enableDebug(x.debugNamespaces.value)}"
               >
-                Сохранить пространства имён
+                ${() =>
+                  ppp.t('$servicePppAspirantWorkerPage.saveDebugNamespaces')}
               </ppp-button>
             </div>
           </section>
@@ -526,15 +542,14 @@ export const servicePppAspirantWorkerPageTemplate = html`
       )}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -542,8 +557,11 @@ export const servicePppAspirantWorkerPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Описание сервиса</h5>
-          <p class="description">Любые заметки о сервисе.</p>
+          <h5>${() => ppp.t('$servicePppAspirantWorkerPage.serviceDescription')}</h5>
+          <p class="description">
+            ${() =>
+              ppp.t('$servicePppAspirantWorkerPage.serviceDescriptionNotes')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-snippet
@@ -555,10 +573,10 @@ export const servicePppAspirantWorkerPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тип сервиса</h5>
+          <h5>${() => ppp.t('$servicePppAspirantWorkerPage.serviceType')}</h5>
           <p class="description">
-            Сервис можно развернуть в Aspirant, а можно сразу указать URL уже
-            настроенного извне.
+            ${() =>
+              ppp.t('$servicePppAspirantWorkerPage.serviceTypeDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -568,8 +586,12 @@ export const servicePppAspirantWorkerPageTemplate = html`
             value="${(x) => (x.document.url ? 'url' : 'aspirant')}"
             ${ref('serviceTypeSelector')}
           >
-            <ppp-radio value="aspirant">Настроить в Aspirant</ppp-radio>
-            <ppp-radio value="url">Указать URL</ppp-radio>
+            <ppp-radio value="aspirant">
+              ${() => ppp.t('$servicePppAspirantWorkerPage.setUpInAspirant')}
+            </ppp-radio>
+            <ppp-radio value="url">
+              ${() => ppp.t('$servicePppAspirantWorkerPage.specifyUrl')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
@@ -578,10 +600,14 @@ export const servicePppAspirantWorkerPageTemplate = html`
         html`
           <section>
             <div class="label-group">
-              <h5>Сервис Aspirant</h5>
+              <h5>
+                ${() => ppp.t('$servicePppAspirantWorkerPage.aspirantService')}
+              </h5>
               <p class="description">
-                Aspirant, на котором будет запущен Worker. Можно выбрать при
-                создании или после удаления сервиса.
+                ${() =>
+                  ppp.t(
+                    '$servicePppAspirantWorkerPage.aspirantServiceDescription'
+                  )}
               </p>
             </div>
             <div class="input-group">
@@ -633,8 +659,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
             <div class="label-group">
               <h5>API Yandex Cloud</h5>
               <p class="description">
-                API, который будет использован для выгрузки файлов сервиса в
-                облачное хранилище.
+                ${() =>
+                  ppp.t('$servicePppAspirantWorkerPage.ycApiDescription')}
               </p>
             </div>
             <div class="input-group">
@@ -678,16 +704,17 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   })}"
                 appearance="primary"
               >
-                Добавить API Yandex Cloud
+                ${() => ppp.t('$servicePppAspirantWorkerPage.addYcApi')}
               </ppp-button>
             </div>
           </section>
           <section>
             <div class="implementation-area">
               <div class="label-group full" style="min-width: 600px">
-                <h5>Точка входа</h5>
+                <h5>${() => ppp.t('$servicePppAspirantWorkerPage.entryPoint')}</h5>
                 <p class="description">
-                  Код JavaScript или другое содержимое для исполнения.
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.entryPointDescription')}
                 </p>
                 <ppp-snippet
                   style="height: 400px"
@@ -697,9 +724,15 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   ${ref('sourceCode')}
                 ></ppp-snippet>
                 <div class="label-group full" style="min-width: 600px">
-                  <h5>Параметры запуска</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t('$servicePppAspirantWorkerPage.launchParameters')}
+                  </h5>
                   <p class="description">
-                    Можно переопределить команду и аргументы на запуск сервиса. В аргументах доступны $PPP_WORKER_ID и $PPP_WORKER_PATH.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.launchParametersDescription'
+                      )}
                   </p>
                   <ppp-text-field
                     optional
@@ -714,9 +747,11 @@ export const servicePppAspirantWorkerPageTemplate = html`
                     ${ref('args')}
                   ></ppp-text-field>
                   <p class="description">
-                    Если включить сетевой доступ, родительский сервис Aspirant
-                    обеспечит проксирование трафика к текущему сервису по
-                    относительной ссылке <code>/workers/{serviceID}/</code>.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.enableHttpDescription'
+                      )}
+                    <code>/workers/{serviceID}/</code>.
                   </p>
                   <ppp-checkbox
                     ?checked="${(x) =>
@@ -724,14 +759,18 @@ export const servicePppAspirantWorkerPageTemplate = html`
                       predefinedWorkerData.default.enableHttp}"
                     ${ref('enableHttp')}
                   >
-                    Включить сетевой доступ
+                    ${() => ppp.t('$servicePppAspirantWorkerPage.enableHttp')}
                   </ppp-checkbox>
                 </div>
                 <div class="label-group full" style="min-width: 600px">
-                  <h5>Дополнительные файлы</h5>
+                  <h5>
+                    ${() => ppp.t('$servicePppAspirantWorkerPage.extraFiles')}
+                  </h5>
                   <p class="description">
-                    Ссылки на дополнительные файлы, которые будут размещены в
-                    файловой системе сервиса относительно файла точки входа.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.extraFilesDescription'
+                      )}
                   </p>
                   <div class="spacing2"></div>
                   ${repeat(
@@ -747,7 +786,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
                         <ppp-text-field
                           standalone
                           style="width: 256px;"
-                          placeholder="Относительный путь"
+                          placeholder="${() =>
+                            ppp.t('$servicePppAspirantWorkerPage.relativePath')}"
                           value="${(x) => x.path}"
                         >
                         </ppp-text-field>
@@ -756,7 +796,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                           @click="${(x, c) =>
                             c.parent.removeFileFromFileList(c.index)}"
                         >
-                          Удалить
+                          ${() => ppp.t('$g.delete')}
                           <span slot="start">${html.partial(trash)}</span>
                         </ppp-button>
                       </div>
@@ -769,16 +809,20 @@ export const servicePppAspirantWorkerPageTemplate = html`
                     appearance="primary"
                     @click="${(x) => x.addFileToFileList()}"
                   >
-                    Добавить файл
+                    ${() => ppp.t('$servicePppAspirantWorkerPage.addFile')}
                   </ppp-button>
                 </div>
               </div>
               <div class="control-stack">
                 <div class="label-group full">
-                  <h5>Версионирование</h5>
+                  <h5>
+                    ${() => ppp.t('$servicePppAspirantWorkerPage.versioning')}
+                  </h5>
                   <p class="description">
-                    Включите настройку, чтобы отслеживать версию сервиса и
-                    предлагать обновления.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.versioningDescription'
+                      )}
                   </p>
                   <ppp-checkbox
                     ?checked="${(x) => x.document.useVersioning ?? false}"
@@ -788,11 +832,13 @@ export const servicePppAspirantWorkerPageTemplate = html`
                     }}"
                     ${ref('useVersioning')}
                   >
-                    Отслеживать версию сервиса по этому файлу:
+                    ${() =>
+                      ppp.t('$servicePppAspirantWorkerPage.trackVersionByFile')}
                   </ppp-checkbox>
                   <ppp-text-field
                     ?disabled="${(x) => !x.useVersioning.checked}"
-                    placeholder="Введите ссылку"
+                    placeholder="${() =>
+                      ppp.t('$servicePppAspirantWorkerPage.enterLink')}"
                     value="${(x) => x.document.versioningUrl ?? ''}"
                     @input="${(x) =>
                       (x.workerPredefinedTemplate.value = 'custom')}"
@@ -800,10 +846,15 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   ></ppp-text-field>
                 </div>
                 <div class="label-group full">
-                  <h5>Шаблоны готовых сервисов</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t('$servicePppAspirantWorkerPage.predefinedTemplates')}
+                  </h5>
                   <p class="description">
-                    Воспользуйтесь шаблонами готовых сервисов для их быстрой
-                    настройки.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.predefinedTemplatesDescription'
+                      )}
                   </p>
                   <div class="control-stack">
                     <ppp-select
@@ -811,40 +862,79 @@ export const servicePppAspirantWorkerPageTemplate = html`
                         x.document.workerPredefinedTemplate ?? 'default'}"
                       ${ref('workerPredefinedTemplate')}
                     >
-                      <ppp-option value="custom"
-                        >По файлу отслеживания</ppp-option
-                      >
-                      <ppp-option value="default">Тестовый пример</ppp-option>
-                      <ppp-option value="utexAlpaca">
-                        Alpaca-совместимый API UTEX
+                      <ppp-option value="custom">
+                        ${() =>
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templateByWatchedFile'
+                          )}
                       </ppp-option>
-                      <ppp-option value="ibGateway">Шлюз TWS API</ppp-option>
-                      <ppp-option value="ppf">Шлюз MongoDB Realm</ppp-option>
-                      <ppp-option value="connectors">Соединители</ppp-option>
+                      <ppp-option value="default">
+                        ${() =>
+                          ppp.t('$servicePppAspirantWorkerPage.templateDefault')}
+                      </ppp-option>
+                      <ppp-option value="utexAlpaca">
+                        ${() =>
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templateUtexAlpaca'
+                          )}
+                      </ppp-option>
+                      <ppp-option value="ibGateway">
+                        ${() =>
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templateIbGateway'
+                          )}
+                      </ppp-option>
+                      <ppp-option value="ppf">
+                        ${() =>
+                          ppp.t('$servicePppAspirantWorkerPage.templatePpf')}
+                      </ppp-option>
+                      <ppp-option value="connectors">
+                        ${() =>
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templateConnectors'
+                          )}
+                      </ppp-option>
                       <ppp-option value="pppTraderRuntime">
-                        Среда выполнения трейдеров
+                        ${() =>
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templateTraderRuntime'
+                          )}
                       </ppp-option>
                       <ppp-option value="psinaUsNews">
-                        Новостной источник (Psina, US)
+                        ${() =>
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templatePsinaUsNews'
+                          )}
                       </ppp-option>
                     </ppp-select>
                     ${psinaUsNewsTemplate()}
                     <ppp-checkbox ${ref('doNotFillEnvVars')}>
-                      Не заполнять переменные окружения
+                      ${() =>
+                        ppp.t('$servicePppAspirantWorkerPage.doNotFillEnvVars')}
                     </ppp-checkbox>
                     <ppp-button
                       @click="${(x) => x.fillOutFormsWithTemplate()}"
                       appearance="primary"
                     >
-                      Заполнить формы по этому шаблону
+                      ${() =>
+                        ppp.t(
+                          '$servicePppAspirantWorkerPage.fillOutFormsWithTemplate'
+                        )}
                     </ppp-button>
                   </div>
                 </div>
                 <div class="label-group full">
-                  <h5>Переменные окружения</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.environmentVariables'
+                      )}
+                  </h5>
                   <p class="description">
-                    Объект JavaScript с переменными окружения, которые будут
-                    переданы в Worker.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.environmentVariablesDescription'
+                      )}
                   </p>
                   <ppp-snippet
                     style="height: 150px"
@@ -855,11 +945,17 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   ></ppp-snippet>
                 </div>
                 <div class="label-group full">
-                  <h5>Шифруемые переменные окружения</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.secretEnvironmentVariables'
+                      )}
+                  </h5>
                   <p class="description">
-                    Объект JavaScript с переменными окружения, которые будут
-                    переданы в Worker в исходном виде, но сохранены в базе
-                    данных в зашифрованном.
+                    ${() =>
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.secretEnvironmentVariablesDescription'
+                      )}
                   </p>
                   <ppp-snippet
                     style="height: 150px"
@@ -873,16 +969,23 @@ export const servicePppAspirantWorkerPageTemplate = html`
             </div>
           </section>
           ${documentPageFooterPartial({
-            text: 'Сохранить в PPP и обновить в Aspirant',
+            text: ppp.t(
+              '$servicePppAspirantWorkerPage.saveToPPPAndUpdateInAspirant'
+            ),
             extraControls: servicePageFooterExtraControls
           })}
         `,
         html`
           <section>
             <div class="label-group">
-              <h5>Шаблон сервиса</h5>
+              <h5>
+                ${() => ppp.t('$servicePppAspirantWorkerPage.serviceTemplate')}
+              </h5>
               <p class="description">
-                Шаблон используется для фильтрации в выпадающих списках.
+                ${() =>
+                  ppp.t(
+                    '$servicePppAspirantWorkerPage.serviceTemplateDescription'
+                  )}
               </p>
             </div>
             <div class="input-group">
@@ -891,25 +994,44 @@ export const servicePppAspirantWorkerPageTemplate = html`
                   x.document.workerPredefinedTemplate ?? 'custom'}"
                 ${ref('urlWorkerPredefinedTemplate')}
               >
-                <ppp-option value="custom">Без шаблона</ppp-option>
-                <ppp-option value="default">Тестовый пример</ppp-option>
-                <ppp-option value="utexAlpaca">
-                  Alpaca-совместимый API UTEX
+                <ppp-option value="custom">
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.templateNone')}
                 </ppp-option>
-                <ppp-option value="ibGateway">Шлюз TWS API</ppp-option>
-                <ppp-option value="ppf">Шлюз MongoDB Realm</ppp-option>
-                <ppp-option value="connectors">Соединители</ppp-option>
+                <ppp-option value="default">
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.templateDefault')}
+                </ppp-option>
+                <ppp-option value="utexAlpaca">
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.templateUtexAlpaca')}
+                </ppp-option>
+                <ppp-option value="ibGateway">
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.templateIbGateway')}
+                </ppp-option>
+                <ppp-option value="ppf">
+                  ${() => ppp.t('$servicePppAspirantWorkerPage.templatePpf')}
+                </ppp-option>
+                <ppp-option value="connectors">
+                  ${() =>
+                    ppp.t('$servicePppAspirantWorkerPage.templateConnectors')}
+                </ppp-option>
                 <ppp-option value="pppTraderRuntime">
-                  Среда выполнения трейдеров
+                  ${() =>
+                    ppp.t(
+                      '$servicePppAspirantWorkerPage.templateTraderRuntime'
+                    )}
                 </ppp-option>
               </ppp-select>
             </div>
           </section>
           <section>
             <div class="label-group">
-              <h5>URL сервиса</h5>
+              <h5>${() => ppp.t('$servicePppAspirantWorkerPage.serviceUrl')}</h5>
               <p class="description">
-                Укажите URL сервиса, который уже настроен извне приложения.
+                ${() =>
+                  ppp.t('$servicePppAspirantWorkerPage.serviceUrlDescription')}
               </p>
             </div>
             <div class="input-group">
@@ -922,7 +1044,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
             </div>
           </section>
           ${documentPageFooterPartial({
-            text: 'Сохранить в PPP'
+            text: ppp.t('$page.saveToPPP')
           })}
         `
       )}
@@ -999,7 +1121,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             method: 'POST',
             body: JSON.stringify({ namespaces })
           }),
-          'Сервис не поддерживает эту функцию.'
+          ppp.t('$servicePppAspirantWorkerPage.debugNotSupported')
         );
 
         this.showSuccessNotification();
@@ -1076,7 +1198,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
         const allocationsResponse = await maybeFetchError(
           await fetch(`${aspirantUrl}/v1/allocations?task_states=false`),
-          'Не удалось получить список размещений.'
+          ppp.t('$servicePppAspirantWorkerPage.allocationListFailed')
         );
 
         const alloc = (await allocationsResponse.json()).find(
@@ -1093,14 +1215,18 @@ export class ServicePppAspirantWorkerPage extends Page {
           await fetch(
             `${aspirantUrl}/v1/client/fs/logs/${alloc.ID}?follow=true&offset=50000&origin=end&task=worker&type=stdout`
           ),
-          'Ошибка чтения потока stdout.'
+          ppp.t('$servicePppAspirantWorkerPage.streamReadError', {
+            stream: 'stdout'
+          })
         );
 
         const stderrResponse = await maybeFetchError(
           await fetch(
             `${aspirantUrl}/v1/client/fs/logs/${alloc.ID}?follow=true&offset=50000&origin=end&task=worker&type=stderr`
           ),
-          'Ошибка чтения потока srderr.'
+          ppp.t('$servicePppAspirantWorkerPage.streamReadError', {
+            stream: 'stderr'
+          })
         );
 
         this.stdoutTerminal.terminal.clear();
@@ -1181,7 +1307,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
         await maybeFetchError(
           contentsResponse,
-          'Не удалось загрузить файл с шаблоном.'
+          ppp.t('$servicePppAspirantWorkerPage.couldNotLoadTemplateFile')
         );
 
         const code = await contentsResponse.text();
@@ -1252,11 +1378,13 @@ export class ServicePppAspirantWorkerPage extends Page {
 
         Observable.notify(this, 'document');
         this.showSuccessNotification(
-          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен.`
+          ppp.t('$servicePppAspirantWorkerPage.templateLoaded', {
+            name: this.workerPredefinedTemplate.displayValue.trim()
+          })
         );
       } catch (e) {
         invalidate(this.versioningUrl, {
-          errorMessage: 'Неверный URL',
+          errorMessage: ppp.t('$servicePppAspirantWorkerPage.invalidUrl'),
           raiseException: true
         });
       }
@@ -1275,13 +1403,15 @@ export class ServicePppAspirantWorkerPage extends Page {
 
       await maybeFetchError(
         await fetch(`${aspirantUrl}/nomad/health`),
-        'Нет связи с родительским сервисом Aspirant.'
+        ppp.t('$servicePppAspirantWorkerPage.noAspirantConnection')
       );
 
       return aspirantUrl;
     } catch (e) {
       invalidate(this.aspirantServiceId, {
-        errorMessage: 'Нет связи с родительским сервисом Aspirant',
+        errorMessage: ppp.t(
+          '$servicePppAspirantWorkerPage.noAspirantConnectionError'
+        ),
         raiseException: true
       });
     }
@@ -1304,14 +1434,16 @@ export class ServicePppAspirantWorkerPage extends Page {
         json = await response.json();
       } catch (e) {
         invalidate(this.serviceUrl, {
-          errorMessage: 'Этот URL не может быть использован',
+          errorMessage: ppp.t('$page.urlCannotBeUsed'),
           raiseException: true
         });
       }
 
       if (!json.ok) {
         invalidate(this.serviceUrl, {
-          errorMessage: 'Недопустимый ответ сервиса',
+          errorMessage: ppp.t(
+            '$servicePppAspirantWorkerPage.invalidServiceResponse'
+          ),
           raiseException: true
         });
       }
@@ -1327,7 +1459,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           ppp.getWorkerTemplateFullUrl(this.versioningUrl.value);
         } catch (e) {
           invalidate(this.versioningUrl, {
-            errorMessage: 'Неверный URL',
+            errorMessage: ppp.t('$servicePppAspirantWorkerPage.invalidUrl'),
             raiseException: true
           });
         }
@@ -1359,7 +1491,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             url = ppp.getWorkerTemplateFullUrl(urlField.value).toString();
           } catch (e) {
             invalidate(urlField, {
-              errorMessage: 'Неверный URL',
+              errorMessage: ppp.t('$servicePppAspirantWorkerPage.invalidUrl'),
               raiseException: true
             });
           }
@@ -1379,7 +1511,9 @@ export class ServicePppAspirantWorkerPage extends Page {
             console.error(e);
 
             invalidate(urlField, {
-              errorMessage: 'Не удалось загрузить файл',
+              errorMessage: ppp.t(
+                '$servicePppAspirantWorkerPage.couldNotLoadFile'
+              ),
               raiseException: true
             });
           }
@@ -1404,7 +1538,9 @@ export class ServicePppAspirantWorkerPage extends Page {
         )();
       } catch (e) {
         invalidate(this.environmentCode, {
-          errorMessage: 'Код содержит ошибки',
+          errorMessage: ppp.t(
+            '$servicePppAspirantWorkerPage.codeContainsErrors'
+          ),
           raiseException: true
         });
       }
@@ -1419,7 +1555,9 @@ export class ServicePppAspirantWorkerPage extends Page {
         )();
       } catch (e) {
         invalidate(this.environmentCodeSecret, {
-          errorMessage: 'Код содержит ошибки',
+          errorMessage: ppp.t(
+            '$servicePppAspirantWorkerPage.codeContainsErrors'
+          ),
           raiseException: true
         });
       }
@@ -1535,7 +1673,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             }
           }
         ),
-        'Не удалось получить список бакетов. Проверьте права доступа.'
+        ppp.t('$servicePppAspirantWorkerPage.bucketListFailed')
       );
 
       const bucketList = await rBucketList.json();
@@ -1568,7 +1706,7 @@ export class ServicePppAspirantWorkerPage extends Page {
               })
             }
           ),
-          'Не удалось создать бакет для сервисных файлов.'
+          ppp.t('$servicePppAspirantWorkerPage.bucketCreationFailed')
         );
 
         artifactsBucket = (await rNewBucket.json()).response;
@@ -1615,7 +1753,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           },
           body: zipBlob
         }),
-        'Не удалось загрузить файлы сервиса в облачное хранилище.'
+        ppp.t('$servicePppAspirantWorkerPage.uploadToStorageFailed')
       );
 
       const artifactUrl = `https://${host}/${key}`;
@@ -1656,7 +1794,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             args
           })
         }),
-        'Не удалось запланировать сервис на исполнение.'
+        ppp.t('$servicePppAspirantWorkerPage.scheduleFailed')
       );
 
       this.document.state = SERVICE_STATE.ACTIVE;
@@ -1668,7 +1806,7 @@ export class ServicePppAspirantWorkerPage extends Page {
       }
     } else {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Отсутствует архив с файлами сервиса.',
+        errorMessage: ppp.t('$servicePppAspirantWorkerPage.noServiceArchive'),
         raiseException: true
       });
     }
@@ -1764,7 +1902,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
     await maybeFetchError(
       contentsResponse,
-      'Не удалось загрузить файл с шаблоном.'
+      ppp.t('$servicePppAspirantWorkerPage.couldNotLoadTemplateFile')
     );
     this.sourceCode.updateCode(code);
 
@@ -1817,7 +1955,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           }
         }
       ),
-      'Не удалось получить список бакетов. Проверьте права доступа.'
+      ppp.t('$servicePppAspirantWorkerPage.bucketListFailed')
     );
 
     const bucketList = await rBucketList.json();
@@ -1857,7 +1995,7 @@ export class ServicePppAspirantWorkerPage extends Page {
             'X-Amz-Date': xAmzDate
           }
         }),
-        'Не удалось удалить файлы сервиса из облачного хранилища. Удаление прервано.'
+        ppp.t('$servicePppAspirantWorkerPage.deleteFromStorageFailed')
       );
     }
 
@@ -1874,7 +2012,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           workerId: this.document._id
         })
       }),
-      'Не удалось остановить (удалить) сервис.'
+      ppp.t('$servicePppAspirantWorkerPage.stopFailed')
     );
   }
 
@@ -1896,7 +2034,7 @@ export class ServicePppAspirantWorkerPage extends Page {
           workerId: this.document._id
         })
       }),
-      'Не удалось перезапустить сервис.'
+      ppp.t('$servicePppAspirantWorkerPage.restartFailed')
     );
   }
 

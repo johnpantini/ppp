@@ -6,6 +6,8 @@ import { TraderRuntime } from '../../../lib/traders/runtime.js';
 import '../../widget-column-list.js';
 import '../../banner.js';
 
+await ppp.i18n(import.meta.url);
+
 export const DEFAULT_COLUMNS = [
   {
     source: COLUMN_SOURCE.INSTRUMENT
@@ -147,7 +149,7 @@ export async function listDefinition() {
       await validate(widget.container.depth);
       await validate(widget.container.depth, {
         hook: async (value) => +value >= 1 && +value <= 100,
-        errorMessage: 'Введите значение от 1 до 100'
+        errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 100 })
       });
     },
     submit: async (widget) => {
@@ -157,14 +159,15 @@ export async function listDefinition() {
     },
     settings: html`
       <ppp-banner appearance="warning">
-        Этот список наполняется автоматически. Содержимым можно управлять,
-        только находясь в окне терминала.
+        ${() => ppp.t('$mruWidget.autoFillBanner')}
       </ppp-banner>
       <div class="spacing2"></div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Глубина списка</h5>
-          <p class="description">Введите значение от 1 до 100.</p>
+          <h5>${() => ppp.t('$mruWidget.listDepth')}</h5>
+          <p class="description">
+            ${() => ppp.t('$page.valueInRange', { min: 1, max: 100 })}.
+          </p>
         </div>
         <div class="widget-settings-input-group">
           <ppp-text-field
@@ -178,7 +181,7 @@ export async function listDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Столбцы таблицы инструментов</h5>
+          <h5>${() => ppp.t('$mruWidget.instrumentsTableColumns')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-widget-column-list

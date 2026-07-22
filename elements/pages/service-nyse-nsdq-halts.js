@@ -28,61 +28,61 @@ import '../text-field.js';
 await ppp.i18n(import.meta.url);
 
 const exampleSymbolsCodeAll = `/**
- * Пустой массив - отслеживаются все тикеры.
+ * An empty array means all tickers are tracked.
  *
  */
 return [];`;
 
 const exampleFormatterCode = `/**
- * Функция форматирования сообщения о торговой паузе.
+ * Trading halt message formatter function.
  *
- * @param {string} halt_date - Дата начала торговой паузы (MM/DD/YYYY).
- * @param {string} halt_time - Время торговой паузы (Eastern Time).
- * @param {string} symbol - Тикер инструмента.
- * @param {string} name - Название инструмента.
- * @param {string} market - Площадка листинга инструмента.
- * @param {string} reason_code - Код торговой паузы.
- * @param {string} pause_threshold_price - Индикативная пороговая цена торговой паузы.
- * @param {string} resumption_date - Дата окончания торговой паузы (MM/DD/YYYY).
- * @param {string} resumption_quote_time - Время открытия книги заявок (Eastern Time).
- * @param {string} resumption_trade_time - Время открытия торгов (Eastern Time).
+ * @param {string} halt_date - Trading halt start date (MM/DD/YYYY).
+ * @param {string} halt_time - Trading halt time (Eastern Time).
+ * @param {string} symbol - Instrument ticker.
+ * @param {string} name - Instrument name.
+ * @param {string} market - Instrument listing market.
+ * @param {string} reason_code - Trading halt code.
+ * @param {string} pause_threshold_price - Indicative trading halt threshold price.
+ * @param {string} resumption_date - Trading halt end date (MM/DD/YYYY).
+ * @param {string} resumption_quote_time - Order book opening time (Eastern Time).
+ * @param {string} resumption_trade_time - Trading resumption time (Eastern Time).
  */
 const mappings = {
-  T1: 'Halt - News Pending. Ожидаются новости.',
-  T2: 'Halt - News Released. Эмитент начинает процесс распространения новостей в соответствии с требованиями о добросовестном раскрытии информации (SEC Regulation FD).',
-  T5: 'Single Stock Trading Pause in Effect. Цена инструмента изменилась более чем на 10% (включительно) в течение 5 минут.',
-  T6: 'Halt - Extraordinary Market Activity. Необычная рыночная активность. Срабатывает, если NASDAQ обнаруживает проблемы (которые могут привести к изменению цены) с котированием, с репортингом в ленту сделок, или проблемы соединения.',
-  T8: 'Halt - Exchange-Traded-Fund (ETF). Срабатывает в ETF, если обнаружены проблемы в базовых активах.',
-  T12: 'Halt - Additional Information Requested by NASDAQ. Срабатывает, если NASDAQ ожидает дополнительную информацию (эмитенту направляются вопросы, на которые тот должен дать ответ).',
-  H4: 'Halt - Non-compliance. Несоответствие требованиям листинга NASDAQ.',
-  H9: 'Halt - Not Current. Компания не опубликовала актуальный отчёт в регулирующие органы (SEC).',
-  H10: 'Halt - SEC Trading Suspension. SEC приостановила торги на неопределенное время.',
-  H11: 'Halt - Regulatory Concern. Торги приостановлены в другом рыночном центре по требованию регулирующих органов. Длительность приостановки может исчисляться днями или неделями.',
-  O1: 'Operations Halt, Contact Market Operations. Проблемы с маркет-мейкингом (проблемы с выставлением котировок и обработкой заявок участников торгов).',
-  IPO1: 'HIPO Issue not yet Trading. Проблемы на торгах инструментов, выходящих на IPO (в первый день торгов). Торги IPO начинаются позже начала основной сессии на несколько часов.',
-  M1: 'Corporate Action. Корпоративное событие.',
-  M2: 'Quotation Not Available. Нет котировок по инструменту.',
-  LUDP: 'Volatility Trading Pause. Торговая пауза в связи с волатильностью.',
-  LUDS: 'Volatility Trading Pause - Straddle Condition. Пауза, связанная с выходом котировки bid или ask за установленные пределы.',
-  MWC1: 'Market Wide Circuit Breaker Halt. Остановка торгов из-за срабатывания глобальной стоп-защиты рынка.',
-  MWC2: 'Market Wide Circuit Breaker Halt. Остановка торгов из-за срабатывания глобальной стоп-защиты рынка.',
-  MWC3: 'Market Wide Circuit Breaker Halt. Остановка торгов из-за срабатывания глобальной стоп-защиты рынка.',
-  MWC0: 'Market Wide Circuit Breaker Halt. Остановка торгов из-за срабатывания глобальной стоп-защиты рынка.',
-  T3: 'News and Resumption Times. Эмитент закончил процесс распространения новостей, вскоре ожидаются торги.',
-  T7: 'Single Stock Trading Pause/Quotation-Only Period. См. код T5.',
-  R4: 'Qualifications Issues Reviewed/Resolved; Quotations/Trading to Resume. См. код H4.',
-  R9: 'Filing Requirements Satisfied/Resolved; Quotations/Trading To Resume. См. код H9.',
-  C3: 'Issuer News Not Forthcoming; Quotations/Trading To Resume. Публикация новостей отменена. См. коды T2 и T3.',
-  C4: 'Qualifications Halt Ended; Maintenance Requirements Met. См. коды H4 и R4.',
-  C9: 'Qualifications Halt Concluded; Filings Met; Quotes/Trades To Resume. См. коды H9 и R9.',
-  C11: 'Trade Halt Concluded By Other Regulatory Auth.; Quotes/Trades Resume. См. код H11.',
-  R1: 'New Issue Available. См. код T1.',
-  R2: 'Issue Available. См. код T2.',
-  IPOQ: 'IPO security released for quotation. Для инструментов в день IPO - начало котирования. Только NASDAQ.',
-  IPOE: 'IPO security - positioning window extension. Расширение периода подачи заявок в перекрёстной сессии NASDAQ для инструментов в день IPO.',
-  MWCQ: 'Market Wide Circuit Breaker Resumption. Снятие глобальной стоп-защиты рынка.',
-  M: 'Volatility Trading Pause. Торговая пауза в связи с волатильностью.',
-  D: 'Security deletion from NASDAQ / CQS. Инструмент удалён с торгов (делистинг).'
+  T1: 'Halt - News Pending. News is expected.',
+  T2: 'Halt - News Released. The issuer is starting the news dissemination process in accordance with fair disclosure requirements (SEC Regulation FD).',
+  T5: 'Single Stock Trading Pause in Effect. The instrument price has changed by 10% or more within 5 minutes.',
+  T6: 'Halt - Extraordinary Market Activity. Unusual market activity. Triggered when NASDAQ detects problems (that may affect the price) with quoting, trade reporting, or connectivity.',
+  T8: 'Halt - Exchange-Traded-Fund (ETF). Triggered for an ETF when problems are detected in the underlying assets.',
+  T12: 'Halt - Additional Information Requested by NASDAQ. Triggered when NASDAQ is awaiting additional information (the issuer is sent questions it must answer).',
+  H4: 'Halt - Non-compliance. Non-compliance with NASDAQ listing requirements.',
+  H9: 'Halt - Not Current. The company has not filed a current report with the regulators (SEC).',
+  H10: 'Halt - SEC Trading Suspension. The SEC has suspended trading indefinitely.',
+  H11: 'Halt - Regulatory Concern. Trading is halted in another market center at the request of the regulators. The halt may last for days or weeks.',
+  O1: 'Operations Halt, Contact Market Operations. Market-making problems (issues with posting quotes and processing orders of trading participants).',
+  IPO1: 'HIPO Issue not yet Trading. Problems with trading of instruments going through an IPO (on the first trading day). IPO trading starts several hours after the main session opens.',
+  M1: 'Corporate Action. Corporate action.',
+  M2: 'Quotation Not Available. No quotes available for the instrument.',
+  LUDP: 'Volatility Trading Pause. Volatility trading pause.',
+  LUDS: 'Volatility Trading Pause - Straddle Condition. A pause triggered when the bid or ask quote moves outside the allowed bands.',
+  MWC1: 'Market Wide Circuit Breaker Halt. Trading halted due to a market-wide circuit breaker.',
+  MWC2: 'Market Wide Circuit Breaker Halt. Trading halted due to a market-wide circuit breaker.',
+  MWC3: 'Market Wide Circuit Breaker Halt. Trading halted due to a market-wide circuit breaker.',
+  MWC0: 'Market Wide Circuit Breaker Halt. Trading halted due to a market-wide circuit breaker.',
+  T3: 'News and Resumption Times. The issuer has finished disseminating news; trading is expected to resume shortly.',
+  T7: 'Single Stock Trading Pause/Quotation-Only Period. See code T5.',
+  R4: 'Qualifications Issues Reviewed/Resolved; Quotations/Trading to Resume. See code H4.',
+  R9: 'Filing Requirements Satisfied/Resolved; Quotations/Trading To Resume. See code H9.',
+  C3: 'Issuer News Not Forthcoming; Quotations/Trading To Resume. News publication has been cancelled. See codes T2 and T3.',
+  C4: 'Qualifications Halt Ended; Maintenance Requirements Met. See codes H4 and R4.',
+  C9: 'Qualifications Halt Concluded; Filings Met; Quotes/Trades To Resume. See codes H9 and R9.',
+  C11: 'Trade Halt Concluded By Other Regulatory Auth.; Quotes/Trades Resume. See code H11.',
+  R1: 'New Issue Available. See code T1.',
+  R2: 'Issue Available. See code T2.',
+  IPOQ: 'IPO security released for quotation. For instruments on their IPO day - quotation start. NASDAQ only.',
+  IPOE: 'IPO security - positioning window extension. Extension of the order entry period in the NASDAQ cross session for instruments on their IPO day.',
+  MWCQ: 'Market Wide Circuit Breaker Resumption. Market-wide circuit breaker lifted.',
+  M: 'Volatility Trading Pause. Volatility trading pause.',
+  D: 'Security deletion from NASDAQ / CQS. The instrument has been removed from trading (delisting).'
 };
 const formatDateTime = (dateString) => {
   const currentDate = new Date();
@@ -105,7 +105,7 @@ const formatDateTime = (dateString) => {
   return \`\${d}.\${m}.\${y} \${time} MSK\`;
 };
 
-let message = \`‼️⏸ Приостановка торгов (\${market})
+let message = \`‼️⏸ Trading halt (\${market})
 \${'\$'}\${symbol}
 <b>\${name}</b>
 🕒 \${formatDateTime(\`\${halt_date} \${halt_time}\`)}
@@ -114,21 +114,21 @@ let message = \`‼️⏸ Приостановка торгов (\${market})
 
 const description = mappings[reason_code];
 
-if (description) message += \`<b>Код \${reason_code}</b>: \${description}\\n\`;
-else message += \`<b>Ожидание кода</b>\\n\`;
+if (description) message += \`<b>Code \${reason_code}</b>: \${description}\\n\`;
+else message += \`<b>Awaiting code</b>\\n\`;
 
 if (resumption_quote_time)
-  message += \`\\nОткрытие книги заявок: \${formatDateTime(
+  message += \`\\nOrder book opens: \${formatDateTime(
     \`\${resumption_date} \${resumption_quote_time}\`
   )}\`;
 
 if (resumption_trade_time)
-  message += \`\\nВозобновление торгов: \${formatDateTime(
+  message += \`\\nTrading resumes: \${formatDateTime(
     \`\${resumption_date} \${resumption_trade_time}\`
   )}\`;
 
 message +=
-  '\\n\\n<a href="https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts">К списку торговых пауз</a>';
+  '\\n\\n<a href="https://www.nasdaqtrader.com/trader.aspx?id=TradeHalts">To the trading halt list</a>';
 
 return message;`;
 
@@ -142,15 +142,14 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -158,7 +157,7 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Профиль API Supabase</h5>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.supabaseApiProfile')}</h5>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -199,21 +198,23 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Supabase
+            ${() => ppp.t('$serviceNyseNsdqHaltsPage.addSupabaseApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Интеграция с Pusher</h5>
-          <p class="description">Опциональная интеграция, позволяющая принимать
-            сообщения от парсера в канал ppp платформы Pusher.</p>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.pusherIntegration')}</h5>
+          <p class="description">
+            ${() =>
+              ppp.t('$serviceNyseNsdqHaltsPage.pusherIntegrationDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
             ${ref('pusherApiId')}
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.pusherApiId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.pusherApi ?? ''}"
@@ -252,16 +253,16 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Pusher
+            ${() => ppp.t('$serviceNyseNsdqHaltsPage.addPusherApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Интервал опроса</h5>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.pollingInterval')}</h5>
           <p class="description">
-            Периодичность проверки новых сообщений о торговых паузах от биржи.
-            Задаётся в секундах.
+            ${() =>
+              ppp.t('$serviceNyseNsdqHaltsPage.pollingIntervalDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -275,9 +276,9 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Глубина хранения</h5>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.storageDepth')}</h5>
           <p class="description">
-            Максимальное количество записей для хранения в базе данных.
+            ${() => ppp.t('$serviceNyseNsdqHaltsPage.storageDepthDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -291,10 +292,10 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тикеры для отслеживания</h5>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.symbolsToTrack')}</h5>
           <p class="description">
-            Тело функции на языке PLV8, которая возвращает массив тикеров для
-            отслеживания. Можно воспользоваться готовыми шаблонами:
+            ${() =>
+              ppp.t('$serviceNyseNsdqHaltsPage.symbolsToTrackDescription')}
           </p>
           <ppp-select
             value="${(x) => x.document.symbolsTemplate ?? 'all'}"
@@ -306,7 +307,7 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
             ${ref('symbolsTemplate')}
           >
             <ppp-option value="all">
-              Отслеживать все тикеры
+              ${() => ppp.t('$serviceNyseNsdqHaltsPage.trackAllSymbols')}
             </ppp-option>
           </ppp-select>
         </div>
@@ -327,16 +328,15 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
               @click="${(x) => x.callSymbolsFunction()}"
               appearance="primary"
             >
-              Выполнить функцию
+              ${() => ppp.t('$serviceNyseNsdqHaltsPage.callFunction')}
             </ppp-button>
           </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Бот</h5>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.bot')}</h5>
           <p class="description">
-            Будет использован для публикации сообщений о торговых паузах. Должен
-            обладать соответствующими правами в канале/группе.
+            ${() => ppp.t('$serviceNyseNsdqHaltsPage.botDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -366,16 +366,17 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Канал или группа</h5>
+          <h5>${() => ppp.t('$serviceNyseNsdqHaltsPage.channelOrGroup')}</h5>
           <p class="description">
-            Идентификатор канала или группы, куда будут отправляться уведомления
-            о торговых паузах.
+            ${() =>
+              ppp.t('$serviceNyseNsdqHaltsPage.channelOrGroupDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="number"
-            placeholder="Канал или группа"
+            placeholder="${() =>
+              ppp.t('$serviceNyseNsdqHaltsPage.channelOrGroup')}"
             value="${(x) => x.document.channel}"
             ${ref('channel')}
           ></ppp-text-field>
@@ -383,9 +384,14 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Форматирование уведомлений</h5>
+          <h5>
+            ${() => ppp.t('$serviceNyseNsdqHaltsPage.notificationFormatting')}
+          </h5>
           <p class="description">
-            Логика форматирования итогового сообщения в Telegram на языке PLV8.
+            ${() =>
+              ppp.t(
+                '$serviceNyseNsdqHaltsPage.notificationFormattingDescription'
+              )}
           </p>
         </div>
         <div class="input-group">
@@ -403,12 +409,12 @@ export const serviceNyseNsdqHaltsPageTemplate = html`
             @click="${(x) => x.sendTestNyseNsdqHaltMessage()}"
             appearance="primary"
           >
-            Отправить тестовое сообщение
+            ${() => ppp.t('$serviceNyseNsdqHaltsPage.sendTestMessage')}
           </ppp-button>
         </div>
       </section>
       ${documentPageFooterPartial({
-        text: 'Сохранить в PPP и обновить в Supabase',
+        text: ppp.t('$serviceNyseNsdqHaltsPage.saveToPPPAndUpdateInSupabase'),
         extraControls: servicePageFooterExtraControls
       })}
     </form>
@@ -484,7 +490,9 @@ export class ServiceNyseNsdqHaltsPage extends Page {
         functionBody
       });
 
-      this.showSuccessNotification('Сообщение отправлено.');
+      this.showSuccessNotification(
+        ppp.t('$serviceNyseNsdqHaltsPage.messageSent')
+      );
     } catch (e) {
       this.failOperation(e);
     } finally {
@@ -507,7 +515,7 @@ export class ServiceNyseNsdqHaltsPage extends Page {
 
       if (!returnResult)
         this.showSuccessNotification(
-          'База данных успешно выполнила функцию. Смотрите результат в консоли браузера.'
+          ppp.t('$serviceNyseNsdqHaltsPage.functionExecutedSeeConsole')
         );
 
       return result;
@@ -549,12 +557,12 @@ export class ServiceNyseNsdqHaltsPage extends Page {
     await validate(this.interval);
     await validate(this.interval, {
       hook: async (value) => +value > 0 && +value <= 1000,
-      errorMessage: 'Введите значение в диапазоне от 1 до 1000'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 1000 })
     });
     await validate(this.depth);
     await validate(this.depth, {
       hook: async (value) => +value >= 1000 && +value <= 10000,
-      errorMessage: 'Введите значение в диапазоне от 1000 до 10000'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1000, max: 10000 })
     });
     await validate(this.symbolsCode);
     await validate(this.botId);

@@ -18,6 +18,8 @@ import {
   themeConditional
 } from '../../design/design-tokens.js';
 
+await ppp.i18n(import.meta.url);
+
 export const iframeModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -107,7 +109,9 @@ export class IframeModalPage extends Page {
   constructor() {
     super();
 
-    this.src = this.generateHtml('<p>Подождите, пока страница загрузится.</p>');
+    this.src = this.generateHtml(
+      `<p>${ppp.t('$iframeModalPage.waitForPageToLoad')}</p>`
+    );
   }
 }
 

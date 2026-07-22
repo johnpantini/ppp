@@ -36,6 +36,8 @@ import '../snippet.js';
 import '../text-field.js';
 import { dictionarySelectorTemplate } from './instruments-manage.js';
 
+await ppp.i18n(import.meta.url);
+
 export const levelOneTraderClonableListTemplate = html`
   <template>
     <ppp-draggable-stack
@@ -61,7 +63,8 @@ export const levelOneTraderClonableListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
                 }}"
-                placeholder="Трейдер L1"
+                placeholder="${() =>
+                  ppp.t('$traderCombinedL1Page.l1TraderPlaceholder')}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -172,7 +175,7 @@ export class LevelOneTraderClonableList extends ClonableList {
 
       if (duplicates.has(field.value)) {
         throw new ValidationError({
-          message: 'Трейдеры не могут повторяться в списке',
+          message: ppp.t('$traderCombinedL1Page.tradersMustBeUnique'),
           element: ppp.app.toast
         });
       } else {
@@ -184,7 +187,7 @@ export class LevelOneTraderClonableList extends ClonableList {
 
     if (!value.length || value.every((x) => x.hidden)) {
       throw new ValidationError({
-        message: 'Список источников не должен быть пустым',
+        message: ppp.t('$traderCombinedL1Page.sourceListEmpty'),
         element: ppp.app.toast
       });
     }
@@ -223,9 +226,9 @@ export const traderCombinedL1Template = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Словарь</h5>
+          <h5>${() => ppp.t('$traderCombinedL1Page.dictionaryTitle')}</h5>
           <p class="description">
-            Словарь инструментов, который будет назначен трейдеру.
+            ${() => ppp.t('$traderCombinedL1Page.dictionaryDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -238,11 +241,9 @@ export const traderCombinedL1Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Список трейдеров-источников L1</h5>
+          <h5>${() => ppp.t('$traderCombinedL1Page.traderListTitle')}</h5>
           <p class="description">
-            Выбранные трейдеры будут объединены в один комбинированный источник
-            данных L1. Цифробуквенные флаги контролируют возможность поставки
-            данных в соотвествии с документацией:
+            ${() => ppp.t('$traderCombinedL1Page.traderListDescription')}
           </p>
           <div class>
             <ppp-snippet

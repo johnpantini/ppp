@@ -79,9 +79,9 @@ export const importInstrumentsSuggestionTemplate = (e) => html`
       href="?page=instruments&tab=import"
       @click="${(x) => x.openInstrumentsImport(e.trader)}"
     >
-      Импортируйте</a
+      ${() => ppp.t('$widget.noInstrumentsImportLink')}</a
     >
-    или
+    ${() => ppp.t('$widget.noInstrumentsOr')}
     <a
       class="link"
       @click="${async (x) => {
@@ -94,15 +94,15 @@ export const importInstrumentsSuggestionTemplate = (e) => html`
         }
       }}"
     >
-      синхронизируйте
+      ${() => ppp.t('$widget.noInstrumentsSyncLink')}
     </a>
-    торговые инструменты, затем обновите страницу.
+    ${() => ppp.t('$widget.noInstrumentsTail')}
   </span>
 `;
 
 export const staleInstrumentCacheSuggestionTemplate = (e) => html`
   <span>
-    Локальные инструменты устарели, необходима
+    ${() => ppp.t('$widget.staleInstrumentsPrefix')}
     <a
       class="link"
       @click="${async (x) => {
@@ -115,7 +115,7 @@ export const staleInstrumentCacheSuggestionTemplate = (e) => html`
         }
       }}"
     >
-      синхронизация </a
+      ${() => ppp.t('$widget.staleInstrumentsSyncLink')} </a
     >.
   </span>
 `;
@@ -1319,32 +1319,32 @@ export class Widget extends PPPElement {
       });
     } else if (e instanceof AuthorizationError) {
       return this.notificationsArea.error({
-        text: 'Ошибка авторизации в источнике данных.',
+        text: ppp.t('$widget.authorizationError'),
         keep: true
       });
     } else if (e instanceof ConnectionLimitExceededError) {
       return this.notificationsArea.error({
-        text: 'Исчерпан лимит доступных соединений.',
+        text: ppp.t('$widget.connectionLimitExceeded'),
         keep: true
       });
     } else if (e instanceof ConnectionError) {
       return this.notificationsArea.error({
-        text: 'Ошибка соединения с источником данных.',
+        text: ppp.t('$widget.connectionError'),
         keep: true
       });
     } else if (e instanceof TraderTrinityError) {
       return this.notificationsArea.error({
-        text: 'Трейдер не загружается (проверьте URL).',
+        text: ppp.t('$widget.traderTrinityError'),
         keep: true
       });
     } else if (e instanceof ValidationError) {
       return this.notificationsArea.error({
-        text: 'Ошибка валидации данных.',
+        text: ppp.t('$widget.validationError'),
         keep: true
       });
     } else if (e instanceof FetchError) {
       return this.notificationsArea.error({
-        text: 'Ошибка сетевого запроса.',
+        text: ppp.t('$widget.fetchError'),
         keep: true
       });
     } else if (e?.name === 'ConflictError') {
@@ -1355,11 +1355,11 @@ export class Widget extends PPPElement {
       }
     } else if (e?.name === 'InternalServerError') {
       return this.notificationsArea.error({
-        text: 'Ошибка на стороне сервера.'
+        text: ppp.t('$widget.internalServerError')
       });
     } else {
       return this.notificationsArea.error({
-        text: 'Неизвестная ошибка, подробности в консоли.'
+        text: ppp.t('$widget.unknownError')
       });
     }
   }

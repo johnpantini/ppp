@@ -20,6 +20,8 @@ import '../button.js';
 import '../query-select.js';
 import '../table.js';
 
+await ppp.i18n(import.meta.url);
+
 export const restoreMongodbModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -31,19 +33,20 @@ export const restoreMongodbModalPageTemplate = html`
         ${ref('fileInput')}
       />
       <ppp-banner class="inline" appearance="warning">
-        Чтобы восстановить базу из ZIP-архива, нажмите
+        ${() => ppp.t('$restoreMongodbModalPage.restoreFromZipPrefix')}
         <a
           class="link"
           style="font-weight: 700"
           @click="${(x) => x.fileInput.click()}"
           href="javascript:void(0)"
-          >сюда</a
+          >${() => ppp.t('$restoreMongodbModalPage.hereLink')}</a
         >.
       </ppp-banner>
       <div class="spacing2"></div>
       <ppp-query-select
         style="max-width: 384px"
-        placeholder="Выберите API S3 для загрузки списка копий"
+        placeholder="${() =>
+          ppp.t('$restoreMongodbModalPage.selectS3ApiPlaceholder')}"
         ${ref('s3ApiID')}
         :context="${(x) => x}"
         @change="${(x) => {
@@ -75,16 +78,16 @@ export const restoreMongodbModalPageTemplate = html`
         ?hidden="${(x) => !x.s3ApiID.value}"
         :columns="${() => [
           {
-            label: 'База данных'
+            label: ppp.t('$restoreMongodbModalPage.databaseColumn')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$restoreMongodbModalPage.createdAtColumn')
           },
           {
-            label: 'Размер'
+            label: ppp.t('$restoreMongodbModalPage.sizeColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$restoreMongodbModalPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -102,7 +105,7 @@ export const restoreMongodbModalPageTemplate = html`
                       href="${datum.url}"
                       target="_blank"
                       rel="noopener"
-                      >Ссылка</a>
+                      >${() => ppp.t('$restoreMongodbModalPage.link')}</a>
                   `,
                   formatDateWithOptions(datum.lastModified, {
                     year: 'numeric',
@@ -121,14 +124,14 @@ export const restoreMongodbModalPageTemplate = html`
                         class="xsmall"
                         @click="${() => x.restoreFromBackup(datum)}"
                       >
-                        Восстановить
+                        ${() => ppp.t('$restoreMongodbModalPage.restore')}
                       </ppp-button>
                       <ppp-button
                         appearance="danger"
                         class="xsmall"
                         @click="${() => x.deleteBackup(datum)}"
                       >
-                        Удалить
+                        ${() => ppp.t('$g.delete')}
                       </ppp-button>
                     </div>
                   `
@@ -282,10 +285,13 @@ export class RestoreMongodbModalPage extends Page {
       }
 
       this.showSuccessNotification(
-        'Восстановление прошло успешно, можно обновить страницу.'
+        ppp.t('$restoreMongodbModalPage.restoreSucceeded')
       );
     } catch (e) {
-      this.failOperation(e, 'Восстановление из резервной копии');
+      this.failOperation(
+        e,
+        ppp.t('$restoreMongodbModalPage.restoreFromBackupTitle')
+      );
     } finally {
       this.endOperation();
     }
@@ -294,10 +300,9 @@ export class RestoreMongodbModalPage extends Page {
   async restoreFromBackup(datum) {
     if (
       await ppp.app.confirm(
-        'Восстановление из резервной копии',
-        `Будет восстановлена база данных по резервной копии, созданной ${formatDateWithOptions(
-          datum.lastModified,
-          {
+        ppp.t('$restoreMongodbModalPage.restoreFromBackupTitle'),
+        ppp.t('$restoreMongodbModalPage.confirmRestoreFromBackup', {
+          date: formatDateWithOptions(datum.lastModified, {
             year: 'numeric',
             month: 'numeric',
             day: 'numeric',
@@ -305,8 +310,8 @@ export class RestoreMongodbModalPage extends Page {
             minute: 'numeric',
             second: 'numeric',
             hour12: false
-          }
-        )}. Перед восстановлением текущая база данных будет очищена. Подтвердите действие.`
+          })
+        })
       )
     ) {
       return this.#restore(datum.url);
@@ -316,10 +321,9 @@ export class RestoreMongodbModalPage extends Page {
   async deleteBackup(datum) {
     if (
       await ppp.app.confirm(
-        'Удаление резервной копии',
-        `Будет удалена резервная копия, созданная ${formatDateWithOptions(
-          datum.lastModified,
-          {
+        ppp.t('$restoreMongodbModalPage.backupRemovalTitle'),
+        ppp.t('$restoreMongodbModalPage.confirmBackupRemoval', {
+          date: formatDateWithOptions(datum.lastModified, {
             year: 'numeric',
             month: 'numeric',
             day: 'numeric',
@@ -327,8 +331,8 @@ export class RestoreMongodbModalPage extends Page {
             minute: 'numeric',
             second: 'numeric',
             hour12: false
-          }
-        )}. Подтвердите действие.`
+          })
+        })
       )
     ) {
       this.beginOperation();
@@ -365,7 +369,7 @@ export class RestoreMongodbModalPage extends Page {
               'X-Amz-Date': xAmzDate
             }
           }),
-          'Не удалось удалить резервную копию.'
+          ppp.t('$restoreMongodbModalPage.cannotDeleteBackup')
         );
 
         const index = this.documents.findIndex((d) => d.url === datum.url);
@@ -375,9 +379,14 @@ export class RestoreMongodbModalPage extends Page {
         }
 
         Observable.notify(this, 'documents');
-        this.showSuccessNotification('Копия удалена.');
+        this.showSuccessNotification(
+          ppp.t('$restoreMongodbModalPage.backupDeleted')
+        );
       } catch (e) {
-        this.failOperation(e, 'Удаление резервной копии');
+        this.failOperation(
+          e,
+          ppp.t('$restoreMongodbModalPage.backupRemovalTitle')
+        );
       } finally {
         this.endOperation();
       }
@@ -412,7 +421,7 @@ export class RestoreMongodbModalPage extends Page {
           }
         }
       ),
-      'Не удалось получить список бакетов. Проверьте права доступа.'
+      ppp.t('$restoreMongodbModalPage.cannotFetchBucketList')
     );
 
     const bucketList = await rBucketList.json();
@@ -448,7 +457,7 @@ export class RestoreMongodbModalPage extends Page {
             'X-Amz-Date': xAmzDate
           }
         }),
-        'Не удалось выгрузить список резервных копий.'
+        ppp.t('$restoreMongodbModalPage.cannotFetchBackupList')
       );
 
       const xml = await rObjectList.text();

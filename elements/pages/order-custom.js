@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   html,
   css,
@@ -18,6 +19,8 @@ import { invalidate, validate, ValidationError } from '../../lib/ppp-errors.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const orderCustomPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -27,15 +30,12 @@ export const orderCustomPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название шаблона</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
+          <h5>${() => ppp.t('$orderCustomPage.templateNameHeader')}</h5>
+          <p class="description">${() => ppp.t('$page.arbitraryProfileName')}</p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Заявка"
+            placeholder="${() => ppp.t('$orderCustomPage.namePlaceholder')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -43,10 +43,9 @@ export const orderCustomPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Базовая ссылка на директорию заявки</h5>
+          <h5>${() => ppp.t('$orderCustomPage.baseUrlHeader')}</h5>
           <p class="description">
-            Ссылка на директорию на сервере, где находятся файлы реализации
-            заявки.
+            ${() => ppp.t('$orderCustomPage.baseUrlDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -75,7 +74,7 @@ export const orderCustomPageTemplate = html`
               appearance="primary"
               @click="${(x) => x.loadOrderPageDefinition()}"
             >
-              Продолжить
+              ${() => ppp.t('$orderCustomPage.continueButton')}
             </ppp-button>
           </footer>
         `
@@ -114,7 +113,7 @@ export class OrderCustomPage extends Page {
         ).toString()}page.js`;
       } catch (e) {
         invalidate(this.baseUrl, {
-          errorMessage: 'Этот URL не может быть использован',
+          errorMessage: ppp.t('$page.urlCannotBeUsed'),
           raiseException: true
         });
       }
@@ -168,12 +167,12 @@ export class OrderCustomPage extends Page {
       } catch (e) {
         console.error(e);
         invalidate(this.baseUrl, {
-          errorMessage: 'Этот URL не может быть загружен',
+          errorMessage: ppp.t('$orderCustomPage.urlCannotBeLoaded'),
           raiseException: true
         });
       }
     } catch (e) {
-      this.failOperation(e, 'Загрузка шаблона заявки по ссылке');
+      this.failOperation(e, ppp.t('$orderCustomPage.loadOrderTemplateTitle'));
     } finally {
       this.endOperation();
     }

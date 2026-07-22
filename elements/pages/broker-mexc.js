@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
@@ -12,6 +13,8 @@ import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerMexcPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +24,9 @@ export const brokerMexcPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,15 +39,15 @@ export const brokerMexcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ доступа</h5>
+          <h5>${() => ppp.t('$brokerMexcPage.accessKey')}</h5>
           <p class="description">
-            Ключ и секрет можно сгенерировать по
+            ${() => ppp.t('$brokerMexcPage.keyAndSecretDescription')}
             <a
               class="link"
               href="https://www.mexc.com/user/openapi"
               target="_blank"
               rel="noopener"
-              >ссылке</a
+              >${() => ppp.t('$brokerMexcPage.link')}</a
             >.
           </p>
         </div>
@@ -59,7 +61,7 @@ export const brokerMexcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Секретный ключ</h5>
+          <h5>${() => ppp.t('$brokerMexcPage.secretKey')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -72,9 +74,9 @@ export const brokerMexcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервис-соединитель</h5>
+          <h5>${() => ppp.t('$brokerMexcPage.connectorService')}</h5>
           <p class="description">
-            Будет использован для совершения запросов к API MEXC.
+            ${() => ppp.t('$brokerMexcPage.connectorServiceDescription')}
           </p>
         </div>
         <div class="input-group">

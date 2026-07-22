@@ -36,12 +36,14 @@ import '../radio-group.js';
 import '../snippet.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const defaultProcessorFuncCode = `/**
-* Функция обработки книги заявок трейдера.
+* Order book processing function of the trader.
 *
-* @param {object} trader - Экземпляр трейдера PPP.
-* @param {array} prices - Массив цен (bid или ask) книги заявок.
-* @param {boolean} isBidSide - Тип массива цен, переданного на обработку.
+* @param {object} trader - PPP trader instance.
+* @param {array} prices - Array of order book prices (bid or ask).
+* @param {boolean} isBidSide - Type of the price array being processed.
 */
 
 return prices;`;
@@ -71,7 +73,10 @@ export const orderbookTraderClonableListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
                 }}"
-                placeholder="Трейдер-источник"
+                placeholder="${() =>
+                  ppp.t(
+                    '$traderCombinedOrderbookPage.sourceTraderPlaceholder'
+                  )}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -97,7 +102,8 @@ export const orderbookTraderClonableListTemplate = html`
                   use-processor-func
                   ?checked="${(x) => x.useProcessorFunc ?? false}"
                 >
-                  Трейдер будет обрабатывать книгу заявок функцией:
+                  ${() =>
+                    ppp.t('$traderCombinedOrderbookPage.processorFuncCheckbox')}
                 </ppp-checkbox>
                 <ppp-snippet
                   ?disabled="${(x) => x.hidden}"
@@ -126,7 +132,7 @@ export class OrderbookTraderClonableList extends ClonableList {
 
       if (duplicates.has(field.value)) {
         throw new ValidationError({
-          message: 'Трейдеры не могут повторяться в списке',
+          message: ppp.t('$traderCombinedOrderbookPage.tradersMustBeUnique'),
           element: ppp.app.toast
         });
       } else {
@@ -151,7 +157,7 @@ export class OrderbookTraderClonableList extends ClonableList {
         console.dir(e);
 
         invalidate(field, {
-          errorMessage: 'Код содержит ошибки.',
+          errorMessage: ppp.t('$page.codeContainsErrors'),
           raiseException: true
         });
       }
@@ -161,7 +167,7 @@ export class OrderbookTraderClonableList extends ClonableList {
 
     if (!value.length || value.every((x) => x.hidden)) {
       throw new ValidationError({
-        message: 'Список источников не должен быть пустым',
+        message: ppp.t('$traderCombinedOrderbookPage.sourceListEmpty'),
         element: ppp.app.toast
       });
     }
@@ -197,9 +203,9 @@ export const traderCombinedOrderbookTemplate = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Словарь</h5>
+          <h5>${() => ppp.t('$traderCombinedOrderbookPage.dictionaryTitle')}</h5>
           <p class="description">
-            Словарь инструментов, который будет назначен трейдеру.
+            ${() => ppp.t('$traderCombinedOrderbookPage.dictionaryDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -212,14 +218,13 @@ export const traderCombinedOrderbookTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Список трейдеров-поставщиков</h5>
+          <h5>${() => ppp.t('$traderCombinedOrderbookPage.traderListTitle')}</h5>
           <p class="description">
-            Данные выбранных трейдеров будут объединены в одну комбинированную
-            книгу заявок.
+            ${() => ppp.t('$traderCombinedOrderbookPage.traderListDescription')}
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Можно указать до 10 трейдеров.
+            ${() => ppp.t('$traderCombinedOrderbookPage.maxTradersWarning')}
           </ppp-banner>
         </div>
         <div class="input-group">

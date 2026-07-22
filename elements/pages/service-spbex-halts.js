@@ -22,24 +22,26 @@ import '../snippet.js';
 import '../terminal.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 const exampleFormatterCode = `/**
- * Функция форматирования сообщения о торговой паузе.
+ * Trading halt message formatter function.
  *
- * @param {string} isin - ISIN инструмента.
- * @param {string} ticker - Тикер инструмента.
- * @param {string} name - Название инструмента.
- * @param {string} currency - Валюта инструмента.
- * @param {string} date - Дата и время сообщения от биржи.
- * @param {string} url - Ссылка на сообщение на сайте биржи.
- * @param {string} start - Время начала торговой паузы, MSK.
- * @param {string} finish - Время окончания торговой паузы, MSK.
+ * @param {string} isin - Instrument ISIN.
+ * @param {string} ticker - Instrument ticker.
+ * @param {string} name - Instrument name.
+ * @param {string} currency - Instrument currency.
+ * @param {string} date - Date and time of the exchange message.
+ * @param {string} url - Link to the message on the exchange website.
+ * @param {string} start - Trading halt start time, MSK.
+ * @param {string} finish - Trading halt end time, MSK.
  */
-return \`‼️⏸ Приостановка торгов (SPBEX)
+return \`‼️⏸ Trading halt (SPBEX)
 \${'$'}\${ticker || isin}
 <b>\${name}, \${isin}</b>
 🕒 \${start} - \${finish}
 
-<a href="\${encodeURIComponent(url)}">Сообщение о приостановке торгов</a>
+<a href="\${encodeURIComponent(url)}">Trading halt message</a>
 \`;`;
 
 export const serviceSpbexHaltsPageTemplate = html`
@@ -52,15 +54,14 @@ export const serviceSpbexHaltsPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -68,7 +69,7 @@ export const serviceSpbexHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Профиль API Supabase</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.supabaseApiProfile')}</h5>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -109,15 +110,15 @@ export const serviceSpbexHaltsPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Supabase
+            ${() => ppp.t('$serviceSpbexHaltsPage.addSupabaseApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Базовый URL</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.baseUrl')}</h5>
           <p class="description">
-            Ссылка на базовый ресурс биржи. Это может быть адрес прокси-сервера.
+            ${() => ppp.t('$serviceSpbexHaltsPage.baseUrlDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -130,17 +131,16 @@ export const serviceSpbexHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Интеграция с Pusher</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.pusherIntegration')}</h5>
           <p class="description">
-            Опциональная интеграция, позволяющая принимать сообщения от парсера
-            в канал ppp платформы Pusher.
+            ${() => ppp.t('$serviceSpbexHaltsPage.pusherIntegrationDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-query-select
             ${ref('pusherApiId')}
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.pusherApiId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.pusherApi ?? ''}"
@@ -179,16 +179,15 @@ export const serviceSpbexHaltsPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Pusher
+            ${() => ppp.t('$serviceSpbexHaltsPage.addPusherApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Интервал опроса</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.pollingInterval')}</h5>
           <p class="description">
-            Периодичность проверки новых сообщений о торговых паузах от биржи.
-            Задаётся в секундах.
+            ${() => ppp.t('$serviceSpbexHaltsPage.pollingIntervalDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -202,9 +201,9 @@ export const serviceSpbexHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Глубина хранения</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.storageDepth')}</h5>
           <p class="description">
-            Максимальное количество записей для хранения в базе данных.
+            ${() => ppp.t('$serviceSpbexHaltsPage.storageDepthDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -218,10 +217,9 @@ export const serviceSpbexHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Бот</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.bot')}</h5>
           <p class="description">
-            Будет использован для публикации сообщений о торговых паузах. Должен
-            обладать соответствующими правами в канале/группе.
+            ${() => ppp.t('$serviceSpbexHaltsPage.botDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -251,16 +249,15 @@ export const serviceSpbexHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Канал или группа</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.channelOrGroup')}</h5>
           <p class="description">
-            Идентификатор канала или группы, куда будут отправляться уведомления
-            о торговых паузах.
+            ${() => ppp.t('$serviceSpbexHaltsPage.channelOrGroupDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="number"
-            placeholder="Канал или группа"
+            placeholder="${() => ppp.t('$serviceSpbexHaltsPage.channelOrGroup')}"
             value="${(x) => x.document.channel}"
             ${ref('channel')}
           ></ppp-text-field>
@@ -268,9 +265,10 @@ export const serviceSpbexHaltsPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Форматирование уведомлений</h5>
+          <h5>${() => ppp.t('$serviceSpbexHaltsPage.notificationFormatting')}</h5>
           <p class="description">
-            Логика форматирования итогового сообщения в Telegram на языке PLV8.
+            ${() =>
+              ppp.t('$serviceSpbexHaltsPage.notificationFormattingDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -288,12 +286,12 @@ export const serviceSpbexHaltsPageTemplate = html`
             @click="${(x) => x.sendTestSpbexHaltMessage()}"
             appearance="primary"
           >
-            Отправить тестовое сообщение
+            ${() => ppp.t('$serviceSpbexHaltsPage.sendTestMessage')}
           </ppp-button>
         </div>
       </section>
       ${documentPageFooterPartial({
-        text: 'Сохранить в PPP и обновить в Supabase',
+        text: ppp.t('$serviceSpbexHaltsPage.saveToPPPAndUpdateInSupabase'),
         extraControls: servicePageFooterExtraControls
       })}
     </form>

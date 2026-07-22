@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerUtexPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +23,9 @@ export const brokerUtexPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,7 +38,7 @@ export const brokerUtexPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Логин учётной записи UTEX</h5>
+          <h5>${() => ppp.t('$brokerUtexPage.accountLogin')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -49,7 +50,7 @@ export const brokerUtexPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пароль учётной записи UTEX</h5>
+          <h5>${() => ppp.t('$brokerUtexPage.accountPassword')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -106,12 +107,12 @@ export class BrokerUtexPage extends Page {
 
     if (/UserSoftBlockedException|BlockingException/i.test(json?.type)) {
       invalidate(this.login, {
-        errorMessage: 'Учётная запись временно заблокирована',
+        errorMessage: ppp.t('$brokerUtexPage.accountBlocked'),
         raiseException: true
       });
     } else if (!response.ok) {
       invalidate(this.login, {
-        errorMessage: 'Неверный логин или пароль',
+        errorMessage: ppp.t('$brokerUtexPage.invalidLoginOrPassword'),
         raiseException: true
       });
     }

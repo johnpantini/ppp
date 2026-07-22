@@ -26,6 +26,8 @@ import '../snippet.js';
 import '../text-field.js';
 import '../widget-controls.js';
 
+await ppp.i18n(import.meta.url);
+
 const defaultBuySideButtonsTemplate = `+1,+2,+5,+10
 -1,-2,-5,-10`;
 const defaultSellSideButtonsTemplate = `+1,+2,+5,+10
@@ -238,7 +240,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер для модификации заявок.',
+        text: ppp.t('$scalpingButtonsWidget.noOrdersTraderText'),
         keep: true
       });
     }
@@ -338,7 +340,7 @@ export class ScalpingButtonsWidget extends WidgetWithInstrument {
     if (this.container.coolDown.value) {
       await validate(this.container.coolDown, {
         hook: async (value) => +value >= 0 && +value <= 5000,
-        errorMessage: 'Введите значение в диапазоне от 0 до 5000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 0, max: 5000 })
       });
     }
 
@@ -365,10 +367,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.SCALPING_BUTTONS,
     collection: 'PPP',
-    title: html`Скальперские кнопки`,
-    description: html`<span class="positive">Скальперские кнопки</span>
-      позволяют быстро модифицировать лимитные и условные заявки на заданное
-      количество шагов цены.`,
+    title: html`${() =>
+      ppp.t(`$const.widget.${WIDGET_TYPES.SCALPING_BUTTONS}`)}`,
+    description: html`<span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.SCALPING_BUTTONS}`)}
+      </span>
+      ${() => ppp.t('$scalpingButtonsWidget.widgetDescriptionSuffix')}`,
     customElement: ScalpingButtonsWidget.compose({
       template: scalpingButtonsWidgetTemplate,
       styles: scalpingButtonsWidgetStyles
@@ -380,9 +384,12 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер лимитных заявок</h5>
+          <h5>
+            ${() => ppp.t('$scalpingButtonsWidget.limitOrdersTraderHeader')}
+          </h5>
           <p class="description">
-            Трейдер, который будет переставлять лимитные заявки.
+            ${() =>
+              ppp.t('$scalpingButtonsWidget.limitOrdersTraderDescription')}
           </p>
         </div>
         <div class="control-line flex-start">
@@ -390,7 +397,7 @@ export async function widgetDefinition() {
             ${ref('ordersTraderId')}
             deselectable
             standalone
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.ordersTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.ordersTrader ?? ''}"
@@ -434,10 +441,9 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Задержка после использования кнопок</h5>
+          <h5>${() => ppp.t('$scalpingButtonsWidget.coolDownHeader')}</h5>
           <p class="description">
-            В течение этого времени после нажатия кнопка будет недоступна.
-            Указывается в миллисекундах.
+            ${() => ppp.t('$scalpingButtonsWidget.coolDownDescription')}
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -453,12 +459,9 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Кнопки для заявок на покупку</h5>
+          <h5>${() => ppp.t('$scalpingButtonsWidget.buySideButtonsHeader')}</h5>
           <p class="description">
-            Перечислите значения (со знаком) кнопок через запятую. Для создания
-            нового ряда выполните перенос строки. Чтобы сделать отступ, оставьте
-            очередную строку пустой. Значения задаются в шагах цены торгового
-            инструмента.
+            ${() => ppp.t('$scalpingButtonsWidget.buySideButtonsDescription')}
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -473,7 +476,7 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Кнопки для заявок на продажу</h5>
+          <h5>${() => ppp.t('$scalpingButtonsWidget.sellSideButtonsHeader')}</h5>
         </div>
         <div class="widget-settings-input-group">
           <ppp-snippet
@@ -487,26 +490,26 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Наполнение</h5>
+          <h5>${() => ppp.t('$scalpingButtonsWidget.contentHeader')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.showAllTab ?? true}"
           ${ref('showAllTab')}
         >
-          Показывать вкладку «Все»
+          ${() => ppp.t('$scalpingButtonsWidget.showAllTabText')}
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.showRealTab ?? true}"
           ${ref('showRealTab')}
         >
-          Показывать вкладку «Биржевые»
+          ${() => ppp.t('$scalpingButtonsWidget.showRealTabText')}
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.showConditionalTab ?? true}"
           ${ref('showConditionalTab')}
         >
-          Показывать вкладку «Условные»
+          ${() => ppp.t('$scalpingButtonsWidget.showConditionalTabText')}
         </ppp-checkbox>
       </div>
     `

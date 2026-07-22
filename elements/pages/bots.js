@@ -6,12 +6,14 @@ import '../badge.js';
 import '../button.js';
 import '../table.js';
 
+await ppp.i18n(import.meta.url);
+
 export const botsPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список ботов Telegram
+        ${() => ppp.t('$botsPage.listHeader')}
         <ppp-button
           appearance="primary"
           slot="controls"
@@ -20,7 +22,7 @@ export const botsPageTemplate = html`
               page: 'bot'
             })}"
         >
-          Добавить бота
+          ${() => ppp.t('$botsPage.addBot')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -31,19 +33,19 @@ export const botsPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$botsPage.createdAtColumn')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$botsPage.updatedAtColumn')
           },
           {
-            label: 'Версия'
+            label: ppp.t('$botsPage.versionColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$botsPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -78,7 +80,7 @@ export const botsPageTemplate = html`
                     :datum="${() => datum}"
                     class="xsmall"
                   >
-                    Удалить
+                    ${() => ppp.t('$g.delete')}
                   </ppp-button>
                 `
               ]

@@ -5,18 +5,20 @@ import { formatDate } from '../../lib/intl.js';
 import '../button.js';
 import '../table.js';
 
+await ppp.i18n(import.meta.url);
+
 export const workspacesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список терминалов
+        ${() => ppp.t('$workspacesPage.listHeader')}
         <ppp-button
           appearance="primary"
           slot="controls"
           @click="${() => ppp.app.handleNewWorkspaceClick()}"
         >
-          Новый терминал
+          ${() => ppp.t('$sideNav.newWorkspace')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -27,16 +29,16 @@ export const workspacesPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$workspacesPage.createdAtColumn')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$workspacesPage.updatedAtColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$workspacesPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -76,14 +78,14 @@ export const workspacesPageTemplate = html`
                         return false;
                       }}"
                     >
-                      Перейти в терминал
+                      ${() => ppp.t('$workspacesPage.goToWorkspace')}
                     </ppp-button>
                     <ppp-button
                       action="cleanup"
                       :datum="${() => datum}"
                       class="xsmall"
                     >
-                      Удалить
+                      ${() => ppp.t('$g.delete')}
                     </ppp-button>
                   </div>
                 `

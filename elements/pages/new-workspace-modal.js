@@ -8,27 +8,31 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const newWorkspaceModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group full">
-          <h5>Название</h5>
-          <p class="description">Будет отображаться в боковой панели.</p>
+          <h5>${() => ppp.t('$g.name')}</h5>
+          <p class="description">
+            ${() => ppp.t('$newWorkspaceModalPage.nameDescription')}
+          </p>
           <ppp-text-field
-            placeholder="Название терминала"
+            placeholder="${() =>
+              ppp.t('$newWorkspaceModalPage.workspaceNamePlaceholder')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
           <p class="description">
-            Можно выбрать существующий терминал - из него будут скопированы все
-            виджеты:
+            ${() => ppp.t('$newWorkspaceModalPage.cloneDescription')}
           </p>
           <ppp-query-select
             ${ref('workspaceId')}
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.workspaceId}"
             :context="${(x) => x}"
             :query="${() => {
@@ -49,24 +53,25 @@ export const newWorkspaceModalPageTemplate = html`
       </section>
       <section>
         <div class="label-group full">
-          <h5>Параметры</h5>
+          <h5>${() => ppp.t('$collection.settings')}</h5>
           <p class="description">
-            Заблокированные виджеты не могут перемещаться или изменять размер.
+            ${() => ppp.t('$newWorkspaceModalPage.lockedWidgetsDescription')}
           </p>
           <ppp-checkbox
             ${ref('allowLockedWidgets')}
             ?checked="${(x) => x.document.allowLockedWidgets}"
           >
-            Разрешить блокировку виджетов
+            ${() => ppp.t('$newWorkspaceModalPage.allowLockedWidgets')}
           </ppp-checkbox>
         </div>
       </section>
       <section>
         <div class="label-group full">
-          <h5>Комментарий</h5>
+          <h5>${() => ppp.t('$newWorkspaceModalPage.comment')}</h5>
           <ppp-text-field
             optional
-            placeholder="Произвольное описание"
+            placeholder="${() =>
+              ppp.t('$newWorkspaceModalPage.commentPlaceholder')}"
             value="${(x) => x.document.comment}"
             ${ref('comment')}
           ></ppp-text-field>
@@ -78,7 +83,7 @@ export const newWorkspaceModalPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Создать пространство
+          ${() => ppp.t('$newWorkspaceModalPage.createWorkspace')}
         </ppp-button>
       </footer>
     </form>
@@ -130,7 +135,7 @@ export class NewWorkspaceModalPage extends Page {
   failOperation(e) {
     if (e instanceof ConflictError) {
       invalidate(this.name, {
-        errorMessage: 'Рабочее пространство с таким названием уже существует'
+        errorMessage: ppp.t('$newWorkspaceModalPage.workspaceAlreadyExists')
       });
     } else {
       super.failOperation(e);

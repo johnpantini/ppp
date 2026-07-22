@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
@@ -13,6 +14,8 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderUtexMarginStocksTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -23,8 +26,13 @@ export const traderUtexMarginStocksTemplate = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль UTEX.</p>
+          <h5>
+            ${() => ppp.t('$traderUtexMarginStocksPage.brokerProfileTitle')}
+          </h5>
+          <p class="description">
+            ${() =>
+              ppp.t('$traderUtexMarginStocksPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -65,17 +73,15 @@ export const traderUtexMarginStocksTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль UTEX
+            ${() => ppp.t('$traderUtexMarginStocksPage.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Комиссия UTEX</h5>
+          <h5>${() => ppp.t('$traderUtexMarginStocksPage.commissionTitle')}</h5>
           <p class="description">
-            Укажите в % комиссию вашего торгового счёта UTEX. Если значение не
-            указано, расчет будет производиться по значению 0,04% от суммы
-            заявки.
+            ${() => ppp.t('$traderUtexMarginStocksPage.commissionDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -88,11 +94,12 @@ export const traderUtexMarginStocksTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тайм-аут восстановления соединения</h5>
+          <h5>
+            ${() => ppp.t('$traderUtexMarginStocksPage.reconnectTimeoutTitle')}
+          </h5>
           <p class="description">
-            Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверу. Задаётся в
-            миллисекундах, по умолчанию 1000 мс.
+            ${() =>
+              ppp.t('$traderUtexMarginStocksPage.reconnectTimeoutDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -122,7 +129,7 @@ export class TraderUtexMarginStocksPage extends TraderCommonPage {
       TRADER_CAPS.CAPS_LEVEL1,
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_POSITIONS,
       TRADER_CAPS.CAPS_TIMELINE,
@@ -138,14 +145,14 @@ export class TraderUtexMarginStocksPage extends TraderCommonPage {
     if (this.commissionRate.value.trim()) {
       await validate(this.commissionRate, {
         hook: async (value) => +value > 0 + value <= 100,
-        errorMessage: 'Введите значение в диапазоне от 0 до 100'
+        errorMessage: ppp.t('$page.valueInRange', { min: 0, max: 100 })
       });
     }
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
-        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 100, max: 10000 })
       });
     }
   }

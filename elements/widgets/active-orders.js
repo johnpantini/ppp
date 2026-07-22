@@ -54,11 +54,13 @@ import '../widget-allowed-order-list.js';
 import '../widget-controls.js';
 import '../widget-real-order-card.js';
 
+await ppp.i18n(import.meta.url);
+
 export const defaultOrderProcessorFunc = `/**
-* Функция обработки списка активных заявок.
+* A function to process the list of active orders.
 *
-* @param {object} trader - Экземпляр трейдера PPP.
-* @param {array} orders - Массив заявок.
+* @param {object} trader - The PPP trader instance.
+* @param {array} orders - An array of orders.
 */
 
 return orders.sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));`;
@@ -120,7 +122,7 @@ export const activeOrdersWidgetTemplate = html`
               }}"
               ?active="${(x) => x.document.isConditionalOrdersFilterActive}"
               class="conditional-orders-filter"
-              title="Фильтр условных заявок"
+              title="${() => ppp.t('$activeOrdersWidget.conditionalOrdersFilter')}"
               @click="${(x) => x.handleConditionalFilterButtonClick()}"
             >
               <span>${html.partial(filter)}</span>
@@ -128,7 +130,7 @@ export const activeOrdersWidgetTemplate = html`
             <button
               ?hidden="${(x) => !x.document.showRefreshOrdersButton}"
               class="refresh-orders"
-              title="Переставить биржевые заявки"
+              title="${() => ppp.t('$activeOrdersWidget.refreshRealOrders')}"
               @click="${(x) => x.refreshOrders()}"
             >
               <span>${html.partial(refresh)}</span>
@@ -136,7 +138,7 @@ export const activeOrdersWidgetTemplate = html`
             <button
               ?hidden="${(x) => !x.document.showCancelAllBuyOrdersButton}"
               class="cancel-buy-orders"
-              title="Отменить все заявки на покупку"
+              title="${() => ppp.t('$activeOrdersWidget.cancelAllBuyOrders')}"
               @click="${(x, c) =>
                 x.cancelAllOrders({
                   filter: 'buy',
@@ -148,7 +150,7 @@ export const activeOrdersWidgetTemplate = html`
             <button
               ?hidden="${(x) => !x.document.showCancelAllBuyOrdersButton}"
               class="cancel-sell-orders"
-              title="Отменить все заявки на продажу"
+              title="${() => ppp.t('$activeOrdersWidget.cancelAllSellOrders')}"
               @click="${(x, c) =>
                 x.cancelAllOrders({
                   filter: 'sell',
@@ -163,7 +165,7 @@ export const activeOrdersWidgetTemplate = html`
                   ? false
                   : !x.document.showCancelAllOrdersButton}"
               class="cancel-orders"
-              title="Отменить все заявки"
+              title="${() => ppp.t('$activeOrdersWidget.cancelAllOrders')}"
               @click="${(x, c) =>
                 x.cancelAllOrders({ force: c.event.shiftKey })}"
             >
@@ -435,7 +437,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер активных заявок.',
+        text: ppp.t('$activeOrdersWidget.noOrdersTrader'),
         keep: true
       });
     }
@@ -797,7 +799,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   async cancelOrder(order) {
     if (typeof this.ordersTrader?.cancelRealOrder !== 'function') {
       return this.notificationsArea.error({
-        text: 'Трейдер не поддерживает отмену заявок.'
+        text: ppp.t('$activeOrdersWidget.cancellationNotSupported')
       });
     }
 
@@ -811,13 +813,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
-          title: 'Заявка отменена'
+          title: ppp.t('$activeOrdersWidget.orderCanceled')
         });
     } catch (e) {
       this.$$debug('cancelOrder [%o] failed: %o', order, e);
 
       this.notificationsArea.error({
-        text: 'Не удалось отменить заявку.'
+        text: ppp.t('$activeOrdersWidget.cancelOrderFailed')
       });
     } finally {
       this.topLoader.stop();
@@ -832,13 +834,13 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
-          title: 'Условная заявка отменена'
+          title: ppp.t('$activeOrdersWidget.conditionalOrderCanceled')
         });
     } catch (e) {
       this.$$debug('cancelConditionalOrder [%o] failed: %o', order, e);
 
       this.notificationsArea.error({
-        text: 'Не удалось отменить условную заявку.'
+        text: ppp.t('$activeOrdersWidget.cancelConditionalOrderFailed')
       });
     } finally {
       this.topLoader.stop();
@@ -853,7 +855,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
-          title: 'Запрос на действие отправлен'
+          title: ppp.t('$activeOrdersWidget.actionRequestSent')
         });
     } catch (e) {
       this.$$debug(
@@ -865,7 +867,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       );
 
       this.notificationsArea.error({
-        text: 'Не удалось выполнить действие.'
+        text: ppp.t('$activeOrdersWidget.actionFailed')
       });
     } finally {
       this.topLoader.stop();
@@ -876,7 +878,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
     if (this.orderTypeSelector.value === 'conditional') {
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
-          text: 'Переставлять можно только биржевые заявки.'
+          text: ppp.t('$activeOrdersWidget.onlyRealOrdersCanBeRefreshed')
         });
 
       return;
@@ -894,11 +896,18 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       if (!this.document.onlyShowErrorNotifications) {
         if (!this.instrument) {
           this.notificationsArea.success({
-            title: 'Биржевые заявки переставлены по всем инструментам'
+            title: ppp.t(
+              '$activeOrdersWidget.realOrdersRefreshedForAllInstruments'
+            )
           });
         } else {
           this.notificationsArea.success({
-            title: `Биржевые заявки переставлены по инструменту ${this.instrument.symbol}`
+            title: ppp.t(
+              '$activeOrdersWidget.realOrdersRefreshedForInstrument',
+              {
+                symbol: this.instrument.symbol
+              }
+            )
           });
         }
       }
@@ -906,7 +915,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       this.$$debug('refreshOrders failed: %o', e);
 
       this.notificationsArea.error({
-        text: 'Не удалось переставить биржевые заявки.'
+        text: ppp.t('$activeOrdersWidget.refreshRealOrdersFailed')
       });
     } finally {
       this.topLoader.stop();
@@ -918,18 +927,15 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
     try {
       const typeSelectorValue = this.orderTypeSelector.value;
-      const typeText = {
-        all: 'Все',
-        real: 'Биржевые',
-        conditional: 'Условные'
-      }[typeSelectorValue];
-      let filterText = ' ';
+      let typeKey = typeSelectorValue;
 
-      if (options?.filter === 'sell') {
-        filterText = ' на продажу ';
-      } else if (options?.filter === 'buy') {
-        filterText = ' на покупку ';
+      if (options?.filter === 'buy') {
+        typeKey += 'Buy';
+      } else if (options?.filter === 'sell') {
+        typeKey += 'Sell';
       }
+
+      const typeText = ppp.t(`$activeOrdersWidget.ordersToCancel.${typeKey}`);
 
       if (typeSelectorValue === 'all' || typeSelectorValue === 'real') {
         await this.ordersTrader?.cancelAllRealOrders?.({
@@ -951,11 +957,19 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       if (!this.document.onlyShowErrorNotifications) {
         if (!this.instrument) {
           this.notificationsArea.note({
-            title: `${typeText} заявки${filterText}отменены по всем инструментам`
+            title: ppp.t(
+              '$activeOrdersWidget.ordersCancelledForAllInstruments',
+              {
+                type: typeText
+              }
+            )
           });
         } else {
           this.notificationsArea.note({
-            title: `${typeText} заявки${filterText}отменены по инструменту ${this.instrument.symbol}`
+            title: ppp.t('$activeOrdersWidget.ordersCancelledForInstrument', {
+              type: typeText,
+              symbol: this.instrument.symbol
+            })
           });
         }
       }
@@ -963,7 +977,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       this.$$debug('cancelAllOrders [%o] failed: %o', options, e);
 
       this.notificationsArea.error({
-        text: 'Не удалось отменить все или некоторые заявки.'
+        text: ppp.t('$activeOrdersWidget.cancelAllOrdersFailed')
       });
     } finally {
       this.topLoader.stop();
@@ -987,7 +1001,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
       this.$$debug('validate failed: %o', e);
 
       invalidate(this.container.orderProcessorFunc, {
-        errorMessage: 'Код содержит ошибки.',
+        errorMessage: ppp.t('$activeOrdersWidget.codeContainsErrors'),
         raiseException: true
       });
     }
@@ -1026,10 +1040,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.ACTIVE_ORDERS,
     collection: 'PPP',
-    title: html`Активные заявки`,
-    description: html`Виджет
-      <span class="positive">Активные заявки</span> отображает текущие рыночные,
-      лимитные и условные заявки, которые ожидают исполнения и не отменены.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.ACTIVE_ORDERS}`)}`,
+    description: html`${() => ppp.t('$activeOrdersWidget.descriptionStart')}
+      <span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.ACTIVE_ORDERS}`)}
+      </span>
+      ${() => ppp.t('$activeOrdersWidget.descriptionEnd')}`,
     customElement: ActiveOrdersWidget.compose({
       template: activeOrdersWidgetTemplate,
       styles: activeOrdersWidgetStyles
@@ -1040,15 +1056,20 @@ export async function widgetDefinition() {
     defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="main">
-        <ppp-tab id="main">Основные настройки</ppp-tab>
+        <ppp-tab id="main">
+          ${() => ppp.t('$activeOrdersWidget.settings.tabs.main')}
+        </ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
-        <ppp-tab id="conditional">Условные заявки</ppp-tab>
+        <ppp-tab id="conditional">
+          ${() => ppp.t('$activeOrdersWidget.settings.tabs.conditional')}
+        </ppp-tab>
         <ppp-tab-panel id="main-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер активных заявок</h5>
+              <h5>${() => ppp.t('$activeOrdersWidget.settings.ordersTrader')}</h5>
               <p class="description">
-                Трейдер, который будет источником списка активных заявок.
+                ${() =>
+                  ppp.t('$activeOrdersWidget.settings.ordersTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1056,7 +1077,7 @@ export async function widgetDefinition() {
                 ${ref('ordersTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.ordersTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.ordersTrader ?? ''}"
@@ -1105,9 +1126,14 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Обработка списка заявок</h5>
+              <h5>
+                ${() => ppp.t('$activeOrdersWidget.settings.orderProcessing')}
+              </h5>
               <p class="description">
-                Тело функции для обработки списка заявок.
+                ${() =>
+                  ppp.t(
+                    '$activeOrdersWidget.settings.orderProcessingDescription'
+                  )}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -1127,77 +1153,87 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>${() => ppp.t('$activeOrdersWidget.settings.interface')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.disableInstrumentFiltering}"
               ${ref('disableInstrumentFiltering')}
             >
-              Не фильтровать содержимое по выбранному инструменту
+              ${() =>
+                ppp.t('$activeOrdersWidget.settings.disableInstrumentFiltering')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.onlyShowErrorNotifications}"
               ${ref('onlyShowErrorNotifications')}
             >
-              Показывать только уведомления об ошибках
+              ${() =>
+                ppp.t('$activeOrdersWidget.settings.onlyShowErrorNotifications')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Наполнение</h5>
+              <h5>${() => ppp.t('$activeOrdersWidget.settings.content')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showAllTab ?? true}"
               ${ref('showAllTab')}
             >
-              Показывать вкладку «Все»
+              ${() => ppp.t('$activeOrdersWidget.settings.showAllTab')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showLimitTab ?? true}"
               ${ref('showLimitTab')}
             >
-              Показывать вкладку «Биржевые»
+              ${() => ppp.t('$activeOrdersWidget.settings.showRealTab')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showConditionalTab ?? true}"
               ${ref('showConditionalTab')}
             >
-              Показывать вкладку «Условные»
+              ${() => ppp.t('$activeOrdersWidget.settings.showConditionalTab')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showRefreshOrdersButton ?? false}"
               ${ref('showRefreshOrdersButton')}
             >
-              Показывать кнопку «Переставить все заявки»
+              ${() =>
+                ppp.t('$activeOrdersWidget.settings.showRefreshOrdersButton')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) =>
                 x.document.showCancelAllBuyOrdersButton ?? false}"
               ${ref('showCancelAllBuyOrdersButton')}
             >
-              Показывать кнопку «Отменить все заявки на покупку»
+              ${() =>
+                ppp.t(
+                  '$activeOrdersWidget.settings.showCancelAllBuyOrdersButton'
+                )}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) =>
                 x.document.showCancelAllSellOrdersButton ?? false}"
               ${ref('showCancelAllSellOrdersButton')}
             >
-              Показывать кнопку «Отменить все заявки на продажу»
+              ${() =>
+                ppp.t(
+                  '$activeOrdersWidget.settings.showCancelAllSellOrdersButton'
+                )}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showCancelAllOrdersButton ?? true}"
               ${ref('showCancelAllOrdersButton')}
             >
-              Показывать кнопку «Отменить все заявки»
+              ${() =>
+                ppp.t('$activeOrdersWidget.settings.showCancelAllOrdersButton')}
             </ppp-checkbox>
           </div>
         </ppp-tab-panel>
         <ppp-tab-panel id="conditional-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>${() => ppp.t('$activeOrdersWidget.settings.interface')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
@@ -1205,22 +1241,30 @@ export async function widgetDefinition() {
                 x.document.showConditionalOrdersFilterButton ?? true}"
               ${ref('showConditionalOrdersFilterButton')}
             >
-              Показывать кнопку фильтра условных заявок
+              ${() =>
+                ppp.t(
+                  '$activeOrdersWidget.settings.showConditionalOrdersFilterButton'
+                )}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) =>
                 x.document.isConditionalOrdersFilterActive ?? false}"
               ${ref('isConditionalOrdersFilterActive')}
             >
-              Включить фильтр
+              ${() => ppp.t('$activeOrdersWidget.settings.enableFilter')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Разрешённые условные заявки</h5>
+              <h5>
+                ${() =>
+                  ppp.t('$activeOrdersWidget.settings.allowedConditionalOrders')}
+              </h5>
               <p class="description">
-                Список условных заявок, которые будут отображаться при активном
-                фильтре.
+                ${() =>
+                  ppp.t(
+                    '$activeOrdersWidget.settings.allowedConditionalOrdersDescription'
+                  )}
               </p>
             </div>
             <div class="widget-settings-input-group">

@@ -16,6 +16,8 @@ import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderCapitalcomTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -27,8 +29,10 @@ export const traderCapitalcomTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Capital.com.</p>
+          <h5>${() => ppp.t('$traderCapitalcomPage.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderCapitalcomPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -69,15 +73,15 @@ export const traderCapitalcomTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Capital.com
+            ${() => ppp.t('$traderCapitalcomPage.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Определение последней цены</h5>
+          <h5>${() => ppp.t('$traderCapitalcomPage.lastPriceModeTitle')}</h5>
           <p class="description">
-            Вышестоящий источник предоставляет цены bid/ask CFD-контрактов. Выберите, каким образом рассчитывать цену последней сделки.
+            ${() => ppp.t('$traderCapitalcomPage.lastPriceModeDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -94,9 +98,9 @@ export const traderCapitalcomTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервис-соединитель</h5>
+          <h5>${() => ppp.t('$traderCapitalcomPage.connectorServiceTitle')}</h5>
           <p class="description">
-            Будет использован для совершения HTTP-запросов к Capital.com.
+            ${() => ppp.t('$traderCapitalcomPage.connectorServiceDescription')}
           </p>
         </div>
         <div class="input-group">

@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
@@ -14,6 +15,8 @@ import '../radio-group.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderAlorOpenApiV2Template = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -24,8 +27,10 @@ export const traderAlorOpenApiV2Template = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Alor.</p>
+          <h5>${() => ppp.t('$traderAlorOpenapiV2Page.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderAlorOpenapiV2Page.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -66,15 +71,15 @@ export const traderAlorOpenApiV2Template = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Alor
+            ${() => ppp.t('$traderAlorOpenapiV2Page.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Идентификатор клиентского портфеля</h5>
+          <h5>${() => ppp.t('$traderAlorOpenapiV2Page.portfolioIdTitle')}</h5>
           <p class="description">
-            Портфель Алор для требуемой торговой секции.
+            ${() => ppp.t('$traderAlorOpenapiV2Page.portfolioIdDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -87,7 +92,7 @@ export const traderAlorOpenApiV2Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тип клиентского портфеля</h5>
+          <h5>${() => ppp.t('$traderAlorOpenapiV2Page.portfolioTypeTitle')}</h5>
         </div>
         <div class="input-group">
           <ppp-radio-group
@@ -95,17 +100,21 @@ export const traderAlorOpenApiV2Template = html`
             value="${(x) => x.document.portfolioType ?? 'stock'}"
             ${ref('portfolioType')}
           >
-            <ppp-radio value="stock">Фондовый рынок</ppp-radio>
-            <ppp-radio value="futures">Срочный рынок</ppp-radio>
+            <ppp-radio value="stock">
+              ${() => ppp.t('$traderAlorOpenapiV2Page.portfolioTypeStock')}
+            </ppp-radio>
+            <ppp-radio value="futures">
+              ${() => ppp.t('$traderAlorOpenapiV2Page.portfolioTypeFutures')}
+            </ppp-radio>
             <ppp-radio value="currency">
-              Валютный рынок и рынок драг. металлов
+              ${() => ppp.t('$traderAlorOpenapiV2Page.portfolioTypeCurrency')}
             </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Торговая площадка</h5>
+          <h5>${() => ppp.t('$traderAlorOpenapiV2Page.exchangeTitle')}</h5>
         </div>
         <div class="input-group">
           <ppp-radio-group
@@ -113,17 +122,21 @@ export const traderAlorOpenApiV2Template = html`
             value="${(x) => x.document.exchange ?? EXCHANGE.SPBX}"
             ${ref('exchange')}
           >
-            <ppp-radio value="${() => EXCHANGE.SPBX}">СПБ Биржа</ppp-radio>
+            <ppp-radio value="${() => EXCHANGE.SPBX}">
+              ${() => ppp.t(`$const.exchange.${EXCHANGE.SPBX}`)}
+            </ppp-radio>
             <ppp-radio value="${() => EXCHANGE.MOEX}">
-              Московская биржа
+              ${() => ppp.t(`$const.exchange.${EXCHANGE.MOEX}`)}
             </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Глубина книги заявок</h5>
-          <p class="description">По умолчанию 20 уровней.</p>
+          <h5>${() => ppp.t('$traderAlorOpenapiV2Page.orderbookDepthTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderAlorOpenapiV2Page.orderbookDepthDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -136,10 +149,9 @@ export const traderAlorOpenApiV2Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Комиссия плоского тарифа</h5>
+          <h5>${() => ppp.t('$traderAlorOpenapiV2Page.flatCommissionTitle')}</h5>
           <p class="description">
-            Укажите в % комиссию вашего тарифа, если он отличается от
-            стандартных, предлагаемых брокером.
+            ${() => ppp.t('$traderAlorOpenapiV2Page.flatCommissionDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -153,11 +165,12 @@ export const traderAlorOpenApiV2Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тайм-аут восстановления соединения</h5>
+          <h5>
+            ${() => ppp.t('$traderAlorOpenapiV2Page.reconnectTimeoutTitle')}
+          </h5>
           <p class="description">
-            Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверам брокера. Задаётся в
-            миллисекундах, по умолчанию 1000 мс.
+            ${() =>
+              ppp.t('$traderAlorOpenapiV2Page.reconnectTimeoutDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -186,7 +199,7 @@ export class TraderAlorOpenApiV2Page extends TraderCommonPage {
     return [
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_ORDERBOOK,
       TRADER_CAPS.CAPS_TIME_AND_SALES,
@@ -205,21 +218,21 @@ export class TraderAlorOpenApiV2Page extends TraderCommonPage {
     if (this.orderbookDepth.value.trim()) {
       await validate(this.orderbookDepth, {
         hook: async (value) => +value > 0 && +value <= 50,
-        errorMessage: 'Введите значение в диапазоне от 1 до 50'
+        errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 50 })
       });
     }
 
     if (this.flatCommissionRate.value.trim()) {
       await validate(this.flatCommissionRate, {
         hook: async (value) => +value >= 0 && +value <= 100,
-        errorMessage: 'Введите значение в диапазоне от 0 до 100'
+        errorMessage: ppp.t('$page.valueInRange', { min: 0, max: 100 })
       });
     }
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
-        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 100, max: 10000 })
       });
     }
 
@@ -231,7 +244,10 @@ export class TraderAlorOpenApiV2Page extends TraderCommonPage {
       }
     );
 
-    await maybeFetchError(jwtResponse, 'Неверный токен Alor.');
+    await maybeFetchError(
+      jwtResponse,
+      ppp.t('$traderAlorOpenapiV2Page.invalidAlorToken')
+    );
 
     const { AccessToken } = await jwtResponse.json();
     const summaryResponse = await fetch(
@@ -248,7 +264,7 @@ export class TraderAlorOpenApiV2Page extends TraderCommonPage {
 
     await maybeFetchError(
       summaryResponse,
-      'Не удаётся получить информацию о портфеле.'
+      ppp.t('$traderAlorOpenapiV2Page.portfolioSummaryFailed')
     );
   }
 

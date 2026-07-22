@@ -63,6 +63,59 @@ import '../top-loader.js';
 import '../widget.js';
 import '../pages/template-library-modal.js';
 
+await ppp.i18n(import.meta.url);
+
+const paletteSelectOptionsSnippet = [
+  'palette-white',
+  'palette-black',
+  'palette-gray-dark-4',
+  'palette-gray-dark-3',
+  'palette-gray-dark-2',
+  'palette-gray-dark-1',
+  'palette-gray-base',
+  'palette-gray-light-1',
+  'palette-gray-light-2',
+  'palette-gray-light-3',
+  'palette-green-dark-3',
+  'palette-green-dark-2',
+  'palette-green-dark-1',
+  'palette-green-base',
+  'palette-green-light-1',
+  'palette-green-light-2',
+  'palette-green-light-3',
+  'palette-purple-dark-3',
+  'palette-purple-dark-2',
+  'palette-purple-base',
+  'palette-purple-light-2',
+  'palette-purple-light-3',
+  'palette-blue-dark-3',
+  'palette-blue-dark-2',
+  'palette-blue-dark-1',
+  'palette-blue-base',
+  'palette-blue-light-1',
+  'palette-blue-light-2',
+  'palette-blue-light-3',
+  'palette-yellow-dark-3',
+  'palette-yellow-dark-2',
+  'palette-yellow-base',
+  'palette-yellow-light-2',
+  'palette-yellow-light-3',
+  'palette-red-dark-3',
+  'palette-red-dark-2',
+  'palette-red-dark-1',
+  'palette-red-base',
+  'palette-red-light-1',
+  'palette-red-light-2',
+  'palette-red-light-3'
+]
+  .map(
+    (v) =>
+      `<ppp-option value="${v}">${ppp.t(
+        `$widgetPage.paletteOptions.${v}`
+      )}</ppp-option>`
+  )
+  .join('\n    ');
+
 export const colorSelectorTemplate = ({
   refName,
   value,
@@ -78,50 +131,13 @@ export const colorSelectorTemplate = ({
     standalone="${!!hideDescription}"
   >
     <span ?hidden="${hideDescription}" slot="description"
-      >${isDark ? 'Тёмная тема' : 'Светлая тема'}</span
+      >${() =>
+        ppp.t(isDark ? '$widgetPage.darkTheme' : '$widgetPage.lightTheme')}</span
     >
-    <ppp-option value="default">По умолчанию</ppp-option>
-    <ppp-option value="palette-white">Белый</ppp-option>
-    <ppp-option value="palette-black">Чёрный</ppp-option>
-    <ppp-option value="palette-gray-dark-4">Серый -4</ppp-option>
-    <ppp-option value="palette-gray-dark-3">Серый -3</ppp-option>
-    <ppp-option value="palette-gray-dark-2">Серый -2</ppp-option>
-    <ppp-option value="palette-gray-dark-1">Серый -1</ppp-option>
-    <ppp-option value="palette-gray-base">Серый</ppp-option>
-    <ppp-option value="palette-gray-light-1">Серый +1</ppp-option>
-    <ppp-option value="palette-gray-light-2">Серый +2</ppp-option>
-    <ppp-option value="palette-gray-light-3">Серый +3</ppp-option>
-    <ppp-option value="palette-green-dark-3">Зелёный -3</ppp-option>
-    <ppp-option value="palette-green-dark-2">Зелёный -2</ppp-option>
-    <ppp-option value="palette-green-dark-1">Зелёный -1</ppp-option>
-    <ppp-option value="palette-green-base">Зелёный</ppp-option>
-    <ppp-option value="palette-green-light-1">Зелёный +1</ppp-option>
-    <ppp-option value="palette-green-light-2">Зелёный +2</ppp-option>
-    <ppp-option value="palette-green-light-3">Зелёный +3</ppp-option>
-    <ppp-option value="palette-purple-dark-3">Фиолетовый -3</ppp-option>
-    <ppp-option value="palette-purple-dark-2">Фиолетовый -2</ppp-option>
-    <ppp-option value="palette-purple-base">Фиолетовый</ppp-option>
-    <ppp-option value="palette-purple-light-2">Фиолетовый +2</ppp-option>
-    <ppp-option value="palette-purple-light-3">Фиолетовый +3</ppp-option>
-    <ppp-option value="palette-blue-dark-3">Синий -3</ppp-option>
-    <ppp-option value="palette-blue-dark-2">Синий -2</ppp-option>
-    <ppp-option value="palette-blue-dark-1">Синий -1</ppp-option>
-    <ppp-option value="palette-blue-base">Синий</ppp-option>
-    <ppp-option value="palette-blue-light-1">Синий +1</ppp-option>
-    <ppp-option value="palette-blue-light-2">Синий +2</ppp-option>
-    <ppp-option value="palette-blue-light-3">Синий +3</ppp-option>
-    <ppp-option value="palette-yellow-dark-3">Жёлтый -3</ppp-option>
-    <ppp-option value="palette-yellow-dark-2">Жёлтый -2</ppp-option>
-    <ppp-option value="palette-yellow-base">Жёлтый</ppp-option>
-    <ppp-option value="palette-yellow-light-2">Жёлтый +2</ppp-option>
-    <ppp-option value="palette-yellow-light-3">Жёлтый +3</ppp-option>
-    <ppp-option value="palette-red-dark-3">Красный -3</ppp-option>
-    <ppp-option value="palette-red-dark-2">Красный -2</ppp-option>
-    <ppp-option value="palette-red-dark-1">Красный -1</ppp-option>
-    <ppp-option value="palette-red-base">Красный</ppp-option>
-    <ppp-option value="palette-red-light-1">Красный +1</ppp-option>
-    <ppp-option value="palette-red-light-2">Красный +2</ppp-option>
-    <ppp-option value="palette-red-light-3">Красный +3</ppp-option>
+    <ppp-option value="default">
+      ${() => ppp.t('$widgetPage.defaultOption')}
+    </ppp-option>
+    ${html.partial(paletteSelectOptionsSnippet)}
   </ppp-select>
 `;
 
@@ -244,7 +260,9 @@ export const widgetPageTemplate = html`
         hidden
         dismissible
       >
-        <span slot="title">Библиотека шаблонов</span>
+        <span slot="title">
+          ${() => ppp.t('$widgetPage.templateLibraryTitle')}
+        </span>
         <ppp-template-library-modal-page
           ${ref('templateLibraryModalPage')}
           slot="body"
@@ -264,7 +282,7 @@ export const widgetPageTemplate = html`
                   >
                     <div class="drawer-header">
                       <div class="drawer-header-inner">
-                        <h3>Тип виджета</h3>
+                        <h3>${() => ppp.t('$widgetPage.widgetTypeHeader')}</h3>
                       </div>
                     </div>
                     <div class="drawer-body">
@@ -280,7 +298,9 @@ export const widgetPageTemplate = html`
                               x.document._id && x.document.type !== 'order'}"
                             value="order"
                           >
-                            <span slot="text">Заявка</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.order')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -288,7 +308,9 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'scalping-buttons'}"
                             value="scalping-buttons"
                           >
-                            <span slot="text">Скальперские кнопки</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.scalping-buttons')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -296,7 +318,9 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'active-orders'}"
                             value="active-orders"
                           >
-                            <span slot="text">Активные заявки</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.active-orders')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -304,7 +328,9 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'light-chart'}"
                             value="light-chart"
                           >
-                            <span slot="text">Лёгкий график</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.light-chart')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -312,7 +338,9 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'orderbook'}"
                             value="orderbook"
                           >
-                            <div slot="text">Книга заявок</div>
+                            <div slot="text">
+                              ${() => ppp.t('$const.widget.orderbook')}
+                            </div>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -320,7 +348,9 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'time-and-sales'}"
                             value="time-and-sales"
                           >
-                            <div slot="text">Лента всех сделок</div>
+                            <div slot="text">
+                              ${() => ppp.t('$const.widget.time-and-sales')}
+                            </div>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
@@ -328,56 +358,72 @@ export const widgetPageTemplate = html`
                               x.document.type !== 'portfolio'}"
                             value="portfolio"
                           >
-                            <span slot="text">Портфель</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.portfolio')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'balances'}"
                             value="balances"
                           >
-                            <span slot="text">Балансы</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.balances')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'list'}"
                             value="list"
                           >
-                            <span slot="text">Список</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.list')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'timeline'}"
                             value="timeline"
                           >
-                            <span slot="text">Лента операций</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.timeline')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'clock'}"
                             value="clock"
                           >
-                            <span slot="text">Часы</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.clock')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'marquee'}"
                             value="marquee"
                           >
-                            <span slot="text">Строка котировок</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.marquee')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'tcc'}"
                             value="tcc"
                           >
-                            <span slot="text">Управление трейдерами</span>
+                            <span slot="text">
+                              ${() => ppp.t('$const.widget.tcc')}
+                            </span>
                           </ppp-widget-type-radio>
                           <ppp-widget-type-radio
                             ?disabled="${(x) =>
                               x.document._id && x.document.type !== 'custom'}"
                             value="custom"
                           >
-                            <div slot="text">По ссылке</div>
+                            <div slot="text">
+                              ${() => ppp.t('$widgetPage.byLink')}
+                            </div>
                             <span slot="icon">
                               ${html.partial(customWidget)}
                             </span>
@@ -389,7 +435,7 @@ export const widgetPageTemplate = html`
                   <div class="drawer">
                     <div class="drawer-header">
                       <div class="drawer-header-inner">
-                        <h3>Настройки</h3>
+                        <h3>${() => ppp.t('$widgetPage.settingsHeader')}</h3>
                       </div>
                     </div>
                     <div class="drawer-body">
@@ -401,20 +447,20 @@ export const widgetPageTemplate = html`
                           class="xsmall"
                           @click="${(x) => x.loadTemplateSettings()}"
                         >
-                          Подставить настройки из шаблона
+                          ${() => ppp.t('$widget.applyTemplateSettingsTitle')}
                         </ppp-button>
                         <div class="widget-settings-section">
                           <div class="widget-settings-label-group">
-                            <h5>Название</h5>
+                            <h5>${() => ppp.t('$g.name')}</h5>
                             <p class="description">
-                              Название (если виджет поддерживает) отображается в
-                              заголовке.
+                              ${() => ppp.t('$widgetPage.nameDescription')}
                             </p>
                           </div>
                           <div class="widget-settings-input-group">
                             <ppp-text-field
                               standalone
-                              placeholder="Название виджета"
+                              placeholder="${() =>
+                                ppp.t('$widgetPage.widgetNamePlaceholder')}"
                               value="${(x) => x.document.name}"
                               ?disabled="${(x) => !x.isSteady()}"
                               ${ref('name')}
@@ -423,7 +469,9 @@ export const widgetPageTemplate = html`
                         </div>
                         <div class="widget-settings-section">
                           <div class="widget-settings-label-group">
-                            <h5>Цвет фона заголовка</h5>
+                            <h5>
+                              ${() => ppp.t('$widgetPage.headerBgColorHeader')}
+                            </h5>
                           </div>
                           <div class="widget-settings-input-group">
                             <div class="control-line colors-line">
@@ -448,14 +496,19 @@ export const widgetPageTemplate = html`
                                 ?disabled="${(x) => !x.isSteady()}"
                                 ${ref('headerBgOpacity')}
                               >
-                                <span slot="description">Прозрачность, %</span>
+                                <span slot="description">
+                                  ${() => ppp.t('$widgetPage.opacityPercent')}
+                                </span>
                               </ppp-text-field>
                             </div>
                           </div>
                         </div>
                         <div class="widget-settings-section">
                           <div class="widget-settings-label-group">
-                            <h5>Цвет шрифта заголовка</h5>
+                            <h5>
+                              ${() =>
+                                ppp.t('$widgetPage.headerFontColorHeader')}
+                            </h5>
                           </div>
                           <div class="widget-settings-input-group">
                             <div class="control-line colors-line">
@@ -480,15 +533,24 @@ export const widgetPageTemplate = html`
                           html`
                             <div class="widget-settings-section">
                               <div class="widget-settings-label-group">
-                                <h5>Название в ансамбле</h5>
+                                <h5>
+                                  ${() =>
+                                    ppp.t('$widgetPage.ensembleNameHeader')}
+                                </h5>
                                 <p class="description">
-                                  Будет отображаться во вкладках ансамбля.
+                                  ${() =>
+                                    ppp.t(
+                                      '$widgetPage.ensembleNameDescription'
+                                    )}
                                 </p>
                               </div>
                               <div class="widget-settings-input-group">
                                 <ppp-text-field
                                   standalone
-                                  placeholder="Название виджета в ансамбле"
+                                  placeholder="${() =>
+                                    ppp.t(
+                                      '$widgetPage.ensembleNamePlaceholder'
+                                    )}"
                                   value="${(x) => x.document.nameWhenStacked}"
                                   ${ref('nameWhenStacked')}
                                 ></ppp-text-field>
@@ -503,10 +565,8 @@ export const widgetPageTemplate = html`
                               <div class="widget-settings-label-group">
                                 <h5>URL</h5>
                                 <p class="description">
-                                  Ссылка на реализацию виджета. Нельзя изменить
-                                  после создания. Можно воспользоваться
-                                  выпадающим списком, чтобы использовать готовую
-                                  ссылку (только при создании виджета).
+                                  ${() =>
+                                    ppp.t('$widgetPage.urlDescription')}
                                 </p>
                               </div>
                               <div class="widget-settings-input-group">
@@ -538,40 +598,50 @@ export const widgetPageTemplate = html`
                                             typeof x.widgetDefinition
                                               ?.customElement === 'undefined'
                                         )}"
-                                      placeholder="Выберите готовую ссылку"
+                                      placeholder="${() =>
+                                        ppp.t(
+                                          '$widgetPage.selectPredefinedUrlPlaceholder'
+                                        )}"
                                       @change="${(x) => {
                                         switch (x.predefinedWidgetUrl.value) {
                                           case 'simple-frame-widget':
                                             x.url.value =
                                               'https://psina.pages.dev/widgets/simple-frame-widget.js';
-                                            x.name.value = 'Фрейм';
+                                            x.name.value =
+                                              ppp.t('$const.widget.frame');
 
                                             break;
                                           case 'pusher-subscription-widget':
                                             x.url.value =
                                               'https://psina.pages.dev/widgets/pusher-subscription-widget.js';
-                                            x.name.value = 'Сообщения Pusher';
+                                            x.name.value = ppp.t(
+                                              '$widgetPage.pusherWidgetName'
+                                            );
 
                                             break;
                                           case 'noii':
                                             x.url.value =
                                               'https://psina.pages.dev/widgets/noii.js';
-                                            x.name.value = 'Индикатор NOII';
+                                            x.name.value = ppp.t(
+                                              '$widgetPage.noiiWidgetName'
+                                            );
 
                                             break;
                                         }
                                       }}"
                                     >
                                       <ppp-option value="noii">
-                                        Индикатор NOII
+                                        ${() =>
+                                          ppp.t('$widgetPage.noiiWidgetName')}
                                       </ppp-option>
                                       <ppp-option value="simple-frame-widget">
-                                        Фрейм
+                                        ${() => ppp.t('$const.widget.frame')}
                                       </ppp-option>
                                       <ppp-option
                                         value="pusher-subscription-widget"
                                       >
-                                        Сообщения Pusher
+                                        ${() =>
+                                          ppp.t('$widgetPage.pusherWidgetName')}
                                       </ppp-option>
                                     </ppp-select>
                                   </div>
@@ -596,7 +666,7 @@ export const widgetPageTemplate = html`
                     slot="controls"
                     appearance="red"
                   >
-                    Виджет удалён
+                    ${() => ppp.t('$widgetPage.widgetRemovedBadge')}
                   </ppp-badge>
                 `
               )}
@@ -611,8 +681,8 @@ export const widgetPageTemplate = html`
                   ${(x) =>
                     x.document.type === 'custom' &&
                     typeof x.widgetDefinition?.customElement === 'undefined'
-                      ? 'Продолжить'
-                      : 'Сохранить виджет'}
+                      ? ppp.t('$widgetPage.proceed')
+                      : ppp.t('$widgetPage.saveWidget')}
                 </ppp-button>
                 <ppp-button
                   ?hidden="${(x) => !x.document._id || x.mounted}"
@@ -620,7 +690,7 @@ export const widgetPageTemplate = html`
                   appearance="danger"
                   @click="${(x) => x.cleanupAndRemoveDocument()}"
                 >
-                  Удалить
+                  ${() => ppp.t('$g.delete')}
                 </ppp-button>
               </div>
             </div>
@@ -633,7 +703,7 @@ export const widgetPageTemplate = html`
                 <div class="control-stack">
                   <div class="drawer-header">
                     <div class="drawer-header-inner">
-                      <h3>Предварительный просмотр</h3>
+                      <h3>${() => ppp.t('$widgetPage.previewHeader')}</h3>
                     </div>
                   </div>
                   <ppp-checkbox
@@ -647,7 +717,7 @@ export const widgetPageTemplate = html`
                       ppp.settings.get('autoApplyWidgetModifications') ?? true}"
                     ?disabled="${(x) => !x.isSteady()}"
                   >
-                    Применять настройки по мере редактирования
+                    ${() => ppp.t('$widgetPage.autoApplyModifications')}
                   </ppp-checkbox>
                   <ppp-button
                     ${ref('autoApplyWidgetModificationsButton')}
@@ -656,7 +726,7 @@ export const widgetPageTemplate = html`
                     ?disabled="${(x) => !x.isSteady()}"
                     @click="${(x) => x.applyModifications()}"
                   >
-                    Применить текущие настройки
+                    ${() => ppp.t('$widgetPage.applyCurrentModifications')}
                   </ppp-button>
                 </div>
               </div>
@@ -670,7 +740,7 @@ export const widgetPageTemplate = html`
                   ${(x) => x.widgetDefinition.title}
                 </span>
                 <span ?hidden="${(x) => x.isSteady()}" class="positive">
-                  Идёт загрузка, подождите...
+                  ${() => ppp.t('$widgetPage.loadingInProgress')}
                 </span>
               </h2>
               ${when(
@@ -699,7 +769,7 @@ export const widgetPageTemplate = html`
                   <hr class="divider" />
                   <div class="widget-area">
                     <ppp-banner class="inline" appearance="warning">
-                      Виджет появится здесь после загрузки.
+                      ${() => ppp.t('$widgetPage.widgetWillAppearAfterLoading')}
                     </ppp-banner>
                   </div>
                 `
@@ -723,7 +793,9 @@ export const widgetPageTemplate = html`
                 html`
                   <hr class="divider" />
                   <div class="summary">
-                    <div class="summary-left">Коллекция</div>
+                    <div class="summary-left">
+                      ${() => ppp.t('$widgetPage.collection')}
+                    </div>
                     <div class="summary-right">
                       <span class="positive"
                         >${(x) => x.widgetDefinition.collection}</span
@@ -1133,7 +1205,7 @@ export class WidgetPage extends Page {
 
     if (typeof this.widgetDefinition?.customElement !== 'object') {
       invalidate(this.url, {
-        errorMessage: 'Этот виджет не может быть загружен.',
+        errorMessage: ppp.t('$widgetPage.widgetCannotBeLoaded'),
         raiseException: true
       });
     }
@@ -1166,7 +1238,7 @@ export class WidgetPage extends Page {
         this.widgetSettings = null;
 
         invalidate(this.url, {
-          errorMessage: 'Неверный или неполный URL',
+          errorMessage: ppp.t('$widgetPage.invalidOrIncompleteUrl'),
           raiseException: true
         });
       }
@@ -1511,10 +1583,10 @@ export class WidgetPage extends Page {
     if (!url && this.document.type === 'custom') {
       this.widgetDefinitionLoaded = false;
       this.widgetDefinition = {
-        title: 'По ссылке',
-        tags: ['Загружаемый виджет'],
+        title: ppp.t('$widgetPage.byLink'),
+        tags: [ppp.t('$widgetPage.loadableWidgetTag')],
         collection: null,
-        description: 'Введите название виджета и его URL, чтобы продолжить.'
+        description: ppp.t('$widgetPage.customWidgetDescription')
       };
 
       this.endOperation();
@@ -1545,7 +1617,7 @@ export class WidgetPage extends Page {
 
         if (typeof this.widgetDefinition?.customElement !== 'object') {
           invalidate(this.url, {
-            errorMessage: 'Этот виджет не может быть загружен.',
+            errorMessage: ppp.t('$widgetPage.widgetCannotBeLoaded'),
             raiseException: true
           });
         }
@@ -1704,7 +1776,7 @@ export class WidgetPage extends Page {
           this.loadedWidgetTag = null;
 
           invalidate(this.url, {
-            errorMessage: 'Этот URL не может быть использован',
+            errorMessage: ppp.t('$page.urlCannotBeUsed'),
             raiseException: true
           });
         }

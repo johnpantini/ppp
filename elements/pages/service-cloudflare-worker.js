@@ -23,6 +23,7 @@ import '../query-select.js';
 import '../select.js';
 import '../snippet.js';
 import '../text-field.js';
+await ppp.i18n(import.meta.url);
 
 export const predefinedWorkerData = {
   default: {
@@ -99,7 +100,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
           <section>
             <div class="control-stack">
               <ppp-banner class="inline" appearance="warning">
-                Глобальная ссылка сервиса в Cloudflare:
+                ${() => ppp.t('$serviceCloudflareWorkerPage.globalLinkBanner')}
               </ppp-banner>
               <ppp-copyable>
                 ${(x) =>
@@ -111,15 +112,14 @@ export const serviceCloudflareWorkerPageTemplate = html`
       )}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -127,9 +127,14 @@ export const serviceCloudflareWorkerPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Профиль Cloudflare API</h5>
+          <h5>
+            ${() => ppp.t('$serviceCloudflareWorkerPage.cloudflareApiProfile')}
+          </h5>
           <p class="description">
-            Необходим для авторизации, нельзя изменить после создания.
+            ${() =>
+              ppp.t(
+                '$serviceCloudflareWorkerPage.cloudflareApiProfileDescription'
+              )}
           </p>
         </div>
         <div class="input-group">
@@ -174,15 +179,23 @@ export const serviceCloudflareWorkerPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Cloudflare
+            ${() => ppp.t('$serviceCloudflareWorkerPage.addCloudflareApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="implementation-area">
           <div class="label-group full" style="min-width: 600px">
-            <h5>Реализация сервиса</h5>
-            <p class="description">Код Cloudflare Worker.</p>
+            <h5>
+              ${() =>
+                ppp.t('$serviceCloudflareWorkerPage.serviceImplementation')}
+            </h5>
+            <p class="description">
+              ${() =>
+                ppp.t(
+                  '$serviceCloudflareWorkerPage.serviceImplementationDescription'
+                )}
+            </p>
             <ppp-snippet
               style="height: 750px"
               :code="${(x) =>
@@ -193,10 +206,10 @@ export const serviceCloudflareWorkerPageTemplate = html`
           </div>
           <div class="control-stack">
             <div class="label-group full">
-              <h5>Версионирование</h5>
+              <h5>${() => ppp.t('$serviceCloudflareWorkerPage.versioning')}</h5>
               <p class="description">
-                Включите настройку, чтобы отслеживать версию сервиса и
-                предлагать обновления.
+                ${() =>
+                  ppp.t('$serviceCloudflareWorkerPage.versioningDescription')}
               </p>
               <ppp-checkbox
                 ?checked="${(x) => x.document.useVersioning ?? false}"
@@ -206,21 +219,27 @@ export const serviceCloudflareWorkerPageTemplate = html`
                 }}"
                 ${ref('useVersioning')}
               >
-                Отслеживать версию сервиса по этому файлу:
+                ${() => ppp.t('$serviceCloudflareWorkerPage.trackVersionByFile')}
               </ppp-checkbox>
               <ppp-text-field
                 ?disabled="${(x) => !x.useVersioning.checked}"
-                placeholder="Введите ссылку"
+                placeholder="${() =>
+                  ppp.t('$serviceCloudflareWorkerPage.enterUrlPlaceholder')}"
                 value="${(x) => x.document.versioningUrl ?? ''}"
                 @input="${(x) => (x.workerPredefinedTemplate.value = 'custom')}"
                 ${ref('versioningUrl')}
               ></ppp-text-field>
             </div>
             <div class="label-group full">
-              <h5>Шаблоны готовых сервисов</h5>
+              <h5>
+                ${() =>
+                  ppp.t('$serviceCloudflareWorkerPage.predefinedTemplates')}
+              </h5>
               <p class="description">
-                Воспользуйтесь шаблонами готовых сервисов для их быстрой
-                настройки.
+                ${() =>
+                  ppp.t(
+                    '$serviceCloudflareWorkerPage.predefinedTemplatesDescription'
+                  )}
               </p>
               <div class="control-stack" style="align-items: unset">
                 <ppp-select
@@ -228,17 +247,31 @@ export const serviceCloudflareWorkerPageTemplate = html`
                     x.document.workerPredefinedTemplate ?? 'default'}"
                   ${ref('workerPredefinedTemplate')}
                 >
-                  <ppp-option value="custom">По файлу отслеживания</ppp-option>
-                  <ppp-option value="default">Тестовый пример</ppp-option>
-                  <ppp-option value="tradingview">
-                    Прокси для ru.tradingview.com
+                  <ppp-option value="custom">
+                    ${() =>
+                      ppp.t('$serviceCloudflareWorkerPage.customTemplate')}
                   </ppp-option>
-                  <ppp-option value="thefly">Прокси для thefly.com</ppp-option>
+                  <ppp-option value="default">
+                    ${() =>
+                      ppp.t('$serviceCloudflareWorkerPage.defaultTemplate')}
+                  </ppp-option>
+                  <ppp-option value="tradingview">
+                    ${() =>
+                      ppp.t('$serviceCloudflareWorkerPage.tradingviewTemplate')}
+                  </ppp-option>
+                  <ppp-option value="thefly">
+                    ${() =>
+                      ppp.t('$serviceCloudflareWorkerPage.theflyTemplate')}
+                  </ppp-option>
                   <ppp-option value="psinaPusher">
-                    Интеграция Pusher и Psina
+                    ${() =>
+                      ppp.t('$serviceCloudflareWorkerPage.psinaPusherTemplate')}
                   </ppp-option>
                   <ppp-option value="psinaUsNewsBodyExtraction">
-                    Новости (Psina) - содержимое из AstraDB
+                    ${() =>
+                      ppp.t(
+                        '$serviceCloudflareWorkerPage.psinaUsNewsBodyExtractionTemplate'
+                      )}
                   </ppp-option>
                 </ppp-select>
                 ${when(
@@ -249,7 +282,8 @@ export const serviceCloudflareWorkerPageTemplate = html`
                       <ppp-query-select
                         ${ref('psinaPusherApiId')}
                         standalone
-                        placeholder="Выберите профиль API Pusher"
+                        placeholder="${() =>
+                          ppp.t('$serviceCloudflareWorkerPage.choosePusherApi')}"
                         :context="${(x) => x}"
                         :query="${() => {
                           return (context) => {
@@ -296,7 +330,8 @@ export const serviceCloudflareWorkerPageTemplate = html`
                       <ppp-query-select
                         ${ref('psinaUsNewsAstraDbApiId')}
                         standalone
-                        placeholder="Выберите профиль API AstraDB"
+                        placeholder="${() =>
+                          ppp.t('$serviceCloudflareWorkerPage.chooseAstraDbApi')}"
                         :context="${(x) => x}"
                         :query="${() => {
                           return (context) => {
@@ -334,21 +369,23 @@ export const serviceCloudflareWorkerPageTemplate = html`
                   `
                 )}
                 <ppp-checkbox ${ref('doNotFillEnvVars')}>
-                  Не заполнять переменные окружения
+                  ${() =>
+                    ppp.t('$serviceCloudflareWorkerPage.doNotFillEnvVars')}
                 </ppp-checkbox>
                 <ppp-button
                   @click="${(x) => x.fillOutFormsWithTemplate()}"
                   appearance="primary"
                 >
-                  Заполнить формы по этому шаблону
+                  ${() =>
+                    ppp.t('$serviceCloudflareWorkerPage.fillFormsWithTemplate')}
                 </ppp-button>
               </div>
             </div>
             <div class="label-group full">
-              <h5>Переменные окружения</h5>
+              <h5>${() => ppp.t('$serviceCloudflareWorkerPage.envVars')}</h5>
               <p class="description">
-                Объект JavaScript с переменными окружения, которые будут
-                переданы в Worker.
+                ${() =>
+                  ppp.t('$serviceCloudflareWorkerPage.envVarsDescription')}
               </p>
               <ppp-snippet
                 style="height: 150px"
@@ -359,11 +396,14 @@ export const serviceCloudflareWorkerPageTemplate = html`
               ></ppp-snippet>
             </div>
             <div class="label-group full">
-              <h5>Шифруемые переменные окружения</h5>
+              <h5>
+                ${() => ppp.t('$serviceCloudflareWorkerPage.secretEnvVars')}
+              </h5>
               <p class="description">
-                Объект JavaScript с переменными окружения, которые будут
-                переданы в Worker в исходном виде, но сохранены в базе данных в
-                зашифрованном.
+                ${() =>
+                  ppp.t(
+                    '$serviceCloudflareWorkerPage.secretEnvVarsDescription'
+                  )}
               </p>
               <ppp-snippet
                 style="height: 150px"
@@ -377,7 +417,7 @@ export const serviceCloudflareWorkerPageTemplate = html`
         </div>
       </section>
       ${documentPageFooterPartial({
-        text: 'Сохранить в PPP и обновить в Cloudflare'
+        text: ppp.t('$serviceCloudflareWorkerPage.saveAndUpdateInCloudflare')
       })}
     </form>
   </template>
@@ -428,7 +468,7 @@ export class ServiceCloudflareWorkerPage extends Page {
 
         await maybeFetchError(
           contentsResponse,
-          'Не удалось загрузить файл с шаблоном.'
+          ppp.t('$serviceCloudflareWorkerPage.cannotLoadTemplateFile')
         );
 
         const code = await contentsResponse.text();
@@ -479,11 +519,13 @@ export class ServiceCloudflareWorkerPage extends Page {
         this.useVersioning.checked = true;
 
         this.showSuccessNotification(
-          `Шаблон «${this.workerPredefinedTemplate.displayValue.trim()}» успешно загружен.`
+          ppp.t('$serviceCloudflareWorkerPage.templateLoaded', {
+            template: this.workerPredefinedTemplate.displayValue.trim()
+          })
         );
       } catch (e) {
         invalidate(this.versioningUrl, {
-          errorMessage: 'Неверный URL',
+          errorMessage: ppp.t('$serviceCloudflareWorkerPage.invalidUrl'),
           raiseException: true
         });
       }
@@ -511,7 +553,7 @@ export class ServiceCloudflareWorkerPage extends Page {
 
     await maybeFetchError(
       subdomainResponse,
-      'Ошибка чтения поддомена Cloudflare Workers.'
+      ppp.t('$serviceCloudflareWorkerPage.cannotReadSubdomain')
     );
 
     const subdomainData = await subdomainResponse.json();
@@ -519,7 +561,9 @@ export class ServiceCloudflareWorkerPage extends Page {
 
     if (!subdomain) {
       invalidate(this.cloudflareApiId, {
-        errorMessage: 'В сервисе Cloudflare Workers не настроен поддомен',
+        errorMessage: ppp.t(
+          '$serviceCloudflareWorkerPage.subdomainNotConfigured'
+        ),
         raiseException: true
       });
     }
@@ -537,7 +581,7 @@ export class ServiceCloudflareWorkerPage extends Page {
         ppp.getWorkerTemplateFullUrl(this.versioningUrl.value);
       } catch (e) {
         invalidate(this.versioningUrl, {
-          errorMessage: 'Неверный URL',
+          errorMessage: ppp.t('$serviceCloudflareWorkerPage.invalidUrl'),
           raiseException: true
         });
       }
@@ -555,7 +599,9 @@ export class ServiceCloudflareWorkerPage extends Page {
       )();
     } catch (e) {
       invalidate(this.environmentCode, {
-        errorMessage: 'Код содержит ошибки',
+        errorMessage: ppp.t(
+          '$serviceCloudflareWorkerPage.codeContainsErrors'
+        ),
         raiseException: true
       });
     }
@@ -570,7 +616,9 @@ export class ServiceCloudflareWorkerPage extends Page {
       )();
     } catch (e) {
       invalidate(this.environmentCodeSecret, {
-        errorMessage: 'Код содержит ошибки',
+        errorMessage: ppp.t(
+          '$serviceCloudflareWorkerPage.codeContainsErrors'
+        ),
         raiseException: true
       });
     }
@@ -680,7 +728,7 @@ export class ServiceCloudflareWorkerPage extends Page {
 
     await maybeFetchError(
       updateWorkerResponse,
-      'Не удалось развернуть сервис в Cloudflare.'
+      ppp.t('$serviceCloudflareWorkerPage.cannotDeployWorker')
     );
 
     const enableSubdomainResponse = await ppp.fetch(
@@ -700,7 +748,7 @@ export class ServiceCloudflareWorkerPage extends Page {
 
     await maybeFetchError(
       enableSubdomainResponse,
-      'Не удалось активировать поддомен *.dev для сервиса в Cloudflare.'
+      ppp.t('$serviceCloudflareWorkerPage.cannotEnableSubdomain')
     );
   }
 
@@ -761,7 +809,7 @@ export class ServiceCloudflareWorkerPage extends Page {
 
     await maybeFetchError(
       contentsResponse,
-      'Не удалось загрузить файл с шаблоном.'
+      ppp.t('$serviceCloudflareWorkerPage.cannotLoadTemplateFile')
     );
 
     this.sourceCode.updateCode(await contentsResponse.text());

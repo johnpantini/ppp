@@ -571,7 +571,7 @@ export class WidgetGroupControl extends PPPOffClickElement {
 
         if (typeof this.widget.instrumentTrader === 'undefined') {
           this.widget.notificationsArea?.error({
-            text: 'Не задан трейдер для работы с инструментом.'
+            text: ppp.t('$widget.noInstrumentTrader')
           });
         } else {
           this.widget.instrument = this.widget.instrumentTrader.adoptInstrument(
@@ -633,7 +633,7 @@ export const widgetSearchControlTemplate = html`
         <input
           ${ref('suggestInput')}
           spellcheck="false"
-          placeholder="Поиск по тикеру или названию инструмента"
+          placeholder="${() => ppp.t('$widget.searchPlaceholder')}"
           class="suggest-input"
           @input="${(x, c) => {
             x.search(c.event.target.value);
@@ -717,7 +717,7 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.ticker,
             html`
-              <div class="menu-title">Тикер</div>
+              <div class="menu-title">${() => ppp.t('$g.symbol')}</div>
               <div
                 class="menu-item"
                 @click="${(x) => x.chooseInstrument(x.ticker)}"
@@ -749,7 +749,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.stocks.length,
             html`
-              <div class="menu-title">Акции</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.stocks')}
+              </div>
               ${repeat(
                 (x) => x.stocks,
                 html`
@@ -783,7 +785,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.bonds.length,
             html`
-              <div class="menu-title">Облигации</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.bonds')}
+              </div>
               ${repeat(
                 (x) => x.bonds,
                 html`
@@ -817,7 +821,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.etfs.length,
             html`
-              <div class="menu-title">Фонды</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.etfs')}
+              </div>
               ${repeat(
                 (x) => x.etfs,
                 html`
@@ -851,7 +857,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.futures.length,
             html`
-              <div class="menu-title">Фьючерсы</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.futures')}
+              </div>
               ${repeat(
                 (x) => x.futures,
                 html`
@@ -885,7 +893,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.currencies.length,
             html`
-              <div class="menu-title">Валютные пары</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.currencyPairs')}
+              </div>
               ${repeat(
                 (x) => x.currencies,
                 html`
@@ -917,7 +927,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.cryptocurrencies.length,
             html`
-              <div class="menu-title">Криптовалютные пары</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.cryptoPairs')}
+              </div>
               ${repeat(
                 (x) => x.cryptocurrencies,
                 html`
@@ -949,7 +961,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.indices.length,
             html`
-              <div class="menu-title">Индексы</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.indices')}
+              </div>
               ${repeat(
                 (x) => x.indices,
                 html`
@@ -981,7 +995,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.commodities.length,
             html`
-              <div class="menu-title">Товары</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.commodities')}
+              </div>
               ${repeat(
                 (x) => x.commodities,
                 html`
@@ -1013,7 +1029,9 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.special.length,
             html`
-              <div class="menu-title">Специальные инструменты</div>
+              <div class="menu-title">
+                ${() => ppp.t('$widget.menu.special')}
+              </div>
               ${repeat(
                 (x) => x.special,
                 html`
@@ -2114,7 +2132,7 @@ export class WidgetNotificationsArea extends PPPElement {
 
   async openInstrumentsImport(trader) {
     const page = await ppp.app.mountPage('instruments-import', {
-      title: 'Импорт инструментов'
+      title: ppp.t('$widget.importInstrumentsTitle')
     });
 
     if (typeof trader.getDictionary === 'function')
@@ -2123,7 +2141,7 @@ export class WidgetNotificationsArea extends PPPElement {
 
   #appearance({
     status,
-    title = this.widget.document.name || 'Виджет',
+    title = this.widget.document.name || ppp.t('$widget.widgetFallbackTitle'),
     text,
     keep,
     timeout
@@ -2238,7 +2256,7 @@ export class WidgetHeaderButtons extends PPPElement {
     if (!this.widget.preview) {
       if (!this.widget.stackSelector) {
         return this.widget.notificationsArea.error({
-          text: 'Этот виджет не поддерживает создание ансамблей.'
+          text: ppp.t('$widget.ensembleNotSupported')
         });
       }
 
@@ -2410,7 +2428,7 @@ export class WidgetHeaderButtons extends PPPElement {
                   ppp.app.widgetClipboard = null;
 
                   this.widget.container.showSuccessNotification(
-                    'Виджет из буфера обмена был удалён и помещён в ансамбль другого виджета.'
+                    ppp.t('$widget.clipboardWidgetMovedToEnsemble')
                   );
                 }
 
@@ -2442,7 +2460,9 @@ export class WidgetHeaderButtons extends PPPElement {
       ppp.app.mountPoint.widget = this.widget;
 
       const page = await ppp.app.mountPage('widget', {
-        title: `Виджет - ${this.widget.document.name}`,
+        title: ppp.t('$widget.widgetSettingsTitle', {
+          name: this.widget.document.name
+        }),
         size: 'custom-size-for-widget-settings',
         documentId: this.widget.document._id,
         autoRead: true
@@ -2455,8 +2475,8 @@ export class WidgetHeaderButtons extends PPPElement {
       page.loadTemplateSettings = async () => {
         if (
           await ppp.app.confirm(
-            'Подставить настройки из шаблона',
-            'Текущие настройки виджета будут заменены на те, которые были указаны в родительском шаблоне. Подтвердите действие.'
+            ppp.t('$widget.applyTemplateSettingsTitle'),
+            ppp.t('$widget.applyTemplateSettingsText')
           )
         ) {
           page.document = Object.assign(
@@ -2512,9 +2532,9 @@ export class WidgetHeaderButtons extends PPPElement {
 
           container.lastWidgetSubmissionTime = Date.now();
 
-          page.showSuccessNotification('Виджет сохранён.');
+          page.showSuccessNotification(ppp.t('$widget.widgetSaved'));
         } catch (e) {
-          page.failOperation(e, 'Сохранение виджета');
+          page.failOperation(e, ppp.t('$widget.widgetSavingTitle'));
         } finally {
           page.endOperation();
         }
@@ -2534,8 +2554,10 @@ export class WidgetHeaderButtons extends PPPElement {
 
       if (ppp.settings.get('confirmWidgetClosing')) {
         shouldCloseNow = await ppp.app.confirm(
-          'Закрытие виджета',
-          `Закрыть виджет «${this.widget.document.name}» ?`
+          ppp.t('$widget.widgetClosingTitle'),
+          ppp.t('$widget.closeWidgetConfirm', {
+            name: this.widget.document.name
+          })
         );
       }
 
@@ -2917,10 +2939,10 @@ export const widgetTrifectaFieldTemplate = html`
           class="unit-selector"
           title="${(x) =>
             x.distanceUnit === '%'
-              ? 'В процентах'
+              ? ppp.t('$widget.inPercents')
               : x.distanceUnit === '+'
-                ? 'В шагах цены'
-                : 'В валюте'}"
+                ? ppp.t('$widget.inPriceSteps')
+                : ppp.t('$widget.inCurrency')}"
           @click="${(x) => x.toggleUnit()}"
         >
           <button ?disabled=${(x) => x.disabled}>
@@ -2954,7 +2976,7 @@ export const widgetTrifectaFieldTemplate = html`
         <ppp-widget-text-field
           class="price-placeholder"
           disabled
-          placeholder="Рыночная"
+          placeholder="${() => ppp.t('$widget.marketPricePlaceholder')}"
         >
         </ppp-widget-text-field>
       `

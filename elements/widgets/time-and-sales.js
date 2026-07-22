@@ -97,7 +97,7 @@ export const timeAndSalesWidgetTemplate = html`
         buttons: html`
           <div
             ?hidden="${(x) => !x.document.showPauseButton}"
-            title="Обновить вручную"
+            title="${() => ppp.t('$timeAndSalesWidget.refreshManually')}"
             class="button"
             slot="start"
             @click="${(x) => {
@@ -108,7 +108,7 @@ export const timeAndSalesWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !x.document.showPauseButton}"
-            title="Пауза"
+            title="${() => ppp.t('$timeAndSalesWidget.pause')}"
             class="button${(x) => (x.paused ? ' earth' : '')}"
             slot="start"
             @click="${(x) => {
@@ -119,7 +119,7 @@ export const timeAndSalesWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !x.document.showResetButton}"
-            title="Очистить виджет"
+            title="${() => ppp.t('$timeAndSalesWidget.clearWidget')}"
             class="button"
             slot="start"
             @click="${(x) => {
@@ -458,7 +458,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер ленты.',
+        text: ppp.t('$timeAndSalesWidget.noTradesTrader'),
         keep: true
       });
     }
@@ -901,7 +901,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
           );
 
           return this.notificationsArea.error({
-            text: 'Не удалось загрузить историю сделок.'
+            text: ppp.t('$timeAndSalesWidget.historyLoadFailed')
           });
         }
       }
@@ -914,7 +914,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 500,
-      errorMessage: 'Введите значение в диапазоне от 1 до 500'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 500 })
     });
     await validate(this.container.threshold);
 
@@ -930,7 +930,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
           return v >= 0 && v <= 10000000;
         },
-        errorMessage: 'Введите значение в диапазоне от 0 до 10000000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 0, max: 10000000 })
       });
     } else {
       try {
@@ -949,7 +949,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
         this.$$debug('[%s] validate failed: %o', this.document.name, e);
 
         invalidate(this.container.threshold, {
-          errorMessage: 'Код содержит ошибки.',
+          errorMessage: ppp.t('$timeAndSalesWidget.codeContainsErrors'),
           raiseException: true
         });
       }
@@ -979,11 +979,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.TIME_AND_SALES,
     collection: 'PPP',
-    title: html`Лента всех сделок`,
-    tags: ['Лента обезличенных сделок'],
-    description: html`<span class="positive">Лента всех сделок</span> отображает
-      обезличенные сделки с финансовым инструментом по всем доступным рыночным
-      центрам.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.TIME_AND_SALES}`)}`,
+    tags: [ppp.t('$timeAndSalesWidget.tags.anonymousTrades')],
+    description: html`<span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.TIME_AND_SALES}`)}
+      </span>
+      ${() => ppp.t('$timeAndSalesWidget.description')}`,
     customElement: TimeAndSalesWidget.compose({
       template: timeAndSalesWidgetTemplate,
       styles: timeAndSalesWidgetStyles
@@ -994,16 +995,23 @@ export async function widgetDefinition() {
     defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="main">
-        <ppp-tab id="main">Подключения</ppp-tab>
-        <ppp-tab id="columns">Столбцы</ppp-tab>
-        <ppp-tab id="filter">Фильтр</ppp-tab>
+        <ppp-tab id="main">
+          ${() => ppp.t('$timeAndSalesWidget.settings.tabs.main')}
+        </ppp-tab>
+        <ppp-tab id="columns">
+          ${() => ppp.t('$timeAndSalesWidget.settings.tabs.columns')}
+        </ppp-tab>
+        <ppp-tab id="filter">
+          ${() => ppp.t('$timeAndSalesWidget.settings.tabs.filter')}
+        </ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab-panel id="main-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер ленты</h5>
+              <h5>${() => ppp.t('$timeAndSalesWidget.settings.tradesTrader')}</h5>
               <p class="description">
-                Трейдер, который будет источником ленты сделок.
+                ${() =>
+                  ppp.t('$timeAndSalesWidget.settings.tradesTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1011,7 +1019,7 @@ export async function widgetDefinition() {
                 ${ref('tradesTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.tradesTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.tradesTrader ?? ''}"
@@ -1057,7 +1065,9 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="columns-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Столбцы таблицы сделок</h5>
+              <h5>
+                ${() => ppp.t('$timeAndSalesWidget.settings.tradesTableColumns')}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <ppp-widget-time-and-sales-column-list
@@ -1073,11 +1083,10 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="filter-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Фильтр объёма</h5>
+              <h5>${() => ppp.t('$timeAndSalesWidget.settings.volumeFilter')}</h5>
               <p class="description">
-                Сделки с объёмом меньше указанного не будут отображены в ленте.
-                Чтобы всегда отображать все сделки, введите 0. Можно вводить
-                целые, дробные числа или код тела функции JavaScript.
+                ${() =>
+                  ppp.t('$timeAndSalesWidget.settings.volumeFilterDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -1092,25 +1101,29 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс заголовка</h5>
+              <h5>
+                ${() => ppp.t('$timeAndSalesWidget.settings.headerInterface')}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showResetButton ?? false}"
               ${ref('showResetButton')}
             >
-              Показывать кнопку очистки
+              ${() => ppp.t('$timeAndSalesWidget.settings.showResetButton')}
             </ppp-checkbox>
              <ppp-checkbox
               ?checked="${(x) => x.document.showPauseButton ?? false}"
               ${ref('showPauseButton')}
             >
-              Показывать кнопку паузы
+              ${() => ppp.t('$timeAndSalesWidget.settings.showPauseButton')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Формат отображения времени</h5>
+              <h5>
+                ${() => ppp.t('$timeAndSalesWidget.settings.timeDisplayFormat')}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -1119,19 +1132,30 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.timeColumnOptions ?? 'default'}"
                 ${ref('timeColumnOptions')}
               >
-                <ppp-radio value="default">Часы, минуты, секунды</ppp-radio>
-                <ppp-radio value="fractional">Часы, минуты, секунды, миллисекунды</ppp-radio>
-                <ppp-radio value="day-1">День, часы, минуты, секунды</ppp-radio>
-                <ppp-radio value="compact">Часы, минуты</ppp-radio>
-                <ppp-radio value="day-2">День, часы, минуты</ppp-radio>
+                <ppp-radio value="default">
+                  ${() => ppp.t('$timeAndSalesWidget.settings.timeFormatHms')}
+                </ppp-radio>
+                <ppp-radio value="fractional">
+                  ${() => ppp.t('$timeAndSalesWidget.settings.timeFormatHmsf')}
+                </ppp-radio>
+                <ppp-radio value="day-1">
+                  ${() =>
+                    ppp.t('$timeAndSalesWidget.settings.timeFormatDayHms')}
+                </ppp-radio>
+                <ppp-radio value="compact">
+                  ${() => ppp.t('$timeAndSalesWidget.settings.timeFormatHm')}
+                </ppp-radio>
+                <ppp-radio value="day-2">
+                  ${() => ppp.t('$timeAndSalesWidget.settings.timeFormatDayHm')}
+                </ppp-radio>
               </ppp-radio-group>
             </div>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Количество сделок для отображения</h5>
+              <h5>${() => ppp.t('$timeAndSalesWidget.settings.depth')}</h5>
               <p class="description">
-                Максимальное количество сделок, отображаемое в ленте.
+                ${() => ppp.t('$timeAndSalesWidget.settings.depthDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -1146,16 +1170,22 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Выделение сделок по объёму</h5>
+              <h5>
+                ${() => ppp.t('$timeAndSalesWidget.settings.volumeHighlight')}
+              </h5>
               <p class="description">
-                Будут выделяться сделки с объёмом не меньше заданного.
+                ${() =>
+                  ppp.t(
+                    '$timeAndSalesWidget.settings.volumeHighlightDescription'
+                  )}
               </p>
             </div>
             <div class="widget-settings-input-group">
               <ppp-text-field
                 standalone
                 type="number"
-                placeholder="Нет"
+                placeholder="${() =>
+                  ppp.t('$timeAndSalesWidget.settings.nonePlaceholder')}"
                 value="${(x) => x.document.highlightedVolumeThreshold ?? ''}"
                 ${ref('highlightedVolumeThreshold')}
               ></ppp-text-field>

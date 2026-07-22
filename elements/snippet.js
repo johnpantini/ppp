@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import Prism from '../vendor/prism.min.js';
 import { PPPAppearanceElement } from '../lib/ppp-element.js';
 import {
@@ -103,7 +104,11 @@ export const snippetTemplate = html`
         )} class="code language-js"></code></pre>
       </div>
       <div class="panel">
-        <button title="Скопировать" class="copy" @click="${(x) => x.copy()}">
+        <button
+          title="${() => ppp.t('$g.copy')}"
+          class="copy"
+          @click="${(x) => x.copy()}"
+        >
           <span class="icon">
             ${when((x) => x.copied, html`${html.partial(checkmarkWithCircle)}`)}
             ${when((x) => !x.copied, html`${html.partial(copy)}`)}
@@ -114,7 +119,7 @@ export const snippetTemplate = html`
           html`
             <button
               class="revert"
-              title="Восстановить значение по умолчанию"
+              title="${() => ppp.t('$g.restoreDefaultValue')}"
               @click="${(x) => x.revert()}"
             >
               <span class="icon">
@@ -132,7 +137,7 @@ export const snippetTemplate = html`
           html`
             <button
               class="wizard"
-              title="Воспользоваться библиотекой шаблонов"
+              title="${() => ppp.t('$g.useTemplateLibrary')}"
               @click="${(x) => {
                 x.$emit('wizard', {
                   snippet: x

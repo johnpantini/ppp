@@ -290,7 +290,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер ленты операций.',
+        text: ppp.t('$timeLineWidget.noTimelineTrader'),
         keep: true
       });
     }
@@ -639,7 +639,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 100,
-      errorMessage: 'Введите значение в диапазоне от 1 до 100'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 100 })
     });
   }
 
@@ -661,10 +661,13 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.TIMELINE,
     collection: 'PPP',
-    title: html`Лента операций`,
-    description: html`Виджет
-      <span class="positive">Лента операций</span> отображает историю сделок и
-      других биржевых событий по одному или нескольким торговым инструментам.`,
+    title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.TIMELINE)}`,
+    description: html`${() =>
+        ppp.t('$timeLineWidget.widgetDescriptionPrefix')}
+      <span class="positive">
+        ${() => ppp.t('$const.widget.' + WIDGET_TYPES.TIMELINE)}
+      </span>
+      ${() => ppp.t('$timeLineWidget.widgetDescriptionSuffix')}`,
     customElement: TimelineWidget.compose({
       template: timelineWidgetTemplate,
       styles: timelineWidgetStyles
@@ -676,9 +679,9 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер ленты операций</h5>
+          <h5>${() => ppp.t('$timeLineWidget.timelineTrader')}</h5>
           <p class="description">
-            Трейдер, который будет источником ленты операций.
+            ${() => ppp.t('$timeLineWidget.timelineTraderDescription')}
           </p>
         </div>
         <div class="control-line flex-start">
@@ -686,7 +689,7 @@ export async function widgetDefinition() {
             ${ref('timelineTraderId')}
             deselectable
             standalone
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.timelineTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.timelineTrader ?? ''}"
@@ -730,9 +733,9 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Количество операций для отображения</h5>
+          <h5>${() => ppp.t('$timeLineWidget.operationsToDisplay')}</h5>
           <p class="description">
-            Максимальное количество операций, отображаемое в ленте.
+            ${() => ppp.t('$timeLineWidget.operationsToDisplayDescription')}
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -747,26 +750,26 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Интерфейс</h5>
+          <h5>${() => ppp.t('$timeLineWidget.interface')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.highlightTrades}"
           ${ref('highlightTrades')}
         >
-          Выделять покупки и продажи фоновым цветом
+          ${() => ppp.t('$timeLineWidget.highlightTrades')}
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.disableInstrumentFiltering}"
           ${ref('disableInstrumentFiltering')}
         >
-          Не фильтровать содержимое по выбранному инструменту
+          ${() => ppp.t('$timeLineWidget.disableInstrumentFiltering')}
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.showCommissions}"
           ${ref('showCommissions')}
         >
-          Показывать комиссии
+          ${() => ppp.t('$timeLineWidget.showCommissions')}
         </ppp-checkbox>
       </div>
     `

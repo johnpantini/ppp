@@ -17,6 +17,8 @@ import '../radio-group.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderAlpacaV2PlusTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -27,8 +29,10 @@ export const traderAlpacaV2PlusTemplate = html`
       ${traderNameAndRuntimePartial({ editableCaps: true })}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль UTEX, Alpaca или Psina.</p>
+          <h5>${() => ppp.t('$traderAlpacaV2PlusPage.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderAlpacaV2PlusPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -80,7 +84,7 @@ export const traderAlpacaV2PlusTemplate = html`
                 })}"
               appearance="primary"
             >
-              Добавить профиль UTEX
+              ${() => ppp.t('$traderAlpacaV2PlusPage.addUtexProfile')}
             </ppp-button>
             <ppp-button
               @click="${() =>
@@ -90,7 +94,7 @@ export const traderAlpacaV2PlusTemplate = html`
                 })}"
               appearance="primary"
             >
-              Добавить профиль Alpaca
+              ${() => ppp.t('$traderAlpacaV2PlusPage.addAlpacaProfile')}
             </ppp-button>
             <ppp-button
               @click="${() =>
@@ -100,24 +104,23 @@ export const traderAlpacaV2PlusTemplate = html`
                 })}"
               appearance="primary"
             >
-              Добавить профиль Psina
+              ${() => ppp.t('$traderAlpacaV2PlusPage.addPsinaProfile')}
             </ppp-button>
           </div>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>URL для подключения к общему потоку рыночных данных</h5>
+          <h5>${() => ppp.t('$traderAlpacaV2PlusPage.wsUrlTitle')}</h5>
           <p class="description">
-            Ссылка для передачи данных книги заявок и ленты всех сделок. Можно
-            сформировать по сервису, если таковой имеется (воспользуйтесь
-            выпадающим списком).
+            ${() => ppp.t('$traderAlpacaV2PlusPage.wsUrlDescription')}
           </p>
           <div>
             <ppp-query-select
               ${ref('aspirantWorkerSelector')}
               :context="${(x) => x}"
-              :placeholder="${() => 'Нажмите, чтобы выбрать сервис'}"
+              :placeholder="${() =>
+                ppp.t('$traderAlpacaV2PlusPage.clickToSelectService')}"
               :query="${() => {
                 return (context) => {
                   return context.services
@@ -146,7 +149,7 @@ export const traderAlpacaV2PlusTemplate = html`
               appearance="primary"
               @click="${(x) => x.generateLink(x.aspirantWorkerSelector.value)}"
             >
-              Сформировать ссылку
+              ${() => ppp.t('$traderAlpacaV2PlusPage.generateLink')}
             </ppp-button>
           </div>
         </div>
@@ -160,11 +163,12 @@ export const traderAlpacaV2PlusTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тайм-аут восстановления соединения</h5>
+          <h5>
+            ${() => ppp.t('$traderAlpacaV2PlusPage.reconnectTimeoutTitle')}
+          </h5>
           <p class="description">
-            Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверу. Задаётся в
-            миллисекундах, по умолчанию 1000 мс.
+            ${() =>
+              ppp.t('$traderAlpacaV2PlusPage.reconnectTimeoutDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -179,14 +183,16 @@ export const traderAlpacaV2PlusTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Параметры рыночных данных</h5>
+          <h5>
+            ${() => ppp.t('$traderAlpacaV2PlusPage.marketDataSettingsTitle')}
+          </h5>
         </div>
         <div class="input-group">
           <ppp-checkbox
             ?checked="${(x) => x.document.useLots}"
             ${ref('useLots')}
           >
-            Передавать объёмы акций в книге заявок в лотах
+            ${() => ppp.t('$traderAlpacaV2PlusPage.useLotsCheckbox')}
           </ppp-checkbox>
         </div>
       </section>
@@ -204,7 +210,7 @@ export const checkConnection = async (control, login, password) => {
     new URL(control.value);
   } catch (e) {
     invalidate(control, {
-      errorMessage: 'Неверный или неполный URL',
+      errorMessage: ppp.t('$traderAlpacaV2PlusPage.invalidUrl'),
       raiseException: true
     });
   }
@@ -215,7 +221,7 @@ export const checkConnection = async (control, login, password) => {
 
       return url.protocol === 'wss:' || url.protocol === 'ws:';
     },
-    errorMessage: 'Недопустимый протокол URL'
+    errorMessage: ppp.t('$traderAlpacaV2PlusPage.invalidUrlProtocol')
   });
 
   try {
@@ -261,8 +267,8 @@ export const checkConnection = async (control, login, password) => {
     invalidate(control, {
       errorMessage:
         e instanceof ConnectionLimitExceededError
-          ? 'Исчерпан лимит доступных соединений'
-          : 'Не удалось соединиться, проверьте ссылку и брокера',
+          ? ppp.t('$traderAlpacaV2PlusPage.connectionLimitExceeded')
+          : ppp.t('$traderAlpacaV2PlusPage.connectionFailedCheckLink'),
       raiseException: true
     });
   }
@@ -434,7 +440,7 @@ export class TraderAlpacaV2PlusPage extends TraderCommonPage {
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
-        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 100, max: 10000 })
       });
     }
   }

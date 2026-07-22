@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import {
   html,
   repeat,
@@ -45,19 +46,31 @@ export const widgetTimeframeListTemplate = html`
                 ?disabled="${(x) => x.hidden}"
                 value="${(x) => x.unit ?? 'Day'}"
               >
-                <ppp-option value="Sec">Секунда</ppp-option>
-                <ppp-option value="Min">Минута</ppp-option>
-                <ppp-option value="Hour">Час</ppp-option>
-                <ppp-option value="Day">День</ppp-option>
-                <ppp-option value="Week">Неделя</ppp-option>
-                <ppp-option value="Month">Месяц</ppp-option>
+                <ppp-option value="Sec">
+                  ${() => ppp.t('$const.timeframeLabel.Sec')}
+                </ppp-option>
+                <ppp-option value="Min">
+                  ${() => ppp.t('$const.timeframeLabel.Min')}
+                </ppp-option>
+                <ppp-option value="Hour">
+                  ${() => ppp.t('$const.timeframeLabel.Hour')}
+                </ppp-option>
+                <ppp-option value="Day">
+                  ${() => ppp.t('$const.timeframeLabel.Day')}
+                </ppp-option>
+                <ppp-option value="Week">
+                  ${() => ppp.t('$const.timeframeLabel.Week')}
+                </ppp-option>
+                <ppp-option value="Month">
+                  ${() => ppp.t('$const.timeframeLabel.Month')}
+                </ppp-option>
               </ppp-select>
               <ppp-text-field
                 timeframe-value
                 type="number"
                 standalone
                 ?disabled="${(x) => x.hidden}"
-                placeholder="Значение"
+                placeholder="${() => ppp.t('$g.value')}"
                 value="${(item) => item.value ?? 1}"
               ></ppp-text-field>
             </div>
@@ -66,7 +79,7 @@ export const widgetTimeframeListTemplate = html`
                 timeframe-name
                 standalone
                 ?disabled="${(x) => x.hidden}"
-                placeholder="Название"
+                placeholder="${() => ppp.t('$g.name')}"
                 value="${(item) => item.name}"
               ></ppp-text-field>
             </div>
@@ -93,10 +106,10 @@ export class WidgetTimeframeList extends ClonableList {
 
   formatAllowedTimeframesHint() {
     if (!this.allowedTimeframeList?.length) {
-      return '// Трейдер не задан или не поддерживает таймфреймы.';
+      return ppp.t('$widget.traderNoTimeframes');
     }
 
-    let result = '// Поддерживаемые таймфреймы:\n{\n';
+    let result = ppp.t('$widget.supportedTimeframes') + '\n{\n';
 
     this.allowedTimeframeList.forEach(({ name, values, interval }, i) => {
       let value = '1';
@@ -127,7 +140,7 @@ export class WidgetTimeframeList extends ClonableList {
 
       await validate(value, {
         hook: async (value) => +value > 0 && !isNaN(+value),
-        errorMessage: 'Значение должно быть положительным'
+        errorMessage: ppp.t('$widget.valueMustBePositive')
       });
     }
   }

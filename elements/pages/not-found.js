@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { arrowLeft } from '../../static/svg/sprite.js';
@@ -12,16 +13,16 @@ import {
 } from '../../design/design-tokens.js';
 import '../button.js';
 
+await ppp.i18n(import.meta.url);
+
 export const notFoundPageTemplate = html`
   <template>
     <main>
       <div class="content">
         <img src="static/svg/404.svg" draggable="false" alt="404" />
         <div class="details">
-          <p class="headline">Что-то пошло не так.</p>
-          <p class="text">
-            Страница не открывается. Убедитесь, что адрес введён правильно.
-          </p>
+          <p class="headline">${() => ppp.t('$notFoundPage.headline')}</p>
+          <p class="text">${() => ppp.t('$notFoundPage.text')}</p>
           <div class="actions">
             <ppp-button
               @click="${() =>
@@ -30,7 +31,7 @@ export const notFoundPageTemplate = html`
                 })}"
               appearance="primary"
             >
-              К настройкам облачных сервисов
+              ${() => ppp.t('$notFoundPage.goToCloudServices')}
               <span slot="start">${html.partial(arrowLeft)}</span>
             </ppp-button>
           </div>
@@ -38,7 +39,7 @@ export const notFoundPageTemplate = html`
       </div>
       <div class="footer">
         <div class="copyright">
-          <p>© PPP 2021-текущее время.</p>
+          <p>${() => ppp.t('$notFoundPage.copyright')}</p>
         </div>
       </div>
     </main>

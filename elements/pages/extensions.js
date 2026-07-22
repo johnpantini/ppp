@@ -6,22 +6,24 @@ import '../badge.js';
 import '../button.js';
 import '../table.js';
 
+await ppp.i18n(import.meta.url);
+
 export const extensionsPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список дополнений
+        ${() => ppp.t('$extensionsPage.listHeader')}
         <ppp-button
           appearance="primary"
           slot="controls"
           @click="${() =>
             ppp.app.mountPage('new-extension-modal', {
-              title: 'Установить дополнение',
+              title: ppp.t('$extensionsPage.installExtension'),
               size: 'large'
             })}"
         >
-          Установить дополнение
+          ${() => ppp.t('$extensionsPage.installExtension')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -32,22 +34,22 @@ export const extensionsPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Автор'
+            label: ppp.t('$extensionsPage.authorColumn')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$extensionsPage.createdAtColumn')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$extensionsPage.updatedAtColumn')
           },
           {
-            label: 'Версия'
+            label: ppp.t('$extensionsPage.versionColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$extensionsPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -93,14 +95,14 @@ export const extensionsPageTemplate = html`
                         return false;
                       }}"
                     >
-                      Открыть дополнение
+                      ${() => ppp.t('$extensionsPage.openExtension')}
                     </ppp-button>
                     <ppp-button
                       action="cleanup"
                       :datum="${() => datum}"
                       class="xsmall"
                     >
-                      Удалить
+                      ${() => ppp.t('$g.delete')}
                     </ppp-button>
                   </div>
                 `

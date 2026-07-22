@@ -18,7 +18,22 @@ export default function (i18n) {
       lotAtPrice: '%{lotCount} по цене %{price}',
       buyOperation: 'Покупка %{tradedCount} %{instrumentFullName}',
       sellOperation: 'Продажа %{tradedCount} %{instrumentFullName}',
-      locateFeeOperation: 'Займ %{tradedCount} %{instrumentFullName}'
+      locateFeeOperation: 'Займ %{tradedCount} %{instrumentFullName}',
+      noTimelineTrader: 'Отсутствует трейдер ленты операций.',
+      widgetDescriptionPrefix: 'Виджет',
+      widgetDescriptionSuffix:
+        'отображает историю сделок и других биржевых событий по одному или нескольким торговым инструментам.',
+      timelineTrader: 'Трейдер ленты операций',
+      timelineTraderDescription:
+        'Трейдер, который будет источником ленты операций.',
+      operationsToDisplay: 'Количество операций для отображения',
+      operationsToDisplayDescription:
+        'Максимальное количество операций, отображаемое в ленте.',
+      interface: 'Интерфейс',
+      highlightTrades: 'Выделять покупки и продажи фоновым цветом',
+      disableInstrumentFiltering:
+        'Не фильтровать содержимое по выбранному инструменту',
+      showCommissions: 'Показывать комиссии'
     }
   });
 }

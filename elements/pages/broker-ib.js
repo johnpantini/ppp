@@ -15,6 +15,8 @@ import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerIbPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -24,10 +26,9 @@ export const brokerIbPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -40,8 +41,10 @@ export const brokerIbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Хост TWS</h5>
-          <p class="description">Хост Trader Workstation.</p>
+          <h5>${() => ppp.t('$brokerIbPage.twsHost')}</h5>
+          <p class="description">
+            ${() => ppp.t('$brokerIbPage.twsHostDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -53,8 +56,10 @@ export const brokerIbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Порт TWS</h5>
-          <p class="description">Порт Trader Workstation.</p>
+          <h5>${() => ppp.t('$brokerIbPage.twsPort')}</h5>
+          <p class="description">
+            ${() => ppp.t('$brokerIbPage.twsPortDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -67,11 +72,9 @@ export const brokerIbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ссылка на шлюз TWS API</h5>
+          <h5>${() => ppp.t('$brokerIbPage.gatewayUrlTitle')}</h5>
           <p class="description">
-            Конечная точка, которая будет использована для взаимодействия с IB.
-            Можно установить по сервису типа Aspirant Worker (шаблон «Шлюз TWS
-            API»):
+            ${() => ppp.t('$brokerIbPage.gatewayUrlDescription')}
           </p>
           <ppp-query-select
             ${ref('ibGatewayServiceId')}
@@ -122,13 +125,13 @@ export const brokerIbPageTemplate = html`
 
                 x.ibGatewayUrl.value = `${aspirantUrl}workers/${datum._id}/`;
               } catch (e) {
-                x.failOperation(e, 'Ссылка на шлюз');
+                x.failOperation(e, ppp.t('$brokerIbPage.gatewayLink'));
               } finally {
                 x.endOperation();
               }
             }}"
           >
-            Взять ссылку из сервиса
+            ${() => ppp.t('$brokerIbPage.takeLinkFromService')}
           </ppp-button>
         </div>
         <div class="input-group">
@@ -179,7 +182,10 @@ export class BrokerIbPage extends Page {
       })
     });
 
-    await maybeFetchError(connectionResponse, 'Нет связи со шлюзом.');
+    await maybeFetchError(
+      connectionResponse,
+      ppp.t('$brokerIbPage.noGatewayConnection')
+    );
     await later(3000);
 
     const timeResponse = await fetch(`${gatewayUrl}call`, {
@@ -190,13 +196,16 @@ export class BrokerIbPage extends Page {
       })
     });
 
-    await maybeFetchError(timeResponse, 'Шлюз не выполнил запрос времени.');
+    await maybeFetchError(
+      timeResponse,
+      ppp.t('$brokerIbPage.gatewayTimeRequestFailed')
+    );
 
     const { result } = await timeResponse.json();
 
     if (typeof result !== 'number') {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Шлюз ответил ошибкой на запрос времени.',
+        errorMessage: ppp.t('$brokerIbPage.gatewayTimeRequestError'),
         raiseException: true
       });
     }

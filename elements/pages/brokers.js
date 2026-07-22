@@ -13,7 +13,7 @@ export const brokersPageTemplate = html`
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список брокеров
+        ${() => ppp.t('$brokersPage.title')}
         <ppp-button
           appearance="primary"
           slot="controls"
@@ -22,7 +22,7 @@ export const brokersPageTemplate = html`
               page: 'broker'
             })}"
         >
-          Добавить брокера
+          ${() => ppp.t('$brokersPage.addBroker')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -33,22 +33,22 @@ export const brokersPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Тип'
+            label: ppp.t('$brokersPage.type')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$brokersPage.createdAt')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$brokersPage.updatedAt')
           },
           {
-            label: 'Версия'
+            label: ppp.t('$brokersPage.version')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$brokersPage.actions')
           }
         ]}"
         :rows="${(x) =>
@@ -84,7 +84,7 @@ export const brokersPageTemplate = html`
                     :datum="${() => datum}"
                     class="xsmall"
                   >
-                    Удалить
+                    ${() => ppp.t('$g.delete')}
                   </ppp-button>
                 `
               ]

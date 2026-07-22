@@ -34,6 +34,8 @@ import '../snippet.js';
 import '../terminal.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const predefinedParserData = {
   default: {
     url: '/lib/supabase-parser/default-parser.js',
@@ -46,18 +48,18 @@ link text not null`,
       await fetch(`${ppp.rootUrl}/lib/supabase-parser/default-parser.js`)
     ).text(),
     insertTriggerCode: `/**
- * @constant {string} TABLE_NAME - Имя таблицы состояния.
+ * @constant {string} TABLE_NAME - State table name.
  */
 void 0;`,
     deleteTriggerCode: `/**
- * @constant {string} TABLE_NAME - Имя таблицы состояния.
+ * @constant {string} TABLE_NAME - State table name.
  */
 void 0;`,
     formatterCode: `/**
- * Функция форматирования сообщения о новой записи в таблице состояния.
+ * Formatter function for a message about a new record in the state table.
  *
- * @param {json} record - Запись, вставленная в таблицу состояния.
- * @var consts - Статические данные, сформированные на этапе сохранения сервиса.
+ * @param {json} record - The record inserted into the state table.
+ * @var consts - Static data generated when the service is saved.
  */
 const formatDateTime = (pubDate) => {
   const [date, timeZ] = new Date(Date.parse(pubDate || new Date()))
@@ -84,11 +86,11 @@ priority bool not null,
 link text`,
     constsCode: 'return [];',
     insertTriggerCode: `/**
- * @constant {string} TABLE_NAME - Имя таблицы состояния.
+ * @constant {string} TABLE_NAME - State table name.
  */
 void 0;`,
     deleteTriggerCode: `/**
- * @constant {string} TABLE_NAME - Имя таблицы состояния.
+ * @constant {string} TABLE_NAME - State table name.
  */
 void 0;`,
     formatterCode: `const formatDateTime = (pubDate) => {
@@ -225,15 +227,14 @@ export const serviceSupabaseParserPageTemplate = html`
       )}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -241,7 +242,7 @@ export const serviceSupabaseParserPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Профиль API Supabase</h5>
+          <h5>${() => ppp.t('$serviceSupabaseParserPage.supabaseApiProfile')}</h5>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -282,23 +283,23 @@ export const serviceSupabaseParserPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Supabase
+            ${() => ppp.t('$serviceSupabaseParserPage.addSupabaseApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Интеграция с Pusher</h5>
+          <h5>${() => ppp.t('$serviceSupabaseParserPage.pusherIntegration')}</h5>
           <p class="description">
-            Опциональная интеграция, позволяющая принимать сообщения от парсера
-            в канал ppp платформы Pusher.
+            ${() =>
+              ppp.t('$serviceSupabaseParserPage.pusherIntegrationDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-query-select
             ${ref('pusherApiId')}
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.pusherApiId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.pusherApi ?? ''}"
@@ -337,23 +338,25 @@ export const serviceSupabaseParserPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Pusher
+            ${() => ppp.t('$serviceSupabaseParserPage.addPusherApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Ресурс</h5>
+          <h5>${() => ppp.t('$serviceSupabaseParserPage.resource')}</h5>
           <p class="description">
-            Произвольная ссылка, которая будет передана в код настройки через
-            ключ url. Для автоматического заполнения используйте шаблоны:
+            ${() => ppp.t('$serviceSupabaseParserPage.resourceDescription')}
           </p>
           <div>
             <ppp-select
-              placeholder="Выберите шаблон"
+              placeholder="${() =>
+                ppp.t('$serviceSupabaseParserPage.selectTemplate')}"
               ${ref('urlTemplateSelect')}
             >
-              <ppp-option value="thefly">Новости TheFly</ppp-option>
+              <ppp-option value="thefly">
+                ${() => ppp.t('$serviceSupabaseParserPage.theflyNews')}
+              </ppp-option>
             </ppp-select>
             ${when(
               (x) => x.urlTemplateSelect.value === 'thefly',
@@ -361,7 +364,8 @@ export const serviceSupabaseParserPageTemplate = html`
                 <ppp-query-select
                   ${ref('cloudflareWorkerSelector')}
                   :context="${(x) => x}"
-                  :placeholder="${() => 'Нажмите, чтобы выбрать сервис'}"
+                  :placeholder="${() =>
+                    ppp.t('$serviceSupabaseParserPage.clickToSelectService')}"
                   :query="${() => {
                     return (context) => {
                       return context.services
@@ -391,7 +395,7 @@ export const serviceSupabaseParserPageTemplate = html`
               @click="${(x) =>
                 x.generateUrlByTemplate(x.urlTemplateSelect.value)}"
             >
-              Вставить ссылку по шаблону
+              ${() => ppp.t('$serviceSupabaseParserPage.insertUrlByTemplate')}
             </ppp-button>
           </div>
         </div>
@@ -407,10 +411,9 @@ export const serviceSupabaseParserPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Фрейм</h5>
+          <h5>${() => ppp.t('$serviceSupabaseParserPage.frame')}</h5>
           <p class="description">
-            Произвольная ссылка, которая будет вставлена в iframe на странице
-            сервиса.
+            ${() => ppp.t('$serviceSupabaseParserPage.frameDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -425,9 +428,10 @@ export const serviceSupabaseParserPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Интервал опроса</h5>
+          <h5>${() => ppp.t('$serviceSupabaseParserPage.pollingInterval')}</h5>
           <p class="description">
-            Периодичность парсинга. Задаётся в секундах.
+            ${() =>
+              ppp.t('$serviceSupabaseParserPage.pollingIntervalDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -441,9 +445,9 @@ export const serviceSupabaseParserPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Глубина хранения</h5>
+          <h5>${() => ppp.t('$serviceSupabaseParserPage.storageDepth')}</h5>
           <p class="description">
-            Максимальное количество записей для хранения в базе данных.
+            ${() => ppp.t('$serviceSupabaseParserPage.storageDepthDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -458,10 +462,10 @@ export const serviceSupabaseParserPageTemplate = html`
       <section>
         <div class="implementation-area">
           <div class="label-group full" style="min-width: 600px">
-            <h5>Функция парсинга</h5>
+            <h5>${() => ppp.t('$serviceSupabaseParserPage.parsingFunction')}</h5>
             <p class="description">
-              Тело функции на языке PLV8, возвращающей массив элементов на
-              каждой итерации парсинга.
+              ${() =>
+                ppp.t('$serviceSupabaseParserPage.parsingFunctionDescription')}
             </p>
             <ppp-snippet
               style="height: 1378px"
@@ -476,15 +480,15 @@ export const serviceSupabaseParserPageTemplate = html`
               @click="${(x) => x.callParsingFunction()}"
               appearance="primary"
             >
-              Выполнить функцию
+              ${() => ppp.t('$serviceSupabaseParserPage.callFunction')}
             </ppp-button>
           </div>
           <div class="control-stack">
             <div class="label-group full">
-              <h5>Версионирование</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.versioning')}</h5>
               <p class="description">
-                Включите настройку, чтобы отслеживать версию сервиса и
-                предлагать обновления.
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.versioningDescription')}
               </p>
               <ppp-checkbox
                 ?checked="${(x) => x.document.useVersioning ?? false}"
@@ -494,43 +498,52 @@ export const serviceSupabaseParserPageTemplate = html`
                 }}"
                 ${ref('useVersioning')}
               >
-                Отслеживать версию сервиса по этому файлу:
+                ${() => ppp.t('$serviceSupabaseParserPage.trackVersionByFile')}
               </ppp-checkbox>
               <ppp-text-field
                 ?disabled="${(x) => !x.useVersioning.checked}"
-                placeholder="Введите ссылку"
+                placeholder="${() =>
+                  ppp.t('$serviceSupabaseParserPage.enterLink')}"
                 value="${(x) => x.document.versioningUrl ?? ''}"
                 ${ref('versioningUrl')}
               ></ppp-text-field>
             </div>
             <div class="label-group full">
-              <h5>Шаблоны готовых сервисов</h5>
+              <h5>
+                ${() => ppp.t('$serviceSupabaseParserPage.predefinedTemplates')}
+              </h5>
               <p class="description">
-                Воспользуйтесь шаблонами готовых сервисов для их быстрой
-                настройки.
+                ${() =>
+                  ppp.t(
+                    '$serviceSupabaseParserPage.predefinedTemplatesDescription'
+                  )}
               </p>
               <ppp-select
                 value="${(x) =>
                   x.document.parserPredefinedTemplate ?? 'default'}"
                 ${ref('parserPredefinedTemplate')}
               >
-                <ppp-option value="default">По умолчанию</ppp-option>
-                <ppp-option value="thefly">Новости TheFly</ppp-option>
+                <ppp-option value="default">
+                  ${() => ppp.t('$serviceSupabaseParserPage.defaultTemplate')}
+                </ppp-option>
+                <ppp-option value="thefly">
+                  ${() => ppp.t('$serviceSupabaseParserPage.theflyNews')}
+                </ppp-option>
               </ppp-select>
               <div class="spacing2"></div>
               <ppp-button
                 @click="${(x) => x.fillOutParserFormsWithTemplate()}"
                 appearance="primary"
               >
-                Заполнить формы по этому шаблону
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.fillOutFormsWithTemplate')}
               </ppp-button>
             </div>
             <div class="label-group full">
-              <h5>Поля таблицы состояния</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.tableSchema')}</h5>
               <p class="description">
-                Поля таблицы для хранения обработанных записей. Будут размещены
-                внутри выражения CREATE TABLE. Их можно задать только на этапе
-                создания или после удаления сервиса.
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.tableSchemaDescription')}
               </p>
               <ppp-snippet
                 style="height: 150px"
@@ -543,11 +556,10 @@ export const serviceSupabaseParserPageTemplate = html`
               ></ppp-snippet>
             </div>
             <div class="label-group full">
-              <h5>Статические данные</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.constsData')}</h5>
               <p class="description">
-                Тело функции на языке PLV8, возвращающей словари и прочие
-                неизменяемые данные, настраиваемые единоразово во время
-                сохранения сервиса.
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.constsDataDescription')}
               </p>
               <ppp-snippet
                 style="height: 256px"
@@ -562,14 +574,14 @@ export const serviceSupabaseParserPageTemplate = html`
                 @click="${(x) => x.callConstsFunction()}"
                 appearance="primary"
               >
-                Выполнить функцию
+                ${() => ppp.t('$serviceSupabaseParserPage.callFunction')}
               </ppp-button>
             </div>
             <div class="label-group full">
-              <h5>Добавление записи</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.insertTrigger')}</h5>
               <p class="description">
-                Произвольный код на языке PLV8, который будет исполнен при
-                добавлении записи в таблицу состояния.
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.insertTriggerDescription')}
               </p>
               <ppp-snippet
                 style="height: 150px"
@@ -580,10 +592,10 @@ export const serviceSupabaseParserPageTemplate = html`
               ></ppp-snippet>
             </div>
             <div class="label-group full">
-              <h5>Удаление записи</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.deleteTrigger')}</h5>
               <p class="description">
-                Произвольный код на языке PLV8, который будет исполнен при
-                удалении записи из таблицы состояния.
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.deleteTriggerDescription')}
               </p>
               <ppp-snippet
                 style="height: 150px"
@@ -598,14 +610,12 @@ export const serviceSupabaseParserPageTemplate = html`
                 ?checked="${(x) => x.document.telegramEnabled ?? false}"
                 ${ref('telegramEnabled')}
               >
-                Также отправлять уведомления в Telegram
+                ${() => ppp.t('$serviceSupabaseParserPage.alsoSendToTelegram')}
               </ppp-checkbox>
               <div class="spacing2"></div>
-              <h5>Бот</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.bot')}</h5>
               <p class="description">
-                Будет использован для публикации сообщений при парсинге новых
-                записей. Должен обладать соответствующими правами в
-                канале/группе.
+                ${() => ppp.t('$serviceSupabaseParserPage.botDescription')}
               </p>
               <ppp-query-select
                 ${ref('botId')}
@@ -640,29 +650,34 @@ export const serviceSupabaseParserPageTemplate = html`
                   })}"
                 appearance="primary"
               >
-                Добавить бота
+                ${() => ppp.t('$serviceSupabaseParserPage.addBot')}
               </ppp-button>
             </div>
             <div class="label-group full">
-              <h5>Канал или группа</h5>
+              <h5>${() => ppp.t('$serviceSupabaseParserPage.channelOrGroup')}</h5>
               <p class="description">
-                Идентификатор канала или группы, куда будут отправляться
-                уведомления о торговых паузах.
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.channelOrGroupDescription')}
               </p>
               <ppp-text-field
                 ?disabled="${(x) => !x.telegramEnabled.checked}"
                 type="number"
-                placeholder="Канал или группа"
+                placeholder="${() =>
+                  ppp.t('$serviceSupabaseParserPage.channelOrGroup')}"
                 value="${(x) => x.document.channel}"
                 ${ref('channel')}
               ></ppp-text-field>
             </div>
             <div class="label-group full">
-              <h5>Форматирование уведомлений</h5>
+              <h5>
+                ${() =>
+                  ppp.t('$serviceSupabaseParserPage.notificationFormatting')}
+              </h5>
               <p class="description">
-                Логика форматирования итогового сообщения в Telegram на языке
-                PLV8. Тестовое сообщение использует первый элемент данных,
-                полученный от функции парсинга.
+                ${() =>
+                  ppp.t(
+                    '$serviceSupabaseParserPage.notificationFormattingDescription'
+                  )}
               </p>
               <ppp-snippet
                 style="height: 256px"
@@ -679,14 +694,14 @@ export const serviceSupabaseParserPageTemplate = html`
                 @click="${(x) => x.sendTestMessage()}"
                 appearance="primary"
               >
-                Отправить тестовое сообщение
+                ${() => ppp.t('$serviceSupabaseParserPage.sendTestMessage')}
               </ppp-button>
             </div>
           </div>
         </div>
       </section>
       ${documentPageFooterPartial({
-        text: 'Сохранить в PPP и обновить в Supabase',
+        text: ppp.t('$serviceSupabaseParserPage.saveToPPPAndUpdateInSupabase'),
         extraControls: servicePageFooterExtraControls
       })}
     </form>
@@ -724,7 +739,7 @@ export class ServiceSupabaseParserPage extends Page {
       });
 
       this.showSuccessNotification(
-        'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
+        ppp.t('$serviceSupabaseParserPage.functionExecutedSeeConsole')
       );
     } catch (e) {
       this.failOperation(e);
@@ -749,7 +764,7 @@ export class ServiceSupabaseParserPage extends Page {
 
         await maybeFetchError(
           contentsResponse,
-          'Не удалось загрузить файл с шаблоном.'
+          ppp.t('$serviceSupabaseParserPage.couldNotLoadTemplateFile')
         );
 
         this.parsingCode.updateCode(await contentsResponse.text());
@@ -767,11 +782,13 @@ export class ServiceSupabaseParserPage extends Page {
         this.useVersioning.checked = true;
 
         this.showSuccessNotification(
-          `Шаблон «${this.parserPredefinedTemplate.displayValue.trim()}» успешно загружен.`
+          ppp.t('$serviceSupabaseParserPage.templateLoaded', {
+            name: this.parserPredefinedTemplate.displayValue.trim()
+          })
         );
       } catch (e) {
         invalidate(this.versioningUrl, {
-          errorMessage: 'Неверный URL',
+          errorMessage: ppp.t('$serviceSupabaseParserPage.invalidUrl'),
           raiseException: true
         });
       }
@@ -815,7 +832,7 @@ export class ServiceSupabaseParserPage extends Page {
 
       if (!returnResult)
         this.showSuccessNotification(
-          'База данных выполнила функцию успешно. Смотрите результат в консоли браузера.'
+          ppp.t('$serviceSupabaseParserPage.functionExecutedSeeConsole')
         );
 
       return result;
@@ -841,8 +858,9 @@ export class ServiceSupabaseParserPage extends Page {
         console.log(firstRecord);
 
         invalidate(ppp.app.toast, {
-          errorMessage:
-            'Функция парсинга вернула результат, который не пригоден для форматирования.',
+          errorMessage: ppp.t(
+            '$serviceSupabaseParserPage.parsingResultNotSuitable'
+          ),
           raiseException: true
         });
       }
@@ -906,7 +924,9 @@ export class ServiceSupabaseParserPage extends Page {
         functionBody
       });
 
-      this.showSuccessNotification('Сообщение отправлено.');
+      this.showSuccessNotification(
+        ppp.t('$serviceSupabaseParserPage.messageSent')
+      );
     } catch (e) {
       this.failOperation(e);
     } finally {
@@ -1036,12 +1056,12 @@ export class ServiceSupabaseParserPage extends Page {
     await validate(this.interval);
     await validate(this.interval, {
       hook: async (value) => +value > 0 && +value <= 1000,
-      errorMessage: 'Введите значение в диапазоне от 1 до 1000'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 1000 })
     });
     await validate(this.depth);
     await validate(this.depth, {
       hook: async (value) => +value >= 30 && +value <= 1000000,
-      errorMessage: 'Введите значение в диапазоне от 30 до 1000000'
+      errorMessage: ppp.t('$page.valueInRange', { min: 30, max: 1000000 })
     });
 
     if (this.useVersioning.checked) {
@@ -1052,7 +1072,7 @@ export class ServiceSupabaseParserPage extends Page {
         ppp.getWorkerTemplateFullUrl(this.versioningUrl.value);
       } catch (e) {
         invalidate(this.versioningUrl, {
-          errorMessage: 'Неверный URL',
+          errorMessage: ppp.t('$serviceSupabaseParserPage.invalidUrl'),
           raiseException: true
         });
       }
@@ -1091,7 +1111,7 @@ export class ServiceSupabaseParserPage extends Page {
     if (this.useVersioning.checked) {
       if (!parsed || typeof version !== 'number') {
         invalidate(this.parsingCode, {
-          errorMessage: 'Не удалось прочитать версию',
+          errorMessage: ppp.t('$page.couldNotReadVersion'),
           raiseException: true
         });
       }
@@ -1153,7 +1173,7 @@ export class ServiceSupabaseParserPage extends Page {
 
     await maybeFetchError(
       contentsResponse,
-      'Не удалось загрузить файл с шаблоном.'
+      ppp.t('$serviceSupabaseParserPage.couldNotLoadTemplateFile')
     );
 
     this.parsingCode.updateCode(await contentsResponse.text());

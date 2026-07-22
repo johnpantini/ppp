@@ -6,6 +6,7 @@ import { cloud, search } from '../../static/svg/sprite.js';
 import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
+await ppp.i18n(import.meta.url);
 
 export function serviceStateAppearance(document) {
   if (document.removed) return 'red';
@@ -61,7 +62,7 @@ export const servicePageHeaderExtraControls = html`
         appearance="primary"
         @click="${(x) => x.updateService?.()}"
       >
-        Обновить
+        ${() => ppp.t('$servicePage.update')}
         <span slot="start">${html.partial(cloud)}</span>
       </ppp-button>
     `
@@ -77,7 +78,7 @@ export const servicePageFooterExtraControls = html`
       x.document.state === SERVICE_STATE.FAILED}"
     @click="${(x) => x.restartService()}"
   >
-    Перезапустить
+    ${() => ppp.t('$servicePage.restart')}
   </ppp-button>
   <ppp-button
     ?hidden="${(x) => !x.document._id}"
@@ -88,7 +89,7 @@ export const servicePageFooterExtraControls = html`
       x.document.state === SERVICE_STATE.STOPPED}"
     @click="${(x) => x.stopService()}"
   >
-    Приостановить
+    ${() => ppp.t('$servicePage.pause')}
   </ppp-button>
 `;
 
@@ -96,11 +97,11 @@ export const servicePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>Сервисы</ppp-page-header>
+      <ppp-page-header>${() => ppp.t('$collection.services')}</ppp-page-header>
       <ppp-text-field
         class="global-search-input"
         type="search"
-        placeholder="Поиск"
+        placeholder="${() => ppp.t('$servicePage.searchPlaceholder')}"
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
@@ -117,12 +118,12 @@ export const servicePageTemplate = html`
           />
           <span slot="title">Cloudflare Worker</span>
           <span slot="description">
-            Бессерверная разработка от Cloudflare.&nbsp;<a
+            ${() => ppp.t('$servicePage.cloudflareWorkerDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://workers.cloudflare.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$servicePage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -132,26 +133,28 @@ export const servicePageTemplate = html`
                 page: `service-${SERVICES.CLOUDFLARE_WORKER}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$servicePage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card hidden>
           <img
             slot="logo"
             draggable="false"
-            alt="Торговые паузы NYSE/NASDAQ"
+            alt="${() => ppp.t('$servicePage.nyseNsdqHaltsTitle')}"
             style="height: 44px"
             src="${() => ppp.brandSvg('nsdq')}"
           />
-          <span slot="title">Торговые паузы NYSE/NASDAQ</span>
+          <span slot="title">
+            ${() => ppp.t('$servicePage.nyseNsdqHaltsTitle')}
+          </span>
           <span slot="description">
-            Оповещение о торговых паузах NYSE/NASDAQ в Telegram.
+            ${() => ppp.t('$servicePage.nyseNsdqHaltsDescription')}
             <a
               class="link"
               target="_blank"
               rel="noopener"
               href="http://www.nasdaqtrader.com/rss.aspx?feed=tradehalts"
-              >RSS-лента пауз</a
+              >${() => ppp.t('$servicePage.haltsRssFeed')}</a
             >.
           </span>
           <ppp-button
@@ -161,20 +164,22 @@ export const servicePageTemplate = html`
                 page: `service-${SERVICES.NYSE_NSDQ_HALTS}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$servicePage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card hidden>
           <img
             slot="logo"
             draggable="false"
-            alt="Парсер (Supabase)"
+            alt="${() => ppp.t('$servicePage.supabaseParserTitle')}"
             style="height: 40px"
             src="${() => ppp.brandSvg('supabase')}"
           />
-          <span slot="title">Парсер (Supabase)</span>
+          <span slot="title">
+            ${() => ppp.t('$servicePage.supabaseParserTitle')}
+          </span>
           <span slot="description">
-            Парсер общего назначения на основе Supabase.
+            ${() => ppp.t('$servicePage.supabaseParserDescription')}
           </span>
           <ppp-button
             slot="action"
@@ -183,7 +188,7 @@ export const servicePageTemplate = html`
                 page: `service-${SERVICES.SUPABASE_PARSER}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$servicePage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -196,7 +201,7 @@ export const servicePageTemplate = html`
           />
           <span slot="title">Aspirant</span>
           <span slot="description">
-            Сервис для запуска долго работающих процессов в облаке.
+            ${() => ppp.t('$servicePage.aspirantDescription')}
           </span>
           <div slot="action" class="control-line">
             <ppp-button
@@ -205,7 +210,7 @@ export const servicePageTemplate = html`
                   page: `service-${SERVICES.CLOUD_PPP_ASPIRANT}`
                 })}"
             >
-              В облаке
+              ${() => ppp.t('$servicePage.inCloud')}
             </ppp-button>
             <ppp-button
               @click="${() =>
@@ -213,7 +218,7 @@ export const servicePageTemplate = html`
                   page: `service-${SERVICES.DEPLOYED_PPP_ASPIRANT}`
                 })}"
             >
-              По адресу
+              ${() => ppp.t('$servicePage.byUrl')}
             </ppp-button>
             <ppp-button
               @click="${() =>
@@ -235,7 +240,7 @@ export const servicePageTemplate = html`
           />
           <span slot="title">Aspirant Worker</span>
           <span slot="description">
-            Рабочий процес в облачном сервисе Aspirant.
+            ${() => ppp.t('$servicePage.aspirantWorkerDescription')}
           </span>
           <ppp-button
             slot="action"
@@ -244,7 +249,7 @@ export const servicePageTemplate = html`
                 page: `service-${SERVICES.PPP_ASPIRANT_WORKER}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$servicePage.continue')}
           </ppp-button>
         </ppp-generic-card>
       </div>

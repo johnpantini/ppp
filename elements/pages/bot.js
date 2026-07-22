@@ -13,6 +13,8 @@ import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const botPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -22,11 +24,8 @@ export const botPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название бота</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
+          <h5>${() => ppp.t('$botPage.botNameHeader')}</h5>
+          <p class="description">${() => ppp.t('$page.arbitraryProfileName')}</p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -38,22 +37,22 @@ export const botPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен бота</h5>
+          <h5>${() => ppp.t('$botPage.botTokenHeader')}</h5>
           <p class="description">
-            Будет сохранён в зашифрованном виде. Получить можно у
+            ${() => ppp.t('$botPage.botTokenDescription')}
             <a
               target="_blank"
               rel="noopener"
               href="https://telegram.me/BotFather"
               >@BotFather</a
             >
-            - отправьте ему команду /newbot
+            ${() => ppp.t('$botPage.botTokenDescriptionSuffix')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Токен бота"
+            placeholder="${() => ppp.t('$botPage.botTokenHeader')}"
             value="${(x) => x.document.token}"
             ${ref('token')}
           ></ppp-text-field>
@@ -63,8 +62,7 @@ export const botPageTemplate = html`
         <div class="label-group">
           <h5>Webhook</h5>
           <p class="description">
-            Укажите webhook для привязки к боту. Чтобы удалить webhook, оставьте
-            поле пустым.
+            ${() => ppp.t('$botPage.webhookDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -101,7 +99,7 @@ export class BotPage extends Page {
       ).ok
     ) {
       invalidate(this.token, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }
@@ -113,7 +111,7 @@ export class BotPage extends Page {
         new URL(webhook);
       } catch (e) {
         invalidate(this.webhook, {
-          errorMessage: 'Неверный или неполный URL',
+          errorMessage: ppp.t('$botPage.invalidOrIncompleteUrl'),
           raiseException: true
         });
       }
@@ -149,12 +147,12 @@ export class BotPage extends Page {
     if (this.webhook.value) {
       await maybeFetchError(
         await telegramBot.setWebhook(new URL(this.webhook.value).toString()),
-        'Ошибка установки webhook.'
+        ppp.t('$botPage.webhookSetError')
       );
     } else {
       await maybeFetchError(
         await telegramBot.deleteWebhook(),
-        'Ошибка удаления webhook.'
+        ppp.t('$botPage.webhookDeleteError')
       );
     }
 

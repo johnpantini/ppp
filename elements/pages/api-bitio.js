@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import {
   Page,
@@ -10,6 +11,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiBitioPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -19,10 +22,9 @@ export const apiBitioPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -35,16 +37,15 @@ export const apiBitioPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ API базы данных</h5>
+          <h5>${() => ppp.t('$apiBitioPage.dbApiKey')}</h5>
           <p class="description">
-            API-ключ базы bit.io. Можно получить в панели управления на вкладке
-            Connect.
+            ${() => ppp.t('$apiBitioPage.dbApiKeyDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="API-ключ"
+            placeholder="${() => ppp.t('$apiBitioPage.apiKeyPlaceholder')}"
             value="${(x) => x.document.apiKey}"
             ${ref('apiKey')}
           ></ppp-text-field>
@@ -52,8 +53,10 @@ export const apiBitioPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>База данных</h5>
-          <p class="description">Название базы данных для подключения.</p>
+          <h5>${() => ppp.t('$apiBitioPage.database')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiBitioPage.databaseDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field

@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiRenderPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +23,9 @@ export const apiRenderPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,17 +38,17 @@ export const apiRenderPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен API</h5>
+          <h5>${() => ppp.t('$apiRenderPage.apiToken')}</h5>
           <p class="description">
-            API-токен Render. Можно получить в
+            ${() => ppp.t('$apiRenderPage.apiTokenDescriptionPrefix')}
             <a
               class="link"
               href="https://dashboard.render.com/u/settings#api-keys"
               target="_blank"
               rel="noopener"
-              >панели управления</a
+              >${() => ppp.t('$apiRenderPage.apiTokenDescriptionLink')}</a
             >
-            профилем.
+            ${() => ppp.t('$apiRenderPage.apiTokenDescriptionSuffix')}
           </p>
         </div>
         <div class="input-group">
@@ -92,7 +93,7 @@ export class ApiRenderPage extends Page {
       ).ok
     ) {
       invalidate(this.token, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }

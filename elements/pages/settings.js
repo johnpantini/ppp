@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import '../tabs.js';
@@ -5,10 +6,12 @@ import './settings-appearance.js';
 import './settings-ui.js';
 import './settings-workspace.js';
 
+await ppp.i18n(import.meta.url);
+
 export const settingsPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
-    <ppp-page-header>Параметры</ppp-page-header>
+    <ppp-page-header>${() => ppp.t('$collection.settings')}</ppp-page-header>
     <ppp-tabs
       ${ref('tabs')}
       activeid="${(x) => x.getActiveTab()}"
@@ -18,8 +21,10 @@ export const settingsPageTemplate = html`
         });
       }}"
     >
-      <ppp-tab id="appearance">Тема и цвета</ppp-tab>
-      <ppp-tab id="workspace">Терминал</ppp-tab>
+      <ppp-tab id="appearance">
+        ${() => ppp.t('$settingsPage.themeAndColors')}
+      </ppp-tab>
+      <ppp-tab id="workspace">${() => ppp.t('$settingsPage.workspace')}</ppp-tab>
       <ppp-tab id="ui">UI</ppp-tab>
       <ppp-tab-panel id="appearance-panel"></ppp-tab-panel>
       <ppp-tab-panel id="workspace-panel"></ppp-tab-panel>

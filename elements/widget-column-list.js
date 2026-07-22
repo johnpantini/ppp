@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import {
   html,
   repeat,
@@ -31,7 +32,7 @@ export const widgetColumnListItemTemplate = html`
           class="name"
           standalone
           ?disabled="${(x) => x.column.hidden}"
-          placeholder="Название"
+          placeholder="${() => ppp.t('$g.name')}"
           value="${(x) => x.column.name}"
         ></ppp-text-field>
         <ppp-query-select
@@ -53,7 +54,7 @@ export const widgetColumnListItemTemplate = html`
                 ${item?.name}
               </span>
             `}"
-          placeholder="Трейдер #1"
+          placeholder="${() => ppp.t('$g.traderNumber', { n: 1 })}"
           variant="compact"
           :context="${(x) => x}"
           :query="${() => {
@@ -76,7 +77,7 @@ export const widgetColumnListItemTemplate = html`
             <ppp-text-field
               ${ref('valueKey')}
               standalone
-              placeholder="Ключ"
+              placeholder="${() => ppp.t('$g.key')}"
               value="${(x) => x.column.valueKey}"
             ></ppp-text-field>
           `
@@ -91,7 +92,7 @@ export const widgetColumnListItemTemplate = html`
               value="${(x) => x.column.highlightChanges}"
               ?checked="${(x) => x.column.highlightChanges}"
             >
-              Выделять изменения цветом
+              ${() => ppp.t('$widget.highlightChanges')}
             </ppp-checkbox>
           `
         )}
@@ -131,7 +132,7 @@ export const widgetColumnListItemTemplate = html`
                 ${item?.name}
               </span>
             `}"
-          placeholder="Трейдер #2"
+          placeholder="${() => ppp.t('$g.traderNumber', { n: 2 })}"
           variant="compact"
           :context="${(x) => x}"
           :query="${() => {

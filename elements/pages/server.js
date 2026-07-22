@@ -21,6 +21,8 @@ import '../table.js';
 import '../terminal.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const serverPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -39,15 +41,12 @@ export const serverPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
-          <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
-          </p>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
+          <p class="description">${() => ppp.t('$page.arbitraryProfileName')}</p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Мой сервер"
+            placeholder="${() => ppp.t('$serverPage.serverNamePlaceholder')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -55,9 +54,9 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервис-соединитель</h5>
+          <h5>${() => ppp.t('$serverPage.connectorServiceHeader')}</h5>
           <p class="description">
-            Будет использован для доступа к серверу по SSH.
+            ${() => ppp.t('$serverPage.connectorServiceDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -97,8 +96,10 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Адрес</h5>
-          <p class="description">Укажите имя хоста или IP-адрес сервера.</p>
+          <h5>${() => ppp.t('$serverPage.hostnameHeader')}</h5>
+          <p class="description">
+            ${() => ppp.t('$serverPage.hostnameDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -111,8 +112,8 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Порт</h5>
-          <p class="description">Укажите SSH-порт сервера.</p>
+          <h5>${() => ppp.t('$serverPage.portHeader')}</h5>
+          <p class="description">${() => ppp.t('$serverPage.portDescription')}</p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -125,7 +126,7 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Имя пользователя</h5>
+          <h5>${() => ppp.t('$serverPage.usernameHeader')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -137,7 +138,7 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тип авторизации</h5>
+          <h5>${() => ppp.t('$serverPage.authTypeHeader')}</h5>
         </div>
         <div class="input-group">
           <ppp-radio-group
@@ -145,15 +146,21 @@ export const serverPageTemplate = html`
             value="${(x) => x.document.authType ?? 'password'}"
             ${ref('authType')}
           >
-            <ppp-radio value="password">По паролю</ppp-radio>
-            <ppp-radio value="key">По приватному ключу</ppp-radio>
+            <ppp-radio value="password">
+              ${() => ppp.t('$serverPage.authByPassword')}
+            </ppp-radio>
+            <ppp-radio value="key">
+              ${() => ppp.t('$serverPage.authByKey')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ или пароль</h5>
-          <p class="description">Данные сохраняются в зашифрованном виде.</p>
+          <h5>${() => ppp.t('$serverPage.keyOrPasswordHeader')}</h5>
+          <p class="description">
+            ${() => ppp.t('$serverPage.keyOrPasswordDescription')}
+          </p>
         </div>
         <div class="input-group">
           <div
@@ -164,7 +171,7 @@ export const serverPageTemplate = html`
           >
             <ppp-text-field
               type="password"
-              placeholder="Введите пароль"
+              placeholder="${() => ppp.t('$serverPage.enterPassword')}"
               value="${(x) => x.document.password}"
               ${ref('password')}
             ></ppp-text-field>
@@ -175,7 +182,7 @@ export const serverPageTemplate = html`
           >
             <ppp-snippet
               style="height: 256px"
-              placeholder="Введите ключ"
+              placeholder="${() => ppp.t('$serverPage.enterKey')}"
               :code="${(x) =>
                 x.document.key ??
                 `-----BEGIN RSA PRIVATE KEY-----
@@ -188,7 +195,7 @@ export const serverPageTemplate = html`
               @click="${(x) => x.loadPrivateKey()}"
               appearance="primary"
             >
-              Загрузить из файла
+              ${() => ppp.t('$serverPage.loadFromFile')}
             </ppp-button>
             <input
               @change="${(x, c) => x.handleFileSelection(c)}"
@@ -201,11 +208,10 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Команды, выполняемые до основной настройки</h5>
+          <h5>${() => ppp.t('$serverPage.preCommandsHeader')}</h5>
           <div class="spacing2"></div>
           <p class="description">
-            Произвольные команды, которые можно использовать в отладочных целях.
-            Не сохраняются в базе данных.
+            ${() => ppp.t('$serverPage.preCommandsDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -218,16 +224,16 @@ export const serverPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Список доменов</h5>
+          <h5>${() => ppp.t('$serverPage.domainListHeader')}</h5>
           <p class="description">
-            Домены, привязанные к серверу.
+            ${() => ppp.t('$serverPage.domainListDescription')}
           </p>
           <div class="spacing2"></div>
           <ppp-button
             ?disabled="${(x) => !x.document._id}"
             @click="${async (x) => {
               const page = await ppp.app.mountPage('new-domain-modal', {
-                title: 'Добавить домены',
+                title: ppp.t('$serverPage.addDomains'),
                 size: 'large'
               });
 
@@ -235,17 +241,17 @@ export const serverPageTemplate = html`
             }}"
             appearance="primary"
           >
-            Добавить домены
+            ${() => ppp.t('$serverPage.addDomains')}
           </ppp-button>
         </div>
         <div class="input-group">
           <ppp-table
             :columns="${() => [
               {
-                label: 'Домен'
+                label: ppp.t('$serverPage.domainColumn')
               },
               {
-                label: 'Действия'
+                label: ppp.t('$serverPage.actionsColumn')
               }
             ]}"
             :rows="${(x) =>
@@ -265,7 +271,7 @@ export const serverPageTemplate = html`
                       class="xsmall"
                       @click="${() => x.removeDomain(datum)}"
                     >
-                      Удалить
+                      ${() => ppp.t('$g.delete')}
                     </ppp-button>`
                   ]
                 };
@@ -288,8 +294,8 @@ export class ServerPage extends Page {
   async removeDomain(domain) {
     if (
       await ppp.app.confirm(
-        'Удаление домена',
-        `Будет удалён домен «${domain}». Подтвердите действие.`
+        ppp.t('$serverPage.domainRemovalTitle'),
+        ppp.t('$serverPage.confirmDomainRemoval', { domain })
       )
     ) {
       this.beginOperation();
@@ -320,7 +326,7 @@ export class ServerPage extends Page {
           this.showSuccessNotification();
         }
       } catch (e) {
-        this.failOperation(e, 'Удаление домена');
+        this.failOperation(e, ppp.t('$serverPage.domainRemovalTitle'));
       } finally {
         this.endOperation();
       }
@@ -418,7 +424,7 @@ export class ServerPage extends Page {
       }))
     ) {
       invalidate(this.host, {
-        errorMessage: 'Не удалось настроить сервер.',
+        errorMessage: ppp.t('$serverPage.serverSetupFailed'),
         raiseException: true
       });
     }

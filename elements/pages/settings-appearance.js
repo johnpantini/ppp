@@ -19,70 +19,131 @@ import {
   spacing4
 } from '../../design/design-tokens.js';
 import defaultTheme from '../../design/themes/tinkoff.js';
+import ppp from '../../ppp.js';
 import '../banner.js';
 import '../button.js';
 import '../radio-group.js';
 import '../select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
+const paletteLabel = (dt) => {
+  const [, color, , shade, n] =
+    dt.match(/^palette-([a-z]+)(-base|-(dark|light)-(\d))?$/) ?? [];
+
+  if (!color) return dt;
+
+  return (
+    ppp.t(`$settingsAppearancePage.palette.${color}`) +
+    (shade ? ` ${shade === 'dark' ? '-' : '+'}${n}` : '')
+  );
+};
+
+const paletteSelectOptionsSnippet = [
+  'palette-white',
+  'palette-black',
+  'palette-gray-dark-4',
+  'palette-gray-dark-3',
+  'palette-gray-dark-2',
+  'palette-gray-dark-1',
+  'palette-gray-base',
+  'palette-gray-light-1',
+  'palette-gray-light-2',
+  'palette-gray-light-3',
+  'palette-green-dark-3',
+  'palette-green-dark-2',
+  'palette-green-dark-1',
+  'palette-green-base',
+  'palette-green-light-1',
+  'palette-green-light-2',
+  'palette-green-light-3',
+  'palette-purple-dark-3',
+  'palette-purple-dark-2',
+  'palette-purple-base',
+  'palette-purple-light-2',
+  'palette-purple-light-3',
+  'palette-blue-dark-3',
+  'palette-blue-dark-2',
+  'palette-blue-dark-1',
+  'palette-blue-base',
+  'palette-blue-light-1',
+  'palette-blue-light-2',
+  'palette-blue-light-3',
+  'palette-yellow-dark-3',
+  'palette-yellow-dark-2',
+  'palette-yellow-base',
+  'palette-yellow-light-2',
+  'palette-yellow-light-3',
+  'palette-red-dark-3',
+  'palette-red-dark-2',
+  'palette-red-dark-1',
+  'palette-red-base',
+  'palette-red-light-1',
+  'palette-red-light-2',
+  'palette-red-light-3'
+]
+  .map((v) => `<ppp-option value="${v}">${paletteLabel(v)}</ppp-option>`)
+  .join('\n      ');
+
 const colorPairs = [
   {
-    h: 'Оформление ссылок',
+    h: ppp.t('$settingsAppearancePage.linkColor'),
     pair: 'linkColor'
   },
   {
-    h: 'Рост',
+    h: ppp.t('$settingsAppearancePage.increase'),
     pair: 'positive'
   },
   {
-    h: 'Падение',
+    h: ppp.t('$settingsAppearancePage.decrease'),
     pair: 'negative'
   },
   {
-    h: 'Покупка',
+    h: ppp.t('$g.buyButtonText'),
     pair: 'buy'
   },
   {
-    h: 'Продажа',
+    h: ppp.t('$g.sellButtonText'),
     pair: 'sell'
   },
   {
-    h: 'Покупка (активно)',
+    h: ppp.t('$settingsAppearancePage.buyHover'),
     pair: 'buyHover'
   },
   {
-    h: 'Продажа (активно)',
+    h: ppp.t('$settingsAppearancePage.sellHover'),
     pair: 'sellHover'
   },
   {
-    h: 'Тело свечи на графике (рост)',
+    h: ppp.t('$settingsAppearancePage.chartUpColor'),
     pair: 'chartUpColor'
   },
   {
-    h: 'Тело свечи на графике (падение)',
+    h: ppp.t('$settingsAppearancePage.chartDownColor'),
     pair: 'chartDownColor'
   },
   {
-    h: 'Обрамление свечи на графике (рост)',
+    h: ppp.t('$settingsAppearancePage.chartBorderUpColor'),
     pair: 'chartBorderUpColor'
   },
   {
-    h: 'Обрамление свечи на графике (падение)',
+    h: ppp.t('$settingsAppearancePage.chartBorderDownColor'),
     pair: 'chartBorderDownColor'
   },
   {
-    h: 'Фитиль свечи на графике (рост)',
+    h: ppp.t('$settingsAppearancePage.chartWickUpColor'),
     pair: 'chartWickUpColor'
   },
   {
-    h: 'Фитиль свечи на графике (падение)',
+    h: ppp.t('$settingsAppearancePage.chartWickDownColor'),
     pair: 'chartWickDownColor'
   }
 ];
 
 for (const g of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
   colorPairs.push({
-    h: `Группа виджетов ${g}`,
+    h: ppp.t('$settingsAppearancePage.widgetGroup', { n: g }),
     pair: `widgetGroup${g}`
   });
 }
@@ -92,49 +153,15 @@ const colorPairSelectSnippet = ({ index, pair, document }) => {
   const value = document[themePropName]?.[index] ?? defaultTheme[pair][index];
 
   return html` ${html.partial(`
-    <ppp-select index="${index}" pair="${pair}" value="${value}" placeholder="Выберите цвет">
-      <span slot="label">${index === 0 ? 'Светлое' : 'Тёмное'}</span>
-      <ppp-option value="palette-white">Белый</ppp-option>
-      <ppp-option value="palette-black">Чёрный</ppp-option>
-      <ppp-option value="palette-gray-dark-4">Серый -4</ppp-option>
-      <ppp-option value="palette-gray-dark-3">Серый -3</ppp-option>
-      <ppp-option value="palette-gray-dark-2">Серый -2</ppp-option>
-      <ppp-option value="palette-gray-dark-1">Серый -1</ppp-option>
-      <ppp-option value="palette-gray-base">Серый</ppp-option>
-      <ppp-option value="palette-gray-light-1">Серый +1</ppp-option>
-      <ppp-option value="palette-gray-light-2">Серый +2</ppp-option>
-      <ppp-option value="palette-gray-light-3">Серый +3</ppp-option>
-      <ppp-option value="palette-green-dark-3">Зелёный -3</ppp-option>
-      <ppp-option value="palette-green-dark-2">Зелёный -2</ppp-option>
-      <ppp-option value="palette-green-dark-1">Зелёный -1</ppp-option>
-      <ppp-option value="palette-green-base">Зелёный</ppp-option>
-      <ppp-option value="palette-green-light-1">Зелёный +1</ppp-option>
-      <ppp-option value="palette-green-light-2">Зелёный +2</ppp-option>
-      <ppp-option value="palette-green-light-3">Зелёный +3</ppp-option>
-      <ppp-option value="palette-purple-dark-3">Фиолетовый -3</ppp-option>
-      <ppp-option value="palette-purple-dark-2">Фиолетовый -2</ppp-option>
-      <ppp-option value="palette-purple-base">Фиолетовый</ppp-option>
-      <ppp-option value="palette-purple-light-2">Фиолетовый +2</ppp-option>
-      <ppp-option value="palette-purple-light-3">Фиолетовый +3</ppp-option>
-      <ppp-option value="palette-blue-dark-3">Синий -3</ppp-option>
-      <ppp-option value="palette-blue-dark-2">Синий -2</ppp-option>
-      <ppp-option value="palette-blue-dark-1">Синий -1</ppp-option>
-      <ppp-option value="palette-blue-base">Синий</ppp-option>
-      <ppp-option value="palette-blue-light-1">Синий +1</ppp-option>
-      <ppp-option value="palette-blue-light-2">Синий +2</ppp-option>
-      <ppp-option value="palette-blue-light-3">Синий +3</ppp-option>
-      <ppp-option value="palette-yellow-dark-3">Жёлтый -3</ppp-option>
-      <ppp-option value="palette-yellow-dark-2">Жёлтый -2</ppp-option>
-      <ppp-option value="palette-yellow-base">Жёлтый</ppp-option>
-      <ppp-option value="palette-yellow-light-2">Жёлтый +2</ppp-option>
-      <ppp-option value="palette-yellow-light-3">Жёлтый +3</ppp-option>
-      <ppp-option value="palette-red-dark-3">Красный -3</ppp-option>
-      <ppp-option value="palette-red-dark-2">Красный -2</ppp-option>
-      <ppp-option value="palette-red-dark-1">Красный -1</ppp-option>
-      <ppp-option value="palette-red-base">Красный</ppp-option>
-      <ppp-option value="palette-red-light-1">Красный +1</ppp-option>
-      <ppp-option value="palette-red-light-2">Красный +2</ppp-option>
-      <ppp-option value="palette-red-light-3">Красный +3</ppp-option>
+    <ppp-select index="${index}" pair="${pair}" value="${value}" placeholder="${ppp.t(
+      '$settingsAppearancePage.selectColor'
+    )}">
+      <span slot="label">${
+        index === 0
+          ? ppp.t('$settingsAppearancePage.light')
+          : ppp.t('$settingsAppearancePage.dark')
+      }</span>
+      ${paletteSelectOptionsSnippet}
     </ppp-select>
   `)}`;
 };
@@ -187,13 +214,13 @@ export const settingsAppearancePageTemplate = html`
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Оформление приложения</h5>
+          <h5>${() => ppp.t('$settingsAppearancePage.appearanceHeader')}</h5>
           <p class="description">
-            Светлое, тёмное или по выбору операционной системы.
+            ${() => ppp.t('$settingsAppearancePage.appearanceDescription')}
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Оформление вступит в силу после сохранения изменений.
+            ${() => ppp.t('$settingsAppearancePage.appearanceBanner')}
           </ppp-banner>
         </div>
         <div class="input-group">
@@ -202,22 +229,28 @@ export const settingsAppearancePageTemplate = html`
             value="${(x) => x.document.darkMode ?? '2'}"
             ${ref('darkMode')}
           >
-            <ppp-radio value="2">По выбору системы</ppp-radio>
-            <ppp-radio value="1">Тёмное</ppp-radio>
-            <ppp-radio value="0">Светлое</ppp-radio>
+            <ppp-radio value="2">
+              ${() => ppp.t('$settingsAppearancePage.bySystem')}
+            </ppp-radio>
+            <ppp-radio value="1">
+              ${() => ppp.t('$settingsAppearancePage.dark')}
+            </ppp-radio>
+            <ppp-radio value="0">
+              ${() => ppp.t('$settingsAppearancePage.light')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Палитра</h5>
+          <h5>${() => ppp.t('$settingsAppearancePage.paletteHeader')}</h5>
           <p class="description">
-            Настройте цветовое оформления приложения самостоятельно или
-            воспользуйтесь готовым шаблоном:
+            ${() => ppp.t('$settingsAppearancePage.paletteDescription')}
           </p>
           <div>
             <ppp-select
-              placeholder="Выберите шаблон"
+              placeholder="${() =>
+                ppp.t('$settingsAppearancePage.selectTemplate')}"
               ${ref('themeColorsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
@@ -230,143 +263,147 @@ export const settingsAppearancePageTemplate = html`
               @click="${(x) =>
                 x.applyThemeColorsTemplate(x.themeColorsTemplateSelect.value)}"
             >
-              Заполнить цвета по шаблону
+              ${() => ppp.t('$settingsAppearancePage.fillColorsFromTemplate')}
             </ppp-button>
           </div>
         </div>
         <div class="input-group">
           <div class="settings-grid colors">
             <div class="row">
-              <ppp-palette-item dt="palette-white"> Белый</ppp-palette-item>
-              <ppp-palette-item dt="palette-black"> Чёрный</ppp-palette-item>
+              <ppp-palette-item dt="palette-white">
+                ${() => paletteLabel('palette-white')}
+              </ppp-palette-item>
+              <ppp-palette-item dt="palette-black">
+                ${() => paletteLabel('palette-black')}
+              </ppp-palette-item>
             </div>
             <div class="row">
               <ppp-palette-item dt="palette-gray-dark-4">
-                Серый -4
+                ${() => paletteLabel('palette-gray-dark-4')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-dark-3">
-                Серый -3
+                ${() => paletteLabel('palette-gray-dark-3')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-dark-2">
-                Серый -2
+                ${() => paletteLabel('palette-gray-dark-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-dark-1">
-                Серый -1
+                ${() => paletteLabel('palette-gray-dark-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-base">
-                Серый
+                ${() => paletteLabel('palette-gray-base')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-light-1">
-                Серый +1
+                ${() => paletteLabel('palette-gray-light-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-light-2">
-                Серый +2
+                ${() => paletteLabel('palette-gray-light-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-gray-light-3">
-                Серый +3
+                ${() => paletteLabel('palette-gray-light-3')}
               </ppp-palette-item>
             </div>
             <div class="row">
               <ppp-palette-item dt="palette-green-dark-3">
-                Зелёный -3
+                ${() => paletteLabel('palette-green-dark-3')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-green-dark-2">
-                Зелёный -2
+                ${() => paletteLabel('palette-green-dark-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-green-dark-1">
-                Зелёный -1
+                ${() => paletteLabel('palette-green-dark-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-green-base">
-                Зелёный
+                ${() => paletteLabel('palette-green-base')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-green-light-1">
-                Зелёный +1
+                ${() => paletteLabel('palette-green-light-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-green-light-2">
-                Зелёный +2
+                ${() => paletteLabel('palette-green-light-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-green-light-3">
-                Зелёный +3
+                ${() => paletteLabel('palette-green-light-3')}
               </ppp-palette-item>
             </div>
             <div class="row">
               <ppp-palette-item dt="palette-purple-dark-3">
-                Фиолетовый -3
+                ${() => paletteLabel('palette-purple-dark-3')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-purple-dark-2">
-                Фиолетовый -2
+                ${() => paletteLabel('palette-purple-dark-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-purple-base">
-                Фиолетовый
+                ${() => paletteLabel('palette-purple-base')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-purple-light-2">
-                Фиолетовый +2
+                ${() => paletteLabel('palette-purple-light-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-purple-light-3">
-                Фиолетовый +3
+                ${() => paletteLabel('palette-purple-light-3')}
               </ppp-palette-item>
             </div>
             <div class="row">
               <ppp-palette-item dt="palette-blue-dark-3">
-                Синий -3
+                ${() => paletteLabel('palette-blue-dark-3')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-blue-dark-2">
-                Синий -2
+                ${() => paletteLabel('palette-blue-dark-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-blue-dark-1">
-                Синий -1
+                ${() => paletteLabel('palette-blue-dark-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-blue-base">
-                Синий
+                ${() => paletteLabel('palette-blue-base')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-blue-light-1">
-                Синий +1
+                ${() => paletteLabel('palette-blue-light-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-blue-light-2">
-                Синий +2
+                ${() => paletteLabel('palette-blue-light-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-blue-light-3">
-                Синий +3
+                ${() => paletteLabel('palette-blue-light-3')}
               </ppp-palette-item>
             </div>
             <div class="row">
               <ppp-palette-item dt="palette-yellow-dark-3">
-                Жёлтый -3
+                ${() => paletteLabel('palette-yellow-dark-3')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-yellow-dark-2">
-                Жёлтый -2
+                ${() => paletteLabel('palette-yellow-dark-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-yellow-base">
-                Жёлтый
+                ${() => paletteLabel('palette-yellow-base')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-yellow-light-2">
-                Жёлтый +2
+                ${() => paletteLabel('palette-yellow-light-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-yellow-light-3">
-                Жёлтый +3
+                ${() => paletteLabel('palette-yellow-light-3')}
               </ppp-palette-item>
             </div>
             <div class="row">
               <ppp-palette-item dt="palette-red-dark-3">
-                Красный -3
+                ${() => paletteLabel('palette-red-dark-3')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-red-dark-2">
-                Красный -2
+                ${() => paletteLabel('palette-red-dark-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-red-dark-1">
-                Красный -1
+                ${() => paletteLabel('palette-red-dark-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-red-base">
-                Красный
+                ${() => paletteLabel('palette-red-base')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-red-light-1">
-                Красный +1
+                ${() => paletteLabel('palette-red-light-1')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-red-light-2">
-                Красный +2
+                ${() => paletteLabel('palette-red-light-2')}
               </ppp-palette-item>
               <ppp-palette-item dt="palette-red-light-3">
-                Красный +3
+                ${() => paletteLabel('palette-red-light-3')}
               </ppp-palette-item>
             </div>
           </div>
@@ -374,13 +411,14 @@ export const settingsAppearancePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пары цветов</h5>
+          <h5>${() => ppp.t('$settingsAppearancePage.colorPairsHeader')}</h5>
           <p class="description">
-            Цветовые пары задаются из палитры для светлого и тёмного оформления.
+            ${() => ppp.t('$settingsAppearancePage.colorPairsDescription')}
           </p>
           <div>
             <ppp-select
-              placeholder="Выберите шаблон"
+              placeholder="${() =>
+                ppp.t('$settingsAppearancePage.selectTemplate')}"
               ${ref('themeColorPairsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
@@ -395,7 +433,7 @@ export const settingsAppearancePageTemplate = html`
                   x.themeColorPairsTemplateSelect.value
                 )}"
             >
-              Заполнить пары по шаблону
+              ${() => ppp.t('$settingsAppearancePage.fillPairsFromTemplate')}
             </ppp-button>
           </div>
         </div>
@@ -426,11 +464,14 @@ export const settingsAppearancePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Шрифты и размеры</h5>
-          <p class="description">Настройте шрифты приложения.</p>
+          <h5>${() => ppp.t('$settingsAppearancePage.fontsHeader')}</h5>
+          <p class="description">
+            ${() => ppp.t('$settingsAppearancePage.fontsDescription')}
+          </p>
           <div>
             <ppp-select
-              placeholder="Выберите шаблон"
+              placeholder="${() =>
+                ppp.t('$settingsAppearancePage.selectTemplate')}"
               ${ref('themeFontsTemplateSelect')}
             >
               <ppp-option value="tinkoff">Tinkoff</ppp-option>
@@ -443,97 +484,141 @@ export const settingsAppearancePageTemplate = html`
               @click="${(x) =>
                 x.applyThemeFontsTemplate(x.themeFontsTemplateSelect.value)}"
             >
-              Заполнить шрифты по шаблону
+              ${() => ppp.t('$settingsAppearancePage.fillFontsFromTemplate')}
             </ppp-button>
           </div>
         </div>
         <div class="input-group">
           <div class="settings-grid fonts">
-            <h5>Семейство шрифта</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.fontFamily')}</h5>
             <div class="row">
               <ppp-text-field dt="body-font" placeholder="Roboto">
-                <span slot="label">Обычный шрифт</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.regularFont')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="monospace-font" placeholder="monospace">
-                <span slot="label">Моноширинный шрифт</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.monospaceFont')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Шрифт виджетов</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.widgetFont')}</h5>
             <div class="row">
               <ppp-text-field dt="font-size-widget" placeholder="12px">
-                <span slot="label">Размер</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontSize')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="font-weight-widget" placeholder="400">
-                <span slot="label">Насыщенность</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontWeight')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="line-height-widget" placeholder="normal">
-                <span slot="label">Межстрочный интервал</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.lineHeight')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Шрифт обычного текста</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.bodyFont')}</h5>
             <div class="row">
               <ppp-text-field dt="font-size-body-1" placeholder="13px">
-                <span slot="label">Размер</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontSize')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="font-weight-body-1" placeholder="400">
-                <span slot="label">Насыщенность</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontWeight')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="line-height-body-1" placeholder="20px">
-                <span slot="label">Межстрочный интервал</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.lineHeight')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Шрифт кода</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.codeFont')}</h5>
             <div class="row">
               <ppp-text-field dt="font-size-code-1" placeholder="13px">
-                <span slot="label">Размер</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontSize')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="font-weight-code-1" placeholder="400">
-                <span slot="label">Насыщенность</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontWeight')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="line-height-code-1" placeholder="20px">
-                <span slot="label">Межстрочный интервал</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.lineHeight')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Шрифт заголовка 3</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.heading3Font')}</h5>
             <div class="row">
               <ppp-text-field dt="font-size-heading-3" placeholder="24px">
-                <span slot="label">Размер</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontSize')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="font-weight-heading-3" placeholder="500">
-                <span slot="label">Насыщенность</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontWeight')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="line-height-heading-3" placeholder="32px">
-                <span slot="label">Межстрочный интервал</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.lineHeight')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Шрифт заголовка 5</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.heading5Font')}</h5>
             <div class="row">
               <ppp-text-field dt="font-size-heading-5" placeholder="16px">
-                <span slot="label">Размер</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontSize')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="font-weight-heading-5" placeholder="700">
-                <span slot="label">Насыщенность</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontWeight')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="line-height-heading-5" placeholder="20px">
-                <span slot="label">Межстрочный интервал</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.lineHeight')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Шрифт заголовка 6</h5>
+            <h5>${() => ppp.t('$settingsAppearancePage.heading6Font')}</h5>
             <div class="row">
               <ppp-text-field dt="font-size-heading-6" placeholder="18px">
-                <span slot="label">Размер</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontSize')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="font-weight-heading-6" placeholder="700">
-                <span slot="label">Насыщенность</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.fontWeight')}
+                </span>
               </ppp-text-field>
               <ppp-text-field dt="line-height-heading-6" placeholder="24px">
-                <span slot="label">Межстрочный интервал</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.lineHeight')}
+                </span>
               </ppp-text-field>
             </div>
-            <h5>Высота кнопок в виджетах (покупка/продажа)</h5>
+            <h5>
+              ${() => ppp.t('$settingsAppearancePage.widgetButtonHeight')}
+            </h5>
             <div class="row">
               <ppp-text-field dt="button-height-widget" placeholder="32px">
-                <span slot="label">Высота</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsAppearancePage.height')}
+                </span>
               </ppp-text-field>
             </div>
           </div>
@@ -545,7 +630,7 @@ export const settingsAppearancePageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить параметры
+          ${() => ppp.t('$settingsAppearancePage.saveSettings')}
         </ppp-button>
       </footer>
     </form>
@@ -646,7 +731,7 @@ export class SettingsAppearancePage extends Page {
       await validate(pi.control);
       await validate(pi.control, {
         hook: async (value) => CSS.supports('color', value),
-        errorMessage: 'Недопустимый цвет'
+        errorMessage: ppp.t('$settingsAppearancePage.invalidColor')
       });
     }
 
@@ -660,27 +745,27 @@ export class SettingsAppearancePage extends Page {
       if (dt === 'body-font' || dt === 'monospace-font') {
         await validate(input, {
           hook: async (value) => CSS.supports('font-family', value),
-          errorMessage: 'Недопустимый шрифт'
+          errorMessage: ppp.t('$settingsAppearancePage.invalidFont')
         });
       } else if (dt.startsWith('font-size')) {
         await validate(input, {
           hook: async (value) => CSS.supports('font-size', value),
-          errorMessage: 'Недопустимый размер'
+          errorMessage: ppp.t('$settingsAppearancePage.invalidSize')
         });
       } else if (dt.startsWith('font-weight')) {
         await validate(input, {
           hook: async (value) => CSS.supports('font-weight', value),
-          errorMessage: 'Недопустимое значение'
+          errorMessage: ppp.t('$settingsAppearancePage.invalidValue')
         });
       } else if (dt.startsWith('line-height')) {
         await validate(input, {
           hook: async (value) => CSS.supports('line-height', value),
-          errorMessage: 'Недопустимое значение'
+          errorMessage: ppp.t('$settingsAppearancePage.invalidValue')
         });
       } else if (dt.startsWith('button-height')) {
         await validate(input, {
           hook: async (value) => CSS.supports('height', value),
-          errorMessage: 'Недопустимое значение'
+          errorMessage: ppp.t('$settingsAppearancePage.invalidValue')
         });
       }
     }
@@ -837,7 +922,10 @@ export class SettingsAppearancePage extends Page {
         pi.control.appearance = 'default';
       }
     } catch (e) {
-      this.failOperation(e, 'Загрузка шаблона темы');
+      this.failOperation(
+        e,
+        ppp.t('$settingsAppearancePage.themeTemplateLoading')
+      );
     } finally {
       this.endOperation();
     }
@@ -862,7 +950,10 @@ export class SettingsAppearancePage extends Page {
           theme[select.getAttribute('pair')][+select.getAttribute('index')];
       });
     } catch (e) {
-      this.failOperation(e, 'Загрузка шаблона темы');
+      this.failOperation(
+        e,
+        ppp.t('$settingsAppearancePage.themeTemplateLoading')
+      );
     } finally {
       this.endOperation();
     }
@@ -891,7 +982,10 @@ export class SettingsAppearancePage extends Page {
         input.appearance = 'default';
       });
     } catch (e) {
-      this.failOperation(e, 'Загрузка шаблона темы');
+      this.failOperation(
+        e,
+        ppp.t('$settingsAppearancePage.themeTemplateLoading')
+      );
     } finally {
       this.endOperation();
     }

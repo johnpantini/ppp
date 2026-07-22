@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
@@ -17,6 +18,8 @@ import '../radio-group.js';
 import '../snippet.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const orderMarketDataRecorderTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -27,18 +30,18 @@ export const orderMarketDataRecorderTemplate = html`
       ${documentPageNameSectionPartial({})}
       <section>
         <div class="label-group">
-          <h5>Спецификация</h5>
+          <h5>${() => ppp.t('$orderMarketDataRecorderPage.specificationHeader')}</h5>
           <p class="description">
-            Узнайте, каким образом используются трейдеры для этой условной
-            заявки. Трейдеры задаются в виджете заявки.
+            ${() =>
+              ppp.t('$orderMarketDataRecorderPage.specificationDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-snippet
             readonly
             style="height: 128px"
-            :code="${(x) =>
-              `Трейдер #1 - источник книги заявок.\nТрейдер #2 - источник сделок.\nТрейдер #3 - источник торговых статусов.`}"
+            :code="${() =>
+              ppp.t('$orderMarketDataRecorderPage.specificationCode')}"
           ></ppp-snippet>
         </div>
       </section>
@@ -46,8 +49,7 @@ export const orderMarketDataRecorderTemplate = html`
         <div class="label-group">
           <h5>API Yandex Cloud</h5>
           <p class="description">
-            API, который будет использован для выгрузки записей в облачное
-            хранилище.
+            ${() => ppp.t('$orderMarketDataRecorderPage.ycApiDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -91,14 +93,16 @@ export const orderMarketDataRecorderTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Yandex Cloud
+            ${() => ppp.t('$orderMarketDataRecorderPage.addYcApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Флаги</h5>
-          <p class="description">Параметры работы заявки.</p>
+          <h5>${() => ppp.t('$orderMarketDataRecorderPage.flagsHeader')}</h5>
+          <p class="description">
+            ${() => ppp.t('$orderMarketDataRecorderPage.flagsDescription')}
+          </p>
         </div>
         <div class="input-group">
           <div class="control-stack">
@@ -106,7 +110,7 @@ export const orderMarketDataRecorderTemplate = html`
               ${ref('autoStartFlag')}
               ?checked="${(x) => x.document.autoStart ?? true}"
             >
-              Запускать запись сразу после выставления заявки
+              ${() => ppp.t('$orderMarketDataRecorderPage.autoStartRecording')}
             </ppp-checkbox>
           </div>
         </div>

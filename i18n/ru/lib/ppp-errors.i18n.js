@@ -16,7 +16,10 @@ export default function (i18n) {
       E_BAD_FORM: 'Форма заполнена с ошибками или не полностью',
       E_BAD_URL: 'Этот URL не может быть использован',
       E_BAD_DATE: 'Неверный формат даты',
-      E_UNKNOWN: 'Неизвестная ошибка. Подробности в консоли браузера'
+      E_UNKNOWN: 'Неизвестная ошибка. Подробности в консоли браузера',
+      E_UNKNOWN_ERROR: 'Неизвестная ошибка',
+      E_INVALID_VALUE: 'Это значение недопустимо',
+      E_VALUE_MUST_BE_POSITIVE: 'Значение должно быть положительным'
     },
     $exceptions: {
       EndpointDuplicateKey:
@@ -37,6 +40,9 @@ export default function (i18n) {
       E_UNKNOWN: 'Неизвестная ошибка трейдера.',
       E_REQUEST_TIMEOUT: 'Запрос превысил время ожидания.',
       E_TRADING_ACCOUNT_NOT_FOUND: 'Торговый счёт не найден.',
+      E_NO_LOCATES_FOR_ACCOUNT_SYMBOL: 'Нет локейтов для счёта или тикера.',
+      E_ALPACA_ONLY_DAY_ORDERS_ALLOWED_FOR_HTB:
+        'Для HTB-инструментов доступны только дневные заявки.',
       E_NOT_AVAILABLE_FOR_SHORT:
         'Невозможно открыть короткую позицию по инструменту.',
       E_SIZE_CANT_BE_ZERO: 'Объём должен быть ненулевым.',

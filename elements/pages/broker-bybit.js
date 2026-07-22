@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -15,6 +16,8 @@ import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerBybitPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -24,10 +27,9 @@ export const brokerBybitPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -40,15 +42,15 @@ export const brokerBybitPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ API</h5>
+          <h5>${() => ppp.t('$page.apiKey')}</h5>
           <p class="description">
-            Ключ и секрет можно сгенерировать по
+            ${() => ppp.t('$brokerBybitPage.keyAndSecretDescription')}
             <a
               class="link"
               href="https://www.bybit.com/app/user/api-management"
               target="_blank"
               rel="noopener"
-              >ссылке</a
+              >${() => ppp.t('$brokerBybitPage.link')}</a
             >.
           </p>
         </div>
@@ -62,7 +64,7 @@ export const brokerBybitPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Секретный ключ</h5>
+          <h5>${() => ppp.t('$brokerBybitPage.secretKey')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -75,7 +77,7 @@ export const brokerBybitPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Конечная точка</h5>
+          <h5>${() => ppp.t('$brokerBybitPage.endpoint')}</h5>
         </div>
         <div class="input-group">
           <ppp-select
@@ -93,9 +95,9 @@ export const brokerBybitPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервис-соединитель</h5>
+          <h5>${() => ppp.t('$brokerBybitPage.connectorService')}</h5>
           <p class="description">
-            Будет использован для совершения запросов к API Bybit.
+            ${() => ppp.t('$brokerBybitPage.connectorServiceDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -209,7 +211,7 @@ export class BrokerBybitPage extends Page {
       ).ok
     ) {
       invalidate(this.secret, {
-        errorMessage: 'Не удалось выполнить проверочный запрос к API Bybit',
+        errorMessage: ppp.t('$brokerBybitPage.testRequestFailed'),
         raiseException: true
       });
     }

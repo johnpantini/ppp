@@ -14,6 +14,8 @@ import '../button.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiSupabasePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -23,10 +25,9 @@ export const apiSupabasePageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -39,10 +40,9 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>URL проекта</h5>
+          <h5>${() => ppp.t('$apiSupabasePage.projectUrl')}</h5>
           <p class="description">
-            Можно найти в панели управления проектом Supabase в подразделе API
-            раздела Settings. Смотрите секцию Config, поле URL.
+            ${() => ppp.t('$apiSupabasePage.projectUrlDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -56,17 +56,15 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ проекта</h5>
+          <h5>${() => ppp.t('$apiSupabasePage.projectKey')}</h5>
           <p class="description">
-            Можно найти в панели управления проектом Supabase в подразделе API
-            раздела Settings. Смотрите секцию Project API keys, поле anon
-            public. Будет сохранён в зашифрованном виде.
+            ${() => ppp.t('$apiSupabasePage.projectKeyDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Ключ API"
+            placeholder="${() => ppp.t('$page.apiKey')}"
             value="${(x) => x.document.key}"
             ${ref('key')}
           ></ppp-text-field>
@@ -74,8 +72,10 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>База данных</h5>
-          <p class="description">Название базы данных для подключения.</p>
+          <h5>${() => ppp.t('$apiSupabasePage.database')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiSupabasePage.databaseDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -87,8 +87,10 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Хост</h5>
-          <p class="description">Хост для подключения к базе данных.</p>
+          <h5>${() => ppp.t('$apiSupabasePage.host')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiSupabasePage.hostDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -101,8 +103,10 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Порт</h5>
-          <p class="description">Порт для подключения к базе данных.</p>
+          <h5>${() => ppp.t('$apiSupabasePage.port')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiSupabasePage.portDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -115,9 +119,9 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пользователь</h5>
+          <h5>${() => ppp.t('$apiSupabasePage.user')}</h5>
           <p class="description">
-            Имя пользователя для подключения к базе данных.
+            ${() => ppp.t('$apiSupabasePage.userDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -130,16 +134,15 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пароль</h5>
+          <h5>${() => ppp.t('$apiSupabasePage.password')}</h5>
           <p class="description">
-            Пароль для подключения к базе данных. Будет сохранён в зашифрованном
-            виде.
+            ${() => ppp.t('$apiSupabasePage.passwordDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Пароль"
+            placeholder="${() => ppp.t('$apiSupabasePage.password')}"
             value="${(x) => x.document.password}"
             ${ref('password')}
           ></ppp-text-field>
@@ -147,9 +150,9 @@ export const apiSupabasePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервис-соединитель</h5>
+          <h5>${() => ppp.t('$apiSupabasePage.connectorService')}</h5>
           <p class="description">
-            Будет использован для совершения HTTP-запросов к Redis.
+            ${() => ppp.t('$apiSupabasePage.connectorServiceDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -244,7 +247,7 @@ export class ApiSupabasePage extends Page {
       ).ok
     ) {
       invalidate(this.key, {
-        errorMessage: 'Неверный ключ проекта',
+        errorMessage: ppp.t('$apiSupabasePage.invalidProjectKey'),
         raiseException: true
       });
     }
@@ -263,7 +266,7 @@ export class ApiSupabasePage extends Page {
       ).ok
     ) {
       invalidate(this.password, {
-        errorMessage: 'Неверный пользователь или пароль',
+        errorMessage: ppp.t('$apiSupabasePage.invalidUserOrPassword'),
         raiseException: true
       });
     }

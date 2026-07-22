@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, validateDistanceElement } from '../../lib/ppp-errors.js';
 import {
@@ -22,6 +23,8 @@ import '../radio-group.js';
 import '../snippet.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const orderStopLossTakeProfitTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -34,27 +37,29 @@ export const orderStopLossTakeProfitTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Спецификация</h5>
+          <h5>${() => ppp.t('$orderStopLossTakeProfitPage.specificationHeader')}</h5>
           <p class="description">
-            Узнайте, каким образом используются трейдеры для этой условной
-            заявки. Трейдеры задаются в виджете заявки.
+            ${() => ppp.t('$orderStopLossTakeProfitPage.specificationDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-snippet
             readonly
             style="height: 128px"
-            :code="${(x) =>
-              `Трейдер #1 - источник данных L1.\nТрейдер #2 - источник данных L1.\nТрейдер #3 - источник данных L1.\nТрейдер #4 - источник данных L1.`}"
+            :code="${() =>
+              [1, 2, 3, 4]
+                .map((n) =>
+                  ppp.t('$orderStopLossTakeProfitPage.traderL1Source', { n })
+                )
+                .join('\n')}"
           ></ppp-snippet>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Тип заявки</h5>
+          <h5>${() => ppp.t('$orderStopLossTakeProfitPage.orderTypeHeader')}</h5>
           <p class="description">
-            Заявка Stop Loss служит для ограничения убытков, Take Profit -
-            фиксации прибыли.
+            ${() => ppp.t('$orderStopLossTakeProfitPage.orderTypeDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -70,11 +75,12 @@ export const orderStopLossTakeProfitTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Цены для отслеживания</h5>
+          <h5>
+            ${() => ppp.t('$orderStopLossTakeProfitPage.watchPricesHeader')}
+          </h5>
           <p class="description">
-            Возможно выбрать сразу несколько цен. При отсутствии выбора будет
-            отслеживаться цена последней сделки. MidPoint срабатывает, если и
-            цена bid, и цена ask положительны одновременно.
+            ${() =>
+              ppp.t('$orderStopLossTakeProfitPage.watchPricesDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -85,7 +91,7 @@ export const orderStopLossTakeProfitTemplate = html`
                 x.document.watchPrices?.includes(TRADER_DATUM.LAST_PRICE) ??
                 true}"
             >
-              Цена последней сделки
+              ${() => ppp.t('$orderStopLossTakeProfitPage.lastPrice')}
             </ppp-checkbox>
             <ppp-checkbox
               ${ref('extendedLastPriceWatchFlag')}
@@ -94,50 +100,47 @@ export const orderStopLossTakeProfitTemplate = html`
                   TRADER_DATUM.EXTENDED_LAST_PRICE
                 )}"
             >
-              Цена последней сделки (вне основной сессии)
+              ${() => ppp.t('$orderStopLossTakeProfitPage.extendedLastPrice')}
             </ppp-checkbox>
             <ppp-checkbox
               ${ref('bestBidWatchFlag')}
               ?checked="${(x) =>
                 x.document.watchPrices?.includes(TRADER_DATUM.BEST_BID)}"
             >
-              Лучшая цена bid
+              ${() => ppp.t('$orderStopLossTakeProfitPage.bestBid')}
             </ppp-checkbox>
             <ppp-checkbox
               ${ref('bestAskWatchFlag')}
               ?checked="${(x) =>
                 x.document.watchPrices?.includes(TRADER_DATUM.BEST_ASK)}"
             >
-              Лучшая цена ask
+              ${() => ppp.t('$orderStopLossTakeProfitPage.bestAsk')}
             </ppp-checkbox>
             <ppp-checkbox
               ${ref('midpointWatchFlag')}
               ?checked="${(x) =>
                 x.document.watchPrices?.includes(TRADER_DATUM.MIDPOINT)}"
             >
-              Цена MidPoint
+              ${() => ppp.t('$orderStopLossTakeProfitPage.midpointPrice')}
             </ppp-checkbox>
           </div>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Дистанция между ценой активации и ценой исполнения</h5>
+          <h5>${() => ppp.t('$orderStopLossTakeProfitPage.distanceHeader')}</h5>
           <p class="description">
-            Для заявок Stop Limit и Take Limit можно указать расстояние, которое
-            будет использоваться при расчете лимитной цены исполнения
-            относительно цены активации на этапе заполнения формы заявки в
-            виджете.
+            ${() => ppp.t('$orderStopLossTakeProfitPage.distanceDescription')}
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Ценовое расстояние можно задавать в процентах (добавьте знак % после
-            числа) или шагах цены инструмента (добавьте знак +).
+            ${() => ppp.t('$orderStopLossTakeProfitPage.distanceBanner')}
           </ppp-banner>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Нет"
+            placeholder="${() =>
+              ppp.t('$orderStopLossTakeProfitPage.nonePlaceholder')}"
             value="${(x) => x.document.limitPriceDistance}"
             ${ref('limitPriceDistance')}
           ></ppp-text-field>
@@ -145,16 +148,16 @@ export const orderStopLossTakeProfitTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Защитное время</h5>
+          <h5>${() => ppp.t('$orderStopLossTakeProfitPage.timeDelayHeader')}</h5>
           <p class="description">
-            Время, в течение которого должно сохраняться условие срабатывания
-            заявки. Задаётся в секундах в диапазоне от 1 до 3600.
+            ${() => ppp.t('$orderStopLossTakeProfitPage.timeDelayDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="number"
-            placeholder="Нет"
+            placeholder="${() =>
+              ppp.t('$orderStopLossTakeProfitPage.nonePlaceholder')}"
             value="${(x) => x.document.timeDelay}"
             ${ref('timeDelay')}
           ></ppp-text-field>
@@ -162,10 +165,12 @@ export const orderStopLossTakeProfitTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Рабочее время</h5>
+          <h5>
+            ${() => ppp.t('$orderStopLossTakeProfitPage.workingHoursHeader')}
+          </h5>
           <p class="description">
-            Временные интервалы, в течение которых допустимо срабатывание заявки
-            (включительно). Время местное.
+            ${() =>
+              ppp.t('$orderStopLossTakeProfitPage.workingHoursDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -179,7 +184,9 @@ export const orderStopLossTakeProfitTemplate = html`
                 value="${(x) => x.document.timeFrom}"
                 ${ref('timeFromHours')}
               >
-                <span slot="label">От (ч.)</span>
+                <span slot="label">
+                  ${() => ppp.t('$orderStopLossTakeProfitPage.fromHours')}
+                </span>
               </ppp-text-field>
               <ppp-text-field
                 disabled
@@ -189,7 +196,9 @@ export const orderStopLossTakeProfitTemplate = html`
                 value="${(x) => x.document.timeFrom}"
                 ${ref('timeFromMinutes')}
               >
-                <span slot="label">От (мин.)</span>
+                <span slot="label">
+                  ${() => ppp.t('$orderStopLossTakeProfitPage.fromMinutes')}
+                </span>
               </ppp-text-field>
             </div>
             <div class="row">
@@ -200,7 +209,9 @@ export const orderStopLossTakeProfitTemplate = html`
                 value="${(x) => x.document.timeTo}"
                 ${ref('timeToHours')}
               >
-                <span slot="label">До (ч.)</span>
+                <span slot="label">
+                  ${() => ppp.t('$orderStopLossTakeProfitPage.toHours')}
+                </span>
               </ppp-text-field>
               <ppp-text-field
                 disabled
@@ -209,7 +220,9 @@ export const orderStopLossTakeProfitTemplate = html`
                 value="${(x) => x.document.timeTo}"
                 ${ref('timeToMinutes')}
               >
-                <span slot="label">До (мин.)</span>
+                <span slot="label">
+                  ${() => ppp.t('$orderStopLossTakeProfitPage.toMinutes')}
+                </span>
               </ppp-text-field>
             </div>
           </div>

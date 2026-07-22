@@ -26,6 +26,7 @@ import '../button.js';
 import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
+await ppp.i18n(import.meta.url);
 
 export const serviceCloudPppAspirantTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -37,10 +38,9 @@ export const serviceCloudPppAspirantTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -53,8 +53,10 @@ export const serviceCloudPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Хранилище Redis</h5>
-          <p class="description">Персистентность для сервиса.</p>
+          <h5>${() => ppp.t('$serviceCloudPppAspirantPage.redisStorage')}</h5>
+          <p class="description">
+            ${() => ppp.t('$serviceCloudPppAspirantPage.redisStorageDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -95,26 +97,35 @@ export const serviceCloudPppAspirantTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить API Redis
+            ${() => ppp.t('$serviceCloudPppAspirantPage.addRedisApi')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Профиль API облачного провайдера</h5>
+          <h5>
+            ${() => ppp.t('$serviceCloudPppAspirantPage.cloudProviderApiProfile')}
+          </h5>
           <p class="description">
-            Northflank или Render. Можно выбрать только на этапе создания или
-            после удаления сервиса.
+            ${() =>
+              ppp.t('$serviceCloudPppAspirantPage.cloudProviderApiDescription')}
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Northflank: должен быть заранее создан проект под названием ppp в
-            облаке.
+            ${() => ppp.t('$serviceCloudPppAspirantPage.northflankBanner')}
           </ppp-banner>
           <div class="spacing1"></div>
           <ppp-banner class="inline" appearance="warning">
-            Render: создайте пустой сервис (тип Docker) с именем
-            aspirant-<i>суффикс</i>. Суффикс сгенерируйте ниже.
+            ${() =>
+              ppp.t(
+                '$serviceCloudPppAspirantPage.renderBannerBeforeSuffix'
+              )}<i
+              >${() =>
+                ppp.t(
+                  '$serviceCloudPppAspirantPage.renderBannerSuffixWord'
+                )}</i
+            >${() =>
+              ppp.t('$serviceCloudPppAspirantPage.renderBannerAfterSuffix')}
           </ppp-banner>
         </div>
         <div class="input-group">
@@ -168,7 +179,7 @@ export const serviceCloudPppAspirantTemplate = html`
                 })}"
               appearance="primary"
             >
-              Добавить API Northflank
+              ${() => ppp.t('$serviceCloudPppAspirantPage.addNorthflankApi')}
             </ppp-button>
             <ppp-button
               ?disabled="${(x) => x.document._id && !x.document.removed}"
@@ -179,23 +190,23 @@ export const serviceCloudPppAspirantTemplate = html`
                 })}"
               appearance="primary"
             >
-              Добавить API Render
+              ${() => ppp.t('$serviceCloudPppAspirantPage.addRenderApi')}
             </ppp-button>
           </div>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Суффикс сервиса в облачном провайдере (11 символов)</h5>
+          <h5>${() => ppp.t('$serviceCloudPppAspirantPage.slugHeader')}</h5>
           <p class="description">
-            Это значение должно быть уникальным и конфиденциальным. Его можно
-            задать только при создании или после удаления сервиса.
+            ${() => ppp.t('$serviceCloudPppAspirantPage.slugDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             ?disabled="${(x) => x.document._id && !x.document.removed}"
-            placeholder="Сгенерируйте уникальное значение кнопкой"
+            placeholder="${() =>
+              ppp.t('$serviceCloudPppAspirantPage.slugPlaceholder')}"
             value="${(x) => x.document.slug}"
             ${ref('slug')}
           ></ppp-text-field>
@@ -206,12 +217,12 @@ export const serviceCloudPppAspirantTemplate = html`
               (x.slug.value = `${uuidv4().replaceAll('-', '').slice(0, 11)}`)}"
             appearance="primary"
           >
-            Сгенерировать уникальное значение
+            ${() => ppp.t('$serviceCloudPppAspirantPage.generateSlug')}
           </ppp-button>
         </div>
       </section>
       ${documentPageFooterPartial({
-        text: 'Сохранить в PPP и развернуть в облаке',
+        text: ppp.t('$serviceCloudPppAspirantPage.saveAndDeployToCloud'),
         extraControls: html`${servicePageFooterExtraControls}`
       })}
     </form>
@@ -235,11 +246,11 @@ export class ServiceCloudPppAspirantPage extends Page {
     await validate(this.slug);
     await validate(this.slug, {
       hook: async (value) => value.trim().length === 11,
-      errorMessage: 'Значение должно содержать 11 символов'
+      errorMessage: ppp.t('$serviceCloudPppAspirantPage.slugLengthError')
     });
     await validate(this.slug, {
       hook: async (value) => /^[a-z0-9]+$/i.test(value),
-      errorMessage: 'Допустимы только цифры и латинские буквы'
+      errorMessage: ppp.t('$serviceCloudPppAspirantPage.slugCharsError')
     });
 
     if (this.deploymentApiId.datum().type === APIS.RENDER) {
@@ -251,7 +262,7 @@ export class ServiceCloudPppAspirantPage extends Page {
             Authorization: `Bearer ${this.deploymentApiId.datum().token}`
           }
         })),
-        'Не удалось получить список сервисов в облаке Render. Операция не может быть выполнена.'
+        ppp.t('$serviceCloudPppAspirantPage.cannotFetchRenderServices')
       );
 
       const services = await r.json();
@@ -261,7 +272,10 @@ export class ServiceCloudPppAspirantPage extends Page {
 
       if (!(s = services.find((s) => s.service?.slug === serviceName))) {
         throw new ValidationError({
-          message: `Сервис ${serviceName} не найден в облаке Render. Создайте его перед тем, как сохранять в PPP.`
+          message: ppp.t(
+            '$serviceCloudPppAspirantPage.serviceNotFoundInRender',
+            { serviceName }
+          )
         });
       }
 
@@ -345,7 +359,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     await maybeFetchError(
       rProjectList,
-      'Не удалось получить список проектов Northflank.'
+      ppp.t('$serviceCloudPppAspirantPage.cannotFetchNorthflankProjects')
     );
 
     const project = (await rProjectList.json()).data.projects.find(
@@ -354,7 +368,9 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     if (!project) {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Проект под названием ppp не найден в облаке Northflank.',
+        errorMessage: ppp.t(
+          '$serviceCloudPppAspirantPage.pppProjectNotFoundInNorthflank'
+        ),
         raiseException: true
       });
     }
@@ -414,7 +430,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     await maybeFetchError(
       rPutService,
-      'Не удалось создать сервис Aspirant, подробности в консоли браузера.'
+      ppp.t('$serviceCloudPppAspirantPage.cannotCreateAspirantService')
     );
 
     this.serviceID = (await rPutService.json()).data.id;
@@ -445,7 +461,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     await maybeFetchError(
       rUpdateVars,
-      'Не удалось обновить переменные окружения сервиса в облаке Render.'
+      ppp.t('$serviceCloudPppAspirantPage.cannotUpdateRenderEnvVars')
     );
 
     const rPatchService = await ppp.fetch(
@@ -471,7 +487,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     await maybeFetchError(
       rPatchService,
-      'Не удалось обновить сервис Aspirant в облаке Render, подробности в консоли браузера.'
+      ppp.t('$serviceCloudPppAspirantPage.cannotUpdateRenderService')
     );
 
     const rDeployService = await ppp.fetch(
@@ -490,7 +506,7 @@ export class ServiceCloudPppAspirantPage extends Page {
 
     await maybeFetchError(
       rDeployService,
-      'Не удалось развернуть сервис Aspirant в облаке Render.'
+      ppp.t('$serviceCloudPppAspirantPage.cannotDeployRenderService')
     );
 
     // Add Render ping trigger code here.
@@ -551,7 +567,7 @@ export class ServiceCloudPppAspirantPage extends Page {
             }
           }
         ),
-        'Не удалось перезапустить сервис в облаке Northflank.'
+        ppp.t('$serviceCloudPppAspirantPage.cannotRestartNorthflankService')
       );
     } else {
       await ppp.fetch(
@@ -576,7 +592,7 @@ export class ServiceCloudPppAspirantPage extends Page {
             }
           }
         ),
-        'Не удалось перезапустить сервис в облаке Render.'
+        ppp.t('$serviceCloudPppAspirantPage.cannotRestartRenderService')
       );
     }
   }
@@ -599,7 +615,7 @@ export class ServiceCloudPppAspirantPage extends Page {
           response,
           ok: response.ok || response.status === 409
         };
-      }, 'Не удалось остановить сервис в облаке Northflank.');
+      }, ppp.t('$serviceCloudPppAspirantPage.cannotStopNorthflankService'));
     } else {
       return maybeFetchError(
         await ppp.fetch(
@@ -612,7 +628,7 @@ export class ServiceCloudPppAspirantPage extends Page {
             }
           }
         ),
-        'Не удалось остановить сервис в облаке Render.'
+        ppp.t('$serviceCloudPppAspirantPage.cannotStopRenderService')
       );
     }
   }
@@ -629,7 +645,7 @@ export class ServiceCloudPppAspirantPage extends Page {
             }
           }
         ),
-        'Не удалось полностью удалить сервис. Удалите его вручную в панели управления Northflank.'
+        ppp.t('$serviceCloudPppAspirantPage.cannotRemoveNorthflankService')
       ).catch(async (error) => {
         await this.updateDocumentFragment({
           $set: {
@@ -653,7 +669,7 @@ export class ServiceCloudPppAspirantPage extends Page {
             }
           }
         ),
-        'Не удалось полностью удалить сервис. Удалите его вручную в панели управления Render.'
+        ppp.t('$serviceCloudPppAspirantPage.cannotRemoveRenderService')
       ).catch(async (error) => {
         await this.updateDocumentFragment({
           $set: {

@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -13,6 +14,8 @@ import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderBinanceV3Template = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -23,8 +26,10 @@ export const traderBinanceV3Template = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Binance.</p>
+          <h5>${() => ppp.t('$traderBinanceV3Page.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderBinanceV3Page.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -65,14 +70,16 @@ export const traderBinanceV3Template = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Binance
+            ${() => ppp.t('$traderBinanceV3Page.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Базовый URL для подключения к потоку рыночных данных</h5>
-          <p class="description">Ссылка для установки WebSocket-соединения.</p>
+          <h5>${() => ppp.t('$traderBinanceV3Page.wsUrlTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderBinanceV3Page.wsUrlDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -85,10 +92,9 @@ export const traderBinanceV3Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Режим ленты сделок</h5>
+          <h5>${() => ppp.t('$traderBinanceV3Page.tradesModeTitle')}</h5>
           <p class="description">
-            В режиме агрегирования сделки суммируются по количеству и попадают в
-            ленту как одна, если они принадлежат одной заявке тейкера.
+            ${() => ppp.t('$traderBinanceV3Page.tradesModeDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -97,18 +103,22 @@ export const traderBinanceV3Template = html`
             value="${(x) => (x.document.showAggTrades ?? true ? 'agg' : 'raw')}"
             ${ref('showAggTrades')}
           >
-            <ppp-radio value="agg">Агрегированные сделки</ppp-radio>
-            <ppp-radio value="raw">Все сделки</ppp-radio>
+            <ppp-radio value="agg">
+              ${() => ppp.t('$traderBinanceV3Page.aggTrades')}
+            </ppp-radio>
+            <ppp-radio value="raw">
+              ${() => ppp.t('$traderBinanceV3Page.rawTrades')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Тайм-аут восстановления соединения</h5>
+          <h5>
+            ${() => ppp.t('$traderBinanceV3Page.reconnectTimeoutTitle')}
+          </h5>
           <p class="description">
-            Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверу. Задаётся в
-            миллисекундах, по умолчанию 1000 мс.
+            ${() => ppp.t('$traderBinanceV3Page.reconnectTimeoutDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -123,16 +133,23 @@ export const traderBinanceV3Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Интервал обновления книги заявок</h5>
+          <h5>
+            ${() => ppp.t('$traderBinanceV3Page.orderbookUpdateIntervalTitle')}
+          </h5>
         </div>
         <div class="input-group">
           <ppp-select
-            placeholder="Выберите значение"
+            placeholder="${() =>
+              ppp.t('$traderBinanceV3Page.selectValuePlaceholder')}"
             value="${(x) => x.document.orderbookUpdateInterval ?? '100ms'}"
             ${ref('orderbookUpdateInterval')}
           >
-            <ppp-option value="100ms">100 мс</ppp-option>
-            <ppp-option value="1000ms">1000 мс</ppp-option>
+            <ppp-option value="100ms">
+              ${() => ppp.t('$traderBinanceV3Page.interval100ms')}
+            </ppp-option>
+            <ppp-option value="1000ms">
+              ${() => ppp.t('$traderBinanceV3Page.interval1000ms')}
+            </ppp-option>
           </ppp-select>
         </div>
       </section>
@@ -161,7 +178,7 @@ export class TraderBinanceV3Page extends TraderCommonPage {
       new URL(this.wsUrl.value);
     } catch (e) {
       invalidate(this.wsUrl, {
-        errorMessage: 'Неверный или неполный URL',
+        errorMessage: ppp.t('$traderBinanceV3Page.invalidUrl'),
         raiseException: true
       });
     }
@@ -172,13 +189,13 @@ export class TraderBinanceV3Page extends TraderCommonPage {
 
         return url.protocol === 'wss:';
       },
-      errorMessage: 'Недопустимый протокол URL'
+      errorMessage: ppp.t('$traderBinanceV3Page.invalidUrlProtocol')
     });
 
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
-        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 100, max: 10000 })
       });
     }
 
@@ -209,7 +226,7 @@ export class TraderBinanceV3Page extends TraderCommonPage {
       });
     } catch (e) {
       invalidate(this.wsUrl, {
-        errorMessage: 'Не удалось соединиться',
+        errorMessage: ppp.t('$traderBinanceV3Page.connectionFailed'),
         raiseException: true
       });
     }

@@ -88,7 +88,7 @@ export class TraderCommonPage extends Page {
         console.error(e);
 
         invalidate(this.runtimeUrl, {
-          errorMessage: 'Этот URL не может быть использован',
+          errorMessage: ppp.t('$page.urlCannotBeUsed'),
           raiseException: true
         });
       }
@@ -129,7 +129,7 @@ export class TraderCommonPage extends Page {
               }
             }
           ),
-          'Не удалось получить список бакетов. Проверьте права доступа.'
+          ppp.t('$traderPage.fetchBucketListFailed')
         );
 
         const bucketList = await rBucketList.json();
@@ -162,7 +162,7 @@ export class TraderCommonPage extends Page {
                 })
               }
             ),
-            'Не удалось создать бакет для документов Trinity.'
+            ppp.t('$traderPage.createTrinityBucketFailed')
           );
 
           trinityBucket = (await rNewBucket.json()).response;
@@ -251,7 +251,7 @@ export class TraderCommonPage extends Page {
               },
               body: zipBlob
             }),
-            'Не удалось загрузить документ Trinity в облако.'
+            ppp.t('$traderPage.uploadTrinityToCloudFailed')
           );
 
           // Stage 5. Send trinity link.
@@ -322,10 +322,8 @@ export const traderNameAndRuntimePartial = ({
 } = {}) => html`
   <section>
     <div class="label-group">
-      <h5>Название трейдера</h5>
-      <p class="description">
-        Произвольное имя, чтобы ссылаться на этот профиль, когда потребуется.
-      </p>
+      <h5>${() => ppp.t('$traderPage.traderNameTitle')}</h5>
+      <p class="description">${() => ppp.t('$page.arbitraryProfileName')}</p>
     </div>
     <div class="input-group">
       <ppp-text-field
@@ -337,12 +335,13 @@ export const traderNameAndRuntimePartial = ({
   </section>
   <section>
     <div class="label-group">
-      <h5>Среда выполнения</h5>
-      <p class="description">Выберите среду выполнения для трейдера.</p>
+      <h5>${() => ppp.t('$traderPage.runtimeTitle')}</h5>
+      <p class="description">
+        ${() => ppp.t('$traderPage.runtimeDescription')}
+      </p>
       <div class="spacing2"></div>
       <ppp-banner class="inline" appearance="warning">
-        Если изменить среду, а затем сохраниться, то старая среда выполнения
-        получит команду на остановку трейдера.
+        ${() => ppp.t('$traderPage.runtimeChangeWarning')}
       </ppp-banner>
     </div>
     <div class="input-group">
@@ -352,16 +351,18 @@ export const traderNameAndRuntimePartial = ({
         ${ref('runtime')}
       >
         <ppp-radio value="main-thread" ${ref('mainThreadRadio')}>
-          Основной поток, браузер
+          ${() => ppp.t('$traderPage.runtimeMainThread')}
         </ppp-radio>
         <ppp-radio
           ?disabled="${() => sharedWorker === false}"
           value="shared-worker"
           ${ref('sharedWorkerRadio')}
         >
-          Разделяемый поток, браузер
+          ${() => ppp.t('$traderPage.runtimeSharedWorker')}
         </ppp-radio>
-        <ppp-radio value="url" ${ref('urlRadio')}>По ссылке</ppp-radio>
+        <ppp-radio value="url" ${ref('urlRadio')}>
+          ${() => ppp.t(`$const.trader.${TRADERS.CUSTOM}`)}
+        </ppp-radio>
       </ppp-radio-group>
       <div
         class="runtime-selector"
@@ -377,8 +378,7 @@ export const traderNameAndRuntimePartial = ({
         </div>
         <div class="spacing3"></div>
         <p class="description">
-          Cформировать ссылку по шаблону Aspirant Worker «Среда выполнения
-          трейдеров»:
+          ${() => ppp.t('$traderPage.runtimeUrlTemplateDescription')}
         </p>
         <div class="spacing2"></div>
         <ppp-query-select
@@ -417,11 +417,11 @@ export const traderNameAndRuntimePartial = ({
             return true;
           }}"
         >
-          Вставить ссылку по шаблону
+          ${() => ppp.t('$traderPage.insertUrlByTemplate')}
         </ppp-button>
         <div class="spacing3"></div>
         <p class="description">
-          API Yandex Cloud для хранения данных трейдера (Trinity):
+          ${() => ppp.t('$traderPage.ycApiDescription')}
         </p>
         <div class="spacing2"></div>
         <ppp-query-select
@@ -458,25 +458,23 @@ export const traderNameAndRuntimePartial = ({
             })}"
           appearance="primary"
         >
-          Добавить API Yandex Cloud
+          ${() => ppp.t('$traderPage.addYcApi')}
         </ppp-button>
       </div>
     </div>
   </section>
   <section>
     <div class="label-group">
-      <h5>Возможности трейдера</h5>
+      <h5>${() => ppp.t('$traderPage.traderCapsTitle')}</h5>
       <p class="description">
-        Флаги, определяющие возможности трейдера как поставщика данных и
-        исполнителя торговых поручений. Значения могут быть перекрыты для
-        известных хостов или портов.
+        ${() => ppp.t('$traderPage.traderCapsDescription')}
       </p>
       ${when(
         () => !editableCaps,
         html`
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Данный трейдер не поддерживает редактирование возможностей.
+            ${() => ppp.t('$traderPage.capsNotEditable')}
           </ppp-banner>
         `
       )}
@@ -545,7 +543,7 @@ export const traderNameAndRuntimePartial = ({
         ?disabled="${(x) => !editableCaps}"
         appearance="primary"
       >
-        Восстановить значения по умолчанию
+        ${() => ppp.t('$traderPage.restoreDefaultCaps')}
       </ppp-button>
     </div>
   </section>
@@ -555,11 +553,11 @@ export const traderPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>Трейдеры</ppp-page-header>
+      <ppp-page-header>${() => ppp.t('$collection.traders')}</ppp-page-header>
       <ppp-text-field
         class="global-search-input"
         type="search"
-        placeholder="Поиск"
+        placeholder="${() => ppp.t('$traderPage.searchPlaceholder')}"
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
@@ -576,8 +574,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">Alor Open API V2</div>
           <span slot="description">
-            Торговля и рыночные данные через брокерский профиль Alor Open API
-            V2.
+            ${() => ppp.t('$traderPage.alorCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -623,7 +620,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.ALOR_OPENAPI_V2}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -636,7 +633,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">Alpaca API V2+</div>
           <span slot="description">
-            Рыночные данные через брокерский профиль, совместимый с Alpaca API.
+            ${() => ppp.t('$traderPage.alpacaCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -676,7 +673,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.ALPACA_V2_PLUS}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -688,7 +685,9 @@ export const traderPageTemplate = html`
             src="${() => ppp.brandSvg('ib')}"
           />
           <div slot="title">Interactive Brokers</div>
-          <span slot="description"> Торговля через Interactive Brokers. </span>
+          <span slot="description">
+            ${() => ppp.t('$traderPage.ibCardDescription')}
+          </span>
           <div slot="description" class="caps-list">
             <ul>
               <li>
@@ -729,7 +728,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.IB}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -740,9 +739,9 @@ export const traderPageTemplate = html`
             style="height: 32px"
             src="${() => ppp.brandSvg('utex')}"
           />
-          <div slot="title">UTEX Margin, акции и ETF</div>
+          <div slot="title">${() => ppp.t('$traderPage.utexCardTitle')}</div>
           <span slot="description">
-            Торговля акциями США через брокерский профиль UTEX.
+            ${() => ppp.t('$traderPage.utexCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -782,7 +781,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.UTEX_MARGIN_STOCKS}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -795,7 +794,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">T‑Bank Invest API, gRPC-Web</div>
           <span slot="description">
-            Торговля через брокерский профиль T‑Bank Invest API.
+            ${() => ppp.t('$traderPage.tinkoffCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -838,7 +837,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.TINKOFF_GRPC_WEB}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -851,7 +850,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">Finam Trade API</div>
           <span slot="description">
-            Торговля через брокерский профиль Finam.
+            ${() => ppp.t('$traderPage.finamCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -886,7 +885,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.FINAM_TRADE_API}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -899,7 +898,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">Capital.com</div>
           <span slot="description">
-            Рыночные данные платформы Capital.com
+            ${() => ppp.t('$traderPage.capitalcomCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -915,7 +914,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.CAPITALCOM}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -928,7 +927,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">Bybit API V5</div>
           <span slot="description">
-            Торговля и рыночные данные через брокерский профиль Bybit.
+            ${() => ppp.t('$traderPage.bybitCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -974,7 +973,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.BYBIT_V5}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -987,7 +986,7 @@ export const traderPageTemplate = html`
           />
           <div slot="title">Binance API V3 (Spot)</div>
           <span slot="description">
-            Рыночные данные через брокерский профиль Binance.
+            ${() => ppp.t('$traderPage.binanceCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -1008,13 +1007,15 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.BINANCE_V3}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(paperTrade)}</div>
           <div slot="title">paperTrade</div>
-          <span slot="description">Торговля на виртуальном счёте.</span>
+          <span slot="description">
+            ${() => ppp.t('$traderPage.paperTradeCardDescription')}
+          </span>
           <div slot="description" class="caps-list">
             <ul>
               <li>
@@ -1045,13 +1046,17 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.PAPER_TRADE}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(combination)}</div>
-          <div slot="title">L1-комбинация</div>
-          <span slot="description">Настраиваемый источник данных L1.</span>
+          <div slot="title">
+            ${() => ppp.t(`$const.trader.${TRADERS.COMBINED_L1}`)}
+          </div>
+          <span slot="description">
+            ${() => ppp.t('$traderPage.combinedL1CardDescription')}
+          </span>
           <div slot="description" class="caps-list">
             <ul>
               <li>
@@ -1066,14 +1071,16 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.COMBINED_L1}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(combination)}</div>
-          <div slot="title">Комбинация книг заявок</div>
+          <div slot="title">
+            ${() => ppp.t(`$const.trader.${TRADERS.COMBINED_ORDERBOOK}`)}
+          </div>
           <span slot="description">
-            Трейдер, позволяющий комбинировать книги заявок.
+            ${() => ppp.t('$traderPage.combinedOrderbookCardDescription')}
           </span>
           <div slot="description" class="caps-list">
             <ul>
@@ -1090,14 +1097,16 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.COMBINED_ORDERBOOK}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(cloudFunctions)}</div>
-          <div slot="title">По ссылке</div>
+          <div slot="title">
+            ${() => ppp.t(`$const.trader.${TRADERS.CUSTOM}`)}
+          </div>
           <span slot="description">
-            Собственная реализация трейдера, загружаемая по ссылке.
+            ${() => ppp.t('$traderPage.customCardDescription')}
           </span>
           <ppp-button
             slot="action"
@@ -1106,7 +1115,7 @@ export const traderPageTemplate = html`
                 page: `trader-${TRADERS.CUSTOM}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$traderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
       </div>

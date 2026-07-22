@@ -6,19 +6,17 @@ import '../button.js';
 import '../checkbox.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const settingsWorkspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Прилипание виджетов</h5>
+          <h5>${() => ppp.t('$settingsWorkspacePage.widgetSnapping')}</h5>
           <p class="description">
-            Дистанция срабатывания определяет минимальное расстояние между
-            вертикальными или горизонтальными границами виджетов, при котором
-            активируется прилипание, и виджеты притягиваются друг к другу на
-            величину отступа. Параметры задаются в пикселях. Чтобы отключить
-            прилипание, установите оба значение в 0.
+            ${() => ppp.t('$settingsWorkspacePage.widgetSnappingDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -31,7 +29,9 @@ export const settingsWorkspacePageTemplate = html`
                 value="${(x) => x.document.workspaceSnapDistance ?? '5'}"
                 ${ref('workspaceSnapDistance')}
               >
-                <span slot="label">Дистанция срабатывания</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsWorkspacePage.snapDistance')}
+                </span>
               </ppp-text-field>
               <ppp-text-field
                 type="number"
@@ -40,7 +40,9 @@ export const settingsWorkspacePageTemplate = html`
                 value="${(x) => x.document.workspaceSnapMargin ?? '1'}"
                 ${ref('workspaceSnapMargin')}
               >
-                <span slot="label">Отступ между виджетами</span>
+                <span slot="label">
+                  ${() => ppp.t('$settingsWorkspacePage.snapMargin')}
+                </span>
               </ppp-text-field>
             </div>
           </div>
@@ -48,10 +50,10 @@ export const settingsWorkspacePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Подтверждать закрытие виджетов</h5>
+          <h5>${() => ppp.t('$settingsWorkspacePage.confirmWidgetClosing')}</h5>
           <p class="description">
-            Если настройка активна, при попытке закрытия виджета будет показано
-            диалоговое окно для подтверждения.
+            ${() =>
+              ppp.t('$settingsWorkspacePage.confirmWidgetClosingDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -59,17 +61,20 @@ export const settingsWorkspacePageTemplate = html`
             ?checked="${(x) => x.document.confirmWidgetClosing ?? false}"
             ${ref('confirmWidgetClosing')}
           >
-            Подтверждать закрытие виджетов
+            ${() => ppp.t('$settingsWorkspacePage.confirmWidgetClosing')}
           </ppp-checkbox>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Время удержания уведомлений виджетов</h5>
+          <h5>
+            ${() => ppp.t('$settingsWorkspacePage.widgetNotificationTimeout')}
+          </h5>
           <p class="description">
-            Настройка распространяется только на уведомления, исчезающие со
-            временем. Задаётся в миллисекундах. Нулевое значение отключает показ
-            уведомлений.
+            ${() =>
+              ppp.t(
+                '$settingsWorkspacePage.widgetNotificationTimeoutDescription'
+              )}
           </p>
         </div>
         <div class="input-group">
@@ -84,9 +89,9 @@ export const settingsWorkspacePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Базовый URL виджетов Psina</h5>
+          <h5>${() => ppp.t('$settingsWorkspacePage.psinaBaseUrl')}</h5>
           <p class="description">
-            Позволяет указать альтернативный источник для загрузки виджетов.
+            ${() => ppp.t('$settingsWorkspacePage.psinaBaseUrlDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -101,23 +106,24 @@ export const settingsWorkspacePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Инсталляция в пустом терминале</h5>
+          <h5>
+            ${() => ppp.t('$settingsWorkspacePage.emptyWorkspaceInstallation')}
+          </h5>
         </div>
         <div class="input-group">
           <ppp-checkbox
             ?checked="${(x) => x.document.hideEmptyWorkspaceGizmo ?? false}"
             ${ref('hideEmptyWorkspaceGizmo')}
           >
-            Не показывать
+            ${() => ppp.t('$settingsWorkspacePage.doNotShow')}
           </ppp-checkbox>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Параметры отладки</h5>
+          <h5>${() => ppp.t('$settingsWorkspacePage.debugSettings')}</h5>
           <p class="description">
-            Чтобы включить отладочный режим для всего приложения, следует
-            использовать пространство имён *
+            ${() => ppp.t('$settingsWorkspacePage.debugSettingsDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -126,14 +132,16 @@ export const settingsWorkspacePageTemplate = html`
             value="${(x) => x.document.debugEnvVar ?? ''}"
             ${ref('debugEnvVar')}
           >
-            <span slot="label">Пространства имён для отладки</span>
+            <span slot="label">
+              ${() => ppp.t('$settingsWorkspacePage.debugNamespaces')}
+            </span>
           </ppp-text-field>
           <div class="spacing2"></div>
           <ppp-checkbox
             ?checked="${(x) => x.document.useDebugColors ?? true}"
             ${ref('useDebugColors')}
           >
-            Использовать цвета в сообщениях
+            ${() => ppp.t('$settingsWorkspacePage.useDebugColors')}
           </ppp-checkbox>
         </div>
       </section>
@@ -143,7 +151,7 @@ export const settingsWorkspacePageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить параметры
+          ${() => ppp.t('$settingsWorkspacePage.saveSettings')}
         </ppp-button>
       </footer>
     </form>
@@ -178,13 +186,15 @@ export class SettingsWorkspacePage extends Page {
     ]) {
       await validate(input, {
         hook: async (value) => value >= 0,
-        errorMessage: 'Значение должно быть неотрицательным'
+        errorMessage: ppp.t('$settingsWorkspacePage.valueMustBeNonNegative')
       });
     }
 
     await validate(this.workspaceSnapMargin, {
       hook: async (value) => value <= +this.workspaceSnapDistance.value,
-      errorMessage: `Значение должно быть не больше ${this.workspaceSnapDistance.value}`
+      errorMessage: ppp.t('$settingsWorkspacePage.valueMustBeNotGreater', {
+        max: this.workspaceSnapDistance.value
+      })
     });
 
     try {
@@ -195,7 +205,7 @@ export class SettingsWorkspacePage extends Page {
       );
     } catch (e) {
       invalidate(this.psinaBaseUrl, {
-        errorMessage: 'Этот URL не может быть использован',
+        errorMessage: ppp.t('$page.urlCannotBeUsed'),
         raiseException: true
       });
     }

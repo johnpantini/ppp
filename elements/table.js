@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import { PPPElement } from '../lib/ppp-element.js';
 import {
   css,
@@ -85,7 +86,9 @@ export const tableTemplate = html`
     </table>
     ${when(
       (x) => !x.rows?.length,
-      html` <div class="empty-message">Нет записей для отображения.</div>`
+      html` <div class="empty-message">
+        ${() => ppp.t('$g.noRecordsToDisplay')}
+      </div>`
     )}
   </template>
 `;
