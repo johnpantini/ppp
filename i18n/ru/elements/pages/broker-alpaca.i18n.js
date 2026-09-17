@@ -3,7 +3,13 @@ export default function (i18n) {
     $brokerAlpacaPage: {
       alpacaKey: 'Ключ Alpaca',
       alpacaSecret: 'Секрет Alpaca',
-      invalidLoginOrPassword: 'Неверный логин или пароль'
+      invalidLoginOrPassword: 'Неверный логин или пароль',
+      invalidPaperLoginOrPassword:
+        'Неверный логин или пароль для paper-счёта. Проверьте ключи или снимите отметку paper-счёта для боевого счёта',
+      accountType: 'Тип счёта',
+      paperTradingDescription:
+        'Ключи paper-счёта работают только с paper trading API, боевые — только с боевым. Трейдеры с этим профилем брокера отправляют заявки в выбранное окружение.',
+      paperTradingCheckbox: 'Paper trading account'
     }
   });
 }
