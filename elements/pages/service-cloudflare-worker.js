@@ -72,7 +72,6 @@ export default {
     url: '/lib/cloudflare-workers/psina-us-news-body-extraction.js',
     env: (astraDbApi) => {
       return {
-        GLOBAL_PROXY_URL: "[%#ppp.keyVault.getKey('global-proxy-url')%]",
         ASTRA_DB_ID: astraDbApi.dbID,
         ASTRA_DB_REGION: astraDbApi.dbRegion,
         ASTRA_DB_KEYSPACE: astraDbApi.dbKeyspace

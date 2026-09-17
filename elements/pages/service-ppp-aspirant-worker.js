@@ -221,7 +221,12 @@ uWS
         SECRET: psinaBroker.password
       };
     },
-    fileList: []
+    fileList: [
+      {
+        url: '/lib/debug.js',
+        path: 'lib/debug.js'
+      }
+    ]
   }
 };
 
