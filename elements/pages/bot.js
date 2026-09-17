@@ -25,7 +25,9 @@ export const botPageTemplate = html`
       <section>
         <div class="label-group">
           <h5>${() => ppp.t('$botPage.botNameHeader')}</h5>
-          <p class="description">${() => ppp.t('$page.arbitraryProfileName')}</p>
+          <p class="description">
+            ${() => ppp.t('$page.arbitraryProfileName')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -75,6 +77,26 @@ export const botPageTemplate = html`
           </ppp-text-field>
         </div>
       </section>
+      <section>
+        <div class="label-group">
+          <h5>${() => ppp.t('$botPage.webhookSecretHeader')}</h5>
+          <p class="description">
+            ${() => ppp.t('$botPage.webhookSecretDescription')}
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-text-field
+            type="password"
+            placeholder="${() => ppp.t('$botPage.webhookSecretHeader')}"
+            value="${(x) => x.document.webhookSecret}"
+            ${ref('webhookSecret')}
+          ></ppp-text-field>
+          <div class="spacing2"></div>
+          <ppp-button @click="${(x) => x.generateWebhookSecret()}">
+            ${() => ppp.t('$botPage.generateWebhookSecret')}
+          </ppp-button>
+        </div>
+      </section>
       ${documentPageFooterPartial()}
     </form>
   </template>
@@ -86,6 +108,15 @@ export const botPageStyles = css`
 
 export class BotPage extends Page {
   collection = 'bots';
+
+  generateWebhookSecret() {
+    const bytes = window.crypto.getRandomValues(new Uint8Array(32));
+
+    this.webhookSecret.value = btoa(String.fromCharCode(...bytes))
+      .replace(/[+]/g, '-')
+      .replace(/[/]/g, '_')
+      .replace(/=+$/, '');
+  }
 
   async validate() {
     await validate(this.name);
@@ -116,6 +147,15 @@ export class BotPage extends Page {
         });
       }
     }
+
+    const webhookSecret = this.webhookSecret.value.trim();
+
+    if (webhookSecret && !/^[A-Za-z0-9_-]{1,256}$/.test(webhookSecret)) {
+      invalidate(this.webhookSecret, {
+        errorMessage: ppp.t('$botPage.invalidWebhookSecret'),
+        raiseException: true
+      });
+    }
   }
 
   async read() {
@@ -140,13 +180,17 @@ export class BotPage extends Page {
   async submit() {
     const token = this.token.value.trim();
     const webhook = this.webhook.value.trim();
+    const webhookSecret = this.webhookSecret.value.trim();
     const telegramBot = new TelegramBot({
       token
     });
 
-    if (this.webhook.value) {
+    if (webhook) {
       await maybeFetchError(
-        await telegramBot.setWebhook(new URL(this.webhook.value).toString()),
+        await telegramBot.setWebhook(
+          new URL(webhook).toString(),
+          webhookSecret ? { secret_token: webhookSecret } : {}
+        ),
         ppp.t('$botPage.webhookSetError')
       );
     } else {
@@ -161,6 +205,7 @@ export class BotPage extends Page {
         name: this.name.value.trim(),
         token,
         webhook,
+        webhookSecret,
         version: 1,
         updatedAt: new Date()
       },
