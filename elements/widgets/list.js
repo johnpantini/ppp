@@ -307,6 +307,8 @@ export class ListWidget extends WidgetWithInstrument {
 
   #sortLoop;
 
+  #quickAssignScheduled = false;
+
   constructor() {
     super();
 
@@ -573,6 +575,71 @@ export class ListWidget extends WidgetWithInstrument {
     );
   }
 
+  // Shows rows the moment they are added: with manual slot assignment a
+  // row appended to the table body stays invisible until the next
+  // internalSort() assigns it, and that call is throttled to 500 ms because
+  // it reads the value of every cell of every row. Meanwhile a removed row
+  // disappears at once, so a burst of additions looked like rows leaving,
+  // a gap and the new rows arriving half a second later. This pass keeps
+  // the order the last sort assigned and only splices the unassigned rows
+  // in by their insertion side (prepend - top, append - bottom); the
+  // throttled sort still puts them in column order afterwards. One pass
+  // per animation frame batches bulk loads such as a full instrument list.
+  scheduleQuickAssign() {
+    if (this.#quickAssignScheduled || !this.slot) {
+      return;
+    }
+
+    this.#quickAssignScheduled = true;
+
+    requestAnimationFrame(() => {
+      this.#quickAssignScheduled = false;
+      this.quickAssign();
+    });
+  }
+
+  quickAssign() {
+    if (!this.slot) {
+      return;
+    }
+
+    const children = Array.from(this.tableBody.children);
+    const position = new Map(children.map((row, i) => [row, i]));
+    // A row removed from the table body drops out of the assignment by
+    // itself; the remaining ones keep the sorted order.
+    const assigned = this.slot
+      .assignedNodes()
+      .filter((row) => position.has(row));
+    const assignedSet = new Set(assigned);
+    const firstAssigned = assigned.length ? position.get(assigned[0]) : 0;
+    const top = [];
+    const bottom = [];
+
+    for (const row of children) {
+      if (assignedSet.has(row)) {
+        continue;
+      }
+
+      (position.get(row) < firstAssigned ? top : bottom).push(row);
+    }
+
+    if (!top.length && !bottom.length && assigned.length === children.length) {
+      return;
+    }
+
+    this.slot.assign(
+      ...[...top, ...assigned, ...bottom].map((r, i) => {
+        if ((i + 1) % 2 === 0) {
+          r.classList.add('even');
+        } else {
+          r.classList.remove('even');
+        }
+
+        return r;
+      })
+    );
+  }
+
   appendRow(payload, options = {}) {
     let index = payload.index;
 
@@ -623,6 +690,7 @@ export class ListWidget extends WidgetWithInstrument {
 
     this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
 
+    this.scheduleQuickAssign();
     this.sort();
 
     return row;
@@ -740,6 +808,7 @@ export class ListWidget extends WidgetWithInstrument {
       if (this.deletion) {
         await this.control?.removeRow?.(index, this, column);
         row.remove();
+        this.scheduleQuickAssign();
         this.sort();
       } else if (column.defaultTrader && column.instrument) {
         this.instrumentTrader = column.defaultTrader;
