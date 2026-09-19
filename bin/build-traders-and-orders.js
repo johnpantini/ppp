@@ -23,7 +23,6 @@ const path = require('node:path');
     '/ppp/lib/traders/binance-v3.js',
     '/ppp/lib/traders/bybit-v5.js',
     '/ppp/lib/traders/capitalcom.js',
-    '/ppp/lib/traders/finam-trade-api.js',
     '/ppp/lib/traders/ib.js',
     '/ppp/lib/traders/paper-trade.js',
     '/ppp/lib/traders/combined-l1.js',
