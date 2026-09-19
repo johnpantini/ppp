@@ -398,7 +398,9 @@ export const orderWidgetTemplate = html`
               )}"
           >
             <div class="no-conditional-orders-holder">
-              <span>${() => ppp.t('$orderWidget.noConditionalOrdersText')}</span>
+              <span
+                >${() => ppp.t('$orderWidget.noConditionalOrdersText')}</span
+              >
               <a
                 class="link"
                 href="javascript:void(0);"
@@ -1628,7 +1630,12 @@ export class OrderWidget extends WidgetWithInstrument {
     // Rebuild DOM node.
     this.conditionalOrderDefinition = void 0;
 
-    if (type === ORDERS.CUSTOM && typeof order?.order.baseUrl === 'string') {
+    // Nothing to load when no order is selected.
+    if (!type) {
+      return;
+    }
+
+    if (type === ORDERS.CUSTOM && typeof order?.order?.baseUrl === 'string') {
       this.conditionalOrderDefinition = await import(
         `${new URL(order.order.baseUrl)}element.js`
       );
@@ -1661,7 +1668,7 @@ export class OrderWidget extends WidgetWithInstrument {
     if (
       this.price &&
       oldValue &&
-      !this.ordersTrader.instrumentsAreEqual(oldValue, newValue)
+      !this.ordersTrader?.instrumentsAreEqual(oldValue, newValue)
     ) {
       this.price.value = '';
 
@@ -1725,7 +1732,7 @@ export class OrderWidget extends WidgetWithInstrument {
             title: ppp.t('$orderWidget.ordersCancelledTitle')
           });
       } catch (e) {
-        console.log(e);
+        this.$$debug('[%s] cancelAllOrders -> %o', this.document.name, e);
 
         this.notificationsArea.error({
           text: ppp.t('$orderWidget.cancelOrdersFailedText')
@@ -1793,13 +1800,11 @@ export class OrderWidget extends WidgetWithInstrument {
       const multiplier = v[v.length - 1];
       let volume = parseFloat(v);
 
-      if (multiplier) {
-        const lm = multiplier.toLowerCase();
-
-        if (lm === 'k') volume *= 1000;
-        else if (lm === 'm') volume /= 1000;
-        else if (multiplier.toUpperCase() === 'M') volume *= 10000000;
-      }
+      // k/K: thousands, m: thousandths, M: millions. The suffixes are
+      // case-sensitive for m/M, so compare them as they are.
+      if (multiplier === 'k' || multiplier === 'K') volume *= 1000;
+      else if (multiplier === 'm') volume /= 1000;
+      else if (multiplier === 'M') volume *= 1000000;
 
       if (volume > 0) {
         result.push({
@@ -1827,11 +1832,11 @@ export class OrderWidget extends WidgetWithInstrument {
 
         this.ordersTrader
           .estimate(this.instrument, price, quantity)
-          .then((estimate) => {
+          .then((estimate = {}) => {
             this.commission = estimate.commission;
           })
           .catch((error) => {
-            console.log(error);
+            this.$$debug('[%s] commission -> %o', this.document.name, error);
 
             this.notificationsArea.error({
               text: ppp.t('$traderErrors.E_COMMISSION_CALCULATION_ERROR')
@@ -1880,7 +1885,7 @@ export class OrderWidget extends WidgetWithInstrument {
             this.commission = estimate.commission;
           })
           .catch((error) => {
-            console.log(error);
+            this.$$debug('[%s] estimate -> %o', this.document.name, error);
 
             this.notificationsArea.error({
               text: ppp.t('$orderWidget.estimateFailedText')
@@ -1952,13 +1957,16 @@ export class OrderWidget extends WidgetWithInstrument {
         (activeTab !== 'limit' && this.document.setPriceShouldShowLimitTab)
       ) {
         if (this.price) {
-          this.orderTypeTabs.activeid = 'limit';
+          // Switch (and persist) the tab only when it actually changes.
+          if (activeTab !== 'limit') {
+            this.orderTypeTabs.activeid = 'limit';
 
-          void this.updateDocumentFragment({
-            $set: {
-              'widgets.$.activeTab': 'limit'
-            }
-          });
+            void this.updateDocumentFragment({
+              $set: {
+                'widgets.$.activeTab': 'limit'
+              }
+            });
+          }
 
           setTimeout(() => {
             this.price.input.focus();
@@ -2196,6 +2204,13 @@ export class OrderWidget extends WidgetWithInstrument {
           displaySize
         });
       } else if (this.orderTypeTabs?.activeid === 'conditional') {
+        if (!this.conditionalOrder?.order?.type) {
+          return this.notificationsArea.error({
+            title: ppp.t('$orderWidget.orderErrorTitle'),
+            text: ppp.t('$orderWidget.selectConditionalOrderText')
+          });
+        }
+
         try {
           await this.conditionalOrderHolder?.firstElementChild?.validate?.();
         } catch (e) {
@@ -2725,7 +2740,8 @@ export async function widgetDefinition() {
               ?checked="${(x) => x.document.changePriceQuantityViaMouseWheel}"
               ${ref('changePriceQuantityViaMouseWheel')}
             >
-              ${() => ppp.t('$orderWidget.changePriceQuantityViaMouseWheelText')}
+              ${() =>
+                ppp.t('$orderWidget.changePriceQuantityViaMouseWheelText')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.setPriceShouldShowLimitTab}"

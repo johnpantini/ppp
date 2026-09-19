@@ -107,8 +107,11 @@ export class PortfolioWidget extends ListWidget {
               traderId: this.document.portfolioTraderId
             });
 
-            row.setAttribute('currency', currency);
-            this.rowsCache.set(`${symbol}:${currency}`, row);
+            // appendRow() returns nothing for a payload without a symbol.
+            if (row) {
+              row.setAttribute('currency', currency);
+              this.rowsCache.set(`${symbol}:${currency}`, row);
+            }
           }
         } else {
           if (!size) {

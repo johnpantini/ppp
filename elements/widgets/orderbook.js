@@ -511,7 +511,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
   async connectedCallback() {
     super.connectedCallback();
 
-    if (this.document.depth <= 0) {
+    // Also covers a missing or NaN depth.
+    if (!(this.document.depth > 0)) {
       this.document.depth = 10;
     }
 
@@ -763,7 +764,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
         );
         const askCount = Math.min(
           this.document.depth,
-          this.montage.asks.length ?? 0
+          this.montage?.asks.length ?? 0
         );
 
         if (
@@ -1019,7 +1020,9 @@ export class OrderbookWidget extends WidgetWithInstrument {
         style: 'decimal',
         minimumFractionDigits: 2
       }
-    )} (${formatPercentage(Math.max(0, (bestAsk - bestBid) / bestBid))})`;
+    )} (${formatPercentage(
+      bestBid > 0 ? Math.max(0, (bestAsk - bestBid) / bestBid) : 0
+    )})`;
 
     let maxSeenVolume = 0;
 
@@ -1293,7 +1296,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
   }
 
   #getVirtualOrderPool() {
-    let result = this.instrument.exchange;
+    // The instrument may already be cleared when the montage is rebuilt.
+    let result = this.instrument?.exchange;
 
     if (this.ordersTrader) {
       const foreignInstrument = this.ordersTrader.adoptInstrument(

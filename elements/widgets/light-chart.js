@@ -624,6 +624,12 @@ export class LightChartWidget extends WidgetWithInstrument {
         .unsubscribeVisibleLogicalRangeChange(
           this.onVisibleLogicalRangeChanged
         );
+      // The chart is created anew in connectedCallback, release this one.
+      this.chart.remove();
+      this.chart = void 0;
+      this.mainSeries = void 0;
+      this.volumeSeries = void 0;
+      this.vwapSeries = void 0;
     }
 
     if (this.chartTrader) {
@@ -723,7 +729,9 @@ export class LightChartWidget extends WidgetWithInstrument {
     const info = this.mainSeries.barsInLogicalRange(newRange);
 
     if (info !== null && info.barsBefore < 50) {
-      this.ready && this.loadHistory(this.instrument.symbol);
+      this.ready &&
+        this.instrument?.symbol &&
+        this.loadHistory(this.instrument.symbol);
     }
   }
 
@@ -963,6 +971,10 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   // Older quotes come first.
   setData(ohlcv = []) {
+    if (!this.mainSeries) {
+      return;
+    }
+
     this.mainSeries.setData(ohlcv);
 
     const volumeData = [];
@@ -1010,7 +1022,9 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.candles.clear();
       this.mainSeries && this.setData([]);
       this.applyChartOptions();
-      this.chartTrader.resubscribe();
+      Promise.resolve(this.chartTrader.resubscribe()).catch((e) =>
+        this.$$debug('[%s] resubscribe failed: %o', this.document.name, e)
+      );
       this.reloadNeeded(this.instrument.symbol);
     }
   }
@@ -1058,7 +1072,7 @@ export class LightChartWidget extends WidgetWithInstrument {
 
         this.cursor = cursor;
 
-        if (!cursor || !candles.length) {
+        if (!cursor || !candles?.length) {
           this.hasMore = false;
         }
 
@@ -1079,10 +1093,12 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.setData(this.ohlcv);
 
         this.#updateNeeded = true;
+      } catch (e) {
+        this.$$debug('[%s] loadHistory failed: %o', this.document.name, e);
       } finally {
         this.ready = true;
 
-        shouldScroll && this.chart.timeScale().scrollToPosition(3);
+        shouldScroll && this.chart?.timeScale().scrollToPosition(3);
 
         for (const tab of this.tfSelector.tabs) {
           tab.removeAttribute('disabled');
@@ -1448,17 +1464,23 @@ export async function widgetDefinition() {
                 @change="${async (x) => {
                   const datum = x.chartTraderId.datum();
 
-                  if (datum) {
-                    const trader = await ppp.getOrCreateTrader(
-                      await x.denormalization.denormalize(datum),
-                      {
-                        doNotStartWorker: true
-                      }
-                    );
+                  try {
+                    if (datum) {
+                      const trader = await ppp.getOrCreateTrader(
+                        await x.denormalization.denormalize(datum),
+                        {
+                          doNotStartWorker: true
+                        }
+                      );
 
-                    x.timeframeList.allowedTimeframeList =
-                      trader.getTimeframeList() ?? [];
-                  } else {
+                      x.timeframeList.allowedTimeframeList =
+                        trader.getTimeframeList() ?? [];
+                    } else {
+                      x.timeframeList.allowedTimeframeList = [];
+                    }
+                  } catch (e) {
+                    ppp.$$debug('light chart: chartTrader change failed: %o', e);
+
                     x.timeframeList.allowedTimeframeList = [];
                   }
                 }}"

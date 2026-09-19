@@ -291,7 +291,7 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   onClick(e) {
     for (const node of e.composedPath()) {
-      const actionButton = node?.closest?.('.widget-action-button[action');
+      const actionButton = node?.closest?.('.widget-action-button[action]');
 
       if (actionButton) {
         const action = actionButton.getAttribute('action');
@@ -414,6 +414,9 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
 
   #conditionalOrdersQueueIsBusy = false;
 
+  // What was actually passed to subscribeFields(), used for unsubscribing.
+  #subscribedFieldDatumPairs;
+
   orderProcessorFunc;
 
   slot;
@@ -459,32 +462,28 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         conditionalTabHidden(this) &&
         this.document.activeTab === 'real'
       ) {
-        await this.ordersTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            ro: TRADER_DATUM.REAL_ORDER
-          }
-        });
+        this.#subscribedFieldDatumPairs = {
+          ro: TRADER_DATUM.REAL_ORDER
+        };
       } else if (
         allTabHidden(this) &&
         realTabHidden(this) &&
         this.document.activeTab === 'conditional'
       ) {
-        await this.ordersTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            co: TRADER_DATUM.CONDITIONAL_ORDER
-          }
-        });
+        this.#subscribedFieldDatumPairs = {
+          co: TRADER_DATUM.CONDITIONAL_ORDER
+        };
       } else {
-        await this.ordersTrader.subscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            ro: TRADER_DATUM.REAL_ORDER,
-            co: TRADER_DATUM.CONDITIONAL_ORDER
-          }
-        });
+        this.#subscribedFieldDatumPairs = {
+          ro: TRADER_DATUM.REAL_ORDER,
+          co: TRADER_DATUM.CONDITIONAL_ORDER
+        };
       }
+
+      await this.ordersTrader.subscribeFields?.({
+        source: this,
+        fieldDatumPairs: this.#subscribedFieldDatumPairs
+      });
 
       this.orderProcessorFunc ??= new Function(
         'trader',
@@ -496,11 +495,14 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         )
       );
 
-      this.cardList.attachShadow({ mode: 'open', slotAssignment: 'manual' });
+      // Prevent attachShadow() duplicate calls on reconnection.
+      if (!this.cardList.shadowRoot) {
+        this.cardList.attachShadow({ mode: 'open', slotAssignment: 'manual' });
 
-      this.slot = document.createElement('slot');
+        this.slot = document.createElement('slot');
 
-      this.cardList.shadowRoot.append(this.slot);
+        this.cardList.shadowRoot.append(this.slot);
+      }
 
       for (const { orderId, hidden } of this.document
         .allowedConditionalOrders ?? []) {
@@ -522,38 +524,15 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   async disconnectedCallback() {
     this.removeEventListener('click', this.onClick);
 
-    if (this.ordersTrader) {
-      if (
-        allTabHidden(this) &&
-        conditionalTabHidden(this) &&
-        this.document.activeTab === 'real'
-      ) {
-        await this.ordersTrader.unsubscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            ro: TRADER_DATUM.REAL_ORDER
-          }
-        });
-      } else if (
-        allTabHidden(this) &&
-        realTabHidden(this) &&
-        this.document.activeTab === 'conditional'
-      ) {
-        await this.ordersTrader.unsubscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            co: TRADER_DATUM.CONDITIONAL_ORDER
-          }
-        });
-      } else {
-        await this.ordersTrader.unsubscribeFields?.({
-          source: this,
-          fieldDatumPairs: {
-            ro: TRADER_DATUM.REAL_ORDER,
-            co: TRADER_DATUM.CONDITIONAL_ORDER
-          }
-        });
-      }
+    // Unsubscribe exactly what was subscribed: activeTab may have changed
+    // since connectedCallback, so the branches must not be recomputed here.
+    if (this.ordersTrader && this.#subscribedFieldDatumPairs) {
+      await this.ordersTrader.unsubscribeFields?.({
+        source: this,
+        fieldDatumPairs: this.#subscribedFieldDatumPairs
+      });
+
+      this.#subscribedFieldDatumPairs = void 0;
     }
 
     return super.disconnectedCallback();
@@ -629,19 +608,20 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
         this.#conditionalOrdersQueueIsBusy = true;
 
         const order = this.#conditionalOrdersQueue.shift();
-        const type = order.payload.order.type;
-        let cardUrl;
-
-        if (
-          type === ORDERS.CUSTOM &&
-          typeof order.payload.order.baseUrl === 'string'
-        ) {
-          cardUrl = `${new URL(order.payload.order.baseUrl).toString()}card.js`;
-        } else {
-          cardUrl = `${ppp.rootUrl}/lib/orders/${type}/card.js`;
-        }
 
         try {
+          const type = order.payload.order.type;
+          let cardUrl;
+
+          if (
+            type === ORDERS.CUSTOM &&
+            typeof order.payload.order.baseUrl === 'string'
+          ) {
+            cardUrl = `${new URL(order.payload.order.baseUrl).toString()}card.js`;
+          } else {
+            cardUrl = `${ppp.rootUrl}/lib/orders/${type}/card.js`;
+          }
+
           const cardModule = await import(cardUrl);
 
           order.cardDefinition = cardModule.default;
@@ -653,6 +633,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
           }
 
           this.#conditionalOrderLoadedAndChanged(order);
+        } catch (e) {
+          this.$$debug(
+            '[%s] conditional order card failed: %o',
+            this.document.name,
+            e
+          );
         } finally {
           this.#conditionalOrdersQueueIsBusy = false;
 
@@ -875,6 +861,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   async refreshOrders() {
+    if (!this.ordersTrader) {
+      return this.notificationsArea.error({
+        text: ppp.t('$activeOrdersWidget.noOrdersTrader')
+      });
+    }
+
     if (this.orderTypeSelector.value === 'conditional') {
       !this.document.onlyShowErrorNotifications &&
         this.notificationsArea.note({
@@ -923,6 +915,12 @@ export class ActiveOrdersWidget extends WidgetWithInstrument {
   }
 
   async cancelAllOrders(options = {}) {
+    if (!this.ordersTrader) {
+      return this.notificationsArea.error({
+        text: ppp.t('$activeOrdersWidget.noOrdersTrader')
+      });
+    }
+
     this.topLoader.start();
 
     try {

@@ -484,6 +484,12 @@ export async function widgetDefinition() {
 
                       return;
                     }
+
+                    widget.$$debug(
+                      '[%s] marqueesearch trader failed: %o',
+                      widget.document.name,
+                      e
+                    );
                   }
 
                   widget.searchControl.open = true;

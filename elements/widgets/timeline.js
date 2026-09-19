@@ -282,7 +282,11 @@ export class TimelineWidget extends WidgetWithInstrument {
       year: 'numeric'
     });
 
-    return this.#headlineDateFormatter.format(new Date(dateKey));
+    // The key holds local date parts; new Date('YYYY-MM-DD') would parse
+    // it as UTC midnight and shift the day in negative-offset time zones.
+    const [year, month, day] = dateKey.split('-').map(Number);
+
+    return this.#headlineDateFormatter.format(new Date(year, month - 1, day));
   }
 
   formatCardTime(operations) {
@@ -381,7 +385,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       case OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE:
         return `background-image:url(${this.searchControl.getInstrumentIconUrl(
           firstOperation.instrument
-        )}`;
+        )})`;
 
       default:
         return '';
@@ -450,7 +454,7 @@ export class TimelineWidget extends WidgetWithInstrument {
 
     if (negative) totalAmount *= -1;
 
-    totalAmount *= firstOperation.instrument.lot;
+    totalAmount *= firstOperation.instrument.lot ?? 1;
 
     return formatAmount(totalAmount, firstOperation.instrument);
   }
@@ -612,8 +616,8 @@ export class TimelineWidget extends WidgetWithInstrument {
     return number.toString().padStart(2, '0');
   }
 
-  instrumentChanged() {
-    super.instrumentChanged();
+  instrumentChanged(oldValue, newValue) {
+    super.instrumentChanged(oldValue, newValue);
 
     this.#scheduleRebuild();
   }

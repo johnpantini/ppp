@@ -87,7 +87,7 @@ const DEFAULT_COLUMNS = [
 });
 
 export const timeAndSalesWidgetTemplate = html`
-  <template @columnresize="${(x) => x.recalculateGridDimensions()}}">
+  <template @columnresize="${(x) => x.recalculateGridDimensions()}">
     <div class="widget-root">
       ${widgetDefaultHeaderTemplate({
         buttons: html`
@@ -361,36 +361,41 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
   }
 
   async pChanged(oldValue, rawTrade) {
-    const trade = this.tradesTrader.rawTradeToCanonicalTrade(rawTrade);
+    try {
+      const trade = this.tradesTrader.rawTradeToCanonicalTrade(rawTrade);
 
-    if (this.instrument.symbol !== trade.symbol) {
-      return;
-    }
-
-    const threshold = await this.getThreshold(trade);
-
-    if (trade?.price) {
-      this.empty = false;
-
-      if (typeof threshold === 'number' && trade?.volume < threshold) {
+      if (!trade || this.instrument?.symbol !== trade.symbol) {
         return;
       }
 
-      if (this.isWaitingForHistory) {
-        this.#inflyQueue.unshift(this.formatTrade(trade));
-      } else {
-        this.#trades.unshift(this.formatTrade(trade));
+      const threshold = await this.getThreshold(trade);
 
-        while (this.#trades.length > this.document.depth) {
-          this.#trades.pop();
+      if (trade?.price) {
+        this.empty = false;
+
+        if (typeof threshold === 'number' && trade?.volume < threshold) {
+          return;
         }
 
-        this.#stillGrowing = this.#trades.length < this.document.depth + 1;
+        if (this.isWaitingForHistory) {
+          this.#inflyQueue.unshift(this.formatTrade(trade));
+        } else {
+          this.#trades.unshift(this.formatTrade(trade));
 
-        if (!this.paused) {
-          this.#updateNeeded = true;
+          while (this.#trades.length > this.document.depth) {
+            this.#trades.pop();
+          }
+
+          this.#stillGrowing = this.#trades.length < this.document.depth + 1;
+
+          if (!this.paused) {
+            this.#updateNeeded = true;
+          }
         }
       }
+    } catch (e) {
+      // A throwing threshold function must not become an unhandled rejection.
+      this.$$debug('[%s] pChanged failed: %o', this.document.name, e);
     }
   }
 
@@ -615,7 +620,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
       event.composedPath()[0]
     );
 
-    if (index > -1) {
+    if (index > -1 && this.#trades[index]) {
       this.broadcastPrice(this.#trades[index].rawPrice);
     }
   }
@@ -926,7 +931,7 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
               const threshold = await this.getThreshold(trade);
 
               if (
-                this.instrument.symbol === trade.symbol &&
+                this.instrument?.symbol === trade.symbol &&
                 typeof threshold === 'number' &&
                 trade.volume >= threshold
               ) {

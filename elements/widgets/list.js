@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widgetStyles,
   WidgetWithInstrument,
@@ -321,6 +322,11 @@ export class ListWidget extends WidgetWithInstrument {
 
     // Prevent attachShadow() duplicate calls. See below.
     if (this.tableBody.shadowRoot) {
+      // Reconnected: the sort loop was cleared in disconnectedCallback.
+      if (!this.disableSort && !this.#sortLoop) {
+        this.#startSortLoop();
+      }
+
       this.initialized = true;
 
       return;
@@ -376,7 +382,7 @@ export class ListWidget extends WidgetWithInstrument {
       this.extraHeaderButtons = extraHeaderButtons;
       this.pagination = pagination;
       this.maySelectInstrument = !!maySelectInstrument;
-      this.defaultSortOrder = defaultSortOrder;
+      this.defaultSortOrder = defaultSortOrder ?? 'desc';
       this.disableSort = disableSort;
 
       if (
@@ -420,19 +426,7 @@ export class ListWidget extends WidgetWithInstrument {
       }
 
       if (!this.disableSort) {
-        this.#sortLoop = setInterval(() => {
-          let needSort = false;
-
-          for (let i = 0; i < this.columnsArray.length; i++) {
-            if (this.columnsArray[i].sort) {
-              needSort = true;
-
-              break;
-            }
-          }
-
-          needSort && this.internalSort();
-        }, 500);
+        this.#startSortLoop();
       }
 
       this.initialized = true;
@@ -448,8 +442,27 @@ export class ListWidget extends WidgetWithInstrument {
     }
   }
 
+  #startSortLoop() {
+    clearInterval(this.#sortLoop);
+
+    this.#sortLoop = setInterval(() => {
+      let needSort = false;
+
+      for (let i = 0; i < this.columnsArray.length; i++) {
+        if (this.columnsArray[i].sort) {
+          needSort = true;
+
+          break;
+        }
+      }
+
+      needSort && this.internalSort();
+    }, 500);
+  }
+
   async disconnectedCallback() {
     clearInterval(this.#sortLoop);
+    this.#sortLoop = void 0;
     await this.control?.disconnectedCallback?.(this);
 
     return super.disconnectedCallback();
@@ -733,6 +746,10 @@ export class ListWidget extends WidgetWithInstrument {
           row.setAttribute('symbol', payload.symbol);
           row.setAttribute('index', index);
 
+          if (!cell) {
+            continue;
+          }
+
           cell.payload = payload;
           cell.trader = payload.traderId;
 
@@ -945,7 +962,7 @@ export async function widgetDefinition() {
 
             Updates.enqueue(() => x.applyModifications());
           } catch (e) {
-            console.error(e);
+            ppp.$$debug('list widget: listDefinition import failed: %o', e);
             invalidate(x.listWidgetUrl, {
               errorMessage: ppp.t('$listWidget.urlCannotBeUsed'),
               raiseException: true

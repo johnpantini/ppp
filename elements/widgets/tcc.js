@@ -377,7 +377,11 @@ export class TccWidget extends Widget {
   async connectedCallback() {
     super.connectedCallback();
 
-    return this.#adjustTraders();
+    try {
+      await this.#adjustTraders();
+    } catch (e) {
+      this.catchException(e);
+    }
   }
 
   async #adjustTraders() {
@@ -390,9 +394,17 @@ export class TccWidget extends Widget {
         continue;
       }
 
-      const trader = await this.container.denormalization.denormalize(
-        this.document.traders.find((t) => t._id === traderId)
+      const traderDocument = this.document.traders?.find(
+        (t) => t._id === traderId
       );
+
+      // The trader may have been removed from the workspace.
+      if (!traderDocument) {
+        continue;
+      }
+
+      const trader =
+        await this.container.denormalization.denormalize(traderDocument);
 
       if (activeTab !== 'all') {
         if (activeTab !== trader.runtime) {
