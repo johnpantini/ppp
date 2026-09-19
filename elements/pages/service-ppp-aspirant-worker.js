@@ -124,6 +124,10 @@ uWS
       {
         url: '/vendor/lzma/src/lzma_worker.js',
         path: 'vendor/lzma/src/lzma_worker.js'
+      },
+      {
+        url: '/lib/debug.js',
+        path: 'lib/debug.js'
       }
     ]
   },
@@ -484,7 +488,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
             <div class="label-group">
               <h5 class="positive">stdout</h5>
               <p class="description">
-                ${() => ppp.t('$servicePppAspirantWorkerPage.stdoutDescription')}
+                ${() =>
+                  ppp.t('$servicePppAspirantWorkerPage.stdoutDescription')}
               </p>
               <div class="spacing2"></div>
               <ppp-terminal
@@ -496,7 +501,8 @@ export const servicePppAspirantWorkerPageTemplate = html`
             <div class="label-group">
               <h5 class="negative">stderr</h5>
               <p class="description">
-                ${() => ppp.t('$servicePppAspirantWorkerPage.stderrDescription')}
+                ${() =>
+                  ppp.t('$servicePppAspirantWorkerPage.stderrDescription')}
               </p>
               <div class="spacing2"></div>
               <ppp-terminal
@@ -562,7 +568,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>${() => ppp.t('$servicePppAspirantWorkerPage.serviceDescription')}</h5>
+          <h5>
+            ${() => ppp.t('$servicePppAspirantWorkerPage.serviceDescription')}
+          </h5>
           <p class="description">
             ${() =>
               ppp.t('$servicePppAspirantWorkerPage.serviceDescriptionNotes')}
@@ -664,8 +672,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
             <div class="label-group">
               <h5>API Yandex Cloud</h5>
               <p class="description">
-                ${() =>
-                  ppp.t('$servicePppAspirantWorkerPage.ycApiDescription')}
+                ${() => ppp.t('$servicePppAspirantWorkerPage.ycApiDescription')}
               </p>
             </div>
             <div class="input-group">
@@ -716,10 +723,14 @@ export const servicePppAspirantWorkerPageTemplate = html`
           <section>
             <div class="implementation-area">
               <div class="label-group full" style="min-width: 600px">
-                <h5>${() => ppp.t('$servicePppAspirantWorkerPage.entryPoint')}</h5>
+                <h5>
+                  ${() => ppp.t('$servicePppAspirantWorkerPage.entryPoint')}
+                </h5>
                 <p class="description">
                   ${() =>
-                    ppp.t('$servicePppAspirantWorkerPage.entryPointDescription')}
+                    ppp.t(
+                      '$servicePppAspirantWorkerPage.entryPointDescription'
+                    )}
                 </p>
                 <ppp-snippet
                   style="height: 400px"
@@ -792,7 +803,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
                           standalone
                           style="width: 256px;"
                           placeholder="${() =>
-                            ppp.t('$servicePppAspirantWorkerPage.relativePath')}"
+                            ppp.t(
+                              '$servicePppAspirantWorkerPage.relativePath'
+                            )}"
                           value="${(x) => x.path}"
                         >
                         </ppp-text-field>
@@ -853,7 +866,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 <div class="label-group full">
                   <h5>
                     ${() =>
-                      ppp.t('$servicePppAspirantWorkerPage.predefinedTemplates')}
+                      ppp.t(
+                        '$servicePppAspirantWorkerPage.predefinedTemplates'
+                      )}
                   </h5>
                   <p class="description">
                     ${() =>
@@ -875,7 +890,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
                       </ppp-option>
                       <ppp-option value="default">
                         ${() =>
-                          ppp.t('$servicePppAspirantWorkerPage.templateDefault')}
+                          ppp.t(
+                            '$servicePppAspirantWorkerPage.templateDefault'
+                          )}
                       </ppp-option>
                       <ppp-option value="utexAlpaca">
                         ${() =>
@@ -1000,8 +1017,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
                 ${ref('urlWorkerPredefinedTemplate')}
               >
                 <ppp-option value="custom">
-                  ${() =>
-                    ppp.t('$servicePppAspirantWorkerPage.templateNone')}
+                  ${() => ppp.t('$servicePppAspirantWorkerPage.templateNone')}
                 </ppp-option>
                 <ppp-option value="default">
                   ${() =>
@@ -1033,7 +1049,9 @@ export const servicePppAspirantWorkerPageTemplate = html`
           </section>
           <section>
             <div class="label-group">
-              <h5>${() => ppp.t('$servicePppAspirantWorkerPage.serviceUrl')}</h5>
+              <h5>
+                ${() => ppp.t('$servicePppAspirantWorkerPage.serviceUrl')}
+              </h5>
               <p class="description">
                 ${() =>
                   ppp.t('$servicePppAspirantWorkerPage.serviceUrlDescription')}
