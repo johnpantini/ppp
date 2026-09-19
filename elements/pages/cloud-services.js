@@ -49,9 +49,7 @@ export const cloudServicesPageTemplate = html`
           @click="${(x) => x.restoreMongoDB()}"
         >
           ${() => ppp.t('$cloudServicesPage.restoreDatabase')}
-          <span slot="start">
-            ${html.partial(cloud)}
-          </span>
+          <span slot="start"> ${html.partial(cloud)} </span>
         </ppp-button>
         <ppp-button
           appearance="default"
@@ -134,21 +132,6 @@ export const cloudServicesPageTemplate = html`
           <h6>${() => ppp.t('$cloudServicesPage.proxyResource')}</h6>
           <p class="description">
             ${() => ppp.t('$cloudServicesPage.proxyDescriptionPrefix')}
-            <a
-              class="link"
-              rel="noopener"
-              target="_blank"
-              href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/ppp-proxy"
-              >${() => ppp.t('$cloudServicesPage.instructionsLink')}</a
-            >
-            ${() => ppp.t('$cloudServicesPage.proxyDescriptionInfix')}
-            <a
-              class="link"
-              rel="noopener"
-              target="_blank"
-              href="https://app.netlify.com/login"
-              >Netlify</a
-            >.
           </p>
         </div>
         <div class="input-group">
@@ -169,7 +152,7 @@ export const cloudServicesPageTemplate = html`
               class="link"
               target="_blank"
               rel="noopener"
-              href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/personal-github-token"
+              href="https://github.com/settings/tokens/new"
             >
               ${() => ppp.t('$cloudServicesPage.tokenLink')}
             </a>
@@ -197,18 +180,18 @@ export const cloudServicesPageTemplate = html`
           <ppp-text-field
             type="url"
             placeholder="http://0.0.0.0:14444"
-            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"            
+            value="${() => ppp.keyVault.getKey('mongo-proxy-url')}"
             ${ref('mongoProxyUrl')}
           ></ppp-text-field>
         </div>
       </section>
-            <section>
+      <section>
         <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
         <div class="label-group">
           <h6>${() => ppp.t('$cloudServicesPage.mongoDbConnection')}</h6>
           <p class="description">
             ${() => ppp.t('$cloudServicesPage.mongoDbConnectionDescription')}
-          </p>      
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -220,10 +203,7 @@ export const cloudServicesPageTemplate = html`
         </div>
       </section>
       <footer>
-        <ppp-button
-          appearance="danger"
-          @click="${(x) => x.clearKeys()}"
-        >
+        <ppp-button appearance="danger" @click="${(x) => x.clearKeys()}">
           ${() => ppp.t('$cloudServicesPage.clearPasswordAndKeys')}
           <span slot="start"> ${html.partial(trash)} </span>
         </ppp-button>
@@ -347,7 +327,10 @@ export class CloudServicesPage extends Page {
       await validate(this.mongoProxyUrl);
       ppp.keyVault.setKey('tag', TAG);
       ppp.keyVault.setKey('master-password', this.masterPassword.value.trim());
-      await caches.delete('offline');
+      // The AES key is derived from the master password and cached,
+      // drop it so that a new password takes effect immediately.
+      ppp.crypto.resetKey();
+      await globalThis.caches?.delete('offline');
 
       let globalProxyUrl;
 
@@ -355,10 +338,7 @@ export class CloudServicesPage extends Page {
       try {
         globalProxyUrl = new URL(this.globalProxyUrl.value);
 
-        this.progressOperation(
-          25,
-          ppp.t('$cloudServicesPage.checkingProxy')
-        );
+        this.progressOperation(25, ppp.t('$cloudServicesPage.checkingProxy'));
 
         await maybeFetchError(
           await fetch(new URL('zen', globalProxyUrl.origin).toString(), {
@@ -480,7 +460,11 @@ export class CloudServicesPage extends Page {
 
       localStorage.clear();
 
-      localStorage.setItem('ppp-version', version);
+      // Do not store the string "null" when the version was never set.
+      if (version !== null) {
+        localStorage.setItem('ppp-version', version);
+      }
+
       window.location.reload();
     }
   }

@@ -661,7 +661,7 @@ export class App extends PPPElement {
 
       ppp.app.toast.progress.value = 45;
 
-      await caches.delete('offline');
+      await globalThis.caches?.delete('offline');
       await updatesPage.checkForUpdates(true);
 
       ppp.app.toast.progress.value = 75;
