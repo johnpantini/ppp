@@ -3,15 +3,30 @@
 // This variable is intentionally declared and unused.
 // Add a comment for your linter if you want:
 // eslint-disable-next-line no-unused-vars
-const OFFLINE_VERSION = 8;
+const OFFLINE_VERSION = 9;
 const PPP_CACHE_NAME = 'offline';
 const OFFLINE_URL = 'offline.html';
 
 // noinspection DuplicatedCode
+const DECORATE_HELPER =
+  'const __decorate = function (decorators, target, key, desc) {\n' +
+  '  let c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;\n' +
+  '  for (let i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;\n' +
+  '  return c > 3 && r && Object.defineProperty(target, key, r), r;\n' +
+  '};\n';
+
+// Only lines containing one of these can be affected, every other line is
+// copied verbatim, so the source is never split into lines.
+const DECORATOR_CANDIDATE = /@|class|export default/g;
+
+function isDecoratorLine(line) {
+  return line.startsWith('@') && !/^@keyframes/.test(line) && !/=/.test(line);
+}
+
 function placeDecorators(decorators = []) {
   let result = '';
 
-  decorators.forEach(({ d, c, t, l }) => {
+  for (const { d, c, t, l } of decorators) {
     if (t === 'class') {
       result += `${c} = __decorate([${d}], ${c});\n`;
     } else if (t === 'method') {
@@ -24,68 +39,123 @@ function placeDecorators(decorators = []) {
         .replace(/;/, '')
         .trim()}', void 0);\n`;
     }
-  });
+  }
 
   return result;
 }
 
 function removeDecorators(source) {
   const decorators = [];
-  // Should be moved to the bottom after __decorate
-  const exports = [];
-  const lines = source.split(/\n/gi);
-  let result = '';
+  const chunks = [];
+  const length = source.length;
   let currentClass = '';
   let hasDefaultExport = false;
+  // Start of the pending run of unmodified source.
+  let runStart = 0;
+  // Start of the line processed last, a line is handled once.
+  let lastLineStart = -1;
+  // True when the trailing newline has already been emitted (or dropped).
+  let trailingNewlineDone = false;
+  let match;
 
-  lines.forEach((l, i) => {
-    const line = l.trim();
+  DECORATOR_CANDIDATE.lastIndex = 0;
+
+  while ((match = DECORATOR_CANDIDATE.exec(source)) !== null) {
+    const lineStart = source.lastIndexOf('\n', match.index) + 1;
+
+    if (lineStart === lastLineStart) {
+      continue;
+    }
+
+    lastLineStart = lineStart;
+
+    let lineEnd = source.indexOf('\n', match.index);
+
+    if (lineEnd === -1) lineEnd = length;
+
+    // Continue scanning from the next line.
+    DECORATOR_CANDIDATE.lastIndex = lineEnd + 1;
+
+    const line = source.slice(lineStart, lineEnd).trim();
 
     if (/class\s+/.test(line)) {
       currentClass = line.split(/class /)[1].split(/\s/)[0];
     }
 
-    if (line.startsWith('@') && !/^@keyframes/.test(line) && !/=/.test(line)) {
-      const nextLine = lines[i + 1]?.trim();
+    if (isDecoratorLine(line)) {
+      // Collect the whole stack of decorators, the target follows them.
+      const stack = [line.substring(1)];
+      let stackEnd = lineEnd;
+      let target;
+      let targetEnd = -1;
 
-      if (/class\s+/.test(nextLine)) {
-        // Class decorator
-        currentClass = nextLine.split(/class /)[1].split(/\s/)[0];
+      while (stackEnd < length) {
+        targetEnd = source.indexOf('\n', stackEnd + 1);
 
-        decorators.push({
-          d: line.substring(1),
-          c: currentClass,
-          t: 'class'
-        });
-      } else {
-        // Member decorator
-        const t = /\)\s+{/.test(nextLine) ? 'method' : 'prop';
+        if (targetEnd === -1) targetEnd = length;
 
-        decorators.unshift({
-          d: line.substring(1),
-          c: currentClass,
-          t,
-          l: nextLine
-        });
+        target = source.slice(stackEnd + 1, targetEnd).trim();
 
-        t === 'prop' && (lines[i + 1] = '');
+        if (!isDecoratorLine(target)) {
+          break;
+        }
+
+        stack.push(target.substring(1));
+        stackEnd = targetEnd;
+        target = void 0;
+        targetEnd = -1;
       }
+
+      const d = stack.join(', ');
+
+      if (/class\s+/.test(target)) {
+        currentClass = target.split(/class /)[1].split(/\s/)[0];
+
+        decorators.push({ d, c: currentClass, t: 'class' });
+      } else {
+        const t = /\)\s+{/.test(target) ? 'method' : 'prop';
+
+        decorators.unshift({ d, c: currentClass, t, l: target });
+
+        if (t === 'prop' && targetEnd !== -1) {
+          // Decorator lines are dropped, the property line is replaced by
+          // an empty one and is not inspected any further.
+          chunks.push(source.slice(runStart, lineStart), '\n');
+          runStart = targetEnd + 1;
+          lastLineStart = stackEnd + 1;
+          DECORATOR_CANDIDATE.lastIndex = targetEnd + 1;
+          trailingNewlineDone = targetEnd === length;
+
+          continue;
+        }
+      }
+
+      // Decorator lines are dropped.
+      chunks.push(source.slice(runStart, lineStart));
+      runStart = stackEnd + 1;
+      lastLineStart = stackEnd + 1;
+      DECORATOR_CANDIDATE.lastIndex = stackEnd + 1;
+      trailingNewlineDone = stackEnd === length;
     } else if (/(^export default)|(\/\/ export default)/.test(line)) {
       hasDefaultExport = true;
 
-      result += placeDecorators(decorators);
-      result += l + '\n';
-    } else result += l + '\n';
-  });
+      chunks.push(
+        source.slice(runStart, lineStart),
+        placeDecorators(decorators)
+      );
+      runStart = lineStart;
+    }
+  }
+
+  if (runStart < length) chunks.push(source.slice(runStart));
+
+  // Every line is emitted with a newline, so the output ends with one.
+  if (!trailingNewlineDone) chunks.push('\n');
+
+  let result = chunks.join('');
 
   if (decorators.length) {
-    result =
-      'const __decorate = function (decorators, target, key, desc) {\n' +
-      '  let c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;\n' +
-      '  for (let i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;\n' +
-      '  return c > 3 && r && Object.defineProperty(target, key, r), r;\n' +
-      '};\n' +
-      result;
+    result = DECORATE_HELPER + result;
 
     if (!hasDefaultExport) {
       result += placeDecorators(decorators);
