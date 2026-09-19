@@ -24,7 +24,7 @@ export default function (i18n) {
       passwordConfirmation: 'Подтверждение пароля',
       proxyResource: 'Прокси-ресурс',
       proxyDescriptionPrefix:
-        'Используется для совершения запросов к внешним API и сервисам. Рекомендуется создать по',
+        'Используется для совершения запросов к внешним API и сервисам.',
       instructionsLink: 'инструкции',
       proxyDescriptionInfix: 'на платформе',
       personalGitHubToken: 'Персональный токен GitHub',
@@ -38,10 +38,8 @@ export default function (i18n) {
       clearPasswordAndKeys: 'Очистить пароль и ключи',
       checkAndSaveKeys: 'Проверить и сохранить ключи',
       enterAllKeysAndMasterPassword: 'Нужно ввести все ключи и мастер-пароль.',
-      generatingCompactRepresentation:
-        'Генерация компактного представления...',
-      compactRepresentationError:
-        'Ошибка генерации компактного представления.',
+      generatingCompactRepresentation: 'Генерация компактного представления...',
+      compactRepresentationError: 'Ошибка генерации компактного представления.',
       saveDatabaseTitle: 'Сохранить базу данных',
       backupCreationTitle: 'Создание резервной копии',
       restoreDatabaseTitle: 'Восстановить базу данных',

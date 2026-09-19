@@ -23,7 +23,7 @@ export default function (i18n) {
       passwordConfirmation: 'Password confirmation',
       proxyResource: 'Proxy resource',
       proxyDescriptionPrefix:
-        'Used to make requests to external APIs and services. It is recommended to create one following the',
+        'Used to make requests to external APIs and services.',
       instructionsLink: 'instructions',
       proxyDescriptionInfix: 'on the',
       personalGitHubToken: 'Personal GitHub token',
