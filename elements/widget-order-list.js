@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import { html, repeat, ref } from '../vendor/fast-element.min.js';
 import { validate } from '../lib/ppp-errors.js';
 import {
@@ -29,7 +30,7 @@ export const widgetOrderListTemplate = html`
                 style="width: 200px;"
                 standalone
                 ?disabled="${(x) => x.hidden}"
-                placeholder="Название"
+                placeholder="${() => ppp.t('$g.name')}"
                 value="${(order) => order.name}"
               ></ppp-text-field>
               <ppp-query-select
@@ -47,7 +48,7 @@ export const widgetOrderListTemplate = html`
                       ${item?.name}
                     </span>
                   `}"
-                placeholder="Трейдер #1"
+                placeholder="${() => ppp.t('$g.traderNumber', { n: 1 })}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -77,7 +78,7 @@ export const widgetOrderListTemplate = html`
                       ${item?.name}
                     </span>
                   `}"
-                placeholder="Трейдер #3"
+                placeholder="${() => ppp.t('$g.traderNumber', { n: 3 })}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -103,7 +104,7 @@ export const widgetOrderListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.orders?.find((o) => o._id === x.orderId);
                 }}"
-                placeholder="Шаблон заявки"
+                placeholder="${() => ppp.t('$widget.orderTemplate')}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -133,7 +134,7 @@ export const widgetOrderListTemplate = html`
                       ${item?.name}
                     </span>
                   `}"
-                placeholder="Трейдер #2"
+                placeholder="${() => ppp.t('$g.traderNumber', { n: 2 })}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -163,7 +164,7 @@ export const widgetOrderListTemplate = html`
                       ${item?.name}
                     </span>
                   `}"
-                placeholder="Трейдер #4"
+                placeholder="${() => ppp.t('$g.traderNumber', { n: 4 })}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {

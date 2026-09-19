@@ -31,6 +31,8 @@ import '../button.js';
 import '../empty-workspace-gizmo.js';
 import '../top-loader.js';
 
+await ppp.i18n(import.meta.url);
+
 export const workspacePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-top-loader ${ref('topLoader')}></ppp-top-loader>
@@ -45,11 +47,9 @@ export const workspacePageTemplate = html`
           )}
           <div class="empty-state">
             <div class="picture">${html.partial(dragAndDrop)}</div>
-            <h3>В этом терминале нет виджетов</h3>
+            <h3>${() => ppp.t('$workspacePage.noWidgetsHeader')}</h3>
             <p>
-              Перед тем, как начать торговать, разместите виджеты на рабочей
-              области. Чтобы в дальнейшем добавлять виджеты, выберите терминал в
-              боковом меню и нажмите&nbsp;<code
+              ${() => ppp.t('$workspacePage.noWidgetsText')}&nbsp;<code
                 @click="${() => ppp.app.showWidgetSelector()}"
                 class="hotkey"
                 >+W</code
@@ -60,7 +60,7 @@ export const workspacePageTemplate = html`
               class="large"
               @click="${() => ppp.app.showWidgetSelector()}"
             >
-              Разместить виджет
+              ${() => ppp.t('$app.placeWidgetTitle')}
             </ppp-button>
           </div>
         `
@@ -199,7 +199,9 @@ export class WorkspacePage extends Page {
 
               if (ppp.app.widgetClipboard.savedDocument) {
                 this.showSuccessNotification(
-                  `Виджет «${selectedWidget.document.name}» скопирован в буфер обмена.`
+                  ppp.t('$workspacePage.widgetCopiedToClipboard', {
+                    name: selectedWidget.document.name
+                  })
                 );
               }
             }
@@ -599,7 +601,7 @@ export class WorkspacePage extends Page {
           }
         }
       } catch (e) {
-        this.failOperation(e, 'Загрузка терминала');
+        this.failOperation(e, ppp.t('$workspacePage.workspaceLoadingTitle'));
       } finally {
         this.endOperation();
       }

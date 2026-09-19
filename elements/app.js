@@ -127,7 +127,7 @@ export const appTemplate = html`
           )}
           <ppp-side-nav-group>
             <span slot="start">${html.partial(trading)}</span>
-            <span slot="title">Торговля</span>
+            <span slot="title">${() => ppp.t('$sideNav.trading')}</span>
             <a
               href="?page=widgets"
               @click="${(x) =>
@@ -221,7 +221,7 @@ export const appTemplate = html`
           )}
           <ppp-side-nav-group>
             <span slot="start">${html.partial(connections)}</span>
-            <span slot="title">Подключения</span>
+            <span slot="title">${() => ppp.t('$sideNav.connections')}</span>
             <a
               href="?page=apis"
               @click="${(x) =>
@@ -303,13 +303,15 @@ export const appTemplate = html`
                 ?disabled="${() => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page.startsWith('server')}"
               >
-                <span>Серверы</span>
+                <span>${() => ppp.t('$collection.servers')}</span>
               </ppp-side-nav-item>
             </a>
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             <span slot="start">${html.partial(settings)}</span>
-            <span slot="title">Конфигурация</span>
+            <span slot="title">
+              ${() => ppp.t('$sideNav.configuration')}
+            </span>
             <a
               href="?page=cloud-services"
               @click="${(x) =>
@@ -320,7 +322,7 @@ export const appTemplate = html`
               <ppp-side-nav-item
                 ?active="${(x) => x.page === 'cloud-services'}"
               >
-                <span>Облачные сервисы</span>
+                <span>${() => ppp.t('$sideNav.cloudServices')}</span>
               </ppp-side-nav-item>
             </a>
             <a
@@ -354,7 +356,7 @@ export const appTemplate = html`
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             <span slot="start">${html.partial(cloud)}</span>
-            <span slot="title">Обновление</span>
+            <span slot="title">${() => ppp.t('$sideNav.update')}</span>
             <a
               href="?page=updates"
               @click="${(x) =>
@@ -366,7 +368,7 @@ export const appTemplate = html`
                 ?disabled="${(x) => !ppp.keyVault.ok()}"
                 ?active="${(x) => x.page === 'updates'}"
               >
-                <span>Центр обновлений</span>
+                <span>${() => ppp.t('$sideNav.updatesCenter')}</span>
               </ppp-side-nav-item>
             </a>
           </ppp-side-nav-group>
@@ -421,7 +423,7 @@ export const appTemplate = html`
                     x.confirmationModal.result = false;
                   }}"
                 >
-                  Отмена
+                  ${() => ppp.t('$g.cancel')}
                 </ppp-button>
                 <ppp-button
                   appearance="danger"
@@ -431,14 +433,14 @@ export const appTemplate = html`
                     x.confirmationModal.result = true;
                   }}"
                 >
-                  Подтвердить
+                  ${() => ppp.t('$g.confirm')}
                 </ppp-button>
               </div>
             </div>
           </ppp-modal>
           <ppp-modal ${ref('terminalModal')} class="auto" hidden>
             <span slot="title" ${ref('terminalModalTitle')}>
-              Настройка компонентов приложения
+              ${() => ppp.t('$app.componentsSetupTitle')}
             </span>
             <div slot="body" class="terminal-modal-body">
               <ppp-terminal ${ref('terminalWindow')}></ppp-terminal>
@@ -589,15 +591,16 @@ export class App extends PPPElement {
         const updateNeeded = this.updateNeeded();
 
         if (updateNeeded) {
-          this.toast.title = 'Обновление готово';
-          this.toast.text = html`Новая версия приложения (${this.lastVersion})
-            готова к использованию.
+          this.toast.title = ppp.t('$app.updateReadyTitle');
+          this.toast.text = html`${ppp.t('$app.newVersionReady', {
+              version: this.lastVersion
+            })}
             <a
               class="link"
               href="javascript:void(0);"
               @click="${() => this.updateApp(this.lastVersion)}"
             >
-              Нажмите, чтобы обновиться.
+              ${ppp.t('$app.clickToUpdate')}
             </a>`;
           this.toast.appearance = 'note';
           this.toast.removeAttribute('hidden');
@@ -641,8 +644,8 @@ export class App extends PPPElement {
   async updateApp(lastVersion) {
     ppp.app.toast.appearance = 'progress';
     ppp.app.toast.dismissible = false;
-    ppp.app.toast.title = 'Идёт обновление';
-    ppp.app.toast.text = 'Страница будет перезагружена автоматически.';
+    ppp.app.toast.title = ppp.t('$app.updateInProgressTitle');
+    ppp.app.toast.text = ppp.t('$app.pageWillReloadAutomatically');
 
     Updates.enqueue(async () => {
       ppp.app.toast.progress.value = 0;
@@ -1041,7 +1044,7 @@ export class App extends PPPElement {
 
   async showWidgetSelector() {
     const page = await ppp.app.mountPage('widget-selector-modal', {
-      title: 'Разместить виджет',
+      title: ppp.t('$app.placeWidgetTitle'),
       size: 'auto'
     });
 
@@ -1049,8 +1052,8 @@ export class App extends PPPElement {
   }
 
   async confirm(
-    title = 'Подтвердите действие',
-    description = 'Необходимо подтверждение, чтобы продолжить.'
+    title = ppp.t('$app.confirmActionTitle'),
+    description = ppp.t('$app.confirmationNeeded')
   ) {
     this.confirmationModalTitle.textContent = title;
     this.confirmationModalDescriptionContent = void 0;

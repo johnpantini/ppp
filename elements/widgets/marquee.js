@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import { widgetStyles, WidgetWithInstrument } from '../widget.js';
 import {
   html,
@@ -33,6 +34,8 @@ import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
 import '../widget-marquee-list.js';
+
+await ppp.i18n(import.meta.url);
 
 const DEFAULT_MARQUEE = [
   {
@@ -75,7 +78,7 @@ export const marqueeWidgetTemplate = html`
                         }
                       }}"
                     >
-                      Синхронизация
+                      ${() => ppp.t('$marqueeWidget.synchronization')}
                     </ppp-button>
                   `
                 )}
@@ -91,7 +94,7 @@ export const marqueeWidgetTemplate = html`
                         );
                       }}"
                     >
-                      Импорт
+                      ${() => ppp.t('$marqueeWidget.importButton')}
                     </ppp-button>
                   `
                 )}
@@ -427,10 +430,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.MARQUEE,
     collection: 'PPP',
-    title: html`Строка котировок`,
-    description: html`Виджет
-      <span class="positive">Строка котировок</span> служит для отображения
-      котировок инструментов в виде компактной строки.`,
+    title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.MARQUEE)}`,
+    description: html`${() => ppp.t('$marqueeWidget.widgetDescriptionPrefix')}
+      <span class="positive">
+        ${() => ppp.t('$const.widget.' + WIDGET_TYPES.MARQUEE)}
+      </span>
+      ${() => ppp.t('$marqueeWidget.widgetDescriptionSuffix')}`,
     customElement: MarqueeWidget.compose({
       template: marqueeWidgetTemplate,
       styles: marqueeWidgetStyles
@@ -440,12 +445,14 @@ export async function widgetDefinition() {
     defaultWidth: 360,
     settings: html`
       <ppp-tabs activeid="main">
-        <ppp-tab id="instruments">Инструменты</ppp-tab>
+        <ppp-tab id="instruments">
+          ${() => ppp.t('$marqueeWidget.tabs.instruments')}
+        </ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab-panel id="instruments-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Список инструментов</h5>
+              <h5>${() => ppp.t('$marqueeWidget.instrumentList')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-widget-marquee-list
@@ -470,8 +477,9 @@ export async function widgetDefinition() {
                       widget.traderError = e;
 
                       invalidate(ppp.app.toast, {
-                        errorMessage:
-                          'Один или более трейдеров требуют импортировать инструменты кнопкой в заголовке виджета. Затем обновите страницу.'
+                        errorMessage: ppp.t(
+                          '$marqueeWidget.importInstrumentsFirst'
+                        )
                       });
 
                       return;
@@ -519,25 +527,25 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Прилипание к краю окна</h5>
+              <h5>${() => ppp.t('$marqueeWidget.snapToWindowEdge')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.snapToLeft}"
               ${ref('snapToLeft')}
             >
-              Слева
+              ${() => ppp.t('$marqueeWidget.snapLeft')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.snapToRight}"
               ${ref('snapToRight')}
             >
-              Справа
+              ${() => ppp.t('$marqueeWidget.snapRight')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>${() => ppp.t('$marqueeWidget.interface')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -546,7 +554,7 @@ export async function widgetDefinition() {
                   ?checked="${(x) => x.document.highlightLastPriceChanges}"
                   ${ref('highlightLastPriceChanges')}
                 >
-                  Выделять изменения цены цветом
+                  ${() => ppp.t('$marqueeWidget.highlightPriceChanges')}
                 </ppp-checkbox>
               </div>
             </div>

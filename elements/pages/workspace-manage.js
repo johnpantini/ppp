@@ -14,6 +14,8 @@ import '../checkbox.js';
 import '../radio-group.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const workspaceManagePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -23,9 +25,9 @@ export const workspaceManagePageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название терминала</h5>
+          <h5>${() => ppp.t('$workspaceManagePage.workspaceNameHeader')}</h5>
           <p class="description">
-            Название будет отображаться в боковой панели в списке терминалов.
+            ${() => ppp.t('$workspaceManagePage.workspaceNameDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -38,8 +40,10 @@ export const workspaceManagePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Флаги</h5>
-          <p class="description">Параметры, принимающие значение Да или Нет.</p>
+          <h5>${() => ppp.t('$workspaceManagePage.flagsHeader')}</h5>
+          <p class="description">
+            ${() => ppp.t('$workspaceManagePage.flagsDescription')}
+          </p>
         </div>
         <div class="input-group">
           <div class="control-stack">
@@ -47,19 +51,19 @@ export const workspaceManagePageTemplate = html`
               ${ref('allowLockedWidgets')}
               ?checked="${(x) => x.document.allowLockedWidgets}"
             >
-              Разрешить блокировку виджетов
+              ${() => ppp.t('$workspaceManagePage.allowLockedWidgets')}
             </ppp-checkbox>
             <ppp-banner class="inline" appearance="warning">
-              Заблокированные виджеты не могут перемещаться или изменять размер.
+              ${() => ppp.t('$workspaceManagePage.lockedWidgetsBanner')}
             </ppp-banner>
           </div>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Ансамбли виджетов</h5>
+          <h5>${() => ppp.t('$workspaceManagePage.ensemblesHeader')}</h5>
           <p class="description">
-            Укажите режим синхронизации ансамблей виджетов для этого терминала.
+            ${() => ppp.t('$workspaceManagePage.ensemblesDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -68,11 +72,15 @@ export const workspaceManagePageTemplate = html`
             value="${(x) => x.document.ensembleMode ?? 'default'}"
             ${ref('ensembleMode')}
           >
-            <ppp-radio value="default">По умолчанию</ppp-radio>
-            <ppp-radio value="group">
-              Синхронизировать по виджетам группы
+            <ppp-radio value="default">
+              ${() => ppp.t('$workspaceManagePage.ensembleDefault')}
             </ppp-radio>
-            <ppp-radio value="all">Синхронизировать по всем виджетам</ppp-radio>
+            <ppp-radio value="group">
+              ${() => ppp.t('$workspaceManagePage.ensembleGroup')}
+            </ppp-radio>
+            <ppp-radio value="all">
+              ${() => ppp.t('$workspaceManagePage.ensembleAll')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>

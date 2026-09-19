@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -11,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerCapitalcomPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -20,10 +23,9 @@ export const brokerCapitalcomPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -36,9 +38,9 @@ export const brokerCapitalcomPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Идентификатор</h5>
+          <h5>${() => ppp.t('$brokerCapitalcomPage.identifier')}</h5>
           <p class="description">
-            Идентификатор (e-mail) вашей учётной записи Capital.com.
+            ${() => ppp.t('$brokerCapitalcomPage.identifierDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -51,12 +53,12 @@ export const brokerCapitalcomPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ API</h5>
+          <h5>${() => ppp.t('$page.apiKey')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Ключ API"
+            placeholder="${() => ppp.t('$page.apiKey')}"
             value="${(x) => x.document.key}"
             ${ref('key')}
           ></ppp-text-field>
@@ -64,12 +66,12 @@ export const brokerCapitalcomPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пользовательский пароль</h5>
+          <h5>${() => ppp.t('$brokerCapitalcomPage.customPassword')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Пользовательский пароль"
+            placeholder="${() => ppp.t('$brokerCapitalcomPage.customPassword')}"
             value="${(x) => x.document.password}"
             ${ref('password')}
           ></ppp-text-field>
@@ -126,8 +128,7 @@ export class BrokerCapitalcomPage extends Page {
       ).ok
     ) {
       invalidate(this.password, {
-        errorMessage:
-          'Не удалось выполнить проверочный запрос к API Capital.com',
+        errorMessage: ppp.t('$brokerCapitalcomPage.testRequestFailed'),
         raiseException: true
       });
     }

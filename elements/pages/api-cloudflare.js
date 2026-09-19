@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export async function checkCloudflareCredentials({ accountID, email, apiKey }) {
   return ppp.fetch(
     `https://api.cloudflare.com/client/v4/accounts/${accountID}`,
@@ -33,10 +35,9 @@ export const apiCloudflarePageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -49,14 +50,14 @@ export const apiCloudflarePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>ID учётной записи</h5>
+          <h5>${() => ppp.t('$apiCloudflarePage.accountId')}</h5>
           <p class="description">
-            Можно получить в панели управления в разделе Workers.
+            ${() => ppp.t('$apiCloudflarePage.accountIdDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="ID учётной записи"
+            placeholder="${() => ppp.t('$apiCloudflarePage.accountId')}"
             value="${(x) => x.document.accountID}"
             ${ref('accountID')}
           ></ppp-text-field>
@@ -64,9 +65,9 @@ export const apiCloudflarePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>E-mail учётной записи</h5>
+          <h5>${() => ppp.t('$apiCloudflarePage.accountEmail')}</h5>
           <p class="description">
-            Адрес электронной почты учётной записи Cloudflare.
+            ${() => ppp.t('$apiCloudflarePage.accountEmailDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -80,15 +81,15 @@ export const apiCloudflarePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ API</h5>
+          <h5>${() => ppp.t('$page.apiKey')}</h5>
           <p class="description">
-            Global API Key. Можно найти по
+            ${() => ppp.t('$apiCloudflarePage.apiKeyDescriptionPrefix')}
             <a
               class="link"
               href="https://dash.cloudflare.com/profile/api-tokens"
               target="_blank"
               rel="noopener"
-              >ссылке</a
+              >${() => ppp.t('$apiCloudflarePage.apiKeyDescriptionLink')}</a
             >.
           </p>
         </div>
@@ -129,7 +130,7 @@ export class ApiCloudflarePage extends Page {
       ).ok
     ) {
       invalidate(this.apiKey, {
-        errorMessage: 'Неверный ключ API, e-mail или ID учётной записи',
+        errorMessage: ppp.t('$apiCloudflarePage.invalidApiKeyEmailOrAccountId'),
         raiseException: true
       });
     }

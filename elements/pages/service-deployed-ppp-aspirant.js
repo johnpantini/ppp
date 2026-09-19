@@ -30,6 +30,7 @@ import '../checkbox.js';
 import '../copyable.js';
 import '../query-select.js';
 import '../text-field.js';
+await ppp.i18n(import.meta.url);
 
 export const serviceDeployedPppAspirantTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -41,15 +42,14 @@ export const serviceDeployedPppAspirantTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название сервиса</h5>
+          <h5>${() => ppp.t('$page.serviceName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             value="${(x) => x.document.name}"
             ${ref('name')}
           ></ppp-text-field>
@@ -57,14 +57,16 @@ export const serviceDeployedPppAspirantTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>URL сервиса</h5>
-          <p class="description">Ссылка на работающий сервис Aspirant.</p>
+          <h5>${() => ppp.t('$serviceDeployedPppAspirantPage.serviceUrl')}</h5>
+          <p class="description">
+            ${() =>
+              ppp.t('$serviceDeployedPppAspirantPage.serviceUrlDescription')}
+          </p>
           ${when(
             (x) => x.document._id,
             html`
               <p class="description">
-                Для запуска локального Aspirant в Docker выберите профиль API
-                Redis ниже, чтобы сформировать команду.
+                ${() => ppp.t('$serviceDeployedPppAspirantPage.dockerHint')}
               </p>
               <ppp-query-select
                 ${ref('redisApiId')}
@@ -91,7 +93,9 @@ export const serviceDeployedPppAspirantTemplate = html`
               ></ppp-query-select>
               <div class="spacing2"></div>
               <ppp-copyable
-                >${(x) => x.dockerCmd ?? 'Выберите профиль Redis'}
+                >${(x) =>
+                  x.dockerCmd ??
+                  ppp.t('$serviceDeployedPppAspirantPage.chooseRedisProfile')}
               </ppp-copyable>
             `
           )}
@@ -105,11 +109,13 @@ export const serviceDeployedPppAspirantTemplate = html`
           ></ppp-text-field>
           <div class="spacing2"></div>
           <ppp-checkbox ${ref('doNotCheckUrl')}>
-            Не проверять адрес запросами
+            ${() => ppp.t('$serviceDeployedPppAspirantPage.doNotCheckUrl')}
           </ppp-checkbox>
         </div>
       </section>
-      ${documentPageFooterPartial({ text: 'Проверить и сохранить в PPP' })}
+      ${documentPageFooterPartial({
+        text: ppp.t('$serviceDeployedPppAspirantPage.checkAndSaveToPPP')
+      })}
     </form>
   </template>
 `;
@@ -181,7 +187,9 @@ export class ServiceDeployedPppAspirantPage extends Page {
         }
       } catch (e) {
         invalidate(this.url, {
-          errorMessage: 'Указанный URL не может быть использован',
+          errorMessage: ppp.t(
+            '$serviceDeployedPppAspirantPage.urlCannotBeUsed'
+          ),
           raiseException: true
         });
       }

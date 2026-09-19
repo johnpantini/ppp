@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import { Page, pageStyles } from '../page.js';
@@ -12,6 +13,8 @@ import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
 
+await ppp.i18n(import.meta.url);
+
 export class OrderCommonPage extends Page {
   async validate() {
     await validate(this.name);
@@ -23,7 +26,7 @@ export class OrderCommonPage extends Page {
       console.error(e);
 
       invalidate(this.baseUrl, {
-        errorMessage: 'Этот URL не может быть использован',
+        errorMessage: ppp.t('$page.urlCannotBeUsed'),
         raiseException: true
       });
     }
@@ -51,11 +54,11 @@ export const orderPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>Шаблоны заявок</ppp-page-header>
+      <ppp-page-header>${() => ppp.t('$collection.orders')}</ppp-page-header>
       <ppp-text-field
         class="global-search-input"
         type="search"
-        placeholder="Поиск"
+        placeholder="${() => ppp.t('$orderPage.searchPlaceholder')}"
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
@@ -66,9 +69,11 @@ export const orderPageTemplate = html`
           <div class="picture buy-sell" slot="logo">
             ${html.partial(buySell)}
           </div>
-          <span slot="title">Stop Loss/Take Profit</span>
+          <span slot="title">
+            ${() => ppp.t(`$const.order.${ORDERS.STOP_LOSS_TAKE_PROFIT}`)}
+          </span>
           <span slot="description">
-            Классическая отложенная заявка с настройками.
+            ${() => ppp.t('$orderPage.slTpCardDescription')}
           </span>
           <ppp-button
             slot="action"
@@ -77,14 +82,14 @@ export const orderPageTemplate = html`
                 page: `order-${ORDERS.STOP_LOSS_TAKE_PROFIT}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$orderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture buy-sell" slot="logo">${html.partial(scale)}</div>
-          <span slot="title">Запись сделок и котировок</span>
+          <span slot="title">${() => ppp.t('$orderPage.recorderCardTitle')}</span>
           <span slot="description">
-            Записывает изменения рыночных данных в облачное хранилище.
+            ${() => ppp.t('$orderPage.recorderCardDescription')}
           </span>
           <div slot="action" class="control-line">
             <ppp-button
@@ -93,18 +98,18 @@ export const orderPageTemplate = html`
                   page: `order-${ORDERS.MARKET_DATA_RECORDER}`
                 })}"
             >
-              Продолжить
+              ${() => ppp.t('$orderPage.continueButton')}
             </ppp-button>
             <ppp-button @click="${(x) => x.showRecordingsWindow()}">
-              Управление записями
+              ${() => ppp.t('$orderPage.manageRecordings')}
             </ppp-button>
           </div>
         </ppp-generic-card>
         <ppp-generic-card>
           <div class="picture" slot="logo">${html.partial(cloudFunctions)}</div>
-          <div slot="title">По ссылке</div>
+          <div slot="title">${() => ppp.t(`$const.order.${ORDERS.CUSTOM}`)}</div>
           <span slot="description">
-            Собственная реализация заявки, загружаемая по ссылке.
+            ${() => ppp.t('$orderPage.customCardDescription')}
           </span>
           <ppp-button
             slot="action"
@@ -113,7 +118,7 @@ export const orderPageTemplate = html`
                 page: `order-${ORDERS.CUSTOM}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$orderPage.continueButton')}
           </ppp-button>
         </ppp-generic-card>
       </div>
@@ -140,11 +145,11 @@ export class OrderPage extends Page {
 
     try {
       await ppp.app.mountPage('recordings-modal', {
-        title: 'Управление записями',
+        title: ppp.t('$orderPage.manageRecordings'),
         size: 'medium'
       });
     } catch (e) {
-      this.failOperation(e, 'Управление записями');
+      this.failOperation(e, ppp.t('$orderPage.manageRecordings'));
     } finally {
       this.endOperation();
     }

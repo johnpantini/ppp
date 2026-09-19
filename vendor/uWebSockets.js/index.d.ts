@@ -1,5 +1,5 @@
 /*
- * Authored by Alex Hultman, 2018-2021.
+ * Authored by Alex Hultman, 2018-2026.
  * Intellectual property of third-party.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,14 @@ export interface us_socket {
 /** Native type representing a raw uSockets struct us_socket_context_t.
  * Used while upgrading a WebSocket manually. */
 export interface us_socket_context_t {
+
+}
+
+/** Native type representing a raw uWebSockets struct AppDescriptor.
+ * Used internally for worker thread distribution.
+ * Careful with this one, it is entirely unchecked and native so invalid usage will blow up.
+ */
+export interface AppDescriptor {
 
 }
 
@@ -104,8 +112,26 @@ export interface WebSocket<UserData> {
     /** Returns the remote IP address as text. See RecognizedString. */
     getRemoteAddressAsText() : ArrayBuffer;
 
+    /** Returns the remote port number. */
+    getRemotePort() : number;
+
     /** Returns the UserData object. */
     getUserData() : UserData;
+
+    /** Sends the first fragment of a fragmented message. Use for sending large messages in chunks.
+     * Returns 1 for success, 2 for dropped due to backpressure limit, and 0 for built up backpressure.
+     */
+    sendFirstFragment(message: RecognizedString, isBinary?: boolean, compress?: boolean) : number;
+
+    /** Sends a middle fragment of a fragmented message.
+     * Returns 1 for success, 2 for dropped due to backpressure limit, and 0 for built up backpressure.
+     */
+    sendFragment(message: RecognizedString, compress?: boolean) : number;
+
+    /** Sends the last fragment of a fragmented message.
+     * Returns 1 for success, 2 for dropped due to backpressure limit, and 0 for built up backpressure.
+     */
+    sendLastFragment(message: RecognizedString, compress?: boolean) : number;
 }
 
 /** An HttpResponse is valid until either onAborted callback or any of the .end/.tryEnd calls succeed. You may attach user data to this object. */
@@ -124,13 +150,6 @@ export interface HttpResponse {
      * buffer, not in a hash table. You can read about this in
      * the user manual under "corking".
     */
-
-    /** Pause http body streaming (throttle) */
-    pause() : void;
-
-    /** Resume http body streaming (unthrottle) */
-    resume() : void;
-
     writeStatus(status: RecognizedString) : HttpResponse;
     /** Writes key and value to HTTP response.
      * See writeStatus and corking.
@@ -163,8 +182,30 @@ export interface HttpResponse {
      * When this event emits, the response has been aborted and may not be used. */
     onAborted(handler: () => void) : HttpResponse;
 
-    /** Handler for reading data from POST and such requests. You MUST copy the data of chunk if isLast is not true. We Neuter ArrayBuffers on return, making it zero length.*/
+    /** Handler for reading HTTP request body data.
+     * Must be attached before performing any asynchronous operation, otherwise data may be lost.
+     * You MUST copy the data of chunk if isLast is not true. We Neuter ArrayBuffers on return, making them zero length. */
     onData(handler: (chunk: ArrayBuffer, isLast: boolean) => void) : HttpResponse;
+    
+    /** Pause HTTP request body streaming (throttle).
+     * Some buffered data may still be sent to onData. */
+    pause() : void;
+    
+    /** Resume HTTP request body streaming (unthrottle). */
+    resume() : void;
+
+    /** collectBody is a helper function making optimal use of the new onDataV2.
+     * It allows efficient and easy collection of smallish HTTP request body data into RAM.
+     * It accumulates all data chunks and calls handler with the complete body as an ArrayBuffer once all data has arrived.
+     * If the total body size exceeds maxSize bytes, handler is called with null instead. */
+    collectBody(maxSize: number, handler: (fullBody: ArrayBuffer | null) => void) : HttpResponse;
+
+    /** Handler for reading HTTP request body data. V2.
+     * Must be attached before performing any asynchronous operation, otherwise data may be lost.
+     * You MUST copy the data of chunk if maxRemainingBodyLength is not 0n. We Neuter ArrayBuffers on return, making them zero length.
+     * maxRemainingBodyLength is the known maximum of the remaining body length. Can be used to preallocate a receive buffer.
+     */
+    onDataV2(handler: (chunk: ArrayBuffer, maxRemainingBodyLength: bigint) => void) : HttpResponse;
 
     /** Returns the remote IP address in binary format (4 or 16 bytes). */
     getRemoteAddress() : ArrayBuffer;
@@ -172,11 +213,17 @@ export interface HttpResponse {
     /** Returns the remote IP address as text. */
     getRemoteAddressAsText() : ArrayBuffer;
 
+    /** Returns the remote port number. */
+    getRemotePort() : number;
+
     /** Returns the remote IP address in binary format (4 or 16 bytes), as reported by the PROXY Protocol v2 compatible proxy. */
     getProxiedRemoteAddress() : ArrayBuffer;
 
     /** Returns the remote IP address as text, as reported by the PROXY Protocol v2 compatible proxy. */
     getProxiedRemoteAddressAsText() : ArrayBuffer;
+
+    /** Returns the remote port number, as reported by the PROXY Protocol v2 compatible proxy. */
+    getProxiedRemotePort() : number;
 
     /** Corking a response is a performance improvement in both CPU and network, as you ready the IO system for writing multiple chunks at once.
      * By default, you're corked in the immediately executing top portion of the route handler. In all other cases, such as when returning from
@@ -230,7 +277,7 @@ export interface WebSocketBehavior<UserData> {
     maxPayloadLength?: number;
     /** Whether or not we should automatically close the socket when a message is dropped due to backpressure. Defaults to false. */
     closeOnBackpressureLimit?: boolean;
-    /** Maximum number of minutes a WebSocket may be connected before being closed by the server. 0 disables the feature. */
+    /** Maximum number of minutes a WebSocket may be connected before being closed by the server. 0 disables the feature. Valid values are 0 and 1-239. */
     maxLifetime?: number;
     /** Maximum amount of seconds that may pass without sending or getting a message. Connection is closed if this timeout passes. Resolution (granularity) for timeouts are typically 4 seconds, rounded to closest.
      * Disable by using 0. Defaults to 120.
@@ -287,6 +334,8 @@ export enum ListenOptions {
 export interface TemplatedApp {
     /** Listens to hostname & port. Callback hands either false or a listen socket. */
     listen(host: RecognizedString, port: number, cb: (listenSocket: us_listen_socket | false) => void | Promise<void>) : TemplatedApp;
+    /** Listens to hostname & port and sets Listen Options. Callback hands either false or a listen socket. */
+    listen(host: RecognizedString, port: number, options: ListenOptions, cb: (listenSocket: us_listen_socket | false) => void | Promise<void>) : TemplatedApp;
     /** Listens to port. Callback hands either false or a listen socket. */
     listen(port: number, cb: (listenSocket: us_listen_socket | false) => void | Promise<void>) : TemplatedApp;
     /** Listens to port and sets Listen Options. Callback hands either false or a listen socket. */
@@ -331,6 +380,12 @@ export interface TemplatedApp {
     filter(cb: (res: HttpResponse, count: Number) => void | Promise<void>) : TemplatedApp;
     /** Closes all sockets including listen sockets. This will forcefully terminate all connections. */
     close() : TemplatedApp;
+    /** Returns the app descriptor for worker thread distribution. */
+    getDescriptor(): AppDescriptor;
+    /** Add a child app descriptor for worker thread distribution. */
+    addChildAppDescriptor(descriptor: AppDescriptor): void;
+    /** Remove a child app descriptor. */
+    removeChildAppDescriptor(descriptor: AppDescriptor): void;
 }
 
 /** Constructs a non-SSL app. An app is your starting point where you attach behavior to URL routes.
@@ -345,7 +400,7 @@ export function SSLApp(options: AppOptions) : TemplatedApp;
 export function us_listen_socket_close(listenSocket: us_listen_socket) : void;
 
 /** Gets local port of socket (or listenSocket) or -1. */
-export function us_socket_local_port(socket: us_socket) : number;
+export function us_socket_local_port(socket: us_socket | us_listen_socket) : number;
 
 export interface MultipartField {
     data: ArrayBuffer;
@@ -397,3 +452,15 @@ export var DEDICATED_DECOMPRESSOR_1KB: CompressOptions;
 export var DEDICATED_DECOMPRESSOR_512B: CompressOptions;
 /** Sliding dedicated decompress window, requires 32KB of memory per socket (plus about 23KB) */
 export var DEDICATED_DECOMPRESSOR: CompressOptions;
+
+/**
+ * Environment variables recognized by uWebSockets.js.
+ *
+ * These can be set in the process environment before starting the server.
+ */
+export namespace EnvironmentVariables {
+    /** Maximum total byte size of HTTP request headers. This is a runtime env variable. Default: 4096. */
+    const UWS_HTTP_MAX_HEADERS_SIZE: string | undefined;
+    /** Maximum number of HTTP request headers. This is a compile-time define, not a runtime env variable. Default: 100. */
+    const UWS_HTTP_MAX_HEADERS_COUNT: string | undefined;
+}

@@ -79,6 +79,29 @@ import '../text-field.js';
 import '../widget-controls.js';
 import '../widget-timeframe-list.js';
 
+await ppp.i18n(import.meta.url);
+
+// Prints with these conditions do not update bars.
+// https://alpaca.markets/learn/stock-minute-bars/
+const EXCLUDED_TRADE_CONDITIONS = new Set([
+  'B',
+  'W',
+  '4',
+  '7',
+  '9',
+  'C',
+  'G',
+  'H',
+  'M',
+  'N',
+  'P',
+  'Q',
+  'R',
+  'U',
+  'V',
+  'Z'
+]);
+
 export const DEFAULT_TIMEFRAMES = [
   {
     name: '1D',
@@ -95,7 +118,7 @@ export const lightChartWidgetTemplate = html`
         buttons: html`
           <div
             ?hidden="${(x) => !x.document.showRefreshButton}"
-            title="Обновить вручную"
+            title="${() => ppp.t('$lightChartWidget.refreshManually')}"
             class="button"
             slot="start"
             @click="${(x) => {
@@ -106,7 +129,7 @@ export const lightChartWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !x.document.showResetButton}"
-            title="Очистить виджет"
+            title="${() => ppp.t('$lightChartWidget.clearWidget')}"
             class="button"
             slot="start"
             @click="${(x) => {
@@ -117,7 +140,7 @@ export const lightChartWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !x.ready}"
-            title="Перейти в конец графика"
+            title="${() => ppp.t('$lightChartWidget.scrollToChartEnd')}"
             class="button"
             slot="start"
             @click="${(x) => x.scrollToEnd()}"
@@ -324,7 +347,7 @@ export const lightChartWidgetStyles = css`
     gap: 0;
   }
 
-  .ohlcv-line .pair.volume, 
+  .ohlcv-line .pair.volume,
   .ohlcv-line .pair.vwap {
     gap: 0 8px;
   }
@@ -450,7 +473,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер котировок.',
+        text: ppp.t('$lightChartWidget.noChartTrader'),
         keep: true
       });
     }
@@ -459,7 +482,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер формирования графика.',
+        text: ppp.t('$lightChartWidget.noFeedTrader'),
         keep: true
       });
     }
@@ -637,7 +660,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     Updates.enqueue(() => {
       if (this.chart) {
         const { width, height } = getComputedStyle(this);
-        const toolbarOffset = (this.document.showToolbar ?? true) ? 28 : 0;
+        const toolbarOffset = this.document.showToolbar ?? true ? 28 : 0;
 
         if (this.stackSelector.hasAttribute('hidden')) {
           this.chart.resize(
@@ -666,8 +689,34 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.resizeChart();
   }
 
+  // The chart calls this for every axis and crosshair label on each paint,
+  // and an Intl.NumberFormat costs ~20 µs to construct, so cache per
+  // precision. Output matches formatPriceWithoutCurrency(price, instrument).
+  #priceFormatters = new Map();
+
   priceFormatter(price) {
-    return formatPriceWithoutCurrency(price, this.instrument);
+    if (
+      typeof this.instrument === 'undefined' ||
+      typeof price !== 'number' ||
+      isNaN(price)
+    ) {
+      return formatPriceWithoutCurrency(price, this.instrument);
+    }
+
+    const precision = getInstrumentPrecision(this.instrument, price);
+    let formatter = this.#priceFormatters.get(precision);
+
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(ppp.i18nLocale, {
+        style: 'decimal',
+        minimumFractionDigits: precision,
+        maximumFractionDigits: precision
+      });
+
+      this.#priceFormatters.set(precision, formatter);
+    }
+
+    return formatter.format(price);
   }
 
   onVisibleLogicalRangeChanged(newRange) {
@@ -789,26 +838,29 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   applyChartOptions() {
     const tf = this.getCurrentTimeframe();
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false
+    };
+
+    if (tf.unit === 'Sec') {
+      options.second = 'numeric';
+    }
+
+    // One formatter per applyOptions() call instead of one per label.
+    const timeFormatter = new Intl.DateTimeFormat(ppp.i18nLocale, options);
 
     this.chart.applyOptions({
       timeframe: '5',
       localization: {
+        locale: ppp.i18nLocale,
         priceFormatter: this.priceFormatter.bind(this),
         timeFormatter: (t) => {
-          const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: false
-          };
-
-          if (tf.unit === 'Sec') {
-            options.second = 'numeric';
-          }
-
-          return new Intl.DateTimeFormat(ppp.i18nLocale, options).format(
+          return timeFormatter.format(
             new Date(
               t * 1000 + ((3600 * new Date().getTimezoneOffset()) / 60) * 1000
             )
@@ -901,7 +953,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         this.$$debug('setupChart failed: %o', e);
 
         return this.notificationsArea.error({
-          text: 'Не удалось загрузить историю котировок.'
+          text: ppp.t('$lightChartWidget.historyLoadFailed')
         });
       }
     }
@@ -915,6 +967,13 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     const volumeData = [];
     const vwapData = [];
+    // Resolve the colour tokens once, not per candle.
+    const downColor = `rgba(${toColorComponents(
+      chartDownColor
+    ).$value.createCSS()}, 0.56)`;
+    const upColor = `rgba(${toColorComponents(
+      chartUpColor
+    ).$value.createCSS()}, 0.56)`;
 
     for (const c of ohlcv) {
       const time = new Date(c.time).valueOf();
@@ -922,14 +981,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       volumeData.push({
         time,
         value: c.volume,
-        color:
-          c.close < c.open
-            ? `rgba(${toColorComponents(
-                chartDownColor
-              ).$value.createCSS()}, 0.56)`
-            : `rgba(${toColorComponents(
-                chartUpColor
-              ).$value.createCSS()}, 0.56)`
+        color: c.close < c.open ? downColor : upColor
       });
 
       vwapData.push({
@@ -958,6 +1010,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       this.candles.clear();
       this.mainSeries && this.setData([]);
       this.applyChartOptions();
+      this.chartTrader.resubscribe();
       this.reloadNeeded(this.instrument.symbol);
     }
   }
@@ -1107,6 +1160,9 @@ export class LightChartWidget extends WidgetWithInstrument {
     // Always update chart's "tf" attribute.
     this.tf = this.timeFrameObjectToSeconds(tfObject);
 
+    // Force immediate change.
+    this.setAttribute('tf', this.tf);
+
     return tfObject;
   }
 
@@ -1171,28 +1227,8 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     if (this.ready && trade?.price) {
       if (Array.isArray(trade.condition)) {
-        // https://alpaca.markets/learn/stock-minute-bars/
         for (const condition of trade.condition) {
-          if (
-            [
-              'B',
-              'W',
-              '4',
-              '7',
-              '9',
-              'C',
-              'G',
-              'H',
-              'M',
-              'N',
-              'P',
-              'Q',
-              'R',
-              'U',
-              'V',
-              'Z'
-            ].includes(condition)
-          ) {
+          if (EXCLUDED_TRADE_CONDITIONS.has(condition)) {
             return;
           }
         }
@@ -1339,10 +1375,13 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.LIGHT_CHART,
     collection: 'PPP',
-    title: html`Лёгкий график`,
-    description: html`Виджет
-      <span class="positive">Лёгкий график</span> отображает график финансового
-      инструмента в минимальной комплектации.`,
+    title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.LIGHT_CHART)}`,
+    description: html`${() =>
+        ppp.t('$lightChartWidget.widgetDescriptionPrefix')}
+      <span class="positive">
+        ${() => ppp.t('$const.widget.' + WIDGET_TYPES.LIGHT_CHART)}
+      </span>
+      ${() => ppp.t('$lightChartWidget.widgetDescriptionSuffix')}`,
     customElement: LightChartWidget.compose({
       template: lightChartWidgetTemplate,
       styles: lightChartWidgetStyles
@@ -1353,16 +1392,19 @@ export async function widgetDefinition() {
     defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="traders">
-        <ppp-tab id="traders">Трейдеры</ppp-tab>
-        <ppp-tab id="tf">Таймфреймы</ppp-tab>
+        <ppp-tab id="traders">
+          ${() => ppp.t('$lightChartWidget.tabs.traders')}
+        </ppp-tab>
+        <ppp-tab id="tf">
+          ${() => ppp.t('$lightChartWidget.tabs.timeframes')}
+        </ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер исторических данных</h5>
+              <h5>${() => ppp.t('$lightChartWidget.historicalTrader')}</h5>
               <p class="description">
-                Трейдер, который будет являться источником исторических данных
-                графика.
+                ${() => ppp.t('$lightChartWidget.historicalTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1370,7 +1412,7 @@ export async function widgetDefinition() {
                 ${ref('chartTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.chartTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.chartTrader ?? ''}"
@@ -1431,7 +1473,7 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Режим формирования графика</h5>
+              <h5>${() => ppp.t('$lightChartWidget.feedMode')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -1440,8 +1482,12 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.feedMode ?? 'prints'}"
                 ${ref('feedMode')}
               >
-                <ppp-radio value="prints">По сделкам</ppp-radio>
-                <ppp-radio value="candles">По барам</ppp-radio>
+                <ppp-radio value="prints">
+                  ${() => ppp.t('$lightChartWidget.feedModePrints')}
+                </ppp-radio>
+                <ppp-radio value="candles">
+                  ${() => ppp.t('$lightChartWidget.feedModeCandles')}
+                </ppp-radio>
               </ppp-radio-group>
             </div>
           </div>
@@ -1450,10 +1496,9 @@ export async function widgetDefinition() {
             ?hidden="${(x) => x?.feedMode?.value !== 'prints'}"
           >
             <div class="widget-settings-label-group">
-              <h5>Трейдер ленты сделок</h5>
+              <h5>${() => ppp.t('$lightChartWidget.tradesTrader')}</h5>
               <p class="description">
-                График будет формироваться из сделок, приходящих от
-                трейдера-источника.
+                ${() => ppp.t('$lightChartWidget.tradesTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1461,7 +1506,7 @@ export async function widgetDefinition() {
                 ${ref('tradesTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.tradesTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.tradesTrader ?? ''}"
@@ -1508,10 +1553,9 @@ export async function widgetDefinition() {
             ?hidden="${(x) => x?.feedMode?.value !== 'candles'}"
           >
             <div class="widget-settings-label-group">
-              <h5>Трейдер баров</h5>
+              <h5>${() => ppp.t('$lightChartWidget.candlesTrader')}</h5>
               <p class="description">
-                График будет формироваться из баров, приходящих от
-                трейдера-источника.
+                ${() => ppp.t('$lightChartWidget.candlesTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1519,7 +1563,7 @@ export async function widgetDefinition() {
                 ${ref('candlesTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.candlesTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.candlesTrader ?? ''}"
@@ -1567,7 +1611,7 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="tf-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Таймфреймы для отображения</h5>
+              <h5>${() => ppp.t('$lightChartWidget.timeframesToDisplay')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-widget-timeframe-list
@@ -1582,31 +1626,31 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс</h5>
+              <h5>${() => ppp.t('$lightChartWidget.interface')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showToolbar ?? true}"
               ${ref('showToolbar')}
             >
-              Показывать панель выбора таймфрейма
+              ${() => ppp.t('$lightChartWidget.showTimeframeToolbar')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showResetButton ?? false}"
               ${ref('showResetButton')}
             >
-              Показывать кнопку очистки
+              ${() => ppp.t('$lightChartWidget.showResetButton')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showRefreshButton ?? false}"
               ${ref('showRefreshButton')}
             >
-              Показывать кнопку ручного обновления
+              ${() => ppp.t('$lightChartWidget.showRefreshButton')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Вид графика</h5>
+              <h5>${() => ppp.t('$lightChartWidget.seriesKind')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -1615,24 +1659,30 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.seriesKind ?? 'Candlestick'}"
                 ${ref('seriesKind')}
               >
-                <ppp-radio value="Candlestick">Японские свечи</ppp-radio>
-                <ppp-radio value="Bar">Бары</ppp-radio>
-                <ppp-radio value="Line">Линия</ppp-radio>
+                <ppp-radio value="Candlestick">
+                  ${() => ppp.t('$lightChartWidget.seriesKindCandlestick')}
+                </ppp-radio>
+                <ppp-radio value="Bar">
+                  ${() => ppp.t('$lightChartWidget.seriesKindBar')}
+                </ppp-radio>
+                <ppp-radio value="Line">
+                  ${() => ppp.t('$lightChartWidget.seriesKindLine')}
+                </ppp-radio>
               </ppp-radio-group>
             </div>
           </div>
-             <div class="widget-settings-section">
+          <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Наполнение</h5>
+              <h5>${() => ppp.t('$lightChartWidget.contents')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
-             <ppp-checkbox
-              ?checked="${(x) => x.document.showVWAPFlag ?? false}"
-              ${ref('showVWAPFlag')}
-            >
-              Показывать линию VWAP
-            </ppp-checkbox>
+              <ppp-checkbox
+                ?checked="${(x) => x.document.showVWAPFlag ?? false}"
+                ${ref('showVWAPFlag')}
+              >
+                ${() => ppp.t('$lightChartWidget.showVWAPLine')}
+              </ppp-checkbox>
             </div>
           </div>
         </ppp-tab-panel>

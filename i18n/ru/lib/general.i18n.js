@@ -19,7 +19,26 @@ export default function (i18n) {
       buyButtonText: 'Покупка',
       sellButtonText: 'Продажа',
       restoreDefaults: 'Восстановить умолчания',
-      unknownStatus: 'Статус неизвестен'
+      unknownStatus: 'Статус неизвестен',
+      name: 'Название',
+      value: 'Значение',
+      key: 'Ключ',
+      change: 'Изм.',
+      changePercent: 'Изм., %',
+      optional: 'Опционально',
+      clickToSelect: 'Нажмите для выбора',
+      optionalClickToSelect: 'Опционально, нажмите для выбора',
+      itemWasRemoved: 'Этот элемент был удалён',
+      noOptionsToChoose: 'Нет вариантов для выбора',
+      loadingFailed: 'Не удалось загрузить данные',
+      noRecordsToDisplay: 'Нет записей для отображения.',
+      copy: 'Скопировать',
+      restoreDefaultValue: 'Восстановить значение по умолчанию',
+      useTemplateLibrary: 'Воспользоваться библиотекой шаблонов',
+      traderNumber: 'Трейдер #%{n}',
+      delete: 'Удалить',
+      cancel: 'Отмена',
+      confirm: 'Подтвердить'
     }
   });
 }

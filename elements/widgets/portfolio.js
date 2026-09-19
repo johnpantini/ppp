@@ -138,7 +138,7 @@ export class PortfolioWidget extends ListWidget {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует портфельный трейдер.',
+        text: ppp.t('$portfolioWidget.noPortfolioTrader'),
         keep: true
       });
     }
@@ -214,9 +214,13 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.PORTFOLIO,
     collection: 'PPP',
-    title: html`Портфель`,
-    description: html`Виджет <span class="positive">Портфель</span> отображает
-      сводку по всем открытым позициям.`,
+    title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.PORTFOLIO)}`,
+    description: html`${() =>
+        ppp.t('$portfolioWidget.widgetDescriptionPrefix')}
+      <span class="positive">
+        ${() => ppp.t('$const.widget.' + WIDGET_TYPES.PORTFOLIO)}
+      </span>
+      ${() => ppp.t('$portfolioWidget.widgetDescriptionSuffix')}`,
     customElement: PortfolioWidget.compose({
       template: listWidgetTemplate,
       styles: listWidgetStyles
@@ -227,14 +231,18 @@ export async function widgetDefinition() {
     defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="integrations">
-        <ppp-tab id="main">Основные настройки</ppp-tab>
-        <ppp-tab id="columns">Столбцы таблицы</ppp-tab>
+        <ppp-tab id="main">
+          ${() => ppp.t('$portfolioWidget.tabs.main')}
+        </ppp-tab>
+        <ppp-tab id="columns">
+          ${() => ppp.t('$portfolioWidget.tabs.columns')}
+        </ppp-tab>
         <ppp-tab-panel id="integrations-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Портфельный трейдер</h5>
+              <h5>${() => ppp.t('$portfolioWidget.portfolioTrader')}</h5>
               <p class="description">
-                Трейдер, который будет источником позиций в портфеле.
+                ${() => ppp.t('$portfolioWidget.portfolioTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -242,7 +250,7 @@ export async function widgetDefinition() {
                 ${ref('portfolioTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.portfolioTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.portfolioTrader ?? ''}"
@@ -288,45 +296,47 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Типы инструментов для отображения</h5>
+              <h5>
+                ${() => ppp.t('$portfolioWidget.instrumentTypesToDisplay')}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showStocksFlag ?? true}"
               ${ref('showStocksFlag')}
             >
-              Акции
+              ${() => ppp.t('$widget.menu.stocks')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showBondsFlag ?? true}"
               ${ref('showBondsFlag')}
             >
-              Облигации
+              ${() => ppp.t('$widget.menu.bonds')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showEtfsFlag ?? true}"
               ${ref('showEtfsFlag')}
             >
-              Фонды
+              ${() => ppp.t('$widget.menu.etfs')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showFuturesFlag ?? true}"
               ${ref('showFuturesFlag')}
             >
-              Фьючерсы
+              ${() => ppp.t('$widget.menu.futures')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showCryptoFlag ?? true}"
               ${ref('showCryptoFlag')}
             >
-              Криптовалюты
+              ${() => ppp.t('$portfolioWidget.cryptocurrencies')}
             </ppp-checkbox>
           </div>
         </ppp-tab-panel>
         <ppp-tab-panel id="columns-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Столбцы таблицы портфеля</h5>
+              <h5>${() => ppp.t('$portfolioWidget.portfolioTableColumns')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-widget-column-list

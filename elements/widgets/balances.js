@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widgetStyles,
   Widget,
@@ -25,6 +26,8 @@ import '../query-select.js';
 import '../snippet.js';
 import '../text-field.js';
 import '../widget-controls.js';
+
+await ppp.i18n(import.meta.url);
 
 export const balancesWidgetTemplate = html`
   <template>
@@ -74,7 +77,9 @@ export const balancesWidgetTemplate = html`
                         )?.averagePrice;
 
                         return avgPrice
-                          ? `Средняя: ${formatPriceWithoutCurrency(avgPrice)}`
+                          ? ppp.t('$balancesWidget.averagePrice', {
+                              price: formatPriceWithoutCurrency(avgPrice)
+                            })
                           : '';
                       }}"
                       :trader="${(x, c) => c.parent.balancesTrader}"
@@ -186,7 +191,9 @@ export class BalancesWidget extends Widget {
     super.connectedCallback();
 
     if (!this.document.balancesTrader) {
-      this.emptyStateControl.textContent = 'Не задан портфельный трейдер.';
+      this.emptyStateControl.textContent = ppp.t(
+        '$balancesWidget.noBalancesTrader'
+      );
       this.initialized = true;
 
       return;
@@ -271,9 +278,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.BALANCES,
     collection: 'PPP',
-    title: html`Балансы`,
-    description: html`Виджет <span class="positive">Балансы</span> отображает
-      денежные или иные активы, использующиеся для открытия позиций.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.BALANCES}`)}`,
+    description: html`${() => ppp.t('$balancesWidget.descriptionBeforeName')}
+      <span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.BALANCES}`)}
+      </span>
+      ${() => ppp.t('$balancesWidget.descriptionAfterName')}`,
     customElement: BalancesWidget.compose({
       template: balancesWidgetTemplate,
       styles: balancesWidgetStyles
@@ -284,9 +294,9 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Портфельный трейдер</h5>
+          <h5>${() => ppp.t('$balancesWidget.balancesTrader')}</h5>
           <p class="description">
-            Трейдер, который будет источником балансовых позиций.
+            ${() => ppp.t('$balancesWidget.balancesTraderDescription')}
           </p>
         </div>
         <div class="control-line flex-start">
@@ -294,7 +304,7 @@ export async function widgetDefinition() {
             ${ref('balancesTraderId')}
             deselectable
             standalone
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.balancesTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.balancesTrader ?? ''}"
@@ -340,14 +350,14 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Интерфейс</h5>
+          <h5>${() => ppp.t('$balancesWidget.interface')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.hideBalances ?? false}"
           ${ref('hideBalances')}
         >
-          Скрывать значения
+          ${() => ppp.t('$balancesWidget.hideBalances')}
         </ppp-checkbox>
       </div>
     `

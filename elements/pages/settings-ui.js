@@ -5,20 +5,24 @@ import '../button.js';
 import '../checkbox.js';
 import '../select.js';
 
+await ppp.i18n(import.meta.url);
+
 export const settingsUiPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Язык приложения</h5>
-          <p class="description">Выберите язык приложения.</p>
+          <h5>${() => ppp.t('$settingsUiPage.appLanguage')}</h5>
+          <p class="description">
+            ${() => ppp.t('$settingsUiPage.appLanguageDescription')}
+          </p>
         </div>
         <div class="input-group">
           <div class="control-stack">
             <ppp-select
               value="${(x) => x.document.language ?? ppp.locale}"
-              placeholder="Выберите язык"
+              placeholder="${() => ppp.t('$settingsUiPage.selectLanguage')}"
               ${ref('languageSelector')}
             >
               <ppp-option value="ru">Русский</ppp-option>
@@ -29,8 +33,10 @@ export const settingsUiPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Флаги</h5>
-          <p class="description">Параметры, принимающие значение Да или Нет.</p>
+          <h5>${() => ppp.t('$settingsUiPage.flags')}</h5>
+          <p class="description">
+            ${() => ppp.t('$settingsUiPage.flagsDescription')}
+          </p>
         </div>
         <div class="input-group">
           <div class="control-stack">
@@ -38,7 +44,7 @@ export const settingsUiPageTemplate = html`
               ?checked="${(x) => x.document.closeModalsOnEsc}"
               ${ref('closeModalsOnEsc')}
             >
-              Закрывать модальные окна клавишей Esc
+              ${() => ppp.t('$settingsUiPage.closeModalsOnEsc')}
             </ppp-checkbox>
           </div>
         </div>
@@ -49,7 +55,7 @@ export const settingsUiPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить параметры
+          ${() => ppp.t('$settingsUiPage.saveSettings')}
         </ppp-button>
       </footer>
     </form>

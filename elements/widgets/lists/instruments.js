@@ -10,6 +10,8 @@ import { search } from '../../../static/svg/sprite.js';
 import { validate } from '../../../lib/ppp-errors.js';
 import '../../widget-column-list.js';
 
+await ppp.i18n(import.meta.url);
+
 export const DEFAULT_COLUMNS = [
   {
     source: COLUMN_SOURCE.INSTRUMENT
@@ -110,10 +112,9 @@ export async function listDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Выбор инструментов для списка</h5>
+          <h5>${() => ppp.t('$instrumentsWidget.instrumentsSelection')}</h5>
           <p class="description">
-            Укажите трейдера, после чего нажмите на кнопку поиска. Выбирайте
-            инструмент в поисковой строке виджета.
+            ${() => ppp.t('$instrumentsWidget.instrumentsSelectionDescription')}
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -122,7 +123,7 @@ export async function listDefinition() {
               ${ref('level1TraderId')}
               deselectable
               standalone
-              placeholder="Трейдер L1"
+              placeholder="${() => ppp.t('$widget.traderL1')}"
               variant="compact"
               value="${(x) => x.granary.level1TraderId}"
               :preloaded="${(x, c) => {
@@ -225,14 +226,14 @@ export async function listDefinition() {
               8
             >
               <span class="icon" slot="end">${html.partial(search)}</span>
-              Выбрать инструмент
+              ${() => ppp.t('$instrumentsWidget.selectInstrument')}
             </ppp-button>
           </div>
         </div>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Столбцы таблицы инструментов</h5>
+          <h5>${() => ppp.t('$instrumentsWidget.instrumentsTableColumns')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-widget-column-list

@@ -19,6 +19,8 @@ import '../side-nav.js';
 import '../table.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const widgetSelectorModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -31,8 +33,7 @@ export const widgetSelectorModalPageTemplate = html`
                 ? 'initial'
                 : 'none'}"
           >
-            Найдите шаблон виджета в списке и нажмите на строку в таблице, чтобы
-            разместить в терминале, или
+            ${() => ppp.t('$widgetSelectorModalPage.findTemplateHintPrefix')}
             <a
               class="link"
               style="font-weight: 700"
@@ -45,7 +46,8 @@ export const widgetSelectorModalPageTemplate = html`
                 });
               }}}"
               href="javascript:void(0)"
-              >создайте новый</a
+              >${() =>
+                ppp.t('$widgetSelectorModalPage.createNewOneLink')}</a
             >.
           </div>
           <div
@@ -54,8 +56,7 @@ export const widgetSelectorModalPageTemplate = html`
                 ? 'initial'
                 : 'none'}"
           >
-            Похоже, у вас нет ни одного виджета данного типа. Добавьте и
-            настройте в
+            ${() => ppp.t('$widgetSelectorModalPage.noWidgetsOfTypePrefix')}
             <a
               class="link"
               style="font-weight: 700"
@@ -66,7 +67,8 @@ export const widgetSelectorModalPageTemplate = html`
                 });
               }}}"
               href="javascript:void(0)"
-              >соответствующем разделе</a
+              >${() =>
+                ppp.t('$widgetSelectorModalPage.correspondingSectionLink')}</a
             >.
           </div>
         </ppp-banner>
@@ -79,91 +81,95 @@ export const widgetSelectorModalPageTemplate = html`
               @click="${(x, c) => x.handleTypeSelectorClick(c)}"
             >
               <ppp-side-nav-group>
-                <span slot="title">Тип виджета</span>
+                <span slot="title">
+                  ${() => ppp.t('$widgetSelectorModalPage.widgetTypeHeader')}
+                </span>
                 <ppp-side-nav-item
                   slug="order"
                   ?active="${(x) => x.activeItem === 'order'}"
                 >
-                  <span>Заявка</span>
+                  <span>${() => ppp.t('$const.widget.order')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="scalping-buttons"
-                  title="Скальперские кнопки"
+                  title="${() => ppp.t('$const.widget.scalping-buttons')}"
                   ?active="${(x) => x.activeItem === 'scalping-buttons'}"
                 >
-                  <span>Скальперские кнопки</span>
+                  <span>
+                    ${() => ppp.t('$const.widget.scalping-buttons')}
+                  </span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="active-orders"
                   ?active="${(x) => x.activeItem === 'active-orders'}"
                 >
-                  <span>Активные заявки</span>
+                  <span>${() => ppp.t('$const.widget.active-orders')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="light-chart"
                   ?active="${(x) => x.activeItem === 'light-chart'}"
                 >
-                  <span>Лёгкий график</span>
+                  <span>${() => ppp.t('$const.widget.light-chart')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="orderbook"
                   ?active="${(x) => x.activeItem === 'orderbook'}"
                 >
-                  <span>Книга заявок</span>
+                  <span>${() => ppp.t('$const.widget.orderbook')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="time-and-sales"
                   ?active="${(x) => x.activeItem === 'time-and-sales'}"
                 >
-                  <span>Лента всех сделок</span>
+                  <span>${() => ppp.t('$const.widget.time-and-sales')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="portfolio"
                   ?active="${(x) => x.activeItem === 'portfolio'}"
                 >
-                  <span>Портфель</span>
+                  <span>${() => ppp.t('$const.widget.portfolio')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="balances"
                   ?active="${(x) => x.activeItem === 'balances'}"
                 >
-                  <span>Балансы</span>
+                  <span>${() => ppp.t('$const.widget.balances')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="list"
                   ?active="${(x) => x.activeItem === 'list'}"
                 >
-                  <span>Список</span>
+                  <span>${() => ppp.t('$const.widget.list')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="timeline"
                   ?active="${(x) => x.activeItem === 'timeline'}"
                 >
-                  <span>Лента операций</span>
+                  <span>${() => ppp.t('$const.widget.timeline')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="clock"
                   ?active="${(x) => x.activeItem === 'clock'}"
                 >
-                  <span>Часы</span>
+                  <span>${() => ppp.t('$const.widget.clock')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="marquee"
                   ?active="${(x) => x.activeItem === 'marquee'}"
                 >
-                  <span>Строка котировок</span>
+                  <span>${() => ppp.t('$const.widget.marquee')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="tcc"
                   ?active="${(x) => x.activeItem === 'tcc'}"
                 >
-                  <span>Управление трейдерами</span>
+                  <span>${() => ppp.t('$const.widget.tcc')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="frame"
                   ?active="${(x) => x.activeItem === 'frame'}"
                 >
-                  <span>Фрейм</span>
+                  <span>${() => ppp.t('$const.widget.frame')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="noii"
@@ -174,10 +180,10 @@ export const widgetSelectorModalPageTemplate = html`
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="other"
-                  title="Специальный виджет"
+                  title="${() => ppp.t('$const.widget.other')}"
                   ?active="${(x) => x.activeItem === 'other'}"
                 >
-                  <span>Специальный виджет</span>
+                  <span>${() => ppp.t('$const.widget.other')}</span>
                 </ppp-side-nav-item>
               </ppp-side-nav-group>
             </ppp-side-nav>
@@ -189,16 +195,16 @@ export const widgetSelectorModalPageTemplate = html`
               @click="${(x, c) => x.handleWidgetListClick(c)}"
               :columns="${() => [
                 {
-                  label: 'Название'
+                  label: ppp.t('$g.name')
                 },
                 {
-                  label: 'Последнее изменение'
+                  label: ppp.t('$widgetSelectorModalPage.lastModifiedColumn')
                 },
                 {
-                  label: 'Коллекция'
+                  label: ppp.t('$widgetSelectorModalPage.collectionColumn')
                 },
                 {
-                  label: 'Действия'
+                  label: ppp.t('$widgetSelectorModalPage.actionsColumn')
                 }
               ]}"
               :rows="${(x) =>
@@ -206,7 +212,7 @@ export const widgetSelectorModalPageTemplate = html`
                   return {
                     datum,
                     cells: [
-                      datum.name ?? '<Без имени>',
+                      datum.name ?? ppp.t('$widgetSelectorModalPage.unnamed'),
                       formatDate(datum.updatedAt ?? datum.createdAt),
                       datum.collection,
                       html`
@@ -222,7 +228,7 @@ export const widgetSelectorModalPageTemplate = html`
                           }}"
                         >
                           <span slot="start"> ${html.partial(settings)} </span>
-                          К настройкам
+                          ${() => ppp.t('$widgetSelectorModalPage.toSettings')}
                         </ppp-button>
                       `
                     ]
@@ -344,7 +350,10 @@ export class WidgetSelectorModalPage extends Page {
         }
       });
     } catch (e) {
-      this.failOperation(e, 'Размещение виджета');
+      this.failOperation(
+        e,
+        ppp.t('$widgetSelectorModalPage.widgetPlacementTitle')
+      );
     } finally {
       this.endOperation();
     }

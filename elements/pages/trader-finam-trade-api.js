@@ -15,6 +15,8 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderFinamTradeApiTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -25,8 +27,10 @@ export const traderFinamTradeApiTemplate = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Finam.</p>
+          <h5>${() => ppp.t('$traderFinamTradeApiPage.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderFinamTradeApiPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -67,22 +71,21 @@ export const traderFinamTradeApiTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Finam
+            ${() => ppp.t('$traderFinamTradeApiPage.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Торговый код</h5>
+          <h5>${() => ppp.t('$traderFinamTradeApiPage.accountTitle')}</h5>
           <p class="description">
-            Трейдер может работать только с едиными счетами. Можно найти в
-            личном кабинете, открыв счёт из списка - код отобразится в
-            открывшихся подробностях.
+            ${() => ppp.t('$traderFinamTradeApiPage.accountDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Код торгового счёта"
+            placeholder="${() =>
+              ppp.t('$traderFinamTradeApiPage.accountPlaceholder')}"
             value="${(x) => x.document.account}"
             ${ref('account')}
           ></ppp-text-field>
@@ -90,9 +93,12 @@ export const traderFinamTradeApiTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервис-соединитель</h5>
+          <h5>
+            ${() => ppp.t('$traderFinamTradeApiPage.connectorServiceTitle')}
+          </h5>
           <p class="description">
-            Будет использован для совершения HTTP-запросов к Finam.
+            ${() =>
+              ppp.t('$traderFinamTradeApiPage.connectorServiceDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -159,7 +165,7 @@ export class TraderFinamTradeApiPage extends TraderCommonPage {
     return [
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_POSITIONS,
       TRADER_CAPS.CAPS_TIMELINE,
@@ -187,7 +193,7 @@ export class TraderFinamTradeApiPage extends TraderCommonPage {
       ).ok
     ) {
       invalidate(this.account, {
-        errorMessage: 'Неверный торговый код',
+        errorMessage: ppp.t('$traderFinamTradeApiPage.invalidTradingCode'),
         raiseException: true
       });
     }

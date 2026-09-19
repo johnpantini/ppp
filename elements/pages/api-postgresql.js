@@ -13,6 +13,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiPostgreSqlPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -22,10 +24,9 @@ export const apiPostgreSqlPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -38,8 +39,10 @@ export const apiPostgreSqlPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Хост для подключения</h5>
-          <p class="description">Доменное имя или IP-адрес.</p>
+          <h5>${() => ppp.t('$apiPostgresqlPage.hostname')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiPostgresqlPage.hostnameDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -51,8 +54,10 @@ export const apiPostgreSqlPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>База данных</h5>
-          <p class="description">Название базы данных для подключения.</p>
+          <h5>${() => ppp.t('$apiPostgresqlPage.database')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiPostgresqlPage.databaseDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -64,8 +69,10 @@ export const apiPostgreSqlPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Порт</h5>
-          <p class="description">Порт для подключения к базе данных.</p>
+          <h5>${() => ppp.t('$apiPostgresqlPage.port')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiPostgresqlPage.portDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -78,9 +85,9 @@ export const apiPostgreSqlPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пользователь</h5>
+          <h5>${() => ppp.t('$apiPostgresqlPage.user')}</h5>
           <p class="description">
-            Имя пользователя для подключения к базе данных.
+            ${() => ppp.t('$apiPostgresqlPage.userDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -93,16 +100,15 @@ export const apiPostgreSqlPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пароль</h5>
+          <h5>${() => ppp.t('$apiPostgresqlPage.password')}</h5>
           <p class="description">
-            Пароль для подключения к базе данных. Будет сохранён в зашифрованном
-            виде.
+            ${() => ppp.t('$apiPostgresqlPage.passwordDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Пароль"
+            placeholder="${() => ppp.t('$apiPostgresqlPage.password')}"
             value="${(x) => x.document.password}"
             ${ref('password')}
           ></ppp-text-field>

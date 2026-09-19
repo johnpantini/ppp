@@ -116,7 +116,7 @@ export const textFieldTemplate = html`
         html`
           <div class="end">
             <div class="optional-text">
-              <p>Опционально</p>
+              <p>${() => ppp.t('$g.optional')}</p>
             </div>
           </div>
         `

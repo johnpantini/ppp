@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import { BROKERS } from '../../lib/const.js';
@@ -6,15 +7,17 @@ import { filterCards } from '../generic-card.js';
 import '../text-field.js';
 import '../button.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
-      <ppp-page-header>Брокеры</ppp-page-header>
+      <ppp-page-header>${() => ppp.t('$collection.brokers')}</ppp-page-header>
       <ppp-text-field
         class="global-search-input"
         type="search"
-        placeholder="Поиск"
+        placeholder="${() => ppp.t('$brokerPage.searchPlaceholder')}"
         @input="${(x, c) =>
           filterCards(x.cards.children, c.event.target.value)}"
       >
@@ -31,12 +34,12 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">Alor</span>
           <span slot="description">
-            Торговля и рыночные данные через Alor Open API.&nbsp;<a
+            ${() => ppp.t('$brokerPage.alorDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://alor.dev/docs"
-              >Перейти к документации</a
+              >${() => ppp.t('$brokerPage.goToDocumentation')}</a
             >.
           </span>
           <ppp-button
@@ -46,7 +49,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.ALOR}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -59,12 +62,12 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">T-Bank</span>
           <span slot="description">
-            Торговля и рыночные данные через T‑Bank Invest API.&nbsp;<a
+            ${() => ppp.t('$brokerPage.tbankDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://tinkoff.github.io/investAPI"
-              >Перейти к документации</a
+              >${() => ppp.t('$brokerPage.goToDocumentation')}</a
             >.
           </span>
           <ppp-button
@@ -74,7 +77,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.TINKOFF}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -87,12 +90,12 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">Finam</span>
           <span slot="description">
-            Торговля через Finam Trade API.&nbsp;<a
+            ${() => ppp.t('$brokerPage.finamDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://finamweb.github.io/trade-api-docs/"
-              >Перейти к документации</a
+              >${() => ppp.t('$brokerPage.goToDocumentation')}</a
             >.
           </span>
           <ppp-button
@@ -102,7 +105,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.FINAM}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -115,12 +118,12 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">UTEX</span>
           <span slot="description">
-            Торговля и рыночные данные через сервисы UTEX.&nbsp;<a
+            ${() => ppp.t('$brokerPage.utexDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://utex.io"
-              >Официальный ресурс</a
+              >${() => ppp.t('$brokerPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -130,7 +133,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.UTEX}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -142,7 +145,9 @@ export const brokerPageTemplate = html`
             src="${() => ppp.brandSvg('psina')}"
           />
           <span slot="title">Psina</span>
-          <span slot="description">Рыночные данные проекта Psina.</span>
+          <span slot="description">
+            ${() => ppp.t('$brokerPage.psinaDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -150,7 +155,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.PSINA}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -162,7 +167,9 @@ export const brokerPageTemplate = html`
             src="${() => ppp.brandSvg('alpaca')}"
           />
           <span slot="title">Alpaca</span>
-          <span slot="description">Рыночные данные брокера Alpaca.</span>
+          <span slot="description">
+            ${() => ppp.t('$brokerPage.alpacaDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -170,7 +177,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.ALPACA}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -182,7 +189,9 @@ export const brokerPageTemplate = html`
             src="${() => ppp.brandSvg('capitalcom')}"
           />
           <span slot="title">capital.com</span>
-          <span slot="description">Рыночные данные Capital.com.</span>
+          <span slot="description">
+            ${() => ppp.t('$brokerPage.capitalcomDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -190,7 +199,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.CAPITALCOM}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -202,7 +211,9 @@ export const brokerPageTemplate = html`
             src="${() => ppp.brandSvg('ib')}"
           />
           <span slot="title">Interactive Brokers</span>
-          <span slot="description">Торговля через Interactive Brokers.</span>
+          <span slot="description">
+            ${() => ppp.t('$brokerPage.ibDescription')}
+          </span>
           <ppp-button
             slot="action"
             @click="${() =>
@@ -210,7 +221,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.IB}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -223,12 +234,12 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">Binance</span>
           <span slot="description">
-            Рыночные данные через криптовалютную биржу Binance.&nbsp;<a
+            ${() => ppp.t('$brokerPage.binanceDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://www.binance.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$brokerPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -238,7 +249,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.BINANCE}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
         <ppp-generic-card>
@@ -251,12 +262,12 @@ export const brokerPageTemplate = html`
           />
           <span slot="title">Bybit</span>
           <span slot="description">
-            Торговля и рыночные данные через криптовалютную биржу Bybit.&nbsp;<a
+            ${() => ppp.t('$brokerPage.bybitDescription')}&nbsp;<a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://www.bybit.com/"
-              >Официальный ресурс</a
+              >${() => ppp.t('$brokerPage.officialWebsite')}</a
             >.
           </span>
           <ppp-button
@@ -266,7 +277,7 @@ export const brokerPageTemplate = html`
                 page: `broker-${BROKERS.BYBIT}`
               })}"
           >
-            Продолжить
+            ${() => ppp.t('$brokerPage.continue')}
           </ppp-button>
         </ppp-generic-card>
       </div>

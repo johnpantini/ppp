@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiPusherPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +23,9 @@ export const apiPusherPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,9 +38,9 @@ export const apiPusherPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Id приложения</h5>
+          <h5>${() => ppp.t('$apiPusherPage.appId')}</h5>
           <p class="description">
-            Смотрите раздел App Keys панели управления Pusher.
+            ${() => ppp.t('$apiPusherPage.appIdDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -52,7 +53,7 @@ export const apiPusherPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ приложения</h5>
+          <h5>${() => ppp.t('$apiPusherPage.appKey')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -64,7 +65,7 @@ export const apiPusherPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Секрет приложения</h5>
+          <h5>${() => ppp.t('$apiPusherPage.appSecret')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -77,8 +78,10 @@ export const apiPusherPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Кластер</h5>
-          <p class="description">Датацентр, где размещено приложение.</p>
+          <h5>${() => ppp.t('$apiPusherPage.cluster')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiPusherPage.clusterDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -156,7 +159,7 @@ export class ApiPusherPage extends Page {
       ).ok
     ) {
       invalidate(this.secret, {
-        errorMessage: 'Неверные учётные данные',
+        errorMessage: ppp.t('$apiPusherPage.invalidCredentials'),
         raiseException: true
       });
     }

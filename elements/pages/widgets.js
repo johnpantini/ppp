@@ -35,7 +35,7 @@ export const widgetsPageTemplate = html`
     <form novalidate>
       <div class="page-level control-stack">
         <ppp-page-header>
-          Список шаблонов виджетов
+          ${() => ppp.t('$widgetsPage.listOfWidgetTemplates')}
           <ppp-button
             appearance="primary"
             slot="controls"
@@ -44,7 +44,7 @@ export const widgetsPageTemplate = html`
                 page: 'widget'
               })}"
           >
-            Добавить шаблон виджета
+            ${() => ppp.t('$widgetsPage.addWidgetTemplate')}
           </ppp-button>
         </ppp-page-header>
         <div class="table-with-selector">
@@ -56,19 +56,19 @@ export const widgetsPageTemplate = html`
               @click="${(x, c) => x.handleWidgetTypeSelectorClick(c)}"
             >
               <ppp-side-nav-group>
-                <span slot="title">Или</span>
+                <span slot="title">${() => ppp.t('$widgetsPage.or')}</span>
                 <ppp-side-nav-item slug="" ?active="${(x) => !x.activeItem}">
-                  <span>Все шаблоны</span>
+                  <span>${() => ppp.t('$widgetsPage.allTemplates')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="removed"
                   ?active="${(x) => x.activeItem === 'removed'}"
                 >
-                  <span>Удалённые шаблоны</span>
+                  <span>${() => ppp.t('$widgetsPage.removedTemplates')}</span>
                 </ppp-side-nav-item>
               </ppp-side-nav-group>
               <ppp-side-nav-group>
-                <span slot="title">Или по типу</span>
+                <span slot="title">${() => ppp.t('$widgetsPage.orByType')}</span>
                 ${repeat(
                   (x) => Object.keys(FILTERED_WIDGET_TYPES),
                   html`
@@ -105,22 +105,22 @@ export const widgetsPageTemplate = html`
                 })}"
               :columns="${() => [
                 {
-                  label: 'Название'
+                  label: ppp.t('$g.name')
                 },
                 {
-                  label: 'Тип'
+                  label: ppp.t('$widgetsPage.typeColumn')
                 },
                 {
-                  label: 'Коллекция'
+                  label: ppp.t('$widgetsPage.collectionColumn')
                 },
                 {
-                  label: 'Дата создания'
+                  label: ppp.t('$widgetsPage.createdAtColumn')
                 },
                 {
-                  label: 'Последнее изменение'
+                  label: ppp.t('$widgetsPage.updatedAtColumn')
                 },
                 {
-                  label: 'Действия'
+                  label: ppp.t('$widgetsPage.actionsColumn')
                 }
               ]}"
               :rows="${(x) =>
@@ -150,7 +150,7 @@ export const widgetsPageTemplate = html`
                                   ppp.t(`$const.widget.${datum.reportedType}`)}
                               </div>
                               <ppp-badge appearance="yellow"
-                                >По ссылке</ppp-badge
+                                >${() => ppp.t('$widgetsPage.byLink')}</ppp-badge
                               >
                             </div>
                           `
@@ -164,7 +164,7 @@ export const widgetsPageTemplate = html`
                           :datum="${() => datum}"
                           class="xsmall"
                         >
-                          Удалить
+                          ${() => ppp.t('$g.delete')}
                         </ppp-button>
                       `
                     ]

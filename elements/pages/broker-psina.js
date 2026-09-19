@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate, maybeFetchError } from '../../lib/ppp-errors.js';
 import {
@@ -11,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerPsinaPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -20,10 +23,9 @@ export const brokerPsinaPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,7 +39,9 @@ export const brokerPsinaPageTemplate = html`
       <section>
         <div class="label-group">
           <h5>Telegram ID</h5>
-          <p class="description">Логин Psina.</p>
+          <p class="description">
+            ${() => ppp.t('$brokerPsinaPage.loginDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -50,7 +54,7 @@ export const brokerPsinaPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пароль Psina</h5>
+          <h5>${() => ppp.t('$brokerPsinaPage.psinaPassword')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -63,9 +67,9 @@ export const brokerPsinaPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Шлюз администратора Psina</h5>
+          <h5>${() => ppp.t('$brokerPsinaPage.adminGateway')}</h5>
           <p class="description">
-            Будет использован для проверки учётных данных.
+            ${() => ppp.t('$brokerPsinaPage.adminGatewayDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -120,14 +124,14 @@ export class BrokerPsinaPage extends Page {
         console.error(e);
 
         invalidate(this.gateway, {
-          errorMessage: 'Этот URL не может быть использован',
+          errorMessage: ppp.t('$page.urlCannotBeUsed'),
           raiseException: true
         });
       }
 
       if (!json.result) {
         invalidate(this.password, {
-          errorMessage: 'Неверный логин или пароль',
+          errorMessage: ppp.t('$brokerPsinaPage.invalidLoginOrPassword'),
           raiseException: true
         });
       }

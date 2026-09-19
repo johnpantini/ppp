@@ -23,12 +23,7 @@ import {
   TRADER_DATUM,
   WIDGET_TYPES
 } from '../../lib/const.js';
-import {
-  formatAmount,
-  formatCommission,
-  formatDateWithOptions,
-  formatPrice
-} from '../../lib/intl.js';
+import { formatAmount, formatCommission, formatPrice } from '../../lib/intl.js';
 import {
   normalize,
   scrollbars,
@@ -78,12 +73,7 @@ export const timelineWidgetTemplate = html`
                   (x) => typeof x === 'string',
                   html`
                     <div class="timeline-item-headline">
-                      ${(i) =>
-                        formatDateWithOptions(new Date(i), {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
+                      ${(x, c) => c.parent.formatHeadlineDate(x)}
                     </div>
                   `
                 )}
@@ -128,15 +118,7 @@ export const timelineWidgetTemplate = html`
                             ${(x, c) => c.parent.formatCardDescription(x)}
                           </span>
                           <div slot="subtitle-right">
-                            ${(x) =>
-                              formatDateWithOptions(
-                                x[0].parentCreatedAt ??
-                                  x[x.length - 1].createdAt,
-                                {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }
-                              )}
+                            ${(x, c) => c.parent.formatCardTime(x)}
                           </div>
                           <span
                             class="earth"
@@ -219,11 +201,9 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.timelineMap.clear();
       this.emptyIndicatorMap.clear();
 
-      this.timeline = [];
-
       this.$$debug('timeline widget is clear (@CLEAR)');
 
-      return Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+      return this.#scheduleRebuild();
     }
 
     const date = new Date(item.createdAt);
@@ -263,9 +243,62 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.emptyIndicatorMap.set(symbol, [topLevelKey]);
     }
 
+    this.#scheduleRebuild();
+  }
+
+  #rebuildQueued = false;
+
+  // Cards are mutated in place, so the list is emptied first to make the
+  // repeat directive drop its views. Bursts of items within one update
+  // cycle (e.g. history replay) rebuild the array once, not once per item.
+  #scheduleRebuild() {
     this.timeline = [];
 
-    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+    if (this.#rebuildQueued) {
+      return;
+    }
+
+    this.#rebuildQueued = true;
+
+    Updates.enqueue(() => {
+      this.#rebuildQueued = false;
+      this.timeline = this.getTimelineArray();
+    });
+  }
+
+  // formatDateWithOptions() builds an Intl.DateTimeFormat per call (~30 µs);
+  // the timeline uses two fixed layouts, so keep one formatter for each.
+  #headlineDateFormatter;
+
+  #cardTimeFormatter;
+
+  formatHeadlineDate(dateKey) {
+    if (!dateKey) return '—';
+
+    this.#headlineDateFormatter ??= new Intl.DateTimeFormat(ppp.i18nLocale, {
+      hour12: false,
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    return this.#headlineDateFormatter.format(new Date(dateKey));
+  }
+
+  formatCardTime(operations) {
+    const date =
+      operations[0].parentCreatedAt ??
+      operations[operations.length - 1].createdAt;
+
+    if (!date) return '—';
+
+    this.#cardTimeFormatter ??= new Intl.DateTimeFormat(ppp.i18nLocale, {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return this.#cardTimeFormatter.format(new Date(date));
   }
 
   @observable
@@ -290,7 +323,7 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует трейдер ленты операций.',
+        text: ppp.t('$timeLineWidget.noTimelineTrader'),
         keep: true
       });
     }
@@ -525,7 +558,7 @@ export class TimelineWidget extends WidgetWithInstrument {
             {
               minimumFractionDigits: 0,
               maximumFractionDigits:
-                firstOperation.instrument?.broker === BROKERS.IB ? 3 : void 0
+                firstOperation.instrument?.broker === BROKERS.IB ? 3 : 5
             }
           )
         });
@@ -582,9 +615,7 @@ export class TimelineWidget extends WidgetWithInstrument {
   instrumentChanged() {
     super.instrumentChanged();
 
-    this.timeline = [];
-
-    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+    this.#scheduleRebuild();
   }
 
   getTimelineArray() {
@@ -639,7 +670,7 @@ export class TimelineWidget extends WidgetWithInstrument {
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 100,
-      errorMessage: 'Введите значение в диапазоне от 1 до 100'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 100 })
     });
   }
 
@@ -661,10 +692,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.TIMELINE,
     collection: 'PPP',
-    title: html`Лента операций`,
-    description: html`Виджет
-      <span class="positive">Лента операций</span> отображает историю сделок и
-      других биржевых событий по одному или нескольким торговым инструментам.`,
+    title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.TIMELINE)}`,
+    description: html`${() => ppp.t('$timeLineWidget.widgetDescriptionPrefix')}
+      <span class="positive">
+        ${() => ppp.t('$const.widget.' + WIDGET_TYPES.TIMELINE)}
+      </span>
+      ${() => ppp.t('$timeLineWidget.widgetDescriptionSuffix')}`,
     customElement: TimelineWidget.compose({
       template: timelineWidgetTemplate,
       styles: timelineWidgetStyles
@@ -676,9 +709,9 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер ленты операций</h5>
+          <h5>${() => ppp.t('$timeLineWidget.timelineTrader')}</h5>
           <p class="description">
-            Трейдер, который будет источником ленты операций.
+            ${() => ppp.t('$timeLineWidget.timelineTraderDescription')}
           </p>
         </div>
         <div class="control-line flex-start">
@@ -686,7 +719,7 @@ export async function widgetDefinition() {
             ${ref('timelineTraderId')}
             deselectable
             standalone
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.timelineTraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.timelineTrader ?? ''}"
@@ -730,9 +763,9 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Количество операций для отображения</h5>
+          <h5>${() => ppp.t('$timeLineWidget.operationsToDisplay')}</h5>
           <p class="description">
-            Максимальное количество операций, отображаемое в ленте.
+            ${() => ppp.t('$timeLineWidget.operationsToDisplayDescription')}
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -747,26 +780,26 @@ export async function widgetDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Интерфейс</h5>
+          <h5>${() => ppp.t('$timeLineWidget.interface')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.highlightTrades}"
           ${ref('highlightTrades')}
         >
-          Выделять покупки и продажи фоновым цветом
+          ${() => ppp.t('$timeLineWidget.highlightTrades')}
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.disableInstrumentFiltering}"
           ${ref('disableInstrumentFiltering')}
         >
-          Не фильтровать содержимое по выбранному инструменту
+          ${() => ppp.t('$timeLineWidget.disableInstrumentFiltering')}
         </ppp-checkbox>
         <ppp-checkbox
           ?checked="${(x) => x.document.showCommissions}"
           ${ref('showCommissions')}
         >
-          Показывать комиссии
+          ${() => ppp.t('$timeLineWidget.showCommissions')}
         </ppp-checkbox>
       </div>
     `

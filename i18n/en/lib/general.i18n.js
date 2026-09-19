@@ -19,7 +19,26 @@ export default function (i18n) {
       buyButtonText: 'Buy',
       sellButtonText: 'Sell',
       restoreDefaults: 'Restore Defaults',
-      unknownStatus: 'Unknown Status'
+      unknownStatus: 'Unknown Status',
+      name: 'Name',
+      value: 'Value',
+      key: 'Key',
+      change: 'Ch.',
+      changePercent: 'Ch., %',
+      optional: 'Optional',
+      clickToSelect: 'Click to select',
+      optionalClickToSelect: 'Optional, click to select',
+      itemWasRemoved: 'This item has been removed',
+      noOptionsToChoose: 'No options to choose from',
+      loadingFailed: 'Failed to load data',
+      noRecordsToDisplay: 'No records to display.',
+      copy: 'Copy',
+      restoreDefaultValue: 'Restore the default value',
+      useTemplateLibrary: 'Use the template library',
+      traderNumber: 'Trader #%{n}',
+      delete: 'Delete',
+      cancel: 'Cancel',
+      confirm: 'Confirm'
     }
   });
 }

@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { ValidationError, invalidate, validate } from '../../lib/ppp-errors.js';
 import {
@@ -17,14 +18,16 @@ import '../radio-group.js';
 import '../snippet.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const exampleCommFunctionCode = `/**
-* Функция, возвращающая абсолютное значение комиссии за сделку.
+* Function that returns the absolute value of the trade commission.
 *
-* @param {object} trade - Экземпляр сделки.
-* @param trade.instrument - Торговый инструмент.
-* @param trade.quantity - Количество лотов инструмента.
-* @param trade.price - Цена исполнения.
-* @param {(buy|sell)} trade.side - Направление сделки.
+* @param {object} trade - Trade instance.
+* @param trade.instrument - Trading instrument.
+* @param trade.quantity - Quantity in lots of the instrument.
+* @param trade.price - Execution price.
+* @param {(buy|sell)} trade.side - Trade side.
 */
 
 // 0,05 %
@@ -41,9 +44,9 @@ export const traderPaperTradeTemplate = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Начальный депозит</h5>
+          <h5>${() => ppp.t('$traderPaperTradePage.initialDepositTitle')}</h5>
           <p class="description">
-            Значения сбрасываются при перезагрузке трейдера.
+            ${() => ppp.t('$traderPaperTradePage.initialDepositDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -73,10 +76,9 @@ export const traderPaperTradeTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Источник книги заявок</h5>
+          <h5>${() => ppp.t('$traderPaperTradePage.bookSourceTitle')}</h5>
           <p class="description">
-            Трейдер будет использовать книгу заявок для исполнения виртуальных
-            сделок.
+            ${() => ppp.t('$traderPaperTradePage.bookSourceDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -113,9 +115,9 @@ export const traderPaperTradeTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Словарь</h5>
+          <h5>${() => ppp.t('$traderPaperTradePage.dictionaryTitle')}</h5>
           <p class="description">
-            Словарь инструментов, который будет назначен трейдеру.
+            ${() => ppp.t('$traderPaperTradePage.dictionaryDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -128,10 +130,12 @@ export const traderPaperTradeTemplate = html`
       </section>
       <section hidden>
         <div class="label-group">
-          <h5>Защита рыночных заявок, %</h5>
+          <h5>
+            ${() => ppp.t('$traderPaperTradePage.marketOrderProtectionTitle')}
+          </h5>
           <p class="description">
-            Цена исполнения рыночной заявки не может быть хуже лучшей цены книги
-            заявок, скорректированной на это значение.
+            ${() =>
+              ppp.t('$traderPaperTradePage.marketOrderProtectionDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -149,8 +153,10 @@ export const traderPaperTradeTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Комиссия за сделки</h5>
-          <p class="description">Код расчёта комиссии на языке JavaScript.</p>
+          <h5>${() => ppp.t('$traderPaperTradePage.commissionTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderPaperTradePage.commissionDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-snippet
@@ -181,7 +187,7 @@ export class TraderPaperTradePage extends TraderCommonPage {
     return [
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_POSITIONS,
       TRADER_CAPS.CAPS_TIMELINE,
@@ -194,20 +200,26 @@ export class TraderPaperTradePage extends TraderCommonPage {
     await validate(this.initialDepositUSD);
     await validate(this.initialDepositUSD, {
       hook: async (value) => +value >= 1 && +value <= 100000000,
-      errorMessage: 'Введите значение в диапазоне от 1 до 100 000 000'
+      errorMessage: ppp.t('$page.valueInRange', {
+        min: 1,
+        max: '100 000 000'
+      })
     });
 
     await validate(this.initialDepositRUB);
     await validate(this.initialDepositRUB, {
       hook: async (value) => +value >= 1 && +value <= 100000000,
-      errorMessage: 'Введите значение в диапазоне от 1 до 100 000 000'
+      errorMessage: ppp.t('$page.valueInRange', {
+        min: 1,
+        max: '100 000 000'
+      })
     });
 
     await validate(this.bookTraderId);
     // await validate(this.marketOrderCoeff);
     // await validate(this.marketOrderCoeff, {
     //   hook: async (value) => +value >= 0 && +value <= 100,
-    //   errorMessage: 'Введите значение в диапазоне от 0 до 100'
+    //   errorMessage: 'Enter a value between 0 and 100'
     // });
 
     try {
@@ -219,7 +231,7 @@ export class TraderPaperTradePage extends TraderCommonPage {
           symbol: 'ROSN',
           exchange: 'MOEX',
           broker: 'alor',
-          fullName: 'ПАО НК Роснефть',
+          fullName: 'Rosneft Oil Company',
           minPriceIncrement: 0.05,
           type: 'stock',
           currency: 'RUB',
@@ -248,7 +260,7 @@ export class TraderPaperTradePage extends TraderCommonPage {
       console.dir(e);
 
       invalidate(this.commFunctionCode, {
-        errorMessage: 'Исходный код не может быть использован.',
+        errorMessage: ppp.t('$traderPaperTradePage.sourceCodeInvalid'),
         raiseException: true
       });
     }

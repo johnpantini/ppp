@@ -12,6 +12,8 @@ import '../radio-group.js';
 import '../text-field.js';
 import '../widget-controls.js';
 
+await ppp.i18n(import.meta.url);
+
 export const clockWidgetTemplate = html`
   <template ensemble="disabled">
     <div class="widget-root">
@@ -116,9 +118,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.CLOCK,
     collection: 'PPP',
-    title: html`Часы`,
-    description: html`Виджет <span class="positive">Часы</span> служит для
-      отображения времени по заданным настройкам.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.CLOCK}`)}`,
+    description: html`${() => ppp.t('$clockWidget.descriptionBeforeName')}
+      <span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.CLOCK}`)}
+      </span>
+      ${() => ppp.t('$clockWidget.descriptionAfterName')}`,
     customElement: ClockWidget.compose({
       template: clockWidgetTemplate,
       styles: clockWidgetStyles
@@ -129,19 +134,19 @@ export async function widgetDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Интерфейс</h5>
+          <h5>${() => ppp.t('$clockWidget.interface')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-checkbox
           ?checked="${(x) => x.document.displayTimeInHeader ?? true}"
           ${ref('displayTimeInHeader')}
         >
-          Отображать время в заголовке (вместо названия)
+          ${() => ppp.t('$clockWidget.displayTimeInHeader')}
         </ppp-checkbox>
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Формат отображения в заголовке</h5>
+          <h5>${() => ppp.t('$clockWidget.headerTimeFormat')}</h5>
         </div>
         <div class="spacing2"></div>
         <div class="widget-settings-input-group">
@@ -150,10 +155,18 @@ export async function widgetDefinition() {
             value="${(x) => x.document.headerTimeFormat ?? 'default'}"
             ${ref('headerTimeFormat')}
           >
-            <ppp-radio value="default">Часы, минуты, секунды</ppp-radio>
-            <ppp-radio value="day-1">День, часы, минуты, секунды</ppp-radio>
-            <ppp-radio value="compact">Часы, минуты</ppp-radio>
-            <ppp-radio value="day-2">День, часы, минуты</ppp-radio>
+            <ppp-radio value="default">
+              ${() => ppp.t('$clockWidget.formats.default')}
+            </ppp-radio>
+            <ppp-radio value="day-1">
+              ${() => ppp.t('$clockWidget.formats.day1')}
+            </ppp-radio>
+            <ppp-radio value="compact">
+              ${() => ppp.t('$clockWidget.formats.compact')}
+            </ppp-radio>
+            <ppp-radio value="day-2">
+              ${() => ppp.t('$clockWidget.formats.day2')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </div>

@@ -10,7 +10,10 @@ import {
 import { BROKERS } from '../../lib/const.js';
 import '../badge.js';
 import '../button.js';
+import '../checkbox.js';
 import '../text-field.js';
+
+await ppp.i18n(import.meta.url);
 
 export const brokerAlpacaPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -21,10 +24,9 @@ export const brokerAlpacaPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,7 +39,7 @@ export const brokerAlpacaPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Ключ Alpaca</h5>
+          <h5>${() => ppp.t('$brokerAlpacaPage.alpacaKey')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -49,7 +51,7 @@ export const brokerAlpacaPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Секрет Alpaca</h5>
+          <h5>${() => ppp.t('$brokerAlpacaPage.alpacaSecret')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -58,6 +60,22 @@ export const brokerAlpacaPageTemplate = html`
             value="${(x) => x.document.password}"
             ${ref('password')}
           ></ppp-text-field>
+        </div>
+      </section>
+      <section>
+        <div class="label-group">
+          <h5>${() => ppp.t('$brokerAlpacaPage.accountType')}</h5>
+          <p class="description">
+            ${() => ppp.t('$brokerAlpacaPage.paperTradingDescription')}
+          </p>
+        </div>
+        <div class="input-group">
+          <ppp-checkbox
+            ?checked="${(x) => x.document.isPaper}"
+            ${ref('isPaper')}
+          >
+            ${() => ppp.t('$brokerAlpacaPage.paperTradingCheckbox')}
+          </ppp-checkbox>
         </div>
       </section>
       ${documentPageFooterPartial()}
@@ -69,13 +87,23 @@ export const brokerAlpacaPageStyles = css`
   ${pageStyles}
 `;
 
-export async function checkAlpacaCredentials({ key, secret }) {
-  return ppp.fetch('https://api.alpaca.markets/v2/account', {
-    headers: {
-      'APCA-API-KEY-ID': key,
-      'APCA-API-SECRET-KEY': secret
+// The trading API base by account type: a paper key is only valid
+// against the paper endpoint and vice versa.
+export const ALPACA_TRADING_API = Object.freeze({
+  live: 'https://api.alpaca.markets',
+  paper: 'https://paper-api.alpaca.markets'
+});
+
+export async function checkAlpacaCredentials({ key, secret, paper = false }) {
+  return ppp.fetch(
+    `${ALPACA_TRADING_API[paper ? 'paper' : 'live']}/v2/account`,
+    {
+      headers: {
+        'APCA-API-KEY-ID': key,
+        'APCA-API-SECRET-KEY': secret
+      }
     }
-  });
+  );
 }
 
 export class BrokerAlpacaPage extends Page {
@@ -86,14 +114,20 @@ export class BrokerAlpacaPage extends Page {
     await validate(this.login);
     await validate(this.password);
 
+    const paper = !!this.isPaper.checked;
     const response = await checkAlpacaCredentials({
       key: this.login.value.trim(),
-      secret: this.password.value.trim()
+      secret: this.password.value.trim(),
+      paper
     });
 
     if (!response.ok) {
       invalidate(this.login, {
-        errorMessage: 'Неверный логин или пароль',
+        errorMessage: ppp.t(
+          paper
+            ? '$brokerAlpacaPage.invalidPaperLoginOrPassword'
+            : '$brokerAlpacaPage.invalidLoginOrPassword'
+        ),
         raiseException: true
       });
     }
@@ -126,6 +160,7 @@ export class BrokerAlpacaPage extends Page {
         name: this.name.value.trim(),
         login: this.login.value.trim(),
         password: this.password.value.trim(),
+        isPaper: !!this.isPaper.checked,
         version: 1,
         type: BROKERS.ALPACA,
         updatedAt: new Date()

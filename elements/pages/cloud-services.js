@@ -21,14 +21,19 @@ import '../copyable.js';
 import '../modal.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const cloudServicesPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Облачные сервисы
+        ${() => ppp.t('$sideNav.cloudServices')}
         <ppp-badge slot="controls" appearance="yellow">
-          ${`Версия ${localStorage.getItem('ppp-version') ?? '1.0.0'}`}
+          ${() =>
+            ppp.t('$cloudServicesPage.version', {
+              version: localStorage.getItem('ppp-version') ?? '1.0.0'
+            })}
         </ppp-badge>
         <ppp-button
           ?disabled="${() => !ppp.keyVault.ok()}"
@@ -36,14 +41,14 @@ export const cloudServicesPageTemplate = html`
           slot="controls"
           @click="${(x) => x.backupMongoDB()}"
         >
-          Создать резервную копию базы
+          ${() => ppp.t('$cloudServicesPage.backupDatabase')}
         </ppp-button>
         <ppp-button
           ?disabled="${() => !ppp.keyVault.ok()}"
           slot="controls"
           @click="${(x) => x.restoreMongoDB()}"
         >
-          Восстановить базу из копии
+          ${() => ppp.t('$cloudServicesPage.restoreDatabase')}
           <span slot="start">
             ${html.partial(cloud)}
           </span>
@@ -53,15 +58,16 @@ export const cloudServicesPageTemplate = html`
           slot="controls"
           @click="${(x) => x.importKeysModal.removeAttribute('hidden')}"
         >
-          Импортировать ключи
+          ${() => ppp.t('$cloudServicesPage.importKeys')}
           <span slot="start">${html.partial(importExport)}</span>
         </ppp-button>
       </ppp-page-header>
       <ppp-modal ${ref('importKeysModal')} class="large" hidden dismissible>
-        <span slot="title">Импорт ключей</span>
+        <span slot="title">
+          ${() => ppp.t('$cloudServicesPage.importKeysTitle')}
+        </span>
         <div slot="description">
-          Чтобы импортировать ключи, приготовьте мастер-пароль и компактное
-          представление из ранее настроенного приложения.
+          ${() => ppp.t('$cloudServicesPage.importKeysDescription')}
         </div>
         <ppp-import-keys-modal-page slot="body"></ppp-import-keys-modal-page>
       </ppp-modal>
@@ -69,8 +75,7 @@ export const cloudServicesPageTemplate = html`
         <div class="control-stack">
           <ppp-banner class="inline" appearance="warning">
             <span>
-              Чтобы перенести ключи в другой браузер, используйте это компактное
-              представление:
+              ${() => ppp.t('$cloudServicesPage.compactRepresentationBanner')}
             </span>
           </ppp-banner>
           <ppp-copyable> ${(x) => x.cloudCredentialsString} </ppp-copyable>
@@ -79,62 +84,64 @@ export const cloudServicesPageTemplate = html`
       <section ?hidden="${() => ppp.keyVault.ok()}">
         <div class="control-stack">
           <ppp-banner class="inline" appearance="warning">
-            Сохраните ещё раз или
+            ${() => ppp.t('$cloudServicesPage.saveAgainPrefix')}
             <a
               class="link"
               @click="${(x) => x.importKeysModal.removeAttribute('hidden')}"
               href="javascript:void(0)"
-              >импортируйте</a
+              >${() => ppp.t('$cloudServicesPage.importLink')}</a
             >
-            ключи облачных сервисов, чтобы пользоваться приложением.
+            ${() => ppp.t('$cloudServicesPage.saveAgainSuffix')}
           </ppp-banner>
         </div>
       </section>
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(1))}</div>
         <div class="label-group">
-          <h6>Мастер-пароль</h6>
+          <h6>${() => ppp.t('$cloudServicesPage.masterPassword')}</h6>
           <p class="description">
-            Требуется для шифрования/дешифрования конфиденциальных данных:
-            токенов, ключей, других паролей.
+            ${() => ppp.t('$cloudServicesPage.masterPasswordDescription')}
           </p>
           <div class="spacing2"></div>
           <ppp-banner class="inline" appearance="warning">
-            Мастер-пароль следует задать только при первой настройке приложения!
+            ${() => ppp.t('$cloudServicesPage.masterPasswordBanner')}
           </ppp-banner>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Введите пароль"
+            placeholder="${() =>
+              ppp.t('$cloudServicesPage.enterPasswordPlaceholder')}"
             value="${() => ppp.keyVault.getKey('master-password')}"
             ${ref('masterPassword')}
           ></ppp-text-field>
           <div class="spacing4"></div>
           <ppp-text-field
             type="password"
-            placeholder="Введите мастер-пароль ещё раз"
+            placeholder="${() =>
+              ppp.t('$cloudServicesPage.repeatMasterPasswordPlaceholder')}"
             ${ref('masterPasswordConfirmation')}
           >
-            <span slot="label">Подтверждение пароля</span>
+            <span slot="label">
+              ${() => ppp.t('$cloudServicesPage.passwordConfirmation')}
+            </span>
           </ppp-text-field>
         </div>
       </section>
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(2))}</div>
         <div class="label-group">
-          <h6>Прокси-ресурс</h6>
+          <h6>${() => ppp.t('$cloudServicesPage.proxyResource')}</h6>
           <p class="description">
-            Используется для совершения запросов к внешним API и сервисам.
-            Рекомендуется создать по
+            ${() => ppp.t('$cloudServicesPage.proxyDescriptionPrefix')}
             <a
               class="link"
               rel="noopener"
               target="_blank"
               href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/ppp-proxy"
-              >инструкции</a
+              >${() => ppp.t('$cloudServicesPage.instructionsLink')}</a
             >
-            на платформе
+            ${() => ppp.t('$cloudServicesPage.proxyDescriptionInfix')}
             <a
               class="link"
               rel="noopener"
@@ -156,7 +163,7 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(3))}</div>
         <div class="label-group">
-          <h6>Персональный токен GitHub</h6>
+          <h6>${() => ppp.t('$cloudServicesPage.personalGitHubToken')}</h6>
           <p class="description">
             <a
               class="link"
@@ -164,15 +171,15 @@ export const cloudServicesPageTemplate = html`
               rel="noopener"
               href="https://johnpantini.gitbook.io/learn-ppp/cloud-services/personal-github-token"
             >
-              Токен
+              ${() => ppp.t('$cloudServicesPage.tokenLink')}
             </a>
-            необходим для получения обновлений.
+            ${() => ppp.t('$cloudServicesPage.gitHubTokenDescriptionSuffix')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Токен"
+            placeholder="${() => ppp.t('$page.token')}"
             value="${() => ppp.keyVault.getKey('github-token')}"
             ${ref('gitHubToken')}
           ></ppp-text-field>
@@ -181,9 +188,9 @@ export const cloudServicesPageTemplate = html`
       <section>
         <div class="section-index-icon">${html.partial(numberedCircle(4))}</div>
         <div class="label-group">
-          <h6>Шлюз доступа к MongoDB</h6>
+          <h6>${() => ppp.t('$cloudServicesPage.mongoDbGateway')}</h6>
           <p class="description">
-            Ссылка на шлюз для подключения к кластеру MongoDB.
+            ${() => ppp.t('$cloudServicesPage.mongoDbGatewayDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -198,9 +205,9 @@ export const cloudServicesPageTemplate = html`
             <section>
         <div class="section-index-icon">${html.partial(numberedCircle(5))}</div>
         <div class="label-group">
-          <h6>Подключение к базе данных MongoDB</h6>
+          <h6>${() => ppp.t('$cloudServicesPage.mongoDbConnection')}</h6>
           <p class="description">
-            Ссылка на кластер MongoDB.
+            ${() => ppp.t('$cloudServicesPage.mongoDbConnectionDescription')}
           </p>      
         </div>
         <div class="input-group">
@@ -217,7 +224,7 @@ export const cloudServicesPageTemplate = html`
           appearance="danger"
           @click="${(x) => x.clearKeys()}"
         >
-          Очистить пароль и ключи
+          ${() => ppp.t('$cloudServicesPage.clearPasswordAndKeys')}
           <span slot="start"> ${html.partial(trash)} </span>
         </ppp-button>
         <ppp-button
@@ -225,7 +232,7 @@ export const cloudServicesPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Проверить и сохранить ключи
+          ${() => ppp.t('$cloudServicesPage.checkAndSaveKeys')}
         </ppp-button>
       </footer>
     </form>
@@ -254,17 +261,22 @@ export class CloudServicesPage extends Page {
     await super.connectedCallback();
 
     if (!ppp.keyVault.ok()) {
-      this.cloudCredentialsString = 'Нужно ввести все ключи и мастер-пароль.';
+      this.cloudCredentialsString = ppp.t(
+        '$cloudServicesPage.enterAllKeysAndMasterPassword'
+      );
     } else {
-      this.cloudCredentialsString = 'Генерация компактного представления...';
+      this.cloudCredentialsString = ppp.t(
+        '$cloudServicesPage.generatingCompactRepresentation'
+      );
 
       try {
         this.cloudCredentialsString = btoa(
           JSON.stringify(await this.generateCloudCredentialsString())
         );
       } catch (e) {
-        this.cloudCredentialsString =
-          'Ошибка генерации компактного представления.';
+        this.cloudCredentialsString = ppp.t(
+          '$cloudServicesPage.compactRepresentationError'
+        );
       }
     }
   }
@@ -294,11 +306,11 @@ export class CloudServicesPage extends Page {
 
     try {
       await ppp.app.mountPage('backup-mongodb-modal', {
-        title: 'Сохранить базу данных',
+        title: ppp.t('$cloudServicesPage.saveDatabaseTitle'),
         size: 'large'
       });
     } catch (e) {
-      this.failOperation(e, 'Создание резервной копии');
+      this.failOperation(e, ppp.t('$cloudServicesPage.backupCreationTitle'));
     } finally {
       this.endOperation();
     }
@@ -309,11 +321,11 @@ export class CloudServicesPage extends Page {
 
     try {
       await ppp.app.mountPage('restore-mongodb-modal', {
-        title: 'Восстановить базу данных',
+        title: ppp.t('$cloudServicesPage.restoreDatabaseTitle'),
         size: 'medium'
       });
     } catch (e) {
-      this.failOperation(e, 'Восстановление резервной копии');
+      this.failOperation(e, ppp.t('$cloudServicesPage.backupRestoreTitle'));
     } finally {
       this.endOperation();
     }
@@ -327,7 +339,7 @@ export class CloudServicesPage extends Page {
       await validate(this.masterPasswordConfirmation);
       await validate(this.masterPasswordConfirmation, {
         hook: async (value) => value === this.masterPassword.value,
-        errorMessage: 'Пароли не совпадают'
+        errorMessage: ppp.t('$cloudServicesPage.passwordsDoNotMatch')
       });
       await validate(this.globalProxyUrl);
       await validate(this.gitHubToken);
@@ -343,7 +355,10 @@ export class CloudServicesPage extends Page {
       try {
         globalProxyUrl = new URL(this.globalProxyUrl.value);
 
-        this.progressOperation(25, 'Проверка прокси-ресурса...');
+        this.progressOperation(
+          25,
+          ppp.t('$cloudServicesPage.checkingProxy')
+        );
 
         await maybeFetchError(
           await fetch(new URL('zen', globalProxyUrl.origin).toString(), {
@@ -358,14 +373,16 @@ export class CloudServicesPage extends Page {
         ppp.$$debug('proxy: %o', e);
 
         return invalidate(this.globalProxyUrl, {
-          errorMessage:
-            'Этот ресурс не может быть использован в качестве прокси',
+          errorMessage: ppp.t('$cloudServicesPage.resourceCannotBeProxy'),
           raiseException: true
         });
       }
 
       ppp.keyVault.setKey('global-proxy-url', globalProxyUrl.origin);
-      this.progressOperation(50, 'Проверка токена GitHub...');
+      this.progressOperation(
+        50,
+        ppp.t('$cloudServicesPage.checkingGitHubToken')
+      );
 
       // Check GitHub token, store repo owner.
       const rGitHub = await checkGitHubToken({
@@ -376,7 +393,7 @@ export class CloudServicesPage extends Page {
         ppp.$$debug('github: %o, text: %s', rGitHub, await rGitHub.text());
 
         return invalidate(this.gitHubToken, {
-          errorMessage: 'Неверный или истёкший токен',
+          errorMessage: ppp.t('$cloudServicesPage.invalidOrExpiredToken'),
           raiseException: true
         });
       }
@@ -385,7 +402,10 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('github-token', this.gitHubToken.value.trim());
 
       // Check gateway connection.
-      this.progressOperation(75, 'Проверка шлюза доступа к MongoDB...');
+      this.progressOperation(
+        75,
+        ppp.t('$cloudServicesPage.checkingMongoDbGateway')
+      );
 
       let mongoProxyUrl = this.mongoProxyUrl.value
         .trim()
@@ -403,7 +423,7 @@ export class CloudServicesPage extends Page {
         ppp.$$debug('gateway: %o', e);
 
         return invalidate(this.mongoProxyUrl, {
-          errorMessage: 'Запрос к шлюзу завершился с ошибкой',
+          errorMessage: ppp.t('$cloudServicesPage.gatewayRequestFailed'),
           raiseException: true
         });
       }
@@ -411,7 +431,10 @@ export class CloudServicesPage extends Page {
       ppp.keyVault.setKey('mongo-proxy-url', this.mongoProxyUrl.value.trim());
 
       // Check database connection.
-      this.progressOperation(90, 'Проверка подключения к MongoDB...');
+      this.progressOperation(
+        90,
+        ppp.t('$cloudServicesPage.checkingMongoDbConnection')
+      );
 
       try {
         await maybeFetchError(
@@ -427,7 +450,7 @@ export class CloudServicesPage extends Page {
         ppp.$$debug('mongodb: %o', e);
 
         return invalidate(this.mongoConnectionUri, {
-          errorMessage: 'Запрос к MongoDB завершился с ошибкой',
+          errorMessage: ppp.t('$cloudServicesPage.mongoDbRequestFailed'),
           raiseException: true
         });
       }
@@ -437,7 +460,7 @@ export class CloudServicesPage extends Page {
         this.mongoConnectionUri.value.trim()
       );
       this.showSuccessNotification(
-        'Операция успешно выполнена. Обновите страницу, чтобы пользоваться приложением.'
+        ppp.t('$cloudServicesPage.operationDoneRefreshPage')
       );
     } catch (e) {
       this.failOperation(e);
@@ -449,8 +472,8 @@ export class CloudServicesPage extends Page {
   async clearKeys() {
     if (
       await ppp.app.confirm(
-        'Очистка пароля и ключей',
-        'Мастер-пароль и все ключи облачных сервисов будут удалены из хранилища браузера. Подтвердите действие.'
+        ppp.t('$cloudServicesPage.keysCleanupTitle'),
+        ppp.t('$cloudServicesPage.confirmKeysCleanup')
       )
     ) {
       const version = localStorage.getItem('ppp-version');

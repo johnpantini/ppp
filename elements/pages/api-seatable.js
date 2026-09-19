@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiSeatablePageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +23,9 @@ export const apiSeatablePageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,9 +38,9 @@ export const apiSeatablePageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен базы</h5>
+          <h5>${() => ppp.t('$apiSeatablePage.baseToken')}</h5>
           <p class="description">
-            API-токен базы Seatable. Можно получить в панели управления.
+            ${() => ppp.t('$apiSeatablePage.baseTokenDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -86,7 +87,7 @@ export class ApiSeatablePage extends Page {
       ).ok
     ) {
       invalidate(this.baseToken, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }

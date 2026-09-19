@@ -29,13 +29,15 @@ import { Tmpl } from '../../../lib/tmpl.js';
 import { ValidationError } from '../../../lib/ppp-exceptions.js';
 import '../../snippet.js';
 
+await ppp.i18n(import.meta.url);
+
 export const exampleVirtualCommFunctionCode = `/**
-* Функция, возвращающая абсолютное значение комиссии за балансирующую сделку.
+* A function returning the absolute commission value of a balancing trade.
 *
-* @param price - Цена исполнения.
-* @param quantity - Количество лотов инструмента.
-* @param instrument - Торговый инструмент.
-* @param {boolean} isBuySide - Направление сделки.
+* @param price - Execution price.
+* @param quantity - Quantity in lots of the instrument.
+* @param instrument - Trading instrument.
+* @param {boolean} isBuySide - Trade direction.
 */
 
 return 0;
@@ -60,12 +62,12 @@ export const DEFAULT_COLUMNS = [
   },
   {
     source: COLUMN_SOURCE.FORMATTED_VALUE,
-    name: 'Покупки',
+    name: ppp.t('$intradayStatsWidget.columns.buys'),
     valueKey: 'buys'
   },
   {
     source: COLUMN_SOURCE.FORMATTED_VALUE,
-    name: 'Продажи',
+    name: ppp.t('$intradayStatsWidget.columns.sells'),
     valueKey: 'sells'
   },
   {
@@ -75,7 +77,7 @@ export const DEFAULT_COLUMNS = [
   },
   {
     source: COLUMN_SOURCE.FORMATTED_VALUE,
-    name: 'Комиссия',
+    name: ppp.t('$g.commission'),
     valueKey: 'commission'
   },
   {
@@ -331,11 +333,6 @@ export class IntradayStats {
       return;
     }
 
-    if (newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE) {
-      newValue.price = 0;
-      newValue.quantity = 0;
-    }
-
     const currency = newValue.instrument.currency;
 
     if (!this.timeline.has(currency)) {
@@ -355,8 +352,14 @@ export class IntradayStats {
       array,
       {
         instrument: newValue.instrument,
-        price: newValue.price,
-        quantity: newValue.quantity,
+        price:
+          newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
+            ? 0
+            : newValue.price,
+        quantity:
+          newValue.type === OPERATION_TYPE.OPERATION_TYPE_LOCATE_FEE
+            ? 0
+            : newValue.quantity,
         commission: newValue.commission,
         createdAt: new Date(newValue.createdAt),
         side:
@@ -967,7 +970,7 @@ export class IntradayStats {
 
     if (!this.widget.document.trader) {
       return this.widget.notificationsArea.error({
-        text: 'Отсутствует трейдер портфеля и позиций.',
+        text: ppp.t('$intradayStatsWidget.noStatsTrader'),
         keep: true
       });
     }
@@ -1078,7 +1081,7 @@ export async function listDefinition() {
           symbol: 'ROSN',
           exchange: 'MOEX',
           broker: 'alor',
-          fullName: 'ПАО НК Роснефть',
+          fullName: 'Rosneft Oil Company',
           minPriceIncrement: 0.05,
           type: 'stock',
           currency: 'RUB',
@@ -1095,7 +1098,7 @@ export async function listDefinition() {
         console.dir(e);
 
         invalidate(widget.container.virtualTradesCommFunctionCode, {
-          errorMessage: 'Исходный код не может быть использован.',
+          errorMessage: ppp.t('$intradayStatsWidget.sourceCodeUnusable'),
           raiseException: true
         });
       }
@@ -1113,9 +1116,9 @@ export async function listDefinition() {
     settings: html`
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер для формирования статистики</h5>
+          <h5>${() => ppp.t('$intradayStatsWidget.statsTrader')}</h5>
           <p class="description">
-            Трейдер должен поддерживать выгрузку истории операций и портфеля.
+            ${() => ppp.t('$intradayStatsWidget.statsTraderDescription')}
           </p>
         </div>
         <div class="widget-settings-input-group">
@@ -1124,7 +1127,7 @@ export async function listDefinition() {
               ${ref('traderId')}
               deselectable
               standalone
-              placeholder="Основной трейдер"
+              placeholder="${() => ppp.t('$intradayStatsWidget.mainTrader')}"
               variant="compact"
               value="${(x) => x.document.traderId}"
               :context="${(x) => x}"
@@ -1176,15 +1179,17 @@ export async function listDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Трейдер L1</h5>
-          <p class="description">Источник L1-данных.</p>
+          <h5>${() => ppp.t('$widget.traderL1')}</h5>
+          <p class="description">
+            ${() => ppp.t('$intradayStatsWidget.l1Source')}
+          </p>
         </div>
         <div class="control-line flex-start">
           <ppp-query-select
             ${ref('level1TraderId')}
             standalone
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.level1TraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.level1Trader ?? ''}"
@@ -1228,7 +1233,7 @@ export async function listDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Дополнительный трейдер L1 #1</h5>
+          <h5>${() => ppp.t('$intradayStatsWidget.extraTraderL1', { n: 1 })}</h5>
         </div>
         <div class="spacing2"></div>
         <div class="control-line flex-start">
@@ -1236,7 +1241,7 @@ export async function listDefinition() {
             ${ref('extraLevel1TraderId')}
             standalone
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.extraLevel1TraderId}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.extraLevel1Trader ?? ''}"
@@ -1282,7 +1287,7 @@ export async function listDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Дополнительный трейдер L1 #2</h5>
+          <h5>${() => ppp.t('$intradayStatsWidget.extraTraderL1', { n: 2 })}</h5>
         </div>
         <div class="spacing2"></div>
         <div class="control-line flex-start">
@@ -1290,7 +1295,7 @@ export async function listDefinition() {
             ${ref('extraLevel1Trader2Id')}
             standalone
             deselectable
-            placeholder="Опционально, нажмите для выбора"
+            placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
             value="${(x) => x.document.extraLevel1Trader2Id}"
             :context="${(x) => x}"
             :preloaded="${(x) => x.document.extraLevel1Trader2 ?? ''}"
@@ -1336,7 +1341,7 @@ export async function listDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Расчёт комиссии виртуальных сделок</h5>
+          <h5>${() => ppp.t('$intradayStatsWidget.virtualCommFunction')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-snippet
@@ -1356,7 +1361,7 @@ export async function listDefinition() {
       </div>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Столбцы таблицы со статистикой</h5>
+          <h5>${() => ppp.t('$intradayStatsWidget.statsTableColumns')}</h5>
         </div>
         <div class="spacing2"></div>
         <ppp-widget-column-list

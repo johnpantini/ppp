@@ -24,6 +24,8 @@ import '../button.js';
 import '../table.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiAstraDbPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -36,16 +38,15 @@ export const apiAstraDbPageTemplate = html`
             slot="controls"
             @click="${(x) => x.checkLastWakeUpTime()}"
           >
-            Проверить подключение к базе
+            ${() => ppp.t('$apiAstradbPage.checkDbConnection')}
           </ppp-button>
         `
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -58,9 +59,9 @@ export const apiAstraDbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Идентификатор базы данных</h5>
+          <h5>${() => ppp.t('$apiAstradbPage.dbId')}</h5>
           <p class="description">
-            Можно найти в панели управления базой данных, ключ ASTRA_DB_ID.
+            ${() => ppp.t('$apiAstradbPage.dbIdDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -73,9 +74,9 @@ export const apiAstraDbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Регион базы данных</h5>
+          <h5>${() => ppp.t('$apiAstradbPage.dbRegion')}</h5>
           <p class="description">
-            Можно найти в панели управления базой данных, ключ ASTRA_DB_REGION.
+            ${() => ppp.t('$apiAstradbPage.dbRegionDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -88,10 +89,9 @@ export const apiAstraDbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пространство ключей</h5>
+          <h5>${() => ppp.t('$apiAstradbPage.dbKeyspace')}</h5>
           <p class="description">
-            Можно найти в панели управления базой данных, ключ
-            ASTRA_DB_KEYSPACE.
+            ${() => ppp.t('$apiAstradbPage.dbKeyspaceDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -104,9 +104,9 @@ export const apiAstraDbPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен доступа</h5>
+          <h5>${() => ppp.t('$page.accessToken')}</h5>
           <p class="description">
-            Хранится в переменной окружения ASTRA_DB_APPLICATION_TOKEN.
+            ${() => ppp.t('$apiAstradbPage.dbTokenDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -123,19 +123,19 @@ export const apiAstraDbPageTemplate = html`
         html`
           <section>
             <div class="label-group">
-              <h5>Список таблиц</h5>
+              <h5>${() => ppp.t('$apiAstradbPage.tableList')}</h5>
               <p class="description">
-                Таблицы в AstraDB в пространстве ключей текущего профиля.
+                ${() => ppp.t('$apiAstradbPage.tableListDescription')}
               </p>
             </div>
             <div class="input-group">
               <ppp-table
                 :columns="${() => [
                   {
-                    label: 'Таблица'
+                    label: ppp.t('$apiAstradbPage.tableColumn')
                   },
                   {
-                    label: 'Действия'
+                    label: ppp.t('$apiAstradbPage.actionsColumn')
                   }
                 ]}"
                 :rows="${(x) =>
@@ -148,7 +148,7 @@ export const apiAstraDbPageTemplate = html`
                           class="xsmall"
                           @click="${() => x.removeTable(datum)}"
                         >
-                          Удалить
+                          ${() => ppp.t('$g.delete')}
                         </ppp-button>`
                       ]
                     };
@@ -161,7 +161,7 @@ export const apiAstraDbPageTemplate = html`
       ${documentPageFooterPartial({
         extraControls: html`
           <ppp-banner appearance="warning">
-            Будет настроен триггер, чтобы базу не отключили за неактивность.
+            ${() => ppp.t('$apiAstradbPage.wakeUpTriggerBanner')}
           </ppp-banner>
         `
       })}
@@ -185,8 +185,8 @@ export class ApiAstraDbPage extends Page {
   async removeTable(table) {
     if (
       await ppp.app.confirm(
-        'Удаление таблицы',
-        `Таблица «${table}» будет удалена. Подтвердите действие.`
+        ppp.t('$apiAstradbPage.tableRemovalTitle'),
+        ppp.t('$apiAstradbPage.confirmTableRemoval', { table })
       )
     ) {
       this.beginOperation();
@@ -207,11 +207,13 @@ export class ApiAstraDbPage extends Page {
           )
         );
 
-        this.showSuccessNotification(`Таблица «${table}» успешно удалена.`);
+        this.showSuccessNotification(
+          ppp.t('$apiAstradbPage.tableRemoved', { table })
+        );
 
         this.tables = this.tables.filter((t) => t !== table);
       } catch (e) {
-        this.failOperation(e, 'Удаление коллекции');
+        this.failOperation(e, ppp.t('$apiAstradbPage.collectionRemovalTitle'));
       } finally {
         this.endOperation();
       }
@@ -258,7 +260,7 @@ export class ApiAstraDbPage extends Page {
       ).ok
     ) {
       invalidate(this.dbToken, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }
@@ -300,7 +302,7 @@ export class ApiAstraDbPage extends Page {
 
       await maybeFetchError(
         res,
-        'Не удалось прочитать документ с состоянием базы.'
+        ppp.t('$apiAstradbPage.cannotReadDbStateDocument')
       );
 
       const json = await res.json();
@@ -308,14 +310,14 @@ export class ApiAstraDbPage extends Page {
 
       if (typeof time === 'undefined') {
         invalidate(ppp.app.toast, {
-          errorMessage: 'База данных не содержит информации о состоянии.',
+          errorMessage: ppp.t('$apiAstradbPage.noDbStateInfo'),
           raiseException: true
         });
       } else {
         this.showSuccessNotification(
-          `База данных в порядке. Последнее обновление: ${formatDate(
-            new Date(time)
-          )}`
+          ppp.t('$apiAstradbPage.dbOkLastUpdate', {
+            date: formatDate(new Date(time))
+          })
         );
       }
     } catch (e) {

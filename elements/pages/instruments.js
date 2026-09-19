@@ -1,13 +1,16 @@
+import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { Page, pageStyles } from '../page.js';
 import '../tabs.js';
 import './instruments-import.js';
 import './instruments-manage.js';
 
+await ppp.i18n(import.meta.url);
+
 export const instrumentsTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
-    <ppp-page-header>Торговые инструменты</ppp-page-header>
+    <ppp-page-header>${() => ppp.t('$instrumentsPage.title')}</ppp-page-header>
     <ppp-tabs
       ${ref('tabs')}
       activeid="${(x) => x.getActiveTab()}"
@@ -19,8 +22,12 @@ export const instrumentsTemplate = html`
         });
       }}}"
     >
-      <ppp-tab id="manage">Добавление/редактирование</ppp-tab>
-      <ppp-tab id="import">Импорт</ppp-tab>
+      <ppp-tab id="manage">
+        ${() => ppp.t('$instrumentsPage.manageTab')}
+      </ppp-tab>
+      <ppp-tab id="import">
+        ${() => ppp.t('$instrumentsPage.importTab')}
+      </ppp-tab>
       <ppp-tab-panel id="manage-panel"></ppp-tab-panel>
       <ppp-tab-panel id="import-panel"></ppp-tab-panel>
     </ppp-tabs>

@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
@@ -14,6 +15,8 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiRedisPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -23,10 +26,9 @@ export const apiRedisPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -39,12 +41,14 @@ export const apiRedisPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Хост</h5>
-          <p class="description">Хост для подключения.</p>
+          <h5>${() => ppp.t('$apiRedisPage.host')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiRedisPage.hostDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите адрес"
+            placeholder="${() => ppp.t('$apiRedisPage.enterAddress')}"
             value="${(x) => x.document.host}"
             ${ref('host')}
           ></ppp-text-field>
@@ -53,14 +57,16 @@ export const apiRedisPageTemplate = html`
             ?checked="${(x) => x.document.tls ?? true}"
             ${ref('tls')}
           >
-            Защищённое соединение
+            ${() => ppp.t('$apiRedisPage.secureConnection')}
           </ppp-checkbox>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Порт</h5>
-          <p class="description">Порт для подключения.</p>
+          <h5>${() => ppp.t('$apiRedisPage.port')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiRedisPage.portDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -73,8 +79,10 @@ export const apiRedisPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>База данных</h5>
-          <p class="description">Индекс базы данных Redis для подключения.</p>
+          <h5>${() => ppp.t('$apiRedisPage.database')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiRedisPage.databaseDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -87,13 +95,15 @@ export const apiRedisPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Имя пользователя</h5>
-          <p class="description">Имя пользователя для подключения.</p>
+          <h5>${() => ppp.t('$apiRedisPage.username')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiRedisPage.usernameDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             optional
-            placeholder="Имя пользователя"
+            placeholder="${() => ppp.t('$apiRedisPage.username')}"
             value="${(x) => x.document.username}"
             ${ref('username')}
           ></${'ppp-text-field'}>
@@ -101,14 +111,16 @@ export const apiRedisPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Пароль</h5>
-          <p class="description">Пароль Redis.</p>
+          <h5>${() => ppp.t('$apiRedisPage.password')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiRedisPage.passwordDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             optional
             type="password"
-            placeholder="Пароль"
+            placeholder="${() => ppp.t('$apiRedisPage.password')}"
             value="${(x) => x.document.password}"
             ${ref('password')}
           ></ppp-text-field>
@@ -138,14 +150,13 @@ export class ApiRedisPage extends Page {
     if (this.host.value.endsWith('upstash.io')) {
       await validate(this.database, {
         hook: async (value) => +value === 0,
-        errorMessage:
-          'Upstash поддерживает только базу данных с нулевым индексом'
+        errorMessage: ppp.t('$apiRedisPage.upstashZeroDbOnly')
       });
     }
 
     await validate(this.database, {
       hook: async (value) => +value >= 0 && +value <= 16,
-      errorMessage: 'Введите значение в диапазоне от 0 до 16'
+      errorMessage: ppp.t('$page.valueInRange', { min: 0, max: 16 })
     });
   }
 

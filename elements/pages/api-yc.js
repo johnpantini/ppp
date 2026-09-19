@@ -19,6 +19,8 @@ import '../button.js';
 import '../snippet.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiYcPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -28,10 +30,9 @@ export const apiYcPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -44,12 +45,14 @@ export const apiYcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Сервисный аккаунт Yandex Cloud</h5>
-          <p class="description">Идентификатор сервисного аккаунта.</p>
+          <h5>${() => ppp.t('$apiYcPage.serviceAccount')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiYcPage.serviceAccountDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите значение"
+            placeholder="${() => ppp.t('$page.enterValue')}"
             value="${(x) => x.document.ycServiceAccountID}"
             ${ref('ycServiceAccountID')}
           ></ppp-text-field>
@@ -57,14 +60,14 @@ export const apiYcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Идентификатор открытого ключа Yandex Cloud</h5>
+          <h5>${() => ppp.t('$apiYcPage.publicKeyId')}</h5>
           <p class="description">
-            Идентификатор открытого авторизованного ключа сервисного аккаунта.
+            ${() => ppp.t('$apiYcPage.publicKeyIdDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Введите значение"
+            placeholder="${() => ppp.t('$page.enterValue')}"
             value="${(x) => x.document.ycPublicKeyID}"
             ${ref('ycPublicKeyID')}
           ></ppp-text-field>
@@ -72,9 +75,9 @@ export const apiYcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Закрытый ключ Yandex Cloud</h5>
+          <h5>${() => ppp.t('$apiYcPage.privateKey')}</h5>
           <p class="description">
-            Закрытый авторизованный ключ сервисного аккаунта.
+            ${() => ppp.t('$apiYcPage.privateKeyDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -90,8 +93,10 @@ export const apiYcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Идентификатор статического ключа</h5>
-          <p class="description">Требуется для доступа к хранилищу объектов.</p>
+          <h5>${() => ppp.t('$apiYcPage.staticKeyId')}</h5>
+          <p class="description">
+            ${() => ppp.t('$apiYcPage.staticKeyIdDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -103,7 +108,7 @@ export const apiYcPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Секрет статического ключа</h5>
+          <h5>${() => ppp.t('$apiYcPage.staticKeySecret')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -145,8 +150,7 @@ export class ApiYcPage extends Page {
       });
     } catch (e) {
       invalidate(this.ycPrivateKey, {
-        errorMessage:
-          'Не удалось сгенерировать JWT. Проверьте правильность ключей Yandex Cloud.',
+        errorMessage: ppp.t('$apiYcPage.jwtGenerationFailed'),
         raiseException: true
       });
     }
@@ -164,7 +168,7 @@ export class ApiYcPage extends Page {
 
     await maybeFetchError(
       iamTokenRequest,
-      'Не удалось получить IAM-токен. Проверьте правильность ключей Yandex Cloud.'
+      ppp.t('$apiYcPage.iamTokenFailed')
     );
 
     const host = 'storage.yandexcloud.net';
@@ -194,7 +198,7 @@ export class ApiYcPage extends Page {
           'X-Amz-Date': xAmzDate
         }
       }),
-      'Не удалось выгрузить список бакетов. Проверьте статический ключ.'
+      ppp.t('$apiYcPage.bucketListFailed')
     );
   }
 

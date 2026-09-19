@@ -6,15 +6,17 @@ import '../button.js';
 import '../select.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const newExtensionModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group full">
-          <h5>Манифест</h5>
+          <h5>${() => ppp.t('$newExtensionModalPage.manifest')}</h5>
           <p class="description">
-            Введите URL манифеста (адрес файла ppp.json).
+            ${() => ppp.t('$newExtensionModalPage.manifestDescription')}
           </p>
           <ppp-text-field
             type="url"
@@ -23,7 +25,8 @@ export const newExtensionModalPageTemplate = html`
           ></ppp-text-field>
           <ppp-select
             deselectable
-            placeholder="Здесь можно выбрать ссылку по шаблону"
+            placeholder="${() =>
+              ppp.t('$newExtensionModalPage.templateUrlPlaceholder')}"
             @change="${(x) => {
               x.url.appearance = 'default';
 
@@ -37,20 +40,20 @@ export const newExtensionModalPageTemplate = html`
             ${ref('urlTemplateSelector')}
           >
             <ppp-option value="liquid-equities">
-              Маржинальные инструменты
+              ${() => ppp.t('$newExtensionModalPage.liquidEquities')}
             </ppp-option>
           </ppp-select>
         </div>
       </section>
       <section>
         <div class="label-group full">
-          <h5>Название</h5>
+          <h5>${() => ppp.t('$g.name')}</h5>
           <p class="description">
-            Название для отображения в боковой панели в разделе дополнений.
+            ${() => ppp.t('$newExtensionModalPage.titleDescription')}
           </p>
           <ppp-text-field
             optional
-            placeholder="Введите название"
+            placeholder="${() => ppp.t('$page.enterName')}"
             ${ref('extensionTitle')}
           ></ppp-text-field>
         </div>
@@ -61,7 +64,7 @@ export const newExtensionModalPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Установить дополнение
+          ${() => ppp.t('$newExtensionModalPage.installExtension')}
         </ppp-button>
       </footer>
     </form>
@@ -113,7 +116,7 @@ export class NewExtensionModalPage extends Page {
   failOperation(e) {
     if (e instanceof ConflictError) {
       invalidate(this.url, {
-        errorMessage: 'Это дополнение уже установлено'
+        errorMessage: ppp.t('$newExtensionModalPage.extensionAlreadyInstalled')
       });
     } else {
       super.failOperation(e);
@@ -150,14 +153,14 @@ export class NewExtensionModalPage extends Page {
       }
     } catch (e) {
       invalidate(this.url, {
-        errorMessage: 'Неверный URL манифеста',
+        errorMessage: ppp.t('$newExtensionModalPage.invalidManifestUrl'),
         raiseException: true
       });
     }
 
     if (!url.pathname.endsWith('/ppp.json')) {
       invalidate(this.url, {
-        errorMessage: 'Этот манифест не может быть прочитан',
+        errorMessage: ppp.t('$newExtensionModalPage.manifestCannotBeRead'),
         raiseException: true
       });
     }
@@ -176,7 +179,7 @@ export class NewExtensionModalPage extends Page {
       parseInt(manifest.version) < 1
     ) {
       invalidate(this.url, {
-        errorMessage: 'Манифест содержит ошибки и не может быть использован',
+        errorMessage: ppp.t('$newExtensionModalPage.manifestContainsErrors'),
         raiseException: true
       });
     }

@@ -13,7 +13,7 @@ export const ordersPageTemplate = html`
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список шаблонов заявок
+        ${() => ppp.t('$ordersPage.listHeader')}
         <ppp-button
           appearance="primary"
           slot="controls"
@@ -22,7 +22,7 @@ export const ordersPageTemplate = html`
               page: 'order'
             })}"
         >
-          Добавить шаблон заявки
+          ${() => ppp.t('$ordersPage.addOrderTemplate')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -33,22 +33,22 @@ export const ordersPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Тип'
+            label: ppp.t('$ordersPage.typeColumn')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$ordersPage.createdAtColumn')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$ordersPage.updatedAtColumn')
           },
           {
-            label: 'Версия'
+            label: ppp.t('$ordersPage.versionColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$ordersPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -84,7 +84,7 @@ export const ordersPageTemplate = html`
                     :datum="${() => datum}"
                     class="xsmall"
                   >
-                    Удалить
+                    ${() => ppp.t('$g.delete')}
                   </ppp-button>
                 `
               ]

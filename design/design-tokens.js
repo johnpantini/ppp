@@ -63,7 +63,7 @@ export const fromPair = (propName) => {
   );
 };
 
-function hexToRgb(hex) {
+export const hexToRgb = (hex) => {
   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 
   hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
@@ -81,7 +81,15 @@ function hexToRgb(hex) {
         g: 0,
         b: 0
       };
-}
+};
+
+export const lerpColor = (a, b, t) => {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t)
+  ];
+};
 
 export const toColorComponents = (token) => {
   if (token.$value.startsWith('#')) {

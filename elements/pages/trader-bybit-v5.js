@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref, when } from '../../vendor/fast-element.min.js';
 import { validate } from '../../lib/ppp-errors.js';
 import {
@@ -13,6 +14,8 @@ import '../query-select.js';
 import '../radio-group.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderBybitV5Template = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -23,8 +26,10 @@ export const traderBybitV5Template = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Профиль брокера</h5>
-          <p class="description">Брокерский профиль Bybit.</p>
+          <h5>${() => ppp.t('$traderBybitV5Page.brokerProfileTitle')}</h5>
+          <p class="description">
+            ${() => ppp.t('$traderBybitV5Page.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -65,15 +70,15 @@ export const traderBybitV5Template = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Bybit
+            ${() => ppp.t('$traderBybitV5Page.addBrokerProfile')}
           </ppp-button>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Продукт</h5>
+          <h5>${() => ppp.t('$traderBybitV5Page.productTitle')}</h5>
           <p class="description">
-            Выберите продукт, в рамках которого будете торговать.
+            ${() => ppp.t('$traderBybitV5Page.productDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -90,16 +95,20 @@ export const traderBybitV5Template = html`
             }}"
             ${ref('productLine')}
           >
-            <ppp-radio value="linear">Деривативы</ppp-radio>
-            <ppp-radio value="spot">Спот</ppp-radio>
+            <ppp-radio value="linear">
+              ${() => ppp.t('$traderBybitV5Page.productLinear')}
+            </ppp-radio>
+            <ppp-radio value="spot">
+              ${() => ppp.t('$traderBybitV5Page.productSpot')}
+            </ppp-radio>
           </ppp-radio-group>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Глубина книги заявок</h5>
+          <h5>${() => ppp.t('$traderBybitV5Page.orderbookDepthTitle')}</h5>
           <p class="description">
-            Чем меньше глубина, тем быстрее будет обновляться книга заявок.
+            ${() => ppp.t('$traderBybitV5Page.orderbookDepthDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -120,11 +129,9 @@ export const traderBybitV5Template = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Тайм-аут восстановления соединения</h5>
+          <h5>${() => ppp.t('$traderBybitV5Page.reconnectTimeoutTitle')}</h5>
           <p class="description">
-            Время, по истечении которого будет предпринята очередная попытка
-            восстановить прерванное подключение к серверу. Задаётся в
-            миллисекундах, по умолчанию 1000 мс.
+            ${() => ppp.t('$traderBybitV5Page.reconnectTimeoutDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -154,7 +161,7 @@ export class TraderBybitV5Page extends TraderCommonPage {
       TRADER_CAPS.CAPS_LEVEL1,
       TRADER_CAPS.CAPS_LIMIT_ORDERS,
       TRADER_CAPS.CAPS_MARKET_ORDERS,
-      TRADER_CAPS.CAPS_СONDITIONAL_ORDERS,
+      TRADER_CAPS.CAPS_CONDITIONAL_ORDERS,
       TRADER_CAPS.CAPS_ACTIVE_ORDERS,
       TRADER_CAPS.CAPS_ORDERBOOK,
       TRADER_CAPS.CAPS_TIME_AND_SALES,
@@ -171,7 +178,7 @@ export class TraderBybitV5Page extends TraderCommonPage {
     if (this.reconnectTimeout.value.trim()) {
       await validate(this.reconnectTimeout, {
         hook: async (value) => +value >= 100 && +value <= 10000,
-        errorMessage: 'Введите значение в диапазоне от 100 до 10000'
+        errorMessage: ppp.t('$page.valueInRange', { min: 100, max: 10000 })
       });
     }
   }

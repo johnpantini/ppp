@@ -12,6 +12,8 @@ import '../button.js';
 import '../checkbox.js';
 import '../query-select.js';
 
+await ppp.i18n(import.meta.url);
+
 export const backupMongodbModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -20,8 +22,7 @@ export const backupMongodbModalPageTemplate = html`
         <div class="label-group full">
           <h5>API S3</h5>
           <p class="description">
-            API, который будет использован для выгрузки резервной копии в
-            облачное хранилище.
+            ${() => ppp.t('$backupMongodbModalPage.s3ApiDescription')}
           </p>  
         </div>
         <div class="input-group">
@@ -55,14 +56,14 @@ export const backupMongodbModalPageTemplate = html`
           appearance="secondary"
           @click="${(x) => x.saveToDisk()}"
         >
-          Сохранить копию на диск
+          ${() => ppp.t('$backupMongodbModalPage.saveBackupToDisk')}
         </ppp-button>
         <ppp-button
           type="submit"
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Сохранить копию в S3
+          ${() => ppp.t('$backupMongodbModalPage.saveBackupToS3')}
         </ppp-button>
       </footer>
     </form>
@@ -155,7 +156,7 @@ export class BackupMongodbModalPage extends Page {
               }
             }
           ),
-          'Не удалось получить список бакетов. Проверьте права доступа.'
+          ppp.t('$backupMongodbModalPage.cannotFetchBucketList')
         );
 
         const bucketList = await rBucketList.json();
@@ -187,7 +188,7 @@ export class BackupMongodbModalPage extends Page {
                 })
               }
             ),
-            'Не удалось создать бакет для резервных копий.'
+            ppp.t('$backupMongodbModalPage.cannotCreateBackupsBucket')
           );
 
           backupsBucket = (await rNewBucket.json()).response;
@@ -236,7 +237,7 @@ export class BackupMongodbModalPage extends Page {
             },
             body: zipBlob
           }),
-          'Не удалось загрузить резервную копию в облачное хранилище.'
+          ppp.t('$backupMongodbModalPage.cannotUploadBackup')
         );
       }
 
@@ -265,9 +266,14 @@ export class BackupMongodbModalPage extends Page {
 
       ppp.app.mountPointModal.setAttribute('hidden', '');
 
-      this.showSuccessNotification('Копия базы данных успешно сохранена.');
+      this.showSuccessNotification(
+        ppp.t('$backupMongodbModalPage.backupSaved')
+      );
     } catch (e) {
-      this.failOperation(e, 'Создание резервной копии');
+      this.failOperation(
+        e,
+        ppp.t('$backupMongodbModalPage.backupCreationTitle')
+      );
     } finally {
       this.endOperation();
     }

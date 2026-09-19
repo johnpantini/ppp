@@ -139,7 +139,7 @@ export const documentPageHeaderPartial = ({
             slot="controls"
             appearance="red"
           >
-            Документ удалён
+            ${() => ppp.t('$page.documentRemovedBadge')}
           </ppp-badge>
           ${extraControls}
         `
@@ -152,27 +152,25 @@ export const documentPageHeaderPartial = ({
             page: collection
           })}"
       >
-        Перейти к списку
+        ${() => ppp.t('$page.goToTheList')}
         <span slot="start">${html.partial(arrowLeft)}</span>
       </ppp-button>
     </ppp-page-header>
   `;
 };
 
-export const documentPageNameSectionPartial = ({
-  placeholder = 'Введите значение'
-} = {}) =>
+export const documentPageNameSectionPartial = ({ placeholder } = {}) =>
   html`
     <section>
       <div class="label-group">
-        <h5>Название</h5>
+        <h5>${() => ppp.t('$g.name')}</h5>
         <p class="description">
-          Произвольное имя, чтобы ссылаться на этот документ, когда потребуется.
+          ${() => ppp.t('$page.arbitraryDocumentName')}
         </p>
       </div>
       <div class="input-group">
         <ppp-text-field
-          placeholder="${placeholder}"
+          placeholder="${() => placeholder ?? ppp.t('$page.enterValue')}"
           value="${(x) => x.document.name}"
           ${ref('name')}
         ></ppp-text-field>
@@ -188,7 +186,7 @@ export const documentPageFooterPartial = ({ text, extraControls } = {}) => html`
       appearance="primary"
       @click="${(x) => x.submitDocument()}"
     >
-      ${text ?? 'Сохранить в PPP'}
+      ${() => text ?? ppp.t('$page.saveToPPP')}
     </ppp-button>
     <ppp-button
       ?hidden="${(x) => !x.document._id}"
@@ -196,7 +194,7 @@ export const documentPageFooterPartial = ({ text, extraControls } = {}) => html`
       appearance="danger"
       @click="${(x) => x.cleanupAndRemoveDocument()}"
     >
-      Удалить
+      ${() => ppp.t('$g.delete')}
     </ppp-button>
   </footer>
 `;
@@ -736,10 +734,10 @@ class Page extends PPPElement {
   async cleanupAndRemoveDocument() {
     if (
       await ppp.app.confirm(
-        'Удаление документа',
-        `Подтвердите, что собираетесь удалить документ «${
-          this.document.name ?? this.document.title ?? this.document._id
-        }».`
+        ppp.t('$page.documentRemovalTitle'),
+        ppp.t('$page.confirmDocumentRemoval', {
+          name: this.document.name ?? this.document.title ?? this.document._id
+        })
       )
     ) {
       this.beginOperation();
@@ -753,7 +751,10 @@ class Page extends PPPElement {
           }
         });
 
-        this.showSuccessNotification('Документ удалён.', 'Удаление документа');
+        this.showSuccessNotification(
+          ppp.t('$page.documentRemovedToast'),
+          ppp.t('$page.documentRemovalTitle')
+        );
       } catch (e) {
         await this.updateDocumentFragment({
           $set: {
@@ -762,7 +763,7 @@ class Page extends PPPElement {
           }
         });
 
-        this.failOperation(e, 'Удаление документа');
+        this.failOperation(e, ppp.t('$page.documentRemovalTitle'));
       } finally {
         this.endOperation();
       }
@@ -778,8 +779,8 @@ class Page extends PPPElement {
       try {
         if (
           await ppp.app.confirm(
-            'Удаление документа',
-            'Документ будет удалён безвозвратно. Подтвердите действие.'
+            ppp.t('$page.documentRemovalTitle'),
+            ppp.t('$page.irreversibleDocumentRemoval')
           )
         ) {
           this.beginOperation();
@@ -956,7 +957,7 @@ class Page extends PPPElement {
     switch (errorName) {
       case 'AllocationNotFoundError':
         return invalidate(ppp.app.toast, {
-          errorMessage: 'Размещение не найдено.'
+          errorMessage: ppp.t('$page.allocationNotFound')
         });
       case 'ValidationError':
         return invalidate(ppp.app.toast, {
@@ -979,8 +980,9 @@ class Page extends PPPElement {
       case 'ConflictError':
         return invalidate(ppp.app.toast, {
           errorMessage: e?.href
-            ? html`Документ с таким названием уже существует, перейдите по
-                <a href="${e.href}">ссылке</a> для редактирования.`
+            ? html`${ppp.t('$page.conflictPrefix')}
+                <a href="${e.href}">${ppp.t('$page.conflictLink')}</a>
+                ${ppp.t('$page.conflictSuffix')}`
             : (e?.message ?? ppp.t('$pppErrors.E_DOCUMENT_CONFLICT'))
         });
       default:
@@ -1243,7 +1245,7 @@ class PageWithService {
     if (validateVersion) {
       if (!parsed || typeof version !== 'number') {
         invalidate(snippet, {
-          errorMessage: 'Не удалось прочитать версию',
+          errorMessage: ppp.t('$page.couldNotReadVersion'),
           raiseException: true
         });
       }
@@ -1271,14 +1273,14 @@ class PageWithService {
 
           await maybeFetchError(
             contentsResponse,
-            'Не удалось отследить версию сервиса.'
+            ppp.t('$page.couldNotTrackServiceVersion')
           );
 
           const parsed = parsePPPScript(await contentsResponse.text());
 
           if (!parsed || !Array.isArray(parsed.meta?.version)) {
             invalidate(this.versioningUrl, {
-              errorMessage: 'Не удалось прочитать версию',
+              errorMessage: ppp.t('$page.couldNotReadVersion'),
               raiseException: true
             });
           }
@@ -1324,7 +1326,10 @@ class PageWithService {
         }
       });
 
-      this.showSuccessNotification('Сервис перезапущен.', 'Перезапуск сервиса');
+      this.showSuccessNotification(
+        ppp.t('$page.serviceRestarted'),
+        ppp.t('$page.serviceRestartTitle')
+      );
     } catch (e) {
       await this.updateDocumentFragment({
         $set: {
@@ -1333,7 +1338,7 @@ class PageWithService {
         }
       });
 
-      this.failOperation(e, 'Перезапуск сервиса');
+      this.failOperation(e, ppp.t('$page.serviceRestartTitle'));
     } finally {
       this.endOperation();
     }
@@ -1351,7 +1356,10 @@ class PageWithService {
         }
       });
 
-      this.showSuccessNotification('Сервис остановлен.', 'Остановка сервиса');
+      this.showSuccessNotification(
+        ppp.t('$page.serviceStopped'),
+        ppp.t('$page.serviceStopTitle')
+      );
     } catch (e) {
       await this.updateDocumentFragment({
         $set: {
@@ -1360,7 +1368,7 @@ class PageWithService {
         }
       });
 
-      this.failOperation(e, 'Остановка сервиса');
+      this.failOperation(e, ppp.t('$page.serviceStopTitle'));
     } finally {
       this.endOperation();
     }
@@ -1404,7 +1412,7 @@ class PageWithSupabaseService {
 
     if (!connector) {
       invalidate(ppp.app.toast, {
-        errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+        errorMessage: ppp.t('$page.noConnector'),
         raiseException: true
       });
     }
@@ -1424,7 +1432,7 @@ class PageWithSupabaseService {
       })
     });
 
-    await maybeFetchError(rExecuteSQL, 'Не удалось выполнить функцию.');
+    await maybeFetchError(rExecuteSQL, ppp.t('$page.functionExecutionFailed'));
 
     const json = await rExecuteSQL.json();
     let result;
@@ -1468,7 +1476,9 @@ class PageWithSupabaseService {
     try {
       terminal.clear();
       terminal.reset();
-      terminal.writeInfo('Выполняется запрос к базе данных...\r\n');
+      terminal.writeInfo(
+        ppp.t('$page.terminalDatabaseQueryInProgress') + '\r\n'
+      );
 
       const connector = await ppp.user.functions.findOne(
         { collection: 'services' },
@@ -1479,7 +1489,7 @@ class PageWithSupabaseService {
 
       if (!connector) {
         invalidate(ppp.app.toast, {
-          errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+          errorMessage: ppp.t('$page.noConnector'),
           raiseException: true
         });
       }
@@ -1508,12 +1518,12 @@ class PageWithSupabaseService {
         // noinspection ExceptionCaughtLocallyJS
         throw new FetchError({
           ...rSQL,
-          ...{ message: 'SQL-запрос завершился с ошибкой.' }
+          ...{ message: ppp.t('$page.sqlQueryFailed') }
         });
       } else {
         terminal.writeln(text);
         terminal.writeln(
-          '\x1b[32m\r\nОперация выполнена, это окно можно закрыть.\r\n\x1b[0m'
+          '\x1b[32m\r\n' + ppp.t('$page.terminalDoneCanClose') + '\r\n\x1b[0m'
         );
       }
     } finally {
@@ -1645,7 +1655,7 @@ class PageWithSSHTerminal {
       ppp.app.terminalModal.dismissible = true;
 
       invalidate(ppp.app.toast, {
-        errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+        errorMessage: ppp.t('$page.noConnector'),
         raiseException: true
       });
     }
@@ -1662,7 +1672,7 @@ class PageWithSSHTerminal {
         ppp.app.terminalModal.dismissible = true;
 
         invalidate(ppp.app.toast, {
-          errorMessage: 'Запрос невозможен: отсутствует соединитель.',
+          errorMessage: ppp.t('$page.noConnector'),
           raiseException: true
         });
       }
@@ -1677,7 +1687,9 @@ class PageWithSSHTerminal {
     try {
       terminal.clear();
       terminal.reset();
-      terminal.writeInfo('Выполняется настройка сервера...\r\n');
+      terminal.writeInfo(
+        ppp.t('$page.terminalServerSetupInProgress') + '\r\n'
+      );
 
       if (!commandsToDisplay) commandsToDisplay = commands;
 
@@ -1713,7 +1725,11 @@ class PageWithSSHTerminal {
     } catch (e) {
       console.error(e);
 
-      terminal.writeError(`Операция завершилась с ошибкой ${e.status ?? 503}`);
+      terminal.writeError(
+        ppp.t('$page.terminalOperationFailedWithStatus', {
+          status: e.status ?? 503
+        })
+      );
     } finally {
       ppp.app.terminalModal.dismissible = true;
     }

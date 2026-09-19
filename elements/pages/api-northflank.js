@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const apiNorthflankPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +23,9 @@ export const apiNorthflankPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,9 +38,9 @@ export const apiNorthflankPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен API</h5>
+          <h5>${() => ppp.t('$apiNorthflankPage.apiToken')}</h5>
           <p class="description">
-            API-токен Northflank. Можно получить в настройках профиля.
+            ${() => ppp.t('$apiNorthflankPage.apiTokenDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -83,7 +84,7 @@ export class ApiNorthflankPage extends Page {
       ).ok
     ) {
       invalidate(this.token, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }

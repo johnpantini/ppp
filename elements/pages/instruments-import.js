@@ -17,15 +17,17 @@ import '../checkbox.js';
 import '../query-select.js';
 import '../select.js';
 
+await ppp.i18n(import.meta.url);
+
 export const instrumentsImportPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Словарь</h5>
+          <h5>${() => ppp.t('$instrumentsImportPage.dictionary')}</h5>
           <p class="description">
-            Выберите словарь-источник для импорта инструментов.
+            ${() => ppp.t('$instrumentsImportPage.dictionaryDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -42,7 +44,7 @@ export const instrumentsImportPageTemplate = html`
             ?checked="${() =>
               ppp.settings.get('clearInstrumentsBeforeImport') ?? true}"
           >
-            Удалить инструменты словаря перед импортом (ускоряет импорт)
+            ${() => ppp.t('$instrumentsImportPage.clearBeforeImport')}
           </ppp-checkbox>
         </div>
       </section>
@@ -55,10 +57,9 @@ export const instrumentsImportPageTemplate = html`
           )}"
       >
         <div class="label-group">
-          <h5>Ссылка на словарь</h5>
+          <h5>${() => ppp.t('$instrumentsImportPage.dictionaryUrlTitle')}</h5>
           <p class="description">
-            Этот словарь загружается из внешнего источника по ссылке. Значение
-            запоминается при редактировании.
+            ${() => ppp.t('$instrumentsImportPage.dictionaryUrlDescription')}
           </p>
         </div>
         <div class="input-group">
@@ -78,11 +79,11 @@ export const instrumentsImportPageTemplate = html`
       </section>
       <section hidden>
         <div class="label-group">
-          <h5>Параметры импорта</h5>
+          <h5>${() => ppp.t('$instrumentsImportPage.importParameters')}</h5>
         </div>
         <div class="input-group">
           <ppp-checkbox checked ${ref('psinaSkipOTC')}>
-            Не импортировать инструменты OTC
+            ${() => ppp.t('$instrumentsImportPage.skipOtcInstruments')}
           </ppp-checkbox>
         </div>
       </section>
@@ -90,8 +91,15 @@ export const instrumentsImportPageTemplate = html`
         ?hidden="${(x) => x.dictionary.value !== INSTRUMENT_DICTIONARY.TINKOFF}"
       >
         <div class="label-group">
-          <h5>Брокерский профиль T-Bank</h5>
-          <p class="description">Необходим для формирования словаря.</p>
+          <h5>
+            ${() =>
+              ppp.t('$instrumentsImportPage.brokerProfileTitle', {
+                broker: ppp.t(`$const.broker.${BROKERS.TINKOFF}`)
+              })}
+          </h5>
+          <p class="description">
+            ${() => ppp.t('$instrumentsImportPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -125,7 +133,10 @@ export const instrumentsImportPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль T-Bank
+            ${() =>
+              ppp.t('$instrumentsImportPage.addBrokerProfile', {
+                broker: ppp.t(`$const.broker.${BROKERS.TINKOFF}`)
+              })}
           </ppp-button>
         </div>
       </section>
@@ -133,8 +144,15 @@ export const instrumentsImportPageTemplate = html`
         ?hidden="${(x) => x.dictionary.value !== INSTRUMENT_DICTIONARY.FINAM}"
       >
         <div class="label-group">
-          <h5>Брокерский профиль Finam</h5>
-          <p class="description">Необходим для формирования словаря.</p>
+          <h5>
+            ${() =>
+              ppp.t('$instrumentsImportPage.brokerProfileTitle', {
+                broker: ppp.t(`$const.broker.${BROKERS.FINAM}`)
+              })}
+          </h5>
+          <p class="description">
+            ${() => ppp.t('$instrumentsImportPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -168,7 +186,10 @@ export const instrumentsImportPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Finam
+            ${() =>
+              ppp.t('$instrumentsImportPage.addBrokerProfile', {
+                broker: ppp.t(`$const.broker.${BROKERS.FINAM}`)
+              })}
           </ppp-button>
         </div>
       </section>
@@ -177,8 +198,15 @@ export const instrumentsImportPageTemplate = html`
           x.dictionary.value !== INSTRUMENT_DICTIONARY.CAPITALCOM}"
       >
         <div class="label-group">
-          <h5>Брокерский профиль Capital.com</h5>
-          <p class="description">Необходим для формирования словаря.</p>
+          <h5>
+            ${() =>
+              ppp.t('$instrumentsImportPage.brokerProfileTitle', {
+                broker: ppp.t(`$const.broker.${BROKERS.CAPITALCOM}`)
+              })}
+          </h5>
+          <p class="description">
+            ${() => ppp.t('$instrumentsImportPage.brokerProfileDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-query-select
@@ -212,7 +240,10 @@ export const instrumentsImportPageTemplate = html`
               })}"
             appearance="primary"
           >
-            Добавить профиль Capital.com
+            ${() =>
+              ppp.t('$instrumentsImportPage.addBrokerProfile', {
+                broker: ppp.t(`$const.broker.${BROKERS.CAPITALCOM}`)
+              })}
           </ppp-button>
         </div>
       </section>
@@ -222,7 +253,7 @@ export const instrumentsImportPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Импортировать инструменты
+          ${() => ppp.t('$instrumentsImportPage.importInstruments')}
         </ppp-button>
       </footer>
     </form>
@@ -248,7 +279,10 @@ export class InstrumentsImportPage extends Page {
       }
     );
 
-    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
+    await maybeFetchError(
+      rStocks,
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
+    );
 
     const stocks = await rStocks.json();
     const { symbolsInfo } = stocks;
@@ -288,7 +322,10 @@ export class InstrumentsImportPage extends Page {
 
     const rStocks = await ppp.fetch(this.dictionaryUrl.value);
 
-    await maybeFetchError(rStocks, 'Не удалось загрузить список инструментов.');
+    await maybeFetchError(
+      rStocks,
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
+    );
 
     const stocks = await rStocks.json();
     // const psinaSkipOTC = this.psinaSkipOTC.checked;
@@ -345,7 +382,7 @@ export class InstrumentsImportPage extends Page {
 
     await maybeFetchError(
       rSecurities,
-      'Не удалось загрузить список инструментов.'
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
     );
 
     const securities = await rSecurities.json();
@@ -407,7 +444,7 @@ export class InstrumentsImportPage extends Page {
 
     await maybeFetchError(
       rSecurities,
-      'Не удалось загрузить список инструментов.'
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
     );
 
     const securities = await rSecurities.json();
@@ -493,7 +530,7 @@ export class InstrumentsImportPage extends Page {
 
     await maybeFetchError(
       rInstruments,
-      'Не удалось загрузить список инструментов.'
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
     );
 
     const securities = await rInstruments.json();
@@ -709,7 +746,7 @@ export class InstrumentsImportPage extends Page {
 
     await maybeFetchError(
       rFinamSecurities,
-      'Не удалось авторизоваться в Finam.'
+      ppp.t('$instrumentsImportPage.finamAuthorizationFailed')
     );
 
     const instruments = (await rFinamSecurities.json()).data.securities ?? [];
@@ -874,7 +911,7 @@ export class InstrumentsImportPage extends Page {
 
     await maybeFetchError(
       rExchangeInfo,
-      'Не удалось загрузить список инструментов.'
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
     );
 
     const { symbols } = await rExchangeInfo.json();
@@ -915,7 +952,7 @@ export class InstrumentsImportPage extends Page {
 
     await maybeFetchError(
       rInstrumentsInfo,
-      'Не удалось загрузить список инструментов.'
+      ppp.t('$instrumentsImportPage.failedToLoadInstruments')
     );
 
     const json = await rInstrumentsInfo.json();
@@ -974,7 +1011,7 @@ export class InstrumentsImportPage extends Page {
 
       if (!instruments.length) {
         invalidate(ppp.app.toast, {
-          errorMessage: 'Список инструментов для импорта пуст.',
+          errorMessage: ppp.t('$instrumentsImportPage.emptyInstrumentList'),
           raiseException: true
         });
       }
@@ -1149,7 +1186,9 @@ export class InstrumentsImportPage extends Page {
       }
 
       this.showSuccessNotification(
-        `Операция выполнена, импортировано инструментов: ${instruments.length}`
+        ppp.t('$instrumentsImportPage.importSucceeded', {
+          count: instruments.length
+        })
       );
     } catch (e) {
       this.failOperation(e);

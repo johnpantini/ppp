@@ -1,3 +1,4 @@
+import ppp from '../../ppp.js';
 import { html, css, ref } from '../../vendor/fast-element.min.js';
 import { validate, invalidate } from '../../lib/ppp-errors.js';
 import {
@@ -18,6 +19,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerTinkoffPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -27,10 +30,9 @@ export const brokerTinkoffPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -43,22 +45,22 @@ export const brokerTinkoffPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен для доступа к API</h5>
+          <h5>${() => ppp.t('$brokerTinkoffPage.apiTokenTitle')}</h5>
           <p class="description">
-            Требуется для подписи всех запросов. Получить можно по
+            ${() => ppp.t('$brokerTinkoffPage.apiTokenDescription')}
             <a
               class="link"
               rel="noopener"
               target="_blank"
               href="https://www.tbank.ru/invest/settings/api/"
-              >ссылке</a
+              >${() => ppp.t('$brokerTinkoffPage.link')}</a
             >.
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
-            placeholder="Введите токен"
+            placeholder="${() => ppp.t('$brokerTinkoffPage.enterToken')}"
             value="${(x) => x.document.apiToken}"
             ${ref('apiToken')}
           ></ppp-text-field>
@@ -99,7 +101,7 @@ export class BrokerTinkoffPage extends Page {
       console.error(e);
 
       invalidate(this.apiToken, {
-        errorMessage: 'Недопустимый токен',
+        errorMessage: ppp.t('$brokerTinkoffPage.malformedToken'),
         raiseException: true
       });
     }
@@ -113,7 +115,7 @@ export class BrokerTinkoffPage extends Page {
         )?.length
       ) {
         invalidate(this.apiToken, {
-          errorMessage: 'Не найдены открытые брокерские счета',
+          errorMessage: ppp.t('$brokerTinkoffPage.noOpenAccounts'),
           raiseException: true
         });
       }
@@ -121,7 +123,7 @@ export class BrokerTinkoffPage extends Page {
       console.error(e);
 
       invalidate(this.apiToken, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }

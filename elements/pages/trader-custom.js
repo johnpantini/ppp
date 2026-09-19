@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   html,
   css,
@@ -17,6 +18,8 @@ import { traderNameAndRuntimePartial, TraderCommonPage } from './trader.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const traderCustomPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -27,7 +30,7 @@ export const traderCustomPageTemplate = html`
       ${traderNameAndRuntimePartial()}
       <section>
         <div class="label-group">
-          <h5>Ссылка на реализацию трейдера</h5>
+          <h5>${() => ppp.t('$traderCustomPage.urlTitle')}</h5>
         </div>
         <div class="input-group">
           <ppp-text-field
@@ -55,7 +58,7 @@ export const traderCustomPageTemplate = html`
               appearance="primary"
               @click="${(x) => x.loadTraderPageDefinition()}"
             >
-              Продолжить
+              ${() => ppp.t('$traderCustomPage.continueButton')}
             </ppp-button>
           </footer>
         `
@@ -89,7 +92,7 @@ export class TraderCustomPage extends TraderCommonPage {
         traderUrl = new URL(url ?? this.url.value);
       } catch (e) {
         invalidate(this.url, {
-          errorMessage: 'Этот URL не может быть использован',
+          errorMessage: ppp.t('$page.urlCannotBeUsed'),
           raiseException: true
         });
       }
@@ -150,12 +153,12 @@ export class TraderCustomPage extends TraderCommonPage {
       } catch (e) {
         console.error(e);
         invalidate(this.url, {
-          errorMessage: 'Этот URL не может быть загружен',
+          errorMessage: ppp.t('$traderCustomPage.urlCannotBeLoaded'),
           raiseException: true
         });
       }
     } catch (e) {
-      this.failOperation(e, 'Загрузка трейдера по ссылке');
+      this.failOperation(e, ppp.t('$traderCustomPage.loadTraderByUrl'));
     } finally {
       this.endOperation();
     }

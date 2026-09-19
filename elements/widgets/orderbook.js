@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../ppp.js';
 import {
   widgetStyles,
   WidgetWithInstrument,
@@ -24,8 +25,7 @@ import { pause, trash, refresh } from '../../static/svg/sprite.js';
 import {
   formatAmount,
   formatPercentage,
-  formatPriceWithoutCurrency,
-  formatQuantity,
+  getInstrumentPrecision,
   priceCurrencySymbol,
   stringToFloat
 } from '../../lib/intl.js';
@@ -68,12 +68,14 @@ import '../tabs.js';
 import '../text-field.js';
 import '../widget-controls.js';
 
+await ppp.i18n(import.meta.url);
+
 export const defaultBookProcessorFunc = `/**
-* Функция обработки книг заявок, поступающих от трейдеров.
+* A function to process orderbooks incoming from traders.
 *
-* @param {object} trader - Экземпляр трейдера PPP.
-* @param {array} prices - Массив цен (bid или ask) книги заявок.
-* @param {boolean} isBidSide - Тип массива цен, переданного на обработку.
+* @param {object} trader - The PPP trader instance.
+* @param {array} prices - An array of orderbook prices (bid or ask).
+* @param {boolean} isBidSide - The type of the price array being processed.
 */
 
 return prices;
@@ -86,7 +88,7 @@ export const orderbookWidgetTemplate = html`
         buttons: html`
           <div
             ?hidden="${(x) => !x.document.showPauseButton}"
-            title="Обновить вручную"
+            title="${() => ppp.t('$orderbookWidget.refreshManually')}"
             class="button"
             slot="start"
             @click="${(x) => {
@@ -97,7 +99,7 @@ export const orderbookWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !x.document.showPauseButton}"
-            title="Пауза"
+            title="${() => ppp.t('$orderbookWidget.pause')}"
             class="button${(x) => (x.paused ? ' earth' : '')}"
             slot="start"
             @click="${(x) => {
@@ -108,7 +110,7 @@ export const orderbookWidgetTemplate = html`
           </div>
           <div
             ?hidden="${(x) => !x.document.showResetButton}"
-            title="Очистить виджет"
+            title="${() => ppp.t('$orderbookWidget.clearWidget')}"
             class="button"
             slot="start"
             @click="${(x) => {
@@ -383,7 +385,7 @@ export const orderbookWidgetStyles = css`
     ${ellipsis()};
   }
 
-  svg[orderbook]{
+  svg[orderbook] {
     position: absolute;
     pointer-events: none;
     z-index: 0;
@@ -536,7 +538,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       this.initialized = true;
 
       return this.notificationsArea.error({
-        text: 'Отсутствует основной трейдер книги заявок.',
+        text: ppp.t('$orderbookWidget.noBookTrader'),
         keep: true
       });
     }
@@ -946,6 +948,55 @@ export class OrderbookWidget extends WidgetWithInstrument {
     }
   }
 
+  // #repaint formats every visible row on each frame, and an Intl
+  // constructor costs ~20 µs, so formatters are cached per precision.
+  // Output is identical to formatPriceWithoutCurrency() and formatQuantity().
+  #numberFormatters = new Map();
+
+  #numberFormatter(precision) {
+    let formatter = this.#numberFormatters.get(precision);
+
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(ppp.i18nLocale, {
+        style: 'decimal',
+        minimumFractionDigits: precision,
+        maximumFractionDigits: precision
+      });
+
+      this.#numberFormatters.set(precision, formatter);
+    }
+
+    return formatter;
+  }
+
+  #formatPrice(price) {
+    if (typeof price !== 'number' || isNaN(price)) return '—';
+
+    return this.#numberFormatter(
+      getInstrumentPrecision(
+        this.instrument,
+        price,
+        this.instrument.broker === BROKERS.UTEX
+      )
+    ).format(price);
+  }
+
+  #formatQuantity(quantity) {
+    if (typeof quantity !== 'number' || isNaN(quantity)) return '—';
+
+    let precision = 0;
+
+    if (typeof this.instrument?.minQuantityIncrement === 'number') {
+      const [_, frac] = this.instrument.minQuantityIncrement
+        .toString()
+        .split('.');
+
+      precision = frac?.length ?? 0;
+    }
+
+    return this.#numberFormatter(precision).format(quantity);
+  }
+
   #repaint() {
     const montage = this.montage ?? {
       bids: [],
@@ -1001,20 +1052,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
         my += left;
       }
 
-      bidPriceValues +=
-        formatPriceWithoutCurrency(
-          bid.price,
-          this.instrument,
-          this.instrument.broker === BROKERS.UTEX
-        ) + '\n';
+      bidPriceValues += this.#formatPrice(bid.price) + '\n';
 
       let formattedVolume = '';
 
       if (bid.pool === 'LD') {
         formattedVolume = '&nbsp;' + '⬇️';
       } else if (!bid.virtual) {
-        formattedVolume =
-          '&nbsp;' + formatQuantity(bid.volume, this.instrument);
+        formattedVolume = '&nbsp;' + this.#formatQuantity(bid.volume);
       }
 
       if (my > 0 && !seenBidPrices.has(bid.price)) {
@@ -1023,9 +1068,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
         bidVolumeValues +=
           `<span class="my${
             bid.virtual ? ' virtual' : ''
-          }"><span>${formatQuantity(
-            my,
-            this.instrument
+          }"><span>${this.#formatQuantity(
+            my
           )}</span></span>${formattedVolume}` + '\n';
       } else {
         bidVolumeValues += formattedVolume + '\n';
@@ -1089,19 +1133,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
         my += left;
       }
 
-      askPriceValues +=
-        formatPriceWithoutCurrency(
-          ask.price,
-          this.instrument,
-          this.instrument.broker === BROKERS.UTEX
-        ) + '\n';
+      askPriceValues += this.#formatPrice(ask.price) + '\n';
 
       let formattedVolume = '';
 
       if (ask.pool === 'LU') {
         formattedVolume = '⬆️';
       } else if (!ask.virtual) {
-        formattedVolume = formatQuantity(ask.volume, this.instrument);
+        formattedVolume = this.#formatQuantity(ask.volume);
       }
 
       if (my > 0 && !seenAskPrices.has(ask.price)) {
@@ -1111,13 +1150,12 @@ export class OrderbookWidget extends WidgetWithInstrument {
           askVolumeValues +=
             `${formattedVolume}${ask.virtual ? '' : '&nbsp;'}<span class="my${
               ask.virtual ? ' virtual' : ''
-            }"><span>${formatQuantity(my, this.instrument)}</span></span>` +
-            '\n';
+            }"><span>${this.#formatQuantity(my)}</span></span>` + '\n';
         } else {
           askVolumeValues +=
             `<span class="my${
               ask.virtual ? ' virtual' : ''
-            }"><span>${formatQuantity(my, this.instrument)}</span></span>${
+            }"><span>${this.#formatQuantity(my)}</span></span>${
               ask.virtual ? '' : '&nbsp;'
             }${formattedVolume}` + '\n';
         }
@@ -1134,7 +1172,9 @@ export class OrderbookWidget extends WidgetWithInstrument {
       if (this.document.levelColoring === 'ordinal') {
         if (askLevel === 0) {
           askLevel = 1;
-        } else if (ask.price !== montage.asks[i - 1].price) {
+        } else if (montage.asks[i].price !== montage.asks[i - 1].price) {
+          // Level polygon i always covers montage.asks[i] (bottom-up in the
+          // non-compact mode), so compare best-first regardless of `ask`.
           askLevel = Math.min(5, askLevel + 1);
         }
 
@@ -1398,11 +1438,15 @@ export class OrderbookWidget extends WidgetWithInstrument {
       );
     }
 
+    // Rows in #repaint, level polygons, borders and pointer handlers all
+    // address entries by montage index, so empty levels must not get here.
+    const isVisible = (e) => +e.price !== 0 && +e.volume !== 0;
+
     this.montage = {
-      bids: montage.bids.sort((a, b) => {
+      bids: montage.bids.filter(isVisible).sort((a, b) => {
         return b.price - a.price || b.volume - a.volume;
       }),
-      asks: montage.asks.sort((a, b) => {
+      asks: montage.asks.filter(isVisible).sort((a, b) => {
         return a.price - b.price || b.volume - a.volume;
       })
     };
@@ -1537,7 +1581,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
     await validate(this.container.depth);
     await validate(this.container.depth, {
       hook: async (value) => +value > 0 && +value <= 5000,
-      errorMessage: 'Введите значение в диапазоне от 1 до 5000'
+      errorMessage: ppp.t('$page.valueInRange', { min: 1, max: 5000 })
     });
 
     try {
@@ -1555,7 +1599,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       this.$$debug('[%s] validate failed: %o', this.document.name, e);
 
       invalidate(this.container.bookProcessorFunc, {
-        errorMessage: 'Код содержит ошибки.',
+        errorMessage: ppp.t('$orderbookWidget.codeContainsErrors'),
         raiseException: true
       });
     }
@@ -1564,7 +1608,7 @@ export class OrderbookWidget extends WidgetWithInstrument {
       for (const L of [1, 2, 3, 4, 5]) {
         await validate(this.container[`level${L}BgOpacity`], {
           hook: async (value) => +value >= 0 && +value <= 100,
-          errorMessage: 'Введите значение в диапазоне от 0 до 100'
+          errorMessage: ppp.t('$page.valueInRange', { min: 0, max: 100 })
         });
       }
     }
@@ -1616,10 +1660,12 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.ORDERBOOK,
     collection: 'PPP',
-    title: html`Книга заявок`,
-    tags: ['Биржевой стакан'],
-    description: html`<span class="positive">Книга заявок</span> отображает
-      таблицу лимитных заявок инструмента на покупку и продажу.`,
+    title: html`${() => ppp.t(`$const.widget.${WIDGET_TYPES.ORDERBOOK}`)}`,
+    tags: [ppp.t('$orderbookWidget.tags.orderbook')],
+    description: html`<span class="positive">
+        ${() => ppp.t(`$const.widget.${WIDGET_TYPES.ORDERBOOK}`)}
+      </span>
+      ${() => ppp.t('$orderbookWidget.description')}`,
     customElement: OrderbookWidget.compose({
       template: orderbookWidgetTemplate,
       styles: orderbookWidgetStyles
@@ -1630,14 +1676,17 @@ export async function widgetDefinition() {
     defaultHeight: 350,
     settings: html`
       <ppp-tabs activeid="traders">
-        <ppp-tab id="traders">Трейдеры</ppp-tab>
+        <ppp-tab id="traders">
+          ${() => ppp.t('$orderbookWidget.settings.tabs.traders')}
+        </ppp-tab>
         <ppp-tab id="ui">UI</ppp-tab>
         <ppp-tab-panel id="traders-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер книги заявок</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.bookTrader')}</h5>
               <p class="description">
-                Трейдер, который будет источником книги заявок.
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.bookTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1645,7 +1694,7 @@ export async function widgetDefinition() {
                 ${ref('bookTraderId')}
                 deselectable
                 standalone
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.bookTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.bookTrader ?? ''}"
@@ -1689,10 +1738,10 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Трейдер лимитных заявок</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.ordersTrader')}</h5>
               <p class="description">
-                Трейдер, который будет отображать собственные лимитные заявки
-                (количество) на ценовых уровнях.
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.ordersTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1700,7 +1749,7 @@ export async function widgetDefinition() {
                 ${ref('ordersTraderId')}
                 standalone
                 deselectable
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.ordersTraderId}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.ordersTrader ?? ''}"
@@ -1744,7 +1793,9 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Отображение своих заявок</h5>
+              <h5>
+                ${() => ppp.t('$orderbookWidget.settings.ownOrdersDisplay')}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -1754,17 +1805,20 @@ export async function widgetDefinition() {
                 ${ref('ownOrdersDisplayMode')}
               >
                 <ppp-radio value="native">
-                  Только если уровень есть у трейдера книги
+                  ${() => ppp.t('$orderbookWidget.settings.ownOrdersNative')}
                 </ppp-radio>
                 <ppp-radio value="above">
-                  Всегда на виртуальном уровне
+                  ${() => ppp.t('$orderbookWidget.settings.ownOrdersVirtual')}
                 </ppp-radio>
               </ppp-radio-group>
             </div>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Дополнительный трейдер книги заявок #1</h5>
+              <h5>
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.extraBookTrader', { n: 1 })}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <div class="control-line">
@@ -1779,7 +1833,7 @@ export async function widgetDefinition() {
                 standalone
                 deselectable
                 ?disabled=${(x) => !x.extraBookTrader1Enabled.checked}
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.extraBookTrader1Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraBookTrader1 ?? ''}"
@@ -1825,7 +1879,10 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Дополнительный трейдер книги заявок #2</h5>
+              <h5>
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.extraBookTrader', { n: 2 })}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <div class="control-line">
@@ -1840,7 +1897,7 @@ export async function widgetDefinition() {
                 standalone
                 deselectable
                 ?disabled=${(x) => !x.extraBookTrader2Enabled.checked}
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.extraBookTrader2Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraBookTrader2 ?? ''}"
@@ -1886,7 +1943,10 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Дополнительный трейдер книги заявок #3</h5>
+              <h5>
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.extraBookTrader', { n: 3 })}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <div class="control-line">
@@ -1901,7 +1961,7 @@ export async function widgetDefinition() {
                 standalone
                 deselectable
                 ?disabled=${(x) => !x.extraBookTrader3Enabled.checked}
-                placeholder="Опционально, нажмите для выбора"
+                placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                 value="${(x) => x.document.extraBookTrader3Id}"
                 :context="${(x) => x}"
                 :preloaded="${(x) => x.document.extraBookTrader3 ?? ''}"
@@ -1947,10 +2007,12 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Обработка книг заявок</h5>
+              <h5>
+                ${() => ppp.t('$orderbookWidget.settings.bookProcessing')}
+              </h5>
               <p class="description">
-                Тело функции для обработки книг заявок, поступающих от трейдеров
-                виджета.
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.bookProcessingDescription')}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -1970,7 +2032,7 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="ui-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Тип отображения</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.displayMode')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -1979,17 +2041,26 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.displayMode ?? 'compact'}"
                 ${ref('displayMode')}
               >
-                <ppp-radio value="compact">Компактный</ppp-radio>
-                <ppp-radio value="1-column">1 колонка</ppp-radio>
+                <ppp-radio value="compact">
+                  ${() => ppp.t('$orderbookWidget.settings.displayModeCompact')}
+                </ppp-radio>
+                <ppp-radio value="1-column">
+                  ${() =>
+                    ppp.t('$orderbookWidget.settings.displayModeOneColumn')}
+                </ppp-radio>
               </ppp-radio-group>
             </div>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Глубина книги заявок</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.depth')}</h5>
               <p class="description">
-                Количество строк <span class="positive">bid</span> и
-                <span class="negative">ask</span> для отображения.
+                ${() =>
+                  ppp.t('$orderbookWidget.settings.depthDescriptionStart')}
+                <span class="positive">bid</span>
+                ${() => ppp.t('$orderbookWidget.settings.depthDescriptionAnd')}
+                <span class="negative">ask</span>
+                ${() => ppp.t('$orderbookWidget.settings.depthDescriptionEnd')}
               </p>
             </div>
             <div class="widget-settings-input-group">
@@ -2004,61 +2075,63 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Интерфейс заголовка</h5>
+              <h5>
+                ${() => ppp.t('$orderbookWidget.settings.headerInterface')}
+              </h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showResetButton ?? false}"
               ${ref('showResetButton')}
             >
-              Показывать кнопку очистки
+              ${() => ppp.t('$orderbookWidget.settings.showResetButton')}
             </ppp-checkbox>
-             <ppp-checkbox
+            <ppp-checkbox
               ?checked="${(x) => x.document.showPauseButton ?? false}"
               ${ref('showPauseButton')}
             >
-              Показывать кнопку паузы
+              ${() => ppp.t('$orderbookWidget.settings.showPauseButton')}
             </ppp-checkbox>
-          </div>          
+          </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Наполнение</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.content')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showSpread ?? true}"
               ${ref('showSpread')}
             >
-              Показывать спред
+              ${() => ppp.t('$orderbookWidget.settings.showSpread')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.showPools ?? true}"
               ${ref('showPools')}
             >
-              Отображать пулы ликвидности в книге заявок
+              ${() => ppp.t('$orderbookWidget.settings.showPools')}
             </ppp-checkbox>
             <ppp-checkbox
               ?checked="${(x) => x.document.useMicsForPools}"
               ${ref('useMicsForPools')}
             >
-              Отображать пулы ликвидности кодами MIC
+              ${() => ppp.t('$orderbookWidget.settings.useMicsForPools')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Ценовые уровни</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.priceLevels')}</h5>
             </div>
             <div class="spacing2"></div>
             <ppp-checkbox
               ?checked="${(x) => x.document.showBorders ?? true}"
               ${ref('showBorders')}
             >
-              Выделять границы ценовых уровней
+              ${() => ppp.t('$orderbookWidget.settings.showBorders')}
             </ppp-checkbox>
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>Раскраска ценовых уровней</h5>
+              <h5>${() => ppp.t('$orderbookWidget.settings.levelColoring')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
@@ -2067,15 +2140,23 @@ export async function widgetDefinition() {
                 value="${(x) => x.document.levelColoring ?? 'volume'}"
                 ${ref('levelColoring')}
               >
-                <ppp-radio value="off">Нет</ppp-radio>
-                <ppp-radio value="volume">По относительному объёму</ppp-radio>
-                <ppp-radio value="ordinal">По порядковому номеру</ppp-radio>
+                <ppp-radio value="off">
+                  ${() => ppp.t('$orderbookWidget.settings.levelColoringOff')}
+                </ppp-radio>
+                <ppp-radio value="volume">
+                  ${() =>
+                    ppp.t('$orderbookWidget.settings.levelColoringVolume')}
+                </ppp-radio>
+                <ppp-radio value="ordinal">
+                  ${() =>
+                    ppp.t('$orderbookWidget.settings.levelColoringOrdinal')}
+                </ppp-radio>
               </ppp-radio-group>
               <div class="spacing3"></div>
               <div ?hidden="${(x) => x.levelColoring.value !== 'ordinal'}">
                 <ppp-banner class="inline" appearance="warning">
-                  Параметры слева направо: Тёмная тема, Светлая тема,
-                  Прозрачность.
+                  ${() =>
+                    ppp.t('$orderbookWidget.settings.levelColoringBanner')}
                 </ppp-banner>
                 <div class="spacing3"></div>
                 <div class="control-stack" style="gap: 16px 0">

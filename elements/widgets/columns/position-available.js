@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../../../ppp.js';
 import {
   html,
   observable,
@@ -26,7 +27,7 @@ export const columnTemplate = html`
             x.hideButton.nextElementSibling.removeAttribute('hidden', '');
           }}"
         >
-          Скрыто
+          ${() => ppp.t('$widget.hidden')}
         </ppp-button>
         <span class="balance-cell" ?hidden="${(x) => x.column?.hideBalances}">
           ${(x) =>

@@ -14,6 +14,8 @@ import { getAspirantWorkerBaseUrl } from './service-ppp-aspirant-worker.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const newDomainModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -22,7 +24,7 @@ export const newDomainModalPageTemplate = html`
         <div class="label-group full">
           <h5>Email</h5>
           <p class="description">
-            Адрес регистрации учётной записи
+            ${() => ppp.t('$newDomainModalPage.emailDescriptionPrefix')}
             <a
               class="link"
               target="_blank"
@@ -31,8 +33,7 @@ export const newDomainModalPageTemplate = html`
             >
               Let's Encrypt
             </a>
-            для получения служебных уведомлений (например, при скором истечении
-            сертификата).
+            ${() => ppp.t('$newDomainModalPage.emailDescriptionSuffix')}
           </p>
           <ppp-text-field
             placeholder="Email"
@@ -42,10 +43,9 @@ export const newDomainModalPageTemplate = html`
       </section>
       <section>
         <div class="label-group full">
-          <h5>Домены</h5>
+          <h5>${() => ppp.t('$newDomainModalPage.domains')}</h5>
           <p class="description">
-            Список доменов, для которых нужно получить сертификаты. Можно ввести
-            несколько через запятую.
+            ${() => ppp.t('$newDomainModalPage.domainsDescription')}
           </p>
           <ppp-text-field
             placeholder="example.com, www.example.com"
@@ -59,7 +59,7 @@ export const newDomainModalPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Добавить домены
+          ${() => ppp.t('$newDomainModalPage.addDomains')}
         </ppp-button>
       </footer>
     </form>
@@ -126,7 +126,7 @@ export class NewDomainModalPage extends Page {
       ) {
         // noinspection ExceptionCaughtLocallyJS
         invalidate(this.host, {
-          errorMessage: 'Не удалось добавить домены.',
+          errorMessage: ppp.t('$newDomainModalPage.cannotAddDomains'),
           raiseException: true
         });
       }
@@ -158,7 +158,7 @@ export class NewDomainModalPage extends Page {
       Observable.notify(this.parent, 'document');
       this.showSuccessNotification();
     } catch (e) {
-      this.failOperation(e, 'Добавление доменов');
+      this.failOperation(e, ppp.t('$newDomainModalPage.domainAdditionTitle'));
     } finally {
       this.endOperation();
     }

@@ -163,7 +163,9 @@ export const listWidgetTemplate = html`
           <span class="widget-title">
             ${when(
               (x) => x.deletionAvailable && x.deletion,
-              html`<span class="negative">Режим удаления</span>`,
+              html`<span class="negative">
+                ${() => ppp.t('$listWidget.deletionMode')}
+              </span>`,
               html`
                 <span class="title">${(x) => x.document?.name ?? ''}</span>
               `
@@ -305,6 +307,8 @@ export class ListWidget extends WidgetWithInstrument {
 
   #sortLoop;
 
+  #quickAssignScheduled = false;
+
   constructor() {
     super();
 
@@ -345,7 +349,7 @@ export class ListWidget extends WidgetWithInstrument {
         this.initialized = true;
 
         return this.notificationsArea.error({
-          text: 'Не удалось загрузить список.',
+          text: ppp.t('$listWidget.listLoadFailed'),
           keep: true
         });
       }
@@ -438,7 +442,7 @@ export class ListWidget extends WidgetWithInstrument {
       this.$$debug('[%s] connectedCallback failed: %o', this.document.name, e);
 
       return this.notificationsArea.error({
-        text: 'Не удалось загрузить содержимое.',
+        text: ppp.t('$listWidget.contentLoadFailed'),
         keep: true
       });
     }
@@ -571,6 +575,71 @@ export class ListWidget extends WidgetWithInstrument {
     );
   }
 
+  // Shows rows the moment they are added: with manual slot assignment a
+  // row appended to the table body stays invisible until the next
+  // internalSort() assigns it, and that call is throttled to 500 ms because
+  // it reads the value of every cell of every row. Meanwhile a removed row
+  // disappears at once, so a burst of additions looked like rows leaving,
+  // a gap and the new rows arriving half a second later. This pass keeps
+  // the order the last sort assigned and only splices the unassigned rows
+  // in by their insertion side (prepend - top, append - bottom); the
+  // throttled sort still puts them in column order afterwards. One pass
+  // per animation frame batches bulk loads such as a full instrument list.
+  scheduleQuickAssign() {
+    if (this.#quickAssignScheduled || !this.slot) {
+      return;
+    }
+
+    this.#quickAssignScheduled = true;
+
+    requestAnimationFrame(() => {
+      this.#quickAssignScheduled = false;
+      this.quickAssign();
+    });
+  }
+
+  quickAssign() {
+    if (!this.slot) {
+      return;
+    }
+
+    const children = Array.from(this.tableBody.children);
+    const position = new Map(children.map((row, i) => [row, i]));
+    // A row removed from the table body drops out of the assignment by
+    // itself; the remaining ones keep the sorted order.
+    const assigned = this.slot
+      .assignedNodes()
+      .filter((row) => position.has(row));
+    const assignedSet = new Set(assigned);
+    const firstAssigned = assigned.length ? position.get(assigned[0]) : 0;
+    const top = [];
+    const bottom = [];
+
+    for (const row of children) {
+      if (assignedSet.has(row)) {
+        continue;
+      }
+
+      (position.get(row) < firstAssigned ? top : bottom).push(row);
+    }
+
+    if (!top.length && !bottom.length && assigned.length === children.length) {
+      return;
+    }
+
+    this.slot.assign(
+      ...[...top, ...assigned, ...bottom].map((r, i) => {
+        if ((i + 1) % 2 === 0) {
+          r.classList.add('even');
+        } else {
+          r.classList.remove('even');
+        }
+
+        return r;
+      })
+    );
+  }
+
   appendRow(payload, options = {}) {
     let index = payload.index;
 
@@ -621,6 +690,7 @@ export class ListWidget extends WidgetWithInstrument {
 
     this.maxSeenIndex = Math.max(this.maxSeenIndex, index);
 
+    this.scheduleQuickAssign();
     this.sort();
 
     return row;
@@ -707,6 +777,8 @@ export class ListWidget extends WidgetWithInstrument {
   }
 
   async handleListTableClick({ event }) {
+    await this.control?.beforeListTableClick?.(event);
+
     if (!this.document?.listSource?.length) {
       return;
     }
@@ -736,6 +808,7 @@ export class ListWidget extends WidgetWithInstrument {
       if (this.deletion) {
         await this.control?.removeRow?.(index, this, column);
         row.remove();
+        this.scheduleQuickAssign();
         this.sort();
       } else if (column.defaultTrader && column.instrument) {
         this.instrumentTrader = column.defaultTrader;
@@ -745,6 +818,8 @@ export class ListWidget extends WidgetWithInstrument {
         }
       }
     }
+
+    return await this.control?.afterListTableClick?.(event);
   }
 
   toggleDeletionMode() {
@@ -757,8 +832,7 @@ export class ListWidget extends WidgetWithInstrument {
 
     if (this.container.setupStep.value !== '2') {
       invalidate(ppp.app.toast, {
-        errorMessage:
-          'Продолжите настройку виджета перед тем, как сохраняться.',
+        errorMessage: ppp.t('$listWidget.continueSetup'),
         raiseException: true
       });
     }
@@ -787,10 +861,11 @@ export async function widgetDefinition() {
   return {
     type: WIDGET_TYPES.LIST,
     collection: 'PPP',
-    title: html`Список`,
-    description: html`<span class="positive">Список</span> позволяет создавать
-      листинги инструментов и любых других данных, которые можно оформить в
-      таблицу.`,
+    title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.LIST)}`,
+    description: html`<span class="positive">
+        ${() => ppp.t('$const.widget.' + WIDGET_TYPES.LIST)}
+      </span>
+      ${() => ppp.t('$listWidget.widgetDescriptionSuffix')}`,
     customElement: ListWidget.compose({
       template: listWidgetTemplate,
       styles: listWidgetStyles
@@ -807,7 +882,7 @@ export async function widgetDefinition() {
       ></ppp-text-field>
       <div class="widget-settings-section">
         <div class="widget-settings-label-group">
-          <h5>Тип списка</h5>
+          <h5>${() => ppp.t('$listWidget.listType')}</h5>
         </div>
         <div class="spacing2"></div>
         <div class="widget-settings-input-group">
@@ -818,12 +893,18 @@ export async function widgetDefinition() {
             value="${(x) => x.document.listType ?? 'instruments'}"
             ${ref('listType')}
           >
-            <ppp-radio value="instruments">Инструменты</ppp-radio>
-            <ppp-radio value="mru">Недавние инструменты</ppp-radio>
-            <ppp-radio value="intraday-stats">
-              Статистика внутри дня
+            <ppp-radio value="instruments">
+              ${() => ppp.t('$listWidget.typeInstruments')}
             </ppp-radio>
-            <ppp-radio value="url">По ссылке</ppp-radio>
+            <ppp-radio value="mru">
+              ${() => ppp.t('$listWidget.typeMru')}
+            </ppp-radio>
+            <ppp-radio value="intraday-stats">
+              ${() => ppp.t('$listWidget.typeIntradayStats')}
+            </ppp-radio>
+            <ppp-radio value="url">
+              ${() => ppp.t('$listWidget.typeUrl')}
+            </ppp-radio>
           </ppp-radio-group>
           <ppp-text-field
             ?disabled="${(x) => x.setupStep.value === '2'}"
@@ -866,13 +947,13 @@ export async function widgetDefinition() {
           } catch (e) {
             console.error(e);
             invalidate(x.listWidgetUrl, {
-              errorMessage: 'Этот URL не может быть использован',
+              errorMessage: ppp.t('$listWidget.urlCannotBeUsed'),
               raiseException: true
             });
           }
         }}"
       >
-        Продолжить
+        ${() => ppp.t('$listWidget.continueButton')}
       </ppp-button>
       <div class="spacing2"></div>
       ${(x) => x.extraSettings}

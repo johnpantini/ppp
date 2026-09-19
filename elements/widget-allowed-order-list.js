@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import { html, repeat, ref } from '../vendor/fast-element.min.js';
 import { validate } from '../lib/ppp-errors.js';
 import {
@@ -36,7 +37,7 @@ export const widgetAllowedOrderListTemplate = html`
               :preloaded="${(x, c) => {
                 return c.parent?.orders?.find((o) => o._id === x.orderId);
               }}"
-              placeholder="Шаблон заявки"
+              placeholder="${() => ppp.t('$widget.orderTemplate')}"
               variant="compact"
               :context="${(x) => x}"
               :query="${() => {

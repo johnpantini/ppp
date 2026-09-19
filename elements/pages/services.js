@@ -27,7 +27,7 @@ export const servicesPageTemplate = html`
     <form novalidate>
       <div class="page-level control-stack">
         <ppp-page-header>
-          Список сервисов
+          ${() => ppp.t('$servicesPage.listHeader')}
           <ppp-button
             appearance="primary"
             slot="controls"
@@ -36,7 +36,7 @@ export const servicesPageTemplate = html`
                 page: 'service'
               })}"
           >
-            Установить сервис
+            ${() => ppp.t('$servicesPage.installService')}
           </ppp-button>
         </ppp-page-header>
         <div class="table-with-selector">
@@ -48,19 +48,21 @@ export const servicesPageTemplate = html`
               @click="${(x, c) => x.handleServiceTypeSelectorClick(c)}"
             >
               <ppp-side-nav-group>
-                <span slot="title">Или</span>
+                <span slot="title">${() => ppp.t('$servicesPage.or')}</span>
                 <ppp-side-nav-item slug="" ?active="${(x) => !x.activeItem}">
-                  <span>Все сервисы</span>
+                  <span>${() => ppp.t('$servicesPage.allServices')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="removed"
                   ?active="${(x) => x.activeItem === 'removed'}"
                 >
-                  <span>Удалённые сервисы</span>
+                  <span>${() => ppp.t('$servicesPage.removedServices')}</span>
                 </ppp-side-nav-item>
               </ppp-side-nav-group>
               <ppp-side-nav-group>
-                <span slot="title">Или по типу</span>
+                <span slot="title">
+                  ${() => ppp.t('$servicesPage.orByType')}
+                </span>
                 ${repeat(
                   (x) =>
                     Object.keys(SERVICES).filter(
@@ -126,31 +128,31 @@ export const servicesPageTemplate = html`
                 })}"
               :columns="${() => [
                 {
-                  label: 'Название'
+                  label: ppp.t('$g.name')
                 },
                 {
-                  label: 'Тип'
+                  label: ppp.t('$servicesPage.typeColumn')
                 },
                 {
-                  label: 'Дата создания'
+                  label: ppp.t('$servicesPage.createdAtColumn')
                 },
                 {
-                  label: 'Последнее изменение'
+                  label: ppp.t('$servicesPage.updatedAtColumn')
                 },
                 {
-                  label: 'Версия'
+                  label: ppp.t('$servicesPage.versionColumn')
                 },
                 {
-                  label: 'Последняя версия'
+                  label: ppp.t('$servicesPage.actualVersionColumn')
                 },
                 {
-                  label: 'Состояние'
+                  label: ppp.t('$servicesPage.stateColumn')
                 },
                 {
-                  label: 'Изоляция'
+                  label: ppp.t('$servicesPage.isolationColumn')
                 },
                 {
-                  label: 'Действия'
+                  label: ppp.t('$servicesPage.actionsColumn')
                 }
               ]}"
               :rows="${(x) =>
@@ -220,7 +222,7 @@ export const servicesPageTemplate = html`
                         >
                           ${(x, c) =>
                             c.parent.datum.removed
-                              ? 'Удалён'
+                              ? ppp.t('$servicesPage.removedBadge')
                               : ppp.t(
                                   `$const.serviceState.${datum.state ?? 'N/A'}`
                                 )}
@@ -247,7 +249,7 @@ export const servicesPageTemplate = html`
                             );
                           }}"
                         >
-                          Изолирован
+                          ${() => ppp.t('$servicesPage.isolated')}
                         </ppp-checkbox>
                       `,
                       html`
@@ -261,7 +263,7 @@ export const servicesPageTemplate = html`
                                 :datum="${() => datum}"
                                 class="xsmall"
                               >
-                                Обновить
+                                ${() => ppp.t('$servicesPage.update')}
                               </ppp-button>
                             `
                           )}
@@ -270,7 +272,7 @@ export const servicesPageTemplate = html`
                             :datum="${() => datum}"
                             class="xsmall"
                           >
-                            Удалить
+                            ${() => ppp.t('$g.delete')}
                           </ppp-button>
                         </div>
                       `

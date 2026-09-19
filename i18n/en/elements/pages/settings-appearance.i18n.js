@@ -1,0 +1,68 @@
+export default function (i18n) {
+  i18n.extend({
+    $settingsAppearancePage: {
+      palette: {
+        white: 'White',
+        black: 'Black',
+        gray: 'Gray',
+        green: 'Green',
+        purple: 'Purple',
+        blue: 'Blue',
+        yellow: 'Yellow',
+        red: 'Red'
+      },
+      light: 'Light',
+      dark: 'Dark',
+      bySystem: 'System default',
+      appearanceHeader: 'Application appearance',
+      appearanceDescription:
+        'Light, dark, or based on the operating system preference.',
+      appearanceBanner: 'The appearance will take effect after saving changes.',
+      paletteHeader: 'Palette',
+      paletteDescription:
+        'Customize the application color scheme yourself or use a ready-made template:',
+      selectTemplate: 'Select a template',
+      selectColor: 'Select a color',
+      fillColorsFromTemplate: 'Fill in colors from the template',
+      colorPairsHeader: 'Color pairs',
+      colorPairsDescription:
+        'Color pairs are set from the palette for the light and dark appearance.',
+      fillPairsFromTemplate: 'Fill in pairs from the template',
+      linkColor: 'Link decoration',
+      increase: 'Increase',
+      decrease: 'Decrease',
+      buyHover: 'Buy (active)',
+      sellHover: 'Sell (active)',
+      chartUpColor: 'Chart candle body (up)',
+      chartDownColor: 'Chart candle body (down)',
+      chartBorderUpColor: 'Chart candle border (up)',
+      chartBorderDownColor: 'Chart candle border (down)',
+      chartWickUpColor: 'Chart candle wick (up)',
+      chartWickDownColor: 'Chart candle wick (down)',
+      widgetGroup: 'Widget group %{n}',
+      fontsHeader: 'Fonts and sizes',
+      fontsDescription: 'Customize the application fonts.',
+      fillFontsFromTemplate: 'Fill in fonts from the template',
+      fontFamily: 'Font family',
+      regularFont: 'Regular font',
+      monospaceFont: 'Monospace font',
+      widgetFont: 'Widget font',
+      bodyFont: 'Body text font',
+      codeFont: 'Code font',
+      heading3Font: 'Heading 3 font',
+      heading5Font: 'Heading 5 font',
+      heading6Font: 'Heading 6 font',
+      fontSize: 'Size',
+      fontWeight: 'Weight',
+      lineHeight: 'Line height',
+      widgetButtonHeight: 'Widget button height (buy/sell)',
+      height: 'Height',
+      saveSettings: 'Save settings',
+      invalidColor: 'Invalid color',
+      invalidFont: 'Invalid font',
+      invalidSize: 'Invalid size',
+      invalidValue: 'Invalid value',
+      themeTemplateLoading: 'Theme template loading'
+    }
+  });
+}

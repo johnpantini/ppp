@@ -16,10 +16,7 @@ import '../query-select.js';
 import '../select.js';
 import '../text-field.js';
 
-const HINTS = {
-  formatter: 'Форматирование сообщений',
-  history: 'Загрузка исторических данных'
-};
+await ppp.i18n(import.meta.url);
 
 export const templateLibraryModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
@@ -27,18 +24,22 @@ export const templateLibraryModalPageTemplate = html`
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Шаблон</h5>
+          <h5>${() => ppp.t('$templateLibraryModalPage.template')}</h5>
           <div class="spacing2"></div>
-          <ppp-badge appearance="yellow">${(x) => HINTS[x.hint]}</ppp-badge>
+          <ppp-badge appearance="yellow">
+            ${(x) => ppp.t(`$templateLibraryModalPage.hints.${x.hint}`)}
+          </ppp-badge>
         </div>
         <div class="input-group">
           <ppp-select
             value="${(x) => x.template ?? 'psina-us-news'}"
             ${ref('templateSelector')}
           >
-            <ppp-option value="psina-us-news">Новости (Psina, US)</ppp-option>
+            <ppp-option value="psina-us-news">
+              ${() => ppp.t('$templateLibraryModalPage.psinaUsNews')}
+            </ppp-option>
             <ppp-option value="psina-us-statuses">
-              Торговые статусы (Psina, US)
+              ${() => ppp.t('$templateLibraryModalPage.psinaUsStatuses')}
             </ppp-option>
           </ppp-select>
         </div>
@@ -48,8 +49,11 @@ export const templateLibraryModalPageTemplate = html`
         html`
           <section>
             <div class="label-group">
-              <h5>Сервис-источник</h5>
-              <p class="description">Выберите сервис источника новостей.</p>
+              <h5>${() => ppp.t('$templateLibraryModalPage.sourceService')}</h5>
+              <p class="description">
+                ${() =>
+                  ppp.t('$templateLibraryModalPage.selectNewsSourceService')}
+              </p>
             </div>
             <div class="input-group">
               <ppp-query-select
@@ -84,17 +88,24 @@ export const templateLibraryModalPageTemplate = html`
             html`
               <section>
                 <div class="label-group">
-                  <h5>Сервис извлечения содержимого новостей</h5>
+                  <h5>
+                    ${() =>
+                      ppp.t(
+                        '$templateLibraryModalPage.newsBodyExtractionService'
+                      )}
+                  </h5>
                   <p class="description">
-                    Создайте Cloudflare Worker по шаблону. Понадобится, если
-                    нужен GPT-пересказ сообщений.
+                    ${() =>
+                      ppp.t(
+                        '$templateLibraryModalPage.newsBodyExtractionServiceDescription'
+                      )}
                   </p>
                 </div>
                 <div class="input-group">
                   <ppp-query-select
                     ${ref('psinaUsNewsBodyExtractionServiceId')}
                     deselectable
-                    placeholder="Опционально, нажмите для выбора"
+                    placeholder="${() => ppp.t('$g.optionalClickToSelect')}"
                     :context="${(x) => x}"
                     :query="${() => {
                       return (context) => {
@@ -123,16 +134,22 @@ export const templateLibraryModalPageTemplate = html`
               </section>
               <section>
                 <div class="label-group">
-                  <h5>Токен Yandex OAuth</h5>
+                  <h5>
+                    ${() => ppp.t('$templateLibraryModalPage.yandexOauthToken')}
+                  </h5>
                   <p class="description">
-                    Понадобится, если нужен GPT-пересказ сообщений.
+                    ${() =>
+                      ppp.t(
+                        '$templateLibraryModalPage.yandexOauthTokenDescription'
+                      )}
                   </p>
                 </div>
                 <div class="input-group">
                   <ppp-text-field
                     type="password"
                     optional
-                    placeholder="Токен Yandex OAuth"
+                    placeholder="${() =>
+                      ppp.t('$templateLibraryModalPage.yandexOauthToken')}"
                     ${ref('yandexToken')}
                   ></ppp-text-field>
                 </div>
@@ -146,8 +163,13 @@ export const templateLibraryModalPageTemplate = html`
         html`
           <section>
             <div class="label-group">
-              <h5>Сервис-источник</h5>
-              <p class="description">Выберите сервис источника статусов.</p>
+              <h5>${() => ppp.t('$templateLibraryModalPage.sourceService')}</h5>
+              <p class="description">
+                ${() =>
+                  ppp.t(
+                    '$templateLibraryModalPage.selectStatusesSourceService'
+                  )}
+              </p>
             </div>
             <div class="input-group">
               <ppp-query-select
@@ -185,7 +207,7 @@ export const templateLibraryModalPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Вставить код по шаблону
+          ${() => ppp.t('$templateLibraryModalPage.insertTemplateCode')}
         </ppp-button>
       </footer>
     </form>

@@ -13,13 +13,16 @@ import '../button.js';
 import '../query-select.js';
 import '../table.js';
 
+await ppp.i18n(import.meta.url);
+
 export const recordingsModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-query-select
         style="max-width: 384px"
-        placeholder="Выберите API Yandex Cloud для загрузки списка записей"
+        placeholder="${() =>
+          ppp.t('$recordingsModalPage.selectYcApiPlaceholder')}"
         ${ref('ycApiId')}
         :context="${(x) => x}"
         @change="${(x) => {
@@ -51,19 +54,19 @@ export const recordingsModalPageTemplate = html`
         ?hidden="${(x) => !x.ycApiId.value}"
         :columns="${() => [
           {
-            label: 'Тикер'
+            label: ppp.t('$g.symbol')
           },
           {
-            label: 'Словарь'
+            label: ppp.t('$recordingsModalPage.dictionaryColumn')
           },
           {
-            label: 'Дата'
+            label: ppp.t('$recordingsModalPage.dateColumn')
           },
           {
-            label: 'Размер'
+            label: ppp.t('$recordingsModalPage.sizeColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$recordingsModalPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -102,7 +105,7 @@ export const recordingsModalPageTemplate = html`
                         class="xsmall"
                         @click="${() => x.deleteRecording(datum)}"
                       >
-                        Удалить
+                        ${() => ppp.t('$g.delete')}
                       </ppp-button>
                     </div>
                   `
@@ -128,10 +131,10 @@ export class RecordingsModalPage extends Page {
 
     if (
       await ppp.app.confirm(
-        'Удаление записи',
-        `Будет удалена запись [${ticker}], созданная ${formatDateWithOptions(
-          datum.lastModified,
-          {
+        ppp.t('$recordingsModalPage.recordingRemovalTitle'),
+        ppp.t('$recordingsModalPage.confirmRecordingRemoval', {
+          ticker,
+          date: formatDateWithOptions(datum.lastModified, {
             year: 'numeric',
             month: 'numeric',
             day: 'numeric',
@@ -139,8 +142,8 @@ export class RecordingsModalPage extends Page {
             minute: 'numeric',
             second: 'numeric',
             hour12: false
-          }
-        )}. Подтвердите действие.`
+          })
+        })
       )
     ) {
       this.beginOperation();
@@ -180,7 +183,7 @@ export class RecordingsModalPage extends Page {
               'X-Amz-Date': xAmzDate
             }
           }),
-          'Не удалось удалить запись.'
+          ppp.t('$recordingsModalPage.cannotDeleteRecording')
         );
 
         const index = this.documents.findIndex((d) => d.url === datum.url);
@@ -190,9 +193,14 @@ export class RecordingsModalPage extends Page {
         }
 
         Observable.notify(this, 'documents');
-        this.showSuccessNotification('Запись удалена.');
+        this.showSuccessNotification(
+          ppp.t('$recordingsModalPage.recordingDeleted')
+        );
       } catch (e) {
-        this.failOperation(e, 'Удаление записи');
+        this.failOperation(
+          e,
+          ppp.t('$recordingsModalPage.recordingRemovalTitle')
+        );
       } finally {
         this.endOperation();
       }
@@ -227,7 +235,7 @@ export class RecordingsModalPage extends Page {
           }
         }
       ),
-      'Не удалось получить список бакетов. Проверьте права доступа.'
+      ppp.t('$recordingsModalPage.cannotFetchBucketList')
     );
 
     const bucketList = await rBucketList.json();
@@ -263,7 +271,7 @@ export class RecordingsModalPage extends Page {
             'X-Amz-Date': xAmzDate
           }
         }),
-        'Не удалось выгрузить список записей.'
+        ppp.t('$recordingsModalPage.cannotFetchRecordingList')
       );
 
       const xml = await rObjectList.text();

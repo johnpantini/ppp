@@ -13,7 +13,7 @@ export const apisPageTemplate = html`
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список внешних API
+        ${() => ppp.t('$apisPage.listHeader')}
         <ppp-button
           appearance="primary"
           slot="controls"
@@ -22,7 +22,7 @@ export const apisPageTemplate = html`
               page: 'api'
             })}"
         >
-          Подключить API
+          ${() => ppp.t('$apisPage.connectApi')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -33,22 +33,22 @@ export const apisPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Тип'
+            label: ppp.t('$apisPage.typeColumn')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$apisPage.createdAtColumn')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$apisPage.updatedAtColumn')
           },
           {
-            label: 'Версия'
+            label: ppp.t('$apisPage.versionColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$apisPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -84,7 +84,7 @@ export const apisPageTemplate = html`
                     :datum="${() => datum}"
                     class="xsmall"
                   >
-                    Удалить
+                    ${() => ppp.t('$g.delete')}
                   </ppp-button>
                 `
               ]

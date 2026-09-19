@@ -23,7 +23,7 @@ export const tradersPageTemplate = html`
     <form novalidate>
       <div class="page-level control-stack">
         <ppp-page-header>
-          Список трейдеров
+          ${() => ppp.t('$tradersPage.traderListTitle')}
           <ppp-button
             appearance="primary"
             slot="controls"
@@ -32,7 +32,7 @@ export const tradersPageTemplate = html`
                 page: 'trader'
               })}"
           >
-            Добавить трейдера
+            ${() => ppp.t('$tradersPage.addTrader')}
           </ppp-button>
         </ppp-page-header>
         <div class="table-with-selector">
@@ -44,19 +44,21 @@ export const tradersPageTemplate = html`
               @click="${(x, c) => x.handleTraderTypeSelectorClick(c)}"
             >
               <ppp-side-nav-group>
-                <span slot="title">Или</span>
+                <span slot="title">${() => ppp.t('$tradersPage.or')}</span>
                 <ppp-side-nav-item slug="" ?active="${(x) => !x.activeItem}">
-                  <span>Все трейдеры</span>
+                  <span>${() => ppp.t('$tradersPage.allTraders')}</span>
                 </ppp-side-nav-item>
                 <ppp-side-nav-item
                   slug="removed"
                   ?active="${(x) => x.activeItem === 'removed'}"
                 >
-                  <span>Удалённые трейдеры</span>
+                  <span>${() => ppp.t('$tradersPage.removedTraders')}</span>
                 </ppp-side-nav-item>
               </ppp-side-nav-group>
               <ppp-side-nav-group>
-                <span slot="title">Или по типу</span>
+                <span slot="title">
+                  ${() => ppp.t('$tradersPage.orByType')}
+                </span>
                 ${repeat(
                   (x) => Object.keys(TRADERS),
                   html`
@@ -87,22 +89,22 @@ export const tradersPageTemplate = html`
               }}"
               :columns="${() => [
                 {
-                  label: 'Название'
+                  label: ppp.t('$g.name')
                 },
                 {
-                  label: 'Тип'
+                  label: ppp.t('$tradersPage.typeColumn')
                 },
                 {
-                  label: 'Дата создания'
+                  label: ppp.t('$tradersPage.createdAtColumn')
                 },
                 {
-                  label: 'Последнее изменение'
+                  label: ppp.t('$tradersPage.updatedAtColumn')
                 },
                 {
-                  label: 'Версия'
+                  label: ppp.t('$tradersPage.versionColumn')
                 },
                 {
-                  label: 'Действия'
+                  label: ppp.t('$tradersPage.actionsColumn')
                 }
               ]}"
               :rows="${(x) =>
@@ -140,7 +142,7 @@ export const tradersPageTemplate = html`
                           :datum="${() => datum}"
                           class="xsmall"
                         >
-                          Удалить
+                          ${() => ppp.t('$g.delete')}
                         </ppp-button>
                       `
                     ]

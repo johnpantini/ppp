@@ -1,5 +1,6 @@
 /** @decorator */
 
+import ppp from '../ppp.js';
 import {
   html,
   repeat,
@@ -38,7 +39,7 @@ export const widgetMarqueeListTemplate = html`
                 :preloaded="${(x, c) => {
                   return c.parent?.traders?.find((t) => t._id === x.traderId);
                 }}"
-                placeholder="Трейдер L1"
+                placeholder="${() => ppp.t('$widget.traderL1')}"
                 variant="compact"
                 :context="${(x) => x}"
                 :query="${() => {
@@ -64,7 +65,8 @@ export const widgetMarqueeListTemplate = html`
                   style="width: 200px;"
                   standalone
                   ?disabled="${(x) => x.hidden}"
-                  placeholder="${(item) => item.symbol || 'Тикер'}"
+                  placeholder="${(item) =>
+                    item.symbol || ppp.t('$g.symbol')}"
                   value="${(item) => item.symbol}"
                 ></ppp-text-field>
                 <ppp-button
@@ -99,21 +101,21 @@ export const widgetMarqueeListTemplate = html`
                   ?disabled="${(x) => x.hidden}"
                   ?checked="${(x) => x.showPrice ?? true}"
                 >
-                  Цена
+                  ${() => ppp.t('$g.price')}
                 </ppp-checkbox>
                 <ppp-checkbox
                   marquee-show-absolute-change
                   ?disabled="${(x) => x.hidden}"
                   ?checked="${(x) => x.showAbsoluteChange ?? true}"
                 >
-                  Изм.
+                  ${() => ppp.t('$g.change')}
                 </ppp-checkbox>
                 <ppp-checkbox
                   marquee-show-relative-change
                   ?disabled="${(x) => x.hidden}"
                   ?checked="${(x) => x.showRelativeChange ?? true}"
                 >
-                  Изм., %
+                  ${() => ppp.t('$g.changePercent')}
                 </ppp-checkbox>
               </div>
               <ppp-text-field
@@ -121,7 +123,7 @@ export const widgetMarqueeListTemplate = html`
                 style="width: 200px;"
                 standalone
                 ?disabled="${(x) => x.hidden}"
-                placeholder="${(item) => item.name || 'Название'}"
+                placeholder="${(item) => item.name || ppp.t('$g.name')}"
                 value="${(item) => item.name}"
               ></ppp-text-field>
             </div>
@@ -182,7 +184,7 @@ export class WidgetMarqueeList extends ClonableList {
 
       if (!realTrader.instruments.has(symbol.value.trim())) {
         invalidate(symbol, {
-          errorMessage: 'Тикер не найден в словаре',
+          errorMessage: ppp.t('$widget.symbolNotFoundInDictionary'),
           raiseException: true
         });
       }

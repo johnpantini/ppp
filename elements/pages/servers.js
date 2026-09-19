@@ -26,7 +26,7 @@ export const serversPageTemplate = html`
     <ppp-loader></ppp-loader>
     <form novalidate>
       <ppp-page-header>
-        Список серверов
+        ${() => ppp.t('$serversPage.listHeader')}
         <ppp-button
           appearance="primary"
           slot="controls"
@@ -35,7 +35,7 @@ export const serversPageTemplate = html`
               page: 'server'
             })}"
         >
-          Добавить сервер
+          ${() => ppp.t('$serversPage.addServer')}
         </ppp-button>
       </ppp-page-header>
       <ppp-table
@@ -46,28 +46,28 @@ export const serversPageTemplate = html`
           })}"
         :columns="${() => [
           {
-            label: 'Название'
+            label: ppp.t('$g.name')
           },
           {
-            label: 'Тип авторизации'
+            label: ppp.t('$serversPage.authTypeColumn')
           },
           {
-            label: 'Дата создания'
+            label: ppp.t('$serversPage.createdAtColumn')
           },
           {
-            label: 'Последнее изменение'
+            label: ppp.t('$serversPage.updatedAtColumn')
           },
           {
-            label: 'Версия'
+            label: ppp.t('$serversPage.versionColumn')
           },
           {
-            label: 'Состояние'
+            label: ppp.t('$serversPage.stateColumn')
           },
           {
-            label: 'Изоляция'
+            label: ppp.t('$serversPage.isolationColumn')
           },
           {
-            label: 'Действия'
+            label: ppp.t('$serversPage.actionsColumn')
           }
         ]}"
         :rows="${(x) =>
@@ -124,7 +124,7 @@ export const serversPageTemplate = html`
                       );
                     }}"
                   >
-                    Изолирован
+                    ${() => ppp.t('$serversPage.isolatedCheckbox')}
                   </ppp-checkbox>
                 `,
                 html`
@@ -133,7 +133,7 @@ export const serversPageTemplate = html`
                     :datum="${() => datum}"
                     class="xsmall"
                   >
-                    Удалить
+                    ${() => ppp.t('$g.delete')}
                   </ppp-button>
                 `
               ]

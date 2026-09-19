@@ -12,6 +12,8 @@ import '../badge.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const brokerFinamPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
@@ -21,10 +23,9 @@ export const brokerFinamPageTemplate = html`
       })}
       <section>
         <div class="label-group">
-          <h5>Название подключения</h5>
+          <h5>${() => ppp.t('$page.connectionName')}</h5>
           <p class="description">
-            Произвольное имя, чтобы ссылаться на этот профиль, когда
-            потребуется.
+            ${() => ppp.t('$page.arbitraryProfileName')}
           </p>
         </div>
         <div class="input-group">
@@ -37,15 +38,15 @@ export const brokerFinamPageTemplate = html`
       </section>
       <section>
         <div class="label-group">
-          <h5>Токен для доступа к API</h5>
+          <h5>${() => ppp.t('$brokerFinamPage.apiTokenTitle')}</h5>
           <p class="description">
-            Требуется для подписи всех запросов. Получить можно по
+            ${() => ppp.t('$brokerFinamPage.apiTokenDescription')}
             <a
               class="link"
               target="_blank"
               rel="noopener"
               href="https://www.comon.ru/my/trade-api/tokens/"
-              >ссылке</a
+              >${() => ppp.t('$brokerFinamPage.link')}</a
             >.
           </p>
         </div>
@@ -93,7 +94,7 @@ export class BrokerFinamPage extends Page {
       ).ok
     ) {
       invalidate(this.token, {
-        errorMessage: 'Неверный токен',
+        errorMessage: ppp.t('$page.invalidToken'),
         raiseException: true
       });
     }

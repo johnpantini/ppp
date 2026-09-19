@@ -6,34 +6,41 @@ import { Page, pageStyles } from '../page.js';
 import '../button.js';
 import '../text-field.js';
 
+await ppp.i18n(import.meta.url);
+
 export const importKeysModalPageTemplate = html`
   <template class="${(x) => x.generateClasses()}">
     <ppp-loader></ppp-loader>
     <form novalidate>
       <section>
         <div class="label-group">
-          <h5>Мастер-пароль</h5>
-          <p class="description">Задавался при первой настройке приложения.</p>
+          <h5>${() => ppp.t('$importKeysModalPage.masterPassword')}</h5>
+          <p class="description">
+            ${() => ppp.t('$importKeysModalPage.masterPasswordDescription')}
+          </p>
         </div>
         <div class="input-group">
           <ppp-text-field
             type="password"
             value="${() => ppp.keyVault.getKey('master-password') ?? ''}"
-            placeholder="Введите пароль"
+            placeholder="${() =>
+              ppp.t('$importKeysModalPage.enterPasswordPlaceholder')}"
             ${ref('masterPasswordForImport')}
           ></ppp-text-field>
         </div>
       </section>
       <section>
         <div class="label-group">
-          <h5>Компактное представление</h5>
+          <h5>${() => ppp.t('$importKeysModalPage.compactRepresentation')}</h5>
           <p class="description">
-            Формат Base64. Скопируйте из настроенного ранее приложения.
+            ${() =>
+              ppp.t('$importKeysModalPage.compactRepresentationDescription')}
           </p>
         </div>
         <div class="input-group">
           <ppp-text-field
-            placeholder="Вставьте представление"
+            placeholder="${() =>
+              ppp.t('$importKeysModalPage.pasteRepresentationPlaceholder')}"
             ${ref('cloudCredentialsData')}
           ></ppp-text-field>
         </div>
@@ -44,7 +51,7 @@ export const importKeysModalPageTemplate = html`
           appearance="primary"
           @click="${(x) => x.submitDocument()}"
         >
-          Импортировать ключи
+          ${() => ppp.t('$importKeysModalPage.importKeys')}
         </ppp-button>
       </footer>
     </form>
@@ -88,11 +95,11 @@ export class importKeysModalPage extends Page {
 
       if (+TAG > +decryptedCredentials.tag) {
         this.showSuccessNotification(
-          'Импортированные ключи устарели. Обновите страницу и введите их заново. Затем настройте облачные функции и триггеры.'
+          ppp.t('$importKeysModalPage.importedKeysAreStale')
         );
       } else {
         this.showSuccessNotification(
-          'Всё в порядке. Обновите страницу, чтобы пользоваться приложением.'
+          ppp.t('$importKeysModalPage.importedKeysAreOk')
         );
       }
     } catch (e) {
