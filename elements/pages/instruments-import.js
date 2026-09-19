@@ -52,8 +52,8 @@ export const instrumentsImportPageTemplate = html`
         ?hidden="${(x) =>
           !(
             x.dictionary.value === INSTRUMENT_DICTIONARY.PSINA_US_STOCKS ||
-              x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
-              x.dictionary.value === INSTRUMENT_DICTIONARY.IB
+            x.dictionary.value === INSTRUMENT_DICTIONARY.ALPACA ||
+            x.dictionary.value === INSTRUMENT_DICTIONARY.IB
           )}"
       >
         <div class="label-group">
@@ -136,59 +136,6 @@ export const instrumentsImportPageTemplate = html`
             ${() =>
               ppp.t('$instrumentsImportPage.addBrokerProfile', {
                 broker: ppp.t(`$const.broker.${BROKERS.TINKOFF}`)
-              })}
-          </ppp-button>
-        </div>
-      </section>
-      <section
-        ?hidden="${(x) => x.dictionary.value !== INSTRUMENT_DICTIONARY.FINAM}"
-      >
-        <div class="label-group">
-          <h5>
-            ${() =>
-              ppp.t('$instrumentsImportPage.brokerProfileTitle', {
-                broker: ppp.t(`$const.broker.${BROKERS.FINAM}`)
-              })}
-          </h5>
-          <p class="description">
-            ${() => ppp.t('$instrumentsImportPage.brokerProfileDescription')}
-          </p>
-        </div>
-        <div class="input-group">
-          <ppp-query-select
-            ${ref('finamBrokerId')}
-            :context="${(x) => x}"
-            :query="${() => {
-              return (context) => {
-                return context.services
-                  .get('mongodb-atlas')
-                  .db('ppp')
-                  .collection('brokers')
-                  .find({
-                    $and: [
-                      {
-                        type: `[%#(await import(ppp.rootUrl + '/lib/const.js')).BROKERS.FINAM%]`
-                      },
-                      { removed: { $ne: true } }
-                    ]
-                  })
-                  .sort({ updatedAt: -1 });
-              };
-            }}"
-            :transform="${() => ppp.decryptDocumentsTransformation()}"
-          ></ppp-query-select>
-          <div class="spacing2"></div>
-          <ppp-button
-            @click="${() =>
-              ppp.app.mountPage('broker-finam', {
-                size: 'xlarge',
-                adoptHeader: true
-              })}"
-            appearance="primary"
-          >
-            ${() =>
-              ppp.t('$instrumentsImportPage.addBrokerProfile', {
-                broker: ppp.t(`$const.broker.${BROKERS.FINAM}`)
               })}
           </ppp-button>
         </div>
@@ -730,108 +677,6 @@ export class InstrumentsImportPage extends Page {
     }
 
     return instruments;
-  }
-
-  async [INSTRUMENT_DICTIONARY.FINAM]() {
-    await validate(this.finamBrokerId);
-
-    const rFinamSecurities = await ppp.fetch(
-      'https://trade-api.finam.ru/public/api/v1/securities',
-      {
-        headers: {
-          'X-Api-Key': this.finamBrokerId.datum().token
-        }
-      }
-    );
-
-    await maybeFetchError(
-      rFinamSecurities,
-      ppp.t('$instrumentsImportPage.finamAuthorizationFailed')
-    );
-
-    const instruments = (await rFinamSecurities.json()).data.securities ?? [];
-    // USD securities only.
-    const mmaStocks = instruments.filter((i) => {
-      return (
-        !/\s/.test(i.code) &&
-        i.board === 'MCT' &&
-        i.currency === 'USD' &&
-        i.market?.toUpperCase?.() === 'MMA' &&
-        (+i.decimals === 2 || +i.decimals === 4) &&
-        +i.lotSize === 1 &&
-        (+i.minStep === 1 || +i.minStep === 100)
-      );
-    });
-
-    const result = [];
-    const alorSpbexSecurities = await this[INSTRUMENT_DICTIONARY.ALOR_SPBX]();
-    const alorMoexSecurities =
-      await this[INSTRUMENT_DICTIONARY.ALOR_MOEX_SECURITIES]();
-
-    for (const s of alorSpbexSecurities) {
-      if (/@/.test(s.symbol) && s.symbol !== 'SPB@US') {
-        continue;
-      }
-
-      s.broker = BROKERS.FINAM;
-      s.classCode = 'SPFEQ';
-
-      result.push(s);
-    }
-
-    for (const s of alorMoexSecurities) {
-      if (/@/.test(s.symbol)) {
-        continue;
-      }
-
-      if (s.type === 'stock') {
-        s.broker = BROKERS.FINAM;
-
-        // Collision with "Five Below Inc".
-        if (s.symbol === 'FIVE') {
-          s.symbol = 'FIVE~MOEX';
-        } else if (s.symbol === 'ASTR') {
-          // ASTR
-          s.symbol = 'ASTR~MOEX';
-        }
-
-        result.push(s);
-      } else if (s.type === 'etf') {
-        s.broker = BROKERS.FINAM;
-
-        if (s.symbol === 'GOLD') {
-          // GOLD
-          s.symbol = 'GOLD~MOEX';
-        }
-
-        result.push(s);
-      }
-    }
-
-    for (const s of mmaStocks) {
-      if (s.symbol === 'SPB') {
-        s.shortName = 'Spectrum Brands Holdings, Inc.';
-      }
-
-      result.push({
-        symbol: s.code.replace('.', ' ') + '~US',
-        exchange: EXCHANGE.US,
-        broker: BROKERS.FINAM,
-        fullName: s.shortName,
-        minPriceIncrement: s.decimals === 2 ? 0.01 : 0.0001,
-        type:
-          s.shortName.toUpperCase().endsWith(' ETF') ||
-          /Invesco|ProShares|iShares/i.test(s.fullName)
-            ? 'etf'
-            : 'stock',
-        currency: 'USD',
-        forQualInvestorFlag: true,
-        lot: s.lotSize,
-        classCode: s.board
-      });
-    }
-
-    return result;
   }
 
   async [INSTRUMENT_DICTIONARY.CAPITALCOM]() {

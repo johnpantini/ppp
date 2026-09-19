@@ -45,7 +45,7 @@ export const brokerFinamPageTemplate = html`
               class="link"
               target="_blank"
               rel="noopener"
-              href="https://www.comon.ru/my/trade-api/tokens/"
+              href="https://www.finam.ru/"
               >${() => ppp.t('$brokerFinamPage.link')}</a
             >.
           </p>
@@ -69,14 +69,7 @@ export const brokerFinamPageStyles = css`
 `;
 
 export async function checkFinamAPIToken({ token }) {
-  return ppp.fetch(
-    'https://trade-api.finam.ru/public/api/v1/access-tokens/check',
-    {
-      headers: {
-        'X-Api-Key': token
-      }
-    }
-  );
+  throw new Error('E_NOT_IMPLEMENTED');
 }
 
 export class BrokerFinamPage extends Page {

@@ -844,54 +844,6 @@ export const traderPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="Finam"
-            style="height: 44px"
-            src="${() => ppp.brandSvg('finam')}"
-          />
-          <div slot="title">Finam Trade API</div>
-          <span slot="description">
-            ${() => ppp.t('$traderPage.finamCardDescription')}
-          </span>
-          <div slot="description" class="caps-list">
-            <ul>
-              <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_LIMIT_ORDERS}`)}
-              </li>
-              <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_MARKET_ORDERS}`)}
-              </li>
-              <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_ACTIVE_ORDERS}`)}
-              </li>
-              <li>
-                ${() =>
-                  ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_POSITIONS}`)}
-              </li>
-              <li>
-                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_TIMELINE}`)}
-              </li>
-              <li>
-                ${() => ppp.t(`$const.traderCaps.${TRADER_CAPS.CAPS_CHARTS}`)}
-              </li>
-            </ul>
-          </div>
-          <ppp-button
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `trader-${TRADERS.FINAM_TRADE_API}`
-              })}"
-          >
-            ${() => ppp.t('$traderPage.continueButton')}
-          </ppp-button>
-        </ppp-generic-card>
-        <ppp-generic-card>
-          <img
-            slot="logo"
-            draggable="false"
             alt="Capital.com"
             style="height: 42px"
             src="${() => ppp.brandSvg('capitalcom')}"

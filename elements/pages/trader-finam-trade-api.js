@@ -146,16 +146,7 @@ export const traderFinamTradeApiStyles = css`
 `;
 
 export async function checkFinamAccount({ connectorUrl, token, account }) {
-  return fetch(`${connectorUrl}fetch`, {
-    method: 'POST',
-    body: JSON.stringify({
-      method: 'GET',
-      url: `https://trade-api.finam.ru/public/api/v1/portfolio?ClientId=${account}`,
-      headers: {
-        'X-Api-Key': token
-      }
-    })
-  });
+  throw new Error('E_NOT_IMPLEMENTED');
 }
 
 export class TraderFinamTradeApiPage extends TraderCommonPage {

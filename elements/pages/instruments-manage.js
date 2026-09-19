@@ -83,9 +83,6 @@ export const dictionarySelectorTemplate = (options = {}) => html`
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.TINKOFF}">
       T-Bank
     </ppp-option>
-    <ppp-option value="${() => INSTRUMENT_DICTIONARY.FINAM}">
-      Finam
-    </ppp-option>
     <ppp-option value="${() => INSTRUMENT_DICTIONARY.CAPITALCOM}">
       Capital.com
     </ppp-option>
@@ -282,8 +279,7 @@ export const instrumentsManagePageTemplate = html`
                   ?checked="${(x) => x.document.forQualInvestorFlag}"
                   ${ref('forQualInvestorFlag')}
                 >
-                  ${() =>
-                    ppp.t('$instrumentsManagePage.forQualInvestorFlag')}
+                  ${() => ppp.t('$instrumentsManagePage.forQualInvestorFlag')}
                 </ppp-checkbox>
                 ${when(
                   (x) => x.type.value === 'bond',
@@ -292,8 +288,7 @@ export const instrumentsManagePageTemplate = html`
                       ?checked="${(x) => x.document.amortizationFlag}"
                       ${ref('amortizationFlag')}
                     >
-                      ${() =>
-                        ppp.t('$instrumentsManagePage.amortizationFlag')}
+                      ${() => ppp.t('$instrumentsManagePage.amortizationFlag')}
                     </ppp-checkbox>
                     <ppp-checkbox
                       ?checked="${(x) => x.document.floatingCouponFlag}"
@@ -312,8 +307,7 @@ export const instrumentsManagePageTemplate = html`
                       ?checked="${(x) => x.document.subordinatedFlag}"
                       ${ref('subordinatedFlag')}
                     >
-                      ${() =>
-                        ppp.t('$instrumentsManagePage.subordinatedFlag')}
+                      ${() => ppp.t('$instrumentsManagePage.subordinatedFlag')}
                     </ppp-checkbox>
                   `
                 )}
@@ -343,7 +337,9 @@ export const instrumentsManagePageTemplate = html`
           )}
           <section>
             <div class="label-group">
-              <h5>${() => ppp.t('$instrumentsManagePage.minPriceIncrement')}</h5>
+              <h5>
+                ${() => ppp.t('$instrumentsManagePage.minPriceIncrement')}
+              </h5>
               <p class="description">
                 ${() =>
                   ppp.t('$instrumentsManagePage.minPriceIncrementDescription')}

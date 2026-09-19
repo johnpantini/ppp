@@ -84,34 +84,6 @@ export const brokerPageTemplate = html`
           <img
             slot="logo"
             draggable="false"
-            alt="Finam"
-            style="height: 44px"
-            src="${() => ppp.brandSvg('finam')}"
-          />
-          <span slot="title">Finam</span>
-          <span slot="description">
-            ${() => ppp.t('$brokerPage.finamDescription')}&nbsp;<a
-              class="link"
-              target="_blank"
-              rel="noopener"
-              href="https://finamweb.github.io/trade-api-docs/"
-              >${() => ppp.t('$brokerPage.goToDocumentation')}</a
-            >.
-          </span>
-          <ppp-button
-            slot="action"
-            @click="${() =>
-              ppp.app.navigate({
-                page: `broker-${BROKERS.FINAM}`
-              })}"
-          >
-            ${() => ppp.t('$brokerPage.continue')}
-          </ppp-button>
-        </ppp-generic-card>
-        <ppp-generic-card>
-          <img
-            slot="logo"
-            draggable="false"
             alt="UTEX"
             style="height: 32px"
             src="${() => ppp.brandSvg('utex')}"
