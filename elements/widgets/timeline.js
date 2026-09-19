@@ -23,12 +23,7 @@ import {
   TRADER_DATUM,
   WIDGET_TYPES
 } from '../../lib/const.js';
-import {
-  formatAmount,
-  formatCommission,
-  formatDateWithOptions,
-  formatPrice
-} from '../../lib/intl.js';
+import { formatAmount, formatCommission, formatPrice } from '../../lib/intl.js';
 import {
   normalize,
   scrollbars,
@@ -78,12 +73,7 @@ export const timelineWidgetTemplate = html`
                   (x) => typeof x === 'string',
                   html`
                     <div class="timeline-item-headline">
-                      ${(i) =>
-                        formatDateWithOptions(new Date(i), {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })}
+                      ${(x, c) => c.parent.formatHeadlineDate(x)}
                     </div>
                   `
                 )}
@@ -128,15 +118,7 @@ export const timelineWidgetTemplate = html`
                             ${(x, c) => c.parent.formatCardDescription(x)}
                           </span>
                           <div slot="subtitle-right">
-                            ${(x) =>
-                              formatDateWithOptions(
-                                x[0].parentCreatedAt ??
-                                  x[x.length - 1].createdAt,
-                                {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                }
-                              )}
+                            ${(x, c) => c.parent.formatCardTime(x)}
                           </div>
                           <span
                             class="earth"
@@ -219,11 +201,9 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.timelineMap.clear();
       this.emptyIndicatorMap.clear();
 
-      this.timeline = [];
-
       this.$$debug('timeline widget is clear (@CLEAR)');
 
-      return Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+      return this.#scheduleRebuild();
     }
 
     const date = new Date(item.createdAt);
@@ -263,9 +243,62 @@ export class TimelineWidget extends WidgetWithInstrument {
       this.emptyIndicatorMap.set(symbol, [topLevelKey]);
     }
 
+    this.#scheduleRebuild();
+  }
+
+  #rebuildQueued = false;
+
+  // Cards are mutated in place, so the list is emptied first to make the
+  // repeat directive drop its views. Bursts of items within one update
+  // cycle (e.g. history replay) rebuild the array once, not once per item.
+  #scheduleRebuild() {
     this.timeline = [];
 
-    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+    if (this.#rebuildQueued) {
+      return;
+    }
+
+    this.#rebuildQueued = true;
+
+    Updates.enqueue(() => {
+      this.#rebuildQueued = false;
+      this.timeline = this.getTimelineArray();
+    });
+  }
+
+  // formatDateWithOptions() builds an Intl.DateTimeFormat per call (~30 µs);
+  // the timeline uses two fixed layouts, so keep one formatter for each.
+  #headlineDateFormatter;
+
+  #cardTimeFormatter;
+
+  formatHeadlineDate(dateKey) {
+    if (!dateKey) return '—';
+
+    this.#headlineDateFormatter ??= new Intl.DateTimeFormat(ppp.i18nLocale, {
+      hour12: false,
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
+    return this.#headlineDateFormatter.format(new Date(dateKey));
+  }
+
+  formatCardTime(operations) {
+    const date =
+      operations[0].parentCreatedAt ??
+      operations[operations.length - 1].createdAt;
+
+    if (!date) return '—';
+
+    this.#cardTimeFormatter ??= new Intl.DateTimeFormat(ppp.i18nLocale, {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return this.#cardTimeFormatter.format(new Date(date));
   }
 
   @observable
@@ -582,9 +615,7 @@ export class TimelineWidget extends WidgetWithInstrument {
   instrumentChanged() {
     super.instrumentChanged();
 
-    this.timeline = [];
-
-    Updates.enqueue(() => (this.timeline = this.getTimelineArray()));
+    this.#scheduleRebuild();
   }
 
   getTimelineArray() {
@@ -662,8 +693,7 @@ export async function widgetDefinition() {
     type: WIDGET_TYPES.TIMELINE,
     collection: 'PPP',
     title: html`${() => ppp.t('$const.widget.' + WIDGET_TYPES.TIMELINE)}`,
-    description: html`${() =>
-        ppp.t('$timeLineWidget.widgetDescriptionPrefix')}
+    description: html`${() => ppp.t('$timeLineWidget.widgetDescriptionPrefix')}
       <span class="positive">
         ${() => ppp.t('$const.widget.' + WIDGET_TYPES.TIMELINE)}
       </span>

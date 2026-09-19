@@ -25,8 +25,7 @@ import { pause, trash, refresh } from '../../static/svg/sprite.js';
 import {
   formatAmount,
   formatPercentage,
-  formatPriceWithoutCurrency,
-  formatQuantity,
+  getInstrumentPrecision,
   priceCurrencySymbol,
   stringToFloat
 } from '../../lib/intl.js';
@@ -386,7 +385,7 @@ export const orderbookWidgetStyles = css`
     ${ellipsis()};
   }
 
-  svg[orderbook]{
+  svg[orderbook] {
     position: absolute;
     pointer-events: none;
     z-index: 0;
@@ -949,6 +948,55 @@ export class OrderbookWidget extends WidgetWithInstrument {
     }
   }
 
+  // #repaint formats every visible row on each frame, and an Intl
+  // constructor costs ~20 µs, so formatters are cached per precision.
+  // Output is identical to formatPriceWithoutCurrency() and formatQuantity().
+  #numberFormatters = new Map();
+
+  #numberFormatter(precision) {
+    let formatter = this.#numberFormatters.get(precision);
+
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(ppp.i18nLocale, {
+        style: 'decimal',
+        minimumFractionDigits: precision,
+        maximumFractionDigits: precision
+      });
+
+      this.#numberFormatters.set(precision, formatter);
+    }
+
+    return formatter;
+  }
+
+  #formatPrice(price) {
+    if (typeof price !== 'number' || isNaN(price)) return '—';
+
+    return this.#numberFormatter(
+      getInstrumentPrecision(
+        this.instrument,
+        price,
+        this.instrument.broker === BROKERS.UTEX
+      )
+    ).format(price);
+  }
+
+  #formatQuantity(quantity) {
+    if (typeof quantity !== 'number' || isNaN(quantity)) return '—';
+
+    let precision = 0;
+
+    if (typeof this.instrument?.minQuantityIncrement === 'number') {
+      const [_, frac] = this.instrument.minQuantityIncrement
+        .toString()
+        .split('.');
+
+      precision = frac?.length ?? 0;
+    }
+
+    return this.#numberFormatter(precision).format(quantity);
+  }
+
   #repaint() {
     const montage = this.montage ?? {
       bids: [],
@@ -1004,20 +1052,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
         my += left;
       }
 
-      bidPriceValues +=
-        formatPriceWithoutCurrency(
-          bid.price,
-          this.instrument,
-          this.instrument.broker === BROKERS.UTEX
-        ) + '\n';
+      bidPriceValues += this.#formatPrice(bid.price) + '\n';
 
       let formattedVolume = '';
 
       if (bid.pool === 'LD') {
         formattedVolume = '&nbsp;' + '⬇️';
       } else if (!bid.virtual) {
-        formattedVolume =
-          '&nbsp;' + formatQuantity(bid.volume, this.instrument);
+        formattedVolume = '&nbsp;' + this.#formatQuantity(bid.volume);
       }
 
       if (my > 0 && !seenBidPrices.has(bid.price)) {
@@ -1026,9 +1068,8 @@ export class OrderbookWidget extends WidgetWithInstrument {
         bidVolumeValues +=
           `<span class="my${
             bid.virtual ? ' virtual' : ''
-          }"><span>${formatQuantity(
-            my,
-            this.instrument
+          }"><span>${this.#formatQuantity(
+            my
           )}</span></span>${formattedVolume}` + '\n';
       } else {
         bidVolumeValues += formattedVolume + '\n';
@@ -1092,19 +1133,14 @@ export class OrderbookWidget extends WidgetWithInstrument {
         my += left;
       }
 
-      askPriceValues +=
-        formatPriceWithoutCurrency(
-          ask.price,
-          this.instrument,
-          this.instrument.broker === BROKERS.UTEX
-        ) + '\n';
+      askPriceValues += this.#formatPrice(ask.price) + '\n';
 
       let formattedVolume = '';
 
       if (ask.pool === 'LU') {
         formattedVolume = '⬆️';
       } else if (!ask.virtual) {
-        formattedVolume = formatQuantity(ask.volume, this.instrument);
+        formattedVolume = this.#formatQuantity(ask.volume);
       }
 
       if (my > 0 && !seenAskPrices.has(ask.price)) {
@@ -1114,13 +1150,12 @@ export class OrderbookWidget extends WidgetWithInstrument {
           askVolumeValues +=
             `${formattedVolume}${ask.virtual ? '' : '&nbsp;'}<span class="my${
               ask.virtual ? ' virtual' : ''
-            }"><span>${formatQuantity(my, this.instrument)}</span></span>` +
-            '\n';
+            }"><span>${this.#formatQuantity(my)}</span></span>` + '\n';
         } else {
           askVolumeValues +=
             `<span class="my${
               ask.virtual ? ' virtual' : ''
-            }"><span>${formatQuantity(my, this.instrument)}</span></span>${
+            }"><span>${this.#formatQuantity(my)}</span></span>${
               ask.virtual ? '' : '&nbsp;'
             }${formattedVolume}` + '\n';
         }
@@ -1137,7 +1172,9 @@ export class OrderbookWidget extends WidgetWithInstrument {
       if (this.document.levelColoring === 'ordinal') {
         if (askLevel === 0) {
           askLevel = 1;
-        } else if (ask.price !== montage.asks[i - 1].price) {
+        } else if (montage.asks[i].price !== montage.asks[i - 1].price) {
+          // Level polygon i always covers montage.asks[i] (bottom-up in the
+          // non-compact mode), so compare best-first regardless of `ask`.
           askLevel = Math.min(5, askLevel + 1);
         }
 
@@ -1401,11 +1438,15 @@ export class OrderbookWidget extends WidgetWithInstrument {
       );
     }
 
+    // Rows in #repaint, level polygons, borders and pointer handlers all
+    // address entries by montage index, so empty levels must not get here.
+    const isVisible = (e) => +e.price !== 0 && +e.volume !== 0;
+
     this.montage = {
-      bids: montage.bids.sort((a, b) => {
+      bids: montage.bids.filter(isVisible).sort((a, b) => {
         return b.price - a.price || b.volume - a.volume;
       }),
-      asks: montage.asks.sort((a, b) => {
+      asks: montage.asks.filter(isVisible).sort((a, b) => {
         return a.price - b.price || b.volume - a.volume;
       })
     };
@@ -1966,7 +2007,9 @@ export async function widgetDefinition() {
           </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>${() => ppp.t('$orderbookWidget.settings.bookProcessing')}</h5>
+              <h5>
+                ${() => ppp.t('$orderbookWidget.settings.bookProcessing')}
+              </h5>
               <p class="description">
                 ${() =>
                   ppp.t('$orderbookWidget.settings.bookProcessingDescription')}
@@ -1999,8 +2042,7 @@ export async function widgetDefinition() {
                 ${ref('displayMode')}
               >
                 <ppp-radio value="compact">
-                  ${() =>
-                    ppp.t('$orderbookWidget.settings.displayModeCompact')}
+                  ${() => ppp.t('$orderbookWidget.settings.displayModeCompact')}
                 </ppp-radio>
                 <ppp-radio value="1-column">
                   ${() =>
@@ -2044,13 +2086,13 @@ export async function widgetDefinition() {
             >
               ${() => ppp.t('$orderbookWidget.settings.showResetButton')}
             </ppp-checkbox>
-             <ppp-checkbox
+            <ppp-checkbox
               ?checked="${(x) => x.document.showPauseButton ?? false}"
               ${ref('showPauseButton')}
             >
               ${() => ppp.t('$orderbookWidget.settings.showPauseButton')}
             </ppp-checkbox>
-          </div>          
+          </div>
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>${() => ppp.t('$orderbookWidget.settings.content')}</h5>

@@ -18,12 +18,8 @@ import {
 import { WIDGET_TYPES, TRADER_DATUM, BROKERS } from '../../lib/const.js';
 import {
   priceCurrencySymbol,
-  formatQuantity,
-  formatDateWithOptions,
-  formatPriceWithoutCurrency,
   stringToFloat,
-  getInstrumentPrecision,
-  formatNumber
+  getInstrumentPrecision
 } from '../../lib/intl.js';
 import {
   ellipsis,
@@ -366,11 +362,12 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
 
   async pChanged(oldValue, rawTrade) {
     const trade = this.tradesTrader.rawTradeToCanonicalTrade(rawTrade);
-    const threshold = await this.getThreshold(trade);
 
     if (this.instrument.symbol !== trade.symbol) {
       return;
     }
+
+    const threshold = await this.getThreshold(trade);
 
     if (trade?.price) {
       this.empty = false;
@@ -527,25 +524,85 @@ export class TimeAndSalesWidget extends WidgetWithInstrument {
     }
   }
 
+  // Intl constructors cost ~20-30 µs each, so formatters are cached per
+  // (min, max) fraction digits; output is identical to lib/intl.js helpers.
+  #numberFormatters = new Map();
+
+  #dateFormatter;
+
+  #numberFormatter(minimumFractionDigits, maximumFractionDigits) {
+    const key = minimumFractionDigits * 100 + maximumFractionDigits;
+    let formatter = this.#numberFormatters.get(key);
+
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(ppp.i18nLocale, {
+        style: 'decimal',
+        minimumFractionDigits,
+        maximumFractionDigits
+      });
+
+      this.#numberFormatters.set(key, formatter);
+    }
+
+    return formatter;
+  }
+
+  // Same as formatPriceWithoutCurrency() for a defined instrument.
+  #formatPrice(price) {
+    if (typeof price !== 'number' || isNaN(price)) return '—';
+
+    const precision = getInstrumentPrecision(
+      this.instrument,
+      price,
+      this.instrument.broker === BROKERS.UTEX
+    );
+
+    return this.#numberFormatter(precision, precision).format(price);
+  }
+
+  // Same as formatQuantity().
+  #formatQuantity(quantity) {
+    if (typeof quantity !== 'number' || isNaN(quantity)) return '—';
+
+    let precision = 0;
+
+    if (typeof this.instrument?.minQuantityIncrement === 'number') {
+      const [_, frac] = this.instrument.minQuantityIncrement
+        .toString()
+        .split('.');
+
+      precision = frac?.length ?? 0;
+    }
+
+    return this.#numberFormatter(precision, precision).format(quantity);
+  }
+
+  // Same as formatDateWithOptions(date, this.timeColumnOptions).
+  #formatTime(date) {
+    if (!date) return '—';
+
+    if (!this.#dateFormatter) {
+      this.#dateFormatter = new Intl.DateTimeFormat(
+        ppp.i18nLocale,
+        Object.assign({ hour12: false }, this.timeColumnOptions)
+      );
+    }
+
+    return this.#dateFormatter.format(new Date(date));
+  }
+
   formatTrade(trade) {
     return {
       rawPrice: trade.price,
-      price: formatPriceWithoutCurrency(
-        trade.price,
-        this.instrument,
-        this.instrument.broker === BROKERS.UTEX
-      ),
+      price: this.#formatPrice(trade.price),
       side: trade.side,
-      volume: formatQuantity(trade.volume ?? 0, this.instrument),
+      volume: this.#formatQuantity(trade.volume ?? 0),
       rawVolume: trade.volume,
-      amount: formatNumber(+trade.volume * +trade.price, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: Math.max(
-          2,
-          getInstrumentPrecision(this.instrument)
-        )
-      }),
-      time: formatDateWithOptions(trade.timestamp, this.timeColumnOptions),
+      amount: this.#numberFormatter(
+        2,
+        Math.max(2, getInstrumentPrecision(this.instrument))
+      ).format(+trade.volume * +trade.price),
+      time: this.#formatTime(trade.timestamp),
       pool: trade.pool,
       condition: Array.isArray(trade.condition)
         ? trade.condition.join(' ').trim()
@@ -1008,7 +1065,9 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="main-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>${() => ppp.t('$timeAndSalesWidget.settings.tradesTrader')}</h5>
+              <h5>
+                ${() => ppp.t('$timeAndSalesWidget.settings.tradesTrader')}
+              </h5>
               <p class="description">
                 ${() =>
                   ppp.t('$timeAndSalesWidget.settings.tradesTraderDescription')}
@@ -1066,7 +1125,8 @@ export async function widgetDefinition() {
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>
-                ${() => ppp.t('$timeAndSalesWidget.settings.tradesTableColumns')}
+                ${() =>
+                  ppp.t('$timeAndSalesWidget.settings.tradesTableColumns')}
               </h5>
             </div>
             <div class="spacing2"></div>
@@ -1083,7 +1143,9 @@ export async function widgetDefinition() {
         <ppp-tab-panel id="filter-panel">
           <div class="widget-settings-section">
             <div class="widget-settings-label-group">
-              <h5>${() => ppp.t('$timeAndSalesWidget.settings.volumeFilter')}</h5>
+              <h5>
+                ${() => ppp.t('$timeAndSalesWidget.settings.volumeFilter')}
+              </h5>
               <p class="description">
                 ${() =>
                   ppp.t('$timeAndSalesWidget.settings.volumeFilterDescription')}
@@ -1112,7 +1174,7 @@ export async function widgetDefinition() {
             >
               ${() => ppp.t('$timeAndSalesWidget.settings.showResetButton')}
             </ppp-checkbox>
-             <ppp-checkbox
+            <ppp-checkbox
               ?checked="${(x) => x.document.showPauseButton ?? false}"
               ${ref('showPauseButton')}
             >

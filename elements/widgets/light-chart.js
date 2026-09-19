@@ -81,6 +81,27 @@ import '../widget-timeframe-list.js';
 
 await ppp.i18n(import.meta.url);
 
+// Prints with these conditions do not update bars.
+// https://alpaca.markets/learn/stock-minute-bars/
+const EXCLUDED_TRADE_CONDITIONS = new Set([
+  'B',
+  'W',
+  '4',
+  '7',
+  '9',
+  'C',
+  'G',
+  'H',
+  'M',
+  'N',
+  'P',
+  'Q',
+  'R',
+  'U',
+  'V',
+  'Z'
+]);
+
 export const DEFAULT_TIMEFRAMES = [
   {
     name: '1D',
@@ -326,7 +347,7 @@ export const lightChartWidgetStyles = css`
     gap: 0;
   }
 
-  .ohlcv-line .pair.volume, 
+  .ohlcv-line .pair.volume,
   .ohlcv-line .pair.vwap {
     gap: 0 8px;
   }
@@ -639,7 +660,7 @@ export class LightChartWidget extends WidgetWithInstrument {
     Updates.enqueue(() => {
       if (this.chart) {
         const { width, height } = getComputedStyle(this);
-        const toolbarOffset = (this.document.showToolbar ?? true) ? 28 : 0;
+        const toolbarOffset = this.document.showToolbar ?? true ? 28 : 0;
 
         if (this.stackSelector.hasAttribute('hidden')) {
           this.chart.resize(
@@ -668,8 +689,34 @@ export class LightChartWidget extends WidgetWithInstrument {
     this.resizeChart();
   }
 
+  // The chart calls this for every axis and crosshair label on each paint,
+  // and an Intl.NumberFormat costs ~20 µs to construct, so cache per
+  // precision. Output matches formatPriceWithoutCurrency(price, instrument).
+  #priceFormatters = new Map();
+
   priceFormatter(price) {
-    return formatPriceWithoutCurrency(price, this.instrument);
+    if (
+      typeof this.instrument === 'undefined' ||
+      typeof price !== 'number' ||
+      isNaN(price)
+    ) {
+      return formatPriceWithoutCurrency(price, this.instrument);
+    }
+
+    const precision = getInstrumentPrecision(this.instrument, price);
+    let formatter = this.#priceFormatters.get(precision);
+
+    if (!formatter) {
+      formatter = new Intl.NumberFormat(ppp.i18nLocale, {
+        style: 'decimal',
+        minimumFractionDigits: precision,
+        maximumFractionDigits: precision
+      });
+
+      this.#priceFormatters.set(precision, formatter);
+    }
+
+    return formatter.format(price);
   }
 
   onVisibleLogicalRangeChanged(newRange) {
@@ -791,6 +838,21 @@ export class LightChartWidget extends WidgetWithInstrument {
 
   applyChartOptions() {
     const tf = this.getCurrentTimeframe();
+    const options = {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false
+    };
+
+    if (tf.unit === 'Sec') {
+      options.second = 'numeric';
+    }
+
+    // One formatter per applyOptions() call instead of one per label.
+    const timeFormatter = new Intl.DateTimeFormat(ppp.i18nLocale, options);
 
     this.chart.applyOptions({
       timeframe: '5',
@@ -798,20 +860,7 @@ export class LightChartWidget extends WidgetWithInstrument {
         locale: ppp.i18nLocale,
         priceFormatter: this.priceFormatter.bind(this),
         timeFormatter: (t) => {
-          const options = {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            hour12: false
-          };
-
-          if (tf.unit === 'Sec') {
-            options.second = 'numeric';
-          }
-
-          return new Intl.DateTimeFormat(ppp.i18nLocale, options).format(
+          return timeFormatter.format(
             new Date(
               t * 1000 + ((3600 * new Date().getTimezoneOffset()) / 60) * 1000
             )
@@ -918,6 +967,13 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     const volumeData = [];
     const vwapData = [];
+    // Resolve the colour tokens once, not per candle.
+    const downColor = `rgba(${toColorComponents(
+      chartDownColor
+    ).$value.createCSS()}, 0.56)`;
+    const upColor = `rgba(${toColorComponents(
+      chartUpColor
+    ).$value.createCSS()}, 0.56)`;
 
     for (const c of ohlcv) {
       const time = new Date(c.time).valueOf();
@@ -925,14 +981,7 @@ export class LightChartWidget extends WidgetWithInstrument {
       volumeData.push({
         time,
         value: c.volume,
-        color:
-          c.close < c.open
-            ? `rgba(${toColorComponents(
-                chartDownColor
-              ).$value.createCSS()}, 0.56)`
-            : `rgba(${toColorComponents(
-                chartUpColor
-              ).$value.createCSS()}, 0.56)`
+        color: c.close < c.open ? downColor : upColor
       });
 
       vwapData.push({
@@ -1178,28 +1227,8 @@ export class LightChartWidget extends WidgetWithInstrument {
 
     if (this.ready && trade?.price) {
       if (Array.isArray(trade.condition)) {
-        // https://alpaca.markets/learn/stock-minute-bars/
         for (const condition of trade.condition) {
-          if (
-            [
-              'B',
-              'W',
-              '4',
-              '7',
-              '9',
-              'C',
-              'G',
-              'H',
-              'M',
-              'N',
-              'P',
-              'Q',
-              'R',
-              'U',
-              'V',
-              'Z'
-            ].includes(condition)
-          ) {
+          if (EXCLUDED_TRADE_CONDITIONS.has(condition)) {
             return;
           }
         }
@@ -1375,8 +1404,7 @@ export async function widgetDefinition() {
             <div class="widget-settings-label-group">
               <h5>${() => ppp.t('$lightChartWidget.historicalTrader')}</h5>
               <p class="description">
-                ${() =>
-                  ppp.t('$lightChartWidget.historicalTraderDescription')}
+                ${() => ppp.t('$lightChartWidget.historicalTraderDescription')}
               </p>
             </div>
             <div class="control-line flex-start">
@@ -1643,18 +1671,18 @@ export async function widgetDefinition() {
               </ppp-radio-group>
             </div>
           </div>
-             <div class="widget-settings-section">
+          <div class="widget-settings-section">
             <div class="widget-settings-label-group">
               <h5>${() => ppp.t('$lightChartWidget.contents')}</h5>
             </div>
             <div class="spacing2"></div>
             <div class="widget-settings-input-group">
-             <ppp-checkbox
-              ?checked="${(x) => x.document.showVWAPFlag ?? false}"
-              ${ref('showVWAPFlag')}
-            >
-              ${() => ppp.t('$lightChartWidget.showVWAPLine')}
-            </ppp-checkbox>
+              <ppp-checkbox
+                ?checked="${(x) => x.document.showVWAPFlag ?? false}"
+                ${ref('showVWAPFlag')}
+              >
+                ${() => ppp.t('$lightChartWidget.showVWAPLine')}
+              </ppp-checkbox>
             </div>
           </div>
         </ppp-tab-panel>
