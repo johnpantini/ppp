@@ -49,7 +49,7 @@ export const querySelectTemplate = html`
       <div class="indicator" slot="indicator">
         ${when(
           (x) => x.loading,
-          html`<span class="spinner"> ${html.partial(circleNotch)} </span>`
+          html`<span class="spinner">${html.partial(circleNotch)}</span>`
         )}
         ${when(
           (x) => !x.loading && x.appearance === 'default',

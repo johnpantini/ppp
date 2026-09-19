@@ -108,6 +108,11 @@ import { later } from '../lib/ppp-decorators.js';
 import { Tab, Tabs, tabsTemplate, tabTemplate } from './tabs.js';
 import { TextField, textFieldStyles, textFieldTemplate } from './text-field.js';
 import { Select, selectStyles, selectTemplate } from './select.js';
+import {
+  QuerySelect,
+  querySelectStyles,
+  querySelectTemplate
+} from './query-select.js';
 import { Button, buttonStyles, buttonTemplate } from './button.js';
 import { RadioGroup, radioGroupTemplate } from './radio-group.js';
 import { BoxRadio, boxRadioStyles, boxRadioTemplate } from './radio.js';
@@ -785,9 +790,7 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.bonds.length,
             html`
-              <div class="menu-title">
-                ${() => ppp.t('$widget.menu.bonds')}
-              </div>
+              <div class="menu-title">${() => ppp.t('$widget.menu.bonds')}</div>
               ${repeat(
                 (x) => x.bonds,
                 html`
@@ -821,9 +824,7 @@ export const widgetSearchControlTemplate = html`
           ${when(
             (x) => x.etfs.length,
             html`
-              <div class="menu-title">
-                ${() => ppp.t('$widget.menu.etfs')}
-              </div>
+              <div class="menu-title">${() => ppp.t('$widget.menu.etfs')}</div>
               ${repeat(
                 (x) => x.etfs,
                 html`
@@ -1963,8 +1964,8 @@ export const widgetNotificationsAreaTemplate = html`
                     (x.status ?? 'success') === 'success'
                       ? notificationSuccess
                       : x.status === 'note'
-                        ? notificationNote
-                        : notificationError
+                      ? notificationNote
+                      : notificationError
                   )}`}
               </div>
               <div class="widget-notification-text-container">
@@ -2169,12 +2170,9 @@ export class WidgetNotificationsArea extends PPPElement {
     clearTimeout(this.#timeout);
 
     if (!keep) {
-      this.#timeout = setTimeout(
-        () => {
-          this.setAttribute('hidden', '');
-        },
-        timeout ?? timeoutFromSettings ?? 3000
-      );
+      this.#timeout = setTimeout(() => {
+        this.setAttribute('hidden', '');
+      }, timeout ?? timeoutFromSettings ?? 3000);
     }
   }
 
@@ -2941,8 +2939,8 @@ export const widgetTrifectaFieldTemplate = html`
             x.distanceUnit === '%'
               ? ppp.t('$widget.inPercents')
               : x.distanceUnit === '+'
-                ? ppp.t('$widget.inPriceSteps')
-                : ppp.t('$widget.inCurrency')}"
+              ? ppp.t('$widget.inPriceSteps')
+              : ppp.t('$widget.inCurrency')}"
           @click="${(x) => x.toggleUnit()}"
         >
           <button ?disabled=${(x) => x.disabled}>
@@ -2950,8 +2948,8 @@ export const widgetTrifectaFieldTemplate = html`
               x.distanceUnit === '%'
                 ? '%'
                 : x.distanceUnit === '+'
-                  ? html`${html.partial(upDown)}`
-                  : priceCurrencySymbol(x.instrument)}
+                ? html`${html.partial(upDown)}`
+                : priceCurrencySymbol(x.instrument)}
           </button>
         </div>
       `
@@ -3388,6 +3386,20 @@ export const widgetSelectStyles = css`
 `;
 
 export class WidgetSelect extends Select {}
+
+export const widgetQuerySelectStyles = css`
+  ${querySelectStyles}
+  :host {
+    width: 100%;
+  }
+`;
+
+export class WidgetQuerySelect extends QuerySelect {
+  connectedCallback() {
+    super.connectedCallback();
+    widgetSelectStyles.addStylesTo(this.control);
+  }
+}
 
 export const widgetButtonStyles = css`
   ${buttonStyles}
@@ -3911,6 +3923,10 @@ export default {
   WidgetSelectComposition: WidgetSelect.compose({
     template: selectTemplate,
     styles: widgetSelectStyles
+  }).define(),
+  WidgetQuerySelectComposition: WidgetQuerySelect.compose({
+    template: querySelectTemplate,
+    styles: widgetQuerySelectStyles
   }).define(),
   WidgetButtonComposition: WidgetButton.compose({
     template: buttonTemplate,
