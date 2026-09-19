@@ -144,6 +144,10 @@ uWS
       {
         url: '/lib/aspirant-worker/utils.mjs',
         path: 'lib/aspirant-worker/utils.mjs'
+      },
+      {
+        url: '/lib/debug.js',
+        path: 'lib/debug.js'
       }
     ]
   },
@@ -156,6 +160,10 @@ uWS
       {
         url: '/vendor/mongodb.min.js',
         path: 'vendor/mongodb.min.js'
+      },
+      {
+        url: '/lib/debug.js',
+        path: 'lib/debug.js'
       }
     ]
   },
@@ -200,6 +208,10 @@ uWS
       {
         url: '/vendor/ssh2/ssh2.min.js',
         path: 'vendor/ssh2/ssh2.min.js'
+      },
+      {
+        url: '/lib/debug.js',
+        path: 'lib/debug.js'
       }
     ]
   },
@@ -670,7 +682,7 @@ export const servicePppAspirantWorkerPageTemplate = html`
           </section>
           <section>
             <div class="label-group">
-              <h5>API Yandex Cloud</h5>
+              <h5>API S3</h5>
               <p class="description">
                 ${() => ppp.t('$servicePppAspirantWorkerPage.ycApiDescription')}
               </p>
@@ -1521,7 +1533,7 @@ export class ServicePppAspirantWorkerPage extends Page {
 
           const path = pathField.value.trim();
 
-          await caches.delete('offline');
+          await globalThis.caches?.delete('offline');
 
           try {
             await this.zipWriter.add(
