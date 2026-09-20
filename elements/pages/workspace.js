@@ -154,6 +154,7 @@ export class WorkspacePage extends Page {
     this.onDblClick = this.onDblClick.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
+    this.onWindowBlur = this.onWindowBlur.bind(this);
   }
 
   getWidgetNameWhenStacked(uniqueID) {
@@ -289,7 +290,43 @@ export class WorkspacePage extends Page {
     );
   }
 
+  // Drops every piece of drag/resize state so a failed or interrupted
+  // operation can never leave the workspace stuck with frozen widgets.
+  resetPointerState() {
+    this.rectangles = [];
+    this.dragging = false;
+    this.resizing = false;
+    this.draggedWidget = null;
+    this.resizeControls = null;
+
+    if (this.shadowRoot) {
+      this.widgets.forEach((w) => {
+        w.dragging = false;
+        w.resizing = false;
+      });
+    }
+  }
+
   onPointerDown(event) {
+    // Only the primary button (or touch/pen contact) starts a drag/resize.
+    if (typeof event.button === 'number' && event.button !== 0) {
+      return;
+    }
+
+    // A previous pointerup was lost (e.g. window switch mid-drag).
+    if (this.dragging || this.resizing) {
+      this.onPointerUp(event);
+    }
+
+    try {
+      this.#onPointerDown(event);
+    } catch (e) {
+      console.error(e);
+      this.resetPointerState();
+    }
+  }
+
+  #onPointerDown(event) {
     let resizeControls;
     let isFromHeader = false;
     let isFromHeaderControl = false;
@@ -328,9 +365,10 @@ export class WorkspacePage extends Page {
     if (this.dragging || this.resizing) {
       const widget = cp.find((n) => n?.classList?.contains('widget'));
 
-      if (widget?.locked) {
-        this.dragging = false;
-        this.resizing = false;
+      // No workspace widget under the pointer (or it is locked): a header
+      // from a preview/nested element must not put the page in drag mode.
+      if (!widget || widget.locked) {
+        this.resetPointerState();
 
         return;
       }
@@ -487,6 +525,29 @@ export class WorkspacePage extends Page {
   }
 
   onPointerMove(event) {
+    if (!this.dragging && !this.resizing) {
+      return;
+    }
+
+    if (
+      (this.dragging && !this.draggedWidget) ||
+      (this.resizing && !this.resizeControls)
+    ) {
+      // Inconsistent state: nothing to move, drop the mode.
+      this.resetPointerState();
+
+      return;
+    }
+
+    try {
+      this.#onPointerMove(event);
+    } catch (e) {
+      console.error(e);
+      this.resetPointerState();
+    }
+  }
+
+  #onPointerMove(event) {
     if (this.dragging) {
       const deltaX = event.clientX - this.clientX;
       const deltaY = event.clientY - this.clientY;
@@ -515,36 +576,53 @@ export class WorkspacePage extends Page {
   }
 
   onPointerUp(event) {
-    if (this.dragging || this.resizing) {
-      if (this.dragging) {
-        void this.draggedWidget.updateDocumentFragment({
-          $set: {
-            'widgets.$.x': parseInt(this.draggedWidget.style.left),
-            'widgets.$.y': parseInt(this.draggedWidget.style.top)
-          }
-        });
+    if (!this.dragging && !this.resizing) {
+      return;
+    }
 
-        this.draggedWidget.repositionLinkedWidgets(event.shiftKey);
+    try {
+      if (this.dragging && this.draggedWidget) {
+        this.draggedWidget
+          .updateDocumentFragment({
+            $set: {
+              'widgets.$.x': parseInt(this.draggedWidget.style.left),
+              'widgets.$.y': parseInt(this.draggedWidget.style.top)
+            }
+          })
+          .catch((e) => console.error(e));
+
+        this.draggedWidget
+          .repositionLinkedWidgets(event?.shiftKey)
+          ?.catch?.((e) => console.error(e));
 
         if (typeof this.draggedWidget.afterDrag === 'function') {
           this.draggedWidget.afterDrag();
         }
-
-        this.draggedWidget = null;
       }
 
-      if (this.resizing) {
-        this.resizeControls.onPointerUp({ event });
+      if (this.resizing && this.resizeControls) {
+        const result = this.resizeControls.onPointerUp({
+          event: event ?? { shiftKey: false }
+        });
+
+        if (typeof result?.catch === 'function') {
+          result.catch((e) => console.error(e));
+        }
       }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      // Always leave drag/resize mode, even if a hook above has thrown.
+      this.resetPointerState();
+    }
+  }
 
-      this.rectangles = [];
-      this.dragging = false;
-      this.resizing = false;
+  onWindowBlur() {
+    // Keyup/pointerup never arrive after the window loses focus.
+    this.frozen = false;
 
-      this.widgets.forEach((w) => {
-        w.dragging = false;
-        w.resizing = false;
-      });
+    if (this.dragging || this.resizing) {
+      this.onPointerUp({ shiftKey: false });
     }
   }
 
@@ -561,9 +639,12 @@ export class WorkspacePage extends Page {
     document.addEventListener('pointercancel', this.onPointerUp);
     document.addEventListener('keydown', this.onKeyDown);
     document.addEventListener('keyup', this.onKeyUp);
+    window.addEventListener('blur', this.onWindowBlur);
   }
 
   disconnectedCallback() {
+    window.removeEventListener('blur', this.onWindowBlur);
+    this.resetPointerState();
     document.removeEventListener('dblclick', this.onDblClick);
     document.removeEventListener('pointerdown', this.onPointerDown);
     document.removeEventListener('pointerup', this.onPointerUp);

@@ -103,7 +103,10 @@ export const timelineWidgetTemplate = html`
                           <span slot="icon-fallback">
                             ${(x, c) => c.parent.getLogoFallback(x)}
                           </span>
-                          <span slot="title-left">
+                          <span
+                            slot="title-left"
+                            title="${(x, c) => c.parent.formatCardTitle(x)}"
+                          >
                             ${(x, c) => c.parent.formatCardTitle(x)}
                           </span>
                           <span slot="title-right">
