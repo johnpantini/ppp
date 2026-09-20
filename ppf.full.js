@@ -1,25 +1,31 @@
 import { createServer } from 'node:http';
-import mongodb from '/ppp/vendor/mongodb.min.js';
+import * as mongodb from '/ppp/vendor/mongodb.min.js';
+import '/ppp/lib/debug.js';
 
-const { MongoClient, BSON } = mongodb;
+const { MongoClient, BSON } = mongodb.default;
+const $$ppf = globalThis.ppp.$debug('ppf');
 const EJSON = BSON.EJSON;
 // biome-ignore lint/complexity/useArrowFunction: OK
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 const mongoClients = new Map();
 
+// The map holds pending connections, so that concurrent requests for the
+// same URI share one client and wait for it to be connected.
 async function getMongoClient(uri) {
   if (!mongoClients.has(uri)) {
     const newClient = new MongoClient(uri.replace('localhost', '0.0.0.0'));
 
-    mongoClients.set(uri, newClient);
+    $$ppf('connecting to MongoDB...');
 
-    try {
-      await newClient.connect();
-    } catch (e) {
-      mongoClients.delete(uri);
+    mongoClients.set(
+      uri,
+      newClient.connect().catch((e) => {
+        $$ppf('MongoDB connection failed: %o', e);
+        mongoClients.delete(uri);
 
-      throw e;
-    }
+        throw e;
+      })
+    );
   }
 
   return mongoClients.get(uri);
@@ -51,6 +57,7 @@ const server = createServer(async (request, response) => {
 
       if (request.url === '/mongodb' && body.mongoDbUri) {
         await getMongoClient(body.mongoDbUri);
+
         response.write('200 OK');
         response.end();
       } else if (body.name) {
@@ -89,7 +96,10 @@ const server = createServer(async (request, response) => {
               invocation?.constructor?.name === 'FindCursor'
             ) {
               result = await invocation.toArray();
-            } else if (typeof invocation === 'object') {
+            } else if (typeof invocation !== 'object') {
+              // Primitives (numbers, strings, booleans) are returned as is.
+              result = invocation;
+            } else {
               if (Array.isArray(invocation)) {
                 result = invocation;
               } else {
@@ -136,17 +146,32 @@ const server = createServer(async (request, response) => {
           response.write(JSON.stringify(EJSON.serialize(result)));
           response.end();
         }
+      } else {
+        // Neither a gateway check nor a function call: do not leave
+        // the request hanging.
+        response.setHeader('Content-Type', 'application/json; charset=UTF-8');
+        response.writeHead(422);
+        response.write(JSON.stringify({ error: 'E_INVALID_BODY' }));
+        response.end();
       }
     } catch (e) {
-      console.error(e);
+      $$ppf('%s failed: %o', request.url, e);
       response.setHeader('Content-Type', 'application/json; charset=UTF-8');
       response.writeHead(400);
       response.write(
         e
-          ? JSON.stringify(e, (key, value) =>
-              value && value instanceof Set ? Array.from(value) : value
+          ? JSON.stringify(
+              // Error#message and Error#name are not enumerable, expose them
+              // in the "error" and "error_code" fields the client reads.
+              {
+                error: e.message,
+                error_code: e.codeName ?? e.name,
+                ...e
+              },
+              (key, value) =>
+                value && value instanceof Set ? Array.from(value) : value
             )
-          : 'UnknownMongoDBError'
+          : JSON.stringify({ error: 'UnknownMongoDBError' })
       );
       response.end();
     }
@@ -163,7 +188,9 @@ const server = createServer(async (request, response) => {
       })
     );
     response.end();
+  } else {
+    response.writeHead(404).end();
   }
 }).listen(process.env.NOMAD_PORT_HTTP ?? process.env.PPF_PORT ?? 14444, () => {
-  console.log('[ppf.full] listening to port ' + server.address().port);
+  $$ppf('listening on port %d', server.address().port);
 });
