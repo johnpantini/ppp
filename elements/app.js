@@ -309,9 +309,7 @@ export const appTemplate = html`
           </ppp-side-nav-group>
           <ppp-side-nav-group>
             <span slot="start">${html.partial(settings)}</span>
-            <span slot="title">
-              ${() => ppp.t('$sideNav.configuration')}
-            </span>
+            <span slot="title">${() => ppp.t('$sideNav.configuration')}</span>
             <a
               href="?page=cloud-services"
               @click="${(x) =>
@@ -581,7 +579,7 @@ export class App extends PPPElement {
       );
     }
 
-    fetch(`${ppp.rootUrl}/package.json`, {
+    fetch(`${ppp.rootUrl}/version.json`, {
       cache: 'no-store'
     })
       .then((response) => response.json())
