@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/widgets/orderbook phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $orderbookWidget: {
@@ -16,7 +21,8 @@ export default function (i18n) {
           traders: 'Трейдеры'
         },
         bookTrader: 'Трейдер книги заявок',
-        bookTraderDescription: 'Трейдер, который будет источником книги заявок.',
+        bookTraderDescription:
+          'Трейдер, который будет источником книги заявок.',
         ordersTrader: 'Трейдер лимитных заявок',
         ordersTraderDescription:
           'Трейдер, который будет отображать собственные лимитные заявки (количество) на ценовых уровнях.',

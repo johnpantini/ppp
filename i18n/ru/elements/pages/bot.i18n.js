@@ -1,9 +1,15 @@
+/**
+ * Registers the i18n/ru/elements/pages/bot phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $botPage: {
       botNameHeader: 'Название бота',
       botTokenHeader: 'Токен бота',
-      botTokenDescription: 'Будет сохранён в зашифрованном виде. Получить можно у',
+      botTokenDescription:
+        'Будет сохранён в зашифрованном виде. Получить можно у',
       botTokenDescriptionSuffix: '- отправьте ему команду /newbot',
       webhookDescription:
         'Укажите webhook для привязки к боту. Чтобы удалить webhook, оставьте поле пустым.',

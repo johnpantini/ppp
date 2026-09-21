@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/widgets/active-orders phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $activeOrdersWidget: {
@@ -7,7 +12,8 @@ export default function (i18n) {
       cancelAllSellOrders: 'Cancel all sell orders',
       cancelAllOrders: 'Cancel all orders',
       noOrdersTrader: 'The active orders trader is missing.',
-      cancellationNotSupported: 'The trader does not support order cancellation.',
+      cancellationNotSupported:
+        'The trader does not support order cancellation.',
       orderCanceled: 'The order has been canceled',
       cancelOrderFailed: 'Failed to cancel the order.',
       conditionalOrderCanceled: 'The conditional order has been canceled',
@@ -33,8 +39,7 @@ export default function (i18n) {
       },
       ordersCancelledForAllInstruments:
         '%{type} have been canceled for all instruments',
-      ordersCancelledForInstrument:
-        '%{type} have been canceled for %{symbol}',
+      ordersCancelledForInstrument: '%{type} have been canceled for %{symbol}',
       cancelAllOrdersFailed: 'Failed to cancel all or some of the orders.',
       codeContainsErrors: 'The code contains errors.',
       descriptionStart: 'The',
@@ -60,8 +65,7 @@ export default function (i18n) {
         showRealTab: 'Show the "Real" tab',
         showConditionalTab: 'Show the "Conditional" tab',
         showRefreshOrdersButton: 'Show the "Reprice all orders" button',
-        showCancelAllBuyOrdersButton:
-          'Show the "Cancel all buy orders" button',
+        showCancelAllBuyOrdersButton: 'Show the "Cancel all buy orders" button',
         showCancelAllSellOrdersButton:
           'Show the "Cancel all sell orders" button',
         showCancelAllOrdersButton: 'Show the "Cancel all orders" button',

@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/pages/service-supabase-parser phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $serviceSupabaseParserPage: {
@@ -18,7 +23,8 @@ export default function (i18n) {
       frameDescription:
         'Произвольная ссылка, которая будет вставлена в iframe на странице сервиса.',
       pollingInterval: 'Интервал опроса',
-      pollingIntervalDescription: 'Периодичность парсинга. Задаётся в секундах.',
+      pollingIntervalDescription:
+        'Периодичность парсинга. Задаётся в секундах.',
       storageDepth: 'Глубина хранения',
       storageDepthDescription:
         'Максимальное количество записей для хранения в базе данных.',

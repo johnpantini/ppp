@@ -356,73 +356,97 @@ export const textFieldStyles = css`
   }
 `;
 
+/** Styled native input with observable text, validation appearance and password reveal. */
 export class TextField extends PPPAppearanceElement {
+  /** @type {string} Current text value; nullish assignments normalize to an empty string. */
   @attr
   value;
 
+  /** @type {boolean} Selects standalone field presentation. */
   @attr({ mode: 'boolean' })
   standalone;
 
+  /** @type {boolean} Disables the inner input. */
   @attr({ mode: 'boolean' })
   disabled;
 
+  /** @type {string} Native input name. */
   @attr
   name;
 
+  /** @type {boolean} Allows selection but prevents native text editing. */
   @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
 
+  /** @type {boolean} Requests focus when connected. */
   @attr({ mode: 'boolean' })
   autofocus;
 
+  /** @type {string} Hint shown while the input is empty. */
   @attr
   placeholder;
 
+  /** @type {string} Native input type, defaulting to text. */
   @attr
   type;
 
+  /** @type {string} ID of the native datalist supplying suggestions. */
   @attr
   list;
 
+  /** @type {number | null} Maximum input length in characters. */
   @attr({ converter: nullableNumberConverter })
   maxlength;
 
+  /** @type {number | null} Minimum input length in characters. */
   @attr({ converter: nullableNumberConverter })
   minlength;
 
+  /** @type {string} Native input validation pattern. */
   @attr
   pattern;
 
+  /** @type {number | null} Native input size hint. */
   @attr({ converter: nullableNumberConverter })
   size;
 
+  /** @type {boolean} Enables spelling checks. */
   @attr({ mode: 'boolean' })
   spellcheck;
 
+  /** @type {boolean} Marks the label as optional. */
   @attr({ mode: 'boolean' })
   optional;
 
+  /** @type {string} Browser autocomplete hint. */
   @attr
   autocomplete;
 
+  /** @type {number | null} Minimum numeric value. */
   @attr({ converter: nullableNumberConverter })
   min;
 
+  /** @type {number | null} Maximum numeric value. */
   @attr({ converter: nullableNumberConverter })
   max;
 
+  /** @type {number | null} Decimal precision consumed by numeric input helpers. */
   @attr({ converter: nullableNumberConverter })
   precision;
 
+  /** @type {number | null} Native numeric input step. */
   @attr({ converter: nullableNumberConverter })
   step;
 
+  /** @type {boolean} Whether the inner password input is currently revealed. */
   @observable
   passwordVisible;
 
+  /** @type {Node[]} Nodes assigned to the label slot. */
   @observable
   defaultSlottedNodes;
 
+  /** Initializes an empty text input with password reveal disabled. */
   constructor() {
     super();
 
@@ -431,6 +455,7 @@ export class TextField extends PPPAppearanceElement {
     this.type = 'text';
   }
 
+  /** Connects the FAST template and requests deferred focus when autofocus is set. */
   connectedCallback() {
     super.connectedCallback();
 
@@ -441,6 +466,7 @@ export class TextField extends PPPAppearanceElement {
     }
   }
 
+  /** Toggles the native control between password and text while updating reveal state. */
   togglePasswordVisibility() {
     if (this.control.type === 'password') {
       this.control.type = 'text';
@@ -451,6 +477,7 @@ export class TextField extends PPPAppearanceElement {
     }
   }
 
+  /** Copies native input text and clears the error appearance once text is entered. */
   handleTextInput() {
     this.value = this.control.value ?? '';
 
@@ -459,6 +486,11 @@ export class TextField extends PPPAppearanceElement {
     }
   }
 
+  /**
+   * @param {string} prev Previous input value.
+   * @param {string | null | undefined} next New value; nullish values normalize to empty text.
+   * @returns {void}
+   */
   valueChanged(prev, next) {
     if (next === null || next === undefined) this.value = '';
   }

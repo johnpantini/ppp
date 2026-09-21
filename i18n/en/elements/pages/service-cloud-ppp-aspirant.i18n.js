@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/service-cloud-ppp-aspirant phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $serviceCloudPppAspirantPage: {
@@ -45,7 +50,8 @@ export default function (i18n) {
         'Failed to restart the service in the Render cloud.',
       cannotStopNorthflankService:
         'Failed to stop the service in the Northflank cloud.',
-      cannotStopRenderService: 'Failed to stop the service in the Render cloud.',
+      cannotStopRenderService:
+        'Failed to stop the service in the Render cloud.',
       cannotRemoveNorthflankService:
         'Failed to remove the service completely. Remove it manually in the Northflank dashboard.',
       cannotRemoveRenderService:

@@ -1,5 +1,10 @@
 import $const from '../../lib/const.i18n.js';
 
+/**
+ * Registers the i18n/en/elements/pages/trader phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   $const(i18n);
 
@@ -37,8 +42,7 @@ export default function (i18n) {
       ibCardDescription: 'Trading via Interactive Brokers.',
       utexCardTitle: 'UTEX Margin, stocks and ETFs',
       utexCardDescription: 'US stock trading via a UTEX broker profile.',
-      tinkoffCardDescription:
-        'Trading via a T‑Bank Invest API broker profile.',
+      tinkoffCardDescription: 'Trading via a T‑Bank Invest API broker profile.',
       finamCardDescription: 'Trading via a Finam broker profile.',
       capitalcomCardDescription: 'Capital.com platform market data',
       bybitCardDescription:
@@ -46,10 +50,8 @@ export default function (i18n) {
       binanceCardDescription: 'Market data via a Binance broker profile.',
       paperTradeCardDescription: 'Trading on a virtual account.',
       combinedL1CardDescription: 'Customizable L1 data source.',
-      combinedOrderbookCardDescription:
-        'A trader that combines order books.',
-      customCardDescription:
-        'Custom trader implementation loaded from a URL.'
+      combinedOrderbookCardDescription: 'A trader that combines order books.',
+      customCardDescription: 'Custom trader implementation loaded from a URL.'
     }
   });
 }

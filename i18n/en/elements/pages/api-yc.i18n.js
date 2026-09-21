@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/api-yc phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $apiYcPage: {
@@ -16,8 +21,7 @@ export default function (i18n) {
         'Failed to generate a JWT. Check that your Yandex Cloud keys are correct.',
       iamTokenFailed:
         'Failed to obtain an IAM token. Check that your Yandex Cloud keys are correct.',
-      bucketListFailed:
-        'Failed to fetch the bucket list. Check the static key.'
+      bucketListFailed: 'Failed to fetch the bucket list. Check the static key.'
     }
   });
 }

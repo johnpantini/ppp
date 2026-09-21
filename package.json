@@ -3,5 +3,19 @@
   "version": "5.35.0",
   "description": "ppp monorepo",
   "author": "johnpantini",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "bun test",
+    "test:coverage": "bun test --coverage && bun bin/coverage-inventory.js",
+    "check:syntax": "bun bin/check-project.js",
+    "check:types": "tsc --project jsconfig.check.json --pretty false",
+    "check": "bun run check:syntax && bun run check:types && bun test",
+    "build:traders": "node bin/build-traders-and-orders.js"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "happy-dom": "^20.14.5",
+    "prettier": "3.9.8",
+    "typescript": "^7.0.2"
+  }
 }

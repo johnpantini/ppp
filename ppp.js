@@ -16,6 +16,7 @@ import { PPPElement } from './lib/ppp-element.js';
 import { APIS } from './lib/const.js';
 import { TAG } from './lib/tag.js';
 
+/** @type {string[]} Required local configuration keys checked before normal startup. */
 export const keySet = [
   'master-password',
   'global-proxy-url',
@@ -25,15 +26,23 @@ export const keySet = [
   'mongo-proxy-url'
 ];
 
+/** Caches application secrets/settings backed by ppp-prefixed localStorage keys. */
 class KeyVault {
   #keys = {};
 
+  /** @returns {boolean} Whether the configuration tag and all required values are present. */
   ok() {
     if (this.getKey('tag') !== TAG) return false;
 
     return keySet.map((k) => this.getKey(k)).every((i) => !!i);
   }
 
+  /**
+   * Caches the supplied value and persists its trimmed representation.
+   * @param {string} key Configuration key without the ppp- prefix.
+   * @param {string | null | undefined} value Value to store; nullish values persist as empty strings.
+   * @returns {void}
+   */
   setKey(key, value) {
     if (key) {
       this.#keys[key] = value;
@@ -42,10 +51,18 @@ class KeyVault {
     }
   }
 
+  /**
+   * @param {string} key Configuration key to reread from storage next time.
+   * @returns {void}
+   */
   decacheKey(key) {
     this.#keys[key] = void 0;
   }
 
+  /**
+   * @param {string} key Configuration key without the ppp- prefix.
+   * @returns {string} Cached value, trimmed stored value or empty string.
+   */
   getKey(key) {
     if (!this.#keys[key])
       this.#keys[key] = (localStorage.getItem(`ppp-${key}`) ?? '').trim();
@@ -53,6 +70,10 @@ class KeyVault {
     return this.#keys[key];
   }
 
+  /**
+   * @param {string} key Configuration key to remove from cache and storage.
+   * @returns {void}
+   */
   removeKey(key) {
     this.#keys[key] = void 0;
 
@@ -60,13 +81,23 @@ class KeyVault {
   }
 }
 
+/** AES-GCM encryption compatible with the application's persisted document format. */
 class PPPCrypto {
   #key;
 
+  /**
+   * Drops the imported key; call before changing the password used by this instance.
+   * @returns {void}
+   */
   resetKey() {
     this.#key = void 0;
   }
 
+  /**
+   * Imports and caches the legacy padded password bytes without changing stored-data compatibility.
+   * @param {string} [password] Explicit password, otherwise the configured master password.
+   * @returns {Promise<CryptoKey>} Cached AES-GCM key.
+   */
   async #generateKey(password = ppp.keyVault.getKey('master-password')) {
     if (!this.#key) {
       const rawKey = new TextEncoder().encode(
@@ -85,6 +116,12 @@ class PPPCrypto {
     return this.#key;
   }
 
+  /**
+   * @param {string | Uint8Array | ArrayBuffer} ivector Base64 or binary initialization vector.
+   * @param {string} plaintext Text encoded as UTF-8 before encryption.
+   * @param {string} [password] Password used when importing the first key; resetKey clears it.
+   * @returns {Promise<string>} Base64 ciphertext including the authentication tag.
+   */
   async encrypt(ivector, plaintext, password) {
     const iv = typeof ivector === 'string' ? stringToBuffer(ivector) : ivector;
     const encoded = new TextEncoder().encode(plaintext);
@@ -101,6 +138,13 @@ class PPPCrypto {
     return bufferToString(ciphertext);
   }
 
+  /**
+   * @param {string | Uint8Array | ArrayBuffer} ivector Base64 or binary initialization vector.
+   * @param {string} ciphertext Base64 ciphertext produced by encrypt.
+   * @param {string} [password] Password used when importing the first key.
+   * @returns {Promise<string>} Authenticated plaintext decoded as UTF-8.
+   * @throws {DOMException} When authentication fails or key/IV parameters are invalid.
+   */
   async decrypt(ivector, ciphertext, password) {
     const iv = typeof ivector === 'string' ? stringToBuffer(ivector) : ivector;
     const key = await this.#generateKey(password);
@@ -135,19 +179,32 @@ class PPPCrypto {
   })
   .define();
 
+/** Observable application settings; load hydrates locally, set also persists when configured. */
 class SettingsMap extends Map {
   #observable;
 
+  /** @param {object} observable Owner notified when its settings change. */
   constructor(observable) {
     super();
 
     this.#observable = observable;
   }
 
+  /**
+   * @param {string} key Setting name.
+   * @param {unknown} value Saved value.
+   * @returns {SettingsMap} This map, with no notification or write.
+   */
   load(key, value) {
     return super.set(key, value);
   }
 
+  /**
+   * Updates memory and observers before optionally persisting the setting.
+   * @param {string} key Setting name.
+   * @param {unknown} value New value.
+   * @returns {Promise<unknown> | undefined} Database result when configuration is ready.
+   */
   set(key, value) {
     super.set(key, value);
 
@@ -174,16 +231,21 @@ class SettingsMap extends Map {
   }
 }
 
+/** Application services shared by pages, widgets, document adapters and trader runtimes. */
 class PPP {
+  /** @type {import('./lib/types.js').PPPDocument[]} Loaded workspace documents. */
   @observable
   workspaces;
 
+  /** @type {import('./lib/types.js').PPPDocument[]} Installed extension documents. */
   @observable
   extensions;
 
+  /** @type {SettingsMap} Observable persisted application preferences. */
   @observable
   settings;
 
+  /** @type {boolean} Effective theme selected from settings and system preference. */
   @observable
   darkMode;
 
@@ -193,6 +255,10 @@ class PPP {
 
   $$debug;
 
+  /**
+   * @param {string} [prefix=''] Source-kind prefix.
+   * @returns {string} Monotonically unique source ID for this application instance.
+   */
   nextSourceID(prefix = '') {
     return `${prefix}${++this.sourceIDCounter}`;
   }
@@ -204,6 +270,7 @@ class PPP {
     }) ??
     this.locales[0];
 
+  /** @returns {'en-US' | 'ru-RU'} Intl locale corresponding to the active translation language. */
   get i18nLocale() {
     return {
       en: 'en-US',

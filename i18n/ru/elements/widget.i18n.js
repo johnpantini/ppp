@@ -1,5 +1,10 @@
 import $g from '../lib/general.i18n.js';
 
+/**
+ * Registers the i18n/ru/elements/widget phrases, including shared dictionaries when required.
+ * @param {import('../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   $g(i18n);
 
@@ -70,8 +75,7 @@ export default function (i18n) {
       orderTemplate: 'Шаблон заявки',
       traderL1: 'Трейдер L1',
       symbolNotFoundInDictionary: 'Тикер не найден в словаре',
-      traderNoTimeframes:
-        '// Трейдер не задан или не поддерживает таймфреймы.',
+      traderNoTimeframes: '// Трейдер не задан или не поддерживает таймфреймы.',
       supportedTimeframes: '// Поддерживаемые таймфреймы:',
       valueMustBePositive: 'Значение должно быть положительным',
       hidden: 'Скрыто'

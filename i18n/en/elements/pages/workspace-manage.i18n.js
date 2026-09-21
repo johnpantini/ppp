@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/workspace-manage phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $workspaceManagePage: {
@@ -7,8 +12,7 @@ export default function (i18n) {
       flagsHeader: 'Flags',
       flagsDescription: 'Yes/No options.',
       allowLockedWidgets: 'Allow widget locking',
-      lockedWidgetsBanner:
-        'Locked widgets cannot be moved or resized.',
+      lockedWidgetsBanner: 'Locked widgets cannot be moved or resized.',
       ensemblesHeader: 'Widget ensembles',
       ensemblesDescription:
         'Specify the widget ensemble synchronization mode for this workspace.',

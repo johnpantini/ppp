@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "types": ["bun"],
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "node_modules",
+    "vendor",
+    "coverage",
+    "**/build/**",
+    "**/*.min.js",
+    "ppf.full.js",
+    "test/types/**"
+  ]
+}

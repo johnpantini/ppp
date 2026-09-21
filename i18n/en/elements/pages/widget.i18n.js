@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/widget phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $widgetPage: {
@@ -78,8 +83,7 @@ export default function (i18n) {
       widgetCannotBeLoaded: 'This widget cannot be loaded.',
       invalidOrIncompleteUrl: 'Invalid or incomplete URL',
       loadableWidgetTag: 'Loadable widget',
-      customWidgetDescription:
-        'Enter the widget name and its URL to continue.'
+      customWidgetDescription: 'Enter the widget name and its URL to continue.'
     }
   });
 }

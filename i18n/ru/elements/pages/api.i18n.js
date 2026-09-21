@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/pages/api phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $apiPage: {
@@ -10,8 +15,7 @@ export default function (i18n) {
         'Платформа бессерверной разработки на базе PostgreSQL.',
       pusherDescription: 'Платформа рассылки уведомлений.',
       astraDbDescription: 'Облачная база данных на основе Apache Cassandra™.',
-      deploymentPlatformDescription:
-        'Платформа для развёртывания приложений.',
+      deploymentPlatformDescription: 'Платформа для развёртывания приложений.',
       seatableDescription: 'База данных с табличным интерфейсом.',
       redisDescription: 'База данных NoSQL.',
       postgresqlDescription: 'Реляционная база данных.',

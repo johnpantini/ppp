@@ -1,0 +1,19 @@
+{
+  "extends": "./jsconfig.json",
+  "compilerOptions": {
+    "checkJs": true,
+    "strict": false,
+    "strictNullChecks": true
+  },
+  "files": ["test/types/locale.d.ts"],
+  "include": [
+    "lib/types.js",
+    "lib/event-bus.js",
+    "lib/extended-form-data.js",
+    "lib/intl.js",
+    "lib/ppp-crypto.js",
+    "lib/ppp-decorators.js",
+    "lib/ppp-script.js",
+    "lib/tmpl.js"
+  ]
+}

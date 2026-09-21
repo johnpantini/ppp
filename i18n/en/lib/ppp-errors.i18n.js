@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/lib/ppp-errors phrases, including shared dictionaries when required.
+ * @param {import('../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $pppErrors: {
@@ -49,8 +54,7 @@ export default function (i18n) {
       E_PRICE_MUST_BE_POSITIVE: 'Price must be positive.',
       E_INSUFFICIENT_FUNDS: 'Insufficient funds.',
       E_INSUFFICIENT_PRIVILEGES: 'Insufficient privileges.',
-      E_NO_QUALIFICATION:
-        'No required qualification to trade this instrument.',
+      E_NO_QUALIFICATION: 'No required qualification to trade this instrument.',
       E_ROUTING_ERROR: 'Routing error.',
       E_INSTRUMENT_NOT_TRADEABLE: 'The instrument is not currently traded.',
       E_MARKET_ORDERS_NOT_SUPPORTED: 'Market orders are not supported.',

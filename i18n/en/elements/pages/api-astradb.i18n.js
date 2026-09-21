@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/api-astradb phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $apiAstradbPage: {
@@ -25,8 +30,7 @@ export default function (i18n) {
         'The table "%{table}" will be removed. Confirm this action.',
       tableRemoved: 'The table "%{table}" has been removed.',
       collectionRemovalTitle: 'Collection removal',
-      cannotReadDbStateDocument:
-        'Failed to read the database state document.',
+      cannotReadDbStateDocument: 'Failed to read the database state document.',
       noDbStateInfo: 'The database does not contain any state information.',
       dbOkLastUpdate: 'The database is fine. Last update: %{date}'
     }

@@ -472,23 +472,29 @@ class ScratchMap extends Map {
   }
 }
 
+/** Base document/list page with persistence, validation and operation notifications. */
 class Page extends PPPElement {
   /**
    * The scratchpad is available within the context of a page to store
    * temporary data or computations.
+   * @type {Map<string, unknown>}
    */
   @observable
   scratch;
 
+  /** @type {import('../lib/types.js').PPPDocument} Current editable document. */
   @observable
   document;
 
+  /** @type {import('../lib/types.js').PPPDocument[]} Loaded listing documents. */
   @observable
   documents;
 
+  /** @type {boolean} Whether the document transformation has completed. */
   @observable
   transformCalled;
 
+  /** @type {string} Operation state from PAGE_STATUS. */
   @attr
   status;
 
@@ -568,6 +574,7 @@ class Page extends PPPElement {
     this.removeEventListener('keypress', this.#keypressHandler);
   }
 
+  /** @returns {boolean | undefined} Whether loading has finished and transformation is complete. */
   isSteady() {
     return (
       !(
@@ -577,6 +584,7 @@ class Page extends PPPElement {
     );
   }
 
+  /** @returns {string} Host classes representing loading and notification state. */
   generateClasses() {
     const result = ['page'];
 
@@ -594,6 +602,7 @@ class Page extends PPPElement {
     ppp.app.pageNotFound = true;
   }
 
+  /** @returns {Promise<string | undefined>} Current document ID from the attribute or application route. */
   async documentId() {
     return (
       this.getAttribute('document-id') ??
@@ -602,6 +611,11 @@ class Page extends PPPElement {
     );
   }
 
+  /**
+   * Loads the current document through the page's read hook or collection and decrypts it.
+   * @param {{raiseException?: boolean}} [options] Rethrow a loading error instead of presenting it.
+   * @returns {Promise<void>} Completion of loading and optional transformation.
+   */
   async readDocument(options = {}) {
     const documentId = await this.documentId();
 
@@ -688,6 +702,11 @@ class Page extends PPPElement {
     }
   }
 
+  /**
+   * Loads a listing through populate and applies the page's documents transformation.
+   * @param {unknown} [anyData] Data forwarded to the page-specific populate hook.
+   * @returns {Promise<void>}
+   */
   async populateDocuments(anyData) {
     this.beginOperation();
 
@@ -866,6 +885,10 @@ class Page extends PPPElement {
     return toastTitle;
   }
 
+  /**
+   * Marks the page busy and resets the operation notification.
+   * @returns {void}
+   */
   beginOperation() {
     if (!ppp.app) return;
 
@@ -882,6 +905,11 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.OPERATION_STARTED;
   }
 
+  /**
+   * @param {number} [progress=0] Completion percentage.
+   * @param {string} [toastText] Progress message.
+   * @returns {void}
+   */
   progressOperation(progress = 0, toastText) {
     if (!ppp.app) return;
 
@@ -899,6 +927,10 @@ class Page extends PPPElement {
     this.status = PAGE_STATUS.OPERATION_STARTED;
   }
 
+  /**
+   * Marks the operation complete so the page can be used again.
+   * @returns {void}
+   */
   endOperation() {
     this.status = PAGE_STATUS.OPERATION_ENDED;
   }
@@ -917,6 +949,12 @@ class Page extends PPPElement {
     ppp.app.toast.removeAttribute('hidden');
   }
 
+  /**
+   * Converts known application errors into the appropriate user notification.
+   * @param {Error | string} e Failure to present.
+   * @param {string} [toastTitle] Notification title, defaulting to the page title.
+   * @returns {void}
+   */
   failOperation(e, toastTitle = this.getToastTitle()) {
     console.error(e);
 
@@ -995,6 +1033,11 @@ class Page extends PPPElement {
     }
   }
 
+  /**
+   * Applies a MongoDB update fragment to the current document and its local state.
+   * @param {Record<string, object>} [documentUpdateFragment] Update operators such as $set/$unset.
+   * @returns {Promise<void>} Resolves after persistence and the local document update.
+   */
   async updateDocumentFragment(documentUpdateFragment = {}) {
     const document = this.document;
     const ownId = await this.getDocumentId?.();
@@ -1152,10 +1195,16 @@ class Page extends PPPElement {
     }
   }
 
+  /** @returns {boolean} Submission guard hook; the base implementation allows submission. */
   canSubmit() {
     return true;
   }
 
+  /**
+   * Runs page validation and submission while managing busy/error notifications.
+   * @param {{silent?: boolean, raiseException?: boolean}} [options] Suppress success notification or rethrow failures.
+   * @returns {Promise<void>} Resolves after the operation's final state update.
+   */
   async submitDocument(options = {}) {
     this.beginOperation();
 
@@ -1687,9 +1736,7 @@ class PageWithSSHTerminal {
     try {
       terminal.clear();
       terminal.reset();
-      terminal.writeInfo(
-        ppp.t('$page.terminalServerSetupInProgress') + '\r\n'
-      );
+      terminal.writeInfo(ppp.t('$page.terminalServerSetupInProgress') + '\r\n');
 
       if (!commandsToDisplay) commandsToDisplay = commands;
 

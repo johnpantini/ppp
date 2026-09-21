@@ -1,22 +1,22 @@
 # editorconfig.org
 
-# Файл верхнего уровня
+# Top-level file
 root = true
 
 [*]
-# Ипользуем пробелы вместо табуляции для отступов
+# Use spaces instead of tabs for indentation
 indent_style = space
-# 2 пробела - отступы в коде
+# 2 spaces per indent level in code
 indent_size = 2
-# Окончание строк LF (как в Linux)
+# LF line endings (as on Linux)
 end_of_line = lf
-# Кодировка UTF-8
+# UTF-8 encoding
 charset = utf-8
-# Удалять все пробельные символы перед окончаниями строк
+# Remove all whitespace characters before line endings
 trim_trailing_whitespace = true
-# Автоматически вставлять одну пустую строку в конец текстовых файлов
+# Automatically insert a single empty line at the end of text files
 insert_final_newline = true
 
 [*.md]
-# Для файлов типа Markdown отключить опцию
+# Disable this option for Markdown files
 trim_trailing_whitespace = false

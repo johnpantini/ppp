@@ -1,0 +1,7 @@
+[test]
+root = "./test/unit"
+preload = ["./test/setup.js"]
+coverageReporter = ["text", "lcov"]
+coverageDir = "./coverage"
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = ["vendor/**", "**/*.min.js", "test/**", "bin/**"]

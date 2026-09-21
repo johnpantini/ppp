@@ -48,9 +48,7 @@ export const radioTemplate = html`
     <label
       part="label"
       class="${(x) =>
-        x.defaultSlottedNodes && x.defaultSlottedNodes.length
-          ? 'label'
-          : 'label label hidden'}"
+        x?.defaultSlottedNodes?.length ? 'label' : 'label label hidden'}"
     >
       <slot
         ${slotted({
@@ -161,25 +159,33 @@ export const radioStyles = css`
   }
 `;
 
+/** Radio choice supporting grouped or independent selection with keyboard access. */
 export class Radio extends PPPElement {
+  /** @type {boolean} Current radio selection. */
   @attr({ mode: 'boolean' })
   checked;
 
+  /** @type {boolean} Prevents changes from keyboard and pointer interaction. */
   @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
 
+  /** @type {string} Radio group name. */
   @attr
   name;
 
+  /** @type {string} Value represented by this choice. */
   @attr
   value;
 
+  /** @type {boolean} Disables selection and automatic keyboard focus. */
   @attr({ mode: 'boolean' })
   disabled;
 
+  /** @type {Node[]} Nodes assigned to the label slot. */
   @observable
   defaultSlottedNodes;
 
+  /** Initializes the value and guarded space-key selection handler. */
   constructor() {
     super();
 
@@ -199,6 +205,7 @@ export class Radio extends PPPElement {
     };
   }
 
+  /** Makes an enabled standalone radio focusable unless tabindex was supplied. */
   connectedCallback() {
     super.connectedCallback();
 
@@ -212,16 +219,19 @@ export class Radio extends PPPElement {
     }
   }
 
+  /** @returns {boolean} Whether an ancestor exposes the radiogroup role. */
   isInsideRadioGroup() {
     return !!this.closest('[role=radiogroup]');
   }
 
+  /** Selects an unchecked enabled radio when editing is allowed. */
   clickHandler() {
     if (!this.disabled && !this.readOnly && !this.checked) {
       this.checked = true;
     }
   }
 
+  /** @param {boolean | undefined} prev Previous state; initial setup does not emit change. @returns {void} */
   checkedChanged(prev) {
     if (prev !== undefined) {
       this.$emit('change', this);
@@ -281,6 +291,7 @@ export const boxRadioStyles = css`
   }
 `;
 
+/** Radio behavior presented with the boxed-choice template. */
 export class BoxRadio extends Radio {}
 
 export default {

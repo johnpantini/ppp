@@ -1,5 +1,10 @@
 import $g from '../../lib/general.i18n.js';
 
+/**
+ * Registers the i18n/ru/elements/widgets/scalping-buttons phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   $g(i18n);
 

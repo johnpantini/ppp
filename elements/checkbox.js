@@ -54,9 +54,7 @@ export const checkboxTemplate = html`
       ?hidden="${(x) => x.standalone}"
       part="label"
       class="${(x) =>
-        x.defaultSlottedNodes && x.defaultSlottedNodes.length
-          ? 'label'
-          : 'label label hidden'}"
+        x?.defaultSlottedNodes?.length ? 'label' : 'label label hidden'}"
     >
       <slot ${slotted('defaultSlottedNodes')}></slot>
     </label>
@@ -137,28 +135,37 @@ export const checkboxStyles = css`
   }
 `;
 
+/** Checkbox with observable checked/mixed state and a composed change event. */
 export class Checkbox extends PPPElement {
+  /** @type {string} Form control name. */
   @attr
   name;
 
+  /** @type {boolean} Current checked state; changes emit the change event. */
   @attr({ mode: 'boolean' })
   checked;
 
+  /** @type {boolean} Prevents pointer changes while retaining the current value. */
   @attr({ attribute: 'readonly', mode: 'boolean' })
   readOnly;
 
+  /** @type {boolean} Selects compact standalone presentation. */
   @attr({ mode: 'boolean' })
   standalone;
 
+  /** @type {Node[]} Nodes assigned to the label slot. */
   @observable
   defaultSlottedNodes;
 
+  /** @type {boolean} Displays the mixed selection state. */
   @observable
   indeterminate;
 
+  /** @type {boolean} Disables user interaction. */
   @attr({ mode: 'boolean' })
   disabled;
 
+  /** Initializes selection state and installs pointer/space-key handlers. */
   constructor() {
     super();
 
@@ -181,6 +188,7 @@ export class Checkbox extends PPPElement {
     };
   }
 
+  /** Publishes the control as the change-event detail whenever checked changes. */
   checkedChanged() {
     this.$emit('change', this);
   }

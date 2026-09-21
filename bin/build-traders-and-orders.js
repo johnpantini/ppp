@@ -1,10 +1,16 @@
-const ncc = require('/ppp/vendor/ncc/index.min.js');
+const ncc = require('../vendor/ncc/index.min.js');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
+const root = path.resolve(__dirname, '..');
 
-(async () => {
-  const sw = fs.readFileSync('/ppp/ppp-sw.js', 'utf8');
+/**
+ * Rebuilds deployable trader/order bundles using the browser's decorator transform.
+ * Paths are resolved from this script so the build also works outside /ppp.
+ * @returns {Promise<void>} Resolves after every bundle has been written.
+ */
+async function buildTradersAndOrders() {
+  const sw = fs.readFileSync(path.join(root, 'ppp-sw.js'), 'utf8');
   const script = new vm.Script(sw);
   const context = {
     self: {
@@ -17,19 +23,20 @@ const path = require('node:path');
 
   globalThis.removeDecorators = context.removeDecorators;
 
-  for (const traderPath of [
-    '/ppp/lib/traders/alor-openapi-v2.js',
-    '/ppp/lib/traders/alpaca-v2-plus.js',
-    '/ppp/lib/traders/binance-v3.js',
-    '/ppp/lib/traders/bybit-v5.js',
-    '/ppp/lib/traders/capitalcom.js',
-    '/ppp/lib/traders/ib.js',
-    '/ppp/lib/traders/paper-trade.js',
-    '/ppp/lib/traders/combined-l1.js',
-    '/ppp/lib/traders/combined-orderbook.js',
-    '/ppp/lib/traders/tinkoff-grpc-web.js',
-    '/ppp/lib/traders/utex-margin-stocks.js'
+  for (const traderName of [
+    'alor-openapi-v2',
+    'alpaca-v2-plus',
+    'binance-v3',
+    'bybit-v5',
+    'capitalcom',
+    'ib',
+    'paper-trade',
+    'combined-l1',
+    'combined-orderbook',
+    'tinkoff-grpc-web',
+    'utex-margin-stocks'
   ]) {
+    const traderPath = path.join(root, 'lib', 'traders', `${traderName}.js`);
     const { code } = await ncc(traderPath, {
       cache: false,
       minify: true,
@@ -38,18 +45,14 @@ const path = require('node:path');
 
     if (code) {
       fs.writeFileSync(
-        `/ppp/lib/traders/build/${path
-          .basename(traderPath)
-          .replace('.js', '.min.js')}`,
+        path.join(root, 'lib', 'traders', 'build', `${traderName}.min.js`),
         code
       );
     }
   }
 
-  for (const orderPath of [
-    '/ppp/lib/orders/stop-loss-take-profit/impl.js',
-    '/ppp/lib/orders/market-data-recorder/impl.js'
-  ]) {
+  for (const orderName of ['stop-loss-take-profit', 'market-data-recorder']) {
+    const orderPath = path.join(root, 'lib', 'orders', orderName, 'impl.js');
     const { code } = await ncc(orderPath, {
       cache: false,
       minify: true,
@@ -65,4 +68,9 @@ const path = require('node:path');
       fs.writeFileSync(orderPath.replace('.js', '.min.js'), code);
     }
   }
-})();
+}
+
+buildTradersAndOrders().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

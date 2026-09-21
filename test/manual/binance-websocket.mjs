@@ -1,5 +1,5 @@
 import { WebSocket } from '/ppp/vendor/websocket/websocket.mjs';
-import https from 'https';
+import https from 'node:https';
 
 const client = new WebSocket('wss://data-stream.binance.com/stream', {
   followRedirects: true,

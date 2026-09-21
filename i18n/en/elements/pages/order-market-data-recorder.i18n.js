@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/order-market-data-recorder phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $orderMarketDataRecorderPage: {
@@ -11,8 +16,7 @@ export default function (i18n) {
       addYcApi: 'Add a Yandex Cloud API',
       flagsHeader: 'Flags',
       flagsDescription: 'Order behaviour options.',
-      autoStartRecording:
-        'Start recording right after the order is placed'
+      autoStartRecording: 'Start recording right after the order is placed'
     }
   });
 }

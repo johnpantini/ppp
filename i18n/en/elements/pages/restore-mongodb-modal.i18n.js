@@ -1,8 +1,12 @@
+/**
+ * Registers the i18n/en/elements/pages/restore-mongodb-modal phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $restoreMongodbModalPage: {
-      restoreFromZipPrefix:
-        'To restore the database from a ZIP archive, click',
+      restoreFromZipPrefix: 'To restore the database from a ZIP archive, click',
       hereLink: 'here',
       selectS3ApiPlaceholder: 'Choose an S3 API to load the backup list',
       databaseColumn: 'Database',

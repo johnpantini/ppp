@@ -19,10 +19,20 @@ const DECORATE_HELPER =
 // copied verbatim, so the source is never split into lines.
 const DECORATOR_CANDIDATE = /@|class|export default/g;
 
+/**
+ * Recognizes a standalone legacy decorator, excluding CSS keyframes and assignments.
+ * @param {string} line Trimmed source line.
+ * @returns {boolean} Whether the line begins a decorator declaration.
+ */
 function isDecoratorLine(line) {
   return line.startsWith('@') && !/^@keyframes/.test(line) && !/=/.test(line);
 }
 
+/**
+ * Emits legacy decorator calls in the order collected by removeDecorators.
+ * @param {{d: string, c: string, t: string, l?: string}[]} [decorators=[]] Decorator expressions and their targets.
+ * @returns {string} JavaScript applying the collected decorators.
+ */
 function placeDecorators(decorators = []) {
   let result = '';
 
@@ -44,6 +54,13 @@ function placeDecorators(decorators = []) {
   return result;
 }
 
+/**
+ * Transforms the project's line-based legacy decorator syntax for browsers and ncc.
+ * Decorated property declarations are removed so prototype accessors remain active.
+ * This is a project-specific transform, not a general JavaScript decorator parser.
+ * @param {string} source Original JavaScript, with LF or CRLF line endings.
+ * @returns {string} Executable source with legacy helper calls and a final newline.
+ */
 function removeDecorators(source) {
   const decorators = [];
   const chunks = [];
@@ -263,17 +280,29 @@ self.addEventListener('fetch', async (event) => {
             ) {
               const r = new Response(removeDecorators(text), init);
 
-              void cache.put(event.request, r.clone());
+              // A full/unavailable cache must not discard a successful response.
+              await cache.put(event.request, r.clone()).catch(() => undefined);
 
               return r;
             } else {
-              void cache.put(event.request, new Response(text, init));
+              await cache
+                .put(event.request, new Response(text, init))
+                .catch(() => undefined);
 
               return networkResponse;
             }
           });
 
-          return cachedResponse ?? fetchedResponse;
+          if (cachedResponse) {
+            // Keep revalidation alive after responding from cache. An offline
+            // refresh must not create an unhandled rejection for a cached page.
+            event.waitUntil(fetchedResponse.catch(() => undefined));
+
+            return cachedResponse;
+          }
+
+          // Await here so rejected network requests reach the offline fallback.
+          return await fetchedResponse;
         } catch (e) {
           const cache = await caches.open(PPP_CACHE_NAME);
 

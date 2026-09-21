@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/pages/settings-appearance phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $settingsAppearancePage: {
@@ -15,7 +20,8 @@ export default function (i18n) {
       dark: 'Тёмное',
       bySystem: 'По выбору системы',
       appearanceHeader: 'Оформление приложения',
-      appearanceDescription: 'Светлое, тёмное или по выбору операционной системы.',
+      appearanceDescription:
+        'Светлое, тёмное или по выбору операционной системы.',
       appearanceBanner: 'Оформление вступит в силу после сохранения изменений.',
       paletteHeader: 'Палитра',
       paletteDescription:

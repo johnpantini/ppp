@@ -1,6 +1,11 @@
 import $const from '../lib/const.i18n.js';
 import $g from '../lib/general.i18n.js';
 
+/**
+ * Registers the i18n/en/elements/app phrases, including shared dictionaries when required.
+ * @param {import('../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   $const(i18n);
   $g(i18n);
@@ -35,8 +40,7 @@ export default function (i18n) {
       confirmationNeeded: 'Confirmation is required to proceed.',
       componentsSetupTitle: 'Application components setup',
       updateReadyTitle: 'Update ready',
-      newVersionReady:
-        'A new version of the app (%{version}) is ready to use.',
+      newVersionReady: 'A new version of the app (%{version}) is ready to use.',
       clickToUpdate: 'Click to update.',
       updateInProgressTitle: 'Updating',
       pageWillReloadAutomatically: 'The page will reload automatically.',

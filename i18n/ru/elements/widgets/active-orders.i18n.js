@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/widgets/active-orders phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $activeOrdersWidget: {
@@ -14,7 +19,8 @@ export default function (i18n) {
       cancelConditionalOrderFailed: 'Не удалось отменить условную заявку.',
       actionRequestSent: 'Запрос на действие отправлен',
       actionFailed: 'Не удалось выполнить действие.',
-      onlyRealOrdersCanBeRefreshed: 'Переставлять можно только биржевые заявки.',
+      onlyRealOrdersCanBeRefreshed:
+        'Переставлять можно только биржевые заявки.',
       realOrdersRefreshedForAllInstruments:
         'Биржевые заявки переставлены по всем инструментам',
       realOrdersRefreshedForInstrument:
@@ -32,8 +38,7 @@ export default function (i18n) {
         conditionalSell: 'Условные заявки на продажу'
       },
       ordersCancelledForAllInstruments: '%{type} отменены по всем инструментам',
-      ordersCancelledForInstrument:
-        '%{type} отменены по инструменту %{symbol}',
+      ordersCancelledForInstrument: '%{type} отменены по инструменту %{symbol}',
       cancelAllOrdersFailed: 'Не удалось отменить все или некоторые заявки.',
       codeContainsErrors: 'Код содержит ошибки.',
       descriptionStart: 'Виджет',
@@ -57,14 +62,12 @@ export default function (i18n) {
         showAllTab: 'Показывать вкладку «Все»',
         showRealTab: 'Показывать вкладку «Биржевые»',
         showConditionalTab: 'Показывать вкладку «Условные»',
-        showRefreshOrdersButton:
-          'Показывать кнопку «Переставить все заявки»',
+        showRefreshOrdersButton: 'Показывать кнопку «Переставить все заявки»',
         showCancelAllBuyOrdersButton:
           'Показывать кнопку «Отменить все заявки на покупку»',
         showCancelAllSellOrdersButton:
           'Показывать кнопку «Отменить все заявки на продажу»',
-        showCancelAllOrdersButton:
-          'Показывать кнопку «Отменить все заявки»',
+        showCancelAllOrdersButton: 'Показывать кнопку «Отменить все заявки»',
         showConditionalOrdersFilterButton:
           'Показывать кнопку фильтра условных заявок',
         enableFilter: 'Включить фильтр',

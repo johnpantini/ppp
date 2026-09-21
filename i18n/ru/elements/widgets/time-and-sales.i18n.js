@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/widgets/time-and-sales phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $timeAndSalesWidget: {
@@ -43,7 +48,8 @@ export default function (i18n) {
         timeFormatHm: 'Часы, минуты',
         timeFormatDayHm: 'День, часы, минуты',
         depth: 'Количество сделок для отображения',
-        depthDescription: 'Максимальное количество сделок, отображаемое в ленте.',
+        depthDescription:
+          'Максимальное количество сделок, отображаемое в ленте.',
         volumeHighlight: 'Выделение сделок по объёму',
         volumeHighlightDescription:
           'Будут выделяться сделки с объёмом не меньше заданного.',

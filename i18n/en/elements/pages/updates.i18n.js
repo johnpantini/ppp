@@ -1,5 +1,10 @@
 import $const from '../../lib/const.i18n.js';
 
+/**
+ * Registers the i18n/en/elements/pages/updates phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   $const(i18n);
 
@@ -24,8 +29,7 @@ export default function (i18n) {
         'Failed to fetch the latest commit of the main branch of the current repository.',
       updateHeadsFailed:
         'Failed to update the HEAD ref of the main branch of the current repository.',
-      pagesBuildFailed:
-        'Failed to request a forced GitHub Pages build.',
+      pagesBuildFailed: 'Failed to request a forced GitHub Pages build.',
       appSynchronized:
         'The app is in sync with the latest version. You will be notified when the update is ready.'
     }

@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/ru/elements/pages/trader-bybit-v5 phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $traderBybitV5Page: {
@@ -5,7 +10,8 @@ export default function (i18n) {
       brokerProfileDescription: 'Брокерский профиль Bybit.',
       addBrokerProfile: 'Добавить профиль Bybit',
       productTitle: 'Продукт',
-      productDescription: 'Выберите продукт, в рамках которого будете торговать.',
+      productDescription:
+        'Выберите продукт, в рамках которого будете торговать.',
       productLinear: 'Деривативы',
       productSpot: 'Спот',
       orderbookDepthTitle: 'Глубина книги заявок',

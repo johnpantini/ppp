@@ -1,5 +1,10 @@
 import $const from '../../lib/const.i18n.js';
 
+/**
+ * Registers the i18n/en/elements/pages/service phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   $const(i18n);
 
@@ -17,8 +22,7 @@ export default function (i18n) {
         'NYSE/NASDAQ trading halts notifications in Telegram.',
       haltsRssFeed: 'Halts RSS feed',
       supabaseParserTitle: 'Parser (Supabase)',
-      supabaseParserDescription:
-        'A general-purpose parser based on Supabase.',
+      supabaseParserDescription: 'A general-purpose parser based on Supabase.',
       aspirantDescription:
         'A service for running long-lived processes in the cloud.',
       inCloud: 'In the cloud',

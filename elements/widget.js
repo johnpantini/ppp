@@ -926,7 +926,9 @@ export const widgetStyles = () => css`
   }
 `;
 
+/** Workspace widget with persisted layout, linked ensembles and trader-source identity. */
 export class Widget extends PPPElement {
+  /** @type {string} Application-unique ID used by trader subscriptions. */
   sourceID;
 
   @attr({ mode: 'boolean' })
@@ -947,12 +949,15 @@ export class Widget extends PPPElement {
   @attr({ mode: 'boolean' })
   preview;
 
+  /** @type {object} Loaded widget metadata, dimensions and settings definition. */
   @observable
   widgetDefinition;
 
+  /** @type {import('../lib/types.js').PPPDocument} Widget configuration stored in the workspace. */
   @observable
   document;
 
+  /** @type {HTMLElement & Record<string, any>} Workspace or settings-preview host. */
   @observable
   container;
 
@@ -1221,6 +1226,7 @@ export class Widget extends PPPElement {
               if (Array.isArray(this.document.columns)) {
                 // For custom lists like T&S.
                 if (typeof th.column.index !== 'number') {
+                  // biome-ignore lint/complexity/useIndexOf: OK
                   th.column.index = this.document.columns.findIndex(
                     (c) => c === th.column
                   );
@@ -1374,6 +1380,11 @@ export class Widget extends PPPElement {
     }
   }
 
+  /**
+   * Persists a fragment targeting the workspace's embedded widget document.
+   * @param {Record<string, object>} [widgetUpdateFragment] MongoDB update operators.
+   * @returns {Promise<unknown>} Database update result, or no write in preview mode.
+   */
   async updateDocumentFragment(widgetUpdateFragment = {}) {
     if (this.preview) return;
 
@@ -1402,6 +1413,10 @@ export class Widget extends PPPElement {
     );
   }
 
+  /**
+   * Removes the widget locally and starts persistence in the background.
+   * @returns {Promise<void>}
+   */
   async close() {
     if (!this.preview) {
       ppp.user.functions.updateOne(
@@ -1433,10 +1448,18 @@ export class Widget extends PPPElement {
   }
 }
 
+/** Widget that adopts instruments through a trader and synchronizes its linked group. */
 export class WidgetWithInstrument extends Widget {
+  /** @type {import('../lib/types.js').Instrument | undefined} Current adopted instrument. */
   @observable
   instrument;
 
+  /**
+   * Updates linked widgets, persistence and instrumentchange subscribers.
+   * @param {import('../lib/types.js').Instrument} oldValue Previous instrument.
+   * @param {import('../lib/types.js').Instrument} newValue Newly adopted instrument.
+   * @returns {void}
+   */
   instrumentChanged(oldValue, newValue) {
     this.unsupportedInstrument =
       newValue?.notSupported &&
@@ -1590,6 +1613,12 @@ export class WidgetWithInstrument extends Widget {
     this.mayShowContent = false;
   }
 
+  /**
+   * Resolves and adopts a symbol using the widget's instrument trader.
+   * @param {string | import('../lib/types.js').Instrument} symbol Dictionary symbol or option instrument.
+   * @param {{isolate?: boolean}} [options] Suppress linked-group propagation while selecting.
+   * @returns {import('../lib/types.js').Instrument | undefined} Adopted or unsupported instrument when selection is possible.
+   */
   selectInstrument(symbol, options = {}) {
     if (this.preview && this.container.savedInstrument) {
       this.instrument = this.container.savedInstrument;
@@ -1633,6 +1662,10 @@ export class WidgetWithInstrument extends Widget {
     return adoptedInstrument;
   }
 
+  /**
+   * @param {number} price Selected price to send to compatible linked widgets.
+   * @returns {void}
+   */
   broadcastPrice(price) {
     if (price > 0 && !this.preview) {
       const widgets = Array.from(

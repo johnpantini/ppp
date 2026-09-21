@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/order-stop-loss-take-profit phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $orderStopLossTakeProfitPage: {
@@ -16,7 +21,8 @@ export default function (i18n) {
       bestBid: 'Best bid price',
       bestAsk: 'Best ask price',
       midpointPrice: 'MidPoint price',
-      distanceHeader: 'Distance between the trigger price and the execution price',
+      distanceHeader:
+        'Distance between the trigger price and the execution price',
       distanceDescription:
         'For Stop Limit and Take Limit orders, you can set a distance that will be used to calculate the limit execution price relative to the trigger price when filling out the order form in the widget.',
       distanceBanner:

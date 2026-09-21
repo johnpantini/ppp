@@ -1,3 +1,8 @@
+/**
+ * Registers the i18n/en/elements/pages/trader-alor-openapi-v2 phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $traderAlorOpenapiV2Page: {
@@ -5,7 +10,8 @@ export default function (i18n) {
       brokerProfileDescription: 'Alor broker profile.',
       addBrokerProfile: 'Add an Alor profile',
       portfolioIdTitle: 'Client portfolio ID',
-      portfolioIdDescription: 'Alor portfolio for the required trading section.',
+      portfolioIdDescription:
+        'Alor portfolio for the required trading section.',
       portfolioTypeTitle: 'Client portfolio type',
       portfolioTypeStock: 'Stock market',
       portfolioTypeFutures: 'Derivatives market',

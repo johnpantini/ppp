@@ -1,9 +1,15 @@
+/**
+ * Registers the i18n/ru/elements/pages/server phrases, including shared dictionaries when required.
+ * @param {import('../../../../lib/types.js').LocalizationRegistry} i18n Registry to extend in place.
+ * @returns {void}
+ */
 export default function (i18n) {
   i18n.extend({
     $serverPage: {
       serverNamePlaceholder: 'Мой сервер',
       connectorServiceHeader: 'Сервис-соединитель',
-      connectorServiceDescription: 'Будет использован для доступа к серверу по SSH.',
+      connectorServiceDescription:
+        'Будет использован для доступа к серверу по SSH.',
       hostnameHeader: 'Адрес',
       hostnameDescription: 'Укажите имя хоста или IP-адрес сервера.',
       portHeader: 'Порт',
